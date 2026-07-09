@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -95,6 +96,7 @@ class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutable
 
     @BeforeEach
     fun setUp() {
+        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("example.com"))
         whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))

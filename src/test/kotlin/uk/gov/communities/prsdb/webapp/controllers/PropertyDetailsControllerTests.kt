@@ -14,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
@@ -141,6 +142,36 @@ class PropertyDetailsControllerTests(
             }
 
             verify(jointLandlordInvitationService, never()).getPendingAndExpiredInvitations(any())
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails adds provideLaterEnabled to the model when the provide later feature is enabled`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)).thenReturn(true)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("provideLaterEnabled", true) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails adds provideLaterEnabled false to the model when the provide later feature is disabled`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)).thenReturn(false)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("provideLaterEnabled", false) }
+            }
         }
 
         @Test

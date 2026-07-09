@@ -19,6 +19,21 @@ abstract class PropertyDetailsBasePage(
 
     val backLink = BackLink.default(page)
 
+    // New registration-flow layout (ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+    val newLayoutSummaryList = PropertyDetailsNewLayoutSummaryList(page)
+
+    fun sectionHeading(text: String) =
+        page.locator(
+            "h3.govuk-heading-s",
+            Page.LocatorOptions().setHasText(text),
+        )
+
+    fun bodyParagraph(text: String) =
+        page.locator(
+            "#property-details p.govuk-body",
+            Page.LocatorOptions().setHasText(text),
+        )
+
     class PropertyDetailsTabs(
         page: Page,
     ) : Tabs(page) {
@@ -51,6 +66,19 @@ abstract class PropertyDetailsBasePage(
         val rentAmountRow = getRow("Rent amount")
         val licensingTypeRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
+    }
+
+    class PropertyDetailsNewLayoutSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val addressRow = getRow("Address")
+        val uprnRow = getRow("UPRN")
+        val ownershipTypeRow = getRow("How do you own this property?")
+        val occupancyRow = getRow("Is this property occupied by tenants?")
+        val licensingRow = getRow("Licensing")
+        val licensingTypeRow = getRow("Licensing type")
+        val tenancyRow = getRow("Tenancy")
+        val numberOfHouseholdsRow = getRow("Number of households")
     }
 
     class PropertyComplianceSummaryList(

@@ -163,7 +163,7 @@ class MockLandlordData {
             customRentFrequency: String? = "Fortnightly",
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
-            lastOccupiedDate: LocalDate? = null,
+            lastOccupiedDate: LocalDate? = LocalDate.of(2025, 1, 1),
         ): PropertyOwnership {
             val propertyOwnership =
                 createPropertyOwnership(

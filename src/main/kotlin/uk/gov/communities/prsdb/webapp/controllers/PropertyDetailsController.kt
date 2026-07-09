@@ -13,6 +13,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
@@ -50,6 +51,9 @@ class PropertyDetailsController(
     val jointLandlordsIsEnabled: Boolean
         get() = featureFlagManager.checkFeature(JOINT_LANDLORDS)
 
+    val provideLaterIsEnabled: Boolean
+        get() = featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
@@ -70,6 +74,7 @@ class PropertyDetailsController(
                 withChangeLinks = true,
                 hideNullUprn = true,
                 messageSource = messageSource,
+                provideLaterEnabled = provideLaterIsEnabled,
             )
 
         val propertyComplianceDetails =
@@ -114,6 +119,7 @@ class PropertyDetailsController(
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
+        modelAndView.addObject("provideLaterEnabled", provideLaterIsEnabled)
         jointLandlordsStrategy.ifEnabled {
             if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
                 modelAndView.addObject(
@@ -180,6 +186,7 @@ class PropertyDetailsController(
                 withChangeLinks = false,
                 hideNullUprn = false,
                 messageSource = messageSource,
+                provideLaterEnabled = provideLaterIsEnabled,
             )
 
         if (jointLandlordsIsEnabled) {
@@ -223,6 +230,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
 
+        model.addAttribute("provideLaterEnabled", provideLaterIsEnabled)
         model.addAttribute("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 

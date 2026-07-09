@@ -142,6 +142,31 @@ propertyRecord:
   localCouncil: Local council
   propertyType: Property type
   ownershipType: Ownership type
+  newLayout:
+    heading: Property and tenancy details
+    propertyDetails:
+      heading: Property details
+      address: Address
+    ownership:
+      heading: Ownership
+      ownershipType: How do you own this property?
+    occupation:
+      heading: Occupied by tenants
+      isOccupied: Is this property occupied by tenants?
+    licensing:
+      heading: Property licensing
+      rowName: Licensing
+      provideLaterOccupied: Provide this later (before {0})
+      provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+      councilOccupied: The landlords must provide these details before {0}.
+      councilNotProvided: These details have not been provided yet.
+    tenancy:
+      heading: Tenancy details
+      currentHeading: Current tenancy details
+      rowName: Tenancy
+      provideLaterOccupied: Provide this later (before {0})
+      councilOccupied: The landlords must provide these details before {0}.
+      councilNotProvided: These details have not been provided yet.
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type

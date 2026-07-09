@@ -139,7 +139,9 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (67, '2025-01-15 00:00:00+00', 150242309330, 0),
        (68, '2025-01-15', 1502423330, 0),
        (69, '2026-02-27', 1502423331, 0),
-       (70, '01/15/25', 1502423332, 0);
+       (70, '01/15/25', 1502423332, 0),
+       (71, '01/15/25', 1502423333, 0),
+       (72, '01/15/25', 1502423334, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -184,7 +186,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '5'),
        (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '1'),
        (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2'),
-       (46, '09/13/24', '09/13/24', 1043, '7 Deregister Lane, DR1 1AA', 1, 'DR1 1AA', '7');
+       (46, '09/13/24', '09/13/24', 1043, '7 Deregister Lane, DR1 1AA', 1, 'DR1 1AA', '7'),
+       (47, '09/13/24', '09/13/24', 5001, '10 Skipped Fields Road, SK1 1AA', 1, 'SK1 1AA', '10'),
+       (48, '09/13/24', '09/13/24', 5002, '11 Complete Fields Road, CO1 1AA', 1, 'CO1 1AA', '11');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_name)
 VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
@@ -250,7 +254,8 @@ VALUES (1, 1, 'L12345678'),
        (5, 2, 'L12345678'),
        (6, 3, 'L12345678'),
        (7, 0, 'L12345678'),
-       (8, 0, 'L12345678');
+       (8, 0, 'L12345678'),
+       (9, 2, 'L99999999');
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
@@ -331,9 +336,25 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null,
         null, null, null, null, null, null, 'End terrace', false),
        (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true);
+        1, null, null, 2, 1, null, 123.12, null, true),
+-- Property 39: interim "occupied but tenancy details skipped" state (PDJB-942). The new-layout view model
+-- infers tenancy-skipped from current_num_households = 0 while occupied is inferred from current_num_tenants > 0,
+-- so this deliberately-invalid tenants>0/households=0 combination is currently the only way to represent it.
+-- The rent/furnished fields are populated only to satisfy the legacy (flag-off) property record, which
+-- unconditionally reads them for occupied properties (PDJB-548). Revisit once occupancy is embedded in PropertyOwnership.
+       (39, true, 1, 0, 2, 71, 47, '05/02/25', '05/02/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, false),
+       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1,
+        1, null, null, 2, 1, null, 123.12, null, false);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
+-- Occupied properties always have a last_occupied_date set in the real flow (PropertyOwnershipService sets it
+-- when a property becomes occupied). Backfill it for all occupied seed rows so the provide-later deadline text
+-- renders and both the property record and compliance tabs behave consistently. Seed it relative to the current
+-- date (7 days ago) so the deadline (last_occupied_date + PROVIDE_LATER_DEADLINE_DAYS days) stays in the future.
+-- TODO(PDJB-548) revisit once occupancy is embedded in PropertyOwnership.
+UPDATE property_ownership SET last_occupied_date = current_date - INTERVAL '7 days' WHERE current_num_tenants > 0 AND last_occupied_date IS NULL;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
@@ -376,6 +397,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 36, '2025-01-15'),
        (1, 37, '2025-01-15'),
        (1, 38, '2025-01-15'),
+       (1, 39, '2025-01-15'),
+       (1, 40, '2025-01-15'),
        (2, 4, '2025-01-15')
 ON CONFLICT DO NOTHING;
 

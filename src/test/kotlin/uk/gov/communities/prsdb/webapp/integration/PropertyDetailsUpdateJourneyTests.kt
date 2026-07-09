@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -44,6 +46,12 @@ import kotlin.test.assertContains
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+
+    @BeforeEach
+    fun disableProvideLaterFlag() {
+        // These tests assert the released (legacy) property record layout, which shows the editable summary rows.
+        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+    }
 
     @Nested
     inner class OwnershipTypeUpdates {

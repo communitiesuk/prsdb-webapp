@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -14,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.math.BigDecimal
+import java.time.LocalDate
 
 class PropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
@@ -478,5 +482,304 @@ class PropertyDetailsViewModelTests {
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
         assertEquals(0, totalChangeLinkCount)
+    }
+
+    // ---- New registration-flow layout (provideLaterEnabled = true) ----
+
+    @Test
+    fun `New layout property details section is in the correct order`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                address = createAddress(uprn = 1234.toLong()),
+                numberOfBedrooms = 2,
+            )
+
+        val expectedHeaderList =
+            listOf(
+                "propertyDetails.propertyRecord.newLayout.propertyDetails.address",
+                "propertyDetails.propertyRecord.uprn",
+                "propertyDetails.propertyRecord.localCouncil",
+                "propertyDetails.propertyRecord.propertyType",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        assertEquals(expectedHeaderList, viewModel.propertyDetailsSection.map { it.fieldHeading })
+    }
+
+    @Test
+    fun `New layout property details section renders the address as multiple lines`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        val addressValue =
+            viewModel.propertyDetailsSection
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.newLayout.propertyDetails.address" }
+                .fieldValue
+
+        assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), addressValue)
+    }
+
+    @Test
+    fun `New layout property details section shows the uprn when available`() {
+        val expectedUprn = 1234.toLong()
+        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = expectedUprn))
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        val uprnValue =
+            viewModel.propertyDetailsSection
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.uprn" }
+                .fieldValue
+
+        assertEquals(expectedUprn.toString(), uprnValue)
+    }
+
+    @Test
+    fun `New layout property details section hides the uprn when unavailable`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = null))
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        assertNull(viewModel.propertyDetailsSection.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.uprn" })
+    }
+
+    @Test
+    fun `New layout registration, ownership and occupation sections contain the expected rows`() {
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.registrationNumber",
+                "propertyDetails.propertyRecord.registrationDate",
+            ),
+            viewModel.registrationDetails.map { it.fieldHeading },
+        )
+        assertEquals(
+            listOf("propertyDetails.propertyRecord.newLayout.ownership.ownershipType"),
+            viewModel.ownershipSection.map { it.fieldHeading },
+        )
+        assertEquals(
+            listOf("propertyDetails.propertyRecord.newLayout.occupation.isOccupied"),
+            viewModel.occupationSection.map { it.fieldHeading },
+        )
+    }
+
+    @Test
+    fun `New layout shows a licensing provide-later row for a landlord when licensing is skipped on an occupied property`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = null,
+                lastOccupiedDate = LocalDate.of(2025, 1, 1),
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = true,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertEquals(
+            listOf("propertyDetails.propertyRecord.newLayout.licensing.rowName"),
+            viewModel.licensingSection.map { it.fieldHeading },
+        )
+        assertNull(viewModel.licensingProvideLaterParagraph)
+    }
+
+    @Test
+    fun `New layout shows a licensing deadline paragraph for a council when licensing is skipped on an occupied property`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = null,
+                lastOccupiedDate = LocalDate.of(2025, 1, 1),
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = false,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertTrue(viewModel.licensingSection.isEmpty())
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.newLayout.licensing.councilOccupied",
+            viewModel.licensingProvideLaterParagraph,
+        )
+    }
+
+    @Test
+    fun `New layout throws when building a council licensing paragraph for an occupied property with no occupied date`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = null,
+                lastOccupiedDate = null,
+            )
+
+        assertThrows<IllegalStateException> {
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = false,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+        }
+    }
+
+    @Test
+    fun `New layout shows a licensing not-provided paragraph for a council when licensing is skipped on an unoccupied property`() {
+        val propertyOwnership = createPropertyOwnership(license = null)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = false,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.newLayout.licensing.councilNotProvided",
+            viewModel.licensingProvideLaterParagraph,
+        )
+    }
+
+    @Test
+    fun `New layout shows the licensing type row when a license is present`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.licensingInformation.licensingType",
+                "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+            ),
+            viewModel.licensingSection.map { it.fieldHeading },
+        )
+        assertNull(viewModel.licensingProvideLaterParagraph)
+    }
+
+    @Test
+    fun `New layout shows a tenancy provide-later row for a landlord when tenancy is skipped on an occupied property`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                currentNumHouseholds = 0,
+                lastOccupiedDate = LocalDate.of(2025, 1, 1),
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = true,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertTrue(viewModel.showTenancySection)
+        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.heading", viewModel.tenancyHeadingKey)
+        assertEquals(
+            listOf("propertyDetails.propertyRecord.newLayout.tenancy.rowName"),
+            viewModel.tenancySection.map { it.fieldHeading },
+        )
+        assertNull(viewModel.tenancyProvideLaterParagraph)
+    }
+
+    @Test
+    fun `New layout hides the tenancy section for a landlord when the property is unoccupied`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = true,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertFalse(viewModel.showTenancySection)
+        assertTrue(viewModel.tenancySection.isEmpty())
+    }
+
+    @Test
+    fun `New layout shows a tenancy not-provided paragraph for a council when the property is unoccupied`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = false,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        assertTrue(viewModel.showTenancySection)
+        assertTrue(viewModel.tenancySection.isEmpty())
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.newLayout.tenancy.councilNotProvided",
+            viewModel.tenancyProvideLaterParagraph,
+        )
+    }
+
+    @Test
+    fun `New layout shows the full tenancy rows when tenancy details are provided`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                rentFrequency = RentFrequency.MONTHLY,
+                customRentFrequency = null,
+            )
+
+        val expectedHeaderList =
+            listOf(
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+
+        assertTrue(viewModel.showTenancySection)
+        assertEquals(expectedHeaderList, viewModel.tenancySection.map { it.fieldHeading })
+        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.currentHeading", viewModel.tenancyHeadingKey)
+        assertNull(viewModel.tenancyProvideLaterParagraph)
+    }
+
+    @Test
+    fun `New layout sections are empty and legacy sections are unchanged when the flag is disabled`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = false)
+
+        assertTrue(viewModel.registrationDetails.isEmpty())
+        assertTrue(viewModel.propertyDetailsSection.isEmpty())
+        assertTrue(viewModel.ownershipSection.isEmpty())
+        assertTrue(viewModel.occupationSection.isEmpty())
+        assertTrue(viewModel.licensingSection.isEmpty())
+        assertTrue(viewModel.tenancySection.isEmpty())
+        assertFalse(viewModel.showTenancySection)
+        assertEquals("", viewModel.tenancyHeadingKey)
+        assertNull(viewModel.licensingProvideLaterParagraph)
+        assertNull(viewModel.tenancyProvideLaterParagraph)
+        assertTrue(viewModel.propertyRecord.isNotEmpty())
+        assertTrue(viewModel.licensingInformation.isNotEmpty())
+        assertTrue(viewModel.tenancyAndRentalInformation.isNotEmpty())
     }
 }
