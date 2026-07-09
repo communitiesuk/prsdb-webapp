@@ -51,6 +51,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
@@ -248,6 +255,13 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val leadTrusteeSelectAddressStep: SelectAddressStep,
     override val leadTrusteeNoAddressFoundStep: NoAddressFoundStep,
     override val leadTrusteeManualAddressStep: ManualAddressStep,
+    override val orgGovBodyDetailsStep: OrgGovBodyDetailsStep,
+    override val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep,
+    override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
+    override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
+    override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
+    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
     journeyStateService: JourneyStateService,
