@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -10,11 +11,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
 @JourneyFrameworkComponent
-class LicensingTypeStepConfig : AbstractRequestableStepConfig<LicensingTypeMode, LicensingTypeFormModel, JourneyState>() {
+class LicensingTypeStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractRequestableStepConfig<LicensingTypeMode, LicensingTypeFormModel, JourneyState>() {
     override val formModelClass = LicensingTypeFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf(
+    override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> {
+        // TODO(PDJB-990): add a 'Provide this later' button to the licensing page behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+        return mapOf(
             "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
             "fieldSetHint" to "forms.licensingType.fieldSetHint",
             "radioOptions" to
@@ -41,6 +45,7 @@ class LicensingTypeStepConfig : AbstractRequestableStepConfig<LicensingTypeMode,
                     ),
                 ),
         )
+    }
 
     override fun chooseTemplate(state: JourneyState): String = "forms/licensingTypeForm"
 

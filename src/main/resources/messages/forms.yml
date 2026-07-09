@@ -132,6 +132,11 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
+orgGovBodyDetails:
+  title: 'TODO: PDJB-1284 - Providing details about your governing body'
+  fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
+  hasDetails: I have details
+  noDetails: I don't have details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -148,6 +153,11 @@ orgMainContact:
     error:
       missing: Enter a phone number
       invalidFormat: Enter a phone number including the country code for international numbers
+leadTrusteeEmail:
+  fieldSetHeading: What is the trustee’s email address?
+  error:
+    missing: Enter email address
+    invalidFormat: Enter an email address in the right format
 checkAnswers:
   heading: Check your answers
 identityNotVerified:
@@ -185,6 +195,9 @@ lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
+  trusteeRegistration:
+    fieldSetHeading: What is the trustee’s contact address?
+    fieldSetHint: We will use this address to send official correspondence to the trustee.
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -231,6 +244,8 @@ manualAddress:
       label: Address 1
     addressLineTwo:
       label: Address 2 (optional)
+  trusteeRegistration:
+    fieldSetHeading: What is the trustee’s contact address?
   propertyRegistration:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:

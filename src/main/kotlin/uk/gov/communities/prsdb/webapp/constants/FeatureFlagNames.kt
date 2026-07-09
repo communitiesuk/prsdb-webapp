@@ -18,6 +18,8 @@ const val COMPLIANCE_ACTIONS_MAY2026_REDESIGN = "compliance-actions-may2026-rede
 
 const val ORGANISATION_LANDLORD_REGISTRATION = "pdjb-1097-organisation-landlord-registration"
 
+const val PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING = "pdjb-939-property-registration-restructure-and-skipping"
+
 const val DASHBOARD_NAV_LINK = "pdjb-1053-dashboard-nav-link"
 
 val featureFlagNames =
@@ -27,5 +29,6 @@ val featureFlagNames =
         SUBJECT_IDENTIFIER_PAGE,
         COMPLIANCE_ACTIONS_MAY2026_REDESIGN,
         ORGANISATION_LANDLORD_REGISTRATION,
+        PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING,
         DASHBOARD_NAV_LINK,
     )
