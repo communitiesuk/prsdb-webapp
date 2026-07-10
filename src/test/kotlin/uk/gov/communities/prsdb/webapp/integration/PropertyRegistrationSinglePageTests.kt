@@ -251,7 +251,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
-        fun `Submitting with an HMO mandatory licence redirects to the next step when skip tenancy flow is disabled`(page: Page) {
+        fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
@@ -261,35 +261,13 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
-        fun `Submitting with an HMO additional licence redirects to the next step when skip tenancy flow is disabled`(page: Page) {
+        fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
                 .containsText("Section 1 of 2 — Add property details")
-        }
-
-        @Test
-        fun `Submitting with an HMO mandatory licence redirects to the next step when skip tenancy flow is enabled`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-            val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
-            licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-            val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
-            BaseComponent
-                .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Tenancy details")
-        }
-
-        @Test
-        fun `Submitting with an HMO additional licence redirects to the next step when skip tenancy flow is enabled`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-            val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
-            licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-            val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
-            BaseComponent
-                .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Tenancy details")
         }
     }
 
@@ -421,53 +399,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `Submitting with a zero integer in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
-            householdsPage.submitNumberOfHouseholds(0)
-            assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Enter how many separate households, like 1 or 2")
-        }
-    }
-
-    @Nested
-    inner class NumberOfHouseholdsStepSkipTenancyFlow {
-        @BeforeEach
-        fun enableSkipTenancyFlow() {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        }
-
-        @Test
-        fun `Submitting with a blank numberOfHouseholds field returns an error when skip tenancy flow enabled`() {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
-            householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
-        }
-
-        @Test
-        fun `Submitting with a non-numerical value in the numberOfHouseholds field returns an error when skip tenancy flow enabled`() {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
-            householdsPage.submitNumberOfHouseholds("not-a-number")
-            assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Enter how many separate households, like 1 or 2")
-        }
-
-        @Test
-        fun `Submitting with a non-integer number in the numberOfHouseholds field returns an error when skip tenancy flow enabled`() {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
-            householdsPage.submitNumberOfHouseholds("2.3")
-            assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Enter how many separate households, like 1 or 2")
-        }
-
-        @Test
-        fun `Submitting with a negative integer in the numberOfHouseholds field returns an error when skip tenancy flow enabled`() {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
-            householdsPage.submitNumberOfHouseholds(-2)
-            assertThat(householdsPage.form.getErrorMessage())
-                .containsText("Enter how many separate households, like 1 or 2")
-        }
-
-        @Test
-        fun `Submitting with a zero integer in the numberOfHouseholds field returns an error when skip tenancy flow enabled`() {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(0)
             assertThat(householdsPage.form.getErrorMessage())
