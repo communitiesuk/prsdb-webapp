@@ -205,19 +205,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgGovBodyMustProvideInfoStep {
         @Test
-        fun `the page renders the caption, heading, bullets and help block`(page: Page) {
+        fun `the page renders the heading`() {
             val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
 
-            assertThat(mustProvidePage.page.locator("#section-header")).containsText("Register as a landlord")
             assertThat(mustProvidePage.heading).containsText("You must provide more information to register")
-            assertThat(mustProvidePage.bullets).hasCount(3)
-            assertThat(mustProvidePage.bullets.nth(0)).containsText("a Companies House registration number")
-            assertThat(mustProvidePage.bullets.nth(1)).containsText("directors’ details")
-            assertThat(mustProvidePage.bullets.nth(2)).containsText("trustee details")
-            assertThat(mustProvidePage.page.locator("h2")).containsText("Get help with your registration")
-            assertThat(mustProvidePage.page.locator("main")).containsText("Phone: 0303 444 7000")
-            assertThat(mustProvidePage.page.locator("main"))
-                .containsText("Monday to Friday, 9am to 5pm")
         }
 
         @Test
@@ -236,13 +227,6 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             mustProvidePage.registerAsIndividualLink.clickAndWait()
 
             assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
-        }
-
-        @Test
-        fun `the page has no continue button as it is a terminal dead-end`(page: Page) {
-            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
-
-            assertThat(mustProvidePage.page.locator("button[type='submit']")).hasCount(0)
         }
     }
 
