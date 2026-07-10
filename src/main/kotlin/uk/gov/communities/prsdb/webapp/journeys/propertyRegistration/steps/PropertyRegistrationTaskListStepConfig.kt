@@ -91,23 +91,20 @@ class PropertyRegistrationTaskListStepConfig(
                 "registerProperty.taskList.register.heading"
             }
 
-        val sectionViewModels =
-            listOf(
-                TaskSectionViewModel(
-                    registerSectionHeading,
-                    "register-property",
-                    registerTaskItems,
+        return listOf(
+            TaskSectionViewModel(
+                registerSectionHeading,
+                "register-property",
+                registerTaskItems,
+            ),
+            TaskSectionViewModel(
+                "registerProperty.taskList.checkAndSubmit.heading",
+                "check-and-submit",
+                listOf(
+                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
                 ),
-                TaskSectionViewModel(
-                    "registerProperty.taskList.checkAndSubmit.heading",
-                    "check-and-submit",
-                    listOf(
-                        TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
-                    ),
-                ),
-            )
-
-        return sectionViewModels
+            ),
+        )
     }
 
     private fun restructuredSectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
