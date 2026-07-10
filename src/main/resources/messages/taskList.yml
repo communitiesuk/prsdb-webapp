@@ -3,3 +3,4 @@ status:
   notStarted: Not started
   inProgress: In progress
   completed: Completed
+  notRequired: Not required

@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -63,6 +64,13 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @MockitoSpyBean
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
+
+    @BeforeEach
+    fun disableRestructureFlag() {
+        // These tests exercise the legacy property registration task list, so disable the restructure flag
+        // which is enabled by default in the integration config.
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    }
 
     @Nested
     inner class TaskListStep {

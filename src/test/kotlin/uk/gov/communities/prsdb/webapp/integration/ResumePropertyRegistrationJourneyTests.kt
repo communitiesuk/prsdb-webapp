@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -11,6 +13,13 @@ import kotlin.test.assertFalse
 
 class ResumePropertyRegistrationJourneyTests :
     IntegrationTestWithMutableData("data-mockuser-landlord-with-one-incomplete-property.sql") {
+    @BeforeEach
+    fun disableRestructureFlag() {
+        // These tests exercise the legacy property registration task list, so disable the restructure flag
+        // which is enabled by default in the integration config.
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    }
+
     @Test
     fun `resuming an incomplete property registration via the continue link restores saved journey state`(page: Page) {
         val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
