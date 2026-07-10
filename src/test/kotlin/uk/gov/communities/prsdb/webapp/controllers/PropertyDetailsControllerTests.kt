@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
@@ -31,6 +32,9 @@ class PropertyDetailsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService

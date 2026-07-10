@@ -1,21 +1,14 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.whenever
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
@@ -36,16 +29,6 @@ class UserRolesServiceTests {
         localCouncilUserRepository = Mockito.mock(LocalCouncilUserRepository::class.java)
         systemOperatorRepository = Mockito.mock(SystemOperatorRepository::class.java)
         userRolesService = UserRolesService(landlordRepository, localCouncilUserRepository, systemOperatorRepository)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        SecurityContextHolder.clearContext()
-    }
-
-    private fun setAuthenticatedRoles(vararg roles: String) {
-        SecurityContextHolder.getContext().authentication =
-            UsernamePasswordAuthenticationToken("user", "password", roles.map { SimpleGrantedAuthority(it) })
     }
 
     @Test
@@ -422,45 +405,5 @@ class UserRolesServiceTests {
 
         // Assert
         Assertions.assertFalse(hasLocalCouncilUserRole)
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns the landlord dashboard for a landlord`() {
-        setAuthenticatedRoles(ROLE_LANDLORD)
-
-        Assertions.assertEquals(LANDLORD_DASHBOARD_URL, userRolesService.getDashboardUrlForCurrentUser())
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns the local council dashboard for a standard local council user`() {
-        setAuthenticatedRoles(ROLE_LOCAL_COUNCIL_USER)
-
-        Assertions.assertEquals(LOCAL_COUNCIL_DASHBOARD_URL, userRolesService.getDashboardUrlForCurrentUser())
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns the local council dashboard for a local council admin`() {
-        setAuthenticatedRoles(ROLE_LOCAL_COUNCIL_ADMIN, ROLE_LOCAL_COUNCIL_USER)
-
-        Assertions.assertEquals(LOCAL_COUNCIL_DASHBOARD_URL, userRolesService.getDashboardUrlForCurrentUser())
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns the system operator dashboard for a system operator`() {
-        setAuthenticatedRoles(ROLE_SYSTEM_OPERATOR)
-
-        Assertions.assertEquals(SYSTEM_OPERATOR_DASHBOARD_URL, userRolesService.getDashboardUrlForCurrentUser())
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns null when there is no authenticated user`() {
-        Assertions.assertNull(userRolesService.getDashboardUrlForCurrentUser())
-    }
-
-    @Test
-    fun `getDashboardUrlForCurrentUser returns null when the user has no recognised role`() {
-        setAuthenticatedRoles("ROLE_SOMETHING_ELSE")
-
-        Assertions.assertNull(userRolesService.getDashboardUrlForCurrentUser())
     }
 }

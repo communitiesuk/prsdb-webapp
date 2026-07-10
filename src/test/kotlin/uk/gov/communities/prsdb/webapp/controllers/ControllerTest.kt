@@ -15,11 +15,11 @@ import uk.gov.communities.prsdb.webapp.PrsdbWebMvcRegistration
 import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfig
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
@@ -58,7 +58,7 @@ abstract class ControllerTest(
     lateinit var userRolesService: UserRolesService
 
     @MockitoBean
-    lateinit var featureFlagManager: FeatureFlagManager
+    lateinit var dashboardUrlProvider: DashboardUrlProvider
 
     @MockitoBean
     lateinit var mockPrsdbWebMvcRegistration: PrsdbWebMvcRegistration

@@ -11,10 +11,8 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter.Companion.CSP_NONCE_ATTRIBUTE
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
-import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
@@ -27,15 +25,14 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Compan
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
-import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import java.util.Locale
 
 @PrsdbControllerAdvice
 class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
-    private val userRolesService: UserRolesService,
-    private val featureFlagManager: FeatureFlagManager,
+    private val dashboardUrlProvider: DashboardUrlProvider,
 ) {
     @Value("\${plausible.site-id}")
     private lateinit var plausibleSiteId: String
@@ -81,10 +78,8 @@ class GlobalModelAttributes(
             model.addAttribute("isCustomServiceName", true)
         }
 
-        // Dashboard nav link — a user has a single role, so their dashboard is determined by that role
-        // and the link is shown on every authenticated page (including pages without a service-specific route).
-        val dashboardUrl = userRolesService.getDashboardUrlForCurrentUser()
-        if (dashboardUrl != null && featureFlagManager.checkFeature(DASHBOARD_NAV_LINK)) {
+        val dashboardUrl = dashboardUrlProvider.getDashboardUrlForCurrentUser()
+        if (dashboardUrl != null) {
             model.addAttribute(
                 "navLinks",
                 listOf(NavigationLinkViewModel(dashboardUrl, "navLink.dashboard.title", uri == dashboardUrl)),
