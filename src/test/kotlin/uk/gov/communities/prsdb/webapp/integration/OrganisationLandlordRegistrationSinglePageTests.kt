@@ -259,7 +259,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
 
             assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
-                .containsText("What is the trustee’s email address?")
+                .containsText("What is the lead trustee’s email address?")
         }
 
         @Test
@@ -287,7 +287,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee phone number page renders the heading as a label`() {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
 
-            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the trustee’s phone number?")
+            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the lead trustee’s phone number?")
         }
 
         @Test
@@ -592,7 +592,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
             val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
 
-            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
+            assertThat(lookupAddressPage.heading).containsText("What is the lead trustee’s contact address?")
         }
     }
 }
