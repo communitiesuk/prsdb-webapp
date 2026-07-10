@@ -117,6 +117,7 @@ import kotlin.test.assertTrue
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
     private val propertyRegistrationSectionHeader = "Section 1 of 2 — Add property details"
+    private val propertyRegistrationSkipTenancySectionHeader = "Tenancy details"
 
     @MockitoSpyBean
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -156,9 +157,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `Households page renders correctly when skip tenancy flow enabled`() {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
+        val householdsPage = navigator.skipToPropertyRegistrationTenancyDetailsPage()
         assertThat(householdsPage.header).containsText("Households in your property")
-        assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
+        assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSkipTenancySectionHeader)
         featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     }
 

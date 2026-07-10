@@ -407,6 +407,37 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class NumberOfHouseholdsStepWithRestructureFlagEnabled {
+        @BeforeEach
+        fun enableRestructureFlag() {
+            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        }
+
+        @Test
+        fun `Submitting with a blank numberOfHouseholds field returns an error when accessed via tenancy details`(page: Page) {
+            val householdsPage = navigator.skipToPropertyRegistrationTenancyDetailsPage()
+            householdsPage.form.householdsInput.fill("")
+            householdsPage.form.submit()
+            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error when accessed via tenancy details`(
+            page: Page,
+        ) {
+            val householdsPage = navigator.skipToPropertyRegistrationTenancyDetailsPage()
+            householdsPage.submitNumberOfHouseholds(3)
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+            assertThat(peoplePage.form.getErrorMessage())
+                .containsText(
+                    "The number of people in the property must be the same as or higher than the number of households in the property",
+                )
+        }
+    }
+
+    @Nested
     inner class NumberOfPeopleStep {
         @Test
         fun `Submitting with a blank numberOfPeople field returns an error`(page: Page) {
