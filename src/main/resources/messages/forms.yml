@@ -132,6 +132,11 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
+orgGovBodyDetails:
+  title: 'TODO: PDJB-1284 - Providing details about your governing body'
+  fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
+  hasDetails: I have details
+  noDetails: I don't have details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -654,6 +659,7 @@ checkPropertyAnswers:
     address: Property address
     localCouncil: Local council
     type: Property type
+    bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
     licensingNumber: Licensing number

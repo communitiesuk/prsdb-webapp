@@ -10,6 +10,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
 import kotlin.test.Test
@@ -119,17 +120,41 @@ class LocalCouncilDashboardControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `localCouncilDashboard sets isLocalCouncilAdmin to false for a non-admin user`() {
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `localCouncilDashboard adds a manage users nav link for an admin`() {
         val localCouncilUser = createLocalCouncilUser()
         whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(false)
+        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(true)
+
+        val expectedManageUsersLink =
+            NavigationLinkViewModel(
+                ManageLocalCouncilUsersController.getManageUsersRoute(
+                    localCouncilUser.localCouncil.id,
+                    ManageUsersViewType.LocalAuthorityView,
+                ),
+                "navLink.manageUsers.title",
+                false,
+            )
 
         mvc
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
-                model { attribute("isLocalCouncilAdmin", false) }
+                model { attribute("navLinks", listOf(expectedManageUsersLink)) }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `localCouncilDashboard does not add a manage users nav link for a non-admin`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+
+        mvc
+            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("navLinks") }
             }
     }
 }

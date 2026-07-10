@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
@@ -200,13 +199,4 @@ class DateOfBirthFormModel : DateFormModel() {
         toLocalDateOrNull() ?: throw NotNullFormModelValueIsNullException(
             "DateOfBirthFormModel date fields are null or invalid when a valid date was expected",
         )
-
-    companion object {
-        fun fromLandlord(landlord: Landlord): DateOfBirthFormModel =
-            DateOfBirthFormModel().apply {
-                day = landlord.dateOfBirth?.dayOfMonth.toString()
-                month = landlord.dateOfBirth?.monthValue.toString()
-                year = landlord.dateOfBirth?.year.toString()
-            }
-    }
 }

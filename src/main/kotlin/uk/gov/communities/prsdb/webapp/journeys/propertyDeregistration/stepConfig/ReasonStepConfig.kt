@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -38,6 +39,8 @@ class ReasonStepConfig(
         // TODO PDJB-319 - this should be deleted
         // primaryLandlord here arbitrary picks the landlord who registered their account first as a temporary measure.
         val soleLandlord = propertyOwnership.landlords.minBy { it.id }
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        check(soleLandlord is IndividualLandlord)
         val soleLandlordEmailAddress = soleLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.address.singleLineAddress

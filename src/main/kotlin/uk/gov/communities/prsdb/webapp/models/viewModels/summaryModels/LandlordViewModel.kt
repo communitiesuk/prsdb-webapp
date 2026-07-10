@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthCont
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -18,9 +19,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class LandlordViewModel(
-    private val landlord: Landlord,
+    baseLandlord: Landlord,
     private val withChangeLinks: Boolean = true,
 ) {
+    // TODO: PDJB-1251: Update landlord details view for org landlord
+    private val landlord = baseLandlord as IndividualLandlord
+
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
     private val changeLinkMessageKey = "forms.links.change"
