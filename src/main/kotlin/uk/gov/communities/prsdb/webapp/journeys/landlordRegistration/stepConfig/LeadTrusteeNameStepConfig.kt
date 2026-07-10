@@ -13,7 +13,7 @@ class LeadTrusteeNameStepConfig : AbstractRequestableStepConfig<Complete, LeadTr
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "registerAsALandlord.leadTrusteeName.fieldSetHeading",
+            "fieldSetHeading" to "forms.leadTrusteeName.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
         )
 

@@ -11,7 +11,7 @@ class LandlordTypeFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerAsALandlord.landlordType.radios.error.missing",
+                messageKey = "forms.landlordType.radios.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],

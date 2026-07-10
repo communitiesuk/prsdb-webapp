@@ -11,7 +11,7 @@ class OrgPhoneNumberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerAsALandlord.orgPhoneNumber.error.missing",
+                messageKey = "forms.orgPhoneNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(

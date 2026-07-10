@@ -16,26 +16,26 @@ class OrgTypeStepConfig : AbstractRequestableStepConfig<Complete, OrgTypeFormMod
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "registerAsALandlord.orgType.fieldSetHeading",
-            "fieldSetHint" to "registerAsALandlord.orgType.fieldSetHint",
+            "fieldSetHeading" to "forms.orgType.fieldSetHeading",
+            "fieldSetHint" to "forms.orgType.fieldSetHint",
             "checkboxOptions" to
                 listOf(
                     CheckboxButtonViewModel(
                         value = OrgType.COMPANY,
-                        labelMsgKey = "registerAsALandlord.orgType.checkbox.company",
+                        labelMsgKey = "forms.orgType.checkbox.company",
                     ),
                     CheckboxButtonViewModel(
                         value = OrgType.CHARITY,
-                        labelMsgKey = "registerAsALandlord.orgType.checkbox.charity",
+                        labelMsgKey = "forms.orgType.checkbox.charity",
                     ),
                     CheckboxButtonViewModel(
                         value = OrgType.TRUST,
-                        labelMsgKey = "registerAsALandlord.orgType.checkbox.trust",
+                        labelMsgKey = "forms.orgType.checkbox.trust",
                     ),
-                    CheckboxDividerViewModel(labelMsgKey = "registerAsALandlord.orgType.divider"),
+                    CheckboxDividerViewModel(labelMsgKey = "forms.orgType.divider"),
                     CheckboxButtonViewModel(
                         value = OrgType.NONE,
-                        labelMsgKey = "registerAsALandlord.orgType.checkbox.none",
+                        labelMsgKey = "forms.orgType.checkbox.none",
                     ),
                 ),
         )
