@@ -17,9 +17,12 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import java.time.Instant
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -31,11 +34,14 @@ class GlobalModelAttributesTests {
     @Mock
     private lateinit var messageSource: MessageSource
 
+    @Mock
+    private lateinit var dashboardUrlProvider: DashboardUrlProvider
+
     private val defaultServiceName = "Register your rental property"
     private val customServiceName = "Check a rental property or landlord"
 
     private fun createGlobalModelAttributes(): GlobalModelAttributes {
-        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
+        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource, dashboardUrlProvider)
         ReflectionTestUtils.setField(globalModelAttributes, "plausibleSiteId", "test-site-id")
         return globalModelAttributes
     }
@@ -142,6 +148,119 @@ class GlobalModelAttributesTests {
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
         assertEquals(false, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds a dashboard nav link pointing at the current user's dashboard`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/landlord/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes marks the dashboard link unselected when not on the dashboard`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/incomplete-properties"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/landlord/dashboard", navLinks[0].href)
+        assertFalse(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds the dashboard nav link on pages without a service-specific route`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/landlord/dashboard")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/cookies"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/landlord/dashboard", navLinks[0].href)
+        assertFalse(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes points the dashboard link at the local council dashboard for a local council user`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/local-council/dashboard")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/local-council/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/local-council/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes points the dashboard link at the system operator dashboard for a system operator`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn("/system-operator/dashboard")
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/system-operator/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/system-operator/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds no nav link when the user has no dashboard`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(dashboardUrlProvider.getDashboardUrlForCurrentUser()).thenReturn(null)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/register-as-a-landlord"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
     }
 
     private fun createOAuth2AuthenticationToken(registrationId: String): OAuth2AuthenticationToken {

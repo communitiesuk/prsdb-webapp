@@ -16,7 +16,7 @@ class LandlordPrivacyNoticeControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    lateinit var featureFlagManager: FeatureFlagManager
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `LandlordPrivacyNoticeController returns 200 for unauthenticated user`() {
