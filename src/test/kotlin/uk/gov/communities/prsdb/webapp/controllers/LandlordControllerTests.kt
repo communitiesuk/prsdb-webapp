@@ -36,6 +36,9 @@ class LandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
+
+    @MockitoBean
     private lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
@@ -43,9 +46,6 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {

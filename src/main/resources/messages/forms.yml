@@ -309,6 +309,11 @@ dateOfBirth:
   error:
     invalidDateOfBirth: You must enter a valid date of birth
     invalidAge: The minimum age to register as a landlord is 18
+leadTrusteeDob:
+  fieldSetHeading: What is the lead trustee’s date of birth?
+  fieldSetHint: 'For example, 27 03 1968'
+  error:
+    invalidDate: The trustee’s date of birth cannot be in the future
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past

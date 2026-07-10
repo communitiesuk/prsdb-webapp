@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRAT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
@@ -311,6 +312,45 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
             leadTrusteePhonePage.submitPhoneNumber("07123456789")
             assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeDobStep {
+        @Test
+        fun `the lead trustee date of birth page renders the heading`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+
+            assertThat(leadTrusteeDobPage.page.locator("h1")).containsText("What is the lead trustee’s date of birth?")
+        }
+
+        @Test
+        fun `submitting an empty date returns an error`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("", "", "")
+            assertThat(leadTrusteeDobPage.form.getErrorMessage()).containsText("Enter a date")
+        }
+
+        @Test
+        fun `submitting a future date returns an error`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("1", "1", "2999")
+            assertThat(leadTrusteeDobPage.form.getErrorMessage())
+                .containsText("The trustee’s date of birth cannot be in the future")
+        }
+
+        @Test
+        fun `submitting a valid date of birth advances to the lead trustee address step`(page: Page) {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("15", "6", "1980")
+            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the lead trustee address step`(page: Page) {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
         }
     }
 
