@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -19,7 +21,8 @@ class PropertyRegistrationTaskListStepConfig(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val httpServletRequest: HttpServletRequest,
     private val backUrlStorageService: BackUrlStorageService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
+    private val featureFlagManager: FeatureFlagManager,
+    ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any> =
@@ -54,10 +57,17 @@ class PropertyRegistrationTaskListStepConfig(
                     ),
                 )
 
+        val registerSectionHeading =
+            if (featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)) {
+                "registerProperty.taskList.register.headingSkipTenancyFlow"
+            } else {
+                "registerProperty.taskList.register.heading"
+            }
+
         val sectionViewModels =
             listOf(
                 TaskSectionViewModel(
-                    "registerProperty.taskList.register.heading",
+                    registerSectionHeading,
                     "register-property",
                     registerTaskItems,
                 ),

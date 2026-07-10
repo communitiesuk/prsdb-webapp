@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -146,6 +147,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
+        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+    }
+
+    @Test
+    fun `Households page renders correctly when skip tenancy flow enabled`() {
+        featureFlagManager.enableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+        val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
+        assertThat(householdsPage.header).containsText("Households in your property")
+        assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
+        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
     }
 
     @Test
