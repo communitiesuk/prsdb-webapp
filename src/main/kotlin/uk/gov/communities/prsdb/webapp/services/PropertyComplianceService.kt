@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -365,11 +366,22 @@ class PropertyComplianceService(
         val propertyOwnership = propertyCompliance.propertyOwnership
 
         val loggedInBaseUserId = SecurityContextHolder.getContext().authentication.name
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+        val landlords =
+            propertyOwnership.landlords
+                .map {
+                    check(it is IndividualLandlord)
+                    it
+                }
         val landlord =
-            propertyOwnership.landlords.singleOrNull { it.baseUser.id == loggedInBaseUserId }
+            landlords
+                .singleOrNull { landlord ->
+                    landlord.baseUser.id == loggedInBaseUserId
+                }
                 ?: throw PrsdbWebException(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
+        // TODO: PDJB-1274: Update emails to account for org landlord
 
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
@@ -387,7 +399,12 @@ class PropertyComplianceService(
             ),
         )
 
-        val otherLandlords = propertyOwnership.landlords.filter { it.baseUser.id != loggedInBaseUserId }
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+        val otherLandlords =
+            landlords.filter { otherLandlord ->
+                otherLandlord.baseUser.id != loggedInBaseUserId
+            }
+        // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
             complianceUpdateConfirmationSender.sendEmail(
                 otherLandlord.email,

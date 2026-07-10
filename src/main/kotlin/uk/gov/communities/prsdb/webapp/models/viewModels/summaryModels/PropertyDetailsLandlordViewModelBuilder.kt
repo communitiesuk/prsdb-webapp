@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -12,8 +13,10 @@ class PropertyDetailsLandlordViewModelBuilder {
         fun fromEntity(
             landlord: Landlord,
             landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
-        ): List<SummaryListRowViewModel> =
-            mutableListOf<SummaryListRowViewModel>()
+        ): List<SummaryListRowViewModel> {
+            // TODO: PDJB-1269: Remove JL dead code
+            check(landlord is IndividualLandlord)
+            return mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
                         "landlordDetails.personalDetails.name",
@@ -52,6 +55,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                         )
                     }
                 }.toList()
+        }
 
         fun buildSummaryCards(
             landlords: Set<Landlord>,
@@ -59,7 +63,11 @@ class PropertyDetailsLandlordViewModelBuilder {
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
-                .sortedWith(compareByDescending<Landlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
+                // TODO: PDJB-1276: Update landlord tab landlord view for org landlords
+                .map { landlord ->
+                    check(landlord is IndividualLandlord)
+                    landlord
+                }.sortedWith(compareByDescending<IndividualLandlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
                 .map { landlord ->
                     val isCurrentUser = landlord.baseUser.id == currentUserId
                     if (isCurrentUser) {
@@ -84,7 +92,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                     }
                 }
 
-        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+        private fun buildLandlordCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",
@@ -101,7 +109,11 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlordDetailsUrlProvider: (Landlord) -> String,
         ): List<SummaryCardViewModel> =
             landlords
-                .sortedBy { it.name }
+                // TODO: PDJB-1277: Update landlord tab local authority view for org landlords
+                .map { landlord ->
+                    check(landlord is IndividualLandlord)
+                    landlord
+                }.sortedBy { it.name }
                 .map { landlord ->
                     SummaryCardViewModel(
                         title = landlord.name,
@@ -117,7 +129,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                     )
                 }
 
-        private fun buildLocalCouncilCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+        private fun buildLocalCouncilCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",

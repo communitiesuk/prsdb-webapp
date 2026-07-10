@@ -671,6 +671,7 @@ checkPropertyAnswers:
     address: Property address
     localCouncil: Local council
     type: Property type
+    bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
     licensingNumber: Licensing number

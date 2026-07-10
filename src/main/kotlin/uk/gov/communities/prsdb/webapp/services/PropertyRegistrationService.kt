@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -74,6 +75,7 @@ class PropertyRegistrationService(
         val landlord =
             landlordRepository.findByBaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("User not registered as a landlord")
+        // TODO: PDJB-1274: Update emails to account for org landlord
 
         val propertyOwnership =
             createPropertyOwnershipAndRelatedEntities(
@@ -173,7 +175,7 @@ class PropertyRegistrationService(
     }
 
     private fun sendConfirmationEmails(
-        landlord: Landlord,
+        landlord: IndividualLandlord,
         propertyOwnership: PropertyOwnership,
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
