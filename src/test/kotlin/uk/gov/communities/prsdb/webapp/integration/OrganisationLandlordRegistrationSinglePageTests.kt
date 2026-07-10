@@ -345,6 +345,13 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             leadTrusteeDobPage.submitDate("15", "6", "1980")
             assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
         }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the lead trustee address step`(page: Page) {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+        }
     }
 
     @Nested
