@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
+import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
@@ -980,6 +981,7 @@ class JourneyBuilderTest {
 }
 
 // A task that is both a Task and JourneyState, so it can be added via routableTask as its own state.
-abstract class TestSelfStatedTask :
-    Task<JourneyState>(),
-    JourneyState
+abstract class TestSelfStatedTask : SelfStatedRoutableTask<JourneyState>(mock()) {
+    override val taskState: JourneyState
+        get() = this
+}

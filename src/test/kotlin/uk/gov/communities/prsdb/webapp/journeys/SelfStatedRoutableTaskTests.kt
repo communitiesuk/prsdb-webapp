@@ -103,5 +103,8 @@ class SelfStatedRoutableTaskTests {
         var cachedThing: String? by delegateProvider.nullableDelegate("cachedThing")
 
         override fun makeSubJourney(state: JourneyState): SubJourneyBuilder<*> = throw NotImplementedError("not needed for these tests")
+
+        override val taskState: JourneyState
+            get() = this
     }
 }

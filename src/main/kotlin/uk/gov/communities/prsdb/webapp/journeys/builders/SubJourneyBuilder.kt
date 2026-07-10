@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
@@ -83,18 +84,16 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState, T> routableTask(
-        uninitialisedTask: T,
+    override fun <TTaskState : JourneyState> routableTask(
+        uninitialisedTask: SelfStatedRoutableTask<TTaskState>,
         routeSegment: String?,
         init: TaskInitialiser<TTaskState>.() -> Unit,
-    ) where TTaskState : JourneyState, T : Task<TTaskState>, T : JourneyState {
+    ) {
         // The task IS its own state, so build its sub-journey against the task itself. A non-null `routeSegment`
         // prefixes each step's URL, giving "<routeSegment>/<step>", and (via the task's own route-scoped data
         // keys, applied by TaskInitialiser.build -> task.bindRoute) its stored data; null keeps them bare. No
         // external state delegate is needed - the task sources JourneyState from its own journeyStateService.
-        @Suppress("UNCHECKED_CAST")
-        val taskState = uninitialisedTask as TTaskState
-        val taskInitialiser = TaskInitialiser(uninitialisedTask, taskState)
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)

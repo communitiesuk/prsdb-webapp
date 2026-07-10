@@ -40,6 +40,8 @@ abstract class AddressTask(
     protected abstract val lookupAddressContentProperties: Map<String, Any?>
     protected abstract val manualAddressContentProperties: Map<String, Any?>
 
+    override val taskState get() = this
+
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
             step(journey.lookupAddressStep) {

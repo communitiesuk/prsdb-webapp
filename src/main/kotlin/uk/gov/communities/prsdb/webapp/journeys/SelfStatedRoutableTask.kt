@@ -25,4 +25,6 @@ abstract class SelfStatedRoutableTask<TState : JourneyState>(
 
     // Route-only late binding - the sole value the TaskInitialiser supplies at build time.
     override fun bindRoute(routePrefix: String?) = delegateProvider.bindRoutePrefix(routePrefix)
+
+    abstract val taskState: TState
 }
