@@ -85,7 +85,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             updateLicensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
             val updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
 
-            // Update Licence number
+            // Update licence number
             updateLicenceNumberPage.submitLicenseNumber(newLicenceNumber)
             val checkLicensingAnswersPage = assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
 
