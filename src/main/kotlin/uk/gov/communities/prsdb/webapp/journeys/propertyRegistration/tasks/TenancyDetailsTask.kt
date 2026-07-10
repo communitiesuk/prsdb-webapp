@@ -19,6 +19,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
             task(journey.rentIncludesBillsTask) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
+                savable()
             }
             step(journey.furnishedStatus) {
                 routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)

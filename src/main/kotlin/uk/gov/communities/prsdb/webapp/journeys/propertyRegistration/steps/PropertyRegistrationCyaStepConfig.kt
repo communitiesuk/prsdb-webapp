@@ -38,10 +38,19 @@ class PropertyRegistrationCyaStepConfig(
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
                 "propertyName" to state.getAddress().singleLineAddress,
-                "propertyDetails" to getPropertyDetailsSummaryList(state, isRestructured),
+                "propertyDetails" to
+                    if (isRestructured) {
+                        getRestructuredPropertyDetailsSummaryList(state)
+                    } else {
+                        getPropertyDetailsSummaryList(state)
+                    },
                 "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
                 "tenancyDetails" to
-                    occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource, includeBedrooms = !isRestructured),
+                    if (isRestructured) {
+                        occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)
+                    } else {
+                        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+                    },
             )
 
         jointLandlordsStrategy.ifEnabled {
@@ -77,13 +86,16 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    private fun getPropertyDetailsSummaryList(
-        state: PropertyRegistrationJourneyState,
-        isRestructured: Boolean,
-    ) = getAddressRows(state) +
-        getPropertyTypeRow(state) +
-        (if (isRestructured) listOf(getBedroomsRow(state)) else emptyList()) +
-        getOwnershipTypeRow(state)
+    private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
+        getAddressRows(state) +
+            getPropertyTypeRow(state) +
+            getOwnershipTypeRow(state)
+
+    private fun getRestructuredPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
+        getAddressRows(state) +
+            getPropertyTypeRow(state) +
+            getBedroomsRow(state) +
+            getOwnershipTypeRow(state)
 
     private fun getBedroomsRow(state: PropertyRegistrationJourneyState) =
         SummaryListRowViewModel.forCheckYourAnswersPage(
