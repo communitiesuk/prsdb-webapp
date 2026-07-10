@@ -84,20 +84,30 @@ class PropertyRegistrationTaskListStepConfig(
                     ),
                 )
 
-        return listOf(
-            TaskSectionViewModel(
-                "registerProperty.taskList.register.heading",
-                "register-property",
-                registerTaskItems,
-            ),
-            TaskSectionViewModel(
-                "registerProperty.taskList.checkAndSubmit.heading",
-                "check-and-submit",
-                listOf(
-                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
+        val registerSectionHeading =
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                "registerProperty.taskList.register.headingSkipTenancyFlow"
+            } else {
+                "registerProperty.taskList.register.heading"
+            }
+
+        val sectionViewModels =
+            listOf(
+                TaskSectionViewModel(
+                    registerSectionHeading,
+                    "register-property",
+                    registerTaskItems,
                 ),
-            ),
-        )
+                TaskSectionViewModel(
+                    "registerProperty.taskList.checkAndSubmit.heading",
+                    "check-and-submit",
+                    listOf(
+                        TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
+                    ),
+                ),
+            )
+
+        return sectionViewModels
     }
 
     private fun restructuredSectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =

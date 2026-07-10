@@ -112,6 +112,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
@@ -293,7 +294,11 @@ class PropertyRegistrationJourneyFactory(
                 noNextDestination()
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.register.heading")
+                if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                    withHeadingMessageKey("registerProperty.taskList.register.headingSkipTenancyFlow", false)
+                } else {
+                    withHeadingMessageKey("registerProperty.taskList.register.heading")
+                }
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.addToLandlordIncompletePropertiesStep }

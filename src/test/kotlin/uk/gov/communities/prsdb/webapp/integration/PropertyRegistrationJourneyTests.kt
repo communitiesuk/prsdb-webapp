@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -150,6 +151,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         ).thenReturn(URI("http://localhost/property-details/1"))
         // The restructure flag is enabled by default in the integration config. Existing tests exercise the
         // legacy journey, so disable it here; the restructured tests re-enable it explicitly in their bodies.
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    }
+
+    @Test
+    fun `Households page renders correctly when skip tenancy flow enabled`() {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
+        assertThat(householdsPage.header).containsText("Households in your property")
+        assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
         featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     }
 
