@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
@@ -99,6 +100,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
