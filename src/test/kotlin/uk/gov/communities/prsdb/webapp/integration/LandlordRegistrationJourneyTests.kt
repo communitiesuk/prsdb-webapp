@@ -329,9 +329,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
         leadTrusteePhonePage.submitPhoneNumber("07123456789")
 
-        // TODO: PDJB-1163 - Submit real lead trustee DoB data once the step is implemented
         val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
-        leadTrusteeDobPage.form.submit()
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
 
         val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
         leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
