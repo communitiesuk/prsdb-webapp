@@ -36,9 +36,6 @@ class DeregisterPropertyControllerTests(
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
-    @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
@@ -202,7 +199,7 @@ class DeregisterPropertyControllerTests(
             .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
-                view { name("deregisterPropertyConfirmationJune26Redesign") }
+                view { name("deregisterPropertyConfirmation") }
                 model { attribute("address", "1, Example Road, EG") }
             }
     }

@@ -96,7 +96,7 @@ class DeregisterPropertyController(
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
-        return "deregisterPropertyConfirmationJune26Redesign"
+        return "deregisterPropertyConfirmation"
     }
 
     private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(

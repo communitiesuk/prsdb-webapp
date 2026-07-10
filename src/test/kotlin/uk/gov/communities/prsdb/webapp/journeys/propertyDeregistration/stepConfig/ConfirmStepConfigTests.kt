@@ -11,7 +11,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailRedesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -38,7 +38,7 @@ class ConfirmStepConfigTests {
     lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
-    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailRedesign>
+    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
 
     @Mock
     lateinit var mockInviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>
@@ -85,7 +85,7 @@ class ConfirmStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmailRedesign>())
+        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmail>())
     }
 
     @Test
@@ -106,7 +106,7 @@ class ConfirmStepConfigTests {
 
         verify(mockConfirmationEmailSender).sendEmail(
             eq("james@example.com"),
-            argThat<PropertyDeregistrationConfirmationEmailRedesign> {
+            argThat<PropertyDeregistrationConfirmationEmail> {
                 this.landlordName == "James" && this.multiLineAddress == multiLineAddress
             },
         )
