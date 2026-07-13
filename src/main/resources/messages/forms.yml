@@ -1,7 +1,7 @@
 errorSummary:
   heading: There is a problem
 errorMessage:
-  prefix: 'Error:'
+  prefix: 'Error: '
 buttons:
   startNow: Start now
   saveAndContinue: Save and continue
