@@ -119,7 +119,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSurePagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
@@ -1102,15 +1101,6 @@ class Navigator(
         return createValidPage(
             page,
             ConfirmPageLeaveProperty::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToDeregisterPropertyAreYouSurePage(propertyOwnershipId: Long): AreYouSurePagePropertyDeregistration {
-        navigate(DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId))
-        return createValidPage(
-            page,
-            AreYouSurePagePropertyDeregistration::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
