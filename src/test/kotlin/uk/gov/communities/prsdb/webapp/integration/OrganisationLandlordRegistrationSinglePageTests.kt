@@ -477,7 +477,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             leadTrusteeNamePage.submitName("")
 
             assertThat(leadTrusteeNamePage.form.getErrorMessage())
-                .containsText("Enter the trustee’s full name")
+                .containsText("Enter the lead trustee’s full name")
         }
     }
 
