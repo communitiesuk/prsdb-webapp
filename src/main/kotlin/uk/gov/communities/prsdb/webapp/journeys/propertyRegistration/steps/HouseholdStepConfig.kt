@@ -17,16 +17,16 @@ class HouseholdStepConfig(
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState): Map<String, Any?> {
         return mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholds.heading",
-            "label" to "forms.numberOfHouseholds.label",
+            "fieldSetHeading" to "forms.numberOfHouseholdsOld.heading",
+            "label" to "forms.numberOfHouseholdsOld.label",
         )
     }
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/numberOfHouseholdsForm.skipTenancyJourney"
+            "forms/numberOfHouseholdsFormJuly26Redesign"
         } else {
-            "forms/numberOfHouseholdsForm"
+            "forms/numberOfHouseholdsFormOld"
         }
 
     override fun mode(state: HouseholdsAndTenantsState) = getFormModelFromStateOrNull(state)?.numberOfHouseholds?.let { Complete.COMPLETE }

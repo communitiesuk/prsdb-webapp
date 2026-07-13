@@ -19,26 +19,26 @@ class HouseholdStepConfigTests {
     private lateinit var mockUpdateHouseholdsJourneyState: UpdateHouseholdsAndTenantsJourneyState
 
     @Test
-    fun `step content shows the new households content when feature flag is enabled`() {
+    fun `Content shows the July26Redesign households content when feature flag is enabled`() {
         val stepConfig = HouseholdStepConfig(mockFeatureFlagManager)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
 
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
-        assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
-        assertEquals("forms.numberOfHouseholds.label", content["label"])
-        assertEquals("forms/numberOfHouseholdsForm.skipTenancyJourney", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms.numberOfHouseholdsOld.heading", content["fieldSetHeading"])
+        assertEquals("forms.numberOfHouseholdsOld.label", content["label"])
+        assertEquals("forms/numberOfHouseholdsFormJuly26Redesign", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 
     @Test
-    fun `step content shows the original households content when feature flag is disabled`() {
+    fun `Content shows the old households content when feature flag is disabled`() {
         val stepConfig = HouseholdStepConfig(mockFeatureFlagManager)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
 
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
-        assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
-        assertEquals("forms.numberOfHouseholds.label", content["label"])
-        assertEquals("forms/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms.numberOfHouseholdsOld.heading", content["fieldSetHeading"])
+        assertEquals("forms.numberOfHouseholdsOld.label", content["label"])
+        assertEquals("forms/numberOfHouseholdsFormOld", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 }

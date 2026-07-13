@@ -86,9 +86,9 @@ class PropertyRegistrationTaskListStepConfig(
 
         val registerSectionHeading =
             if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                "registerProperty.taskList.register.headingSkipTenancyJourney"
+                "registerProperty.taskList.register.headingJuly26Redesign"
             } else {
-                "registerProperty.taskList.register.heading"
+                "registerProperty.taskList.register.headingOld"
             }
 
         return listOf(

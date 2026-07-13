@@ -294,9 +294,9 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                    withHeadingMessageKey("registerProperty.taskList.register.headingSkipTenancyJourney", false)
+                    withHeadingMessageKey("registerProperty.taskList.register.headingJuly26Redesign", false)
                 } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.heading")
+                    withHeadingMessageKey("registerProperty.taskList.register.headingOld")
                 }
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
