@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -383,7 +384,7 @@ class TaskInitialiserTests {
 
         val stepConfig = RouteTestStepConfig()
         val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.routeSegment("task-route")
@@ -407,7 +408,7 @@ class TaskInitialiserTests {
         val stepConfig = RouteTestStepConfig()
         stepConfig.urlPathPrefix = "inner-route"
         val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.routeSegment("outer-route")
@@ -430,7 +431,7 @@ class TaskInitialiserTests {
 
         val stepConfig = RouteTestStepConfig()
         val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.nextDestination { mock() }
@@ -451,7 +452,7 @@ class TaskInitialiserTests {
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
 
         val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser(taskMock, mock())
@@ -474,7 +475,7 @@ class TaskInitialiserTests {
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser(taskMock, mock())
@@ -496,7 +497,7 @@ class TaskInitialiserTests {
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
         val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
 
         val builder = TaskInitialiser(taskMock, mock())
         builder.nextDestination { mock() }
@@ -515,7 +516,7 @@ class TaskInitialiserTests {
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         val firstStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
         whenever(taskMock.firstStep).thenReturn(firstStep)
 
@@ -539,7 +540,7 @@ class TaskInitialiserTests {
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         val firstStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         whenever(firstStep.currentJourneyId).thenReturn("journey-id")
         whenever(taskMock.firstStep).thenReturn(firstStep)
@@ -568,7 +569,7 @@ class TaskInitialiserTests {
 
         val innerLandingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
         innerLandingStep.stepConfig.routeSegment = "inner-route"
-        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(innerLandingStep))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(innerLandingStep))
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser(taskMock, mock())

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -39,10 +40,15 @@ class TaskInitialiser<TStateInit : JourneyState>(
         return this
     }
 
-    override fun build(): List<JourneyStep<*, *, *>> {
+    override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
         // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime.
         // No-op for journey-stated tasks; self-stated tasks use it to namespace their stored data keys.
         task.bindRoute(taskRoute)
+
+        // Attach the task to the shared registry AFTER bindRoute, so its keys register in their final route-scoped
+        // form and collide against the journey state's keys and every other task's keys. No-op for journey-stated
+        // tasks, which own no keys.
+        task.bindKeyRegistry(registry)
 
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
@@ -82,7 +88,7 @@ class TaskInitialiser<TStateInit : JourneyState>(
             taskSubJourney.configureStep(step, configuration)
         }
 
-        val builtSteps = taskSubJourney.build()
+        val builtSteps = taskSubJourney.build(registry)
 
         // Prefix every requestable step in this task with the task route, so its URL path becomes
         // "<taskRoute>/<routeSegment>" (internal steps have no URL). Prepending rather than overwriting lets

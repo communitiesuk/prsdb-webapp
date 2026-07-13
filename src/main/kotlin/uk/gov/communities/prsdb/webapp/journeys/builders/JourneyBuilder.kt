@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.RegistersDelegateKeys
 import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -40,10 +42,23 @@ open class JourneyBuilder<TState : JourneyState>(
 
     fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
-            build().forEach { journeyStep ->
+            // One registry for the whole build. Bind the journey state first (its keys are bare - the root state has
+            // no route), then thread it through build() so every task registers its route-scoped keys into it and
+            // any cross-element key collision throws here, at build time.
+            val registry = DelegateKeyRegistry()
+            (journey as? RegistersDelegateKeys)?.bindKeyRegistry(registry)
+            build(registry).forEach { journeyStep ->
                 when (journeyStep) {
-                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.urlPath, journeyStep.lifecycleOrchestrator)
-                    is JourneyStep.InternalStep<*, *> -> return@forEach
+                    is JourneyStep.RequestableStep<*, *, *> -> {
+                        put(
+                            journeyStep.urlPath,
+                            journeyStep.lifecycleOrchestrator,
+                        )
+                    }
+
+                    is JourneyStep.InternalStep<*, *> -> {
+                        return@forEach
+                    }
                 }
             }
         }
