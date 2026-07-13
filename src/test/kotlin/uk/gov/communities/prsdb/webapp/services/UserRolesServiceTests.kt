@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -18,17 +18,17 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSystemOperatorData
 
 class UserRolesServiceTests {
-    private lateinit var landlordRepository: LandlordRepository
+    private lateinit var individualLandlordRepository: IndividualLandlordRepository
     private lateinit var localCouncilUserRepository: LocalCouncilUserRepository
     private lateinit var systemOperatorRepository: SystemOperatorRepository
     private lateinit var userRolesService: UserRolesService
 
     @BeforeEach
     fun setup() {
-        landlordRepository = Mockito.mock(LandlordRepository::class.java)
+        individualLandlordRepository = Mockito.mock(IndividualLandlordRepository::class.java)
         localCouncilUserRepository = Mockito.mock(LocalCouncilUserRepository::class.java)
         systemOperatorRepository = Mockito.mock(SystemOperatorRepository::class.java)
-        userRolesService = UserRolesService(landlordRepository, localCouncilUserRepository, systemOperatorRepository)
+        userRolesService = UserRolesService(individualLandlordRepository, localCouncilUserRepository, systemOperatorRepository)
     }
 
     @Test
@@ -36,7 +36,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -104,7 +104,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -168,7 +168,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -235,7 +235,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -326,7 +326,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
@@ -385,7 +385,7 @@ class UserRolesServiceTests {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val user = MockLandlordData.createLandlord(baseUser)
-        whenever(landlordRepository.findByBaseUser_Id(baseUser.id))
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
         // Act
