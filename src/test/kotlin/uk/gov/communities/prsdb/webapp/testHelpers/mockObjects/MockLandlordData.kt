@@ -195,8 +195,9 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
+        fun createUnoccupiedPropertyOwnership(id: Long = 1): PropertyOwnership =
             createPropertyOwnership(
+                id = id,
                 currentNumHouseholds = 0,
                 currentNumTenants = 0,
                 numberOfBedrooms = null,
