@@ -175,6 +175,45 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Nested
+        inner class ComplianceTab {
+            @Test
+            fun `notification banner is visible when certs are expired`(page: Page) {
+                // Property 9: unoccupied, gas expired, EPC expired
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+            }
+
+            @Test
+            fun `gas safety card has certificate status row`(page: Page) {
+                // Property 37: has gas cert, electrical cert, and EPC
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.gasSafetyCard.summaryList.certificateStatusRow).isVisible()
+            }
+
+            @Test
+            fun `electrical safety card has certificate status row`(page: Page) {
+                // Property 37: has gas cert, electrical cert, and EPC
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.electricalSafetyCard.summaryList.certificateStatusRow).isVisible()
+            }
+
+            @Test
+            fun `epc card has certificate status row`(page: Page) {
+                // Property 9: has expired EPC
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
+                detailsPage.tabs.goToComplianceInformation()
+
+                assertThat(detailsPage.epcCard.summaryList.certificateStatusRow).isVisible()
+            }
+        }
+
+        @Nested
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
