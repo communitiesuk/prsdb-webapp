@@ -12,9 +12,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -27,7 +28,7 @@ class PropertyRegistrationService(
     private val addressService: AddressService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val landlordRepository: LandlordRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
@@ -73,8 +74,9 @@ class PropertyRegistrationService(
         epcProvideLater: Boolean? = null,
     ) {
         val landlord =
-            landlordRepository.findByBaseUser_Id(baseUserId)
+            individualLandlordRepository.findByBaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("User not registered as a landlord")
+        // TODO: PDJB-1274: Update emails to account for org landlord
 
         val propertyOwnership =
             createPropertyOwnershipAndRelatedEntities(
@@ -177,7 +179,7 @@ class PropertyRegistrationService(
     }
 
     private fun sendConfirmationEmails(
-        landlord: Landlord,
+        landlord: IndividualLandlord,
         propertyOwnership: PropertyOwnership,
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,

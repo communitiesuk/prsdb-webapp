@@ -35,9 +35,13 @@ class LocalCouncilDashboardController(
         val isAdmin = userRolesService.getHasLocalCouncilAdminRole(principal.name)
 
         if (isAdmin) {
+            val existingNavLinks =
+                (model.getAttribute("navLinks") as? List<*>)
+                    ?.filterIsInstance<NavigationLinkViewModel>()
+                    ?: emptyList()
             model.addAttribute(
                 "navLinks",
-                listOf(
+                existingNavLinks +
                     NavigationLinkViewModel(
                         ManageLocalCouncilUsersController.getManageUsersRoute(
                             localCouncilUser.localCouncil.id,
@@ -46,7 +50,6 @@ class LocalCouncilDashboardController(
                         "navLink.manageUsers.title",
                         false,
                     ),
-                ),
             )
         }
 

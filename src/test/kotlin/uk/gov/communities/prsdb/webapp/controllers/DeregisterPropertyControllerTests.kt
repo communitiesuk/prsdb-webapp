@@ -41,13 +41,13 @@ class DeregisterPropertyControllerTests(
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
+
+    @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator

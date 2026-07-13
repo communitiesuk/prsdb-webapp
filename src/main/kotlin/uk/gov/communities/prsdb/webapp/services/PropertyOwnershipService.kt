@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -98,7 +99,8 @@ class PropertyOwnershipService(
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
 
-        val isLandlord = propertyOwnership.landlords.any { it.baseUser.id == baseUserId }
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+        val isLandlord = propertyOwnership.landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
         if (!isLocalCouncil && !isLandlord) {
             throw ResponseStatusException(
@@ -125,7 +127,8 @@ class PropertyOwnershipService(
     fun getIsLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,

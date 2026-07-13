@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
@@ -26,7 +27,9 @@ class SendRejectionEmailsStepConfig(
 
         invitationService.addRejectedPropertyAddressToSession(propertyAddress)
 
+        // TODO: PDJB-1274: Update emails to account for org landlord
         invitation.registeredOwnership.landlords.forEach { landlord ->
+            check(landlord is IndividualLandlord)
             rejectionEmailSender.sendEmail(
                 landlord.email,
                 JointLandlordInvitationRejectionEmail(

@@ -44,6 +44,7 @@ class LandlordController(
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
 
+    // TODO: PDJB-1278: Update landlord dashboard for org landlords
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
     fun landlordDashboard(
         model: Model,

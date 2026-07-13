@@ -35,6 +35,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -332,7 +334,7 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetLandlordRegisteredPropertiesDetails {
         private val currentLandlord = MockLandlordData.createLandlord()
-        private val registeredLandlords = mutableSetOf(currentLandlord)
+        private val registeredLandlords: MutableSet<Landlord> = mutableSetOf(currentLandlord)
         private val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
         private val expectedIsTenantedMessageKey = "commonText.no"
@@ -511,9 +513,11 @@ class PropertyOwnershipServiceTests {
         fun `returns property ownership when user is only landlord`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName =
-                propertyOwnership
-                    .landlords
-                    .first()
+                (
+                    propertyOwnership
+                        .landlords
+                        .first() as IndividualLandlord
+                )
                     .baseUser
                     .id
 
