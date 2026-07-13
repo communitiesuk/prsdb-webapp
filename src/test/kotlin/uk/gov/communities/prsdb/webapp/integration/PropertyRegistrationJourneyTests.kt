@@ -1517,6 +1517,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
         hasGasSupplyPage.submitHasNoGasSupply()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).isHidden()
         checkGasSafetyAnswersPage.form.submit()
 
         taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1526,6 +1527,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).isHidden()
 
         whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         checkElectricalSafetyAnswersPage.form.submit()
@@ -1536,6 +1538,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
         provideEpcLaterPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        assertThat(checkEpcAnswersPage.sectionHeader).isHidden()
         checkEpcAnswersPage.form.submit()
 
         taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)

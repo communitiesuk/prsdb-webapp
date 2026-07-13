@@ -436,6 +436,15 @@ class PropertyRegistrationJourneyFactory(
                         )
                 }
             }
+            listOf(
+                journey.checkGasSafetyAnswersStep,
+                journey.checkElectricalSafetyAnswersStep,
+                journey.checkEpcAnswersStep,
+            ).forEach { checkAnswersStep ->
+                configureStep(checkAnswersStep) {
+                    withAdditionalContentProperty { "sectionHeaderInfo" to null }
+                }
+            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
