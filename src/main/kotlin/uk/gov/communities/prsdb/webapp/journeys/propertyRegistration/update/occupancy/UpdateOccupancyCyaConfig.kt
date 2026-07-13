@@ -45,6 +45,8 @@ class UpdateOccupancyCyaConfig(
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,
                 isOccupied = isOccupied,
+                // TODO PDJB-1304 - check which of these fields should still be updated when occupancy is updated.
+                //   For example, numBedrooms should no longer be set to null as that will be in the property details section
                 numberOfHouseholds =
                     if (isOccupied) {
                         state.households.formModel
