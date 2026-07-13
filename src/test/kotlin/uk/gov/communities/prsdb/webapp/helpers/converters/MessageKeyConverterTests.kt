@@ -89,29 +89,24 @@ class MessageKeyConverterTests {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 
-    // If this test is failing, this will likely be as work was taken to remove the compliance-actions-page-may26-redesign feature flag.
-    // With it, the old & redesign sub keys should be removed,
-    // and so all keys in the enum can now be resolved.
-    // Remove this test and remove "PROVIDE_LATER" and "EXPIRED" from the exclude of the below test
     @ParameterizedTest
-    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED"], mode = EnumSource.Mode.EXCLUDE)
-    fun `convert does not return a resolvable message key ComplianceCertStatus changed under the feature flag`(
-        value: ComplianceCertStatus,
-    ) {
-        assertMessageKeyDoesNotResolve(MessageKeyConverter.convert(value))
+    @EnumSource(ComplianceCertStatus::class, names = ["PROVIDE_LATER", "EXPIRED"])
+    fun `convert returns a resolvable message key for PROVIDE_LATER and EXPIRED ComplianceCertStatus`(value: ComplianceCertStatus) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 
     @Test
-    fun `convert throws IllegalStateException for NOT_REQUIRED ComplianceCertStatus`() {
-        org.junit.jupiter.api.assertThrows<IllegalStateException> {
-            MessageKeyConverter.convert(ComplianceCertStatus.NOT_REQUIRED)
-        }
+    fun `convert returns a non-resolvable parent message key for HAS_FAULTS ComplianceCertStatus`() {
+        // HAS_FAULTS resolves per cert type (e.g. complianceActions.status.hasFaults.gasSafety),
+        // so the base key intentionally maps to a parent node rather than a message.
+        assertMessageKeyDoesNotResolve(MessageKeyConverter.convert(ComplianceCertStatus.HAS_FAULTS))
     }
 
-    @Test
-    fun `convert throws IllegalStateException for ADDED ComplianceCertStatus`() {
+    @ParameterizedTest
+    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED"])
+    fun `convert throws IllegalStateException for NOT_REQUIRED and ADDED ComplianceCertStatus`(value: ComplianceCertStatus) {
         org.junit.jupiter.api.assertThrows<IllegalStateException> {
-            MessageKeyConverter.convert(ComplianceCertStatus.ADDED)
+            MessageKeyConverter.convert(value)
         }
     }
 
