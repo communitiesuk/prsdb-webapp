@@ -137,6 +137,10 @@ orgGovBodyDetails:
   fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
   hasDetails: I have details
   noDetails: I don't have details
+orgGovBodyMemberName:
+  fieldSetHeading: What is their full name?
+  error:
+    missing: Enter a full name
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:

@@ -635,4 +635,24 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
         }
     }
+
+    @Nested
+    inner class GovBodyMemberNameStep {
+        @Test
+        fun `the governing body member name page renders the caption and heading`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            assertThat(govBodyMemberNamePage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(govBodyMemberNamePage.page.locator("h1")).containsText("What is their full name?")
+        }
+
+        @Test
+        fun `submitting an empty governing body member name returns an error`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            govBodyMemberNamePage.submitName("")
+
+            assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
+        }
+    }
 }

@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GoverningBodyMemberNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeDobFormModel
@@ -211,8 +212,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgGovBodyMemberName(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgGovBodyMemberNameStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgGovBodyMemberName(name: String = "Governing Body Member"): LandlordStateSessionBuilder {
+        val formModel = GoverningBodyMemberNameFormModel().apply { this.name = name }
+        withSubmittedValue(OrgGovBodyMemberNameStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
