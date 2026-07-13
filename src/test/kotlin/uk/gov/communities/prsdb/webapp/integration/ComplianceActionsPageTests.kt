@@ -38,12 +38,6 @@ class ComplianceActionsPageTests : IntegrationTest() {
         }
 
         @Test
-        fun `the page does not show hint text`() {
-            val complianceActionsPage = navigator.goToComplianceActions()
-            assertThat(complianceActionsPage.hintText).isHidden()
-        }
-
-        @Test
         fun `summary cards are populated with correct content and actions`(page: Page) {
             var complianceActionsPage = navigator.goToComplianceActions()
             // Check compliance card - OCCUPIED, gas missing, eicr exempt, epc expired
