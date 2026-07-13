@@ -17,7 +17,7 @@ class OrgGovBodyMustProvideInfoStepConfig :
         mapOf(
             "title" to "forms.orgGovBodyMustProvideInfo.heading",
             "orgTypeUrl" to JourneyStateService.urlWithJourneyState(OrgTypeStep.ROUTE_SEGMENT, state.journeyId),
-            "registerAsIndividualUrl" to JourneyStateService.urlWithJourneyState(OrgTypeStep.ROUTE_SEGMENT, state.journeyId),
+            "registerAsIndividualUrl" to JourneyStateService.urlWithJourneyState(LandlordTypeStep.ROUTE_SEGMENT, state.journeyId),
         )
 
     override fun chooseTemplate(state: LandlordRegistrationOrgLandlordState) = "forms/orgGovBodyMustProvideInfoForm"
