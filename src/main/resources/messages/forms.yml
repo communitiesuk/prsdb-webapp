@@ -133,10 +133,27 @@ orgName:
   error:
     missing: Enter an organisation name
 orgGovBodyDetails:
-  title: 'TODO: PDJB-1284 - Providing details about your governing body'
-  fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
-  hasDetails: I have details
-  noDetails: I don't have details
+  title: Providing details about your organisation’s governing body
+  heading: Providing details about your organisation’s governing body
+  body:
+    one: We are now going to ask you about the people who govern your organisation.
+    two: 'You must provide details for all:'
+  bullet:
+    one: directors
+    two: trustees
+    three: partners
+    four: other members of the governing body
+  insetText: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
+  details:
+    summary: Providing details for partners
+    body:
+      one:
+        beforeLink: Partners of English business partnerships should
+        link: register as individual landlords
+        afterLink: . One partner should then invite the others to join the property as joint landlords.
+      two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
+  continueButton: Continue
+  noDetailsButton: I don't have these details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
