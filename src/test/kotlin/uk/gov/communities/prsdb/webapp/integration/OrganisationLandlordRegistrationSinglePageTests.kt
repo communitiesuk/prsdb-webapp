@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -632,7 +634,36 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
             val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
 
-            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
+            assertThat(lookupAddressPage.heading).containsText("What is the trustee’s contact address?")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyDetailsStep {
+        @Test
+        fun `org governing body details page renders the expected content`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            assertThat(govBodyDetailsPage.heading)
+                .containsText("Providing details about your organisation’s governing body")
+        }
+
+        @Test
+        fun `org governing body details page Continue button navigates to the who to provide step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitHasDetails()
+
+            assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `org governing body details page secondary button navigates to the must provide info step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitNoDetails()
+
+            assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
         }
     }
 }
