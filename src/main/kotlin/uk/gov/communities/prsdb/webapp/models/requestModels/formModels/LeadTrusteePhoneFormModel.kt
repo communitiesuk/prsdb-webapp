@@ -11,7 +11,7 @@ class LeadTrusteePhoneFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.leadTrusteePhone.error.missing",
+                messageKey = "registerAsALandlord.leadTrusteePhone.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(

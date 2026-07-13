@@ -13,7 +13,7 @@ class LeadTrusteePhoneStepConfig : AbstractRequestableStepConfig<Complete, LeadT
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.leadTrusteePhone.fieldSetHeading",
+            "fieldSetHeading" to "registerAsALandlord.leadTrusteePhone.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
             "hint" to "forms.phoneNumber.hint",
         )

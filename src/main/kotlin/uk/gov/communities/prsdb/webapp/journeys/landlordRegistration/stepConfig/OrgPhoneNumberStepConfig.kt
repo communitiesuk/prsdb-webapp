@@ -13,7 +13,7 @@ class OrgPhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, OrgPhon
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.orgPhoneNumber.fieldSetHeading",
+            "fieldSetHeading" to "registerAsALandlord.orgPhoneNumber.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
             "hint" to "forms.phoneNumber.hint",
         )

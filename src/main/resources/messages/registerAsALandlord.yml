@@ -69,6 +69,45 @@ privacyNotice:
   checkBox:
     heading: Confirm you have read the privacy notice
     label: I confirm I have read the privacy notice for this private beta
-  oneLoginInset: "When you continue, you’ll be asked to prove your identity using your GOV.UK One Login."
-
+  oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
+landlordType:
+  fieldSetHeading: Are you registering as an individual or an organisation?
+  partnership:
+    summary: Registering a partnership
+    paragraph:
+      one: All members of English business partnerships must register as individuals and follow the guidance for joint landlords.
+      two: Limited Liability Partnerships (LLPs) and Scottish partnerships must register as organisations.
+  radios:
+    individual:
+      label: An individual
+      hint: You rent out a property as an individual, sole trader or joint landlord
+    organisation:
+      label: An organisation
+      hint: You rent out a property as a company, charity or trust
+    error:
+      missing: Select if you are registering as an individual or an organisation
+orgPhoneNumber:
+  fieldSetHeading: What is your organisation’s phone number?
+  error:
+    missing: Enter a phone number including the country code for international numbers
+leadTrusteePhone:
+  fieldSetHeading: What is the lead trustee’s phone number?
+  error:
+    missing: Enter a phone number including the country code for international numbers
+orgType:
+  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHint: Select all that apply
+  checkbox:
+    company: Company
+    charity: Charity
+    trust: Trust
+    none: None of these
+  divider: or
+  error:
+    missing: Select the types of organisation that apply, or select ‘None of these’
+leadTrusteeName:
+  fieldSetHeading: What is the lead trustee’s full name?
+  fieldSetHint: All trustees are equally legally responsible, but you must nominate one ‘lead’ trustee to be the main point of contact
+  error:
+    missing: Enter the lead trustee’s full name
 

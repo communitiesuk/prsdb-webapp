@@ -14,21 +14,21 @@ class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, L
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.landlordType.fieldSetHeading",
-            "partnershipSummary" to "forms.landlordType.partnership.summary",
-            "partnershipParagraphOne" to "forms.landlordType.partnership.paragraph.one",
-            "partnershipParagraphTwo" to "forms.landlordType.partnership.paragraph.two",
+            "fieldSetHeading" to "registerAsALandlord.landlordType.fieldSetHeading",
+            "partnershipSummary" to "registerAsALandlord.landlordType.partnership.summary",
+            "partnershipParagraphOne" to "registerAsALandlord.landlordType.partnership.paragraph.one",
+            "partnershipParagraphTwo" to "registerAsALandlord.landlordType.partnership.paragraph.two",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = LandlordType.INDIVIDUAL,
-                        labelMsgKey = "forms.landlordType.radios.individual.label",
-                        hintMsgKey = "forms.landlordType.radios.individual.hint",
+                        labelMsgKey = "registerAsALandlord.landlordType.radios.individual.label",
+                        hintMsgKey = "registerAsALandlord.landlordType.radios.individual.hint",
                     ),
                     RadiosButtonViewModel(
                         value = LandlordType.ORGANISATION,
-                        labelMsgKey = "forms.landlordType.radios.organisation.label",
-                        hintMsgKey = "forms.landlordType.radios.organisation.hint",
+                        labelMsgKey = "registerAsALandlord.landlordType.radios.organisation.label",
+                        hintMsgKey = "registerAsALandlord.landlordType.radios.organisation.hint",
                     ),
                 ),
         )

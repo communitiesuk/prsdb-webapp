@@ -10,7 +10,7 @@ class LeadTrusteeNameFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.leadTrusteeName.error.missing",
+                messageKey = "registerAsALandlord.leadTrusteeName.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],

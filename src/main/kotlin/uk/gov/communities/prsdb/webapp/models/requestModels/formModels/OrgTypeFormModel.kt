@@ -11,7 +11,7 @@ class OrgTypeFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.orgType.error.missing",
+                messageKey = "registerAsALandlord.orgType.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isSelectionValid",
             ),
