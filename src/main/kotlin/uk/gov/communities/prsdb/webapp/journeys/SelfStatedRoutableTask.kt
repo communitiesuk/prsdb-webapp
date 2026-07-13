@@ -9,9 +9,9 @@ package uk.gov.communities.prsdb.webapp.journeys
 // Subclasses supply the task's steps, its task-specific state and makeSubJourney; this base owns the route-scoping
 // machinery. Subclasses create route-scoped nullable delegates via delegateProvider.nullableDelegate { scopedKey(...) }.
 //
-// KNOWN LIMITATION: this base creates its OWN JourneyStateDelegateProvider, so route-scoped keys are not compared
-// against the journey state's keys (nor other tasks' keys) for collisions. See the KNOWN LIMITATION comment on
-// JourneyStateDelegateProvider.registerKey - to be addressed in a later commit.
+// This base's provider participates in the journey-build-wide DelegateKeyRegistry (see bindKeyRegistry), so its
+// route-scoped keys are checked for collisions against the journey state's keys and every other task's keys at
+// build time.
 abstract class SelfStatedRoutableTask<TState : JourneyState>(
     // Self-made journey-state delegate over the task's OWN journeyStateService. Because JourneyStateService
     // resolves the active session from the request, this reads/writes the same journey data as the journey root
@@ -25,6 +25,10 @@ abstract class SelfStatedRoutableTask<TState : JourneyState>(
 
     // Route-only late binding - the sole value the TaskInitialiser supplies at build time.
     override fun bindRoute(routePrefix: String?) = delegateProvider.bindRoutePrefix(routePrefix)
+
+    // Attach this task's own provider to the shared registry, flushing its route-scoped keys. Called by the
+    // TaskInitialiser AFTER bindRoute, so keys resolve to their final route-scoped form before registration.
+    override fun bindKeyRegistry(registry: DelegateKeyRegistry) = delegateProvider.bindKeyRegistry(registry)
 
     abstract val taskState: TState
 }

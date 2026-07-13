@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<in TState : JourneyState> {
+abstract class Task<in TState : JourneyState> : RegistersDelegateKeys {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit
@@ -54,6 +54,12 @@ abstract class Task<in TState : JourneyState> {
     // End state: once every task is self-stated, this stops being open/no-op and the route becomes
     // a plain field the TaskInitialiser always populates.
     open fun bindRoute(routePrefix: String?) {}
+
+    // A task that owns delegate keys (a self-stated task) attaches its own provider to the journey-build-wide
+    // DelegateKeyRegistry here, so its route-scoped keys are checked for collisions against the journey state and
+    // every other task. The TaskInitialiser calls this from build(), AFTER bindRoute so keys resolve to their final
+    // route-scoped form. The default no-op keeps journey-stated tasks (which own no keys) unaffected.
+    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {}
 
     fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
 

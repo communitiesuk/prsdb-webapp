@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
@@ -12,6 +13,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
 // SelfStatedRoutableTask route-scopes ONLY its own cached-variable delegates (via delegateProvider.scopedKey): a
@@ -93,6 +95,27 @@ class SelfStatedRoutableTaskTests {
         val task = taskFor("some-route")
 
         assertEquals(stepData, task.getSubmittedStepData())
+    }
+
+    @Test
+    fun `bindKeyRegistry registers the task's cached variable key in its route-scoped form`() {
+        val registry = DelegateKeyRegistry()
+        val task = taskFor("some-route")
+
+        task.bindKeyRegistry(registry)
+
+        // The registry now owns the route-scoped key, so re-registering it collides.
+        assertThrows<JourneyInitialisationException> { registry.register("some-route/cachedThing") }
+    }
+
+    @Test
+    fun `bindKeyRegistry registers a bare cached variable key when no route is bound`() {
+        val registry = DelegateKeyRegistry()
+        val task = taskFor(null)
+
+        task.bindKeyRegistry(registry)
+
+        assertThrows<JourneyInitialisationException> { registry.register("cachedThing") }
     }
 
     // Minimal concrete SelfStatedRoutableTask exposing a single route-scoped cached variable. makeSubJourney is
