@@ -44,6 +44,7 @@ class UpdateOccupancyCyaConfig(
         try {
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,
+                isOccupied = isOccupied,
                 numberOfHouseholds =
                     if (isOccupied) {
                         state.households.formModel

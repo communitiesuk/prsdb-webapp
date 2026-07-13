@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class PropertyOwnershipTests {
@@ -42,5 +45,17 @@ class PropertyOwnershipTests {
 
         assertFalse(property.landlords.contains(landlord))
         assertTrue(property.landlords.contains(coLandlord))
+    }
+
+    @ParameterizedTest(name = "isOccupied returns the stored value {0} regardless of tenant count")
+    @ValueSource(booleans = [true, false])
+    fun `isOccupied returns the stored value regardless of tenant count`(isOccupied: Boolean) {
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                currentNumTenants = if (isOccupied) 0 else 3,
+                isOccupied = isOccupied,
+            )
+
+        assertEquals(isOccupied, property.isOccupied)
     }
 }

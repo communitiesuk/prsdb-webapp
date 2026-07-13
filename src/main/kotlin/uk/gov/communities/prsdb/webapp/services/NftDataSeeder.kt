@@ -422,6 +422,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setIntOrNull(15, rentDetails?.rentFrequency?.ordinal)
         propertyOwnershipStmt.setStringOrNull(16, rentDetails?.customRentFrequency)
         propertyOwnershipStmt.setBigDecimalOrNull(17, rentDetails?.rentAmount)
+        propertyOwnershipStmt.setBoolean(18, isOccupied)
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)

@@ -88,6 +88,7 @@ class PropertyRegistrationServiceTests {
                     LicensingType.NO_LICENSING,
                     "license number",
                     OwnershipType.FREEHOLD,
+                    true,
                     1,
                     1,
                     "baseUserId",
@@ -120,6 +121,7 @@ class PropertyRegistrationServiceTests {
                     LicensingType.NO_LICENSING,
                     "license number",
                     OwnershipType.FREEHOLD,
+                    true,
                     1,
                     1,
                     nonLandlordUserId,
@@ -141,6 +143,7 @@ class PropertyRegistrationServiceTests {
     fun `registerProperty creates the property ownership if all property fields are populated`() {
         // Arrange
         val ownershipType = OwnershipType.FREEHOLD
+        val isOccupied = true
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
@@ -165,6 +168,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
+                isOccupied = isOccupied,
                 landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
@@ -186,6 +190,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
+                isOccupied = isOccupied,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -211,6 +216,7 @@ class PropertyRegistrationServiceTests {
             licenceType,
             licenceNumber,
             ownershipType,
+            isOccupied,
             numberOfHouseholds,
             numberOfPeople,
             landlord.baseUser.id,
@@ -227,6 +233,7 @@ class PropertyRegistrationServiceTests {
         // Assert
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             landlords = mutableSetOf(landlord),
@@ -274,6 +281,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
+                isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 landlords = any(),
@@ -301,6 +309,7 @@ class PropertyRegistrationServiceTests {
             LicensingType.NO_LICENSING,
             "",
             OwnershipType.FREEHOLD,
+            true,
             1,
             1,
             landlord.baseUser.id,
@@ -362,6 +371,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
+                isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 landlords = any(),
@@ -391,6 +401,7 @@ class PropertyRegistrationServiceTests {
             LicensingType.SELECTIVE_LICENCE,
             "Licence",
             OwnershipType.FREEHOLD,
+            true,
             2,
             3,
             "USER_ID",
@@ -463,6 +474,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
+                isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -487,6 +499,7 @@ class PropertyRegistrationServiceTests {
             licenceType,
             licenceNumber = "",
             ownershipType,
+            true,
             numberOfHouseholds,
             numberOfPeople,
             landlord.baseUser.id,
@@ -502,6 +515,7 @@ class PropertyRegistrationServiceTests {
 
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = true,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             landlords = mutableSetOf(landlord),
@@ -553,6 +567,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
+                isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -579,6 +594,7 @@ class PropertyRegistrationServiceTests {
             licenceType,
             licenceNumber,
             ownershipType,
+            true,
             numberOfHouseholds,
             numberOfPeople,
             landlord.baseUser.id,
@@ -631,6 +647,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
+                isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -657,6 +674,7 @@ class PropertyRegistrationServiceTests {
             licenceType,
             "",
             ownershipType,
+            true,
             numberOfHouseholds,
             numberOfPeople,
             landlord.baseUser.id,
@@ -706,6 +724,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
+                isOccupied = true,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 landlords = mutableSetOf(landlord),
@@ -732,6 +751,7 @@ class PropertyRegistrationServiceTests {
             licenceType,
             "",
             ownershipType,
+            true,
             numberOfHouseholds,
             numberOfPeople,
             landlord.baseUser.id,
@@ -770,6 +790,7 @@ class PropertyRegistrationServiceTests {
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
+                isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 landlords = any(),
@@ -797,6 +818,7 @@ class PropertyRegistrationServiceTests {
             LicensingType.NO_LICENSING,
             "",
             OwnershipType.FREEHOLD,
+            false,
             0,
             0,
             landlord.baseUser.id,
@@ -814,6 +836,7 @@ class PropertyRegistrationServiceTests {
         // Assert
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = any(),
+            isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
             landlords = any(),
