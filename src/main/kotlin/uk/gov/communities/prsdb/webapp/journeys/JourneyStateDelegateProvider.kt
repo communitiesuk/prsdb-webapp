@@ -9,37 +9,34 @@ import kotlin.reflect.KProperty
 
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
-) {
+) : RegistersDelegateKeys {
     private val keysInUse = mutableSetOf<String>()
 
-    // KNOWN LIMITATION (to be addressed in a later commit - do not rely on this guard across providers yet):
-    // registerKey was designed to guarantee that, within a single journey state's session storage, no two
-    // delegates share a key. That guarantee only holds for delegates registered against the SAME
-    // JourneyStateDelegateProvider instance - i.e. the journey state's own provider.
-    //
-    // Self-stated tasks (e.g. AddressTask) CREATE their own JourneyStateDelegateProvider rather than sharing the
-    // journey's, so their (route-scoped) keys register in a separate registry and are never compared against the
-    // journey's keys, nor against other tasks' keys. Consequences:
-    //   - A task's null-route bare key (e.g. "cachedAddresses") can silently collide with a journey key of the
-    //     same name in the shared session storage, undetected.
-    //   - Two tasks bound to the SAME route produce identical keys but are not caught.
-    //
-    // Desired outcome: all delegates (journey and task) register in a single shared location so their keys are
-    // compared together and collisions like the above are detected. This is awkward while the provider is created
-    // rather than injected, so it is deferred. Note also that, for the access-time keyProvider overload,
-    // registration now happens lazily on first get/set (request time) rather than at journey build time.
+    private var registry: DelegateKeyRegistry? = null
+
+    // registerKey guarantees that, within this provider, no two delegates share a key. Once bindKeyRegistry attaches
+    // this provider to a journey-build-wide DelegateKeyRegistry, each key is ALSO registered there in its final
+    // route-scoped form, so collisions across the journey state and every task are detected at build time.
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
         } else {
             keysInUse.add(propertyKey)
         }
+        registry?.register(scopedKey(propertyKey))
     }
 
     private var routePrefix: String? = null
 
     fun bindRoutePrefix(routePrefix: String?) {
         this.routePrefix = routePrefix
+    }
+
+    // Attach this provider to the shared registry, flushing its already-collected keys in their final route-scoped
+    // form. Must be called AFTER bindRoutePrefix so scopedKey resolves correctly; keys registered later forward live.
+    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
+        this.registry = registry
+        keysInUse.forEach { registry.register(scopedKey(it)) }
     }
 
     fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
