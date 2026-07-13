@@ -13,10 +13,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationBasePath
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
@@ -41,9 +39,6 @@ class DeregisterPropertyControllerTests(
     private lateinit var propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory
 
     @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
-
-    @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
@@ -53,11 +48,11 @@ class DeregisterPropertyControllerTests(
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     @Nested
-    inner class FlagOff {
+    inner class GetJourneyStepTests {
         @Test
         fun `getJourneyStep for the initial step returns a redirect for an unauthenticated user`() {
             mvc
-                .get(getPropertyDeregistrationPathOld(1))
+                .get(getPropertyDeregistrationPath(1))
                 .andExpect {
                     status { is3xxRedirection() }
                 }
@@ -67,7 +62,7 @@ class DeregisterPropertyControllerTests(
         @WithMockUser
         fun `getJourneyStep for the initial step returns 403 for a user who is not a landlord`() {
             mvc
-                .get(getPropertyDeregistrationPathOld(1))
+                .get(getPropertyDeregistrationPath(1))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -83,73 +78,9 @@ class DeregisterPropertyControllerTests(
 
             // Act, Assert
             mvc
-                .get(getPropertyDeregistrationPathOld(1))
+                .get(getPropertyDeregistrationPath(1))
                 .andExpect {
                     status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"], value = "user")
-        fun `getJourneyStep for the initial step returns 200 for the landlord who owns this property`() {
-            // Arrange
-            val propertyOwnershipId = 1.toLong()
-
-            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-            whenever(
-                propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId),
-            ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-            whenever(
-                mockStepLifecycleOrchestrator.getStepModelAndView(),
-            ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
-
-            // Act, Assert
-            mvc
-                .get(getPropertyDeregistrationPathOld(1))
-                .andExpect {
-                    status { isOk() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"], value = "user")
-        fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
-            // Arrange
-            val propertyOwnershipId = 1.toLong()
-            val journeyId = "test-journey-id"
-
-            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-            whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
-                .thenThrow(NoSuchJourneyException())
-            whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
-
-            // Act, Assert
-            mvc
-                .get(getPropertyDeregistrationPathOld(1))
-                .andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(JourneyStateService.urlWithJourneyState(AreYouSureStep.ROUTE_SEGMENT, journeyId))
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"], value = "user")
-        fun `getJourneyStep redirects to initialize journey when property ownership does not match`() {
-            // Arrange
-            val propertyOwnershipId = 1.toLong()
-            val journeyId = "test-journey-id"
-
-            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-            whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
-                .thenThrow(PropertyOwnershipMismatchException("mismatch"))
-            whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
-
-            // Act, Assert
-            mvc
-                .get(getPropertyDeregistrationPathOld(1))
-                .andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(JourneyStateService.urlWithJourneyState(AreYouSureStep.ROUTE_SEGMENT, journeyId))
                 }
         }
 
@@ -167,10 +98,7 @@ class DeregisterPropertyControllerTests(
                 propertyDeregistrationPath,
             )
         }
-    }
 
-    @Nested
-    inner class FlagOn {
         @Test
         fun `getPropertyDeregistrationPath returns a path to the initial deregister step`() {
             // Arrange
@@ -192,7 +120,6 @@ class DeregisterPropertyControllerTests(
             // Arrange
             val propertyOwnershipId = 1.toLong()
 
-            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(
                 propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
@@ -216,7 +143,6 @@ class DeregisterPropertyControllerTests(
             val propertyOwnershipId = 1.toLong()
             val journeyId = "test-journey-id"
 
-            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(NoSuchJourneyException())
@@ -238,7 +164,6 @@ class DeregisterPropertyControllerTests(
             val propertyOwnershipId = 1.toLong()
             val journeyId = "test-journey-id"
 
-            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(PropertyOwnershipMismatchException("mismatch"))
@@ -317,9 +242,8 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns the new confirmation view with the address when joint landlords is enabled`() {
+    fun `getConfirmation returns the confirmation view with the address`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
         whenever(
             propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
         ).thenReturn(mutableListOf(propertyOwnershipId))
@@ -333,48 +257,6 @@ class DeregisterPropertyControllerTests(
                 status { isOk() }
                 view { name("deregisterPropertyConfirmationJune26Redesign") }
                 model { attribute("address", "1, Example Road, EG") }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns the old confirmation view when joint landlords is disabled`() {
-        val propertyOwnershipId = 1.toLong()
-        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
-        whenever(
-            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
-        ).thenReturn(mutableListOf(propertyOwnershipId))
-        whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
-
-        mvc
-            .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
-            .andExpect {
-                status { isOk() }
-                view { name("deregisterPropertyConfirmationOld") }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
-    fun `getJourneyStep proceeds with journey when property has multiple landlords but flag is disabled`() {
-        // Arrange
-        val propertyOwnershipId = 1.toLong()
-
-        whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
-        whenever(
-            propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId),
-        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-        whenever(
-            mockStepLifecycleOrchestrator.getStepModelAndView(),
-        ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
-
-        // Act, Assert
-        mvc
-            .get(getPropertyDeregistrationPathOld(propertyOwnershipId))
-            .andExpect {
-                status { isOk() }
-                view { name("placeholder") }
             }
     }
 }

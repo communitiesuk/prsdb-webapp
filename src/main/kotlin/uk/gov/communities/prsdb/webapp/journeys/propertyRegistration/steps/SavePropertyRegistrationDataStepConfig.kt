@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -29,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class SavePropertyRegistrationDataStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
@@ -58,12 +56,8 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
-        var jointLandlordEmails: List<String>? = null
-        var markedJointLandlord = false
-        jointLandlordsStrategy.ifEnabled {
-            jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
-            markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
-        }
+        val jointLandlordEmails: List<String>? = state.invitedJointLandlordEmailsMap?.values?.toList()
+        val markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
             addressModel = state.getAddress(),
