@@ -666,4 +666,25 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
         }
     }
+
+    @Nested
+    inner class OrgGovBodyWhoToProvideStep {
+        @Test
+        fun `the who to provide page renders the heading`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationOrgGovBodyWhoToProvidePage()
+
+            assertThat(whoToProvidePage.form.fieldsetHeading)
+                .containsText("Who do you want to provide details for?")
+        }
+
+        @Test
+        fun `submitting with no option selected returns a validation error`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationOrgGovBodyWhoToProvidePage()
+
+            whoToProvidePage.form.submit()
+
+            assertThat(whoToProvidePage.form.getErrorMessage())
+                .containsText("Select who you are providing details for")
+        }
+    }
 }

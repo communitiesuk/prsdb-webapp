@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
@@ -46,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharit
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -206,8 +208,10 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgGovBodyWhoToProvide(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgGovBodyWhoToProvide(option: GoverningBodyMemberType): LandlordStateSessionBuilder {
+        val formModel = OrgGovBodyWhoToProvideFormModel()
+        formModel.whoToProvide = option
+        withSubmittedValue(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -303,7 +307,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgGovBodyWhoToProvide() = beforeOrgGovBodyDetails().withOrgGovBodyDetails(OrgGovBodyDetailsMode.HAS_DETAILS)
 
-        fun beforeOrgGovBodyMemberName() = beforeOrgGovBodyWhoToProvide().withOrgGovBodyWhoToProvide()
+        fun beforeOrgGovBodyMemberName() = beforeOrgGovBodyWhoToProvide().withOrgGovBodyWhoToProvide(GoverningBodyMemberType.DIRECTOR)
 
         fun beforeOrgGovBodyMemberDob() = beforeOrgGovBodyMemberName().withOrgGovBodyMemberName()
 
