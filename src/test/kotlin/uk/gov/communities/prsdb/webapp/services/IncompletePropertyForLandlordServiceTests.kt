@@ -13,8 +13,8 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -26,7 +26,7 @@ class IncompletePropertyForLandlordServiceTests {
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
     @Mock
-    private lateinit var landlordRepository: LandlordRepository
+    private lateinit var individualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
@@ -43,7 +43,7 @@ class IncompletePropertyForLandlordServiceTests {
             MockSavedJourneyStateData.createSavedJourneyState(
                 baseUser = landlordPrsdbUser,
             )
-        whenever(landlordRepository.findByBaseUser_Id(landlordPrsdbUserId))
+        whenever(individualLandlordRepository.findByBaseUser_Id(landlordPrsdbUserId))
             .thenReturn(landlord)
         val expectedNewEntry = LandlordIncompleteProperties(landlord, savedJourneyState)
 
