@@ -14,28 +14,28 @@
         forms.orgGovBodyMustProvideInfo.provideAtLeastOne
     </p>
     <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.companiesHouse}">companiesHouse</li>
-        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.directors}">directors</li>
-        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.trustees}">trustees</li>
+        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.companiesHouse}">forms.orgGovBodyMustProvideInfo.bullet.companiesHouse</li>
+        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.directors}">forms.orgGovBodyMustProvideInfo.bullet.directors</li>
+        <li th:text="#{forms.orgGovBodyMustProvideInfo.bullet.trustees}">forms.orgGovBodyMustProvideInfo.bullet.trustees</li>
     </ul>
     <p class="govuk-body">
-        <span th:text="#{forms.orgGovBodyMustProvideInfo.toRegister.beforeLink}">To register, </span>
+        <span th:text="#{forms.orgGovBodyMustProvideInfo.toRegister.beforeLink}">forms.orgGovBodyMustProvideInfo.toRegister.beforeLink</span>
         <a class="govuk-link" th:href="@{${orgTypeUrl}}"
-           th:text="#{forms.orgGovBodyMustProvideInfo.toRegister.linkText}">enter your organisation’s details.</a>
+           th:text="#{forms.orgGovBodyMustProvideInfo.toRegister.linkText}">forms.orgGovBodyMustProvideInfo.toRegister.linkText</a>
     </p>
     <p class="govuk-body">
-        <span th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.beforeLink}">If you rent…</span>
+        <span th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.beforeLink}">forms.orgGovBodyMustProvideInfo.registerAsIndividual.beforeLink</span>
         <a class="govuk-link" th:href="@{${registerAsIndividualUrl}}"
-           th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.linkText}">register as an individual</a>
-        <span th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.afterLink}">.</span>
+           th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.linkText}">forms.orgGovBodyMustProvideInfo.registerAsIndividual.linkText</a>
+        <span th:text="#{forms.orgGovBodyMustProvideInfo.registerAsIndividual.afterLink}">forms.orgGovBodyMustProvideInfo.registerAsIndividual.afterLink</span>
     </p>
     <h2 class="govuk-heading-m" th:text="#{forms.orgGovBodyMustProvideInfo.getHelp.heading}">
         forms.orgGovBodyMustProvideInfo.getHelp.heading
     </h2>
-    <p class="govuk-body" th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
-    <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
+    <p class="govuk-body" th:text="#{common.contactDetails.phone}">common.contactDetails.phone</p>
+    <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">common.contactDetails.phoneHours</p>
     <p class="govuk-body">
-        <span th:text="#{common.contactDetails.emailLabel}">Email:</span>
+        <span th:text="#{common.contactDetails.emailLabel}">common.contactDetails.emailLabel</span>
         <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}"
            th:text="#{common.contactDetails.email}">common.contactDetails.email</a>
     </p>
