@@ -132,6 +132,11 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
+orgGovBodyDetails:
+  title: 'TODO: PDJB-1284 - Providing details about your governing body'
+  fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
+  hasDetails: I have details
+  noDetails: I don't have details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -304,6 +309,11 @@ dateOfBirth:
   error:
     invalidDateOfBirth: You must enter a valid date of birth
     invalidAge: The minimum age to register as a landlord is 18
+leadTrusteeDob:
+  fieldSetHeading: What is the lead trustee’s date of birth?
+  fieldSetHint: 'For example, 27 03 1968'
+  error:
+    invalidDate: The trustee’s date of birth cannot be in the future
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
@@ -650,6 +660,7 @@ checkPropertyAnswers:
     address: Property address
     localCouncil: Local council
     type: Property type
+    bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
     licensingNumber: Licensing number

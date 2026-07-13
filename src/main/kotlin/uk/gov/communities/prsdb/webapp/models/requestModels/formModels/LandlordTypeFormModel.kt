@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
@@ -17,8 +18,3 @@ class LandlordTypeFormModel(
     )
     var landlordType: LandlordType? = null,
 ) : FormModel
-
-enum class LandlordType {
-    INDIVIDUAL,
-    ORGANISATION,
-}

@@ -22,6 +22,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
@@ -30,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
@@ -162,11 +170,56 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             task(journey.orgLandlordTrusteeAddressTask) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
+                nextStep { journey.orgGovBodyDetailsStep }
+            }
+            step(journey.orgGovBodyDetailsStep) {
+                routeSegment(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
+                parents { journey.orgLandlordTrusteeAddressTask.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.orgGovBodyWhoToProvideStep)
+                        OrgGovBodyDetailsMode.NO_DETAILS -> Destination(journey.orgGovBodyMustProvideInfoStep)
+                    }
+                }
+            }
+            step(journey.orgGovBodyMustProvideInfoStep) {
+                routeSegment(OrgGovBodyMustProvideInfoStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.NO_DETAILS) }
+                nextStep { journey.orgMainContactStep }
+            }
+            step(journey.orgGovBodyWhoToProvideStep) {
+                routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
+                nextStep { journey.orgGovBodyMemberNameStep }
+            }
+            step(journey.orgGovBodyMemberNameStep) {
+                routeSegment(OrgGovBodyMemberNameStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyWhoToProvideStep.isComplete() }
+                nextStep { journey.orgGovBodyMemberDobStep }
+            }
+            step(journey.orgGovBodyMemberDobStep) {
+                routeSegment(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyMemberNameStep.isComplete() }
+                nextStep { journey.orgGovBodyMemberAddressStep }
+            }
+            step(journey.orgGovBodyMemberAddressStep) {
+                routeSegment(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyMemberDobStep.isComplete() }
+                nextStep { journey.orgGovBodyMemberListStep }
+            }
+            step(journey.orgGovBodyMemberListStep) {
+                routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
+                parents { journey.orgGovBodyMemberAddressStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordTrusteeAddressTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgGovBodyMustProvideInfoStep.isComplete(),
+                        journey.orgGovBodyMemberListStep.isComplete(),
+                    )
+                }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {

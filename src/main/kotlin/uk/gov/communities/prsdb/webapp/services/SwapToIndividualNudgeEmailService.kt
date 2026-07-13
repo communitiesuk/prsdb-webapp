@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwapToIndividualNudgeEmail
@@ -41,7 +42,9 @@ class SwapToIndividualNudgeEmailServiceImplFlagOn(
             invitations.any { it.status == JointLandlordInvitationStatus.EXPIRED && !it.invitationExpiredEmailSent }
         if (hasUnprocessedExpiredInvitations) return
 
+        // TODO: PDJB-1274: Update emails to account for org landlord
         val soleLandlord = propertyOwnership.landlords.single()
+        check(soleLandlord is IndividualLandlord)
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 

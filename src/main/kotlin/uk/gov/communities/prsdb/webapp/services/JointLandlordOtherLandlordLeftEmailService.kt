@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordOtherLandlordLeftNotification
@@ -36,7 +37,10 @@ class JointLandlordOtherLandlordLeftEmailServiceImplFlagOn(
         propertyOwnership: PropertyOwnership,
         previousLandlord: Landlord,
     ) {
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        check(previousLandlord is IndividualLandlord)
         propertyOwnership.landlords.forEach { otherLandlord ->
+            check(otherLandlord is IndividualLandlord)
             otherLandlordLeftEmailService.sendEmail(
                 otherLandlord.email,
                 JointLandlordOtherLandlordLeftNotification(

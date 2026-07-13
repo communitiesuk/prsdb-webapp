@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.SWITCHED_TO_INDIVIDUAL_PROPERTY_ID
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -41,7 +42,9 @@ class CompleteSwitchToIndividualStepConfig(
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
         jointLandlordInvitationService.removeInvitations(pendingInvitations)
 
+        // TODO: PDJB-1274: Update emails to account for org landlord
         val landlord = propertyOwnership.landlords.first()
+        check(landlord is IndividualLandlord)
         switchToIndividualConfirmationEmailSender.sendEmail(
             landlord.email,
             SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),

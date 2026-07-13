@@ -28,8 +28,8 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
@@ -51,7 +51,7 @@ class JointLandlordInvitationServiceTests {
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var mockHttpSession: HttpSession
     private lateinit var invitationService: JointLandlordInvitationService
-    private lateinit var invitingLandlord: Landlord
+    private lateinit var invitingLandlord: IndividualLandlord
 
     @BeforeEach
     fun setup() {

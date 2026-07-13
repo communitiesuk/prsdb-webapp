@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
@@ -23,7 +24,12 @@ class LeavePropertyService(
         baseUserId: String,
     ): PropertyOwnership {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val isLandlordOnProperty = propertyOwnership.landlords.any { it.baseUser.id == baseUserId }
+        val isLandlordOnProperty =
+            // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+            propertyOwnership.landlords.any { landlord ->
+                check(landlord is IndividualLandlord)
+                landlord.baseUser.id == baseUserId
+            }
         val isJointlyOwned = propertyOwnership.landlords.size >= 2
         if (!isLandlordOnProperty || !isJointlyOwned) {
             throw ResponseStatusException(
@@ -38,6 +44,7 @@ class LeavePropertyService(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
+        check(landlord is IndividualLandlord)
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
         TransactionHelper.runAfterTransactionCommits {

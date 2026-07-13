@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -52,9 +53,9 @@ class MockLandlordData {
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
             incompleteProperties: List<SavedJourneyState> = emptyList(),
-        ): Landlord {
+        ): IndividualLandlord {
             val landlord =
-                Landlord(
+                IndividualLandlord(
                     baseUser = baseUser,
                     name = name,
                     email = email,
