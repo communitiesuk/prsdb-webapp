@@ -436,6 +436,7 @@ class PropertyRegistrationJourneyFactory(
                         )
                 }
             }
+            // We don't have a section header for these pages, as their titles are the same as the respective page header
             listOf(
                 journey.checkGasSafetyAnswersStep,
                 journey.checkElectricalSafetyAnswersStep,
