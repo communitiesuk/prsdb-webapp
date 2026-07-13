@@ -153,7 +153,7 @@ orgGovBodyDetails:
         afterLink: . One partner should then invite the others to join the property as joint landlords.
       two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
   continueButton: Continue
-  noDetailsButton: I don't have these details
+  noDetailsButton: I don’t have these details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:

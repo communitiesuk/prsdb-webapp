@@ -594,7 +594,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
             val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
 
-            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
+            assertThat(lookupAddressPage.heading).containsText("What is the trustee’s contact address?")
         }
     }
 
@@ -605,7 +605,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
 
             assertThat(govBodyDetailsPage.heading)
-                .containsText("Providing details about your organisation\u2019s governing body")
+                .containsText("Providing details about your organisation’s governing body")
         }
 
         @Test
