@@ -339,7 +339,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
-        // TODO: PDJB-1284 - Submit real governing body details once the step is implemented
         val orgGovBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
         orgGovBodyDetailsPage.submitHasDetails()
 
