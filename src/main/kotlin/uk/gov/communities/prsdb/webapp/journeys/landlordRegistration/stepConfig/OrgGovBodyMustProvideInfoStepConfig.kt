@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -16,8 +16,8 @@ class OrgGovBodyMustProvideInfoStepConfig :
     override fun getStepSpecificContent(state: LandlordRegistrationOrgLandlordState) =
         mapOf(
             "title" to "forms.orgGovBodyMustProvideInfo.heading",
-            "orgTypeUrl" to Destination(state.orgTypeStep).toUrlStringOrNull(),
-            "registerAsIndividualUrl" to Destination(state.landlordTypeStep).toUrlStringOrNull(),
+            "orgTypeUrl" to JourneyStateService.urlWithJourneyState(OrgTypeStep.ROUTE_SEGMENT, state.journeyId),
+            "registerAsIndividualUrl" to JourneyStateService.urlWithJourneyState(OrgTypeStep.ROUTE_SEGMENT, state.journeyId),
         )
 
     override fun chooseTemplate(state: LandlordRegistrationOrgLandlordState) = "forms/orgGovBodyMustProvideInfoForm"
