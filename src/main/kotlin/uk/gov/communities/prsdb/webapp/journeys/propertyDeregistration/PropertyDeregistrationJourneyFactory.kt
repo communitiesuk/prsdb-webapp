@@ -15,14 +15,11 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CanDeregisterMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CannotDeregisterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
@@ -103,41 +100,6 @@ class PropertyDeregistrationJourneyFactory(
         }
     }
 
-//    TODO PDJB-319: Remove this
-    fun createOldJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
-        val state = getInitializedState(propertyOwnershipId)
-
-        return journey(state) {
-            unreachableStepStep { journey.areYouSureStep }
-            configure {
-                withAdditionalContentProperty { "title" to "deregisterProperty.title" }
-            }
-            step(journey.areYouSureStep) {
-                routeSegment(AreYouSureStep.ROUTE_SEGMENT)
-                initialStep()
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
-                nextDestination { mode ->
-                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
-                        Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
-                    } else {
-                        Destination(journey.reasonStep)
-                    }
-                }
-            }
-            step(journey.reasonStep) {
-                routeSegment(ReasonStep.ROUTE_SEGMENT)
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
-                nextUrl {
-                    "${
-                        DeregisterPropertyController.getPropertyDeregistrationBasePath(
-                            propertyOwnershipId,
-                        )
-                    }/$CONFIRMATION_PATH_SEGMENT"
-                }
-            }
-        }
-    }
-
     private fun getInitializedState(propertyOwnershipId: Long): PropertyDeregistrationJourney =
         stateFactory.getObject().initialiseFromPropertyOwnershipId(propertyOwnershipId)
 
@@ -146,14 +108,12 @@ class PropertyDeregistrationJourneyFactory(
 
 @JourneyFrameworkComponent
 class PropertyDeregistrationJourney(
-    override val areYouSureStep: AreYouSureStep,
     override val checkCanDeregisterStep: CheckCanDeregisterStep,
     override val deregisterInfoStep: DeregisterInfoStep,
     override val cannotDeregisterStep: CannotDeregisterStep,
     override val hasPendingInvitationsStep: HasPendingInvitationsStep,
     override val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     override val confirmStep: ConfirmStep,
-    override val reasonStep: ReasonStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     PropertyDeregistrationJourneyState {
@@ -175,12 +135,10 @@ class PropertyDeregistrationJourney(
 }
 
 interface PropertyDeregistrationJourneyState : PropertyOwnershipJourneyState {
-    val areYouSureStep: AreYouSureStep
     val checkCanDeregisterStep: CheckCanDeregisterStep
     val deregisterInfoStep: DeregisterInfoStep
     val cannotDeregisterStep: CannotDeregisterStep
     val hasPendingInvitationsStep: HasPendingInvitationsStep
     val checkPendingInvitationsStep: CheckPendingInvitationsStep
     val confirmStep: ConfirmStep
-    val reasonStep: ReasonStep
 }

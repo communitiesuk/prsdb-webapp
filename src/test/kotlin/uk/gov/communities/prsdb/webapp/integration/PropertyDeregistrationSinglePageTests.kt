@@ -4,11 +4,9 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -117,26 +115,6 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        }
-    }
-
-    @Nested
-    inner class ReasonStepWhenJointLandlordsFlagIsDisabled {
-        @Test
-        fun `Submitting a reason longer than 200 characters returns an error`(page: Page) {
-            featureFlagManager.disableFeature(JOINT_LANDLORDS)
-            val areYouSurePage = navigator.goToDeregisterPropertyAreYouSurePage(1L)
-            areYouSurePage.submitWantsToProceed()
-            val reasonPage =
-                assertPageIs(
-                    page,
-                    ReasonPagePropertyDeregistration::class,
-                    mapOf("propertyOwnershipId" to "1"),
-                )
-            val longReason = "x".repeat(201)
-            reasonPage.submitReason(longReason)
-            assertThat(reasonPage.form.getErrorMessage("reason"))
-                .containsText("Your reason for deleting this property must be 200 characters or fewer")
         }
     }
 }

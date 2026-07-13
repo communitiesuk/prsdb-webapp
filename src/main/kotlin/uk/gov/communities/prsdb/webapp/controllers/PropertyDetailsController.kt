@@ -104,13 +104,7 @@ class PropertyDetailsController(
                 )
             modelAndView.addObject("landlordDetails", landlordViewModel)
         }
-        val deregisterPropertyLink =
-            if (jointLandlordsIsEnabled) {
-                DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
-            } else {
-                // TODO PDJB-319: remove
-                DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId)
-            }
+        val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
