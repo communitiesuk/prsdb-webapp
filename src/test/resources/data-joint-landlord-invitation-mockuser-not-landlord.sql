@@ -20,8 +20,8 @@ VALUES (3, '05/02/25', '05/02/25', 1013, '1 PRSDB Square, EG1 2AA', 2, 'EG1 2AA'
        (7, '05/02/25', '05/02/25', 1017, '5 PRSDB Square, EG1 2AA', 2, 'EG1 2AA', '5');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
-INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified, has_accepted_privacy_notice)
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES  (2, '09/13/24', '09/13/24', 3, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:ABCDE',
         'Original Landlord', 'original.landlord@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
@@ -29,9 +29,9 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status,
-                                rent_frequency, custom_rent_frequency, rent_amount)
+                                rent_frequency, custom_rent_frequency, rent_amount, is_occupied)
 VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
-        1, null, null, 2, 1, null, 123.12);
+        1, null, null, 2, 1, null, 123.12, true);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)

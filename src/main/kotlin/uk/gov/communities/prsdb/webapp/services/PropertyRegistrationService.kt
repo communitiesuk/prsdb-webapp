@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -28,7 +28,7 @@ class PropertyRegistrationService(
     private val addressService: AddressService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val landlordRepository: LandlordRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
@@ -43,6 +43,7 @@ class PropertyRegistrationService(
         licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         baseUserId: String,
@@ -73,7 +74,7 @@ class PropertyRegistrationService(
         epcProvideLater: Boolean? = null,
     ) {
         val landlord =
-            landlordRepository.findByBaseUser_Id(baseUserId)
+            individualLandlordRepository.findByBaseUser_Id(baseUserId)
                 ?: throw EntityNotFoundException("User not registered as a landlord")
         // TODO: PDJB-1274: Update emails to account for org landlord
 
@@ -84,6 +85,7 @@ class PropertyRegistrationService(
                 licenseType,
                 licenceNumber,
                 ownershipType,
+                isOccupied,
                 numberOfHouseholds,
                 numberOfPeople,
                 numBedrooms,
@@ -128,6 +130,7 @@ class PropertyRegistrationService(
         licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         numBedrooms: Int?,
@@ -156,6 +159,7 @@ class PropertyRegistrationService(
 
         return propertyOwnershipService.createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             numBedrooms = numBedrooms,
@@ -188,7 +192,7 @@ class PropertyRegistrationService(
                     .toString(),
                 addressModel.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                propertyOwnership.currentNumTenants > 0,
+                propertyOwnership.isOccupied,
                 jointLandlordEmails,
             ),
         )
