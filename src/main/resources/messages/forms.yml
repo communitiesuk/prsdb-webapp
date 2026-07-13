@@ -417,7 +417,7 @@ numberOfHouseholds:
       paragraph:
         one: A household consists of either a single person or members of the same family who live together. It includes people who are married or living together and people in same-sex relationships.
         two: Unrelated adults who are not a couple or part of a family are separate households.
-numberOfHouseholdsSkipTenancyFlow:
+numberOfHouseholdsSkipTenancyJourney:
   heading: Households in your property
   paragraph:
     one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.

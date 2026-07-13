@@ -41,7 +41,7 @@ taskList:
   subtitle: Your answers are saved as you go. You can return and finish this later.
   register:
     heading: Add property details
-    headingSkipTenancyFlow: Tenancy details
+    headingSkipTenancyJourney: Tenancy details
     addAddress: Property address
     selectType: Property type
     selectOwnership: How you own the property (leasehold, freehold)

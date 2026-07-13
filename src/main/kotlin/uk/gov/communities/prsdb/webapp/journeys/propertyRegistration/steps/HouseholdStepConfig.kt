@@ -16,17 +16,17 @@ class HouseholdStepConfig(
     override val formModelClass = NumberOfHouseholdsFormModel::class
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState): Map<String, Any?> {
-        val skipTenancyFlow = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val canSkipTenancyJourney = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return mapOf(
             "fieldSetHeading" to "forms.numberOfHouseholds.heading",
             "label" to "forms.numberOfHouseholds.label",
-            "skipTenancyFlow" to skipTenancyFlow,
+            "canSkipTenancyJourney" to canSkipTenancyJourney,
         )
     }
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/numberOfHouseholdsForm.skipTenancyFlow"
+            "forms/numberOfHouseholdsForm.skipTenancyJourney"
         } else {
             "forms/numberOfHouseholdsForm"
         }

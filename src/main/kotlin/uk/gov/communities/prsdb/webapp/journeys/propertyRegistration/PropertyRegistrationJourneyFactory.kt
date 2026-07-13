@@ -294,7 +294,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                    withHeadingMessageKey("registerProperty.taskList.register.headingSkipTenancyFlow", false)
+                    withHeadingMessageKey("registerProperty.taskList.register.headingSkipTenancyJourney", false)
                 } else {
                     withHeadingMessageKey("registerProperty.taskList.register.heading")
                 }
@@ -637,7 +637,7 @@ class PropertyRegistrationJourney(
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
-    // ===== Journey-structure tasks (the two alternative flows diverge here) =====
+    // ===== Journey-structure tasks (the two alternative journeys diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels) when the old journey is removed.
     override val occupationTask: OccupationTask,
@@ -794,7 +794,7 @@ interface PropertyRegistrationJourneyState :
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 
-    // Journey-structure tasks (the two alternative flows)
+    // Journey-structure tasks (the two alternative journeys)
     // Legacy journey only (flag-off) — remove with the old journey
     val occupationTask: OccupationTask
 

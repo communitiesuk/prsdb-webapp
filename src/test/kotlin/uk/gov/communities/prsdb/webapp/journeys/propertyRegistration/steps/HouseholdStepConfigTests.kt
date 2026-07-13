@@ -25,10 +25,10 @@ class HouseholdStepConfigTests {
 
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
-        assertEquals(true, content["skipTenancyFlow"])
+        assertEquals(true, content["canSkipTenancyJourney"])
         assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
         assertEquals("forms.numberOfHouseholds.label", content["label"])
-        assertEquals("forms/numberOfHouseholdsForm.skipTenancyFlow", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms/numberOfHouseholdsForm.skipTenancyJourney", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 
     @Test
@@ -38,7 +38,7 @@ class HouseholdStepConfigTests {
 
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
-        assertEquals(false, content["skipTenancyFlow"])
+        assertEquals(false, content["canSkipTenancyJourney"])
         assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
         assertEquals("forms.numberOfHouseholds.label", content["label"])
         assertEquals("forms/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))

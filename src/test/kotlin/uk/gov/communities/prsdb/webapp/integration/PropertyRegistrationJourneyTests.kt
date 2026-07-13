@@ -155,7 +155,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `Households page renders legacy content when skip tenancy flow disabled`() {
+    fun `Households page renders legacy content when skip tenancy journey disabled`() {
         val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
         assertThat(householdsPage.header).containsText("Households in your property")
         assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
@@ -163,7 +163,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `Households page renders correctly when skip tenancy flow enabled`() {
+    fun `Households page renders correctly when skip tenancy journey enabled`() {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val householdsPage = navigator.skipToPropertyRegistrationTenancyDetailsPage()
         assertThat(householdsPage.header).containsText("Households in your property")
