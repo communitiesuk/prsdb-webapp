@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -96,9 +95,8 @@ class DeregisterPropertyController(
         checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId)
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
-
         model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
-        return "deregisterPropertyConfirmationJune26Redesign"
+        return "deregisterPropertyConfirmation"
     }
 
     private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(
@@ -143,9 +141,6 @@ class DeregisterPropertyController(
             UriTemplate(PROPERTY_DEREGISTRATION_ROUTE)
                 .expand(propertyOwnershipId)
                 .toASCIIString()
-
-        fun getPropertyDeregistrationPathOld(propertyOwnershipId: Long): String =
-            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${AreYouSureStep.ROUTE_SEGMENT}"
 
         fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${CheckCanDeregisterStep.ROUTE_SEGMENT}"

@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -110,7 +110,7 @@ class LandlordDashboardUrlTests(
         val prsdbUserService = mock<PrsdbUserService>()
         val addressService = mock<AddressService>()
         val registrationNumberService = mock<RegistrationNumberService>()
-        val repository = mock<LandlordRepository>()
+        val repository = mock<IndividualLandlordRepository>()
         val landlordService =
             LandlordService(
                 repository,
@@ -165,11 +165,11 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
-        val mockLandlordRepository = mock<LandlordRepository>()
+        val mockIndividualLandlordRepository = mock<IndividualLandlordRepository>()
         val propertyRegistrationService =
             PropertyRegistrationService(
                 propertyOwnershipRepository = mock(),
-                landlordRepository = mockLandlordRepository,
+                individualLandlordRepository = mockIndividualLandlordRepository,
                 addressService = mock(),
                 licenseService = mock(),
                 propertyOwnershipService = mockPropertyOwnershipService,
@@ -180,7 +180,7 @@ class LandlordDashboardUrlTests(
                 propertyComplianceService = mock(),
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 anyOrNull(),

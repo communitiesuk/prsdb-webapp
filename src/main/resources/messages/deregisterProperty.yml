@@ -24,12 +24,6 @@ confirm:
   confirmButton: Confirm and deregister property
   cancelLink: Cancel (go back to property record)
 confirmation:
-  banner:
-    heading: You have deleted a property
-  whatHappensNext:
-    paragraph:
-      one: This property has been removed from the database and your landlord record.
-      two: We’ve sent a confirmation email about the deleted property to your email address.
   panel:
     title: "Deregistered {0}"
     body: This property is no longer registered as a rental property
