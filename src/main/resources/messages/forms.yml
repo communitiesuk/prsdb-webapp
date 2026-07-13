@@ -133,10 +133,27 @@ orgName:
   error:
     missing: Enter an organisation name
 orgGovBodyDetails:
-  title: 'TODO: PDJB-1284 - Providing details about your governing body'
-  fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
-  hasDetails: I have details
-  noDetails: I don't have details
+  title: Providing details about your organisation’s governing body
+  heading: Providing details about your organisation’s governing body
+  body:
+    one: We are now going to ask you about the people who govern your organisation.
+    two: 'You must provide details for all:'
+  bullet:
+    one: directors
+    two: trustees
+    three: partners
+    four: other members of the governing body
+  insetText: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
+  details:
+    summary: Providing details for partners
+    body:
+      one:
+        beforeLink: Partners of English business partnerships should
+        link: register as individual landlords
+        afterLink: . One partner should then invite the others to join the property as joint landlords.
+      two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
+  continueButton: Continue
+  noDetailsButton: I don’t have these details
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -309,6 +326,11 @@ dateOfBirth:
   error:
     invalidDateOfBirth: You must enter a valid date of birth
     invalidAge: The minimum age to register as a landlord is 18
+leadTrusteeDob:
+  fieldSetHeading: What is the lead trustee’s date of birth?
+  fieldSetHint: 'For example, 27 03 1968'
+  error:
+    invalidDate: The trustee’s date of birth cannot be in the future
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
@@ -759,11 +781,6 @@ update:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
 warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
 areYouSure:
-  propertyDeregistration:
-    fieldSetHeading: 'Are you sure you want to delete {0,,address} from the database?'
-    radios:
-      error:
-        missing: Select whether you want to delete this property from the database
   landlordDeregistration:
     noProperties:
       fieldSetHeading: Are you sure you want to delete your account?
@@ -778,11 +795,6 @@ areYouSure:
         error:
           missing: Select whether you want to delete your landlord record and properties
 reason:
-  propertyDeregistration:
-    fieldSetHeading: Why are you deleting this property? (optional)
-    fieldSetHint: This will help us understand why landlords might want to remove a property from the database
-    error:
-      tooLong: Your reason for deleting this property must be 200 characters or fewer.
   landlordDeregistration:
     fieldSetHeading: Why are you deleting your account? (optional)
     error:

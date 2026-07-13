@@ -13,23 +13,22 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 
-@PrsdbWebService("epcViewModelServiceRedesign")
+@PrsdbWebService
 class EpcViewModelFactory(
     messageSource: MessageSource,
-) : ComplianceViewModelFactoryBase(messageSource),
-    EpcViewModelService {
+) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
     override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
 
     override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatusMay2026Redesign
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatus
 
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
 
-    override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
+    fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
         if (!propertyCompliance.shouldShowEpcBecameExpiredInset) return null
 
         val formattedDate = propertyCompliance.epcExpiryDate?.format(DATE_FORMATTER) ?: return null
@@ -39,7 +38,7 @@ class EpcViewModelFactory(
         )
     }
 
-    override fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> =
+    fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> =
         buildList {
             if (propertyCompliance.shouldShowEpcTenancySection) {
                 val tenancyAnswer =
@@ -69,7 +68,7 @@ class EpcViewModelFactory(
             }
         }
 
-    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 if (propertyCompliance.epcExemptionReason != null) {
