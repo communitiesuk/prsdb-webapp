@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailRedesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -24,7 +24,7 @@ class ConfirmStepConfig(
     private val propertyDeregistrationService: PropertyDeregistrationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailRedesign>,
+    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
     private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -72,7 +72,7 @@ class ConfirmStepConfig(
         landlordContacts.forEach { (landlordName, landlordEmail) ->
             confirmationEmailSender.sendEmail(
                 landlordEmail,
-                PropertyDeregistrationConfirmationEmailRedesign(landlordName, multiLineAddress),
+                PropertyDeregistrationConfirmationEmail(landlordName, multiLineAddress),
             )
         }
 
