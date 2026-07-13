@@ -77,6 +77,7 @@ class SavePropertyRegistrationDataStepConfig(
             licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             licenceNumber = state.getLicenceNumberOrNull() ?: "",
             ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
                     state.households.formModel
