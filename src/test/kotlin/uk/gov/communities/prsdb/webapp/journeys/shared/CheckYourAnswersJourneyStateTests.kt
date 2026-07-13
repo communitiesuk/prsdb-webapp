@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.ObjectFactory
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -252,5 +253,7 @@ class CheckYourAnswersJourneyStateTests {
         override fun setJourneyId(newJourneyId: String) {}
 
         override fun copyJourneyTo(newJourneyId: String) {}
+
+        override fun bindKeyRegistry(registry: DelegateKeyRegistry) {}
     }
 }

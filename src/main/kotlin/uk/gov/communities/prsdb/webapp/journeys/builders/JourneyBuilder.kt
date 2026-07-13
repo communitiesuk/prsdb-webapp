@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.RegistersDelegateKeys
 import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -46,7 +45,7 @@ open class JourneyBuilder<TState : JourneyState>(
             // no route), then thread it through build() so every task registers its route-scoped keys into it and
             // any cross-element key collision throws here, at build time.
             val registry = DelegateKeyRegistry()
-            (journey as? RegistersDelegateKeys)?.bindKeyRegistry(registry)
+            journey.bindKeyRegistry(registry)
             build(registry).forEach { journeyStep ->
                 when (journeyStep) {
                     is JourneyStep.RequestableStep<*, *, *> -> {

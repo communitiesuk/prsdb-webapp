@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
@@ -16,11 +18,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
+import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
@@ -606,4 +610,109 @@ class TaskInitialiserTests {
                 ),
             ).thenReturn(mock<SubJourneyBuilder<JourneyState>>())
         }
+
+    // End-to-end checks that the shared DelegateKeyRegistry threaded through JourneyBuilder.buildRoutingMap catches
+    // delegate-key collisions ACROSS providers (journey state vs task, task vs task) - the case a single provider's
+    // own duplicate-key guard cannot see.
+    @Nested
+    inner class CollisionRegistryTests {
+        @Test
+        fun `a route-less task key colliding with a journey state key throws when the journey builds`() {
+            val builder = JourneyBuilder(stateRegisteringKey("shared-key"))
+            builder.routableTask(KeyedSelfStatedTask("shared-key"), routeSegment = null) {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+
+            assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+        }
+
+        @Test
+        fun `two tasks under the same route registering the same key collide when the journey builds`() {
+            val builder = JourneyBuilder(mock<JourneyState>())
+            builder.routableTask(KeyedSelfStatedTask("cached"), "same-route") {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+            builder.routableTask(KeyedSelfStatedTask("cached"), "same-route") {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+
+            assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+        }
+
+        @Test
+        fun `two tasks under distinct routes registering the same key build without collision`() {
+            val builder = JourneyBuilder(mock<JourneyState>())
+            builder.routableTask(KeyedSelfStatedTask("cached"), "route-one") {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+            builder.routableTask(KeyedSelfStatedTask("cached"), "route-two") {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+
+            assertDoesNotThrow { builder.buildRoutingMap() }
+        }
+
+        @Test
+        fun `a nested self-stated task registers its key scoped by its route so a matching state key collides`() {
+            // The inner task under route "inner" registers "cached" as "inner/cached"; a root state key of the same
+            // scoped form collides, proving the nested task's keys reach the shared registry through the nested build.
+            val builder = JourneyBuilder(stateRegisteringKey("inner/cached"))
+            builder.task(taskContaining(KeyedSelfStatedTask("cached"), innerRoute = "inner")) {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+
+            assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+        }
+
+        // A journey root state that registers a single delegate key, so its keys can be collided against a task's.
+        private fun stateRegisteringKey(key: String): AbstractJourneyState =
+            object : AbstractJourneyState(mock()) {
+                @Suppress("unused")
+                val registeredValue: String? by delegateProvider.nullableDelegate(key)
+            }
+
+        // A journey-stated (route-less) task whose sub-journey nests a self-stated task under innerRoute, so the
+        // registry threading through the nested build can be exercised.
+        private fun taskContaining(
+            inner: SelfStatedRoutableTask<JourneyState>,
+            innerRoute: String,
+        ): Task<JourneyState> =
+            object : Task<JourneyState>() {
+                override fun makeSubJourney(state: JourneyState) =
+                    subJourney(state) {
+                        routableTask(inner, innerRoute) {
+                            parents { NoParents() }
+                            nextDestination { Destination.ExternalUrl("inner-done") }
+                        }
+                        exitStep { parents { NoParents() } }
+                        unreachableStepUrl { "unreachable" }
+                    }
+            }
+
+        // A minimal self-stated task that registers a single route-scoped delegate key and builds one real step.
+        private inner class KeyedSelfStatedTask(
+            key: String,
+        ) : SelfStatedRoutableTask<JourneyState>(mock()) {
+            @Suppress("unused")
+            val cachedValue: String? by delegateProvider.nullableDelegate(key)
+
+            override val taskState: JourneyState get() = this
+
+            override fun makeSubJourney(state: JourneyState) =
+                subJourney(state) {
+                    step(JourneyStep.RequestableStep(RouteTestStepConfig())) {
+                        routeSegment("step")
+                        nextUrl { "url" }
+                    }
+                    exitStep { parents { NoParents() } }
+                    unreachableStepUrl { "unreachable" }
+                }
+        }
+    }
 }
