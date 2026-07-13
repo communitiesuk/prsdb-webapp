@@ -40,7 +40,7 @@ class IndividualLandlordRegistrationTask : Task<LandlordRegistrationState>() {
                 parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.NON_ENGLAND_OR_WALES) }
                 noNextDestination()
             }
-            routableTask(journey.addressTask) {
+            duplicableTask(journey.addressTask) {
                 parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
                 nextStep { journey.cyaStep }
             }

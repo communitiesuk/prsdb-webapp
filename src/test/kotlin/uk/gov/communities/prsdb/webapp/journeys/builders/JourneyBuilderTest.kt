@@ -22,10 +22,10 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
-import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
@@ -933,7 +933,7 @@ class JourneyBuilderTest {
                 val jb = JourneyBuilder(mock<JourneyState>())
 
                 // Act
-                jb.routableTask(task, "lead-trustee-address") {
+                jb.duplicableTask(task, "lead-trustee-address") {
                     parents { NoParents() }
                     nextDestination { Destination.NavigationalStep(mock()) }
                 }
@@ -966,7 +966,7 @@ class JourneyBuilderTest {
                 val jb = JourneyBuilder(mock<JourneyState>())
 
                 // Act
-                jb.routableTask(task, routeSegment = null) {
+                jb.duplicableTask(task, routeSegment = null) {
                     parents { NoParents() }
                     nextDestination { Destination.NavigationalStep(mock()) }
                 }
@@ -985,7 +985,7 @@ class JourneyBuilderTest {
 }
 
 // A task that is both a Task and JourneyState, so it can be added via routableTask as its own state.
-abstract class TestSelfStatedTask : SelfStatedRoutableTask<JourneyState>(mock()) {
+abstract class TestSelfStatedTask : DuplicableTask<JourneyState>(mock()) {
     override val taskState: JourneyState
         get() = this
 }

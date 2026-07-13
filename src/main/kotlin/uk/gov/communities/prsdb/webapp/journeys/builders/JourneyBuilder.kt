@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.urlPath
@@ -19,6 +19,7 @@ interface JourneyBuilderDsl<TState : JourneyState> {
 
     fun task(
         uninitialisedTask: Task<TState>,
+        routeSegment: String? = null,
         init: TaskInitialiser<TState>.() -> Unit,
     )
 
@@ -26,8 +27,8 @@ interface JourneyBuilderDsl<TState : JourneyState> {
     // state (for data storage) and an optional `routeSegment`, letting the same task be added more than once
     // (each instance isolated by its route) without the journey state gaining per-instance fields. When
     // `routeSegment` is null the task's steps keep bare URLs and data keys.
-    fun <TTaskState : JourneyState> routableTask(
-        uninitialisedTask: SelfStatedRoutableTask<TTaskState>,
+    fun <TTaskState : JourneyState> duplicableTask(
+        uninitialisedTask: DuplicableTask<TTaskState>,
         routeSegment: String? = null,
         init: TaskInitialiser<TTaskState>.() -> Unit,
     )
@@ -95,19 +96,20 @@ open class JourneyBuilder<TState : JourneyState>(
 
         override fun task(
             uninitialisedTask: Task<TState>,
+            routeSegment: String?,
             init: TaskInitialiser<TState>.() -> Unit,
-        ) = journeyBuilder.task(uninitialisedTask) {
+        ) = journeyBuilder.task(uninitialisedTask, routeSegment) {
             init()
             withAdditionalContentProperty {
                 "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
             }
         }
 
-        override fun <TTaskState : JourneyState> routableTask(
-            uninitialisedTask: SelfStatedRoutableTask<TTaskState>,
+        override fun <TTaskState : JourneyState> duplicableTask(
+            uninitialisedTask: DuplicableTask<TTaskState>,
             routeSegment: String?,
             init: TaskInitialiser<TTaskState>.() -> Unit,
-        ) = journeyBuilder.routableTask(uninitialisedTask, routeSegment) {
+        ) = journeyBuilder.duplicableTask(uninitialisedTask, routeSegment) {
             init()
             withAdditionalContentProperty {
                 "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)

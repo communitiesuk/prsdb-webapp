@@ -21,10 +21,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
-import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
@@ -619,7 +619,7 @@ class TaskInitialiserTests {
         @Test
         fun `a route-less task key colliding with a journey state key throws when the journey builds`() {
             val builder = JourneyBuilder(stateRegisteringKey("shared-key"))
-            builder.routableTask(KeyedSelfStatedTask("shared-key"), routeSegment = null) {
+            builder.duplicableTask(KeyedSelfStatedTask("shared-key"), routeSegment = null) {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -630,11 +630,11 @@ class TaskInitialiserTests {
         @Test
         fun `two tasks under the same route registering the same key collide when the journey builds`() {
             val builder = JourneyBuilder(mock<JourneyState>())
-            builder.routableTask(KeyedSelfStatedTask("cached"), "same-route") {
+            builder.duplicableTask(KeyedSelfStatedTask("cached"), "same-route") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
-            builder.routableTask(KeyedSelfStatedTask("cached"), "same-route") {
+            builder.duplicableTask(KeyedSelfStatedTask("cached"), "same-route") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -645,11 +645,11 @@ class TaskInitialiserTests {
         @Test
         fun `two tasks under distinct routes registering the same key build without collision`() {
             val builder = JourneyBuilder(mock<JourneyState>())
-            builder.routableTask(KeyedSelfStatedTask("cached"), "route-one") {
+            builder.duplicableTask(KeyedSelfStatedTask("cached"), "route-one") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
-            builder.routableTask(KeyedSelfStatedTask("cached"), "route-two") {
+            builder.duplicableTask(KeyedSelfStatedTask("cached"), "route-two") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -680,13 +680,13 @@ class TaskInitialiserTests {
         // A journey-stated (route-less) task whose sub-journey nests a self-stated task under innerRoute, so the
         // registry threading through the nested build can be exercised.
         private fun taskContaining(
-            inner: SelfStatedRoutableTask<JourneyState>,
+            inner: DuplicableTask<JourneyState>,
             innerRoute: String,
         ): Task<JourneyState> =
             object : Task<JourneyState>() {
                 override fun makeSubJourney(state: JourneyState) =
                     subJourney(state) {
-                        routableTask(inner, innerRoute) {
+                        duplicableTask(inner, innerRoute) {
                             parents { NoParents() }
                             nextDestination { Destination.ExternalUrl("inner-done") }
                         }
@@ -698,7 +698,7 @@ class TaskInitialiserTests {
         // A minimal self-stated task that registers a single route-scoped delegate key and builds one real step.
         private inner class KeyedSelfStatedTask(
             key: String,
-        ) : SelfStatedRoutableTask<JourneyState>(mock()) {
+        ) : DuplicableTask<JourneyState>(mock()) {
             @Suppress("unused")
             val cachedValue: String? by delegateProvider.nullableDelegate(key)
 

@@ -16,13 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-// SelfStatedRoutableTask route-scopes ONLY its own cached-variable delegates (via delegateProvider.scopedKey): a
-// bound route prefixes their storage keys so the same task can be added to a journey more than once, each instance
-// isolated by its route, while a null route keeps the pre-existing bare keys. Its JourneyState behaviour
-// (getStepData / addStepData / getSubmittedStepData) is delegated straight through to the underlying
-// JourneyStateService with BARE keys - step data is scoped at the step level (AbstractStepConfig.stepDataKey), not
-// here. These tests pin both halves of that contract.
-class SelfStatedRoutableTaskTests {
+class DuplicableTaskTests {
     private val session = mutableMapOf<String, Any?>()
     private lateinit var journeyStateService: JourneyStateService
 
@@ -122,7 +116,7 @@ class SelfStatedRoutableTaskTests {
     // never exercised by these tests, which target the route-scoping and state-delegation behaviour only.
     private class TestTask(
         journeyStateService: JourneyStateService,
-    ) : SelfStatedRoutableTask<JourneyState>(journeyStateService) {
+    ) : DuplicableTask<JourneyState>(journeyStateService) {
         var cachedThing: String? by delegateProvider.nullableDelegate("cachedThing")
 
         override fun makeSubJourney(state: JourneyState): SubJourneyBuilder<*> = throw NotImplementedError("not needed for these tests")

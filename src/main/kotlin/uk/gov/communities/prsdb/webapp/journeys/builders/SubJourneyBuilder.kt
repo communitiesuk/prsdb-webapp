@@ -5,9 +5,9 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
@@ -80,22 +80,21 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     override fun task(
         uninitialisedTask: Task<TState>,
+        routeSegment: String?,
         init: TaskInitialiser<TState>.() -> Unit,
     ) {
         val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
+        routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState : JourneyState> routableTask(
-        uninitialisedTask: SelfStatedRoutableTask<TTaskState>,
+    override fun <TTaskState : JourneyState> duplicableTask(
+        uninitialisedTask: DuplicableTask<TTaskState>,
         routeSegment: String?,
         init: TaskInitialiser<TTaskState>.() -> Unit,
     ) {
-        // The task IS its own state, so build its sub-journey against the task itself. A non-null `routeSegment`
-        // prefixes each step's URL, giving "<routeSegment>/<step>", and (via the task's own route-scoped data
-        // keys, applied by TaskInitialiser.build -> task.bindRoute) its stored data; null keeps them bare. No
-        // external state delegate is needed - the task sources JourneyState from its own journeyStateService.
+        // The task provides its own state, so build its sub-journey against that.
         val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()

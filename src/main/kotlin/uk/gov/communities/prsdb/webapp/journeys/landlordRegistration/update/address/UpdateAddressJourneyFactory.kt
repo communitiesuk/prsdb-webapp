@@ -28,7 +28,7 @@ class UpdateAddressJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
             }
-            routableTask(journey.addressTask) {
+            duplicableTask(journey.addressTask) {
                 initialStep()
                 nextStep { journey.completeAddressUpdateStep }
                 configureStep(journey.addressTask.selectAddressStep) {

@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
@@ -90,11 +90,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
             }
         }
 
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.routableCheckAnswerTask(
-            task: SelfStatedRoutableTask<TTaskState>,
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
+            task: DuplicableTask<TTaskState>,
             route: String? = null,
         ) {
-            routableTask(task) {
+            duplicableTask(task) {
                 route?.let { routeSegment(it) }
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
