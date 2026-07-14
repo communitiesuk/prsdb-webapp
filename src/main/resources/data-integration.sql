@@ -113,7 +113,14 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (53, '2026-04-14 00:00:00+00', 210000000053, 0),
        (54, '2026-04-14 00:00:00+00', 210000000054, 0),
        (55, '2026-04-14 00:00:00+00', 210000000055, 0),
-       (56, '2026-04-14 00:00:00+00', 210000000056, 0) ON CONFLICT DO NOTHING;
+       (56, '2026-04-14 00:00:00+00', 210000000056, 0),
+       -- PDJB-1048 provide-later property record QA (landlord 1): registration numbers for property_ownership 49-54
+       (57, '2026-04-14 00:00:00+00', 210000000057, 0),
+       (58, '2026-04-14 00:00:00+00', 210000000058, 0),
+       (59, '2026-04-14 00:00:00+00', 210000000059, 0),
+       (60, '2026-04-14 00:00:00+00', 210000000060, 0),
+       (61, '2026-04-14 00:00:00+00', 210000000061, 0),
+       (62, '2026-04-14 00:00:00+00', 210000000062, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -249,6 +256,102 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 
 UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 
+-- =============================================================================
+-- PDJB-1048 provide-later property record QA properties (landlord 1), ids 49-54.
+-- For manual QA of the new-layout notification banners and "Provide this later"
+-- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Like the rest of
+-- this seed, addresses are NOT inserted: each property claims a distinct existing
+-- active AddressBase/NGD address not already used by an active property (so these
+-- are INSERT ... SELECT, not plain VALUES rows). Occupied properties set
+-- last_occupied_date so the "within 28 days" deadline renders. Fixed ids + ON
+-- CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
+--   49  occupied, licensing + tenancy skipped, no compliance   -> COMBINED banner
+--   50  occupied, everything provided, fully compliant          -> no banner (control)
+--   51  occupied, tenancy skipped (licence held), compliant     -> TENANCY banner
+--   52  occupied, licensing skipped (tenancy held), compliant   -> LICENSING banner
+--   53  occupied, licensing + tenancy skipped, fully compliant  -> BOTH banner
+--   54  unoccupied, licensing skipped                           -> licensing provide-later row (no banner)
+-- =============================================================================
+INSERT INTO license (id, license_type, license_number)
+VALUES (1, 1, 'LQA0000050'),
+       (2, 1, 'LQA0000051') ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 49, true, 1, 0, 0, 57, a.id, current_date, current_date, null, 1, 1,
+       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 50, true, 1, 1, 2, 58, a.id, current_date, current_date, 1, 1, 1,
+       null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 51, true, 1, 0, 0, 59, a.id, current_date, current_date, 2, 1, 1,
+       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 52, true, 1, 1, 2, 60, a.id, current_date, current_date, null, 1, 1,
+       null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 53, true, 1, 0, 0, 61, a.id, current_date, current_date, null, 1, 1,
+       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+SELECT 54, true, 1, 0, 0, 62, a.id, current_date, current_date, null, 1, 1,
+       null, null, null, null, null, null, null, false, false, null
+FROM address a
+WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+ORDER BY a.id
+LIMIT 1
+ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),
@@ -298,6 +401,12 @@ VALUES (1, 1, '2025-01-15'),
        (1, 46, '2025-01-15'),
        (1, 47, '2025-01-15'),
        (1, 48, '2025-01-15'),
+       (1, 49, '2025-01-15'),
+       (1, 50, '2025-01-15'),
+       (1, 51, '2025-01-15'),
+       (1, 52, '2025-01-15'),
+       (1, 53, '2025-01-15'),
+       (1, 54, '2025-01-15'),
        (6, 1, '2025-01-15'),
        (7, 1, '2025-01-15') ON CONFLICT DO NOTHING;
 
@@ -383,7 +492,21 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
        (45, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (46, 37, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (47, 38, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       -- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
+       -- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
+       (49, 50, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true),
+       (50, 51, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true),
+       (51, 52, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true),
+       (52, 53, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
