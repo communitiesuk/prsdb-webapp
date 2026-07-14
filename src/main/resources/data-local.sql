@@ -260,9 +260,9 @@ VALUES (1, 1, 'L12345678'),
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
 -- Property 39 represents the interim "occupied but tenancy details skipped" state (PDJB-942):
--- is_occupied = true (stored flag, PDJB-1293) with current_num_households/tenants = 0. The rent/furnished
--- fields are populated only to satisfy the legacy (flag-off) property record, which unconditionally reads
--- them for occupied properties (PDJB-548).
+-- is_occupied = true (stored flag, PDJB-1293) with current_num_households/tenants = 0. The tenancy and
+-- rental fields (bills, furnished status, rent frequency/amount) are left null to reflect that tenancy
+-- details were skipped; num_bedrooms is still populated as it is captured in the property details section.
 -- last_occupied_date is set to 7 days ago for every occupied property (matching the real flow, where
 -- PropertyOwnershipService sets it when a property becomes occupied) so the provide-later deadline
 -- (last_occupied_date + PROVIDE_LATER_DEADLINE_DAYS days) stays in the future. num_bedrooms is a required
@@ -306,7 +306,7 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 
        (36, true, 0, 0, 0, 68, 41, '2025-01-15', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, 2, null, null, null, null, null, null, 'End terrace', false, false, null),
        (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, current_date - INTERVAL '7 days'),
-       (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'),
        (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

@@ -158,6 +158,35 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `Occupied is the only row in tenancy details when the property is occupied but tenancy details are skipped`() {
+        // Arrange: occupied property with no tenancy details provided (PDJB-942), so the tenancy and
+        // rental fields are null.
+        val propertyOwnership =
+            createPropertyOwnership(
+                address = createAddress(uprn = 1234.toLong()),
+                isOccupied = true,
+                currentNumHouseholds = 0,
+                currentNumTenants = 0,
+                numberOfBedrooms = 2,
+                furnishedStatus = null,
+                rentFrequency = null,
+                rentAmount = null,
+            )
+
+        val expectedHeaderList =
+            listOf(
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+            )
+
+        // Act
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
+
+        // Assert
+        assertEquals(expectedHeaderList, headerList)
+    }
+
+    @Test
     fun `Licensing number row is hidden when the property has a license record with NOLICENSING type`() {
         // Arrange
         val propertyOwnership =

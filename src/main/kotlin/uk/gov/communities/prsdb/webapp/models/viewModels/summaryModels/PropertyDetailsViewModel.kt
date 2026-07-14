@@ -49,6 +49,12 @@ class PropertyDetailsViewModel(
 
     val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
+    // An occupied property may still have its tenancy details "skipped" during registration
+    // (PDJB-942), in which case the household/tenant/rent/furnishing fields are not populated.
+    // The tenancy and rental rows are therefore driven by whether tenancy details were provided
+    // rather than by occupancy alone.
+    val tenancyInformationProvided = propertyOwnership.currentNumTenants > 0
+
     val propertyRecord: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
@@ -121,7 +127,7 @@ class PropertyDetailsViewModel(
                         "/${OccupiedStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
-                if (isOccupied) {
+                if (tenancyInformationProvided) {
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                         propertyOwnership.currentNumHouseholds,
