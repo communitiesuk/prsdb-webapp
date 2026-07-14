@@ -637,7 +637,7 @@ class PropertyRegistrationJourney(
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
-    // ===== Journey-structure tasks (the two alternative journeys diverge here) =====
+    // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels) when the old journey is removed.
     override val occupationTask: OccupationTask,
@@ -794,7 +794,7 @@ interface PropertyRegistrationJourneyState :
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 
-    // Journey-structure tasks (the two alternative journeys)
+    // Journey-structure tasks (the two alternative flows)
     // Legacy journey only (flag-off) — remove with the old journey
     val occupationTask: OccupationTask
 
