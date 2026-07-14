@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
@@ -34,8 +35,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
@@ -165,7 +166,14 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLeadTrusteeDob(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeDobStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(
+            LeadTrusteeDobStep.ROUTE_SEGMENT,
+            LeadTrusteeDobFormModel().apply {
+                day = "15"
+                month = "6"
+                year = "1980"
+            },
+        )
         return self()
     }
 

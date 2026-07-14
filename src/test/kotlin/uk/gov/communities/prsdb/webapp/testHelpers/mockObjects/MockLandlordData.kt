@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -52,9 +53,9 @@ class MockLandlordData {
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
             incompleteProperties: List<SavedJourneyState> = emptyList(),
-        ): Landlord {
+        ): IndividualLandlord {
             val landlord =
-                Landlord(
+                IndividualLandlord(
                     baseUser = baseUser,
                     name = name,
                     email = email,
@@ -92,6 +93,7 @@ class MockLandlordData {
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
+            isOccupied: Boolean = currentNumTenants > 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
@@ -115,6 +117,7 @@ class MockLandlordData {
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
+                    isOccupied = isOccupied,
                     registrationNumber = registrationNumber,
                     landlords = landlords,
                     propertyBuildType = propertyBuildType,
@@ -171,6 +174,7 @@ class MockLandlordData {
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
+                    isOccupied = true,
                     registrationNumber = registrationNumber,
                     landlords = landlords,
                     propertyBuildType = propertyBuildType,
@@ -191,8 +195,9 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
+        fun createUnoccupiedPropertyOwnership(id: Long = 1): PropertyOwnership =
             createPropertyOwnership(
+                id = id,
                 currentNumHouseholds = 0,
                 currentNumTenants = 0,
                 numberOfBedrooms = null,

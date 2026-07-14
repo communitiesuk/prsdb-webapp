@@ -50,6 +50,18 @@ taskList:
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
   epc: Energy performance certificate (EPC)
+  aboutYourProperty:
+    heading: About your property
+    propertyDetails: Property details
+    ownershipAndLandlords: Ownership and landlords
+    occupied: Tell us if your property’s occupied
+  rentedOut:
+    heading: How your property’s rented out
+    licensing: Tell us if your property needs a license
+    tenancyDetails: Tenancy details
+    tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
+  submitYourRegistration:
+    heading: Submit your registration
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers

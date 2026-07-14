@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfig
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
@@ -55,6 +56,9 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var userRolesService: UserRolesService
+
+    @MockitoBean
+    lateinit var dashboardUrlProvider: DashboardUrlProvider
 
     @MockitoBean
     lateinit var mockPrsdbWebMvcRegistration: PrsdbWebMvcRegistration

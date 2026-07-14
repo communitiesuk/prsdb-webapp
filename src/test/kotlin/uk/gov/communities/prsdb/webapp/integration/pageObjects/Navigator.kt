@@ -88,6 +88,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeNameFormPageLandlordRegistration
@@ -102,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberScotlandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
@@ -118,7 +120,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSurePagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
@@ -179,6 +180,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
@@ -191,6 +193,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -375,6 +378,12 @@ class Navigator(
         return createValidPage(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
     }
 
+    fun skipToOrgLandlordRegistrationLeadTrusteeDobPage(): LeadTrusteeDobFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteeDob().build())
+        navigateToLandlordRegistrationJourneyStep(LeadTrusteeDobStep.ROUTE_SEGMENT)
+        return createValidPage(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+    }
+
     fun skipToLandlordRegistrationPhoneNumberPage(): PhoneNumberFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforePhoneNumber().build())
         navigateToLandlordRegistrationJourneyStep(PhoneNumberStep.ROUTE_SEGMENT)
@@ -471,6 +480,12 @@ class Navigator(
         return createValidPage(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
     }
 
+    fun skipToOrgLandlordRegistrationOrgGovBodyDetailsPage(): OrgGovBodyDetailsFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyDetails().build())
+        navigateToLandlordRegistrationJourneyStep(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+    }
+
     fun navigateToLandlordRegistrationConfirmationPage() {
         navigate("$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
     }
@@ -539,6 +554,26 @@ class Navigator(
     }
 
     fun goToPropertyRegistrationTaskList(): TaskListPagePropertyRegistration {
+        navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
+    fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
+        setJourneyStateInSession(stateBuilder.build())
+        navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
+    fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswers()
+                // The restructured "Property details" task includes the number of bedrooms for all properties, so it
+                // must be set for that task to be complete even when the property is unoccupied.
+                .withBedrooms()
+                .withAdditionalData("cachedOccupied", "false")
+                .build(),
+        )
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
@@ -1074,15 +1109,6 @@ class Navigator(
         return createValidPage(
             page,
             ConfirmPageLeaveProperty::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToDeregisterPropertyAreYouSurePage(propertyOwnershipId: Long): AreYouSurePagePropertyDeregistration {
-        navigate(DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId))
-        return createValidPage(
-            page,
-            AreYouSurePagePropertyDeregistration::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

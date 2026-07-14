@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -43,6 +44,7 @@ class PropertyOwnershipService(
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         landlords: MutableSet<Landlord>,
@@ -67,6 +69,7 @@ class PropertyOwnershipService(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
+                isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
                 landlords = landlords,
                 propertyBuildType = propertyBuildType,
@@ -96,7 +99,8 @@ class PropertyOwnershipService(
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
 
-        val isLandlord = propertyOwnership.landlords.any { it.baseUser.id == baseUserId }
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+        val isLandlord = propertyOwnership.landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
         if (!isLocalCouncil && !isLandlord) {
             throw ResponseStatusException(
@@ -123,7 +127,8 @@ class PropertyOwnershipService(
     fun getIsLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
+        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,
@@ -239,6 +244,7 @@ class PropertyOwnershipService(
     @Transactional
     fun updateOccupancy(
         id: Long,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         numBedrooms: Int?,
@@ -255,6 +261,7 @@ class PropertyOwnershipService(
         val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.isOccupied = isOccupied
         propertyOwnership.numBedrooms = numBedrooms
         propertyOwnership.billsIncludedList = billsIncludedList
         propertyOwnership.customBillsIncluded = customBillsIncluded

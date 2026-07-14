@@ -35,6 +35,9 @@ class PropertyDetailsControllerTests(
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
+
+    @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     @MockitoBean
@@ -48,9 +51,6 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
