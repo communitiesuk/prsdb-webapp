@@ -259,107 +259,57 @@ VALUES (1, 1, 'L12345678'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied)
-VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1,
-           1, null, null, 2, 1, null, 123.12, null, false, true),
-       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', 1, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (8, true, 1, 1, 1, 40, 13, '05/02/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, true),
-       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (10, true, 1, 1, 1, 42, 15, '05/02/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, true, false),
-       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', 2, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', 3, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', 4, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', 5, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', 6, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 7, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 8, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (33, true, 0, 0, 0, 65, 38,'2025-01-15 00:00:00+00', null, null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (34, true, 0, 0, 0, 66, 39,'2025-01-15 00:00:00+00', null, null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (35, true, 0, 0, 0, 67, 40,'2025-01-15 00:00:00+00', null, null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (36, true, 0, 0, 0, 68, 41,'2025-01-15', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false, false),
-       (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null,
-        null, null, null, null, null, null, 'End terrace', false, false),
-       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, true, true),
--- Property 39: interim "occupied but tenancy details skipped" state (PDJB-942). The new-layout view model
--- infers tenancy-skipped from current_num_households = 0 while occupied is inferred from current_num_tenants > 0,
--- so this deliberately-invalid tenants>0/households=0 combination is currently the only way to represent it.
--- The rent/furnished fields are populated only to satisfy the legacy (flag-off) property record, which
--- unconditionally reads them for occupied properties (PDJB-548). Revisit once occupancy is embedded in PropertyOwnership.
-       (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true),
-       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1,
-        1, null, null, 2, 1, null, 123.12, null, false, true);
+-- Property 39 represents the interim "occupied but tenancy details skipped" state (PDJB-942):
+-- is_occupied = true (stored flag, PDJB-1293) with current_num_households/tenants = 0. The rent/furnished
+-- fields are populated only to satisfy the legacy (flag-off) property record, which unconditionally reads
+-- them for occupied properties (PDJB-548).
+-- last_occupied_date is set to 7 days ago for every occupied property (matching the real flow, where
+-- PropertyOwnershipService sets it when a property becomes occupied) so the provide-later deadline
+-- (last_occupied_date + PROVIDE_LATER_DEADLINE_DAYS days) stays in the future. num_bedrooms is a required
+-- field in the real flow, so it is populated for every row.
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', 1, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (8, true, 1, 1, 1, 40, 13, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, current_date - INTERVAL '7 days'),
+       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (10, true, 1, 1, 1, 42, 15, '05/02/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, true, false, null),
+       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', 2, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', 3, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', 4, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', 5, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', 6, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 7, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 8, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (33, true, 0, 0, 0, 65, 38, '2025-01-15 00:00:00+00', null, null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (34, true, 0, 0, 0, 66, 39, '2025-01-15 00:00:00+00', null, null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (35, true, 0, 0, 0, 67, 40, '2025-01-15 00:00:00+00', null, null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (36, true, 0, 0, 0, 68, 41, '2025-01-15', '01/15/25', null, 1, 2, null, null, null, null, null, null, null, false, false, null),
+       (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, 2, null, null, null, null, null, null, 'End terrace', false, false, null),
+       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, current_date - INTERVAL '7 days'),
+       (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
-
--- Occupied properties always have a last_occupied_date set in the real flow (PropertyOwnershipService sets it
--- when a property becomes occupied). Backfill it for all occupied seed rows so the provide-later deadline text
--- renders and both the property record and compliance tabs behave consistently. Seed it relative to the current
--- date (7 days ago) so the deadline (last_occupied_date + PROVIDE_LATER_DEADLINE_DAYS days) stays in the future.
--- TODO(PDJB-548) revisit once occupancy is embedded in PropertyOwnership.
-UPDATE property_ownership SET last_occupied_date = current_date - INTERVAL '7 days' WHERE current_num_tenants > 0 AND last_occupied_date IS NULL;
-
--- Number of bedrooms is a required field for every property in the real flow, so backfill it for all seed rows
--- that were left null. The new-layout property record always shows this row, and the legacy record only shows it
--- for occupied properties, so populating it here does not change the row structure of either view.
-UPDATE property_ownership SET num_bedrooms = 2 WHERE num_bedrooms IS NULL;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
