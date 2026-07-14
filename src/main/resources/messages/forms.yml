@@ -237,6 +237,8 @@ lookupAddress:
       missing: Enter a house name or number
 selectAddress:
   fieldSetHeading: Select your address
+  govBodyMemberRegistration:
+    fieldSetHeading: Select their address
   fieldSetHint:
     beforePostcode: '{0,,addressCount} addresses found for'
     beforeHouseNameOrNumber: and

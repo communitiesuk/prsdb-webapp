@@ -106,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
@@ -499,6 +500,12 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
         navigateToLandlordRegistrationJourneyStep("organisation-governing-body-member-${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage(): OrgGovBodyMemberSelectAddressFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberSelectAddress().build())
+        navigateToLandlordRegistrationJourneyStep("organisation-governing-body-member-${SelectAddressStep.ROUTE_SEGMENT}")
+        return createValidPage(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationConfirmationPage() {

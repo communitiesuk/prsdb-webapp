@@ -44,6 +44,9 @@ class OrgLandlordGovBodyMemberAddressTask : Task<LandlordRegistrationOrgLandlord
                         else -> exitStep
                     }
                 }
+                withAdditionalContentProperties {
+                    mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
+                }
             }
             step(journey.noAddressFoundStep) {
                 routeSegment("organisation-governing-body-member-${NoAddressFoundStep.ROUTE_SEGMENT}")

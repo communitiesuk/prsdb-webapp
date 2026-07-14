@@ -10,4 +10,6 @@ class OrgGovBodyMemberSelectAddressFormPageLandlordRegistration(
 ) : SelectAddressFormPage(
         page,
         "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/organisation-governing-body-member-${SelectAddressStep.ROUTE_SEGMENT}",
-    )
+    ) {
+    val heading = page.locator("h1")
+}

@@ -222,7 +222,7 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgGovBodyMemberAddress(
+    fun withOrgGovBodyMemberLookupAddress(
         houseNameOrNumber: String = "4",
         postcode: String = "EG1 2AB",
     ): LandlordStateSessionBuilder {
@@ -236,6 +236,16 @@ class LandlordStateSessionBuilder(
         val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
         additionalDataMap["govBodyMemberCachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
 
+        return self()
+    }
+
+    fun withOrgGovBodyMemberAddress(
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
+    ): LandlordStateSessionBuilder {
+        withOrgGovBodyMemberLookupAddress(houseNameOrNumber, postcode)
+
+        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
         val selectFormModel =
             SelectAddressFormModel().apply {
                 this.address = address.singleLineAddress
@@ -327,6 +337,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgGovBodyMemberDob() = beforeOrgGovBodyMemberName().withOrgGovBodyMemberName()
 
         fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
+
+        fun beforeOrgGovBodyMemberSelectAddress() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberLookupAddress()
 
         fun beforeOrgGovBodyMemberList() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberAddress()
 
