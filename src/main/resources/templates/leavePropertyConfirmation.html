@@ -12,9 +12,11 @@
         <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.two}">
             leaveProperty.confirmation.paragraph.two
         </p>
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
-            common.confirmationPage.goToDashboard
-        </a>
+        <p class="govuk-body">
+            <a class="govuk-link"
+               th:href="@{${landlordDashboardUrl}}"
+               th:text="#{common.confirmationPage.goToDashboard}">common.confirmationPage.goToDashboard</a>
+        </p>
     </div>
 </main>
 </html>

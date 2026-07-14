@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -13,9 +14,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 
 @JourneyFrameworkComponent
-class LicensingTask : Task<LicensingState>() {
+class LicensingTask(
+    private val featureFlagManager: FeatureFlagManager,
+) : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
+            // TODO(PDJB-990): route to the 'provide details about licensing later' page when 'Provide this later' is selected behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
             step(journey.licensingTypeStep) {
                 routeSegment(LicensingTypeStep.ROUTE_SEGMENT)
                 nextStep { mode ->

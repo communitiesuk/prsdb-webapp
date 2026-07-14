@@ -1,10 +1,15 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedCurrencyString
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedIntegerString
 
 class StringExtensionsTests {
@@ -100,5 +105,54 @@ class StringExtensionsTests {
         expected: String,
     ) {
         assertEquals(expected, input.toNormalizedIntegerString())
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "test@example.com, test@example.com",
+        "Test@Example.com, test@example.com",
+        "'  test@example.com  ', test@example.com",
+        "TEST@EXAMPLE.COM, test@example.com",
+    )
+    fun `toNormalizedEmail trims and lowercases`(
+        input: String,
+        expected: String,
+    ) {
+        assertEquals(expected, input.toNormalizedEmail())
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "test@example.com, test@example.com",
+        "test@example.com, Test@Example.com",
+        "test@example.com, '  TEST@EXAMPLE.COM  '",
+    )
+    fun `isSameEmailAs returns true for emails differing only by case or surrounding whitespace`(
+        email: String,
+        other: String,
+    ) {
+        assertTrue(email.isSameEmailAs(other))
+    }
+
+    @Test
+    fun `isSameEmailAs returns false for different emails`() {
+        assertFalse("test@example.com".isSameEmailAs("other@example.com"))
+    }
+
+    @Test
+    fun `isSameEmailAs returns false when other is null`() {
+        assertFalse("test@example.com".isSameEmailAs(null))
+    }
+
+    @Test
+    fun `containsEmail returns true when an equivalent email is present ignoring case and whitespace`() {
+        val emails = listOf("first@example.com", "Second@Example.com")
+        assertTrue(emails.containsEmail("  SECOND@example.com  "))
+    }
+
+    @Test
+    fun `containsEmail returns false when no equivalent email is present`() {
+        val emails = listOf("first@example.com", "second@example.com")
+        assertFalse(emails.containsEmail("third@example.com"))
     }
 }

@@ -5,15 +5,19 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 
 @JourneyFrameworkComponent
-class LeadTrusteeEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class LeadTrusteeEmailStepConfig : AbstractRequestableStepConfig<Complete, LeadTrusteeEmailFormModel, JourneyState>() {
+    override val formModelClass = LeadTrusteeEmailFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1153 - Lead trustee email")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf(
+            "fieldSetHeading" to "forms.leadTrusteeEmail.fieldSetHeading",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/emailForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -21,7 +25,7 @@ class LeadTrusteeEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInp
 @JourneyFrameworkComponent
 final class LeadTrusteeEmailStep(
     stepConfig: LeadTrusteeEmailStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, LeadTrusteeEmailFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "lead-trustee-email"
     }

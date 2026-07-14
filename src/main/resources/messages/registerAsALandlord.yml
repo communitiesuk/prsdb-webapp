@@ -90,6 +90,10 @@ orgPhoneNumber:
   fieldSetHeading: What is your organisation’s phone number?
   error:
     missing: Enter a phone number including the country code for international numbers
+leadTrusteePhone:
+  fieldSetHeading: What is the lead trustee’s phone number?
+  error:
+    missing: Enter a phone number including the country code for international numbers
 orgType:
   fieldSetHeading: What type of organisation are you registering?
   fieldSetHint: Select all that apply
@@ -101,3 +105,9 @@ orgType:
   divider: or
   error:
     missing: Select the types of organisation that apply, or select ‘None of these’
+leadTrusteeName:
+  fieldSetHeading: What is the lead trustee’s full name?
+  fieldSetHint: All trustees are equally legally responsible, but you must nominate one ‘lead’ trustee to be the main point of contact
+  error:
+    missing: Enter the lead trustee’s full name
+

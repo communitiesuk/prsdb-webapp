@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
@@ -28,10 +29,10 @@ import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
@@ -51,7 +52,7 @@ import kotlin.test.assertNull
 @ExtendWith(MockitoExtension::class)
 class LandlordServiceTests {
     @Mock
-    private lateinit var mockLandlordRepository: LandlordRepository
+    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var mockPrsdbUserService: PrsdbUserService
@@ -81,7 +82,7 @@ class LandlordServiceTests {
     fun setup() {
         landlordService =
             LandlordService(
-                mockLandlordRepository,
+                mockIndividualLandlordRepository,
                 mockPrsdbUserService,
                 mockAddressService,
                 mockRegistrationNumberService,
@@ -95,9 +96,9 @@ class LandlordServiceTests {
     @Test
     fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
         val regNumDataModel = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 0L)
-        val expectedLandlord = Landlord()
+        val expectedLandlord = IndividualLandlord()
 
-        whenever(mockLandlordRepository.findByRegistrationNumber_Number(regNumDataModel.number)).thenReturn(
+        whenever(mockIndividualLandlordRepository.findByRegistrationNumber_Number(regNumDataModel.number)).thenReturn(
             expectedLandlord,
         )
 
@@ -127,9 +128,9 @@ class LandlordServiceTests {
     @Test
     fun `retrieveLandlordByBaseUserId returns a landlord given its base user ID`() {
         val baseUserId = "baseUserId"
-        val expectedLandlord = Landlord()
+        val expectedLandlord = IndividualLandlord()
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
 
         val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)
 
@@ -156,7 +157,7 @@ class LandlordServiceTests {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1233456)
 
         val expectedLandlord =
-            Landlord(
+            IndividualLandlord(
                 baseUser,
                 "name",
                 "example@email.com",
@@ -175,7 +176,7 @@ class LandlordServiceTests {
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)).thenReturn(
             registrationNumber,
         )
-        whenever(mockLandlordRepository.save(any())).thenReturn(expectedLandlord)
+        whenever(mockIndividualLandlordRepository.save(any())).thenReturn(expectedLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
 
         // Act
@@ -192,8 +193,8 @@ class LandlordServiceTests {
             )
 
         // Assert
-        val landlordCaptor = captor<Landlord>()
-        verify(mockLandlordRepository).save(landlordCaptor.capture())
+        val landlordCaptor = captor<IndividualLandlord>()
+        verify(mockIndividualLandlordRepository).save(landlordCaptor.capture())
         assertTrue(ReflectionEquals(expectedLandlord, "id").matches(landlordCaptor.value))
 
         assertEquals(expectedLandlord, createdLandlord)
@@ -209,7 +210,7 @@ class LandlordServiceTests {
         whenever(mockRegistrationNumberService.createRegistrationNumber(any()))
             .thenReturn(expectedLandlord.registrationNumber)
 
-        whenever(mockLandlordRepository.save(any())).thenReturn(expectedLandlord)
+        whenever(mockIndividualLandlordRepository.save(any())).thenReturn(expectedLandlord)
         val dashboardUri = URI("example.com/dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
 
@@ -248,7 +249,7 @@ class LandlordServiceTests {
 
             val matchingLandlords =
                 listOf(createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel())
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
                 .thenReturn(PageImpl(matchingLandlords))
 
             val currentUrlKey = 77
@@ -280,7 +281,7 @@ class LandlordServiceTests {
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
             val matchingLandlord = listOf(createLandlordSearchResultDataModel())
-            whenever(mockLandlordRepository.searchMatchingLRN(searchLRN, lcUserBaseId, pageable = pageRequest))
+            whenever(mockIndividualLandlordRepository.searchMatchingLRN(searchLRN, lcUserBaseId, pageable = pageRequest))
                 .thenReturn(PageImpl(matchingLandlord))
 
             val currentUrlKey = 79
@@ -310,7 +311,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
                 .thenReturn(Page.empty())
 
             // Act
@@ -320,7 +321,7 @@ class LandlordServiceTests {
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
             assertEquals(expectedSearchResults, searchResults.content)
-            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+            verify(mockIndividualLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
         }
 
         @Test
@@ -332,7 +333,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
                 .thenReturn(Page.empty())
 
             // Act
@@ -342,7 +343,7 @@ class LandlordServiceTests {
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
             assertEquals(expectedSearchResults, searchResults.content)
-            verify(mockLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
+            verify(mockIndividualLandlordRepository, never()).searchMatchingLRN(any(), any(), any(), any())
         }
 
         @Test
@@ -362,13 +363,13 @@ class LandlordServiceTests {
             val pageNumber1 = 0
             val pageRequest1 = PageRequest.of(pageNumber1, pageSize)
             val matchingLandlordsPage1 = matchingLandlords.subList(0, pageSize)
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest1))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest1))
                 .thenReturn(PageImpl(matchingLandlordsPage1))
 
             val pageNumber2 = 1
             val pageRequest2 = PageRequest.of(pageNumber2, pageSize)
             val matchingLandlordsPage2 = matchingLandlords.subList(pageSize, matchingLandlords.size)
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest2))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest2))
                 .thenReturn(PageImpl(matchingLandlordsPage2))
 
             val currentUrlKey = 77
@@ -404,7 +405,7 @@ class LandlordServiceTests {
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
-            whenever(mockLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
+            whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
                 .thenThrow(QueryTimeoutException("Query timed out"))
 
             // Act & Assert
@@ -426,7 +427,7 @@ class LandlordServiceTests {
             createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
 
         // Act
         landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
@@ -461,7 +462,7 @@ class LandlordServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
-        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
@@ -484,7 +485,7 @@ class LandlordServiceTests {
         val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
 
         whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
-        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
@@ -515,7 +516,7 @@ class LandlordServiceTests {
             val address = Address(updateModel.address)
             whenever(mockAddressService.findOrCreateAddress(it)).thenReturn(address)
         }
-        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
@@ -541,6 +542,33 @@ class LandlordServiceTests {
                 eq(expectedEmailModel),
             )
         }
+    }
+
+    @Test
+    fun `when a landlord updates their email by case only, a single confirmation email is sent and the new casing is stored`() {
+        // Arrange
+        val userId = "my id"
+        val originalEmailAddress = "landlord@example.com"
+        val newCasingEmailAddress = "Landlord@Example.com"
+        val landlordEntity =
+            createLandlord(
+                name = "original name",
+                email = originalEmailAddress,
+                phoneNumber = "original phone number",
+                address = createAddress("original address"),
+                dateOfBirth = LocalDate.of(1991, 1, 1),
+            )
+        val updateModel = LandlordUpdateModel(newCasingEmailAddress, null, null, null, null)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        // Act
+        val updatedLandlord = landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+
+        // Assert
+        assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
+        verify(updateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
+        verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
     }
 
     @Test

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.taskModels
 
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_BLUE
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_LIGHT_BLUE
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 
@@ -31,6 +32,11 @@ data class TaskStatusViewModel(
                 )
 
                 TaskStatus.COMPLETED -> return TaskStatusViewModel("taskList.status.completed")
+
+                TaskStatus.NOT_REQUIRED -> return TaskStatusViewModel(
+                    "taskList.status.notRequired",
+                    colour = TAG_COLOUR_GREY,
+                )
             }
         }
     }
