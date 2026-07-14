@@ -36,6 +36,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     var currentNumTenants: Int = 0
 
+    @Column(nullable = false)
+    var isOccupied: Boolean = false
+
     @OneToOne(optional = false)
     @JoinColumn(name = "registration_number_id", nullable = false, unique = true)
     lateinit var registrationNumber: RegistrationNumber
@@ -105,6 +108,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
         currentNumTenants: Int,
+        isOccupied: Boolean,
         registrationNumber: RegistrationNumber,
         landlords: MutableSet<Landlord>,
         propertyBuildType: PropertyType,
@@ -125,6 +129,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
+        this.isOccupied = isOccupied
         this.registrationNumber = registrationNumber
         this.ownershipLinks = landlords.mapTo(mutableSetOf()) { landlord -> OwnershipLink(landlord, this) }
         this.propertyBuildType = propertyBuildType
@@ -142,9 +147,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.lastOccupiedDate = lastOccupiedDate
         this.markedJointLandlord = markedJointLandlord
     }
-
-    val isOccupied: Boolean
-        get() = currentNumTenants > 0
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null

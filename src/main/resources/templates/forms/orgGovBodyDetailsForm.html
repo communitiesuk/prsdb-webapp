@@ -1,0 +1,35 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="landlordTypeUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{forms.orgGovBodyDetails.heading}">forms.orgGovBodyDetails.heading</h1>
+        <p class="govuk-body" th:text="#{forms.orgGovBodyDetails.body.one}">forms.orgGovBodyDetails.body.one</p>
+        <p class="govuk-body" th:text="#{forms.orgGovBodyDetails.body.two}">forms.orgGovBodyDetails.body.two</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{forms.orgGovBodyDetails.bullet.one}">forms.orgGovBodyDetails.bullet.one</li>
+            <li th:text="#{forms.orgGovBodyDetails.bullet.two}">forms.orgGovBodyDetails.bullet.two</li>
+            <li th:text="#{forms.orgGovBodyDetails.bullet.three}">forms.orgGovBodyDetails.bullet.three</li>
+            <li th:text="#{forms.orgGovBodyDetails.bullet.four}">forms.orgGovBodyDetails.bullet.four</li>
+        </ul>
+        <div class="govuk-inset-text" th:text="#{forms.orgGovBodyDetails.insetText}">forms.orgGovBodyDetails.insetText</div>
+        <details id="details" th:replace="~{fragments/details :: details(#{forms.orgGovBodyDetails.details.summary}, ~{::#details/content()})}">
+            <div class="govuk-details__text">
+                <p class="govuk-body">
+                    <span th:remove="tag" th:text="#{forms.orgGovBodyDetails.details.body.one.beforeLink}">forms.orgGovBodyDetails.details.body.one.beforeLink</span>
+                    <a class="govuk-link" th:href="@{${landlordTypeUrl}}" th:text="#{forms.orgGovBodyDetails.details.body.one.link}">forms.orgGovBodyDetails.details.body.one.link</a><span th:remove="tag" th:text="#{forms.orgGovBodyDetails.details.body.one.afterLink}">forms.orgGovBodyDetails.details.body.one.afterLink</span>
+                </p>
+                <p class="govuk-body" th:text="#{forms.orgGovBodyDetails.details.body.two}">forms.orgGovBodyDetails.details.body.two</p>
+            </div>
+        </details>
+    </th:block>
+    <th:block id="form-content">
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{forms.orgGovBodyDetails.continueButton}, 'orgGovBodyDetailsMode', 'HAS_DETAILS')}"></button>
+            <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{forms.orgGovBodyDetails.noDetailsButton}, 'orgGovBodyDetailsMode', 'NO_DETAILS')}"></button>
+        </div>
+    </th:block>
+</html>

@@ -13,15 +13,13 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -34,9 +32,6 @@ class LandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var landlordService: LandlordService
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var localCouncilService: LocalCouncilService
@@ -151,16 +146,17 @@ class LandlordControllerTests(
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.HAS_FAULTS,
-                ComplianceCertStatus.HAS_FAULTS,
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+            PageImpl(listOf(nonCompliantDataModel)),
+        )
 
         // Act and Assert
         val expectedComplianceActions =
             listOf(
-                ComplianceActionViewModelBuilderOld.fromDataModel(nonCompliantDataModel),
+                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel),
             )
 
         mvc
@@ -180,39 +176,23 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
-        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+    fun `getComplianceActions returns complianceActions view`() {
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
             PageImpl(emptyList()),
         )
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
 
         mvc
             .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { isOk() }
-                view { name("complianceActionsMay26Redesign") }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
-        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(false)
-
-        mvc
-            .get(COMPLIANCE_ACTIONS_URL)
-            .andExpect {
-                status { isOk() }
-                view { name("complianceActionsOld") }
+                view { name("complianceActions") }
             }
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions redirects to first page when requested page exceeds total pages`() {
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
-        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(5, 10), 10),
         )
 
@@ -225,9 +205,8 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `getComplianceActions includes paginationViewModel when redesign feature flag is enabled`() {
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
-        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+    fun `getComplianceActions includes paginationViewModel`() {
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(0, 10), 20),
         )
 

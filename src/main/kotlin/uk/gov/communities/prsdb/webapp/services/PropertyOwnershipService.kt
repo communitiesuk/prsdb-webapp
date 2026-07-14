@@ -44,6 +44,7 @@ class PropertyOwnershipService(
     @Transactional
     fun createPropertyOwnership(
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         landlords: MutableSet<Landlord>,
@@ -68,6 +69,7 @@ class PropertyOwnershipService(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
+                isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
                 landlords = landlords,
                 propertyBuildType = propertyBuildType,
@@ -242,6 +244,7 @@ class PropertyOwnershipService(
     @Transactional
     fun updateOccupancy(
         id: Long,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         numBedrooms: Int?,
@@ -258,6 +261,7 @@ class PropertyOwnershipService(
         val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.isOccupied = isOccupied
         propertyOwnership.numBedrooms = numBedrooms
         propertyOwnership.billsIncludedList = billsIncludedList
         propertyOwnership.customBillsIncluded = customBillsIncluded
