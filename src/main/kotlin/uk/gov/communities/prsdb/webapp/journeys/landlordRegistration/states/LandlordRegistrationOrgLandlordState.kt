@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -34,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordGovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
@@ -70,9 +70,16 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep
+    val orgLandlordGovBodyMemberAddressTask: OrgLandlordGovBodyMemberAddressTask
+    val govBodyMemberLookupAddressStep: LookupAddressStep
+    val govBodyMemberSelectAddressStep: SelectAddressStep
+    val govBodyMemberNoAddressFoundStep: NoAddressFoundStep
+    val govBodyMemberManualAddressStep: ManualAddressStep
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
     var leadTrusteeCachedAddresses: List<AddressDataModel>?
     var leadTrusteeIsAddressAlreadyRegistered: Boolean?
     var leadTrusteeCachedSelectedAddress: String?
+    var govBodyMemberCachedAddresses: List<AddressDataModel>?
+    var govBodyMemberIsAddressAlreadyRegistered: Boolean?
+    var govBodyMemberCachedSelectedAddress: String?
 }

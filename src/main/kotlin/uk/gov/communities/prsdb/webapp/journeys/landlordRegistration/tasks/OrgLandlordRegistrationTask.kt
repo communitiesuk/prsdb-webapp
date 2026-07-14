@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -200,16 +199,15 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgGovBodyMemberDobStep) {
                 routeSegment(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
-                nextStep { journey.orgGovBodyMemberAddressStep }
+                nextStep { journey.orgLandlordGovBodyMemberAddressTask.firstStep }
             }
-            step(journey.orgGovBodyMemberAddressStep) {
-                routeSegment(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT)
+            task(journey.orgLandlordGovBodyMemberAddressTask) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                parents { journey.orgGovBodyMemberAddressStep.isComplete() }
+                parents { journey.orgLandlordGovBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {

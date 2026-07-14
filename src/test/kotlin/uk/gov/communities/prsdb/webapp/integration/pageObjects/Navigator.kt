@@ -104,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
@@ -492,6 +493,12 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyDetails().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage(): OrgGovBodyMemberLookupAddressFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
+        navigateToLandlordRegistrationJourneyStep("organisation-governing-body-member-${LookupAddressStep.ROUTE_SEGMENT}")
+        return createValidPage(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
     }
 
     fun navigateToLandlordRegistrationConfirmationPage() {

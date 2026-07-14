@@ -219,6 +219,9 @@ lookupAddress:
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
     fieldSetHint: Use an address where the trustee can receive correspondence
+  govBodyMemberRegistration:
+    fieldSetHeading: What is their contact address?
+    fieldSetHint: Use an address where they can receive correspondence
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -267,6 +270,8 @@ manualAddress:
       label: Address 2 (optional)
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
+  govBodyMemberRegistration:
+    fieldSetHeading: What is their contact address?
   propertyRegistration:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:

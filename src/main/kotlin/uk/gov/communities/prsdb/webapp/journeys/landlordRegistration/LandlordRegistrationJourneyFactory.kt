@@ -38,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -64,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordGovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
@@ -168,7 +168,11 @@ class LandlordRegistrationJourney(
     override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
     override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
     override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
-    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val orgLandlordGovBodyMemberAddressTask: OrgLandlordGovBodyMemberAddressTask,
+    override val govBodyMemberLookupAddressStep: LookupAddressStep,
+    override val govBodyMemberSelectAddressStep: SelectAddressStep,
+    override val govBodyMemberNoAddressFoundStep: NoAddressFoundStep,
+    override val govBodyMemberManualAddressStep: ManualAddressStep,
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
@@ -188,6 +192,11 @@ class LandlordRegistrationJourney(
         "leadTrusteeIsAddressAlreadyRegistered",
     )
     override var leadTrusteeCachedSelectedAddress: String? by delegateProvider.nullableDelegate("leadTrusteeCachedSelectedAddress")
+    override var govBodyMemberCachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("govBodyMemberCachedAddresses")
+    override var govBodyMemberIsAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(
+        "govBodyMemberIsAddressAlreadyRegistered",
+    )
+    override var govBodyMemberCachedSelectedAddress: String? by delegateProvider.nullableDelegate("govBodyMemberCachedSelectedAddress")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

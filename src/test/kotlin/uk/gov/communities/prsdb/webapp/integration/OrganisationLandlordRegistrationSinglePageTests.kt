@@ -639,6 +639,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgGovBodyMemberLookupAddressStep {
+        @Test
+        fun `the governing body member lookup address page renders the correct heading`(page: Page) {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is their contact address?")
+        }
+    }
+
+    @Nested
     inner class OrgGovBodyDetailsStep {
         @Test
         fun `org governing body details page renders the expected content`(page: Page) {

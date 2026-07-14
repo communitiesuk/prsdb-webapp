@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -223,8 +222,26 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgGovBodyMemberAddress(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgGovBodyMemberAddress(
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
+    ): LandlordStateSessionBuilder {
+        val lookupFormModel =
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            }
+        withSubmittedValue("organisation-governing-body-member-lookup-address", lookupFormModel)
+
+        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
+        additionalDataMap["govBodyMemberCachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
+
+        val selectFormModel =
+            SelectAddressFormModel().apply {
+                this.address = address.singleLineAddress
+            }
+        withSubmittedValue("organisation-governing-body-member-select-address", selectFormModel)
+
         return self()
     }
 
