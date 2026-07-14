@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
@@ -21,6 +22,7 @@ interface LandlordRegistrationState :
     CheckYourAnswersJourneyState {
     val landlordRegistrationTask: LandlordRegistrationTask
     val individualLandlordRegistrationTask: IndividualLandlordRegistrationTask
+    val landlordTypeStep: LandlordTypeStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     val emailStep: EmailStep
