@@ -15,12 +15,11 @@ class HouseholdStepConfig(
 ) : AbstractRequestableStepConfig<Complete, NumberOfHouseholdsFormModel, HouseholdsAndTenantsState>() {
     override val formModelClass = NumberOfHouseholdsFormModel::class
 
-    override fun getStepSpecificContent(state: HouseholdsAndTenantsState): Map<String, Any?> {
-        return mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholdsOld.heading",
+    override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
+        mapOf(
+            "fieldSetHeading" to "forms.numberOfHouseholdsJuly26Redesign.heading",
             "label" to "forms.numberOfHouseholdsOld.label",
         )
-    }
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
