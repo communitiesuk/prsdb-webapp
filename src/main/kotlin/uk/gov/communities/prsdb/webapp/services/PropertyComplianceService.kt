@@ -178,38 +178,27 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getOldNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getOldNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
+        getAllNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
-    fun getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId).size
-
-    fun getOldNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
-        return compliances
-            .map {
-                ComplianceStatusDataModel.fromPropertyCompliance(it)
-            }.filter { it.shouldShowOnOldComplianceActionsPage }
-    }
-
-    fun getMay2026RedesignNonCompliantPropertiesForLandlord(
+    fun getNonCompliantPropertiesForLandlord(
         landlordBaseUserId: String,
         requestedPageIndex: Int,
     ): Page<ComplianceStatusDataModel> {
-        val allNonCompliant = getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val allNonCompliant = getAllNonCompliantPropertiesForLandlord(landlordBaseUserId)
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE)
         val fromIndex = pageRequest.offset.toInt().coerceAtMost(allNonCompliant.size)
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allNonCompliant.size)
         return PageImpl(allNonCompliant.subList(fromIndex, toIndex), pageRequest, allNonCompliant.size.toLong())
     }
 
-    private fun getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+    private fun getAllNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
         val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
 
         return compliances
             .map {
                 ComplianceStatusDataModel.fromPropertyCompliance(it)
-            }.filter { it.shouldShowOnMay2026RedesignComplianceActionsPage }
+            }.filter { it.shouldShowOnComplianceActionsPage }
     }
 
     @Transactional

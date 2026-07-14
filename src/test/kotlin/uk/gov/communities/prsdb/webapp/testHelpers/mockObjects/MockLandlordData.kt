@@ -93,6 +93,7 @@ class MockLandlordData {
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
+            isOccupied: Boolean = currentNumTenants > 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
@@ -116,6 +117,7 @@ class MockLandlordData {
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
+                    isOccupied = isOccupied,
                     registrationNumber = registrationNumber,
                     landlords = landlords,
                     propertyBuildType = propertyBuildType,
@@ -172,6 +174,7 @@ class MockLandlordData {
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
+                    isOccupied = true,
                     registrationNumber = registrationNumber,
                     landlords = landlords,
                     propertyBuildType = propertyBuildType,
@@ -192,8 +195,9 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
+        fun createUnoccupiedPropertyOwnership(id: Long = 1): PropertyOwnership =
             createPropertyOwnership(
+                id = id,
                 currentNumHouseholds = 0,
                 currentNumTenants = 0,
                 numberOfBedrooms = null,

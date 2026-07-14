@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -260,7 +262,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
 
             assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
-                .containsText("What is the trustee’s email address?")
+                .containsText("What is the lead trustee’s email address?")
         }
 
         @Test
@@ -288,7 +290,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee phone number page renders the heading as a label`() {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
 
-            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the trustee’s phone number?")
+            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the lead trustee’s phone number?")
         }
 
         @Test
@@ -475,7 +477,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             leadTrusteeNamePage.submitName("")
 
             assertThat(leadTrusteeNamePage.form.getErrorMessage())
-                .containsText("Enter the trustee’s full name")
+                .containsText("Enter the lead trustee’s full name")
         }
     }
 
@@ -632,7 +634,36 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
             val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
 
-            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
+            assertThat(lookupAddressPage.heading).containsText("What is the lead trustee’s contact address?")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyDetailsStep {
+        @Test
+        fun `org governing body details page renders the expected content`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            assertThat(govBodyDetailsPage.heading)
+                .containsText("Providing details about your organisation’s governing body")
+        }
+
+        @Test
+        fun `org governing body details page Continue button navigates to the who to provide step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitHasDetails()
+
+            assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `org governing body details page secondary button navigates to the must provide info step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitNoDetails()
+
+            assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
         }
     }
 }
