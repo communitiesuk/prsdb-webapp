@@ -34,7 +34,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @BeforeEach
-    fun enableJointLandlordsFlag() {
+    fun disableOrganisationLandlordRegistrationFlag() {
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 

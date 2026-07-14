@@ -74,7 +74,6 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
 
-        // Show all landlords as summary cards
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                 propertyOwnership.landlords,

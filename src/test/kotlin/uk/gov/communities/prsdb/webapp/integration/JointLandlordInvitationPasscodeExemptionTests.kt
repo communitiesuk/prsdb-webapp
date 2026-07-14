@@ -13,7 +13,7 @@ class JointLandlordInvitationPasscodeExemptionTests : IntegrationTestWithMutable
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
 
     @BeforeEach
-    fun enableJointLandlordsFlag() {
+    fun disableOrganisationLandlordRegistrationFlag() {
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 

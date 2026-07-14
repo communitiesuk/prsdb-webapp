@@ -230,9 +230,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
             }
         }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled
     }
 
     @Nested
@@ -324,9 +321,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(actionLink).hasAttribute("rel", "noreferrer noopener")
             }
         }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled
 
         // Test properties used for notification banner tests:
         // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC

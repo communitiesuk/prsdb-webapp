@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class PropertyDetailsLandlordViewModelBuilderTests {
     @Nested
-    inner class BuildSummaryCardsTests {
+    inner class LandlordViewTests {
         val currentUserId = "current-user"
         val loggedInLandlord =
             MockLandlordData.createLandlord(
@@ -66,7 +66,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
     }
 
     @Nested
-    inner class BuildLocalCouncilSummaryCardsTests {
+    inner class LocalCouncilViewTests {
         @Test
         fun `returns cards sorted alphabetically by landlord name`() {
             val landlords =
