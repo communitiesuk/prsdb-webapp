@@ -38,18 +38,18 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date)
-VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (2, true, 1, 1, 2, 3, 3, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (3, true, 1, 1, 2, 4, 4, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (4, true, 1, 1, 2, 5, 5, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (5, true, 1, 1, 2, 6, 6, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (6, true, 1, 1, 2, 7, 7, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (7, true, 1, 1, 2, 8, 8, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (8, true, 1, 1, 2, 9, 9, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (9, true, 1, 1, 2, 10, 10, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (10, true, 1, 1, 2, 11, 11, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
-       (11, true, 1, 1, 2, 12, 12, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date);
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date, is_occupied)
+VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (2, true, 1, 1, 2, 3, 3, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (3, true, 1, 1, 2, 4, 4, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (4, true, 1, 1, 2, 5, 5, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (5, true, 1, 1, 2, 6, 6, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (6, true, 1, 1, 2, 7, 7, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (7, true, 1, 1, 2, 8, 8, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (8, true, 1, 1, 2, 9, 9, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (9, true, 1, 1, 2, 10, 10, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (10, true, 1, 1, 2, 11, 11, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
+       (11, true, 1, 1, 2, 12, 12, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'), (1, 2, '2025-01-15'), (1, 3, '2025-01-15'), (1, 4, '2025-01-15'), (1, 5, '2025-01-15'), (1, 6, '2025-01-15'), (1, 7, '2025-01-15'), (1, 8, '2025-01-15'), (1, 9, '2025-01-15'), (1, 10, '2025-01-15'), (1, 11, '2025-01-15');

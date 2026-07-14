@@ -292,7 +292,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
 
             assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
-                .containsText("What is the trustee’s email address?")
+                .containsText("What is the lead trustee’s email address?")
         }
 
         @Test
@@ -320,7 +320,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee phone number page renders the heading as a label`() {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
 
-            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the trustee’s phone number?")
+            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the lead trustee’s phone number?")
         }
 
         @Test
@@ -507,7 +507,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             leadTrusteeNamePage.submitName("")
 
             assertThat(leadTrusteeNamePage.form.getErrorMessage())
-                .containsText("Enter the trustee’s full name")
+                .containsText("Enter the lead trustee’s full name")
         }
     }
 
@@ -664,7 +664,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
             val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
 
-            assertThat(lookupAddressPage.heading).containsText("What is the trustee’s contact address?")
+            assertThat(lookupAddressPage.heading).containsText("What is the lead trustee’s contact address?")
         }
     }
 
@@ -694,6 +694,25 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             govBodyDetailsPage.submitNoDetails()
 
             assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberNameStep {
+        @Test
+        fun `the governing body member name page renders the caption and heading`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            assertThat(govBodyMemberNamePage.header).containsText("What is their full name?")
+        }
+
+        @Test
+        fun `submitting an empty governing body member name returns an error`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            govBodyMemberNamePage.submitName("")
+
+            assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
         }
     }
 }

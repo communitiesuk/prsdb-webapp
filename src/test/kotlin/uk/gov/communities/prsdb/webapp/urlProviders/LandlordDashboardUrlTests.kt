@@ -204,6 +204,7 @@ class LandlordDashboardUrlTests(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             ),
         ).thenReturn(propertyOwnership)
 
@@ -221,6 +222,7 @@ class LandlordDashboardUrlTests(
             licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
             licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
             ownershipType = propertyOwnership.ownershipType,
+            isOccupied = propertyOwnership.isOccupied,
             numberOfHouseholds = propertyOwnership.currentNumHouseholds,
             numberOfPeople = propertyOwnership.currentNumTenants,
             baseUserId = landlord.baseUser.id,
