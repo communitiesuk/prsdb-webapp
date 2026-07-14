@@ -43,6 +43,7 @@ class PropertyRegistrationService(
         licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         baseUserId: String,
@@ -84,6 +85,7 @@ class PropertyRegistrationService(
                 licenseType,
                 licenceNumber,
                 ownershipType,
+                isOccupied,
                 numberOfHouseholds,
                 numberOfPeople,
                 numBedrooms,
@@ -128,6 +130,7 @@ class PropertyRegistrationService(
         licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
+        isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         numBedrooms: Int?,
@@ -156,6 +159,7 @@ class PropertyRegistrationService(
 
         return propertyOwnershipService.createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = isOccupied,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             numBedrooms = numBedrooms,
@@ -188,7 +192,7 @@ class PropertyRegistrationService(
                     .toString(),
                 addressModel.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                propertyOwnership.currentNumTenants > 0,
+                propertyOwnership.isOccupied,
                 jointLandlordEmails,
             ),
         )

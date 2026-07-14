@@ -19,51 +19,33 @@ class ComplianceActionsPage(
     val insetText = InsetText(page)
     val pagination = Pagination(page)
 
-    fun getSummaryCard(propertyAddress: String) = ComplianceActionSummaryCard(page, propertyAddress)
-
     /**
      * Will use the pagination buttons if the property isn't immediately visible
      */
-    fun findRedesignedSummaryCard(propertyAddress: String): RedesignedComplianceActionSummaryCard {
+    fun findSummaryCard(propertyAddress: String): ComplianceActionSummaryCard {
         val cardLocator = page.locator(".govuk-summary-card", Page.LocatorOptions().setHasText(propertyAddress))
-        if (cardLocator.isVisible) return getRedesignedSummaryCard(propertyAddress)
+        if (cardLocator.isVisible) return getSummaryCard(propertyAddress)
 
         while (page.locator(".govuk-pagination__next").isVisible) {
             page.locator(".govuk-pagination__next a").click()
             page.waitForLoadState()
-            if (cardLocator.isVisible) return getRedesignedSummaryCard(propertyAddress)
+            if (cardLocator.isVisible) return getSummaryCard(propertyAddress)
         }
 
-        return getRedesignedSummaryCard(propertyAddress)
+        return getSummaryCard(propertyAddress)
     }
 
-    private fun getRedesignedSummaryCard(propertyAddress: String) = RedesignedComplianceActionSummaryCard(page, propertyAddress)
+    private fun getSummaryCard(propertyAddress: String) = ComplianceActionSummaryCard(page, propertyAddress)
 
     class ComplianceActionSummaryCard(
         page: Page,
         title: String,
     ) : SummaryCard(page, title) {
         override val summaryList = ComplianceActionSummaryList(locator)
-    }
-
-    class ComplianceActionSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
-        val registrationNumRow = getRow("Registration number")
-        val gasSafetyRow = getRow("Gas safety")
-        val electricalSafetyRow = getRow("Electrical safety")
-        val energyPerformanceRow = getRow("Energy performance")
-    }
-
-    class RedesignedComplianceActionSummaryCard(
-        page: Page,
-        title: String,
-    ) : SummaryCard(page, title) {
-        override val summaryList = RedesignedComplianceActionSummaryList(locator)
         val epcInsetText = InsetText(locator)
     }
 
-    class RedesignedComplianceActionSummaryList(
+    class ComplianceActionSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
         val statusRow = getRow("Status")
