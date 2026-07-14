@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlin.math.ceil
 import kotlin.math.max
 
 @Profile("!local")
@@ -76,7 +75,7 @@ class AwsCloudWatchMetricsClient(
         val rangeSeconds = period.end.epochSecond - period.start.epochSecond
         val rawBucketSeconds = rangeSeconds / GRANULARITY_DIVISIONS
         val resolution = validResolutionSeconds(period.start)
-        val roundedUp = ceil(rawBucketSeconds.toDouble() / resolution).toLong() * resolution
+        val roundedUp = Math.ceilDiv(rawBucketSeconds, resolution) * resolution
         return max(roundedUp, MIN_PERIOD_SECONDS).toInt()
     }
 
