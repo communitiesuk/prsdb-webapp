@@ -17,7 +17,7 @@ class HouseholdStepConfig(
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholdsJuly26Redesign.heading",
+            "fieldSetHeading" to "forms.numberOfHouseholdsRestructureAndSkipping.heading",
             "label" to "forms.numberOfHouseholdsOld.label",
         )
 
