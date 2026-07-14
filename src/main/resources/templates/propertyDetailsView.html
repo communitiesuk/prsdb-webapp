@@ -18,28 +18,40 @@
                  th:replace="${provideLaterBanner != null} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#provide-later-notification-banner/content()})} : ~{}">
                 <h2 class="govuk-notification-banner__heading" th:switch="${provideLaterBanner.variant.name()}">
-                    <th:block th:case="'COMBINED'">
-                        <span th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.combined.beforeLinkText}" th:remove="tag"></span><a
+                    <th:block th:case="'COMBINED'"
+                              th:with="combinedPrefix='propertyDetails.propertyRecord.newLayout.notificationBanner.' + (${isLandlordView} ? 'landlord' : 'localCouncil') + '.combined.'">
+                        <span th:text="#{${combinedPrefix} + 'beforeLinkText'}" th:remove="tag"></span><a
                             class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.combined.propertyLinkText}"></a><span
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.combined.middleText}" th:remove="tag"></span><a
+                            th:text="#{${combinedPrefix} + 'propertyLinkText'}"></a><span
+                            th:text="#{${combinedPrefix} + 'middleText'}" th:remove="tag"></span><a
                             class="govuk-notification-banner__link" th:href="'#' + ${complianceInfoTabId}"
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.combined.complianceLinkText}"></a><span
+                            th:text="#{${combinedPrefix} + 'complianceLinkText'}"></a><span
                             th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
                     </th:block>
                     <th:block th:case="'BOTH'">
-                        <span th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.beforeLinkText}" th:remove="tag"></span><a
-                            class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.licensingLinkText}"></a><span
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.middleText}" th:remove="tag"></span><a
-                            class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.tenancyLinkText}"></a><span
-                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
+                        <th:block th:if="${isLandlordView}"
+                                  th:with="bothPrefix='propertyDetails.propertyRecord.newLayout.notificationBanner.landlord.both.'">
+                            <span th:text="#{${bothPrefix} + 'beforeLinkText'}" th:remove="tag"></span><a
+                                class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
+                                th:text="#{${bothPrefix} + 'licensingLinkText'}"></a><span
+                                th:text="#{${bothPrefix} + 'middleText'}" th:remove="tag"></span><a
+                                class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
+                                th:text="#{${bothPrefix} + 'tenancyLinkText'}"></a><span
+                                th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
+                        </th:block>
+                        <th:block th:unless="${isLandlordView}"
+                                  th:with="bothPrefix='propertyDetails.propertyRecord.newLayout.notificationBanner.localCouncil.both.'">
+                            <span th:text="#{${bothPrefix} + 'mainText'}" th:remove="tag"></span>
+                            <a class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
+                               th:text="#{${bothPrefix} + 'linkText'}"></a><span
+                                th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
+                        </th:block>
                     </th:block>
-                    <th:block th:case="*" th:with="variantKey=${#strings.toLowerCase(provideLaterBanner.variant.name())}">
-                        <span th:text="#{'propertyDetails.propertyRecord.newLayout.notificationBanner.' + ${variantKey} + '.mainText'}" th:remove="tag"></span>
+                    <th:block th:case="*"
+                              th:with="variantPrefix='propertyDetails.propertyRecord.newLayout.notificationBanner.' + (${isLandlordView} ? 'landlord' : 'localCouncil') + '.' + ${#strings.toLowerCase(provideLaterBanner.variant.name())} + '.'">
+                        <span th:text="#{${variantPrefix} + 'mainText'}" th:remove="tag"></span>
                         <a class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
-                           th:text="#{'propertyDetails.propertyRecord.newLayout.notificationBanner.' + ${variantKey} + '.linkText'}"></a><span
+                           th:text="#{${variantPrefix} + 'linkText'}"></a><span
                             th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
                     </th:block>
                 </h2>

@@ -168,22 +168,38 @@ propertyRecord:
       councilNotProvided: These details have not been provided yet.
     notificationBanner:
       afterLinkText: .
-      licensing:
-        mainText: You must finish adding this property’s licensing details.
-        linkText: View property licensing
-      tenancy:
-        mainText: You must finish adding this property’s tenancy details.
-        linkText: View tenancy details
-      both:
-        beforeLinkText: 'You must finish adding this property’s '
-        licensingLinkText: licensing details
-        middleText: ' and '
-        tenancyLinkText: tenancy details
-      combined:
-        beforeLinkText: 'You must finish providing '
-        propertyLinkText: property and tenancy details
-        middleText: ' and valid '
-        complianceLinkText: compliance certificates
+      landlord:
+        licensing:
+          mainText: You must finish adding this property’s licensing details.
+          linkText: View property licensing
+        tenancy:
+          mainText: You must finish adding this property’s tenancy details.
+          linkText: View tenancy details
+        both:
+          beforeLinkText: 'You must finish adding this property’s '
+          licensingLinkText: licensing details
+          middleText: ' and '
+          tenancyLinkText: tenancy details
+        combined:
+          beforeLinkText: 'You must finish providing '
+          propertyLinkText: property and tenancy details
+          middleText: ' and valid '
+          complianceLinkText: compliance certificates
+      localCouncil:
+        licensing:
+          mainText: This property is missing licensing details.
+          linkText: View property licensing
+        tenancy:
+          mainText: This property is missing tenancy details.
+          linkText: View tenancy details
+        both:
+          mainText: This property is missing licensing and tenancy details.
+          linkText: View property and tenancy details
+        combined:
+          beforeLinkText: 'This registration is missing '
+          propertyLinkText: property and tenancy details
+          middleText: ' and valid '
+          complianceLinkText: compliance certificates
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type

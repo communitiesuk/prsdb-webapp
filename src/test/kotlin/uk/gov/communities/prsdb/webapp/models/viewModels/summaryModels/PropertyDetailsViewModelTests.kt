@@ -681,6 +681,24 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `New layout shows a no-deadline licensing provide-later row for a landlord when licensing is skipped on an unoccupied property`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = true,
+                messageSource = mockMessageSource,
+                provideLaterEnabled = true,
+            )
+
+        val licensingRow = viewModel.licensingSection.single()
+        assertEquals("propertyDetails.propertyRecord.newLayout.licensing.rowName", licensingRow.fieldHeading)
+        assertEquals("propertyDetails.propertyRecord.newLayout.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
+        assertNull(viewModel.licensingProvideLaterParagraph)
+    }
+
+    @Test
     fun `New layout shows the licensing type row when a license is present`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(

@@ -141,7 +141,10 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (69, '2026-02-27', 1502423331, 0),
        (70, '01/15/25', 1502423332, 0),
        (71, '01/15/25', 1502423333, 0),
-       (72, '01/15/25', 1502423334, 0);
+       (72, '01/15/25', 1502423334, 0),
+       (73, '01/15/25', 1502423335, 0),
+       (74, '01/15/25', 1502423336, 0),
+       (75, '01/15/25', 1502423337, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -188,7 +191,10 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2'),
        (46, '09/13/24', '09/13/24', 1043, '7 Deregister Lane, DR1 1AA', 1, 'DR1 1AA', '7'),
        (47, '09/13/24', '09/13/24', 5001, '10 Skipped Fields Road, SK1 1AA', 1, 'SK1 1AA', '10'),
-       (48, '09/13/24', '09/13/24', 5002, '11 Complete Fields Road, CO1 1AA', 1, 'CO1 1AA', '11');
+       (48, '09/13/24', '09/13/24', 5002, '11 Complete Fields Road, CO1 1AA', 1, 'CO1 1AA', '11'),
+       (49, '09/13/24', '09/13/24', 5003, '12 Tenancy Skipped Road, TS1 1AA', 1, 'TS1 1AA', '12'),
+       (50, '09/13/24', '09/13/24', 5004, '13 Licensing Skipped Road, LS1 1AA', 1, 'LS1 1AA', '13'),
+       (51, '09/13/24', '09/13/24', 5005, '14 Both Skipped Road, BS1 1AA', 1, 'BS1 1AA', '14');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_name)
 VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
@@ -255,7 +261,8 @@ VALUES (1, 1, 'L12345678'),
        (6, 3, 'L12345678'),
        (7, 0, 'L12345678'),
        (8, 0, 'L12345678'),
-       (9, 2, 'L99999999');
+       (9, 2, 'L99999999'),
+       (10, 1, 'L10101010');
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
@@ -267,6 +274,14 @@ SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM lice
 -- PropertyOwnershipService sets it when a property becomes occupied) so the provide-later deadline
 -- (last_occupied_date + PROVIDE_LATER_DEADLINE_DAYS days) stays in the future. num_bedrooms is a required
 -- field in the real flow, so it is populated for every row.
+-- Properties 39-43 exercise the new-layout (PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) property record:
+--   39: occupied, licensing AND tenancy skipped, no compliance record -> COMBINED provide-later + compliance banner
+--   40: occupied, all fields completed, no compliance record -> no provide-later banner
+--   41: occupied, tenancy skipped (licence present), fully compliant -> TENANCY-only provide-later banner
+--   42: occupied, licensing skipped (tenancy provided), fully compliant -> LICENSING-only provide-later banner
+--   43: occupied, licensing AND tenancy skipped, fully compliant -> BOTH provide-later banner
+-- Properties 41-43 have fully compliant property_compliance records (see below) so hasComplianceIssue is
+-- false and the pure provide-later banner variants render (not COMBINED).
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
 VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
        (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
@@ -307,7 +322,10 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, 2, null, null, null, null, null, null, 'End terrace', false, false, null),
        (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, true, true, current_date - INTERVAL '7 days'),
        (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'),
-       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days');
+       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (41, true, 1, 0, 0, 73, 49, '05/02/25', '05/02/25', 10, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'),
+       (42, true, 1, 1, 2, 74, 50, '05/02/25', '05/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'),
+       (43, true, 1, 0, 0, 75, 51, '05/02/25', '05/02/25', null, 1, 1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days');
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -354,6 +372,9 @@ VALUES (1, 1, '2025-01-15'),
        (1, 38, '2025-01-15'),
        (1, 39, '2025-01-15'),
        (1, 40, '2025-01-15'),
+       (1, 41, '2025-01-15'),
+       (1, 42, '2025-01-15'),
+       (1, 43, '2025-01-15'),
        (2, 4, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
@@ -402,7 +423,13 @@ VALUES
        (35, 37, '01/01/25', null, '2023-06-15', true, '2024-03-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2030-09-15', null, 'c', null, null, true, true, true),
        (36, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (37, 4, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (38, 38, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true);
+       (38, 38, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true),
+       -- Fully compliant records for properties 41-43 (gas not required, electrical + EPC valid and
+       -- in date, all declarations true) so hasComplianceIssue is false and the pure provide-later
+       -- banner variants (TENANCY / LICENSING / BOTH) render instead of COMBINED.
+       (39, 41, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (40, 42, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
+       (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
