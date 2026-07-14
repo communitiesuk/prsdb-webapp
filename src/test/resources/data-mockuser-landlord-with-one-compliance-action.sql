@@ -22,13 +22,13 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied)
 VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, true),
        (2, true, 1, 1, 2, 3, 3, current_date, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, true),
        (3, true, 1, 1, 2, 4, 4, current_date, 1,
-        1, null, null, 2, 1, null, 123.12);
+        1, null, null, 2, 1, null, 123.12, true);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),

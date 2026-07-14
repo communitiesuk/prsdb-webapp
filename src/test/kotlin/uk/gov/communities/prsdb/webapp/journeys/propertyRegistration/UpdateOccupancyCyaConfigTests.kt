@@ -209,6 +209,7 @@ class UpdateOccupancyCyaConfigTests {
         whenever(
             mockPropertyOwnershipService.updateOccupancy(
                 id = propertyId,
+                isOccupied = true,
                 numberOfHouseholds = 2,
                 numberOfPeople = 5,
                 numBedrooms = 3,

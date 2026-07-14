@@ -26,23 +26,25 @@ class CloudWatchMetricsService(
     @Value("\${cloudwatch-metrics.cloudfront.distribution-id}") private val cloudFrontDistributionId: String,
 ) {
     fun getMetrics(period: ReportingPeriod): CloudWatchMetricsDataModel =
-        try {
-            CloudWatchMetricsDataModel(
-                peakMemoryUtilisation =
-                    client.getMetricStatistic(ecsNamespace, ecsMemoryMetric, ecsDimensions(), Statistic.MAXIMUM, period),
-                averageMemoryUtilisation =
-                    client.getMetricStatistic(ecsNamespace, ecsMemoryMetric, ecsDimensions(), Statistic.AVERAGE, period),
-                peakCpuUtilisation =
-                    client.getMetricStatistic(ecsNamespace, ecsCpuMetric, ecsDimensions(), Statistic.MAXIMUM, period),
-                elastiCacheCpuUtilisation =
+        CloudWatchMetricsDataModel(
+            peakMemoryUtilisation =
+                safely { client.getMetricStatistic(ecsNamespace, ecsMemoryMetric, ecsDimensions(), Statistic.MAXIMUM, period) },
+            averageMemoryUtilisation =
+                safely { client.getMetricStatistic(ecsNamespace, ecsMemoryMetric, ecsDimensions(), Statistic.AVERAGE, period) },
+            peakCpuUtilisation =
+                safely { client.getMetricStatistic(ecsNamespace, ecsCpuMetric, ecsDimensions(), Statistic.MAXIMUM, period) },
+            elastiCacheCpuUtilisation =
+                safely {
                     client.getMetricStatistic(
                         elastiCacheNamespace,
                         elastiCacheCpuMetric,
                         elastiCacheDimensions(),
                         Statistic.MAXIMUM,
                         period,
-                    ),
-                cloudFrontClientErrorRate =
+                    )
+                },
+            cloudFrontClientErrorRate =
+                safely {
                     client.getMetricStatistic(
                         cloudFrontNamespace,
                         cloudFrontClientErrorRateMetric,
@@ -50,8 +52,10 @@ class CloudWatchMetricsService(
                         Statistic.AVERAGE,
                         period,
                         Region.US_EAST_1,
-                    ),
-                cloudFrontServerErrorRate =
+                    )
+                },
+            cloudFrontServerErrorRate =
+                safely {
                     client.getMetricStatistic(
                         cloudFrontNamespace,
                         cloudFrontServerErrorRateMetric,
@@ -59,11 +63,16 @@ class CloudWatchMetricsService(
                         Statistic.AVERAGE,
                         period,
                         Region.US_EAST_1,
-                    ),
-            )
+                    )
+                },
+        )
+
+    private fun <T> safely(block: () -> T?): T? =
+        try {
+            block()
         } catch (e: Exception) {
             println("Failed to fetch CloudWatch metrics: ${e.message}")
-            CloudWatchMetricsDataModel(null, null, null, null, null, null)
+            null
         }
 
     private fun ecsDimensions() =
