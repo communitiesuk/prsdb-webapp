@@ -48,8 +48,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @BeforeEach
-    fun disablePropertyRegistrationRestructureAndSkippingFeature() {
-        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+    fun enablePropertyRegistrationRestructureAndSkippingFeature() {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     }
 
     @Nested
@@ -274,7 +274,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of households
                 val newNumberOfHouseholds = 1
-                assertThat(updateNumberOfHouseholdsPage.header).containsText("Update how many households live in your property")
+                assertThat(updateNumberOfHouseholdsPage.header).containsText("Households in your property")
                 updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
                 val updateNumberOfPeoplePage =
                     assertPageIs(page, OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
@@ -358,8 +358,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `A property can have its occupancy updated from vacant to occupied when restructure flag enabled`(page: Page) {
-                featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            fun `A property can have its occupancy updated from vacant to occupied when restructure flag disabled`(page: Page) {
+                featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
                 // Details page
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
@@ -459,7 +459,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update number of households
                 val newNumberOfHouseholds = 1
-                assertThat(updateNumberOfHouseholdsPage.header).containsText("Update how many households live in your property")
+                assertThat(updateNumberOfHouseholdsPage.header).containsText("Households in your property")
                 updateNumberOfHouseholdsPage.submitNumberOfHouseholds(newNumberOfHouseholds)
                 val updateNumberOfPeoplePage =
                     assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -485,8 +485,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
-            fun `A property can have just their number of households and people updated when restructure flag enabled`(page: Page) {
-                featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            fun `A property can have just their number of households and people updated when restructure flag disabled`(page: Page) {
+                featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
                 // Details page
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
