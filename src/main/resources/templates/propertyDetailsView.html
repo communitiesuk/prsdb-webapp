@@ -27,6 +27,15 @@
                             th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.combined.complianceLinkText}"></a><span
                             th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
                     </th:block>
+                    <th:block th:case="'BOTH'">
+                        <span th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.beforeLinkText}" th:remove="tag"></span><a
+                            class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
+                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.licensingLinkText}"></a><span
+                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.middleText}" th:remove="tag"></span><a
+                            class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"
+                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.both.tenancyLinkText}"></a><span
+                            th:text="#{propertyDetails.propertyRecord.newLayout.notificationBanner.afterLinkText}" th:remove="tag"></span>
+                    </th:block>
                     <th:block th:case="*" th:with="variantKey=${#strings.toLowerCase(provideLaterBanner.variant.name())}">
                         <span th:text="#{'propertyDetails.propertyRecord.newLayout.notificationBanner.' + ${variantKey} + '.mainText'}" th:remove="tag"></span>
                         <a class="govuk-notification-banner__link" th:href="'#' + ${propertyDetailsFragment}"

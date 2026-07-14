@@ -634,7 +634,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
             }
 
             @Test
@@ -642,7 +642,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
             }
         }
 
@@ -672,8 +672,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view does not show a provide-later notification banner for an unoccupied property`(page: Page) {
                 navigator.goToPropertyDetailsLandlordView(9)
 
-                assertThat(page.getByText("This property is missing")).not().isVisible()
-                assertThat(page.getByText("This registration is missing")).not().isVisible()
+                assertThat(page.getByText("You must finish adding")).not().isVisible()
+                assertThat(page.getByText("You must finish providing")).not().isVisible()
             }
         }
 
@@ -705,8 +705,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view does not show a provide-later notification banner when all fields are completed`(page: Page) {
                 navigator.goToPropertyDetailsLandlordView(40)
 
-                assertThat(page.getByText("This property is missing")).not().isVisible()
-                assertThat(page.getByText("This registration is missing")).not().isVisible()
+                assertThat(page.getByText("You must finish adding")).not().isVisible()
+                assertThat(page.getByText("You must finish providing")).not().isVisible()
             }
         }
 
