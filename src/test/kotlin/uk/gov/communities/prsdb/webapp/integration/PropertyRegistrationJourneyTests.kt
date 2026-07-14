@@ -1485,6 +1485,83 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
+    @Suppress("ktlint:standard:max-line-length")
+    fun `restructured occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+        val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+        addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+        val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+        propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
+        bedroomsPage.submitNumOfBedrooms(3)
+        val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+        ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+        hasJointLandlordsPage.submitHasNoJointLandlords()
+
+        val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+        assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
+        occupancyPage.submitIsOccupied()
+        val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+        assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
+        licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
+        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasNoGasSupply()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+        checkGasSafetyAnswersPage.form.submit()
+
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPage.clickRentedOutTaskWithName("Electrical safety certificate")
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        hasElectricalCertPage.submitProvideThisLater()
+        val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
+        provideElectricalCertLaterPage.form.submit()
+        val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        checkElectricalSafetyAnswersPage.form.submit()
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPage.clickRentedOutTaskWithName("Energy performance certificate (EPC)")
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+        hasEpcPage.submitProvideThisLater()
+        val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+        provideEpcLaterPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+        checkEpcAnswersPage.form.submit()
+
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        assertTrue(taskListPage.getRentedOutTask("Tenancy details").hasLink)
+        taskListPage.clickRentedOutTaskWithName("Tenancy details")
+        val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        householdsPage.submitNumberOfHouseholds(2)
+        val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+        peoplePage.submitNumOfPeople(2)
+        val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        rentIncludesBillsPage.submitIsNotIncluded()
+        val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+        furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+        val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+        rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+        rentFrequencyPage.form.submit()
+        val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+        rentAmountPage.submitRentAmount("400")
+
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    @Test
     fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
