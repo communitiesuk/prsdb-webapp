@@ -164,7 +164,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `Households page renders correctly when skip tenancy journey enabled`() {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val householdsPage = navigator.skipToPropertyRegistrationHouseholdsJuly26RedesignPage()
+        val householdsPage = navigator.skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage()
         assertThat(householdsPage.header).containsText("Households in your property")
         assertThat(householdsPage.sectionHeader).containsText("Tenancy details")
         assertThat(householdsPage.subHeader).containsText("How many households are in your property?")

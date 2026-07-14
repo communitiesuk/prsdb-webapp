@@ -23,7 +23,7 @@ class HouseholdStepConfig(
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/numberOfHouseholdsFormJuly26Redesign"
+            "forms/numberOfHouseholdsFormRestructureAndSkipping"
         } else {
             "forms/numberOfHouseholdsFormOld"
         }

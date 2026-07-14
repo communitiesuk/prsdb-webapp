@@ -666,7 +666,7 @@ class Navigator(
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHouseholdsJuly26RedesignPage(): NumberOfHouseholdsFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationTenancyDetails().build(),
         )

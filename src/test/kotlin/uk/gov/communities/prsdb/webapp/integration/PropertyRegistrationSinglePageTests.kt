@@ -407,15 +407,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class NumberOfHouseholdsStepWithJuly26RedesignEnabled {
+    inner class NumberOfHouseholdsStepWithRestructureAndSkippingEnabled {
         @BeforeEach
         fun enableRestructureFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         }
 
         @Test
-        fun `Submitting with a blank numberOfHouseholds field returns an error when accessed via July26Redesign`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsJuly26RedesignPage()
+        fun `Submitting with a blank numberOfHouseholds field returns an error when accessed via restructure and skipping`(page: Page) {
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage()
             householdsPage.form.householdsInput.fill("")
             householdsPage.form.submit()
             assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
@@ -423,10 +423,10 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error when accessed via July26Redesign`(
+        fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error when accessed via restructure and skipping`(
             page: Page,
         ) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsJuly26RedesignPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage()
             householdsPage.submitNumberOfHouseholds(3)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
