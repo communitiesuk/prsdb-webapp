@@ -7,10 +7,12 @@ import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -22,7 +24,7 @@ import kotlin.String
 
 @PrsdbWebService
 class LandlordService(
-    private val landlordRepository: LandlordRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
     private val prsdbUserService: PrsdbUserService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -35,13 +37,15 @@ class LandlordService(
         if (regNum.type != RegistrationNumberType.LANDLORD) {
             throw IllegalArgumentException("Invalid registration number type")
         }
-        return landlordRepository.findByRegistrationNumber_Number(regNum.number)
+        return individualLandlordRepository.findByRegistrationNumber_Number(regNum.number)
     }
 
-    fun retrieveLandlordByBaseUserId(baseUserId: String): Landlord? = landlordRepository.findByBaseUser_Id(baseUserId)
+    // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
+    fun retrieveLandlordByBaseUserId(baseUserId: String): IndividualLandlord? = individualLandlordRepository.findByBaseUser_Id(baseUserId)
 
-    fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
+    fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
 
+    // TODO: PDJB-1180: Update to potentially save an org landlord to the database
     @Transactional
     fun createLandlord(
         baseUserId: String,
@@ -60,8 +64,8 @@ class LandlordService(
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
         val landlord =
-            landlordRepository.save(
-                Landlord(
+            individualLandlordRepository.save(
+                IndividualLandlord(
                     baseUser,
                     name,
                     email,
@@ -95,6 +99,7 @@ class LandlordService(
     ): Landlord {
         checkUpdateIsValid()
         val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
+        // TODO: PDJB-1274: Update emails to account for org landlord
 
         val existingEmail = landlordEntity.email
 
@@ -175,9 +180,11 @@ class LandlordService(
         ) {}
     }
 
+    // TODO: PDJB-1294: Remove this
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
+        check(landlord is IndividualLandlord)
         landlord.hasRespondedToFeedback = true
-        return landlordRepository.save(landlord)
+        return individualLandlordRepository.save(landlord)
     }
 
     fun searchForLandlords(
@@ -193,14 +200,14 @@ class LandlordService(
         val landlordPage =
             try {
                 if (lrn == null) {
-                    landlordRepository.searchMatching(
+                    individualLandlordRepository.searchMatching(
                         searchTerm,
                         localCouncilBaseUserId,
                         restrictToLocalCouncil,
                         pageRequest,
                     )
                 } else {
-                    landlordRepository.searchMatchingLRN(
+                    individualLandlordRepository.searchMatchingLRN(
                         lrn.number,
                         localCouncilBaseUserId,
                         restrictToLocalCouncil,
@@ -216,7 +223,7 @@ class LandlordService(
 
     private fun sendUpdateConfirmationEmail(
         landlordUpdate: LandlordUpdateModel,
-        landlord: Landlord,
+        landlord: IndividualLandlord,
         oldEmail: String,
     ) {
         val updatedDetail =
@@ -229,7 +236,7 @@ class LandlordService(
                 else -> null
             }
 
-        val emails = listOf(landlord.email, oldEmail).distinct()
+        val emails = listOf(landlord.email, oldEmail).distinctBy { it.toNormalizedEmail() }
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
@@ -248,7 +255,11 @@ class LandlordService(
         }
     }
 
-    fun getLandlordUserShouldSeeFeedbackPages(baseUserId: String) =
-        retrieveLandlordByBaseUserId(baseUserId)?.shouldSeeFeedback
-            ?: throw PrsdbWebException("User with id $baseUserId was not found in the Landlord repository")
+    // TODO: PDJB-1294: Remove this
+    fun getLandlordUserShouldSeeFeedbackPages(baseUserId: String): Boolean {
+        val landlord =
+            retrieveLandlordByBaseUserId(baseUserId)
+                ?: throw PrsdbWebException("User with id $baseUserId was not found in the Landlord repository")
+        return landlord.shouldSeeFeedback
+    }
 }

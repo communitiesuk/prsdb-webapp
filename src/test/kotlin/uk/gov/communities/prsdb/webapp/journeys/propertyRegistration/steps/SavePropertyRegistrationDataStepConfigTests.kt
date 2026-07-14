@@ -19,6 +19,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -56,6 +57,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     private lateinit var mockJointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
 
     @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
+    @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
@@ -67,6 +71,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 propertyRegistrationService = mockPropertyRegistrationService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 jointLandlordsStrategy = mockJointLandlordsStrategy,
+                featureFlagManager = mockFeatureFlagManager,
             )
     }
 
@@ -129,6 +134,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             licenseType = any(),
             licenceNumber = any(),
             ownershipType = any(),
+            isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
             baseUserId = any(),
@@ -175,6 +181,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 licenseType = any(),
                 licenceNumber = any(),
                 ownershipType = any(),
+                isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 baseUserId = any(),
@@ -231,6 +238,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             licenseType = any(),
             licenceNumber = any(),
             ownershipType = any(),
+            isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
             baseUserId = any(),

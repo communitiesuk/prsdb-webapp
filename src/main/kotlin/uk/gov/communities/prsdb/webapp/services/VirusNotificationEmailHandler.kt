@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -41,7 +42,9 @@ class VirusNotificationEmailHandler(
         if (emailAddress != null) {
             emailNotificationService.sendEmail(emailAddress, email)
         } else {
+            // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
+                check(landlord is IndividualLandlord)
                 emailNotificationService.sendEmail(landlord.email, email)
             }
         }

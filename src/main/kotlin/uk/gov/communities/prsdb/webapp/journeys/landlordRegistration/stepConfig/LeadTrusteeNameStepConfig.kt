@@ -5,15 +5,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 
 @JourneyFrameworkComponent
-class LeadTrusteeNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class LeadTrusteeNameStepConfig : AbstractRequestableStepConfig<Complete, LeadTrusteeNameFormModel, JourneyState>() {
+    override val formModelClass = LeadTrusteeNameFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1152 - Lead trustee name")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf(
+            "fieldSetHeading" to "registerAsALandlord.leadTrusteeName.fieldSetHeading",
+            "fieldSetHint" to "registerAsALandlord.leadTrusteeName.fieldSetHint",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/nameForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -21,7 +26,7 @@ class LeadTrusteeNameStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
 @JourneyFrameworkComponent
 final class LeadTrusteeNameStep(
     stepConfig: LeadTrusteeNameStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, LeadTrusteeNameFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "lead-trustee-name"
     }

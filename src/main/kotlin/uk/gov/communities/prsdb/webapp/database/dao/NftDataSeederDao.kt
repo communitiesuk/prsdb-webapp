@@ -65,9 +65,9 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO landlord 
-            (id, created_date, last_modified_date, subject_identifier, name, email, phone_number, address_id, date_of_birth, 
-             registration_number_id, has_responded_to_feedback, is_verified, country_of_residence, is_active, has_accepted_privacy_notice) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true)
+            (id, created_date, last_modified_date, individual_subject_identifier, individual_name, individual_email, individual_phone_number, individual_address_id, individual_date_of_birth, 
+             registration_number_id, individual_has_responded_to_feedback, individual_is_verified, individual_country_of_residence, individual_is_active, individual_has_accepted_privacy_notice, landlord_type) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
             """
         return connection.prepareStatement(query)
     }
@@ -88,8 +88,8 @@ class NftDataSeederDao(
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
              license_id, property_build_type, address_id, num_bedrooms,
-             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_active) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+             bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, is_active) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }

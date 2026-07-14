@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConf
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -9,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateExcepti
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailRedesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -23,7 +24,7 @@ class ConfirmStepConfig(
     private val propertyDeregistrationService: PropertyDeregistrationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailRedesign>,
+    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
     private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -54,7 +55,12 @@ class ConfirmStepConfig(
                 "There should be no joint landlords on the property if this step of deregistration is reached",
             )
         }
-        val landlordContacts = propertyOwnership.landlords.map { it.name to it.email }
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        val landlordContacts =
+            propertyOwnership.landlords.map { landlord ->
+                check(landlord is IndividualLandlord)
+                landlord.name to landlord.email
+            }
         val cancelledInvitationEmailAddresses =
             jointLandlordInvitationService.getPendingInvitations(propertyOwnership).map { it.invitedEmail }
         val singleLineAddress = propertyOwnership.address.singleLineAddress
@@ -66,7 +72,7 @@ class ConfirmStepConfig(
         landlordContacts.forEach { (landlordName, landlordEmail) ->
             confirmationEmailSender.sendEmail(
                 landlordEmail,
-                PropertyDeregistrationConfirmationEmailRedesign(landlordName, multiLineAddress),
+                PropertyDeregistrationConfirmationEmail(landlordName, multiLineAddress),
             )
         }
 

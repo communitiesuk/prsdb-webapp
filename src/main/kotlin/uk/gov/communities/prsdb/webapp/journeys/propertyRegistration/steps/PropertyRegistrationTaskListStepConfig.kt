@@ -2,7 +2,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
@@ -12,11 +15,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationTaskListStepConfig(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val featureFlagManager: FeatureFlagManager,
     private val httpServletRequest: HttpServletRequest,
     private val backUrlStorageService: BackUrlStorageService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
@@ -31,6 +36,31 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
+        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        val sectionViewModels =
+            if (isRestructured) {
+                restructuredSectionViewModels(state)
+            } else {
+                legacySectionViewModels(state)
+            }
+
+        val backUrlFromState =
+            state
+                .backUrlKey
+                ?.let { backUrlStorageService.getBackUrl(it) }
+
+        return TaskListViewModel(
+            "registerProperty.title",
+            "registerProperty.taskList.heading",
+            listOf("registerProperty.taskList.subtitle"),
+            sectionViewModels,
+            numberSections = !isRestructured,
+            backUrl = backUrlFromState,
+        )
+    }
+
+    private fun legacySectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> {
         val registerTaskItems =
             listOf(
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
@@ -54,35 +84,73 @@ class PropertyRegistrationTaskListStepConfig(
                     ),
                 )
 
-        val sectionViewModels =
-            listOf(
-                TaskSectionViewModel(
-                    "registerProperty.taskList.register.heading",
-                    "register-property",
-                    registerTaskItems,
+        return listOf(
+            TaskSectionViewModel(
+                "registerProperty.taskList.register.heading",
+                "register-property",
+                registerTaskItems,
+            ),
+            TaskSectionViewModel(
+                "registerProperty.taskList.checkAndSubmit.heading",
+                "check-and-submit",
+                listOf(
+                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
                 ),
-                TaskSectionViewModel(
-                    "registerProperty.taskList.checkAndSubmit.heading",
-                    "check-and-submit",
-                    listOf(
-                        TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
-                    ),
-                ),
-            )
-
-        val backUrlFromState =
-            state
-                .backUrlKey
-                ?.let { backUrlStorageService.getBackUrl(it) }
-
-        return TaskListViewModel(
-            "registerProperty.title",
-            "registerProperty.taskList.heading",
-            listOf("registerProperty.taskList.subtitle"),
-            sectionViewModels,
-            backUrl = backUrlFromState,
+            ),
         )
     }
+
+    private fun restructuredSectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
+        listOf(
+            TaskSectionViewModel(
+                "registerProperty.taskList.aboutYourProperty.heading",
+                "about-your-property",
+                listOf(
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.aboutYourProperty.propertyDetails",
+                        state.propertyDetailsTask,
+                    ),
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                        state.ownershipAndLandlordsTask,
+                    ),
+                    TaskListItemViewModel.fromStep(
+                        "registerProperty.taskList.aboutYourProperty.occupied",
+                        state.occupied,
+                    ),
+                ),
+            ),
+            TaskSectionViewModel(
+                "registerProperty.taskList.rentedOut.heading",
+                "rented-out",
+                listOf(
+                    TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.licensing", state.licensingTask),
+                    TaskListItemViewModel.fromTask("registerProperty.taskList.gasSafety", state.gasSafetyTask),
+                    TaskListItemViewModel.fromTask("registerProperty.taskList.electricalSafety", state.electricalSafetyTask),
+                    TaskListItemViewModel.fromTask("registerProperty.taskList.epc", state.epcTask),
+                    tenancyDetailsItem(state),
+                ),
+            ),
+            TaskSectionViewModel(
+                "registerProperty.taskList.submitYourRegistration.heading",
+                "submit-your-registration",
+                listOf(
+                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
+                ),
+            ),
+        )
+
+    private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
+        if (state.cachedOccupied == false) {
+            TaskListItemViewModel(
+                nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
+                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
+                hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint",
+                url = null,
+            )
+        } else {
+            TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
+        }
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "taskList"
 

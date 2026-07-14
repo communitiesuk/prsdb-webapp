@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
@@ -17,7 +18,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import kotlin.test.assertEquals
 
 class LicensingDetailsHelperTests {
-    private val licensingDetailsHelper = LicensingDetailsHelper()
+    private val featureFlagManager = mock<FeatureFlagManager>()
+
+    private val licensingDetailsHelper = LicensingDetailsHelper(featureFlagManager)
 
     private val childJourneyId = "childJourneyId"
 
