@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 
@@ -683,6 +684,45 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             govBodyMemberNamePage.submitName("")
 
             assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyMemberDobStep {
+        @Test
+        fun `the governing body member date of birth page renders the heading`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+
+            assertThat(govBodyMemberDobPage.heading).containsText("What is their date of birth?")
+        }
+
+        @Test
+        fun `submitting an empty date returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("", "", "")
+            assertThat(govBodyMemberDobPage.form.getErrorMessage()).containsText("Enter a date")
+        }
+
+        @Test
+        fun `submitting a future date returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("1", "1", "2999")
+            assertThat(govBodyMemberDobPage.form.getErrorMessage())
+                .containsText("The date of birth cannot be in the future")
+        }
+
+        @Test
+        fun `submitting a valid date of birth advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("15", "6", "1980")
+            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         }
     }
 }
