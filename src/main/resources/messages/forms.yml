@@ -133,7 +133,7 @@ orgName:
   error:
     missing: Enter an organisation name
 orgGovBodyMustProvideInfo:
-  heading: You must provide more information to register
+  heading: You need to provide more information to register
   provideAtLeastOne: 'You must provide at least one of:'
   bullet:
     companiesHouse: a Companies House registration number
@@ -141,7 +141,8 @@ orgGovBodyMustProvideInfo:
     trustees: trustee details
   toRegister:
     beforeLink: 'To register, '
-    linkText: enter your organisation’s details.
+    linkText: enter your organisation’s details
+    afterLink: .
   registerAsIndividual:
     beforeLink: 'If you rent your property as a sole trader, an individual or joint landlord you should '
     linkText: register as an individual
