@@ -37,7 +37,7 @@ class OccupationTask : Task<OccupationState>() {
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }
-            task(journey.rentIncludesBillsTask) {
+            duplicableTask(journey.rentIncludesBillsTask) {
                 parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.furnishedStatus }
             }

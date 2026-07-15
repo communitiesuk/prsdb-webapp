@@ -118,6 +118,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Check
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -198,11 +199,15 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentIncludesBillsTask)
+                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    duplicableCheckAnswerStep(
+                        journey.rentIncludesBillsTask,
+                        journey.rentIncludesBillsTask.billsIncluded,
+                        BillsIncludedStep.ROUTE_SEGMENT,
+                    )
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
@@ -614,8 +619,6 @@ class PropertyRegistrationJourney(
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val rentIncludesBills: RentIncludesBillsStep,
-    override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,

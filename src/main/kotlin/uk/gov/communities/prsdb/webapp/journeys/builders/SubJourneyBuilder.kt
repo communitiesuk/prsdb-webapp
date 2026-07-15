@@ -106,6 +106,25 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
+    // Adds a single step that is owned by a duplicable task, building it against that task's OWN state rather than the
+    // journey state. Used to check-answer one task-owned step in isolation (see duplicableCheckAnswerStep) without
+    // walking the whole task's sub-journey. The task itself provides no route here, so the step keeps its bare data
+    // key, matching how the task is composed bare in the main flow.
+    fun <TTaskState : JourneyState, TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TTaskState>> duplicableStep(
+        task: DuplicableTask<TTaskState>,
+        uninitialisedStep: JourneyStep<TMode, *, TTaskState>,
+        init: StepInitialiser<TStep, TTaskState, TMode>.() -> Unit,
+    ) {
+        val stepInitialiser = StepInitialiser<TStep, TTaskState, TMode>(uninitialisedStep, task.taskState)
+        stepInitialiser.init()
+        if (journeyElements.isEmpty()) {
+            stepInitialiser.configureFirst {
+                additionalFirstElementConfiguration.forEach { it() }
+            }
+        }
+        journeyElements.add(stepInitialiser)
+    }
+
     override fun conditionallyConfigure(
         condition: ConfigurableElement<*>.() -> Boolean,
         configuration: ConfigurableElement<*>.() -> Unit,

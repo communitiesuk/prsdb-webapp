@@ -10,7 +10,6 @@ interface OccupationState :
     JourneyState,
     HouseholdsAndTenantsState,
     BedroomsState,
-    RentIncludesBillsState,
     FurnishedStatusState {
     val occupied: OccupiedStep
     val householdsAndTenantsTask: HouseholdsAndTenantsTask

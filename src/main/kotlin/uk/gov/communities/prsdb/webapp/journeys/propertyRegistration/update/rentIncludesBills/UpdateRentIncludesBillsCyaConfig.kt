@@ -22,12 +22,13 @@ class UpdateRentIncludesBillsCyaConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource),
+            "summaryListData" to
+                occupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 
     override fun afterStepDataIsAdded(state: UpdateRentIncludesBillsJourneyState) {
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
             propertyOwnershipService.updateRentIncludesBills(
                 id = state.propertyId,
