@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -80,7 +79,6 @@ class CancelJointLandlordInvitationJourney(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     CancelJointLandlordInvitationJourneyState {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var invitedEmail: String by delegateProvider.requiredDelegate("invitedEmail")
     override var invitationId: Long by delegateProvider.requiredDelegate("invitationId")
