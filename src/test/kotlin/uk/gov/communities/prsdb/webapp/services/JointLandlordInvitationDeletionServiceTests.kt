@@ -4,13 +4,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_DELETION_GRACE_PERIOD_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
-import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import java.time.Instant
@@ -18,7 +16,7 @@ import java.time.temporal.ChronoUnit
 
 class JointLandlordInvitationDeletionServiceTests {
     private lateinit var mockInvitationRepository: JointLandlordInvitationRepository
-    private lateinit var deletionService: JointLandlordInvitationDeletionServiceImplFlagOn
+    private lateinit var deletionService: JointLandlordInvitationDeletionService
 
     private val expiredAndPastGracePeriodCreatedDate: Instant =
         Instant.now().minus(
@@ -29,7 +27,7 @@ class JointLandlordInvitationDeletionServiceTests {
     @BeforeEach
     fun setup() {
         mockInvitationRepository = mock()
-        deletionService = JointLandlordInvitationDeletionServiceImplFlagOn(mockInvitationRepository)
+        deletionService = JointLandlordInvitationDeletionService(mockInvitationRepository)
     }
 
     @Test
@@ -94,16 +92,5 @@ class JointLandlordInvitationDeletionServiceTests {
 
         assertEquals(listOf(1L, 2L, 3L), deletedIds)
         verify(mockInvitationRepository).deleteAll(invitations)
-    }
-
-    @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationDeletionServiceImplFlagOff()
-
-        val result = flagOff.deleteExpiredInvitations()
-
-        assertEquals(emptyList<Long>(), result)
-        verify(mockInvitationRepository, never()).findAllByCreatedDateBefore(any())
-        verify(mockInvitationRepository, never()).deleteAll(any<List<JointLandlordInvitation>>())
     }
 }

@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
@@ -37,7 +35,6 @@ class AcceptOrRejectJointLandlordInvitationController(
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun startJourney(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): ModelAndView {
@@ -52,13 +49,11 @@ class AcceptOrRejectJointLandlordInvitationController(
     }
 
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
@@ -77,7 +72,6 @@ class AcceptOrRejectJointLandlordInvitationController(
 
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(model: Model): ModelAndView {
         val (propertyAddress, propertyOwnershipId) =
             invitationService.getLastAcceptedPropertyFromSession()
@@ -94,7 +88,6 @@ class AcceptOrRejectJointLandlordInvitationController(
     }
 
     @GetMapping("/$INVITATION_REJECTED_PATH_SEGMENT")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getRejectionConfirmation(): ModelAndView {
         val propertyAddress =
             invitationService.getRejectedPropertyAddressFromSession()
