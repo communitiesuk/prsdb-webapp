@@ -117,15 +117,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class TaskListStepWithFeatureFlagDisabled {
             @Test
             fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
                 featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                navigator.skipToPropertyRegistrationRentFrequencyPage()
+                navigator.skipToPropertyRegistrationHasGasCertPage()
                 val taskListPage = navigator.goToPropertyRegistrationTaskList()
-                BaseComponent.assertThat(taskListPage.getRegisterTask("Invite joint landlords")).isHidden()
+                assertTrue(
+                    "Invite joint landlords" !in taskListPage.getAboutYourPropertyTaskNames() &&
+                        "Invite joint landlords" !in taskListPage.getRentedOutTaskNames() &&
+                        "Invite joint landlords" !in taskListPage.getSubmitYourRegistrationTaskNames(),
+                )
             }
         }
 
