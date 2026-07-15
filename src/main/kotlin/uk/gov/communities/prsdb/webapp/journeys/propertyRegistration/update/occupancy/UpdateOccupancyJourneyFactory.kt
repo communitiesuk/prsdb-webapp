@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -107,7 +108,8 @@ class UpdateOccupancyJourneyFactory(
                 RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
                 BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                 FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT ->
+                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             replaceHeadings(state)
@@ -159,14 +161,14 @@ class UpdateOccupancyJourneyFactory(
                 "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
             }
         }
-        configureStep(journey.rentFrequency) {
+        configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
             withAdditionalContentProperty {
                 "heading" to "forms.update.rentFrequency.heading"
             }
         }
-        configureStep(journey.rentAmount) {
+        configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
             withAdditionalContentProperty {
-                "heading" to state.getUpdateRentAmountHeading()
+                "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
             }
         }
     }
@@ -189,8 +191,6 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    override val rentFrequency: RentFrequencyStep,
-    override val rentAmount: RentAmountStep,
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,

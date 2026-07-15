@@ -9,8 +9,7 @@ interface TenancyDetailsState :
     JourneyState,
     HouseholdsAndTenantsState,
     RentIncludesBillsState,
-    FurnishedStatusState,
-    RentFrequencyAndAmountState {
+    FurnishedStatusState {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     val rentIncludesBillsTask: RentIncludesBillsTask
     val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask

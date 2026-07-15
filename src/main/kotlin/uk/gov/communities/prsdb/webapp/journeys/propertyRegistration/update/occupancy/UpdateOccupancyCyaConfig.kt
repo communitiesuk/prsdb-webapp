@@ -74,11 +74,11 @@ class UpdateOccupancyCyaConfig(
                 billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
                 customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
                 furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
                 rentAmount =
                     if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
+                        state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                             .toBigDecimal()
                     } else {
                         null

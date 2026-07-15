@@ -11,8 +11,7 @@ interface OccupationState :
     HouseholdsAndTenantsState,
     BedroomsState,
     RentIncludesBillsState,
-    FurnishedStatusState,
-    RentFrequencyAndAmountState {
+    FurnishedStatusState {
     val occupied: OccupiedStep
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     val rentIncludesBillsTask: RentIncludesBillsTask

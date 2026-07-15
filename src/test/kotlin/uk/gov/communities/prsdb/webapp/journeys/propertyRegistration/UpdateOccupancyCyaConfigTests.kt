@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyState
@@ -88,6 +89,9 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockRentFrequencyStep: RentFrequencyStep
 
     @Mock
+    private lateinit var mockRentFrequencyAndAmountTask: RentFrequencyAndAmountTask
+
+    @Mock
     private lateinit var mockRentFrequencyFormModel: RentFrequencyFormModel
 
     @Mock
@@ -136,11 +140,12 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
         lenient().`when`(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
         lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(null)
-        lenient().`when`(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
+        lenient().`when`(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+        lenient().`when`(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         lenient().`when`(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
         lenient().`when`(mockRentFrequencyFormModel.rentFrequency).thenReturn(null)
-        lenient().`when`(mockState.getCustomRentFrequencyIfSelected()).thenReturn(null)
-        lenient().`when`(mockState.rentAmount).thenReturn(mockRentAmountStep)
+        lenient().`when`(mockRentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()).thenReturn(null)
+        lenient().`when`(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
         lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn("500")
     }

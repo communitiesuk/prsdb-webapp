@@ -27,7 +27,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            task(journey.rentFrequencyAndAmountTask) {
+            duplicableTask(journey.rentFrequencyAndAmountTask) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()

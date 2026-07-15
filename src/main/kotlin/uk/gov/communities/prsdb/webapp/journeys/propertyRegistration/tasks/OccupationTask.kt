@@ -47,7 +47,7 @@ class OccupationTask : Task<OccupationState>() {
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            task(journey.rentFrequencyAndAmountTask) {
+            duplicableTask(journey.rentFrequencyAndAmountTask) {
                 parents {
                     journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }

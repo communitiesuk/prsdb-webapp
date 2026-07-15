@@ -210,7 +210,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
                 HasJointLandlordsStep.ROUTE_SEGMENT,
@@ -619,8 +619,6 @@ class PropertyRegistrationJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    override val rentFrequency: RentFrequencyStep,
-    override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
