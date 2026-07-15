@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -61,6 +62,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
+
+    @Mock
+    private lateinit var mockAddressTask: PropertyRegistrationAddressTask
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
@@ -216,7 +220,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockState).isAddressAlreadyRegistered = true
+        verify(mockAddressTask).isAddressAlreadyRegistered = true
     }
 
     @Test
@@ -273,7 +277,8 @@ class SavePropertyRegistrationDataStepConfigTests {
     fun `resolveNextDestination deletes journey and returns default destination when address is not already registered`() {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
-        whenever(mockState.isAddressAlreadyRegistered).thenReturn(false)
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -289,8 +294,9 @@ class SavePropertyRegistrationDataStepConfigTests {
         val defaultDestination = Destination.ExternalUrl("redirect")
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn("test-journey-id")
-        whenever(mockState.isAddressAlreadyRegistered).thenReturn(true)
-        whenever(mockState.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
+        whenever(mockAddressTask.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -312,7 +318,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
-        whenever(mockState.getAddress()).thenReturn(
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
         )
 

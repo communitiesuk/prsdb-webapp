@@ -36,7 +36,7 @@ class SavePropertyRegistrationDataStepConfig(
         try {
             registerProperty(state)
         } catch (_: EntityExistsException) {
-            state.isAddressAlreadyRegistered = true
+            state.addressTask.isAddressAlreadyRegistered = true
             return
         }
     }
@@ -45,8 +45,8 @@ class SavePropertyRegistrationDataStepConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination(state.alreadyRegisteredStep)
+        if (state.addressTask.isAddressAlreadyRegistered == true) {
+            Destination(state.addressTask.alreadyRegisteredStep)
         } else {
             state.deleteJourney()
             defaultDestination
@@ -63,7 +63,7 @@ class SavePropertyRegistrationDataStepConfig(
         val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
-            addressModel = state.getAddress(),
+            addressModel = state.addressTask.getAddress(),
             propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
             customPropertyType =
                 if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
