@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
@@ -200,15 +201,20 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgGovBodyMemberDobStep) {
                 routeSegment(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
-                nextStep { journey.orgLandlordGovBodyMemberAddressTask.firstStep }
+                nextStep { journey.govBodyMemberAddressTask.firstStep }
             }
-            task(journey.orgLandlordGovBodyMemberAddressTask) {
+            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
+                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                    withAdditionalContentProperties {
+                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
+                    }
+                }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordGovBodyMemberAddressTask.isComplete() }
+                parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {

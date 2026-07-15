@@ -685,4 +685,24 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
         }
     }
+
+    @Nested
+    inner class GovBodyMemberLookupAddressStep {
+        @Test
+        fun `the governing body member lookup address page renders the correct heading`() {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is their contact address?")
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberSelectAddressStep {
+        @Test
+        fun `the governing body member select address page renders the correct heading`() {
+            val selectAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage()
+
+            assertThat(selectAddressPage.heading).containsText("Select their address")
+        }
+    }
 }

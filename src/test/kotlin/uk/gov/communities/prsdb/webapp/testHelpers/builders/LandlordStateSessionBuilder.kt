@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
@@ -230,16 +231,21 @@ class LandlordStateSessionBuilder(
         houseNameOrNumber: String = "4",
         postcode: String = "EG1 2AB",
     ): LandlordStateSessionBuilder {
-        val lookupFormModel =
+        // The governing body member address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(address)),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
             LookupAddressFormModel().apply {
                 this.houseNameOrNumber = houseNameOrNumber
                 this.postcode = postcode
-            }
-        withSubmittedValue("organisation-governing-body-member-lookup-address", lookupFormModel)
-
-        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
-        additionalDataMap["govBodyMemberCachedAddresses"] = Json.encodeToString(serializer(), listOf(address))
-
+            },
+        )
         return self()
     }
 
@@ -249,13 +255,12 @@ class LandlordStateSessionBuilder(
     ): LandlordStateSessionBuilder {
         withOrgGovBodyMemberLookupAddress(houseNameOrNumber, postcode)
 
+        val routePrefix = GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT
         val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
-        val selectFormModel =
-            SelectAddressFormModel().apply {
-                this.address = address.singleLineAddress
-            }
-        withSubmittedValue("organisation-governing-body-member-select-address", selectFormModel)
-
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { this.address = address.singleLineAddress },
+        )
         return self()
     }
 

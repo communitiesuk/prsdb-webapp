@@ -51,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -73,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
@@ -246,7 +246,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
     override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
     override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
-    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val govBodyMemberAddressTask: GovBodyMemberAddressTask,
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,

@@ -248,6 +248,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
@@ -499,13 +500,17 @@ class Navigator(
 
     fun skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage(): OrgGovBodyMemberLookupAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
-        navigateToLandlordRegistrationJourneyStep("organisation-governing-body-member-${LookupAddressStep.ROUTE_SEGMENT}")
+        navigateToLandlordRegistrationJourneyStep(
+            "${GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+        )
         return createValidPage(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage(): OrgGovBodyMemberSelectAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberSelectAddress().build())
-        navigateToLandlordRegistrationJourneyStep("organisation-governing-body-member-${SelectAddressStep.ROUTE_SEGMENT}")
+        navigateToLandlordRegistrationJourneyStep(
+            "${GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        )
         return createValidPage(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
     }
 
