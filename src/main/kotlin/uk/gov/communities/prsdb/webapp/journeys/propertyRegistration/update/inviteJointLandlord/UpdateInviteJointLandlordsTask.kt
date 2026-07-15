@@ -11,9 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Remov
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-// InviteJointLandlordsTask specialised for the standalone "invite joint landlord" update journey: the property already
-// exists, so the pre-existing invited emails and co-landlord emails are looked up by propertyId (used to prevent
-// duplicate/self invitations). propertyId is owned here as the task's own route-scoped state; the journey forwards to it.
 @JourneyFrameworkComponent
 class UpdateInviteJointLandlordsTask(
     journeyStateService: JourneyStateService,

@@ -10,9 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
-// InviteJointLandlordsTask specialised for the property-registration journey: there are no pre-existing invitations or
-// co-landlords, so those lists keep their empty defaults; the logged-in landlord's email is supplied so a landlord
-// cannot invite themselves. Structure and route-scoped state come from InviteJointLandlordsTask.
 @JourneyFrameworkComponent
 class PropertyRegistrationInviteJointLandlordsTask(
     journeyStateService: JourneyStateService,

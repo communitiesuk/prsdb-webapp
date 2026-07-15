@@ -9,12 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 
-// A shared task for inviting joint landlords that owns its own four steps and IS its own InviteJointLandlordState, so it
-// can be added to a journey more than once (each instance isolated by its route). The self-stated / route-scoping
-// machinery lives in DuplicableTask; this class supplies the invite steps, the shared invited-emails state and the step
-// flow. Journey-specific email context (existing invited/landlord emails, logged-in landlord email) is supplied by the
-// concrete subclasses (PropertyRegistrationInviteJointLandlordsTask, UpdateInviteJointLandlordsTask), akin to the
-// AddressTask content subclasses.
 abstract class InviteJointLandlordsTask(
     journeyStateService: JourneyStateService,
     private val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
