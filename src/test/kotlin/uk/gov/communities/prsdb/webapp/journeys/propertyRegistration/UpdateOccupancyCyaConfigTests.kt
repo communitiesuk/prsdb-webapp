@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyState
@@ -103,6 +104,9 @@ class UpdateOccupancyCyaConfigTests {
     @Mock
     private lateinit var mockBillsIncludedStep: BillsIncludedStep
 
+    @Mock
+    private lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
+
     private val propertyId = 123L
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
 
@@ -136,7 +140,8 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
         lenient().`when`(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn("3")
-        lenient().`when`(mockState.getBillsIncludedOrNull()).thenReturn(null)
+        lenient().`when`(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        lenient().`when`(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
         lenient().`when`(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
         lenient().`when`(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
         lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(null)

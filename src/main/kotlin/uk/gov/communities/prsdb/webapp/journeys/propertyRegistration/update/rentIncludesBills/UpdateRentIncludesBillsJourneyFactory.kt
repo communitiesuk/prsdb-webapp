@@ -12,14 +12,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -57,7 +56,7 @@ class UpdateRentIncludesBillsJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            task(journey.rentIncludesBillsTask) {
+            duplicableTask(journey.rentIncludesBillsTask) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -70,12 +69,12 @@ class UpdateRentIncludesBillsJourneyFactory(
                 parents { journey.rentIncludesBillsTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            configureStep(journey.rentIncludesBills) {
+            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
                 }
             }
-            configureStep(journey.billsIncluded) {
+            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
                 }
@@ -95,20 +94,25 @@ class UpdateRentIncludesBillsJourneyFactory(
 
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                RentIncludesBillsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                BillsIncludedStep.ROUTE_SEGMENT ->
+                    duplicableCheckAnswerStep(
+                        journey.rentIncludesBillsTask,
+                        journey.rentIncludesBillsTask.billsIncluded,
+                        BillsIncludedStep.ROUTE_SEGMENT,
+                    )
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.rentIncludesBills) {
+            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
                 }
             }
-            configureStep(journey.billsIncluded) {
+            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
                 }
@@ -131,8 +135,6 @@ class UpdateRentIncludesBillsJourneyFactory(
 class UpdateRentIncludesBillsJourney(
     // RentIncludesBills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val rentIncludesBills: RentIncludesBillsStep,
-    override val billsIncluded: BillsIncludedStep,
     // Check your answers step
     override val cyaStep: UpdateRentIncludesBillsCyaStep,
     journeyStateService: JourneyStateService,
@@ -151,7 +153,6 @@ class UpdateRentIncludesBillsJourney(
 }
 
 interface UpdateRentIncludesBillsJourneyState :
-    RentIncludesBillsState,
     CheckYourAnswersJourneyState {
     val rentIncludesBillsTask: RentIncludesBillsTask
     override val cyaStep: UpdateRentIncludesBillsCyaStep

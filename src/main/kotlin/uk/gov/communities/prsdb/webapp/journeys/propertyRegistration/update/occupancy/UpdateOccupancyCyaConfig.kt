@@ -40,7 +40,7 @@ class UpdateOccupancyCyaConfig(
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,

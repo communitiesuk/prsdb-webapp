@@ -61,15 +61,16 @@ class OccupancyDetailsHelper {
                 )
             }
 
-    fun <T> getCheckYourRentIncludesBillsAnswersSummaryList(
+    fun <T : CheckYourAnswersJourneyState> getCheckYourRentIncludesBillsAnswersSummaryList(
         state: T,
+        rentIncludesBillsState: RentIncludesBillsState,
         messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : RentIncludesBillsState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val rentIncludesBillsStep = state.rentIncludesBills
-                val billsIncludedStep = state.billsIncluded
-                val rentIncludesBills = state.doesRentIncludeBills()
+                val rentIncludesBillsStep = rentIncludesBillsState.rentIncludesBills
+                val billsIncludedStep = rentIncludesBillsState.billsIncluded
+                val rentIncludesBills = rentIncludesBillsState.doesRentIncludeBills()
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
@@ -81,7 +82,7 @@ class OccupancyDetailsHelper {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
-                            state.getBillsIncluded(messageSource),
+                            rentIncludesBillsState.getBillsIncluded(messageSource),
                             Destination.VisitableStep(billsIncludedStep, state.getCyaJourneyId(billsIncludedStep)),
                         ),
                     )
@@ -156,7 +157,7 @@ class OccupancyDetailsHelper {
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val furnishedStatusStep = state.furnishedStatus
-                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource))
+                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",

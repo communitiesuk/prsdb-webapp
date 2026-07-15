@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -306,7 +307,9 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(occupancyFormModel)
 
-        whenever(mockState.getBillsIncludedOrNull()).thenReturn(null)
+        val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
+        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
         whenever(mockState.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),

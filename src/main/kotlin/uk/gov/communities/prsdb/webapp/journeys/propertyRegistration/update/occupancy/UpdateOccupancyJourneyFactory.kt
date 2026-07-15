@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -105,8 +106,13 @@ class UpdateOccupancyJourneyFactory(
                 OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
                 BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
-                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                RentIncludesBillsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                BillsIncludedStep.ROUTE_SEGMENT ->
+                    duplicableCheckAnswerStep(
+                        journey.rentIncludesBillsTask,
+                        journey.rentIncludesBillsTask.billsIncluded,
+                        BillsIncludedStep.ROUTE_SEGMENT,
+                    )
                 FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT ->
                     duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
@@ -146,12 +152,12 @@ class UpdateOccupancyJourneyFactory(
                 "heading" to "forms.update.numberOfBedrooms.heading"
             }
         }
-        configureStep(journey.rentIncludesBills) {
+        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
             }
         }
-        configureStep(journey.billsIncluded) {
+        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
             }
@@ -186,8 +192,6 @@ class UpdateOccupancyJourney(
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val rentIncludesBills: RentIncludesBillsStep,
-    override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,

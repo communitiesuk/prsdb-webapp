@@ -131,6 +131,20 @@ interface CheckYourAnswersJourneyState : JourneyState {
             }
         }
 
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TMode : Enum<TMode>> JourneyBuilder<TJourneyState>.duplicableCheckAnswerStep(
+            task: DuplicableTask<TTaskState>,
+            step: JourneyStep<TMode, *, TTaskState>,
+            route: String,
+        ) {
+            val cyaJourney = journey
+            duplicableStep(task, step) {
+                initialStep()
+                nextStep { cyaJourney.finishCyaStep }
+                routeSegment(route)
+            }
+        }
+
         fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
             step: JourneyStep<TMode, *, T>,
             route: String,
