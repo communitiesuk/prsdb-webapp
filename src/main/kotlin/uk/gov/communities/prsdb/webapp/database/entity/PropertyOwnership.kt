@@ -104,8 +104,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     var lastOccupiedDate: LocalDate? = null
 
-    @Column(nullable = false)
-    var licenseProvideLater: Boolean = false
+    var licenseProvideLater: Boolean? = null
 
     constructor(
         ownershipType: OwnershipType,
