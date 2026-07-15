@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -355,8 +356,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgGovBodyMemberAddressPage = assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         orgGovBodyMemberAddressPage.form.submit()
 
-        // TODO: PDJB-1289 - Submit real data once the step is implemented
         val orgGovBodyMemberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        assertThat(orgGovBodyMemberListPage.heading).containsText("You’ve added 1 person")
+        assertThat(orgGovBodyMemberListPage.summaryList.getRowByIndex(0).value)
+            .containsText("Test Governing Body Member Name")
         orgGovBodyMemberListPage.form.submit()
 
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
