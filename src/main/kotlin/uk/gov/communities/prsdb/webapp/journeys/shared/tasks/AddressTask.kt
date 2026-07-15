@@ -38,6 +38,7 @@ abstract class AddressTask(
     // Field-set content for the address steps, supplied by content-specific subclasses (e.g. LandlordAddressTask,
     // TrusteeAddressTask) and applied to the relevant steps in makeSubJourney.
     protected abstract val lookupAddressContentProperties: Map<String, Any?>
+    protected abstract val selectAddressContentProperties: Map<String, Any?>
     protected abstract val manualAddressContentProperties: Map<String, Any?>
 
     override val taskState get() = this
@@ -63,6 +64,7 @@ abstract class AddressTask(
                         else -> exitStep
                     }
                 }
+                withAdditionalContentProperties { selectAddressContentProperties }
             }
             step(journey.noAddressFoundStep) {
                 routeSegment(NoAddressFoundStep.ROUTE_SEGMENT)

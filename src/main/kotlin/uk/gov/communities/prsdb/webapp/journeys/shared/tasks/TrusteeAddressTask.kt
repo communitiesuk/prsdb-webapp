@@ -29,6 +29,8 @@ class TrusteeAddressTask(
             "fieldSetHint" to "forms.lookupAddress.trusteeRegistration.fieldSetHint",
         )
 
+    override val selectAddressContentProperties: Map<String, Any?> = emptyMap()
+
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
