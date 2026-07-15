@@ -187,13 +187,14 @@ ON CONFLICT DO NOTHING;
 -- The 2031 reporting period demonstrates both joint-landlord metrics cases:
 --   * landlord 2002 joins a property that was registered before the period;
 --   * landlords 2004 and 2005 join a property after it was registered in the period.
+-- The older owner and property use 2029 dates to stay isolated from the 2030 cohort.
 -- Every landlord gaining their first property during 2031 does so exactly two days
 -- after registering. Query 1/1/2031 to 31/12/2031 to expect 4 registrations,
 -- 4 verified landlords, 1 property, 4 landlords gaining a property, and
 -- median / p90 / p95 = 2 days.
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
-VALUES ('metrics-joint-user-1', TIMESTAMPTZ '2030-12-01 09:00:00+00'),
+VALUES ('metrics-joint-user-1', TIMESTAMPTZ '2029-12-01 09:00:00+00'),
        ('metrics-joint-user-2', TIMESTAMPTZ '2031-01-01 09:00:00+00'),
        ('metrics-joint-user-3', TIMESTAMPTZ '2031-02-01 09:00:00+00'),
        ('metrics-joint-user-4', TIMESTAMPTZ '2031-02-04 09:00:00+00'),
@@ -201,29 +202,29 @@ VALUES ('metrics-joint-user-1', TIMESTAMPTZ '2030-12-01 09:00:00+00'),
 ON CONFLICT DO NOTHING;
 
 INSERT INTO address (id, created_date, single_line_address, local_council_id, postcode, building_number)
-VALUES (2001, TIMESTAMPTZ '2030-12-01 09:00:00+00', '1 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '1'),
+VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', '1 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '1'),
        (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', '2 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '2'),
        (2003, TIMESTAMPTZ '2031-02-01 09:00:00+00', '3 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '3'),
        (2004, TIMESTAMPTZ '2031-02-04 09:00:00+00', '4 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '4'),
        (2005, TIMESTAMPTZ '2031-02-05 09:00:00+00', '5 Joint Metrics Landlord Street, JM1 1AA', NULL, 'JM1 1AA', '5'),
-       (2201, TIMESTAMPTZ '2030-12-03 09:00:00+00', '1 Joint Metrics Property Road, JM2 2BB', NULL, 'JM2 2BB', '1'),
+       (2201, TIMESTAMPTZ '2029-12-03 09:00:00+00', '1 Joint Metrics Property Road, JM2 2BB', NULL, 'JM2 2BB', '1'),
        (2202, TIMESTAMPTZ '2031-02-03 09:00:00+00', '2 Joint Metrics Property Road, JM2 2BB', NULL, 'JM2 2BB', '2')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
-VALUES (2001, TIMESTAMPTZ '2030-12-01 09:00:00+00', 900002000001, 1),
+VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', 900002000001, 1),
        (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', 900002000002, 1),
        (2003, TIMESTAMPTZ '2031-02-01 09:00:00+00', 900002000003, 1),
        (2004, TIMESTAMPTZ '2031-02-04 09:00:00+00', 900002000004, 1),
        (2005, TIMESTAMPTZ '2031-02-05 09:00:00+00', 900002000005, 1),
-       (2201, TIMESTAMPTZ '2030-12-03 09:00:00+00', 900002200001, 0),
+       (2201, TIMESTAMPTZ '2029-12-03 09:00:00+00', 900002200001, 0),
        (2202, TIMESTAMPTZ '2031-02-03 09:00:00+00', 900002200002, 0)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
-VALUES (2001, TIMESTAMPTZ '2030-12-01 09:00:00+00', NULL, 2001, 2001, DATE '1980-01-01', true, '07300002001', 'metrics-joint-user-1', 'Joint Metrics Landlord 1', 'metrics.joint.1@example.com', 'England or Wales', true, true),
+VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', NULL, 2001, 2001, DATE '1980-01-01', true, '07300002001', 'metrics-joint-user-1', 'Joint Metrics Landlord 1', 'metrics.joint.1@example.com', 'England or Wales', true, true),
        (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', NULL, 2002, 2002, DATE '1980-01-02', true, '07300002002', 'metrics-joint-user-2', 'Joint Metrics Landlord 2', 'metrics.joint.2@example.com', 'England or Wales', true, true),
        (2003, TIMESTAMPTZ '2031-02-01 09:00:00+00', NULL, 2003, 2003, DATE '1980-01-03', true, '07300002003', 'metrics-joint-user-3', 'Joint Metrics Landlord 3', 'metrics.joint.3@example.com', 'England or Wales', true, true),
        (2004, TIMESTAMPTZ '2031-02-04 09:00:00+00', NULL, 2004, 2004, DATE '1980-01-04', true, '07300002004', 'metrics-joint-user-4', 'Joint Metrics Landlord 4', 'metrics.joint.4@example.com', 'England or Wales', true, true),
@@ -233,12 +234,12 @@ ON CONFLICT DO NOTHING;
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied)
-VALUES (2201, true, 1, 1, 2, 2201, 2201, TIMESTAMPTZ '2030-12-03 09:00:00+00', NULL, NULL, 1, 2, true, true),
+VALUES (2201, true, 1, 1, 2, 2201, 2201, TIMESTAMPTZ '2029-12-03 09:00:00+00', NULL, NULL, 1, 2, true, true),
        (2202, true, 1, 1, 2, 2202, 2202, TIMESTAMPTZ '2031-02-03 09:00:00+00', NULL, NULL, 1, 2, true, true)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (2001, 2201, TIMESTAMPTZ '2030-12-03 09:00:00+00'),
+VALUES (2001, 2201, TIMESTAMPTZ '2029-12-03 09:00:00+00'),
        (2002, 2201, TIMESTAMPTZ '2031-01-03 09:00:00+00'),
        (2003, 2202, TIMESTAMPTZ '2031-02-03 09:00:00+00'),
        (2004, 2202, TIMESTAMPTZ '2031-02-06 09:00:00+00'),
