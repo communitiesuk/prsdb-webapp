@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Check
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 
-interface InviteJointLandlordState : JourneyState {
+interface InviteJointLandlordState : LandlordInvitingState {
     val inviteJointLandlordStep: InviteJointLandlordStep
     val inviteAnotherJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep
@@ -14,7 +14,7 @@ interface InviteJointLandlordState : JourneyState {
     var invitedJointLandlordEmailsMap: Map<Int, String>?
     var nextJointLandlordMemberId: Int?
 
-    val invitedJointLandlords: List<String>
+    override val invitedJointLandlords: List<String>
         get() = invitedJointLandlordEmailsMap?.values?.toList() ?: emptyList()
 
     val existingInvitedEmails: List<String>
@@ -25,4 +25,8 @@ interface InviteJointLandlordState : JourneyState {
 
     val loggedInLandlordEmail: String?
         get() = null
+}
+
+interface LandlordInvitingState : JourneyState {
+    val invitedJointLandlords: List<String>
 }

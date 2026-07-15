@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -20,13 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.StartInviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -39,12 +32,14 @@ class InviteJointLandlordJourneyFactory(
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            state.propertyId = propertyId
+            state.inviteJointLandlordsTask.propertyId = propertyId
             state.isStateInitialized = true
         }
 
-        if (state.propertyId != propertyId) {
-            throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
+        if (state.inviteJointLandlordsTask.propertyId != propertyId) {
+            throw PrsdbWebException(
+                "Journey state propertyId ${state.inviteJointLandlordsTask.propertyId} does not match provided propertyId $propertyId",
+            )
         }
 
         val propertyMarkedAsJointLandlord = propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
@@ -77,11 +72,11 @@ class InviteJointLandlordJourneyFactory(
                 initialStep()
                 nextStep { journey.inviteJointLandlordsTask.firstStep }
             }
-            task(journey.inviteJointLandlordsTask) {
+            duplicableTask(journey.inviteJointLandlordsTask) {
                 parents { journey.startInviteJointLandlordStep.isComplete() }
                 backUrl { propertyDetailsLandlordTab }
                 nextDestination { _ ->
-                    if (journey.invitedJointLandlords.isEmpty()) {
+                    if (journey.inviteJointLandlordsTask.invitedJointLandlords.isEmpty()) {
                         Destination.ExternalUrl(propertyDetailsLandlordTab)
                     } else {
                         Destination(journey.checkInvitationsStep)
@@ -125,11 +120,11 @@ class InviteJointLandlordJourneyFactory(
                     }
                 }
             }
-            task(journey.inviteJointLandlordsTask) {
+            duplicableTask(journey.inviteJointLandlordsTask) {
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 backUrl { propertyDetailsLandlordTab }
                 nextDestination { _ ->
-                    if (journey.invitedJointLandlords.isEmpty()) {
+                    if (journey.inviteJointLandlordsTask.invitedJointLandlords.isEmpty()) {
                         Destination(journey.hasJointLandlordsStep)
                     } else {
                         Destination(journey.checkInvitationsStep)
@@ -168,38 +163,18 @@ class InviteJointLandlordJourneyFactory(
 class InviteJointLandlordJourney(
     override val startInviteJointLandlordStep: StartInviteJointLandlordStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val inviteJointLandlordStep: InviteJointLandlordStep,
-    override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
-    override val checkJointLandlordsStep: CheckJointLandlordsStep,
-    override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
-    override val inviteJointLandlordsTask: InviteJointLandlordsTask,
+    override val inviteJointLandlordsTask: UpdateInviteJointLandlordsTask,
     override val checkInvitationsStep: CheckInvitationsStep,
     override val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep,
-    private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val propertyOwnershipService: PropertyOwnershipService,
     journeyStateService: JourneyStateService,
     journeyName: String = "inviteJointLandlord",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
-    InviteJointLandlordJourneyState {
-    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
-    override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
+    InviteJointLandlordJourneyState
 
-    override val existingInvitedEmails: List<String>
-        get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
-
-    // TODO: PDJB-1274: Update emails to account for org landlord
-    override val existingLandlordEmails: List<String>
-        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { (it as IndividualLandlord).email }
-}
-
-interface InviteJointLandlordJourneyState :
-    JourneyState,
-    InviteJointLandlordState {
+interface InviteJointLandlordJourneyState : JourneyState {
     val startInviteJointLandlordStep: StartInviteJointLandlordStep
     val hasJointLandlordsStep: HasJointLandlordsStep
-    val inviteJointLandlordsTask: InviteJointLandlordsTask
+    val inviteJointLandlordsTask: UpdateInviteJointLandlordsTask
     val checkInvitationsStep: CheckInvitationsStep
     val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep
-    val propertyId: Long
 }

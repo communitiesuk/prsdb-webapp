@@ -19,6 +19,9 @@ class CheckInvitationsStepConfigTests {
     private lateinit var mockJourneyState: InviteJointLandlordJourneyState
 
     @Mock
+    private lateinit var mockInviteJointLandlordsTask: UpdateInviteJointLandlordsTask
+
+    @Mock
     private lateinit var mockCheckJointLandlordsStep: CheckJointLandlordsStep
 
     private val journeyId = "journey-123"
@@ -26,7 +29,7 @@ class CheckInvitationsStepConfigTests {
     @Test
     fun `getStepSpecificContent returns summary rows with invited emails`() {
         val stepConfig = setupStepConfig()
-        whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("first@example.com", "second@example.com"))
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("first@example.com", "second@example.com"))
 
         val content = stepConfig.getStepSpecificContent(mockJourneyState)
         val rows = content["summaryListData"] as List<SummaryListRowViewModel>
@@ -78,7 +81,8 @@ class CheckInvitationsStepConfigTests {
         stepConfig.routeSegment = CheckInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
-        whenever(mockJourneyState.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
+        whenever(mockJourneyState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
         whenever(mockCheckJointLandlordsStep.routeSegment).thenReturn(CheckJointLandlordsStep.ROUTE_SEGMENT)
         whenever(mockCheckJointLandlordsStep.currentJourneyId).thenReturn(journeyId)
         whenever(mockCheckJointLandlordsStep.isStepReachable).thenReturn(true)

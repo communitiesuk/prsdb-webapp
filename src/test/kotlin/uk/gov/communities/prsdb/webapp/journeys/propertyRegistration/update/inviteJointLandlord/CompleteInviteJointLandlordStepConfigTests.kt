@@ -38,6 +38,9 @@ class CompleteInviteJointLandlordStepConfigTests {
     @Mock
     private lateinit var mockState: InviteJointLandlordJourneyState
 
+    @Mock
+    private lateinit var mockInviteJointLandlordsTask: UpdateInviteJointLandlordsTask
+
     private val propertyId = 123L
     private val invitedEmails = listOf("first@example.com", "second@example.com")
 
@@ -58,7 +61,8 @@ class CompleteInviteJointLandlordStepConfigTests {
         val baseUserId = "unknown-user"
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
-        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
 
         // Act, Assert
         assertThrows<PrsdbWebException> {
@@ -78,8 +82,9 @@ class CompleteInviteJointLandlordStepConfigTests {
                 mockPropertyOwnershipService,
                 mockLandlordService,
             )
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.propertyId).thenReturn(propertyId)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
@@ -104,7 +109,8 @@ class CompleteInviteJointLandlordStepConfigTests {
                 mockPropertyOwnershipService,
                 mockLandlordService,
             )
-        whenever(mockState.invitedJointLandlords).thenReturn(emptyList())
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(emptyList())
 
         stepConfig.afterStepIsReached(mockState)
 
