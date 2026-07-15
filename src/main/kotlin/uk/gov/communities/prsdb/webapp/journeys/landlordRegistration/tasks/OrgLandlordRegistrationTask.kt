@@ -71,21 +71,6 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 parents { journey.orgPhoneNumberStep.isComplete() }
-                nextStep { journey.orgCompaniesHouseStep }
-            }
-            step(journey.orgCompaniesHouseStep) {
-                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
-                nextDestination { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> Destination(journey.orgCompanyNumberStep)
-                        YesOrNo.NO -> Destination(journey.orgCharityStep)
-                    }
-                }
-            }
-            step(journey.orgCompanyNumberStep) {
-                routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.orgCharityStep }
             }
             step(journey.orgCharityStep) {
@@ -99,7 +84,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
-                        YesOrNo.NO -> Destination(journey.orgDirectorsStep)
+                        YesOrNo.NO -> Destination(journey.orgCompaniesHouseStep)
                     }
                 }
             }
@@ -111,27 +96,27 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                         CharityRegulator.ENGLAND_AND_WALES -> Destination(journey.orgCharityNumberEnglandAndWalesStep)
                         CharityRegulator.NORTHERN_IRELAND -> Destination(journey.orgCharityNumberNorthernIrelandStep)
                         CharityRegulator.SCOTLAND -> Destination(journey.orgCharityNumberScotlandStep)
-                        CharityRegulator.NONE -> Destination(journey.orgDirectorsStep)
+                        CharityRegulator.NONE -> Destination(journey.orgCompaniesHouseStep)
                     }
                 }
             }
             step(journey.orgCharityNumberEnglandAndWalesStep) {
                 routeSegment(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.ENGLAND_AND_WALES) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.orgCompaniesHouseStep }
             }
             step(journey.orgCharityNumberNorthernIrelandStep) {
                 routeSegment(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NORTHERN_IRELAND) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.orgCompaniesHouseStep }
             }
             step(journey.orgCharityNumberScotlandStep) {
                 routeSegment(OrgCharityNumberScotlandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.SCOTLAND) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.orgCompaniesHouseStep }
             }
-            step(journey.orgDirectorsStep) {
-                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+            step(journey.orgCompaniesHouseStep) {
+                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.orgCharityStep.hasOutcome(YesOrNo.NO),
@@ -141,14 +126,34 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                         journey.orgCharityNumberScotlandStep.isComplete(),
                     )
                 }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCompanyNumberStep)
+                        YesOrNo.NO -> Destination(journey.orgGovBodyDetailsStep)
+                    }
+                }
+            }
+            step(journey.orgCompanyNumberStep) {
+                routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
+                // TODO PDJB-1257: point this at orgMainContactStep
+                nextStep { journey.orgDirectorsStep }
+            }
+            // TODO PDJB-1292: remove this
+            step(journey.orgDirectorsStep) {
+                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+                parents {
+                    journey.orgCompanyNumberStep.isComplete()
+                }
                 nextStep { journey.orgTrusteesStep }
             }
+            // TODO PDJB-1292: remove this
             step(journey.orgTrusteesStep) {
                 routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
                 parents { journey.orgDirectorsStep.isComplete() }
                 nextStep { journey.leadTrusteeNameStep }
             }
-            // TODO: PDJB-1257 Make sure this is the correct place
+            // TODO: PDJB-1257 Move this to the correct place
             step(journey.leadTrusteeNameStep) {
                 routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
                 parents { journey.orgTrusteesStep.isComplete() }
@@ -171,11 +176,12 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
-                nextStep { journey.orgGovBodyDetailsStep }
+                // TODO PDJB-1257: reroute to the exit point of the trustee section
+                nextStep { journey.orgMainContactStep }
             }
             step(journey.orgGovBodyDetailsStep) {
                 routeSegment(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
-                parents { journey.trusteeAddressTask.isComplete() }
+                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
                 nextDestination { mode ->
                     when (mode) {
                         OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.orgGovBodyWhoToProvideStep)
@@ -215,7 +221,12 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgGovBodyMemberListStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgCompanyNumberStep.isComplete(),
+                        journey.orgGovBodyMemberListStep.isComplete(),
+                    )
+                }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {
