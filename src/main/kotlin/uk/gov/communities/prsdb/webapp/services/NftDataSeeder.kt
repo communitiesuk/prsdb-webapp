@@ -202,6 +202,8 @@ class NftDataSeeder(
                                     propertyOwnershipId,
                                     landlord,
                                     licenseProvideLater = if (!hasLicence) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
+                                    // TODO PDJB-1048: May need to check another property like licenseProvideLater does (e.g. if isOccupied otherwise null)
+                                    tenancyProvideLater = NftDataFaker.generateBoolean(probabilityTrue = 0.4),
                                 )
 
                             val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
@@ -381,6 +383,7 @@ class NftDataSeeder(
         propertyOwnershipId: Long,
         landlordDetails: CoreLandlordDetails,
         licenseProvideLater: Boolean?,
+        tenancyProvideLater: Boolean?,
     ): Timestamp {
         val createdDate = NftDataFaker.generateCreatedDate(after = landlordDetails.createdDate)
 
@@ -426,6 +429,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBigDecimalOrNull(17, rentDetails?.rentAmount)
         propertyOwnershipStmt.setBoolean(18, isOccupied)
         propertyOwnershipStmt.setBooleanOrNull(19, licenseProvideLater)
+        propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
