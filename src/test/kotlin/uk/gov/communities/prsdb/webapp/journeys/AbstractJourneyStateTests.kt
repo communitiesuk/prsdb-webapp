@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
@@ -174,6 +175,70 @@ class JourneyStateDelegateProviderTests {
         assertThrows<JourneyInitialisationException> {
             var testProperty1: String? by delegateProvider.nullableDelegate("testProperty")
             val testProperty2: Int by delegateProvider.requiredDelegate("testProperty")
+        }
+    }
+
+    @Test
+    fun `bindKeyRegistry flushes bare keys when no route is bound`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        provider.registerKey("cachedAddresses")
+
+        provider.bindKeyRegistry(registry)
+
+        val other = JourneyStateDelegateProvider(journeyStateService).apply { registerKey("cachedAddresses") }
+        assertThrows<JourneyInitialisationException> { other.bindKeyRegistry(registry) }
+    }
+
+    @Test
+    fun `bindKeyRegistry flushes route-scoped keys when a route is bound`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        provider.registerKey("cachedAddresses")
+        provider.bindRoutePrefix("lead-trustee-address")
+
+        provider.bindKeyRegistry(registry)
+
+        assertDoesNotThrow {
+            JourneyStateDelegateProvider(journeyStateService)
+                .apply { registerKey("cachedAddresses") }
+                .bindKeyRegistry(registry)
+        }
+        assertThrows<JourneyInitialisationException> {
+            registry.register("lead-trustee-address/cachedAddresses")
+        }
+    }
+
+    @Test
+    fun `a key registered after bindKeyRegistry forwards to the registry live`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        val provider = JourneyStateDelegateProvider(journeyStateService)
+        provider.bindKeyRegistry(registry)
+
+        provider.registerKey("addedLater")
+
+        assertThrows<JourneyInitialisationException> { registry.register("addedLater") }
+    }
+
+    @Test
+    fun `two same-route providers with an equal key collide in one registry`() {
+        val journeyStateService: JourneyStateService = mock()
+        val registry = DelegateKeyRegistry()
+        JourneyStateDelegateProvider(journeyStateService)
+            .apply {
+                registerKey("cachedAddresses")
+                bindRoutePrefix("addr")
+            }.bindKeyRegistry(registry)
+
+        assertThrows<JourneyInitialisationException> {
+            JourneyStateDelegateProvider(journeyStateService)
+                .apply {
+                    registerKey("cachedAddresses")
+                    bindRoutePrefix("addr")
+                }.bindKeyRegistry(registry)
         }
     }
 }
