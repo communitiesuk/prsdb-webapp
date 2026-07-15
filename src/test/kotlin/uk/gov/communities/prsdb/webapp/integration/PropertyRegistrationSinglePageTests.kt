@@ -368,14 +368,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     inner class NumberOfHouseholdsStep {
         @Test
         fun `Submitting with a blank numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.form.submit()
             assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
         }
 
         @Test
         fun `Submitting with a non-numerical value in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("not-a-number")
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Enter how many separate households, like 1 or 2")
@@ -383,7 +383,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `Submitting with a non-integer number in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds("2.3")
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Enter how many separate households, like 1 or 2")
@@ -391,7 +391,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `Submitting with a negative integer in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(-2)
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Enter how many separate households, like 1 or 2")
@@ -399,41 +399,10 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `Submitting with a zero integer in the numberOfHouseholds field returns an error`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(0)
             assertThat(householdsPage.form.getErrorMessage())
                 .containsText("Enter how many separate households, like 1 or 2")
-        }
-    }
-
-    @Nested
-    inner class NumberOfHouseholdsStepWithRestructureAndSkippingEnabled {
-        @BeforeEach
-        fun enableRestructureFlag() {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        }
-
-        @Test
-        fun `Submitting with a blank numberOfHouseholds field returns an error when accessed via restructure and skipping`(page: Page) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage()
-            householdsPage.form.householdsInput.fill("")
-            householdsPage.form.submit()
-            assertThat(householdsPage.form.getErrorMessage()).containsText("Enter how many separate households, like 1 or 2")
-        }
-
-        @Suppress("ktlint:standard:max-line-length")
-        @Test
-        fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error when accessed via restructure and skipping`(
-            page: Page,
-        ) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsRestructureAndSkippingPage()
-            householdsPage.submitNumberOfHouseholds(3)
-            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            peoplePage.submitNumOfPeople(2)
-            assertThat(peoplePage.form.getErrorMessage())
-                .containsText(
-                    "The number of people in the property must be the same as or higher than the number of households in the property",
-                )
         }
     }
 
@@ -482,7 +451,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with an integer in the numberOfPeople field that is less than the numberOfHouseholds returns an error`(
             page: Page,
         ) {
-            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsOldPage()
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(3)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
