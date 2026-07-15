@@ -499,13 +499,13 @@ class Navigator(
         return createValidPage(page, OrgCharityNumberScotlandFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationOrgGovBodyDetailsPage(): OrgGovBodyDetailsFormPageLandlordRegistration {
+    fun skipToOrgLandlordRegistrationGovBodyDetailsPage(): OrgGovBodyDetailsFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyDetails().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationOrgGovBodyWhoToProvidePage(): OrgGovBodyWhoToProvideFormPageLandlordRegistration {
+    fun skipToOrgLandlordRegistrationGovBodyWhoToProvidePage(): OrgGovBodyWhoToProvideFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyWhoToProvide().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)

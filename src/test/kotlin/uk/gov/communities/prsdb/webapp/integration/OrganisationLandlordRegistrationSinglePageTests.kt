@@ -672,7 +672,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class OrgGovBodyDetailsStep {
         @Test
         fun `org governing body details page renders the expected content`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             assertThat(govBodyDetailsPage.heading)
                 .containsText("Providing details about your organisation’s governing body")
@@ -680,7 +680,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `org governing body details page Continue button navigates to the who to provide step`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             govBodyDetailsPage.submitHasDetails()
 
@@ -689,7 +689,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `org governing body details page secondary button navigates to the must provide info step`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             govBodyDetailsPage.submitNoDetails()
 
@@ -701,7 +701,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class OrgGovBodyWhoToProvideStep {
         @Test
         fun `the who to provide page renders the heading`(page: Page) {
-            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationOrgGovBodyWhoToProvidePage()
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
 
             assertThat(whoToProvidePage.form.fieldsetHeading)
                 .containsText("Who do you want to provide details for?")
@@ -709,7 +709,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns a validation error`(page: Page) {
-            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationOrgGovBodyWhoToProvidePage()
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
 
             whoToProvidePage.form.submit()
 
