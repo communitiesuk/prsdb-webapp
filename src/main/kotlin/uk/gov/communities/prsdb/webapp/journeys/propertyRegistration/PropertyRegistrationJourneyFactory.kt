@@ -27,10 +27,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Lice
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipAndLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddToLandlordIncompletePropertiesStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -121,10 +119,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -159,11 +153,11 @@ class PropertyRegistrationJourneyFactory(
 
             when (checkingAnswersFor) {
                 LookupAddressStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.addressTask)
+                    duplicableCheckAnswerTask(journey.addressTask)
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                    duplicableCheckAnswerStep(journey.addressTask, journey.addressTask.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
                 }
 
                 PropertyTypeStep.ROUTE_SEGMENT -> {
@@ -297,7 +291,7 @@ class PropertyRegistrationJourneyFactory(
                 } else {
                     withHeadingMessageKey("registerProperty.taskList.register.old.heading")
                 }
-                task(journey.addressTask) {
+                duplicableTask(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.addToLandlordIncompletePropertiesStep }
                 }
@@ -593,12 +587,6 @@ class PropertyRegistrationJourney(
     override val taskListStep: PropertyRegistrationTaskListStep,
     // Address task
     override val addressTask: PropertyRegistrationAddressTask,
-    override val lookupAddressStep: LookupAddressStep,
-    override val selectAddressStep: SelectAddressStep,
-    override val alreadyRegisteredStep: AlreadyRegisteredStep,
-    override val noAddressFoundStep: NoAddressFoundStep,
-    override val manualAddressStep: ManualAddressStep,
-    override val localCouncilStep: LocalCouncilStep,
     // Add to LandlordIncompleteProperties join table
     override val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep,
     // Property details steps
@@ -690,9 +678,6 @@ class PropertyRegistrationJourney(
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -735,9 +720,9 @@ class PropertyRegistrationJourney(
     // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
     override val uprn: Long?
         get() {
-            cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
-            val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
-            return getMatchingAddress(submittedAddress)?.uprn
+            addressTask.cachedSelectedAddress?.let { return addressTask.getMatchingAddress(it)?.uprn }
+            val submittedAddress = addressTask.selectAddressStep.formModelOrNull?.address ?: return null
+            return addressTask.getMatchingAddress(submittedAddress)?.uprn
         }
 
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
@@ -763,7 +748,6 @@ class PropertyRegistrationJourney(
 }
 
 interface PropertyRegistrationJourneyState :
-    PropertyRegistrationAddressState,
     OccupationState,
     PropertyDetailsState,
     OwnershipAndLandlordsState,

@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 class PropertyDetailsTask : Task<PropertyDetailsState>() {
     override fun makeSubJourney(state: PropertyDetailsState) =
         subJourney(state) {
-            task(journey.addressTask) {
+            duplicableTask(journey.addressTask) {
                 nextStep { journey.addToLandlordIncompletePropertiesStep }
                 savable()
             }
