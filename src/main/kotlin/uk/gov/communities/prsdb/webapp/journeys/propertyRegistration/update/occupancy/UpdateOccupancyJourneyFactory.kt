@@ -104,7 +104,7 @@ class UpdateOccupancyJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
+                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
                 BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
                 RentIncludesBillsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
                 BillsIncludedStep.ROUTE_SEGMENT ->
@@ -137,12 +137,12 @@ class UpdateOccupancyJourneyFactory(
                 "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
             }
         }
-        configureStep(journey.households) {
+        configureStep(journey.householdsAndTenantsTask.households) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
             }
         }
-        configureStep(journey.tenants) {
+        configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
             }
@@ -187,8 +187,6 @@ class UpdateOccupancyJourney(
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val households: HouseholdStep,
-    override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,

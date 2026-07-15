@@ -77,7 +77,7 @@ class SavePropertyRegistrationDataStepConfig(
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
-                    state.households.formModel
+                    state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
                 } else {
@@ -85,7 +85,7 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             numberOfPeople =
                 if (isOccupied) {
-                    state.tenants.formModel
+                    state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
                 } else {

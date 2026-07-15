@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 
 @ExtendWith(MockitoExtension::class)
 class HouseholdStepConfigTests {
@@ -16,7 +16,7 @@ class HouseholdStepConfigTests {
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
-    private lateinit var mockUpdateHouseholdsJourneyState: UpdateHouseholdsAndTenantsJourneyState
+    private lateinit var mockHouseholdsAndTenantsState: HouseholdsAndTenantsState
 
     @Test
     fun `Content shows the restructure and skipping households content when feature flag is enabled`() {
@@ -25,11 +25,11 @@ class HouseholdStepConfigTests {
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
 
         // Act
-        val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
+        val content = stepConfig.getStepSpecificContent(mockHouseholdsAndTenantsState)
 
         // Assert
         assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.heading", content["fieldSetHeading"])
-        assertEquals("forms/numberOfHouseholdsFormRestructureAndSkipping", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms/numberOfHouseholdsFormRestructureAndSkipping", stepConfig.chooseTemplate(mockHouseholdsAndTenantsState))
     }
 
     @Test
@@ -39,11 +39,11 @@ class HouseholdStepConfigTests {
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
 
         // Act
-        val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
+        val content = stepConfig.getStepSpecificContent(mockHouseholdsAndTenantsState)
 
         // Assert
         assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.heading", content["fieldSetHeading"])
         assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.label", content["label"])
-        assertEquals("forms/numberOfHouseholdsFormOld", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms/numberOfHouseholdsFormOld", stepConfig.chooseTemplate(mockHouseholdsAndTenantsState))
     }
 }

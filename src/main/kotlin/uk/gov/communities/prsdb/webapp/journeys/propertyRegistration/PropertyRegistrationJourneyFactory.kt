@@ -191,7 +191,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask)
+                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
@@ -614,8 +614,6 @@ class PropertyRegistrationJourney(
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val households: HouseholdStep,
-    override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,

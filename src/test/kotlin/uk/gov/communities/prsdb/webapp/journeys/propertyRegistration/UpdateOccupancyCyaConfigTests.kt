@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaConfig
@@ -105,6 +106,9 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockBillsIncludedStep: BillsIncludedStep
 
     @Mock
+    private lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
+
+    @Mock
     private lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
 
     private val propertyId = 123L
@@ -131,10 +135,11 @@ class UpdateOccupancyCyaConfigTests {
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
         lenient().`when`(mockState.wasOccupied).thenReturn(false)
-        lenient().`when`(mockState.households).thenReturn(mockHouseholdStep)
+        lenient().`when`(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        lenient().`when`(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
         lenient().`when`(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
         lenient().`when`(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn("2")
-        lenient().`when`(mockState.tenants).thenReturn(mockTenantsStep)
+        lenient().`when`(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         lenient().`when`(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
         lenient().`when`(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn("5")
         lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
