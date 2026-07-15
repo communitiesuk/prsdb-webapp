@@ -691,21 +691,21 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class OrgGovBodyMemberDobStep {
         @Test
         fun `the governing body member date of birth page renders the heading`() {
-            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
 
             assertThat(govBodyMemberDobPage.heading).containsText("What is their date of birth?")
         }
 
         @Test
         fun `submitting an empty date returns an error`() {
-            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("", "", "")
             assertThat(govBodyMemberDobPage.form.getErrorMessage()).containsText("Enter a date")
         }
 
         @Test
         fun `submitting a future date returns an error`() {
-            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("1", "1", "2999")
             assertThat(govBodyMemberDobPage.form.getErrorMessage())
                 .containsText("The date of birth cannot be in the future")
@@ -713,14 +713,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting a valid date of birth advances to the governing body member address step`(page: Page) {
-            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("15", "6", "1980")
             assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         }
 
         @Test
         fun `submitting a valid date of birth with leading zeros advances to the governing body member address step`(page: Page) {
-            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage()
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("05", "06", "1980")
             assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         }

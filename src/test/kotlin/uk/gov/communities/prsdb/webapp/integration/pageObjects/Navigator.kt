@@ -496,7 +496,7 @@ class Navigator(
         return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationOrgGovBodyMemberDobPage(): OrgGovBodyMemberDobFormPageLandlordRegistration {
+    fun skipToOrgLandlordRegistrationGovBodyMemberDobPage(): OrgGovBodyMemberDobFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberDob().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
