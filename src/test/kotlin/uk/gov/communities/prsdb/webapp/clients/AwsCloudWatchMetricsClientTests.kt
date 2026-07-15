@@ -17,7 +17,9 @@ import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsReque
 import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse
 import software.amazon.awssdk.services.cloudwatch.model.Statistic
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneOffset
 import java.util.function.Consumer
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -33,7 +35,9 @@ class AwsCloudWatchMetricsClientTests {
     private val period =
         ReportingPeriod(Instant.parse("2025-01-10T00:00:00Z"), Instant.parse("2025-01-20T23:59:59Z"))
 
-    private fun client() = AwsCloudWatchMetricsClient(sdkClient, cloudFrontSdkClient)
+    private val fixedClock = Clock.fixed(Instant.parse("2025-01-21T00:00:00Z"), ZoneOffset.UTC)
+
+    private fun client(clock: Clock = fixedClock) = AwsCloudWatchMetricsClient(sdkClient, cloudFrontSdkClient, clock)
 
     private fun stubResponse(response: GetMetricStatisticsResponse) {
         whenever(sdkClient.getMetricStatistics(any<Consumer<GetMetricStatisticsRequest.Builder>>()))
@@ -57,19 +61,46 @@ class AwsCloudWatchMetricsClientTests {
     }
 
     @Test
-    fun `getMetricStatistic returns the mean of datapoint averages for AVERAGE`() {
+    fun `getMetricStatistic returns the volume-weighted mean of datapoint averages for AVERAGE`() {
         stubResponse(
             GetMetricStatisticsResponse
                 .builder()
                 .datapoints(
-                    Datapoint.builder().average(40.0).build(),
-                    Datapoint.builder().average(60.0).build(),
+                    Datapoint.builder().average(40.0).sampleCount(1.0).build(),
+                    Datapoint.builder().average(60.0).sampleCount(3.0).build(),
                 ).build(),
         )
 
         val result = client().getMetricStatistic("ns", "Mem", emptyList(), Statistic.AVERAGE, period)
 
-        assertEquals(50.0, result)
+        // (40*1 + 60*3) / (1 + 3) = 220 / 4 = 55.0
+        assertEquals(55.0, result)
+    }
+
+    @Test
+    fun `getMetricStatistic returns null for AVERAGE when the total sample count is zero`() {
+        stubResponse(
+            GetMetricStatisticsResponse
+                .builder()
+                .datapoints(Datapoint.builder().average(40.0).sampleCount(0.0).build())
+                .build(),
+        )
+
+        assertNull(client().getMetricStatistic("ns", "Mem", emptyList(), Statistic.AVERAGE, period))
+    }
+
+    @Test
+    fun `getMetricStatistic requests both AVERAGE and SAMPLE_COUNT statistics for AVERAGE`() {
+        stubResponse(GetMetricStatisticsResponse.builder().datapoints(emptyList()).build())
+
+        client().getMetricStatistic("ns", "Mem", emptyList(), Statistic.AVERAGE, period)
+
+        val captor = argumentCaptor<Consumer<GetMetricStatisticsRequest.Builder>>()
+        verify(sdkClient).getMetricStatistics(captor.capture())
+        val builder = GetMetricStatisticsRequest.builder()
+        captor.firstValue.accept(builder)
+
+        assertEquals(listOf(Statistic.AVERAGE, Statistic.SAMPLE_COUNT), builder.build().statistics())
     }
 
     @Test
@@ -126,8 +157,42 @@ class AwsCloudWatchMetricsClientTests {
         assertEquals(period.start, request.startTime())
         assertEquals(period.end, request.endTime())
         assertEquals(listOf(Statistic.MAXIMUM), request.statistics())
-        // 10-day, ~24h-short range / 60 divisions, floored to whole minutes -> 15780s
-        assertEquals(15780, request.period())
+        // 10-day, ~24h-short range / 60 divisions, rounded UP to a valid 60s resolution (<=15 days old) -> 15840
+        assertEquals(15840, request.period())
+    }
+
+    @Test
+    fun `getMetricStatistic rounds the period up to a 300s resolution for data older than 15 days`() {
+        stubResponse(GetMetricStatisticsResponse.builder().datapoints(emptyList()).build())
+        // period.start 2025-01-10 is ~41 days before this clock -> 300s resolution
+        val clock = Clock.fixed(Instant.parse("2025-02-20T00:00:00Z"), ZoneOffset.UTC)
+
+        client(clock).getMetricStatistic("ns", "Mem", emptyList(), Statistic.MAXIMUM, period)
+
+        val captor = argumentCaptor<Consumer<GetMetricStatisticsRequest.Builder>>()
+        verify(sdkClient).getMetricStatistics(captor.capture())
+        val builder = GetMetricStatisticsRequest.builder()
+        captor.firstValue.accept(builder)
+
+        // ceil(950399/60 / 300) * 300 = 53 * 300 = 15900
+        assertEquals(15900, builder.build().period())
+    }
+
+    @Test
+    fun `getMetricStatistic rounds the period up to a 3600s resolution for data older than 63 days`() {
+        stubResponse(GetMetricStatisticsResponse.builder().datapoints(emptyList()).build())
+        // period.start 2025-01-10 is ~142 days before this clock -> 3600s resolution
+        val clock = Clock.fixed(Instant.parse("2025-06-01T00:00:00Z"), ZoneOffset.UTC)
+
+        client(clock).getMetricStatistic("ns", "Mem", emptyList(), Statistic.MAXIMUM, period)
+
+        val captor = argumentCaptor<Consumer<GetMetricStatisticsRequest.Builder>>()
+        verify(sdkClient).getMetricStatistics(captor.capture())
+        val builder = GetMetricStatisticsRequest.builder()
+        captor.firstValue.accept(builder)
+
+        // ceil(950399/60 / 3600) * 3600 = 5 * 3600 = 18000
+        assertEquals(18000, builder.build().period())
     }
 
     @Test
@@ -152,7 +217,7 @@ class AwsCloudWatchMetricsClientTests {
             .thenReturn(
                 GetMetricStatisticsResponse
                     .builder()
-                    .datapoints(Datapoint.builder().average(0.82).build())
+                    .datapoints(Datapoint.builder().average(0.82).sampleCount(10.0).build())
                     .build(),
             )
 

@@ -113,4 +113,26 @@ class CloudWatchMetricsServiceTests {
         assertNull(result.cloudFrontClientErrorRate)
         assertNull(result.cloudFrontServerErrorRate)
     }
+
+    @Test
+    fun `getMetrics isolates a failing metric so other rows still populate`() {
+        whenever(
+            client.getMetricStatistic(
+                eq("AWS/CloudFront"),
+                eq("4xxErrorRate"),
+                any(),
+                eq(Statistic.AVERAGE),
+                any(),
+                eq(Region.US_EAST_1),
+            ),
+        ).thenThrow(RuntimeException("boom"))
+        whenever(
+            client.getMetricStatistic(eq("AWS/ECS"), eq("MemoryUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+        ).thenReturn(73.42)
+
+        val result = service().getMetrics(period)
+
+        assertNull(result.cloudFrontClientErrorRate)
+        assertEquals(73.42, result.peakMemoryUtilisation)
+    }
 }

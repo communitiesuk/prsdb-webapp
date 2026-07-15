@@ -1,7 +1,7 @@
 errorSummary:
   heading: There is a problem
 errorMessage:
-  prefix: 'Error:'
+  prefix: 'Error: '
 buttons:
   startNow: Start now
   saveAndContinue: Save and continue
@@ -154,6 +154,10 @@ orgGovBodyDetails:
       two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
   continueButton: Continue
   noDetailsButton: I don’t have these details
+orgGovBodyMemberName:
+  fieldSetHeading: What is their full name?
+  error:
+    missing: Enter a full name
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
