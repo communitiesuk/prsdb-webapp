@@ -38,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgDirectorsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressFormPageLandlordRegistration
@@ -50,7 +49,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTrusteesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
@@ -312,14 +310,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
 
-        // TODO: PDJB-1173 - Submit real organisation directors data once the step is implemented
-        val orgDirectorsPage = assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
-        orgDirectorsPage.form.submit()
-
-        // TODO: PDJB-1174 - Submit real organisation trustees data once the step is implemented
-        val orgTrusteesPage = assertPageIs(page, OrgTrusteesFormPageLandlordRegistration::class)
-        orgTrusteesPage.form.submit()
-
         val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
         leadTrusteeNamePage.submitName("Test Lead Trustee Name")
 
@@ -381,13 +371,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Selecting no on charity skips the charity questions and goes to the directors page`(page: Page) {
+    fun `Selecting no on charity skips the charity questions and goes to the lead trustee name page`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         navigator.skipToOrgLandlordRegistrationCharityPage()
         val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitNo()
 
-        assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
+        assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
     }
 }
