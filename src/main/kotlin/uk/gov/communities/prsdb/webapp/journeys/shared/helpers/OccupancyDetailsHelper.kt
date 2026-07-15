@@ -88,14 +88,15 @@ class OccupancyDetailsHelper {
                 }
             }
 
-    fun <T> getCheckYourRentFrequencyAndAmountAnswersSummaryList(
+    fun <T : CheckYourAnswersJourneyState> getCheckYourRentFrequencyAndAmountAnswersSummaryList(
         state: T,
+        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
         messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : RentFrequencyAndAmountState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val rentFrequencyStep = state.rentFrequency
-                val rentAmountStep = state.rentAmount
+                val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
+                val rentAmountStep = rentFrequencyAndAmountState.rentAmount
                 val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -107,7 +108,7 @@ class OccupancyDetailsHelper {
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getRentAmount(messageSource),
+                        rentFrequencyAndAmountState.getRentAmount(messageSource),
                         Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
                     ),
                 )
@@ -163,6 +164,6 @@ class OccupancyDetailsHelper {
                         Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),
                 )
-                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource))
+                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource))
             }
 }
