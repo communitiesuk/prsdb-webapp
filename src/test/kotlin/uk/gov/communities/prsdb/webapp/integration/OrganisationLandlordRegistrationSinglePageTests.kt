@@ -211,7 +211,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the page renders the heading`() {
             val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
 
-            assertThat(mustProvidePage.heading).containsText("You must provide more information to register")
+            assertThat(mustProvidePage.heading).containsText("You need to provide more information to register")
         }
 
         @Test
