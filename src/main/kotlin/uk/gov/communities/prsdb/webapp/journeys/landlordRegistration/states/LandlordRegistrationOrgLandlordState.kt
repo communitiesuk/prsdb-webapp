@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -29,13 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordGovBodyMemberAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgLandlordRegistrationTask: OrgLandlordRegistrationTask
@@ -58,28 +53,14 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
+    val trusteeAddressTask: AddressTask
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
-    val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask
-    val leadTrusteeLookupAddressStep: LookupAddressStep
-    val leadTrusteeSelectAddressStep: SelectAddressStep
-    val leadTrusteeNoAddressFoundStep: NoAddressFoundStep
-    val leadTrusteeManualAddressStep: ManualAddressStep
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
     val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val orgLandlordGovBodyMemberAddressTask: OrgLandlordGovBodyMemberAddressTask
-    val govBodyMemberLookupAddressStep: LookupAddressStep
-    val govBodyMemberSelectAddressStep: SelectAddressStep
-    val govBodyMemberNoAddressFoundStep: NoAddressFoundStep
-    val govBodyMemberManualAddressStep: ManualAddressStep
+    val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
-    var leadTrusteeCachedAddresses: List<AddressDataModel>?
-    var leadTrusteeIsAddressAlreadyRegistered: Boolean?
-    var leadTrusteeCachedSelectedAddress: String?
-    var govBodyMemberCachedAddresses: List<AddressDataModel>?
-    var govBodyMemberIsAddressAlreadyRegistered: Boolean?
-    var govBodyMemberCachedSelectedAddress: String?
 }
