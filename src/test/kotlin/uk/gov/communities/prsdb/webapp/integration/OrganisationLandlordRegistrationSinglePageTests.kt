@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -200,6 +202,34 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(mainContactPage.page.locator("h1"))
                 .not()
                 .containsText("Who is the main contact for your organisation?")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyMustProvideInfoStep {
+        @Test
+        fun `the page renders the heading`() {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            assertThat(mustProvidePage.heading).containsText("You need to provide more information to register")
+        }
+
+        @Test
+        fun `the enter organisation details link navigates back to the org type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.enterOrgDetailsLink.clickAndWait()
+
+            assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `the register as an individual link navigates back to the landlord type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.registerAsIndividualLink.clickAndWait()
+
+            assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         }
     }
 
