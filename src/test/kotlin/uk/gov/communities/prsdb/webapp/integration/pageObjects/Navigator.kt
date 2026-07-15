@@ -628,7 +628,7 @@ class Navigator(
 
     fun skipToPropertyRegistrationOwnershipTypePage(): OwnershipTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType().withBedrooms().build(),
         )
         navigateToPropertyRegistrationJourneyStep(OwnershipTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, OwnershipTypeFormPagePropertyRegistration::class)
