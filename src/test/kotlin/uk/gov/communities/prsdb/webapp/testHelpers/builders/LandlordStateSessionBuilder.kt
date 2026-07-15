@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GoverningBodyMemberNameFormModel
@@ -249,6 +250,12 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withGoverningBodyMembers(members: Map<Int, GoverningBodyMemberDataModel>): LandlordStateSessionBuilder {
+        additionalDataMap["governingBodyMembersMap"] =
+            Json.encodeToString(serializer(), members)
+        return self()
+    }
+
     fun withOrgMainContact(): LandlordStateSessionBuilder {
         val formModel =
             OrgMainContactFormModel().apply {
@@ -328,6 +335,11 @@ class LandlordStateSessionBuilder(
         fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
 
         fun beforeOrgGovBodyMemberList() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberAddress()
+
+        fun beforeOrgGovBodyMemberListWithMembers(members: Map<Int, GoverningBodyMemberDataModel>) =
+            beforeOrgGovBodyDetails()
+                .withOrgGovBodyDetails(OrgGovBodyDetailsMode.HAS_DETAILS)
+                .withGoverningBodyMembers(members)
 
         fun beforeOrgMainContact() = beforeOrgGovBodyMemberList().withOrgGovBodyMemberList()
 

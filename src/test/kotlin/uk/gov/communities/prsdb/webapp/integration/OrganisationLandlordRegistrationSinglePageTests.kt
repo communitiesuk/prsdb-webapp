@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
@@ -16,6 +17,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -775,5 +778,53 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             govBodyMemberDobPage.submitDate("05", "06", "1980")
             assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         }
+    }
+
+    @Nested
+    inner class GovBodyMemberListStep {
+        @Test
+        fun `the member list page shows the correct heading for one member`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(1 to createTestMember("Alice Smith")),
+                )
+
+            assertThat(memberListPage.heading).containsText("added 1 person")
+        }
+
+        @Test
+        fun `the member list page shows the correct heading for multiple members`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(
+                        1 to createTestMember("Alice Smith"),
+                        2 to createTestMember("Bob Jones"),
+                    ),
+                )
+
+            assertThat(memberListPage.heading).containsText("added 2 people")
+        }
+
+        @Test
+        fun `the member list page shows member names in the summary list`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(
+                        1 to createTestMember("Alice Smith"),
+                        2 to createTestMember("Bob Jones"),
+                    ),
+                )
+
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("Alice Smith")
+            assertThat(memberListPage.summaryList.getRowByIndex(1).value).containsText("Bob Jones")
+        }
+
+        private fun createTestMember(name: String) =
+            GoverningBodyMemberDataModel(
+                name = name,
+                type = GoverningBodyMemberType.DIRECTOR,
+                dateOfBirth = kotlinx.datetime.LocalDate(1970, 1, 1),
+                address = AddressDataModel(singleLineAddress = "Test Address"),
+            )
     }
 }
