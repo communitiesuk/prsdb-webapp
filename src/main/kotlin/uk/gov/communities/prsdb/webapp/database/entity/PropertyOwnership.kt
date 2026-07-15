@@ -106,6 +106,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     var licenseProvideLater: Boolean? = null
 
+    var tenancyProvideLater: Boolean? = null
+
     constructor(
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -128,6 +130,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         lastOccupiedDate: LocalDate? = null,
         markedJointLandlord: Boolean = false,
         licenseProvideLater: Boolean = false,
+        tenancyProvideLater: Boolean = false,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
@@ -150,6 +153,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.lastOccupiedDate = lastOccupiedDate
         this.markedJointLandlord = markedJointLandlord
         this.licenseProvideLater = licenseProvideLater
+        this.tenancyProvideLater = tenancyProvideLater
     }
 
     val rentIncludesBills: Boolean
