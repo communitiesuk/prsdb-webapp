@@ -7,12 +7,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-// AddressTask specialised with the field-set content for a landlord's own address (used by the registration,
-// change-answers and update flows). Structure and route-scoped state come from AddressTask; this only supplies
-// the landlord content. Genuinely flow-specific extras (e.g. the update flow's submit button/warning) are still
-// layered on at the DSL call site.
+// AddressTask specialised with the field-set content for an organisation's lead trustee address. Structure and
+// route-scoped state come from AddressTask; this only supplies the trustee content.
 @JourneyFrameworkComponent
-class LandlordAddressTask(
+class TrusteeAddressTask(
     journeyStateService: JourneyStateService,
     lookupAddressStep: LookupAddressStep,
     selectAddressStep: SelectAddressStep,
@@ -27,13 +25,17 @@ class LandlordAddressTask(
     ) {
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "forms.lookupAddress.trusteeRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.lookupAddress.trusteeRegistration.fieldSetHint",
         )
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
+            "fieldSetHint" to null,
         )
+
+    companion object {
+        const val LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT = "lead-trustee-address"
+    }
 }

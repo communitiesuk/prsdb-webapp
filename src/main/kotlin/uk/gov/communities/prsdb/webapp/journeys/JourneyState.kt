@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 
-interface JourneyState {
+interface JourneyState : DelegateKeysOwner {
     fun getStepData(key: String): FormData?
 
     fun addStepData(

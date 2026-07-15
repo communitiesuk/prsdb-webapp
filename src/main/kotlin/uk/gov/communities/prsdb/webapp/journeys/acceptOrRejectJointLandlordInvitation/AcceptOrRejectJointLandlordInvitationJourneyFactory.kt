@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -73,14 +72,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Landl
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 
 @PrsdbWebService
@@ -223,10 +217,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep,
     // Address task
     override val addressTask: LandlordAddressTask,
-    override val lookupAddressStep: LookupAddressStep,
-    override val noAddressFoundStep: NoAddressFoundStep,
-    override val selectAddressStep: SelectAddressStep,
-    override val manualAddressStep: ManualAddressStep,
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -250,11 +240,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
     override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
     override val leadTrusteeDobStep: LeadTrusteeDobStep,
-    override val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask,
-    override val leadTrusteeLookupAddressStep: LookupAddressStep,
-    override val leadTrusteeSelectAddressStep: SelectAddressStep,
-    override val leadTrusteeNoAddressFoundStep: NoAddressFoundStep,
-    override val leadTrusteeManualAddressStep: ManualAddressStep,
+    override val trusteeAddressTask: TrusteeAddressTask,
     override val orgGovBodyDetailsStep: OrgGovBodyDetailsStep,
     override val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep,
     override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
@@ -268,24 +254,15 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     AcceptOrRejectJointLandlordInvitationJourneyState {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var tokenIsValid: Boolean? by delegateProvider.nullableDelegate("tokenIsValid")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
-    override var leadTrusteeCachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("leadTrusteeCachedAddresses")
-    override var leadTrusteeIsAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(
-        "leadTrusteeIsAddressAlreadyRegistered",
-    )
-    override var leadTrusteeCachedSelectedAddress: String? by delegateProvider.nullableDelegate("leadTrusteeCachedSelectedAddress")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(

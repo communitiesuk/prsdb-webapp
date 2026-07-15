@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRAT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
@@ -375,14 +375,24 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `submitting a valid date of birth advances to the lead trustee address step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("15", "6", "1980")
-            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         }
 
         @Test
         fun `submitting a valid date of birth with leading zeros advances to the lead trustee address step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("05", "06", "1980")
-            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeAddressTaskRoute {
+        @Test
+        fun `navigating to the bare lead trustee address task route redirects to the task's first step`() {
+            val leadTrusteeAddressLookupPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+
+            assertThat(leadTrusteeAddressLookupPage.form.postcodeInput).isVisible()
         }
     }
 
@@ -655,16 +665,6 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
             charityNumberPage.submitCharityNumber("SC-0123!")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
-        }
-    }
-
-    @Nested
-    inner class LeadTrusteeLookupAddressStep {
-        @Test
-        fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
-            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
-
-            assertThat(lookupAddressPage.heading).containsText("What is the lead trustee’s contact address?")
         }
     }
 

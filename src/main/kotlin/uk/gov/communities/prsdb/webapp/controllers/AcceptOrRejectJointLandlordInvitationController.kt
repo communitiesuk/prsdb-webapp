@@ -22,7 +22,8 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordIn
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -50,34 +51,29 @@ class AcceptOrRejectJointLandlordInvitationController(
         return ModelAndView("redirect:$redirectUrl")
     }
 
-    @GetMapping("/{stepRouteSegment}")
+    @GetMapping("/{*stepPath}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
-        @PathVariable stepRouteSegment: String,
-    ): ModelAndView {
-        try {
-            val journeyMap = journeyFactory.createJourneySteps()
-            return journeyMap[stepRouteSegment]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            return ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE")
-        }
-    }
+        @PathVariable stepPath: String,
+    ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
-    @PostMapping("/{stepRouteSegment}")
+    @PostMapping("/{*stepPath}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
-        @PathVariable stepRouteSegment: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-    ): ModelAndView {
-        try {
-            val journeyMap = journeyFactory.createJourneySteps()
-            return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            return ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE")
-        }
-    }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
+
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleUninitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps() },
+            dispatch = dispatch,
+            getRedirect = { ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE") },
+        )
 
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT")
@@ -85,7 +81,10 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun getConfirmation(model: Model): ModelAndView {
         val (propertyAddress, propertyOwnershipId) =
             invitationService.getLastAcceptedPropertyFromSession()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No accepted property details found in the session")
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No accepted property details found in the session",
+                )
 
         model.addAttribute("addressParts", propertyAddress.split("\n"))
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
