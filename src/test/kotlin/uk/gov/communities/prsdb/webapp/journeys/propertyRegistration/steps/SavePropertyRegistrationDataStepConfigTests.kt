@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -322,10 +323,12 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
         val licensingTypeFormModel = LicensingTypeFormModel().apply { licensingType = LicensingType.SELECTIVE_LICENCE }
-        whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
+        val mockLicensingTask = mock<LicensingTask>()
+        whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
+        whenever(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
         whenever(mockLicensingTypeStep.formModel).thenReturn(licensingTypeFormModel)
 
-        whenever(mockState.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
