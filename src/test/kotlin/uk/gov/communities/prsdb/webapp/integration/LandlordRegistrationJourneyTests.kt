@@ -298,12 +298,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        orgCompaniesHousePage.submitYes()
-
-        val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
-        orgCompanyNumberPage.submitCompanyNumber("12345678")
-
         val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitYes()
 
@@ -312,6 +306,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
+
+        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        orgCompaniesHousePage.submitYes()
+
+        val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+        orgCompanyNumberPage.submitCompanyNumber("12345678")
 
         // TODO: PDJB-1173 - Submit real organisation directors data once the step is implemented
         val orgDirectorsPage = assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
@@ -339,6 +339,23 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
+        val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
+        orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
+
+        // TODO: PDJB-1168 - This should lead to the normal landlord registration CYA page not the placeholder one
+        assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
+
+        // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+    }
+
+    @Test
+    fun `Selecting no on companies house skips the company number question and goes through the governing body journey`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        companiesHousePage.submitNo()
+
         val orgGovBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
         orgGovBodyDetailsPage.submitHasDetails()
 
@@ -360,34 +377,17 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgGovBodyMemberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
         orgGovBodyMemberListPage.form.submit()
 
-        val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
-        orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
-
-        // TODO: PDJB-1168 - This should lead to the normal landlord registration CYA page not the placeholder one
-        assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
-
-        // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+        assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
     }
 
     @Test
-    fun `Selecting no on companies house skips to the charity page without asking for company number`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
-        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
-        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        companiesHousePage.submitNo()
-
-        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-    }
-
-    @Test
-    fun `Selecting no on charity skips the charity questions and goes to the directors page`(page: Page) {
+    fun `Selecting no on charity skips the charity questions and goes to the companies house page`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         navigator.skipToOrgLandlordRegistrationCharityPage()
         val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitNo()
 
-        assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
     }
 }

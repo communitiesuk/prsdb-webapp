@@ -73,14 +73,10 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents { journey.orgPhoneNumberStep.isComplete() }
                 nextStep { journey.orgCharityStep }
             }
+            // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO),
-                        journey.orgCompanyNumberStep.isComplete(),
-                    )
-                }
+                parents { journey.orgTypeStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
@@ -223,7 +219,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.orgCompanyNumberStep.isComplete(),
+                        journey.trusteeAddressTask.isComplete(),
                         journey.orgGovBodyMemberListStep.isComplete(),
                     )
                 }
