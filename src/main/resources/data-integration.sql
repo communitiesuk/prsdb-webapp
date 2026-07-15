@@ -113,9 +113,13 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (53, '2026-04-14 00:00:00+00', 210000000053, 0),
        (54, '2026-04-14 00:00:00+00', 210000000054, 0),
        (55, '2026-04-14 00:00:00+00', 210000000055, 0),
-       (56, '2026-04-14 00:00:00+00', 210000000056, 0),
-       -- PDJB-1048 provide-later property record QA (landlord 1): registration numbers for property_ownership 49-54
-       (57, '2026-04-14 00:00:00+00', 210000000057, 0),
+       (56, '2026-04-14 00:00:00+00', 210000000056, 0) ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+
+-- PDJB-1048 provide-later property record QA (landlord 1): registration numbers for property_ownership 49-54
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (57, '2026-04-14 00:00:00+00', 210000000057, 0),
        (58, '2026-04-14 00:00:00+00', 210000000058, 0),
        (59, '2026-04-14 00:00:00+00', 210000000059, 0),
        (60, '2026-04-14 00:00:00+00', 210000000060, 0),
@@ -401,14 +405,17 @@ VALUES (1, 1, '2025-01-15'),
        (1, 46, '2025-01-15'),
        (1, 47, '2025-01-15'),
        (1, 48, '2025-01-15'),
-       (1, 49, '2025-01-15'),
+       (6, 1, '2025-01-15'),
+       (7, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+
+-- PDJB-1048 provide-later property record QA (landlord 1): ownership links for property_ownership 49-54
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 49, '2025-01-15'),
        (1, 50, '2025-01-15'),
        (1, 51, '2025-01-15'),
        (1, 52, '2025-01-15'),
        (1, 53, '2025-01-15'),
-       (1, 54, '2025-01-15'),
-       (6, 1, '2025-01-15'),
-       (7, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+       (1, 54, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
@@ -492,10 +499,17 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
        (45, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (46, 37, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (47, 38, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       -- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
-       -- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
-       (49, 50, current_date, current_date, null, false, '2035-01-01', null,
+       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+-- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
+-- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+VALUES (49, 50, current_date, current_date, null, false, '2035-01-01', null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
         null, 'c', null, null, true, true, true),
        (50, 51, current_date, current_date, null, false, '2035-01-01', null,
@@ -506,7 +520,7 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
         null, 'c', null, null, true, true, true),
        (52, 53, current_date, current_date, null, false, '2035-01-01', null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true);
+        null, 'c', null, null, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
