@@ -105,6 +105,16 @@ orgType:
   divider: or
   error:
     missing: Select the types of organisation that apply, or select ‘None of these’
+orgGovBodyWhoToProvide:
+  title: Who do you want to provide details for?
+  fieldSetHeading: Who do you want to provide details for?
+  radios:
+    director: Director
+    trustee: Trustee
+    partner: Partner
+    otherMember: Other member of the governing body
+  error:
+    missing: Select who you are providing details for
 leadTrusteeName:
   fieldSetHeading: What is the lead trustee’s full name?
   fieldSetHint: All trustees are equally legally responsible, but you must nominate one ‘lead’ trustee to be the main point of contact
