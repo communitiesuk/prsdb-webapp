@@ -154,16 +154,6 @@ orgGovBodyDetails:
       two: If you are registering a Limited Liability Partnership (LLP) or Scottish partnership you should continue and provide details for all partners.
   continueButton: Continue
   noDetailsButton: I don’t have these details
-orgGovBodyWhoToProvide:
-  title: Who do you want to provide details for?
-  fieldSetHeading: Who do you want to provide details for?
-  radios:
-    director: Director
-    trustee: Trustee
-    partner: Partner
-    otherMember: Other member of the governing body
-  error:
-    missing: Select who you are providing details for
 orgGovBodyMemberName:
   fieldSetHeading: What is their full name?
   error:

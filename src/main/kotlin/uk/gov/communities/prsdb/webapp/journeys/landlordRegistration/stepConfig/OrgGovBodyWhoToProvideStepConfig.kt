@@ -15,25 +15,25 @@ class OrgGovBodyWhoToProvideStepConfig : AbstractRequestableStepConfig<Complete,
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.orgGovBodyWhoToProvide.fieldSetHeading",
+            "fieldSetHeading" to "registerAsALandlord.orgGovBodyWhoToProvide.fieldSetHeading",
             "fieldName" to "whoToProvide",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = GoverningBodyMemberType.DIRECTOR,
-                        labelMsgKey = "forms.orgGovBodyWhoToProvide.radios.director",
+                        labelMsgKey = "registerAsALandlord.orgGovBodyWhoToProvide.radios.director",
                     ),
                     RadiosButtonViewModel(
                         value = GoverningBodyMemberType.TRUSTEE,
-                        labelMsgKey = "forms.orgGovBodyWhoToProvide.radios.trustee",
+                        labelMsgKey = "registerAsALandlord.orgGovBodyWhoToProvide.radios.trustee",
                     ),
                     RadiosButtonViewModel(
                         value = GoverningBodyMemberType.PARTNER,
-                        labelMsgKey = "forms.orgGovBodyWhoToProvide.radios.partner",
+                        labelMsgKey = "registerAsALandlord.orgGovBodyWhoToProvide.radios.partner",
                     ),
                     RadiosButtonViewModel(
                         value = GoverningBodyMemberType.OTHER,
-                        labelMsgKey = "forms.orgGovBodyWhoToProvide.radios.otherMember",
+                        labelMsgKey = "registerAsALandlord.orgGovBodyWhoToProvide.radios.otherMember",
                     ),
                 ),
         )

@@ -11,7 +11,7 @@ class OrgGovBodyWhoToProvideFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.orgGovBodyWhoToProvide.error.missing",
+                messageKey = "registerAsALandlord.orgGovBodyWhoToProvide.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],
