@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.HasAnyGovBodyMembersStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -28,8 +29,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val yourDetailsStep: YourDetailsStep
@@ -61,4 +64,8 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
     val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
+    val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
+    val saveGovBodyMemberStep: SaveGovBodyMemberStep
+    var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
+    var nextGoverningBodyMemberId: Int?
 }
