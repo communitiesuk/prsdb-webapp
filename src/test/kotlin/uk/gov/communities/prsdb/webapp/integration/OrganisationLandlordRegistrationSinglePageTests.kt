@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
@@ -345,14 +345,24 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `submitting a valid date of birth advances to the lead trustee address step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("15", "6", "1980")
-            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         }
 
         @Test
         fun `submitting a valid date of birth with leading zeros advances to the lead trustee address step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("05", "06", "1980")
-            assertPageIs(page, LeadTrusteeLookupAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeAddressTaskRoute {
+        @Test
+        fun `navigating to the bare lead trustee address task route redirects to the task's first step`() {
+            val leadTrusteeAddressLookupPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+
+            assertThat(leadTrusteeAddressLookupPage.form.postcodeInput).isVisible()
         }
     }
 
@@ -629,16 +639,6 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class LeadTrusteeLookupAddressStep {
-        @Test
-        fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
-            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
-
-            assertThat(lookupAddressPage.heading).containsText("What is the lead trustee’s contact address?")
-        }
-    }
-
-    @Nested
     inner class OrgGovBodyDetailsStep {
         @Test
         fun `org governing body details page renders the expected content`(page: Page) {
@@ -664,6 +664,25 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             govBodyDetailsPage.submitNoDetails()
 
             assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberNameStep {
+        @Test
+        fun `the governing body member name page renders the caption and heading`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            assertThat(govBodyMemberNamePage.header).containsText("What is their full name?")
+        }
+
+        @Test
+        fun `submitting an empty governing body member name returns an error`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            govBodyMemberNamePage.submitName("")
+
+            assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
         }
     }
 }

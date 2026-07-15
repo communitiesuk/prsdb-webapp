@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -719,7 +718,6 @@ class PropertyRegistrationJourney(
     private val landlordService: LandlordService,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
-    private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
@@ -747,7 +745,7 @@ class PropertyRegistrationJourney(
         .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     // Reads cachedOccupied first; falls back to the step's submitted form data when the upstream step
     // is wired up (parent journey context). The cache is essential when a CYA child journey reads this
