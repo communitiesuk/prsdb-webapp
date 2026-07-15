@@ -348,9 +348,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgGovBodyMemberNamePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
         orgGovBodyMemberNamePage.submitName("Test Governing Body Member Name")
 
-        // TODO: PDJB-1287 - Submit real data once the step is implemented
         val orgGovBodyMemberDobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
-        orgGovBodyMemberDobPage.form.submit()
+        orgGovBodyMemberDobPage.submitDate("15", "6", "1980")
 
         // TODO: PDJB-1288 - Submit real data once the step is implemented
         val orgGovBodyMemberAddressPage = assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
