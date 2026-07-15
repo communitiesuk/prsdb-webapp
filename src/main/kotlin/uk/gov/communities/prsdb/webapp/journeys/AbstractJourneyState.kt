@@ -4,7 +4,10 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 
 abstract class AbstractJourneyState(
     private val journeyStateService: JourneyStateService,
-) : JourneyState {
+    protected val delegateProvider: JourneyStateDelegateProvider =
+        JourneyStateDelegateProvider(journeyStateService),
+) : JourneyState,
+    DelegateKeysOwner by delegateProvider {
     override fun getStepData(key: String): FormData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
 
     override fun addStepData(

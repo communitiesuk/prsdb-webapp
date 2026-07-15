@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
@@ -166,15 +167,15 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.leadTrusteeDobStep) {
                 routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
                 parents { journey.leadTrusteePhoneStep.isComplete() }
-                nextStep { journey.orgLandlordTrusteeAddressTask.firstStep }
+                nextStep { journey.trusteeAddressTask.firstStep }
             }
-            task(journey.orgLandlordTrusteeAddressTask) {
+            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgGovBodyDetailsStep }
             }
             step(journey.orgGovBodyDetailsStep) {
                 routeSegment(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordTrusteeAddressTask.isComplete() }
+                parents { journey.trusteeAddressTask.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
                         OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.orgGovBodyWhoToProvideStep)
@@ -185,7 +186,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgGovBodyMustProvideInfoStep) {
                 routeSegment(OrgGovBodyMustProvideInfoStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.NO_DETAILS) }
-                nextStep { journey.orgMainContactStep }
+                noNextDestination()
             }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
@@ -214,12 +215,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.orgGovBodyMustProvideInfoStep.isComplete(),
-                        journey.orgGovBodyMemberListStep.isComplete(),
-                    )
-                }
+                parents { journey.orgGovBodyMemberListStep.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {
