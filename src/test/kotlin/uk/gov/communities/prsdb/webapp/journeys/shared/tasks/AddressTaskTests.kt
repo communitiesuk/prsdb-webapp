@@ -119,6 +119,7 @@ class AddressTaskTests {
         val manualAddressStep = mock<ManualAddressStep>().apply { whenever(this.formModelOrNull).thenReturn(manualAddressFormModel) }
         return object : AddressTask(journeyStateService, mock(), selectAddressStep, mock(), manualAddressStep) {
             override val lookupAddressContentProperties = emptyMap<String, Any?>()
+            override val selectAddressContentProperties = emptyMap<String, Any?>()
             override val manualAddressContentProperties = emptyMap<String, Any?>()
         }.apply {
             bindRoute(null)
