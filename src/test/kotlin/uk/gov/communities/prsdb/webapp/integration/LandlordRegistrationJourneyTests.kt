@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -341,9 +342,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgGovBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
         orgGovBodyDetailsPage.submitHasDetails()
 
-        // TODO: PDJB-1285 - Submit real data once the step is implemented
         val orgGovBodyWhoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
-        orgGovBodyWhoToProvidePage.form.submit()
+        orgGovBodyWhoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.DIRECTOR)
 
         val orgGovBodyMemberNamePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
         orgGovBodyMemberNamePage.submitName("Test Governing Body Member Name")
