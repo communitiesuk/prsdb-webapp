@@ -262,7 +262,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(

@@ -741,7 +741,7 @@ class PropertyRegistrationJourney(
         .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     // Reads cachedOccupied first; falls back to the step's submitted form data when the upstream step
     // is wired up (parent journey context). The cache is essential when a CYA child journey reads this

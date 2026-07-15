@@ -77,7 +77,7 @@ class CheckYourAnswersJourneyStateTests {
         fun `setter extracts routeSegment from a StepRoute destination`() {
             val state = createTestState()
             state.returnToCyaPageDestination = Destination.StepRoute("my-route", "some-journey-id")
-            assertEquals("my-route", state.cyaRouteSegment)
+            assertEquals("my-route", state.cyaUrlPath)
         }
 
         @Test
@@ -87,14 +87,14 @@ class CheckYourAnswersJourneyStateTests {
 
             val state = createTestState()
             state.returnToCyaPageDestination = Destination.VisitableStep(mockStep, "some-journey-id")
-            assertEquals("step-route", state.cyaRouteSegment)
+            assertEquals("step-route", state.cyaUrlPath)
         }
 
         @Test
         fun `setter sets cyaRouteSegment to null for other destination types`() {
             val state = createTestState(cyaRouteSegment = "existing-route")
             state.returnToCyaPageDestination = Destination.Nowhere()
-            assertEquals(null, state.cyaRouteSegment)
+            assertEquals(null, state.cyaUrlPath)
         }
     }
 
@@ -196,7 +196,7 @@ class CheckYourAnswersJourneyStateTests {
         override val cyaStep: JourneyStep.RequestableStep<*, *, *> = testCyaStep
         override var originalJourneyUpdated: Instant? = Clock.System.now()
         override var cyaJourneys: Map<String, String> = initialCyaJourneys
-        override var cyaRouteSegment: String? = initialCyaRouteSegment
+        override var cyaUrlPath: String? = initialCyaRouteSegment
         override var checkingAnswersFor: String? = initialCheckingAnswersFor
 
         override val journeyId: String = testJourneyId

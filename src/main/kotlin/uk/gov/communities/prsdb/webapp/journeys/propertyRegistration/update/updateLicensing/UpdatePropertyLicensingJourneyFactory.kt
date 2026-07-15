@@ -125,7 +125,7 @@ class UpdateLicensingJourney(
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
 interface UpdateLicensingJourneyState :

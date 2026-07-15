@@ -7,7 +7,7 @@ abstract class AbstractJourneyState(
     protected val delegateProvider: JourneyStateDelegateProvider =
         JourneyStateDelegateProvider(journeyStateService),
 ) : JourneyState,
-    RegistersDelegateKeys by delegateProvider {
+    DelegateKeysOwner by delegateProvider {
     override fun getStepData(key: String): FormData? = objectToStringKeyedMap(journeyStateService.getSubmittedStepData()[key])
 
     override fun addStepData(

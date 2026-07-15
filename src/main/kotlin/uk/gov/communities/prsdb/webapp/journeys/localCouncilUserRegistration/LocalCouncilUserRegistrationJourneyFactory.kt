@@ -127,7 +127,7 @@ class LocalCouncilUserRegistrationJourney(
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val invitation: LocalCouncilInvitation
         get() = invitationService.getValidInvitationFromToken(invitationToken)

@@ -9,7 +9,7 @@ import kotlin.reflect.KProperty
 
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
-) : RegistersDelegateKeys {
+) : DelegateKeysOwner {
     private val keysInUse = mutableSetOf<String>()
 
     private var registry: DelegateKeyRegistry? = null

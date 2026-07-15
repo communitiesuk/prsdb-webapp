@@ -6,8 +6,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.L
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 
-// The lead trustee's address reuses the shared address-lookup task as a second, routed instance, so its first
-// page is the lookup page at <journey>/lead-trustee-address/lookup-address.
 class LeadTrusteeAddressFormPageLandlordRegistration(
     page: Page,
 ) : LookupAddressFormPage(

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.urlPath
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
@@ -19,12 +20,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     var cyaJourneys: Map<String, String>
 
-    var cyaRouteSegment: String?
+    var cyaUrlPath: String?
 
     var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        get() = cyaUrlPath?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
         set(destination) {
-            cyaRouteSegment =
+            cyaUrlPath =
                 when (destination) {
                     is Destination.StepRoute -> destination.routeSegment
                     is Destination.VisitableStep -> destination.step.routeSegment
@@ -45,22 +46,22 @@ interface CheckYourAnswersJourneyState : JourneyState {
     }
 
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
-        if (!cyaJourneys.containsKey(checkableStep.routeSegment)) {
+        if (!cyaJourneys.containsKey(checkableStep.urlPath)) {
             cyaJourneys += makePair(checkableStep)
         }
-        return cyaJourneys[checkableStep.routeSegment]
-            ?: throw IllegalStateException("CYA Journey ID should have been created for ${checkableStep.routeSegment}")
+        return cyaJourneys[checkableStep.urlPath]
+            ?: throw IllegalStateException("CYA Journey ID should have been created for ${checkableStep.urlPath}")
     }
 
     private fun makePair(step: JourneyStep.RequestableStep<*, *, *>): Pair<String, String> {
-        val routeSegment = step.routeSegment
-        val cyaJourneyId = generateJourneyId("$baseJourneyId-$routeSegment")
+        val urlPath = step.urlPath
+        val cyaJourneyId = generateJourneyId("$baseJourneyId-$urlPath")
         val childJourney = createChildJourneyState(cyaJourneyId)
-        childJourney.checkingAnswersFor = routeSegment
+        childJourney.checkingAnswersFor = urlPath
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
         childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
 
-        return (routeSegment to cyaJourneyId)
+        return (urlPath to cyaJourneyId)
     }
 
     val isCheckingAnswers: Boolean
@@ -71,7 +72,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
     fun clearCyaFields() {
         checkingAnswersFor = null
         originalJourneyUpdated = null
-        cyaRouteSegment = null
+        cyaUrlPath = null
     }
 
     val baseJourneyId: String

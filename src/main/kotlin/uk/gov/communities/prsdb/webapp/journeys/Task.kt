@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<in TState : JourneyState> : RegistersDelegateKeys {
+abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit

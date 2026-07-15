@@ -381,8 +381,6 @@ class Navigator(
         return createValidPage(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
     }
 
-    // Navigates to a routed task's bare URL (no step segment). The dispatcher resolves this via the task's landing
-    // step, which redirects to the task's first step - here the lead trustee address lookup page.
     fun skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute(): LeadTrusteeAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteeAddress().build())
         navigateToLandlordRegistrationJourneyStep(TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT)
