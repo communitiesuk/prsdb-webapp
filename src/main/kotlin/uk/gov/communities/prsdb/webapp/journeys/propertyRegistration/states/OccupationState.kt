@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 
 interface OccupationState :
     JourneyState,
-    HouseholdsAndTenantsState,
     BedroomsState,
     FurnishedStatusState {
     val occupied: OccupiedStep

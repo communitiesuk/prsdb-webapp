@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
-            task(journey.householdsAndTenantsTask) {
+            duplicableTask(journey.householdsAndTenantsTask) {
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }

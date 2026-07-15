@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 
 interface TenancyDetailsState :
     JourneyState,
-    HouseholdsAndTenantsState,
     FurnishedStatusState {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     val rentIncludesBillsTask: RentIncludesBillsTask

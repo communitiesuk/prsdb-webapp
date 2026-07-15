@@ -26,7 +26,7 @@ class OccupationTask : Task<OccupationState>() {
                 }
                 savable()
             }
-            task(journey.householdsAndTenantsTask) {
+            duplicableTask(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.bedrooms }
                 savable()

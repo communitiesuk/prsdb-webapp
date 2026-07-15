@@ -49,7 +49,7 @@ class UpdateOccupancyCyaConfig(
                 //   For example, numBedrooms should no longer be set to null as that will be in the property details section
                 numberOfHouseholds =
                     if (isOccupied) {
-                        state.households.formModel
+                        state.householdsAndTenantsTask.households.formModel
                             .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                             .toInt()
                     } else {
@@ -57,7 +57,7 @@ class UpdateOccupancyCyaConfig(
                     },
                 numberOfPeople =
                     if (isOccupied) {
-                        state.tenants.formModel
+                        state.householdsAndTenantsTask.tenants.formModel
                             .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                             .toInt()
                     } else {

@@ -38,13 +38,14 @@ class OccupancyDetailsHelper {
                 if (isOccupied) addAll(getRestructuredOccupiedTenancyDetailsSummaryList(state, messageSource))
             }
 
-    fun <T> getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
+    fun <T : CheckYourAnswersJourneyState> getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
         state: T,
-    ): List<SummaryListRowViewModel> where T : HouseholdsAndTenantsState, T : CheckYourAnswersJourneyState =
+        householdsAndTenantsState: HouseholdsAndTenantsState,
+    ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val householdsStep = state.households
-                val tenantsStep = state.tenants
+                val householdsStep = householdsAndTenantsState.households
+                val tenantsStep = householdsAndTenantsState.tenants
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.households",
@@ -130,7 +131,7 @@ class OccupancyDetailsHelper {
         state: T,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
-        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state) +
+        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
             getBedroomsRow(state) +
             getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
@@ -138,7 +139,7 @@ class OccupancyDetailsHelper {
         state: T,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
-        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state) +
+        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
             getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : OccupationState, T : CheckYourAnswersJourneyState {
