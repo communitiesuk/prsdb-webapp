@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -12,7 +14,9 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
 interface BuildableElement {
-    fun build(): List<JourneyStep<*, *, *>>
+    // A single DelegateKeyRegistry is threaded through the whole build so the journey state and every task register
+    // their route-scoped delegate keys into it, letting cross-element key collisions be detected at build time.
+    fun build(registry: DelegateKeyRegistry = DelegateKeyRegistry()): List<JourneyStep<*, *, *>>
 
     fun configure(configuration: ConfigurableElement<*>.() -> Unit)
 
@@ -35,16 +39,16 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     private var additionalConfiguration: MutableList<ConditionalElementConfiguration> = mutableListOf()
     private var additionalFirstElementConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
 
-    override fun build() = journeyElements.flatMap { element -> element.configureAndBuild() }
+    override fun build(registry: DelegateKeyRegistry) = journeyElements.flatMap { element -> element.configureAndBuild(registry) }
 
-    protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
+    protected fun BuildableElement.configureAndBuild(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
         configure {
             defaultUnreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
         }
 
         additionalConfiguration.forEach { this.conditionallyConfigure(it.condition, it.configuration) }
 
-        return build()
+        return build(registry)
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
@@ -76,9 +80,23 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     override fun task(
         uninitialisedTask: Task<TState>,
+        routeSegment: String?,
         init: TaskInitialiser<TState>.() -> Unit,
     ) {
         val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
+        routeSegment?.let { taskInitialiser.routeSegment(it) }
+        taskInitialiser.init()
+        journeyElements.add(taskInitialiser)
+    }
+
+    override fun <TTaskState : JourneyState> duplicableTask(
+        uninitialisedTask: DuplicableTask<TTaskState>,
+        routeSegment: String?,
+        init: TaskInitialiser<TTaskState>.() -> Unit,
+    ) {
+        // The task provides its own state, so build its sub-journey against that.
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
+        routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }
@@ -143,11 +161,11 @@ open class SubJourneyBuilder<TState : JourneyState>(
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
 
-    override fun build(): List<JourneyStep<*, *, *>> {
+    override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
         step<SubjourneyComplete, SubjourneyExitStepConfig>(exitStep) {
             exitInits.forEach { it() }
         }
-        val built = super.build()
+        val built = super.build(registry)
         firstStep = built.first()
         return built
     }

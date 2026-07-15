@@ -81,9 +81,11 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `createPropertyOwnership creates a property ownership`() {
+        // Arrange
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
+        val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
         val propertyBuildType = PropertyType.OTHER
@@ -103,6 +105,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
+                isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
                 landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyBuildType,
@@ -126,8 +129,10 @@ class PropertyOwnershipServiceTests {
             expectedPropertyOwnership,
         )
 
+        // Act
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
             landlords = mutableSetOf(landlord),
@@ -144,6 +149,7 @@ class PropertyOwnershipServiceTests {
             rentAmount = rentAmount,
         )
 
+        // Assert
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
@@ -155,6 +161,7 @@ class PropertyOwnershipServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
+        val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
         val propertyBuildType = PropertyType.OTHER
@@ -173,6 +180,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = households,
                 currentNumTenants = tenants,
+                isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
                 landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyBuildType,
@@ -198,6 +206,7 @@ class PropertyOwnershipServiceTests {
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = ownershipType,
+            isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
             landlords = mutableSetOf(landlord),
@@ -235,6 +244,7 @@ class PropertyOwnershipServiceTests {
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
             landlords = mutableSetOf(landlord),
@@ -271,6 +281,7 @@ class PropertyOwnershipServiceTests {
 
         propertyOwnershipService.createPropertyOwnership(
             ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
             landlords = mutableSetOf(landlord),
@@ -477,8 +488,7 @@ class PropertyOwnershipServiceTests {
                     propertyOwnership
                         .landlords
                         .first() as IndividualLandlord
-                )
-                    .baseUser
+                ).baseUser
                     .id
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -894,10 +904,11 @@ class PropertyOwnershipServiceTests {
         fun `updateOccupancy updates the property's occupancy status`() {
             // Arrange
             val propertyOwnership =
-                MockLandlordData.createOccupiedPropertyOwnership(
+                MockLandlordData.createUnoccupiedPropertyOwnership(
                     id = 1,
-                    currentNumTenants = 4,
                 )
+            val newOccupiedStatus = true
+            val newNumberOfHouseholds = 1
             val newNumberOfTenants = 5
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
@@ -906,8 +917,9 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = newOccupiedStatus,
                 numberOfPeople = newNumberOfTenants,
-                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                numberOfHouseholds = newNumberOfHouseholds,
                 numBedrooms = propertyOwnership.numBedrooms,
                 billsIncludedList = propertyOwnership.billsIncludedList,
                 customBillsIncluded = propertyOwnership.customBillsIncluded,
@@ -919,6 +931,8 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
+            assertEquals(newOccupiedStatus, propertyOwnership.isOccupied)
+            assertEquals(newNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
             assertEquals(newNumberOfTenants, propertyOwnership.currentNumTenants)
         }
 
@@ -933,6 +947,7 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = true,
                 numberOfPeople = 2,
                 numberOfHouseholds = 1,
                 numBedrooms = 1,
@@ -962,6 +977,7 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = true,
                 numberOfPeople = propertyOwnership.currentNumTenants + 1,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numBedrooms = propertyOwnership.numBedrooms,
@@ -991,6 +1007,7 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = false,
                 numberOfPeople = 0,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numBedrooms = propertyOwnership.numBedrooms,
@@ -1020,6 +1037,7 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = false,
                 numberOfPeople = 0,
                 numberOfHouseholds = 0,
                 numBedrooms = null,
@@ -1049,6 +1067,7 @@ class PropertyOwnershipServiceTests {
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
+                isOccupied = true,
                 numberOfPeople = 3,
                 numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                 numBedrooms = propertyOwnership.numBedrooms,
@@ -1079,6 +1098,7 @@ class PropertyOwnershipServiceTests {
                 assertThrows<UpdateConflictException> {
                     propertyOwnershipService.updateOccupancy(
                         propertyOwnership.id,
+                        isOccupied = true,
                         numberOfPeople = 6,
                         numberOfHouseholds = propertyOwnership.currentNumHouseholds,
                         numBedrooms = propertyOwnership.numBedrooms,

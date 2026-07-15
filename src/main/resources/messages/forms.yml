@@ -1,7 +1,7 @@
 errorSummary:
   heading: There is a problem
 errorMessage:
-  prefix: 'Error:'
+  prefix: 'Error: '
 buttons:
   startNow: Start now
   saveAndContinue: Save and continue
@@ -164,6 +164,10 @@ orgGovBodyWhoToProvide:
     otherMember: Other member of the governing body
   error:
     missing: Select who you are providing details for
+orgGovBodyMemberName:
+  fieldSetHeading: What is their full name?
+  error:
+    missing: Enter a full name
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -181,7 +185,7 @@ orgMainContact:
       missing: Enter a phone number
       invalidFormat: Enter a phone number including the country code for international numbers
 leadTrusteeEmail:
-  fieldSetHeading: What is the trustee’s email address?
+  fieldSetHeading: What is the lead trustee’s email address?
   error:
     missing: Enter email address
     invalidFormat: Enter an email address in the right format
@@ -223,8 +227,8 @@ lookupAddress:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
   trusteeRegistration:
-    fieldSetHeading: What is the trustee’s contact address?
-    fieldSetHint: We will use this address to send official correspondence to the trustee.
+    fieldSetHeading: What is the lead trustee’s contact address?
+    fieldSetHint: Use an address where the trustee can receive correspondence
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -272,7 +276,7 @@ manualAddress:
     addressLineTwo:
       label: Address 2 (optional)
   trusteeRegistration:
-    fieldSetHeading: What is the trustee’s contact address?
+    fieldSetHeading: What is the lead trustee’s contact address?
   propertyRegistration:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:

@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
@@ -200,14 +199,13 @@ class UpdateOccupancyJourney(
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
 
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
