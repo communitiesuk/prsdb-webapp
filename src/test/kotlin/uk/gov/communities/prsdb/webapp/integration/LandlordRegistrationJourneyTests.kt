@@ -390,4 +390,17 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
     }
+
+    @Test
+    fun `Selecting no regulator on charity registered with skips the charity number question and goes to the companies house page`(
+        page: Page,
+    ) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
+        val charityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        charityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.NONE)
+
+        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+    }
 }
