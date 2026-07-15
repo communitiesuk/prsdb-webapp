@@ -22,7 +22,7 @@ class LandlordRegistrationJourneyFactory(
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        val checkingAnswersFor = state.checkingAnswersFor
+        val checkingAnswersFor = state.landlordRegistrationTask.checkingAnswersFor
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
@@ -60,8 +60,6 @@ class LandlordRegistrationJourney(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
-    override val checkingAnswersFor: String? get() = landlordRegistrationTask.checkingAnswersFor
-
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(user) })
@@ -76,5 +74,4 @@ class LandlordRegistrationJourney(
 interface LandlordRegistrationJourneyState : JourneyState {
     val landlordRegistrationTask: LandlordRegistrationTask
     val deleteJourneyStep: DeleteJourneyStep
-    val checkingAnswersFor: String?
 }
