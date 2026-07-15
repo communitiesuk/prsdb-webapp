@@ -132,6 +132,23 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
+orgGovBodyMustProvideInfo:
+  heading: You need to provide more information to register
+  provideAtLeastOne: 'You must provide at least one of:'
+  bullet:
+    companiesHouse: a Companies House registration number
+    directors: directors’ details
+    trustees: trustee details
+  toRegister:
+    beforeLink: 'To register, '
+    linkText: enter your organisation’s details
+    afterLink: .
+  registerAsIndividual:
+    beforeLink: 'If you rent your property as a sole trader, an individual or joint landlord you should '
+    linkText: register as an individual
+    afterLink: .
+  getHelp:
+    heading: Get help with your registration
 orgGovBodyDetails:
   title: Providing details about your organisation’s governing body
   heading: Providing details about your organisation’s governing body

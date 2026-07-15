@@ -186,7 +186,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgGovBodyMustProvideInfoStep) {
                 routeSegment(OrgGovBodyMustProvideInfoStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.NO_DETAILS) }
-                nextStep { journey.orgMainContactStep }
+                noNextDestination()
             }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
@@ -219,12 +219,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.orgGovBodyMustProvideInfoStep.isComplete(),
-                        journey.orgGovBodyMemberListStep.isComplete(),
-                    )
-                }
+                parents { journey.orgGovBodyMemberListStep.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {
