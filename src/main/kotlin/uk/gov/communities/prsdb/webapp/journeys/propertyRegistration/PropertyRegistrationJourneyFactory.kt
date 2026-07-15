@@ -179,7 +179,7 @@ class PropertyRegistrationJourneyFactory(
                 HmoMandatoryLicenceStep.ROUTE_SEGMENT,
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.licensingTask)
+                    duplicableCheckAnswerTask(journey.licensingTask)
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
@@ -318,7 +318,7 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.licensingTask.firstStep }
                     saveProgress()
                 }
-                task(journey.licensingTask) {
+                duplicableTask(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
@@ -470,7 +470,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
-                task(journey.licensingTask) {
+                duplicableTask(journey.licensingTask) {
                     parents {
                         OrParents(
                             journey.occupied.hasOutcome(YesOrNo.YES),
@@ -606,10 +606,6 @@ class PropertyRegistrationJourney(
     override val ownershipTypeStep: OwnershipTypeStep,
     // Licensing task
     override val licensingTask: LicensingTask,
-    override val licensingTypeStep: LicensingTypeStep,
-    override val selectiveLicenceStep: SelectiveLicenceStep,
-    override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
-    override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Occupation steps
     override val occupied: OccupiedStep,
     // Nested households and tenants task
@@ -768,7 +764,6 @@ class PropertyRegistrationJourney(
 
 interface PropertyRegistrationJourneyState :
     PropertyRegistrationAddressState,
-    LicensingState,
     OccupationState,
     PropertyDetailsState,
     OwnershipAndLandlordsState,

@@ -42,7 +42,7 @@ class PropertyRegistrationCyaStepConfig(
                     } else {
                         getPropertyDetailsSummaryList(state)
                     },
-                "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
+                "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask),
                 "tenancyDetails" to
                     if (isRestructured) {
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)
