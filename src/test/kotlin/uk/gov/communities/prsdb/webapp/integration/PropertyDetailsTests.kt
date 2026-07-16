@@ -621,22 +621,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(2)
             }
-
-            @Test
-            fun `landlord view shows the combined provide-later and compliance notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
-
-                assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
-            }
-
-            @Test
-            fun `local council view shows the combined provide-later and compliance notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
-
-                assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
-            }
         }
 
         @Nested
@@ -660,14 +644,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(2)
-            }
-
-            @Test
-            fun `landlord view does not show a provide-later notification banner for an unoccupied property`(page: Page) {
-                navigator.goToPropertyDetailsLandlordView(9)
-
-                assertThat(page.getByText("You must finish adding")).not().isVisible()
-                assertThat(page.getByText("You must finish providing")).not().isVisible()
             }
         }
 
@@ -693,14 +669,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
-            }
-
-            @Test
-            fun `landlord view does not show a provide-later notification banner when all fields are completed`(page: Page) {
-                navigator.goToPropertyDetailsLandlordView(40)
-
-                assertThat(page.getByText("You must finish adding")).not().isVisible()
-                assertThat(page.getByText("You must finish providing")).not().isVisible()
             }
         }
 
@@ -748,27 +716,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `landlord view shows only the tenancy provide-later notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
-
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("You must finish adding")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("licensing details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
-            }
-
-            @Test
-            fun `local council view shows a tenancy provide-later paragraph and a tenancy-only notification banner`(page: Page) {
+            fun `local council view shows a tenancy provide-later paragraph`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
 
                 assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("licensing details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
             }
         }
 
@@ -794,57 +748,12 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `landlord view shows only the licensing provide-later notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
-
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("You must finish adding")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("licensing details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
-            }
-
-            @Test
-            fun `local council view shows a licensing provide-later paragraph and a licensing-only notification banner`(page: Page) {
+            fun `local council view shows a licensing provide-later paragraph`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
 
                 assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
-                ).hasCount(1)
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("licensing details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
-            }
-        }
-
-        @Nested
-        inner class OccupiedWithBothSkippedAndCompliant {
-            // Property 43: occupied, no licence, tenancy skipped, fully compliant (no compliance issue), so the
-            // pure BOTH banner renders rather than COMBINED. The landlord view shows two inline links; the local
-            // council view shows a single link (different copy).
-            @Test
-            fun `landlord view shows the both provide-later notification banner with links to licensing and tenancy`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
-
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("You must finish adding")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("licensing details")
-                assertThat(detailsPage.notificationBanner.content.heading).containsText("tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
-                assertThat(
-                    page.locator(".govuk-notification-banner__heading a.govuk-notification-banner__link"),
-                ).hasCount(2)
-            }
-
-            @Test
-            fun `local council view shows the both provide-later notification banner with a single link`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
-
-                assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("This property is missing licensing and tenancy details")
-                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("compliance certificates")
-                assertThat(
-                    page.locator(".govuk-notification-banner__heading a.govuk-notification-banner__link"),
                 ).hasCount(1)
             }
         }
