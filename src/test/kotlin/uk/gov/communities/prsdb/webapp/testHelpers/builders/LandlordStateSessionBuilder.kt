@@ -176,7 +176,7 @@ class LandlordStateSessionBuilder(
         // The lead trustee address is a routed instance of the shared address task, so its data is stored under
         // keys prefixed with the task route. Provide a full "found and selected an address" path so the task is
         // complete and the journey can proceed past it.
-        val routePrefix = TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = TrusteeAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",
