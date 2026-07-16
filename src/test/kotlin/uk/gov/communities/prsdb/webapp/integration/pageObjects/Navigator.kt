@@ -819,6 +819,14 @@ class Navigator(
         return createValidPage(page, FurnishedStatusFormPagePropertyRegistration::class)
     }
 
+    fun skipToTenancyDetailsFurnishedStatusPage(): FurnishedStatusFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsFurnished().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(FurnishedStatusStep.ROUTE_SEGMENT)
+        return createValidPage(page, FurnishedStatusFormPagePropertyRegistration::class)
+    }
+
     fun skipToTenancyDetailsRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforeTenancyDetailsRentFrequency().build(),
