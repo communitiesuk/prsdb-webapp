@@ -104,6 +104,7 @@ class OrgLandlordRegistrationTask(
                 parents { journey.orgPhoneNumberStep.isComplete() }
                 nextStep { journey.leadTrusteeNameStep }
             }
+            // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.leadTrusteeNameStep) {
                 routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
                 parents { journey.orgTypeStep.isComplete() }
@@ -129,7 +130,6 @@ class OrgLandlordRegistrationTask(
                 // TODO PDJB-1257: reroute to the exit point of the trustee section
                 nextStep { journey.orgCharityStep }
             }
-            // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
                 parents { journey.trusteeAddressTask.isComplete() }
