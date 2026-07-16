@@ -309,7 +309,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class HmoAdditionalLicenceStep {
             @Test
