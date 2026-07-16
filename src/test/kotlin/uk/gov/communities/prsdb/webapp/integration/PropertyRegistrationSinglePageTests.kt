@@ -256,19 +256,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class SelectiveLicenceStep {
             @Test
             fun `Submitting with no licence number returns an error`(page: Page) {
-                val selectiveLicencePage = navigator.skipToPropertyRegistrationSelectiveLicencePage()
+                val selectiveLicencePage = navigator.skipToPropertyRegistrationRentedOutSelectiveLicencePage()
                 selectiveLicencePage.form.submit()
                 assertThat(selectiveLicencePage.form.getErrorMessage()).containsText("Enter the selective licence number")
             }
 
             @Test
             fun `Submitting with a very long licence number returns an error`(page: Page) {
-                val selectiveLicencePage = navigator.skipToPropertyRegistrationSelectiveLicencePage()
+                val selectiveLicencePage = navigator.skipToPropertyRegistrationRentedOutSelectiveLicencePage()
                 val aVeryLongString =
                     "This string is very long, so long that it is not feasible that it is a real licence number " +
                         "- therefore if it is submitted there will in fact be an error rather than a successful submission." +

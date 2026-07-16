@@ -682,6 +682,14 @@ class Navigator(
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationRentedOutSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutSelectiveLicence().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(SelectiveLicenceStep.ROUTE_SEGMENT)
+        return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHmoMandatoryLicence().build(),
