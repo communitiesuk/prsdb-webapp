@@ -787,6 +787,14 @@ class Navigator(
         return createValidPage(page, RentIncludesBillsFormPagePropertyRegistration::class)
     }
 
+    fun skipToTenancyDetailsRentIncludesBillsPage(): RentIncludesBillsFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsRentIncludesBills().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RentIncludesBillsStep.ROUTE_SEGMENT)
+        return createValidPage(page, RentIncludesBillsFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationBillsIncluded().build(),
