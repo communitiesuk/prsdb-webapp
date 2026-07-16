@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
@@ -26,7 +27,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -90,6 +93,7 @@ class PropertyDetailsController(
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+        addProvideLaterBannerAttributes({ name, value -> modelAndView.addObject(name, value) }, propertyDetails, propertyComplianceDetails)
 
         // When joint landlords flag is on, show all landlords as summary cards
         if (jointLandlordsIsEnabled) {
@@ -222,6 +226,7 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+        addProvideLaterBannerAttributes({ name, value -> model.addAttribute(name, value) }, propertyDetails, propertyComplianceDetails)
         model.addAttribute("isLandlordView", false)
 
         model.addAttribute("provideLaterEnabled", provideLaterIsEnabled)
@@ -229,6 +234,28 @@ class PropertyDetailsController(
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
+    }
+
+    private fun addProvideLaterBannerAttributes(
+        addAttribute: (String, Any?) -> Unit,
+        propertyDetails: PropertyDetailsViewModel,
+        propertyComplianceDetails: PropertyComplianceViewModel?,
+    ) {
+        val hasComplianceIssue =
+            propertyComplianceDetails == null || propertyComplianceDetails.notificationMessages.isNotEmpty()
+
+        val provideLaterBanner =
+            PropertyDetailsNotificationBannerViewModel.fromState(
+                provideLaterEnabled = provideLaterIsEnabled,
+                isOccupied = propertyDetails.isOccupied,
+                isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
+                isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
+                hasComplianceIssue = hasComplianceIssue,
+            )
+
+        addAttribute("provideLaterBanner", provideLaterBanner)
+        addAttribute("suppressComplianceBanner", provideLaterBanner?.suppressesComplianceBanner ?: false)
+        addAttribute("propertyDetailsFragment", PROPERTY_DETAILS_FRAGMENT)
     }
 
     companion object {
