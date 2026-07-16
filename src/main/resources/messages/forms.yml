@@ -806,16 +806,6 @@ epcExemptionReason:
   radios:
     annualEnergyConsumptionLessThan25Percent:
       label: 'The building is used or intended to be used for a limited time in the year, with an expected energy use of less than 25% of what it would be if used all year round'
-checkMatchedEpc:
-  error:
-    missing: Select Yes or No to continue
-  isThisTheCorrectEpc:
-    heading: Is this the correct EPC for the property?
-  mode:
-    epcIncorrect: 'No, this is not the correct EPC'
-    epcCompliant: 'Yes, this is the correct EPC and it is compliant'
-    epcOlderThan10Years: 'Yes, this is the correct EPC and it is older than 10 years'
-    epcLowEnergyRating: 'Yes, this is the correct EPC and it has a low energy rating'
 epcLookup:
   error:
     invalidFormat: Enter a 20 digit certificate number
