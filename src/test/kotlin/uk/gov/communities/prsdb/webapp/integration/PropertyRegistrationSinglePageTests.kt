@@ -15,7 +15,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -74,11 +73,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class TaskListStep {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -114,17 +108,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
-        }
-    }
-
-    @Nested
-    inner class TaskListStepWithFeatureFlagDisabled {
-        @Test
-        fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
-            featureFlagManager.disableFeature(JOINT_LANDLORDS)
-            navigator.skipToPropertyRegistrationRentFrequencyPage()
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            BaseComponent.assertThat(taskListPage.getRegisterTask("Invite joint landlords")).isHidden()
         }
     }
 
@@ -691,11 +674,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class HasJointLandlordsStep {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -715,11 +693,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class ManagingJointLandlords {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `Submitting remove a joint landlord with no option selected returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -867,11 +840,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteJointLandlordsStep {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `Submitting with no email returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -891,11 +859,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteAnotherJointLandlordsStep {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `Submitting with an already invited email returns an error`(page: Page) {
             val alreadyInvitedEmail = "already@invited.com"
@@ -1283,13 +1246,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertTrue(savedJourneyStateAfterOwnershipUpdate.serializedState.contains("licensingType\":\"NO_LICENSING\""))
             assertTrue(savedJourneyStateAfterLicensingUpdate.serializedState.contains("licensingType\":\"HMO_ADDITIONAL_LICENCE\""))
             assertTrue(savedJourneyStateAfterLicensingUpdate.serializedState.contains("licenceNumber\":\"licence number\""))
-        }
-
-        @Test
-        fun `the joint landlords section is not shown on the check answers page when the feature flag is disabled`(page: Page) {
-            featureFlagManager.disableFeature(JOINT_LANDLORDS)
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
-            BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
         }
 
         @Test

@@ -3,8 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
@@ -20,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
@@ -33,7 +33,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -41,7 +40,39 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
+class OrgLandlordRegistrationTask(
+    journeyStateService: JourneyStateService,
+    override val yourDetailsStep: YourDetailsStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
+    override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCompanyNumberStep: OrgCompanyNumberStep,
+    override val orgCharityStep: OrgCharityStep,
+    override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
+    override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
+    override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
+    override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
+    override val leadTrusteeNameStep: LeadTrusteeNameStep,
+    override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
+    override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
+    override val leadTrusteeDobStep: LeadTrusteeDobStep,
+    override val trusteeAddressTask: TrusteeAddressTask,
+    override val orgGovBodyDetailsStep: OrgGovBodyDetailsStep,
+    override val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep,
+    override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
+    override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
+    override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
+    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
+) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
+    LandlordRegistrationOrgLandlordState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
             step(journey.yourDetailsStep) {
@@ -71,23 +102,11 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 parents { journey.orgPhoneNumberStep.isComplete() }
-                nextStep { journey.orgDirectorsStep }
-            }
-            // TODO PDJB-1292: remove this
-            step(journey.orgDirectorsStep) {
-                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
-                nextStep { journey.orgTrusteesStep }
-            }
-            // TODO PDJB-1292: remove this
-            step(journey.orgTrusteesStep) {
-                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
-                parents { journey.orgDirectorsStep.isComplete() }
                 nextStep { journey.leadTrusteeNameStep }
             }
             step(journey.leadTrusteeNameStep) {
                 routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
+                parents { journey.orgTypeStep.isComplete() }
                 nextStep { journey.leadTrusteeEmailStep }
             }
             step(journey.leadTrusteeEmailStep) {

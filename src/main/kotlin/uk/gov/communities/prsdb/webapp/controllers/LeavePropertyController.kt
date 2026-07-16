@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LEAVE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -37,7 +35,6 @@ class LeavePropertyController(
     private val leavePropertyService: LeavePropertyService,
 ) {
     @GetMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -57,7 +54,6 @@ class LeavePropertyController(
     }
 
     @PostMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
@@ -78,7 +74,6 @@ class LeavePropertyController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(
         model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,

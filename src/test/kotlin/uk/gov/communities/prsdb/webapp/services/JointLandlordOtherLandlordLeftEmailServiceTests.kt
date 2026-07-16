@@ -17,14 +17,14 @@ import kotlin.test.assertEquals
 class JointLandlordOtherLandlordLeftEmailServiceTests {
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var mockNotificationEmailService: EmailNotificationService<JointLandlordOtherLandlordLeftNotification>
-    private lateinit var emailService: JointLandlordOtherLandlordLeftEmailServiceImplFlagOn
+    private lateinit var emailService: JointLandlordOtherLandlordLeftEmailService
 
     @BeforeEach
     fun setup() {
         mockAbsoluteUrlProvider = mock()
         mockNotificationEmailService = mock()
         emailService =
-            JointLandlordOtherLandlordLeftEmailServiceImplFlagOn(
+            JointLandlordOtherLandlordLeftEmailService(
                 mockAbsoluteUrlProvider,
                 mockNotificationEmailService,
             )
@@ -71,20 +71,6 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
             )
 
         emailService.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
-
-        verify(mockNotificationEmailService, never()).sendEmail(any(), any())
-    }
-
-    @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordOtherLandlordLeftEmailServiceImplFlagOff()
-        val previousLandlord = MockLandlordData.createLandlord(name = "Alice")
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(MockLandlordData.createLandlord(name = "Bob", email = "bob@example.com")),
-            )
-
-        flagOff.sendNotificationToRemainingLandlords(propertyOwnership, previousLandlord)
 
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
     }
