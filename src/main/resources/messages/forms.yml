@@ -645,6 +645,11 @@ checkPropertyAnswers:
     ownership: Ownership type
     licensingType: Licensing type
     noLicensing: None
+    licensingProvideLater: Provide this later
+  additionalLandlords:
+    heading: Additional landlords
+  interestedParties:
+    heading: Interested parties
   tenancyDetails:
     heading: Tenancy and rental information
     occupied: Occupied by tenants

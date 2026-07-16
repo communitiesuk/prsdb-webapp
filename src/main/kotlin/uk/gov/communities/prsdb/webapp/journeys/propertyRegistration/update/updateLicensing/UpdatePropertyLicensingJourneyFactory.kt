@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideLicensingLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -110,6 +111,7 @@ class UpdateLicensingJourney(
     override val selectiveLicenceStep: SelectiveLicenceStep,
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
+    override val provideLicensingLaterStep: ProvideLicensingLaterStep,
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -126,6 +128,9 @@ class UpdateLicensingJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val allowProvideLicensingLaterRoute: Boolean = false
+    override val isOccupied: Boolean? = null
 }
 
 interface UpdateLicensingJourneyState :

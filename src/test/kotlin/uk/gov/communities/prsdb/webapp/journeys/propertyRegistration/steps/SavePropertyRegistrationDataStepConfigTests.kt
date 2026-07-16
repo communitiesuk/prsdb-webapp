@@ -159,6 +159,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = eq(epcExemptionReason),
             epcMeesExemptionReason = eq(meesExemptionReason),
             epcProvideLater = eq(false),
+            licenseProvideLater = eq(false),
         )
     }
 
@@ -206,6 +207,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 epcExemptionReason = anyOrNull(),
                 epcMeesExemptionReason = anyOrNull(),
                 epcProvideLater = anyOrNull(),
+                licenseProvideLater = anyOrNull(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -263,6 +265,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
         )
     }
 
@@ -319,7 +322,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
         val licensingTypeFormModel = LicensingTypeFormModel().apply { licensingType = LicensingType.SELECTIVE_LICENCE }
         whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
-        whenever(mockLicensingTypeStep.formModel).thenReturn(licensingTypeFormModel)
+        whenever(mockLicensingTypeStep.formModelOrNull).thenReturn(licensingTypeFormModel)
+        whenever(mockLicensingTypeStep.outcome).thenReturn(LicensingTypeMode.SELECTIVE_LICENCE)
 
         whenever(mockState.getLicenceNumberOrNull()).thenReturn(null)
 

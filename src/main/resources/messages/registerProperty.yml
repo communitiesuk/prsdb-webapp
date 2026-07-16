@@ -121,3 +121,26 @@ confirmMissingCompliance:
     error:
       missing: Select whether you want to submit this registration
   button: Confirm and submit
+provideLicensingLater:
+  occupied:
+    heading: Provide details about property licensing later
+    paragraph:
+      one: You can continue and submit your registration now, but you'll need to return later and provide details about this property's license.
+    whenToAdd:
+      heading: When you must do this by
+      insetText: To keep your property registered, you must provide its licensing details within 28 days.
+      paragraph: This is because you've told us this property's occupied by tenants.
+  unoccupied:
+    heading: Provide details about property licensing later
+    paragraph:
+      one: If you're unsure, check with the local council if your property needs a license to be rented out.
+    whenToAdd:
+      heading: When you'll need to provide these property licensing details
+      paragraph:
+        one: You can continue to finish your registration and get a Property Registration Number.
+        two: "Once your property's occupied, you have 28 days to return and tell us:"
+  weWillNeedToKnow:
+    intro: "We'll need to know:"
+    bullet:
+      one: if your property needs a licence or not
+      two: details about the licence (if your property needs one)

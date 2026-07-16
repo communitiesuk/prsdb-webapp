@@ -40,7 +40,7 @@ class PropertyRegistrationService(
     fun registerProperty(
         addressModel: AddressDataModel,
         propertyType: PropertyType,
-        licenseType: LicensingType,
+        licenseType: LicensingType?,
         licenceNumber: String,
         ownershipType: OwnershipType,
         isOccupied: Boolean,
@@ -72,6 +72,7 @@ class PropertyRegistrationService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
+        licenseProvideLater: Boolean = false,
     ) {
         val landlord =
             individualLandlordRepository.findByBaseUser_Id(baseUserId)
@@ -98,6 +99,7 @@ class PropertyRegistrationService(
                 customPropertyType,
                 markedJointLandlord,
                 mutableSetOf(landlord),
+                licenseProvideLater = licenseProvideLater,
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
@@ -127,7 +129,7 @@ class PropertyRegistrationService(
     private fun createPropertyOwnershipAndRelatedEntities(
         addressModel: AddressDataModel,
         propertyType: PropertyType,
-        licenseType: LicensingType,
+        licenseType: LicensingType?,
         licenceNumber: String,
         ownershipType: OwnershipType,
         isOccupied: Boolean,
@@ -143,6 +145,7 @@ class PropertyRegistrationService(
         customPropertyType: String?,
         markedJointLandlord: Boolean,
         landlords: MutableSet<Landlord>,
+        licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -151,7 +154,7 @@ class PropertyRegistrationService(
         val address = addressService.findOrCreateAddress(addressModel)
 
         val license =
-            if (licenseType != LicensingType.NO_LICENSING) {
+            if (licenseType != null) {
                 licenseService.createLicense(licenseType, licenceNumber)
             } else {
                 null
@@ -175,6 +178,7 @@ class PropertyRegistrationService(
             markedJointLandlord = markedJointLandlord,
             address = address,
             license = license,
+            licenseProvideLater = licenseProvideLater,
         )
     }
 

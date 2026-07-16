@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideLicensingLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 
 @JourneyFrameworkComponent
@@ -19,7 +20,6 @@ class LicensingTask(
 ) : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
-            // TODO(PDJB-990): route to the 'provide details about licensing later' page when 'Provide this later' is selected behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
             step(journey.licensingTypeStep) {
                 routeSegment(LicensingTypeStep.ROUTE_SEGMENT)
                 nextStep { mode ->
@@ -28,6 +28,7 @@ class LicensingTask(
                         LicensingTypeMode.HMO_MANDATORY_LICENCE -> journey.hmoMandatoryLicenceStep
                         LicensingTypeMode.HMO_ADDITIONAL_LICENCE -> journey.hmoAdditionalLicenceStep
                         LicensingTypeMode.NO_LICENSING -> exitStep
+                        LicensingTypeMode.PROVIDE_LATER -> journey.provideLicensingLaterStep
                     }
                 }
             }
@@ -46,6 +47,12 @@ class LicensingTask(
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_ADDITIONAL_LICENCE) }
                 nextStep { exitStep }
             }
+            step(journey.provideLicensingLaterStep) {
+                routeSegment(ProvideLicensingLaterStep.ROUTE_SEGMENT)
+                parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.PROVIDE_LATER) }
+                nextStep { exitStep }
+                savable()
+            }
             exitStep {
                 parents {
                     OrParents(
@@ -53,6 +60,7 @@ class LicensingTask(
                         journey.selectiveLicenceStep.isComplete(),
                         journey.hmoMandatoryLicenceStep.isComplete(),
                         journey.hmoAdditionalLicenceStep.isComplete(),
+                        journey.provideLicensingLaterStep.isComplete(),
                     )
                 }
             }
