@@ -332,6 +332,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         val hasJointLandlordsFormModel = HasJointLandlordsFormModel().apply { hasJointLandlords = false }
         whenever(mockState.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
         whenever(mockHasJointLandlordsStep.formModel).thenReturn(hasJointLandlordsFormModel)
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mock())
     }
 
     private fun setupStateForComplianceData(
