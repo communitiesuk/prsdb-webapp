@@ -105,7 +105,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
@@ -252,6 +254,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
@@ -505,6 +508,22 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyDetails().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage(): OrgGovBodyMemberLookupAddressFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
+        navigateToLandlordRegistrationJourneyStep(
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+        )
+        return createValidPage(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage(): OrgGovBodyMemberSelectAddressFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberSelectAddress().build())
+        navigateToLandlordRegistrationJourneyStep(
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        )
+        return createValidPage(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationGovBodyWhoToProvidePage(): OrgGovBodyWhoToProvideFormPageLandlordRegistration {
