@@ -206,6 +206,11 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
+                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                    withAdditionalContentProperties {
+                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
+                    }
+                }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
