@@ -698,6 +698,22 @@ class Navigator(
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationRentedOutHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutHmoMandatoryLicence().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HmoMandatoryLicenceStep.ROUTE_SEGMENT)
+        return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationRentedOutHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutHmoAdditionalLicence().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HmoAdditionalLicenceStep.ROUTE_SEGMENT)
+        return createValidPage(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHmoAdditionalLicence().build(),

@@ -104,6 +104,12 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationRentedOutSelectiveLicence() =
             beforePropertyRegistrationRentedOutLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
 
+        fun beforePropertyRegistrationRentedOutHmoMandatoryLicence() =
+            beforePropertyRegistrationRentedOutLicensingType().withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
+
+        fun beforePropertyRegistrationRentedOutHmoAdditionalLicence() =
+            beforePropertyRegistrationRentedOutLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
+
         fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()

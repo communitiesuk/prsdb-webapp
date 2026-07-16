@@ -279,26 +279,25 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class HmoMandatoryLicenceStep {
             @Test
             fun `Submitting with a licence number redirects to the next step`(page: Page) {
-                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
+                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoMandatoryLicencePage()
                 hmoMandatoryLicencePage.submitLicenseNumber("licence number")
-                assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+                assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             }
 
             @Test
             fun `Submitting with no licence number returns an error`(page: Page) {
-                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
+                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoMandatoryLicencePage()
                 hmoMandatoryLicencePage.form.submit()
                 assertThat(hmoMandatoryLicencePage.form.getErrorMessage()).containsText("Enter the HMO Mandatory licence number")
             }
 
             @Test
             fun `Submitting with a very long licence number returns an error`(page: Page) {
-                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
+                val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoMandatoryLicencePage()
                 val aVeryLongString =
                     "This string is very long, so long that it is not feasible that it is a real licence number " +
                         "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
@@ -315,21 +314,21 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         inner class HmoAdditionalLicenceStep {
             @Test
             fun `Submitting with a licence number redirects to the next step`(page: Page) {
-                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
+                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoAdditionalLicencePage()
                 hmoAdditionalLicencePage.submitLicenseNumber("licence number")
-                assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+                assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             }
 
             @Test
             fun `Submitting with no licence number returns an error`(page: Page) {
-                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
+                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoAdditionalLicencePage()
                 hmoAdditionalLicencePage.form.submit()
                 assertThat(hmoAdditionalLicencePage.form.getErrorMessage()).containsText("Enter the HMO additional licence number")
             }
 
             @Test
             fun `Submitting with a very long licence number returns an error`(page: Page) {
-                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
+                val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationRentedOutHmoAdditionalLicencePage()
                 val aVeryLongString =
                     "This string is very long, so long that it is not feasible that it is a real licence number " +
                         "- therefore if it is submitted there will in fact be an error rather than a successful submission." +
