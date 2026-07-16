@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
@@ -742,6 +742,26 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class GovBodyMemberLookupAddressStep {
+        @Test
+        fun `the governing body member lookup address page renders the correct heading`() {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is their contact address?")
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberSelectAddressStep {
+        @Test
+        fun `the governing body member select address page renders the correct heading`() {
+            val selectAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage()
+
+            assertThat(selectAddressPage.heading).containsText("Select their address")
+        }
+    }
+
+    @Nested
     inner class OrgGovBodyMemberDobStep {
         @Test
         fun `the governing body member date of birth page renders the heading`() {
@@ -769,14 +789,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `submitting a valid date of birth advances to the governing body member address step`(page: Page) {
             val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("15", "6", "1980")
-            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
         }
 
         @Test
         fun `submitting a valid date of birth with leading zeros advances to the governing body member address step`(page: Page) {
             val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
             govBodyMemberDobPage.submitDate("05", "06", "1980")
-            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
         }
     }
 

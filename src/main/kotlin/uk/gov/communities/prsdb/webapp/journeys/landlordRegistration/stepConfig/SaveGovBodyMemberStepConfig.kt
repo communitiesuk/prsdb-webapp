@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 @JourneyFrameworkComponent
@@ -34,6 +33,8 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 year = dobData["year"] as? String ?: "",
             ) ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
+        val address = state.govBodyMemberAddressTask.getAddress()
+
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
         val nextKey = state.nextGoverningBodyMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
 
@@ -42,8 +43,7 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 name = name,
                 type = type,
                 dateOfBirth = dateOfBirth,
-                // TODO: PDJB-1288 - Replace with real address once address step is implemented
-                address = AddressDataModel(singleLineAddress = "Address not yet collected"),
+                address = address,
             )
 
         currentMap[nextKey] = member
@@ -53,7 +53,6 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
         // Clear the individual step form data so the next member starts fresh
         state.clearStepData(OrgGovBodyMemberNameStep.ROUTE_SEGMENT)
         state.clearStepData(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
-        state.clearStepData(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT)
         state.clearStepData(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
     }
 }
