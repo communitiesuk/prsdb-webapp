@@ -1640,7 +1640,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withCheckedJointLandlords(mutableListOf("email@address.com")),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
@@ -1654,7 +1661,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
