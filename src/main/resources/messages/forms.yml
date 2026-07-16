@@ -179,7 +179,7 @@ orgGovBodyMemberList:
   heading: '{0,choice,0#You’ve added 0 people|1#You’ve added 1 person|1<You’ve added {0} people}'
   memberName: 'Person {0}'
   buttons:
-    addAnother: Add another member
+    addAnother: Add another person
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
