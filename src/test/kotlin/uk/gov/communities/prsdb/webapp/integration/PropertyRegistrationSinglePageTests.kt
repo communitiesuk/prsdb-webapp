@@ -553,19 +553,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class RentFrequencyStep {
             @Test
-            fun `Submitting with no rentFrequency selected returns an error`(page: Page) {
-                val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            fun `Submitting with no rentFrequency selected returns an error`() {
+                val rentFrequencyPage = navigator.skipToTenancyDetailsRentFrequencyPage()
                 rentFrequencyPage.form.submit()
                 assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Select how often you charge rent")
             }
 
             @Test
-            fun `Submitting with other rent frequency selected but no text entered returns an error`(page: Page) {
-                val rentFrequencyPage = navigator.skipToPropertyRegistrationRentFrequencyPage()
+            fun `Submitting with other rent frequency selected but no text entered returns an error`() {
+                val rentFrequencyPage = navigator.skipToTenancyDetailsRentFrequencyPage()
                 rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
                 rentFrequencyPage.form.submit()
                 assertThat(rentFrequencyPage.form.getErrorMessage()).containsText("Enter how often you charge rent")

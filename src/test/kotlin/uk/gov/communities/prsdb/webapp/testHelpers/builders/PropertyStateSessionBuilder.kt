@@ -100,6 +100,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationTenancyDetails() =
             beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied()
+                .withNoTenants()
+                .withOccupancyStatus(true)
                 .withCheckEpcAnswersComplete()
 
         fun beforePropertyRegistrationBedrooms() = beforePropertyRegistrationPeople().withPeople()
@@ -413,5 +415,9 @@ class PropertyStateSessionBuilder(
         fun beforeTenancyDetailsRentIncludesBills() = beforeTenancyDetailsBedrooms().withBedrooms()
 
         fun beforeTenancyDetailsBillsIncluded() = beforeTenancyDetailsRentIncludesBills().withRentIncludesBills(true)
+
+        fun beforeTenancyDetailsFurnished() = beforeTenancyDetailsBillsIncluded().withBillsIncluded()
+
+        fun beforeTenancyDetailsRentFrequency() = beforeTenancyDetailsFurnished().withFurnished()
     }
 }

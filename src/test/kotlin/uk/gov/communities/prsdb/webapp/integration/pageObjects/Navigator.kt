@@ -738,12 +738,28 @@ class Navigator(
         return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
     }
 
+    fun skipToTenancyDetailsBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsBillsIncluded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
+        return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationFurnishedStatusPage(): FurnishedStatusFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationFurnished().build(),
         )
         navigateToPropertyRegistrationJourneyStep(FurnishedStatusStep.ROUTE_SEGMENT)
         return createValidPage(page, FurnishedStatusFormPagePropertyRegistration::class)
+    }
+
+    fun skipToTenancyDetailsRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsRentFrequency().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RentFrequencyStep.ROUTE_SEGMENT)
+        return createValidPage(page, RentFrequencyFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationRentFrequencyPage(): RentFrequencyFormPagePropertyRegistration {
@@ -1011,14 +1027,6 @@ class Navigator(
 
     fun navigateToPropertyRegistrationConfirmationPage() {
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-    }
-
-    fun skipToTenancyDetailsBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforeTenancyDetailsBillsIncluded().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
-        return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
     }
 
     fun goToLandlordDetails(): LandlordDetailsPage {
