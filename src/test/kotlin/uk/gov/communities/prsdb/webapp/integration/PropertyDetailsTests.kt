@@ -2,22 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
@@ -85,8 +77,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `individual property shows invite text link and not invite button on landlord tab`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -97,8 +87,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `joint property with multiple landlords shows invite button on landlord tab`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -109,8 +97,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `joint property with sole landlord shows mark as single landlord inset text on landlord tab and invite button`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(13)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -217,8 +203,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -229,8 +213,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `multiple landlord cards are displayed with logged in user first then alphabetically`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -246,37 +228,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val thirdCard = detailsPage.landlordSummaryCards[2]
                 assertEquals("Tobias Evans", thirdCard.title.getText())
                 assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
-            }
-        }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled {
-            @Test
-            fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                detailsPage.landlordSummaryList.nameRow
-                    .valueLinkByText("Alexander Smith")
-                    .clickAndWait()
-
-                val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-
-                landlordDetailsPage.backLink.clickAndWait()
-                val detailsPageAfterBack =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
-                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
-            }
-
-            @Test
-            fun `when joint landlords flag is disabled the landlord tab shows the old landlord details list`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                assertEquals(0, detailsPage.landlordSummaryCards.size)
-                assertThat(detailsPage.landlordSummaryList.nameRow).isVisible()
             }
         }
     }
@@ -334,8 +285,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -347,8 +296,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -361,8 +308,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `when joint landlords flag is enabled the landlord cards have a view landlord record action`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -374,31 +319,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 )
                 assertThat(actionLink).hasAttribute("target", "_blank")
                 assertThat(actionLink).hasAttribute("rel", "noreferrer noopener")
-            }
-        }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled {
-            @Test
-            fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                detailsPage.landlordSummaryList.nameRow
-                    .valueLinkByText("Alexander Smith")
-                    .clickAndWait()
-
-                val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
-
-                landlordDetailsPage.backLink.clickAndWait()
-                val detailsPageAfterBack =
-                    assertPageIs(
-                        page,
-                        PropertyDetailsPageLocalCouncilView::class,
-                        mapOf("propertyOwnershipId" to "1"),
-                    )
-                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
             }
         }
 
@@ -448,11 +368,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
     @Nested
     inner class PropertyDetailsInvitations : NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `property details page shows pending invitations section with correct email`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
@@ -489,17 +404,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired on")
         }
-
-        @Test
-        fun `invitation sections are not shown when feature flag is disabled`(page: Page) {
-            featureFlagManager.disableFeature(JOINT_LANDLORDS)
-
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
-            detailsPage.tabs.goToLandlordDetails()
-
-            assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)
-            assertThat(detailsPage.expiredInvitationsDetails).hasCount(0)
-        }
     }
 
     @Nested
@@ -507,11 +411,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
             "data-joint-landlord-invitation.sql",
         ) {
-        @BeforeEach
-        fun setup() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `clicking send new invitation email on a pending invitation shows success banner`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)

@@ -19,19 +19,6 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 enabled = true,
                 expiryDate = LocalDate.of(2026, 12, 31),
             ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "joint-landlords",
-                enabled = false,
-                expiryDate = LocalDate.of(2026, 12, 31),
-            ),
-        )
-
-    val expectedReleasesFromDefaultApplicationYaml =
-        listOf(
-            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                name = "private-beta-release-2",
-                enabled = false,
-            ),
         )
 
     val expectedFeatureFlagsFromIntegrationApplicationYaml =
@@ -41,25 +28,12 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 enabled = true,
                 expiryDate = LocalDate.of(2026, 12, 31),
             ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "joint-landlords",
-                enabled = true,
-                expiryDate = LocalDate.of(2026, 12, 31),
-            ),
-        )
-
-    val expectedReleasesFromIntegrationApplicationYaml =
-        listOf(
-            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                name = "private-beta-release-2",
-                enabled = true,
-            ),
         )
 
     @Test
     fun `features and releases from application yaml are loaded`() {
         assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
-        assertSubset(expectedReleasesFromDefaultApplicationYaml, featureFlagConfig.releases)
+        assertTrue(featureFlagConfig.releases.isEmpty())
     }
 
     @ActiveProfiles("integration")
@@ -70,7 +44,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             val expectedFeatureFlags = expectedFeatureFlagsFromIntegrationApplicationYaml
 
             assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
-            assertSubset(expectedReleasesFromIntegrationApplicationYaml, featureFlagConfig.releases)
+            assertTrue(featureFlagConfig.releases.isEmpty())
         }
     }
 

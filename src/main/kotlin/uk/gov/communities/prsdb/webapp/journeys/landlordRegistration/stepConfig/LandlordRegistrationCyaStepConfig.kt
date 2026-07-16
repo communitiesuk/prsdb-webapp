@@ -33,15 +33,20 @@ class LandlordRegistrationCyaStepConfig(
     override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
         landlordService.createLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
-            name = state.getName(),
-            email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
-            phoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
-            addressDataModel = state.addressTask.getAddress(),
+            name = state.identityTask.getName(),
+            email =
+                state.individualLandlordRegistrationTask.emailStep.formModel
+                    .notNullValue(EmailFormModel::emailAddress),
+            phoneNumber =
+                state.individualLandlordRegistrationTask.phoneNumberStep.formModel.notNullValue(
+                    PhoneNumberFormModel::phoneNumber,
+                ),
+            addressDataModel = state.individualLandlordRegistrationTask.addressTask.getAddress(),
             countryOfResidence = ENGLAND_OR_WALES,
-            isVerified = state.getIsIdentityVerified(),
+            isVerified = state.identityTask.getIsIdentityVerified(),
             hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
             nonEnglandOrWalesAddress = null,
-            dateOfBirth = state.getDateOfBirth(),
+            dateOfBirth = state.identityTask.getDateOfBirth(),
         )
 
         securityContextService.refreshContext()
@@ -53,9 +58,7 @@ class LandlordRegistrationCyaStepConfig(
     override fun resolveNextDestination(
         state: LandlordRegistrationState,
         defaultDestination: Destination,
-    ): Destination {
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 
     private fun getSummaryList(state: LandlordRegistrationState) =
         getIdentityRows(state) +
@@ -63,26 +66,26 @@ class LandlordRegistrationCyaStepConfig(
             getAddressRows(state)
 
     private fun getIdentityRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> {
-        val isIdentityVerified = state.getIsIdentityVerified()
+        val isIdentityVerified = state.identityTask.getIsIdentityVerified()
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
-                state.getName(),
+                state.identityTask.getName(),
                 if (isIdentityVerified) {
                     Destination.Nowhere()
                 } else {
-                    Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep))
+                    Destination.VisitableStep(state.identityTask.nameStep, state.getCyaJourneyId(state.identityTask.nameStep))
                 },
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
-                state.getDateOfBirth(),
+                state.identityTask.getDateOfBirth(),
                 if (isIdentityVerified) {
                     Destination.Nowhere()
                 } else {
                     Destination.VisitableStep(
-                        state.dateOfBirthStep,
-                        state.getCyaJourneyId(state.dateOfBirthStep),
+                        state.identityTask.dateOfBirthStep,
+                        state.getCyaJourneyId(state.identityTask.dateOfBirthStep),
                     )
                 },
             ),
@@ -93,18 +96,20 @@ class LandlordRegistrationCyaStepConfig(
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
-                state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                state.individualLandlordRegistrationTask.emailStep.formModel
+                    .notNullValue(EmailFormModel::emailAddress),
                 Destination.VisitableStep(
-                    state.emailStep,
-                    state.getCyaJourneyId(state.emailStep),
+                    state.individualLandlordRegistrationTask.emailStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.emailStep),
                 ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
-                state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
+                state.individualLandlordRegistrationTask.phoneNumberStep.formModel
+                    .notNullValue(PhoneNumberFormModel::phoneNumber),
                 Destination.VisitableStep(
-                    state.phoneNumberStep,
-                    state.getCyaJourneyId(state.phoneNumberStep),
+                    state.individualLandlordRegistrationTask.phoneNumberStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.phoneNumberStep),
                 ),
             ),
         )
@@ -113,13 +118,23 @@ class LandlordRegistrationCyaStepConfig(
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
-                state.countryOfResidenceStep.formModel.notNullValue(CountryOfResidenceFormModel::livesInEnglandOrWales),
-                Destination.VisitableStep(state.countryOfResidenceStep, state.getCyaJourneyId(state.countryOfResidenceStep)),
+                state.individualLandlordRegistrationTask.countryOfResidenceStep.formModel.notNullValue(
+                    CountryOfResidenceFormModel::livesInEnglandOrWales,
+                ),
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.countryOfResidenceStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.countryOfResidenceStep),
+                ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
-                state.addressTask.getAddress().singleLineAddress,
-                Destination.VisitableStep(state.addressTask.lookupAddressStep, state.getCyaJourneyId(state.addressTask.lookupAddressStep)),
+                state.individualLandlordRegistrationTask.addressTask
+                    .getAddress()
+                    .singleLineAddress,
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.addressTask.lookupAddressStep),
+                ),
             ),
         )
 }

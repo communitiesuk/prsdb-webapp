@@ -5,16 +5,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 
 @JourneyFrameworkComponent
-class OrgGovBodyMemberDobStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgGovBodyMemberDobStepConfig : AbstractRequestableStepConfig<Complete, OrgGovBodyMemberDobFormModel, JourneyState>() {
+    override val formModelClass = OrgGovBodyMemberDobFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1287 - Governing body member date of birth")
+        mapOf(
+            "fieldSetHeading" to "registerAsALandlord.orgGovBodyMemberDob.fieldSetHeading",
+            "fieldSetHint" to "registerAsALandlord.orgGovBodyMemberDob.fieldSetHint",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/dateForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +26,7 @@ class OrgGovBodyMemberDobStepConfig : AbstractRequestableStepConfig<Complete, No
 @JourneyFrameworkComponent
 final class OrgGovBodyMemberDobStep(
     stepConfig: OrgGovBodyMemberDobStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, OrgGovBodyMemberDobFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-governing-body-member-dob"
     }
