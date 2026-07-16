@@ -428,8 +428,6 @@ numberOfHouseholdsOld:
       two: a family living together
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
-  input:
-    error: 'Enter how many separate households, like 1 or 2'
   label: Enter how many households live in your property
   details:
     summary:
@@ -450,6 +448,8 @@ numberOfHouseholdsRestructureAndSkipping:
       two: related (like aunts or cousins)
       three: living together as a couple
   questionHeading: How many households are in your property?
+  input:
+    error: 'Enter how many separate households, like 1 or 2'
 numberOfPeople:
   input:
     error:
