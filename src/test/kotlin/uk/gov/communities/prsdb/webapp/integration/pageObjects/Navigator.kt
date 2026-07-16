@@ -730,6 +730,14 @@ class Navigator(
         return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationRestructuredOccupancyPage(): OccupancyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(OccupiedStep.ROUTE_SEGMENT)
+        return createValidPage(page, OccupancyFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHouseholds().build(),
