@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -36,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
@@ -65,7 +65,7 @@ class OrgLandlordRegistrationTask(
     override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
     override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
     override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
-    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val govBodyMemberAddressTask: GovBodyMemberAddressTask,
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
@@ -222,16 +222,20 @@ class OrgLandlordRegistrationTask(
             step(journey.orgGovBodyMemberDobStep) {
                 routeSegment(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
-                nextStep { journey.orgGovBodyMemberAddressStep }
+                nextStep { journey.govBodyMemberAddressTask.firstStep }
             }
-            step(journey.orgGovBodyMemberAddressStep) {
-                routeSegment(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT)
+            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
+                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                    withAdditionalContentProperties {
+                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
+                    }
+                }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                parents { journey.orgGovBodyMemberAddressStep.isComplete() }
+                parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {

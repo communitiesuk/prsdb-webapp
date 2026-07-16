@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -55,6 +54,6 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep
+    val govBodyMemberAddressTask: AddressTask
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
 }

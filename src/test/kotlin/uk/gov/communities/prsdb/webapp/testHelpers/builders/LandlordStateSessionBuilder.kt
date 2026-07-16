@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
@@ -32,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
@@ -227,8 +227,40 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgGovBodyMemberAddress(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgGovBodyMemberLookupAddress(
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
+    ): LandlordStateSessionBuilder {
+        // The governing body member address is a routed instance of the shared address task, so its data is stored
+        // under keys prefixed with the task route.
+        val routePrefix = GovBodyMemberAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(address)),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            },
+        )
+        return self()
+    }
+
+    fun withOrgGovBodyMemberAddress(
+        houseNameOrNumber: String = "4",
+        postcode: String = "EG1 2AB",
+    ): LandlordStateSessionBuilder {
+        withOrgGovBodyMemberLookupAddress(houseNameOrNumber, postcode)
+
+        val routePrefix = GovBodyMemberAddressTask.ROUTE_SEGMENT
+        val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { this.address = address.singleLineAddress },
+        )
         return self()
     }
 
@@ -310,6 +342,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgGovBodyMemberDob() = beforeOrgGovBodyMemberName().withOrgGovBodyMemberName()
 
         fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
+
+        fun beforeOrgGovBodyMemberSelectAddress() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberLookupAddress()
 
         fun beforeOrgGovBodyMemberList() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberAddress()
 
