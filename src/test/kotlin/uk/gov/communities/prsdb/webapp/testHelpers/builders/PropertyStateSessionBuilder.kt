@@ -120,7 +120,7 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
 
-        fun beforePropertyRegistrationTenancyDetails() =
+        fun beforeTenancyDetails() =
             beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied()
                 .withNoTenants()
                 .withBedrooms()
@@ -429,7 +429,7 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
 
-        fun beforeTenancyDetailsHouseholds() = beforePropertyRegistrationTenancyDetails().withHouseholds()
+        fun beforeTenancyDetailsHouseholds() = beforeTenancyDetails().withHouseholds()
 
         fun beforeTenancyDetailsPeople() = beforeTenancyDetailsHouseholds().withPeople()
 

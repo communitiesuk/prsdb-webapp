@@ -749,7 +749,7 @@ class Navigator(
     fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         val taskListPage =
             goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationTenancyDetails(),
+                PropertyStateSessionBuilder.beforeTenancyDetails(),
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
