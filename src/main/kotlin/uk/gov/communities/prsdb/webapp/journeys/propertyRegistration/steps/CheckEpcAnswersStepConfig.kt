@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.EpcRegistrationCyaSummaryRowsFactory
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcContainerState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -12,11 +12,11 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class CheckEpcAnswersStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcContainerState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
-        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state)
+    override fun getStepSpecificContent(state: EpcContainerState): Map<String, Any?> {
+        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state.epcDetailsTask)
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),
             "epcCardActions" to factory.createEpcCardActions(),
@@ -30,9 +30,9 @@ class CheckEpcAnswersStepConfig(
         )
     }
 
-    override fun chooseTemplate(state: EpcState) = "forms/checkEpcAnswersForm"
+    override fun chooseTemplate(state: EpcContainerState) = "forms/checkEpcAnswersForm"
 
-    override fun mode(state: EpcState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: EpcContainerState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 enum class EpcScenario {
@@ -55,7 +55,7 @@ enum class EpcScenario {
 @JourneyFrameworkComponent
 final class CheckEpcAnswersStep(
     stepConfig: CheckEpcAnswersStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, EpcContainerState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-epc-answers"
     }

@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
@@ -70,6 +71,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockElectricalSafetyDetailsTask: ElectricalSafetyDetailsTask
+
+    @Mock
+    private lateinit var mockEpcDetailsTask: EpcDetailsTask
 
     @Mock
     private lateinit var mockAddressTask: PropertyRegistrationAddressTask
@@ -392,7 +396,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
         whenever(mockGasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
@@ -402,24 +407,24 @@ class SavePropertyRegistrationDataStepConfigTests {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
         }
 
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
+        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(
             EpcInDateAtStartOfTenancyCheckFormModel().apply {
                 tenancyStartedBeforeExpiry = tenancyStartedBeforeEpcExpiry
             },
         )
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(
             EpcExemptionFormModel().apply {
                 exemptionReason = epcExemptionReason
             },
         )
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(
             MeesExemptionReasonFormModel().apply {
                 exemptionReason = meesExemptionReason
@@ -447,21 +452,22 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(null)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
         whenever(mockGasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
     }
 }

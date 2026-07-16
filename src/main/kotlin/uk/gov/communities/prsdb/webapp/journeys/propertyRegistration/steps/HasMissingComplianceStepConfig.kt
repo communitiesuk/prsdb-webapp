@@ -14,7 +14,7 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
         val anyInvalid =
             isGasCertInvalid(state.gasSafetyDetailsTask) ||
                 isElectricalCertInvalid(state.electricalSafetyDetailsTask) ||
-                isEpcInvalid(state)
+                isEpcInvalid(state.epcDetailsTask)
         return if (state.isOccupied && anyInvalid) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {

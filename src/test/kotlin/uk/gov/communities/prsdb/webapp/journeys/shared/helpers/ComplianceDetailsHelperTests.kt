@@ -177,7 +177,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val content = helper.getEpcCyaContent(mockState)
+            val content = helper.getEpcCyaContent(mockState, mockState)
 
             assertEquals(
                 setOf(
