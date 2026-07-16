@@ -129,8 +129,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         customPropertyType: String? = null,
         lastOccupiedDate: LocalDate? = null,
         markedJointLandlord: Boolean = false,
-        licenseProvideLater: Boolean = false,
-        tenancyProvideLater: Boolean = false,
+        licenseProvideLater: Boolean? = null,
+        tenancyProvideLater: Boolean? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
