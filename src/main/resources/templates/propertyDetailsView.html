@@ -130,11 +130,15 @@
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.newLayout.occupation.heading}">propertyDetails.propertyRecord.newLayout.occupation.heading</h3>
                         <dl th:if="${not #lists.isEmpty(propertyDetails.occupationSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupationSection})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.newLayout.licensing.heading}">propertyDetails.propertyRecord.newLayout.licensing.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
+                        <th:block th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}">
+                            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
+                        </th:block>
                         <p th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.licensingProvideLaterParagraph}"></p>
                         <th:block th:if="${propertyDetails.showTenancySection}">
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.tenancyHeadingKey}}">propertyDetails.propertyRecord.newLayout.tenancy.heading</h3>
-                            <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
+                            <th:block th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}">
+                                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
+                            </th:block>
                             <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
                         </th:block>
                     </th:block>
