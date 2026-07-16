@@ -563,12 +563,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class RentAmountStep {
             @Test
             fun `Submitting no rentAmount returns an error`(page: Page) {
-                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+                val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage()
                 rentAmountPage.form.submit()
                 assertThat(
                     rentAmountPage.form.getErrorMessage(),
@@ -577,7 +576,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `Submitting a rentAmount greater than two decimals returns an error`(page: Page) {
-                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+                val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage()
                 rentAmountPage.submitRentAmount("400.123")
                 assertThat(
                     rentAmountPage.form.getErrorMessage(),
@@ -586,7 +585,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `Submitting a negative rentAmount returns an error`(page: Page) {
-                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+                val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage()
                 rentAmountPage.submitRentAmount("-400.12")
                 assertThat(
                     rentAmountPage.form.getErrorMessage(),
@@ -595,7 +594,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `Submitting a non-numerical rentAmount returns an error`(page: Page) {
-                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+                val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage()
                 rentAmountPage.submitRentAmount("not-a-number")
                 assertThat(
                     rentAmountPage.form.getErrorMessage(),
@@ -604,7 +603,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `Submitting a rentAmount of 10000000 or above returns an error`(page: Page) {
-                val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+                val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage()
                 rentAmountPage.submitRentAmount("10000000")
                 assertThat(
                     rentAmountPage.form.getErrorMessage(),
@@ -615,7 +614,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             inner class ConditionalContentPerRentFrequency {
                 @Test
                 fun `Page renders correctly for weekly rent frequency`(page: Page) {
-                    val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
+                    val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.WEEKLY)
                     BaseComponent
                         .assertThat(rentAmountPage.header)
                         .containsText("What is the weekly rent?")
@@ -630,7 +629,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
                 @Test
                 fun `Page renders correctly for four weekly rent frequency`(page: Page) {
-                    val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
+                    val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.FOUR_WEEKLY)
                     BaseComponent
                         .assertThat(rentAmountPage.header)
                         .containsText("What is the 4-weekly rent?")
@@ -645,7 +644,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
                 @Test
                 fun `Page renders correctly for monthly rent frequency`(page: Page) {
-                    val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
+                    val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.MONTHLY)
                     BaseComponent
                         .assertThat(rentAmountPage.header)
                         .containsText("What is the monthly rent?")
@@ -660,7 +659,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
                 @Test
                 fun `Page renders correctly for 'other' rent frequency`(page: Page) {
-                    val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
+                    val rentAmountPage = navigator.skipToTenancyDetailsRentAmountPage(RentFrequency.OTHER)
                     BaseComponent
                         .assertThat(rentAmountPage.header)
                         .containsText("What is the monthly rent?")

@@ -845,6 +845,16 @@ class Navigator(
         return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
+    fun skipToTenancyDetailsRentAmountPage(
+        rentFrequency: RentFrequency = RentFrequency.MONTHLY,
+    ): RentAmountFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsRentAmount(rentFrequency).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RentAmountStep.ROUTE_SEGMENT)
+        return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHasJointLandlordsPage(): HasJointLandlordsFormBasePagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasJointLandlords().build(),

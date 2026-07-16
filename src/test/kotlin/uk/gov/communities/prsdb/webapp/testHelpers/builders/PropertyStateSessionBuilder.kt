@@ -442,5 +442,8 @@ class PropertyStateSessionBuilder(
         fun beforeTenancyDetailsFurnished() = beforeTenancyDetailsBillsIncluded().withBillsIncluded()
 
         fun beforeTenancyDetailsRentFrequency() = beforeTenancyDetailsFurnished().withFurnished()
+
+        fun beforeTenancyDetailsRentAmount(rentFrequency: RentFrequency) =
+            beforeTenancyDetailsRentFrequency().withRentFrequency(rentFrequency)
     }
 }
