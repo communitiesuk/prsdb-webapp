@@ -746,6 +746,15 @@ class Navigator(
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
     }
 
+    fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
+        val taskListPage =
+            goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationTenancyDetails(),
+            )
+        taskListPage.clickRentedOutTaskWithName("Tenancy details")
+        return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationPeople().build(),

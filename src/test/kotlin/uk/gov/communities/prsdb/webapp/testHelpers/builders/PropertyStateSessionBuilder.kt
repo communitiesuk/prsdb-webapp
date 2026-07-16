@@ -123,6 +123,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationTenancyDetails() =
             beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied()
                 .withNoTenants()
+                .withBedrooms()
                 .withOccupancyStatus(true)
                 .withCheckEpcAnswersComplete()
 
