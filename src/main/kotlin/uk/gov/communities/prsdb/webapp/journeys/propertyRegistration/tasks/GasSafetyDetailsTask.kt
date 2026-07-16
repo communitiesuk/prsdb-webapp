@@ -1,16 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
@@ -21,8 +25,33 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-@JourneyFrameworkComponent("propertyRegistrationGasSafetyDetailsTask")
-class GasSafetyDetailsTask : Task<GasSafetyState>() {
+// A gas-safety-details task that owns its own steps and IS its own GasSafetyState, so it can be composed into a
+// journey via duplicableTask. Structure only: makeSubJourney defines the step flow. Instance-specific state
+// (isOccupied, allowProvideCertificateLaterRoute) is supplied by the mount site via a GasSafetyDetailsTaskDependencies contract.
+@JourneyFrameworkComponent
+class GasSafetyDetailsTask(
+    journeyStateService: JourneyStateService,
+    override val hasGasSupplyStep: HasGasSupplyStep,
+    override val hasGasCertStep: HasGasCertStep,
+    override val gasCertIssueDateStep: GasCertIssueDateStep,
+    override val uploadGasCertStep: UploadGasCertStep,
+    override val checkGasCertUploadsStep: CheckGasCertUploadsStep,
+    override val removeGasCertUploadStep: RemoveGasCertUploadStep,
+    override val gasCertExpiredStep: GasCertExpiredStep,
+    override val gasCertMissingStep: GasCertMissingStep,
+    override val provideGasCertLaterStep: ProvideGasCertLaterStep,
+    override val hasUploadedCert: HasAnyInCollectionStep,
+) : DuplicableTaskWithDependencies<GasSafetyState, GasSafetyDetailsTaskDependencies>(journeyStateService),
+    GasSafetyState {
+    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
+    override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
+
+    override val isOccupied: Boolean get() = dependencies.isOccupied
+
+    override val allowProvideCertificateLaterRoute: Boolean get() = dependencies.allowProvideCertificateLaterRoute
+
+    override val taskState get() = this
+
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
             step(journey.hasGasSupplyStep) {

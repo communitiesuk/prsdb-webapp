@@ -3,14 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyContainerState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 
 @JourneyFrameworkComponent("propertyRegistrationGasSafetyTask")
-class GasSafetyTask : Task<GasSafetyState>() {
-    override fun makeSubJourney(state: GasSafetyState) =
+class GasSafetyTask : Task<GasSafetyContainerState>() {
+    override fun makeSubJourney(state: GasSafetyContainerState) =
         subJourney(state) {
-            task(journey.gasSafetyDetailsTask) {
+            duplicableTask(journey.gasSafetyDetailsTask) {
+                withDependencies { journey }
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }

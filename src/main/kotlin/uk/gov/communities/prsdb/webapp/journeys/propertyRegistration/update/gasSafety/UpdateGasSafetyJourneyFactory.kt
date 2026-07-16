@@ -13,24 +13,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -75,7 +62,8 @@ class UpdateGasSafetyJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            task(journey.gasSafetyDetailsTask) {
+            duplicableTask(journey.gasSafetyDetailsTask) {
+                withDependencies { journey }
                 initialStep()
                 backUrl { propertyComplianceRoute }
                 nextStep { journey.updateCheckGasSafetyAnswersStep }
@@ -120,7 +108,7 @@ class UpdateGasSafetyJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(journey.gasSafetyDetailsTask)
+            duplicableCheckAnswerTask(journey.gasSafetyDetailsTask, { journey })
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
@@ -138,21 +126,9 @@ class UpdateGasSafetyJourneyFactory(
 class UpdateGasSafetyJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "gasSafety",
-    override val gasSafetyTask: GasSafetyTask,
     override val gasSafetyDetailsTask: GasSafetyDetailsTask,
-    override val hasGasSupplyStep: HasGasSupplyStep,
-    override val hasGasCertStep: HasGasCertStep,
-    override val gasCertIssueDateStep: GasCertIssueDateStep,
-    override val uploadGasCertStep: UploadGasCertStep,
-    override val checkGasCertUploadsStep: CheckGasCertUploadsStep,
-    override val removeGasCertUploadStep: RemoveGasCertUploadStep,
-    override val gasCertExpiredStep: GasCertExpiredStep,
-    override val gasCertMissingStep: GasCertMissingStep,
-    override val provideGasCertLaterStep: ProvideGasCertLaterStep,
-    override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
     val updateCheckGasSafetyAnswersStep: UpdateCheckGasSafetyAnswersStep,
     override val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep,
-    override val hasUploadedCert: HasAnyInCollectionStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateGasSafetyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -160,12 +136,6 @@ class UpdateGasSafetyJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
-    override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
-
-    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
-    override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
-
-    override val allowProvideCertificateLaterRoute: Boolean = false
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
@@ -173,15 +143,20 @@ class UpdateGasSafetyJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val cyaStep get() = updateCheckGasSafetyAnswersStep
+
+    override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
+
+    override val allowProvideCertificateLaterRoute: Boolean = false
 }
 
 interface UpdateGasSafetyJourneyState :
     JourneyState,
-    GasSafetyState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    GasSafetyDetailsTaskDependencies {
+    override var isOccupied: Boolean
     val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val gasSafetyTask: GasSafetyTask
+    val gasSafetyDetailsTask: GasSafetyDetailsTask
     val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
 }
