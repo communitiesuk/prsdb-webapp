@@ -72,7 +72,6 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : SummaryList(page) {
         val addressRow = getRow("Address")
-        val uprnRow = getRow("UPRN")
         val ownershipTypeRow = getRow("How do you own this property?")
         val occupancyRow = getRow("Is this property occupied by tenants?")
         val licensingRow = getRow("Licensing")

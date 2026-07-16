@@ -576,13 +576,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `landlord view shows the property uprn in the property details section`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-
-            assertThat(detailsPage.newLayoutSummaryList.uprnRow.value).containsText("1")
-        }
-
-        @Test
         fun `landlord view shows a provide later licensing row when licensing is skipped`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 

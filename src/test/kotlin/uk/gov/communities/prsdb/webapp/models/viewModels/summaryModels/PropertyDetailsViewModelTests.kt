@@ -526,7 +526,6 @@ class PropertyDetailsViewModelTests {
         val expectedHeaderList =
             listOf(
                 "propertyDetails.propertyRecord.newLayout.propertyDetails.address",
-                "propertyDetails.propertyRecord.uprn",
                 "propertyDetails.propertyRecord.localCouncil",
                 "propertyDetails.propertyRecord.propertyType",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
@@ -552,23 +551,8 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout property details section shows the uprn when available`() {
-        val expectedUprn = 1234.toLong()
-        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = expectedUprn))
-
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
-
-        val uprnValue =
-            viewModel.propertyDetailsSection
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.uprn" }
-                .fieldValue
-
-        assertEquals(expectedUprn.toString(), uprnValue)
-    }
-
-    @Test
-    fun `New layout property details section hides the uprn when unavailable`() {
-        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = null))
+    fun `New layout property details section does not show the uprn`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
 

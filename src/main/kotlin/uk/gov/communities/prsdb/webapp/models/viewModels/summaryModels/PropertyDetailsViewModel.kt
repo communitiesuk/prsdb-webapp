@@ -293,13 +293,6 @@ class PropertyDetailsViewModel(
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 addRow("propertyDetails.propertyRecord.newLayout.propertyDetails.address", addressParts)
-                if (propertyOwnership.address.uprn != null) {
-                    addRow(
-                        "propertyDetails.propertyRecord.uprn",
-                        propertyOwnership.address.uprn
-                            .toString(),
-                    )
-                }
                 addRow(
                     "propertyDetails.propertyRecord.localCouncil",
                     propertyOwnership.address.localCouncil
