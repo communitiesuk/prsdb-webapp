@@ -1263,7 +1263,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `the electrical certificate change link navigates to the has electrical certificate page`(page: Page) {
-                val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswers()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
                 checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
                 assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
             }
