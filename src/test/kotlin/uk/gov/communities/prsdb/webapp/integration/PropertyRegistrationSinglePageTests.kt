@@ -505,19 +505,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class BillsIncludedStep {
             @Test
-            fun `Submitting with no bills included selected returns an error`(page: Page) {
-                val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            fun `Submitting with no bills included selected returns an error`() {
+                val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
                 billsIncludedPage.form.submit()
                 assertThat(billsIncludedPage.form.getErrorMessage()).containsText("Select what you include in the rent")
             }
 
             @Test
-            fun `Submitting with something else selected but no text entered returns an error`(page: Page) {
-                val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            fun `Submitting with something else selected but no text entered returns an error`() {
+                val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
                 billsIncludedPage.selectGasElectricityWater()
                 billsIncludedPage.selectSomethingElseCheckbox()
                 billsIncludedPage.form.submit()
@@ -525,8 +524,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
 
             @Test
-            fun `Submitting with a very long something else text returns an error`(page: Page) {
-                val billsIncludedPage = navigator.skipToPropertyRegistrationBillsIncludedPage()
+            fun `Submitting with a very long something else text returns an error`() {
+                val billsIncludedPage = navigator.skipToTenancyDetailsBillsIncludedPage()
                 billsIncludedPage.selectGasElectricityWater()
                 billsIncludedPage.selectSomethingElseCheckbox()
                 val aVeryLongString =

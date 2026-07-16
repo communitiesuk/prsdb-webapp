@@ -403,5 +403,15 @@ class PropertyStateSessionBuilder(
                 .withAcceptedEpcFoundByCertificateNumber()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
+
+        fun beforeTenancyDetailsHouseholds() = beforePropertyRegistrationTenancyDetails().withHouseholds()
+
+        fun beforeTenancyDetailsPeople() = beforeTenancyDetailsHouseholds().withPeople()
+
+        fun beforeTenancyDetailsBedrooms() = beforeTenancyDetailsPeople().withPeople()
+
+        fun beforeTenancyDetailsRentIncludesBills() = beforeTenancyDetailsBedrooms().withBedrooms()
+
+        fun beforeTenancyDetailsBillsIncluded() = beforeTenancyDetailsRentIncludesBills().withRentIncludesBills(true)
     }
 }

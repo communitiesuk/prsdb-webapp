@@ -1013,6 +1013,14 @@ class Navigator(
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
+    fun skipToTenancyDetailsBillsIncludedPage(): BillsIncludedFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetailsBillsIncluded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(BillsIncludedStep.ROUTE_SEGMENT)
+        return createValidPage(page, BillsIncludedFormPagePropertyRegistration::class)
+    }
+
     fun goToLandlordDetails(): LandlordDetailsPage {
         navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, LandlordDetailsPage::class)
