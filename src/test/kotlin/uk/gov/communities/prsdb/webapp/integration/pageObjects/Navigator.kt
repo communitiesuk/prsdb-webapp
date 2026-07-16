@@ -513,7 +513,7 @@ class Navigator(
     fun skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage(): OrgGovBodyMemberLookupAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberAddress().build())
         navigateToLandlordRegistrationJourneyStep(
-            "${GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
         )
         return createValidPage(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
     }
@@ -521,7 +521,7 @@ class Navigator(
     fun skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage(): OrgGovBodyMemberSelectAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberSelectAddress().build())
         navigateToLandlordRegistrationJourneyStep(
-            "${GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+            "${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
         )
         return createValidPage(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
     }

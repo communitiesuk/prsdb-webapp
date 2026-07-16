@@ -245,7 +245,7 @@ class LandlordStateSessionBuilder(
     ): LandlordStateSessionBuilder {
         // The governing body member address is a routed instance of the shared address task, so its data is stored
         // under keys prefixed with the task route.
-        val routePrefix = GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = GovBodyMemberAddressTask.ROUTE_SEGMENT
         val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
         withAdditionalData(
             "$routePrefix/cachedAddresses",
@@ -267,7 +267,7 @@ class LandlordStateSessionBuilder(
     ): LandlordStateSessionBuilder {
         withOrgGovBodyMemberLookupAddress(houseNameOrNumber, postcode)
 
-        val routePrefix = GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = GovBodyMemberAddressTask.ROUTE_SEGMENT
         val address = AddressDataModel("$houseNameOrNumber Street Address, City, $postcode", localCouncilId = 22, uprn = 44)
         withSubmittedValue(
             "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",

@@ -238,7 +238,7 @@ class OrgLandlordRegistrationTask(
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
                 nextStep { journey.govBodyMemberAddressTask.firstStep }
             }
-            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.GOV_BODY_MEMBER_ADDRESS_ROUTE_SEGMENT) {
+            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
                 configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
