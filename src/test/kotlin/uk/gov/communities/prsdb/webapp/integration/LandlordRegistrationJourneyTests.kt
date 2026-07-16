@@ -298,21 +298,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitYes()
-
-        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
-        orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
-
-        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
-        orgCharityNumberPage.submitCharityNumber("1234567")
-
-        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        orgCompaniesHousePage.submitYes()
-
-        val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
-        orgCompanyNumberPage.submitCompanyNumber("12345678")
-
         // TODO: PDJB-1173 - Submit real organisation directors data once the step is implemented
         val orgDirectorsPage = assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
         orgDirectorsPage.form.submit()
@@ -338,6 +323,21 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        orgCharityPage.submitYes()
+
+        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+
+        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        orgCharityNumberPage.submitCharityNumber("1234567")
+
+        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        orgCompaniesHousePage.submitYes()
+
+        val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+        orgCompanyNumberPage.submitCompanyNumber("12345678")
 
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
         orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")

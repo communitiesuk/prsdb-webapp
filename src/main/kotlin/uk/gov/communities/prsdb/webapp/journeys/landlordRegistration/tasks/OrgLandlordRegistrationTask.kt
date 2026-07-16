@@ -71,12 +71,49 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 parents { journey.orgPhoneNumberStep.isComplete() }
+                nextStep { journey.orgDirectorsStep }
+            }
+            // TODO PDJB-1292: remove this
+            step(journey.orgDirectorsStep) {
+                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+                parents { journey.orgTypeStep.isComplete() }
+                nextStep { journey.orgTrusteesStep }
+            }
+            // TODO PDJB-1292: remove this
+            step(journey.orgTrusteesStep) {
+                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
+                parents { journey.orgDirectorsStep.isComplete() }
+                nextStep { journey.leadTrusteeNameStep }
+            }
+            step(journey.leadTrusteeNameStep) {
+                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
+                parents { journey.orgTrusteesStep.isComplete() }
+                nextStep { journey.leadTrusteeEmailStep }
+            }
+            step(journey.leadTrusteeEmailStep) {
+                routeSegment(LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeNameStep.isComplete() }
+                nextStep { journey.leadTrusteePhoneStep }
+            }
+            step(journey.leadTrusteePhoneStep) {
+                routeSegment(LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeEmailStep.isComplete() }
+                nextStep { journey.leadTrusteeDobStep }
+            }
+            step(journey.leadTrusteeDobStep) {
+                routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteePhoneStep.isComplete() }
+                nextStep { journey.trusteeAddressTask.firstStep }
+            }
+            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
+                parents { journey.leadTrusteeDobStep.isComplete() }
+                // TODO PDJB-1257: reroute to the exit point of the trustee section
                 nextStep { journey.orgCharityStep }
             }
             // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
+                parents { journey.trusteeAddressTask.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
@@ -132,47 +169,6 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgCompanyNumberStep) {
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
                 parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
-                // TODO PDJB-1257: point this at orgMainContactStep
-                nextStep { journey.orgDirectorsStep }
-            }
-            // TODO PDJB-1292: remove this
-            step(journey.orgDirectorsStep) {
-                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents {
-                    journey.orgCompanyNumberStep.isComplete()
-                }
-                nextStep { journey.orgTrusteesStep }
-            }
-            // TODO PDJB-1292: remove this
-            step(journey.orgTrusteesStep) {
-                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
-                parents { journey.orgDirectorsStep.isComplete() }
-                nextStep { journey.leadTrusteeNameStep }
-            }
-            // TODO: PDJB-1257 Move this to the correct place
-            step(journey.leadTrusteeNameStep) {
-                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
-                nextStep { journey.leadTrusteeEmailStep }
-            }
-            step(journey.leadTrusteeEmailStep) {
-                routeSegment(LeadTrusteeEmailStep.ROUTE_SEGMENT)
-                parents { journey.leadTrusteeNameStep.isComplete() }
-                nextStep { journey.leadTrusteePhoneStep }
-            }
-            step(journey.leadTrusteePhoneStep) {
-                routeSegment(LeadTrusteePhoneStep.ROUTE_SEGMENT)
-                parents { journey.leadTrusteeEmailStep.isComplete() }
-                nextStep { journey.leadTrusteeDobStep }
-            }
-            step(journey.leadTrusteeDobStep) {
-                routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
-                parents { journey.leadTrusteePhoneStep.isComplete() }
-                nextStep { journey.trusteeAddressTask.firstStep }
-            }
-            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
-                parents { journey.leadTrusteeDobStep.isComplete() }
-                // TODO PDJB-1257: reroute to the exit point of the trustee section
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgGovBodyDetailsStep) {
@@ -219,7 +215,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.trusteeAddressTask.isComplete(),
+                        journey.orgCompanyNumberStep.isComplete(),
                         journey.orgGovBodyMemberListStep.isComplete(),
                     )
                 }

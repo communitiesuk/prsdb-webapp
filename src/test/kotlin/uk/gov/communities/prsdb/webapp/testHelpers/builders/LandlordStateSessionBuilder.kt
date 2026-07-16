@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
@@ -50,7 +49,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
@@ -131,12 +129,6 @@ class LandlordStateSessionBuilder(
     fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
         val formModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
         withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, formModel)
-        return self()
-    }
-
-    fun withOrgCompanyNumber(companyNumber: String = "12345678"): LandlordStateSessionBuilder {
-        val formModel = OrgCompanyNumberFormModel().apply { this.companyNumber = companyNumber }
-        withSubmittedValue(OrgCompanyNumberStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -285,7 +277,21 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
-        fun beforeOrgCharity() = beforeOrgType().withOrgType()
+        fun beforeOrgDirectors() = beforeOrgType().withOrgType()
+
+        fun beforeOrgTrustees() = beforeOrgDirectors().withOrgDirectors()
+
+        fun beforeLeadTrusteeName() = beforeOrgTrustees().withOrgTrustees()
+
+        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
+
+        fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
+
+        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
+
+        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
+
+        fun beforeOrgCharity() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
 
         fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
 
@@ -300,20 +306,6 @@ class LandlordStateSessionBuilder(
         fun beforeOrgCompaniesHouse() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
 
         fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
-
-        fun beforeOrgDirectors() = beforeOrgCompanyNumber().withOrgCompanyNumber()
-
-        fun beforeOrgTrustees() = beforeOrgDirectors().withOrgDirectors()
-
-        fun beforeLeadTrusteeName() = beforeOrgTrustees().withOrgTrustees()
-
-        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
-
-        fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
-
-        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
-
-        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
 
         fun beforeOrgGovBodyDetails() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
 
