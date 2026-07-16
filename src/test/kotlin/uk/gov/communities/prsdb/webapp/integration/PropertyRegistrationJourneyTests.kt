@@ -17,7 +17,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -158,7 +157,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
         page: Page,
     ) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -540,7 +538,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
         page: Page,
     ) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -1491,7 +1488,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Suppress("ktlint:standard:max-line-length")
     fun `restructured occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        featureFlagManager.disableFeature(JOINT_LANDLORDS)
 
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         registerPropertyStartPage.startButton.clickAndWait()
@@ -1508,6 +1504,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         bedroomsPage.submitNumOfBedrooms(3)
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
+
+        val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+        hasJointLandlordsPage.submitHasNoJointLandlords()
 
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
@@ -1664,7 +1663,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
 
         val changeLink =
@@ -1679,7 +1677,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
         val changeLink =
@@ -1693,7 +1690,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     fun `a landlord cannot invite themselves as a joint landlord`(page: Page) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val inviteJointLandlordPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
 
         inviteJointLandlordPage.submitEmail("alex.surname@example.com")

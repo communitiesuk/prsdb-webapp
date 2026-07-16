@@ -81,7 +81,7 @@ Spring will automatically add any `FlippingStrategyFactory` beans (such as `Rele
 
 You can define a service which calls different versions of a function depending on the value of a feature flag.
 
-* Define an interface (see `JointLandlordsPropertyRegistrationStrategy.kt` for a real example)
+* Define an interface
 * Define two implementations of the interface, annotated with `@PrsdbWebService("bean-name")`.
     * Add the `@Primary` annotation to the implementation that should be used by default.
 * Annotate members in your interface with `@PrsdbFlip(name = "...", alterBean = "...")` where the `alterBean` value matches the name you
