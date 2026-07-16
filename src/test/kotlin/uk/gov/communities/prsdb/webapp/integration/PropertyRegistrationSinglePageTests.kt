@@ -1223,7 +1223,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         inner class PropertyRegistrationStepCheckAnswers {
             @Test
             fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
-                var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswers()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                var checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
                 checkAnswersPage.summaryList.ownershipRow.actions.firstActionLink
                     .clickAndWait()
