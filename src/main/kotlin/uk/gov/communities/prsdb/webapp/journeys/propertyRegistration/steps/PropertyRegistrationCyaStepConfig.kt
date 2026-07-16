@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
@@ -25,7 +24,6 @@ class PropertyRegistrationCyaStepConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
@@ -53,9 +51,7 @@ class PropertyRegistrationCyaStepConfig(
                     },
             )
 
-        jointLandlordsStrategy.ifEnabled {
-            content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
-        }
+        content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
 
         content += complianceDetailsHelper.getGasSafetyCyaContent(state)
         content += complianceDetailsHelper.getElectricalSafetyCyaContent(state)

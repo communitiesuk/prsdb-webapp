@@ -8,11 +8,14 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -200,6 +203,34 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(mainContactPage.page.locator("h1"))
                 .not()
                 .containsText("Who is the main contact for your organisation?")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyMustProvideInfoStep {
+        @Test
+        fun `the page renders the heading`() {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            assertThat(mustProvidePage.heading).containsText("You need to provide more information to register")
+        }
+
+        @Test
+        fun `the enter organisation details link navigates back to the org type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.enterOrgDetailsLink.clickAndWait()
+
+            assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `the register as an individual link navigates back to the landlord type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.registerAsIndividualLink.clickAndWait()
+
+            assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         }
     }
 
@@ -642,7 +673,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class OrgGovBodyDetailsStep {
         @Test
         fun `org governing body details page renders the expected content`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             assertThat(govBodyDetailsPage.heading)
                 .containsText("Providing details about your organisation’s governing body")
@@ -650,7 +681,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `org governing body details page Continue button navigates to the who to provide step`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             govBodyDetailsPage.submitHasDetails()
 
@@ -659,11 +690,32 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `org governing body details page secondary button navigates to the must provide info step`(page: Page) {
-            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationOrgGovBodyDetailsPage()
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             govBodyDetailsPage.submitNoDetails()
 
             assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyWhoToProvideStep {
+        @Test
+        fun `the who to provide page renders the heading`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
+
+            assertThat(whoToProvidePage.form.fieldsetHeading)
+                .containsText("Who do you want to provide details for?")
+        }
+
+        @Test
+        fun `submitting with no option selected returns a validation error`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
+
+            whoToProvidePage.form.submit()
+
+            assertThat(whoToProvidePage.form.getErrorMessage())
+                .containsText("Select who you are providing details for")
         }
     }
 
@@ -683,6 +735,45 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             govBodyMemberNamePage.submitName("")
 
             assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyMemberDobStep {
+        @Test
+        fun `the governing body member date of birth page renders the heading`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+
+            assertThat(govBodyMemberDobPage.heading).containsText("What is their date of birth?")
+        }
+
+        @Test
+        fun `submitting an empty date returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("", "", "")
+            assertThat(govBodyMemberDobPage.form.getErrorMessage()).containsText("Enter a date")
+        }
+
+        @Test
+        fun `submitting a future date returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("1", "1", "2999")
+            assertThat(govBodyMemberDobPage.form.getErrorMessage())
+                .containsText("The date of birth cannot be in the future")
+        }
+
+        @Test
+        fun `submitting a valid date of birth advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("15", "6", "1980")
+            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
         }
     }
 }

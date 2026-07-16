@@ -3,8 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
@@ -41,7 +42,41 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
+class OrgLandlordRegistrationTask(
+    journeyStateService: JourneyStateService,
+    override val yourDetailsStep: YourDetailsStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
+    override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCompanyNumberStep: OrgCompanyNumberStep,
+    override val orgCharityStep: OrgCharityStep,
+    override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
+    override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
+    override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
+    override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
+    override val orgDirectorsStep: OrgDirectorsStep,
+    override val orgTrusteesStep: OrgTrusteesStep,
+    override val leadTrusteeNameStep: LeadTrusteeNameStep,
+    override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
+    override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
+    override val leadTrusteeDobStep: LeadTrusteeDobStep,
+    override val trusteeAddressTask: TrusteeAddressTask,
+    override val orgGovBodyDetailsStep: OrgGovBodyDetailsStep,
+    override val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep,
+    override val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep,
+    override val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep,
+    override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
+    override val orgGovBodyMemberAddressStep: OrgGovBodyMemberAddressStep,
+    override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
+) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
+    LandlordRegistrationOrgLandlordState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
             step(journey.yourDetailsStep) {
@@ -186,7 +221,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgGovBodyMustProvideInfoStep) {
                 routeSegment(OrgGovBodyMustProvideInfoStep.ROUTE_SEGMENT)
                 parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.NO_DETAILS) }
-                nextStep { journey.orgMainContactStep }
+                noNextDestination()
             }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
@@ -215,12 +250,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.orgGovBodyMustProvideInfoStep.isComplete(),
-                        journey.orgGovBodyMemberListStep.isComplete(),
-                    )
-                }
+                parents { journey.orgGovBodyMemberListStep.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {

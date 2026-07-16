@@ -136,7 +136,6 @@ import java.security.Principal
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
@@ -326,28 +325,16 @@ class PropertyRegistrationJourneyFactory(
 
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep {
-                        jointLandlordsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.jointLandlordsTask.firstStep }
-                            ifDisabled { journey.gasSafetyTask.firstStep }
-                        }
-                    }
+                    nextStep { journey.jointLandlordsTask.firstStep }
                     saveProgress()
                 }
-                jointLandlordsStrategy.ifEnabled {
-                    task(journey.jointLandlordsTask) {
-                        parents { journey.occupationTask.isComplete() }
-                        nextStep { journey.gasSafetyTask.firstStep }
-                        saveProgress()
-                    }
+                task(journey.jointLandlordsTask) {
+                    parents { journey.occupationTask.isComplete() }
+                    nextStep { journey.gasSafetyTask.firstStep }
+                    saveProgress()
                 }
                 task(journey.gasSafetyTask) {
-                    parents {
-                        jointLandlordsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.jointLandlordsTask.isComplete() }
-                            ifDisabled { journey.occupationTask.isComplete() }
-                        }
-                    }
+                    parents { journey.jointLandlordsTask.isComplete() }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
