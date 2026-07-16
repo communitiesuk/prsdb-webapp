@@ -356,6 +356,13 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
+-- PDJB-1048 provide-later flags for the QA properties above: set to true where licensing/tenancy
+-- details were skipped during registration.
+--   49 both skipped, 52 licensing skipped, 53 both skipped, 54 unoccupied licensing skipped
+--   49 both skipped, 51 tenancy skipped, 53 both skipped
+UPDATE property_ownership SET license_provide_later = true WHERE id IN (49, 52, 53, 54);
+UPDATE property_ownership SET tenancy_provide_later = true WHERE id IN (49, 51, 53);
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),

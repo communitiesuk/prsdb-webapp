@@ -329,6 +329,19 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
+-- Provide-later flags (PDJB-990). Set to true where licensing/tenancy details were skipped during
+-- registration (the interim states exercised by the new-layout property record tests). All other
+-- properties leave these columns null (details were provided, or the property is unoccupied so the
+-- tenancy section does not apply).
+--   1:  occupied, licensing skipped (tenancy provided)
+--   9:  unoccupied, licensing skipped
+--   39: occupied, licensing AND tenancy skipped
+--   41: occupied, tenancy skipped (licence present)
+--   42: occupied, licensing skipped (tenancy provided)
+--   43: occupied, licensing AND tenancy skipped
+UPDATE property_ownership SET license_provide_later = true WHERE id IN (1, 9, 39, 42, 43);
+UPDATE property_ownership SET tenancy_provide_later = true WHERE id IN (39, 41, 43);
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (2, 2, '2025-01-15'),

@@ -111,6 +111,8 @@ class MockLandlordData {
             rentAmount: BigDecimal? = null,
             customPropertyType: String? = null,
             markedJointLandlord: Boolean = false,
+            licenseProvideLater: Boolean = false,
+            tenancyProvideLater: Boolean = false,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -133,6 +135,8 @@ class MockLandlordData {
                     rentAmount = rentAmount,
                     customPropertyType = customPropertyType,
                     markedJointLandlord = markedJointLandlord,
+                    licenseProvideLater = licenseProvideLater,
+                    tenancyProvideLater = tenancyProvideLater,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
@@ -167,6 +171,8 @@ class MockLandlordData {
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
             lastOccupiedDate: LocalDate? = LocalDate.of(2025, 1, 1),
+            licenseProvideLater: Boolean = false,
+            tenancyProvideLater: Boolean = false,
         ): PropertyOwnership {
             val propertyOwnership =
                 createPropertyOwnership(
@@ -188,6 +194,8 @@ class MockLandlordData {
                     rentFrequency = rentFrequency,
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
+                    licenseProvideLater = licenseProvideLater,
+                    tenancyProvideLater = tenancyProvideLater,
                 )
             if (lastOccupiedDate != null) {
                 propertyOwnership.lastOccupiedDate = lastOccupiedDate
@@ -195,7 +203,10 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createUnoccupiedPropertyOwnership(id: Long = 1): PropertyOwnership =
+        fun createUnoccupiedPropertyOwnership(
+            id: Long = 1,
+            licenseProvideLater: Boolean = false,
+        ): PropertyOwnership =
             createPropertyOwnership(
                 id = id,
                 currentNumHouseholds = 0,
@@ -207,6 +218,7 @@ class MockLandlordData {
                 rentFrequency = null,
                 customRentFrequency = null,
                 rentAmount = null,
+                licenseProvideLater = licenseProvideLater,
             )
 
         fun createPasscode(

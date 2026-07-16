@@ -588,6 +588,7 @@ class PropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(
                 license = null,
                 lastOccupiedDate = LocalDate.of(2025, 1, 1),
+                licenseProvideLater = true,
             )
 
         val viewModel =
@@ -611,6 +612,7 @@ class PropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(
                 license = null,
                 lastOccupiedDate = LocalDate.of(2025, 1, 1),
+                licenseProvideLater = true,
             )
 
         val viewModel =
@@ -634,6 +636,7 @@ class PropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(
                 license = null,
                 lastOccupiedDate = null,
+                licenseProvideLater = true,
             )
 
         assertThrows<IllegalStateException> {
@@ -648,7 +651,7 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `New layout shows a licensing not-provided paragraph for a council when licensing is skipped on an unoccupied property`() {
-        val propertyOwnership = createPropertyOwnership(license = null)
+        val propertyOwnership = createPropertyOwnership(license = null, licenseProvideLater = true)
 
         val viewModel =
             PropertyDetailsViewModel(
@@ -666,7 +669,7 @@ class PropertyDetailsViewModelTests {
 
     @Test
     fun `New layout shows a no-deadline licensing provide-later row for a landlord when licensing is skipped on an unoccupied property`() {
-        val propertyOwnership = createUnoccupiedPropertyOwnership()
+        val propertyOwnership = createUnoccupiedPropertyOwnership(licenseProvideLater = true)
 
         val viewModel =
             PropertyDetailsViewModel(
@@ -707,6 +710,7 @@ class PropertyDetailsViewModelTests {
             createOccupiedPropertyOwnership(
                 currentNumHouseholds = 0,
                 lastOccupiedDate = LocalDate.of(2025, 1, 1),
+                tenancyProvideLater = true,
             )
 
         val viewModel =

@@ -217,9 +217,7 @@ class PropertyDetailsViewModel(
     val occupationSection: List<SummaryListRowViewModel> =
         if (provideLaterEnabled) buildOccupationSection() else emptyList()
 
-    // TODO(PDJB-990): licensing "provide later" is inferred here from a null license.
-    // Verify this matches the real registration flow once PDJB-990 is implemented.
-    val isLicensingProvideLater: Boolean = provideLaterEnabled && propertyOwnership.license == null
+    val isLicensingProvideLater: Boolean = provideLaterEnabled && propertyOwnership.licenseProvideLater == true
 
     val licensingSection: List<SummaryListRowViewModel> =
         when {
@@ -251,10 +249,8 @@ class PropertyDetailsViewModel(
             "propertyDetails.propertyRecord.newLayout.tenancy.heading"
         }
 
-    // TODO(PDJB-942): tenancy "provide later" is inferred here from an occupied property with no households.
-    // Verify this matches the real registration flow once PDJB-942 is implemented.
     val isTenancyProvideLater: Boolean =
-        provideLaterEnabled && isOccupied && propertyOwnership.currentNumHouseholds == 0
+        provideLaterEnabled && isOccupied && propertyOwnership.tenancyProvideLater == true
 
     val tenancySection: List<SummaryListRowViewModel> =
         when {
