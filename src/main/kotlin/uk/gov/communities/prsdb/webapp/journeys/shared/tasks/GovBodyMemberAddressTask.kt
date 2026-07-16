@@ -34,6 +34,6 @@ class GovBodyMemberAddressTask(
         )
 
     companion object {
-        const val ROUTE_SEGMENT = "governing-body-member-address"
+        const val ROUTE_SEGMENT = "organisation-governing-body-member-address"
     }
 }
