@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharit
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
@@ -227,7 +228,14 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgGovBodyMemberDob(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgGovBodyMemberDobStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(
+            OrgGovBodyMemberDobStep.ROUTE_SEGMENT,
+            OrgGovBodyMemberDobFormModel().apply {
+                day = "15"
+                month = "6"
+                year = "1980"
+            },
+        )
         return self()
     }
 

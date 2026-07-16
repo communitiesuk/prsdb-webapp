@@ -1,12 +1,15 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
+import kotlinx.datetime.Instant
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -15,19 +18,39 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
 @JourneyFrameworkComponent
 class LandlordRegistrationTask(
     private val featureFlagManager: FeatureFlagManager,
-) : Task<LandlordRegistrationState>() {
+    override val identityTask: IdentityTask,
+    override val individualLandlordRegistrationTask: IndividualLandlordRegistrationTask,
+    override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
+    override val landlordTypeStep: LandlordTypeStep,
+    override val privacyNoticeStep: PrivacyNoticeStep,
+    override val cyaStep: LandlordRegistrationCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
+    journeyStateService: JourneyStateService,
+    override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
+) : DuplicableTask<LandlordRegistrationState>(journeyStateService),
+    LandlordRegistrationState {
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val taskState get() = this
+
     override fun makeSubJourney(state: LandlordRegistrationState) =
         if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
             makeOrgLandlordSubJourney(state)
@@ -41,16 +64,21 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            task(journey.identityTask) {
+            duplicableTask(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.individualLandlordRegistrationTask.firstStep }
             }
-            task(journey.individualLandlordRegistrationTask) {
+            duplicableTask(journey.individualLandlordRegistrationTask) {
                 parents { journey.identityTask.isComplete() }
+                nextStep { journey.cyaStep }
+            }
+            step(journey.cyaStep) {
+                routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+                parents { journey.individualLandlordRegistrationTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.individualLandlordRegistrationTask.isComplete() }
+                parents { journey.cyaStep.isComplete() }
             }
         }
 
@@ -60,7 +88,7 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            task(journey.identityTask) {
+            duplicableTask(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.landlordTypeStep }
             }
@@ -74,18 +102,23 @@ class LandlordRegistrationTask(
                     }
                 }
             }
-            task(journey.orgLandlordRegistrationTask) {
+            duplicableTask(journey.orgLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { exitStep }
             }
-            task(journey.individualLandlordRegistrationTask) {
+            duplicableTask(journey.individualLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                nextStep { journey.cyaStep }
+            }
+            step(journey.cyaStep) {
+                routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+                parents { journey.individualLandlordRegistrationTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.individualLandlordRegistrationTask.isComplete(),
+                        journey.cyaStep.isComplete(),
                         journey.orgLandlordRegistrationTask.isComplete(),
                     )
                 }
@@ -105,30 +138,30 @@ class LandlordRegistrationTask(
                 configureFirst { backDestination { journey.returnToCyaPageDestination } }
                 when (checkingAnswersFor) {
                     NameStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
+                        checkAnswerStep(journey.identityTask.nameStep, NameStep.ROUTE_SEGMENT)
                     }
 
                     DateOfBirthStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
+                        checkAnswerStep(journey.identityTask.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
                     }
 
                     EmailStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
+                        checkAnswerStep(journey.individualLandlordRegistrationTask.emailStep, EmailStep.ROUTE_SEGMENT)
                     }
 
                     PhoneNumberStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
+                        checkAnswerStep(journey.individualLandlordRegistrationTask.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
                     }
 
                     CountryOfResidenceStep.ROUTE_SEGMENT -> {
                         checkAnswerStep(
-                            journey.countryOfResidenceStep,
+                            journey.individualLandlordRegistrationTask.countryOfResidenceStep,
                             CountryOfResidenceStep.ROUTE_SEGMENT,
                         )
                     }
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.addressTask, null)
+                        duplicableCheckAnswerTask(journey.individualLandlordRegistrationTask.addressTask, null)
                     }
                 }
                 step(journey.finishCyaStep) {
