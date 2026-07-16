@@ -190,7 +190,7 @@ class OrgLandlordRegistrationTask(
                 parents { journey.leadTrusteePhoneStep.isComplete() }
                 nextStep { journey.trusteeAddressTask.firstStep }
             }
-            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
+            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgGovBodyDetailsStep }
             }

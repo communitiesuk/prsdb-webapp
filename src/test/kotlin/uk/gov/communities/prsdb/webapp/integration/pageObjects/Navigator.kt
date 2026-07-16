@@ -392,7 +392,7 @@ class Navigator(
 
     fun skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute(): LeadTrusteeAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteeAddress().build())
-        navigateToLandlordRegistrationJourneyStep(TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT)
+        navigateToLandlordRegistrationJourneyStep(TrusteeAddressTask.ROUTE_SEGMENT)
         return createValidPage(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
     }
 
