@@ -1303,7 +1303,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `the licensing number change link navigates to the licensing page`(page: Page) {
-                val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithSelectiveLicence()
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswersWithSelectiveLicence()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
                 checkAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
                 val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
                 selectiveLicencePage.submitLicenseNumber("SL-99999")
