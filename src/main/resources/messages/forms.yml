@@ -9,24 +9,11 @@ buttons:
   back: Back
   confirm: Confirm
   confirmAndContinue: Confirm and continue
-  confirmAndCompleteRegistration: Confirm and complete registration
   completeRegistration: Complete registration
   useThisAddress: Use this address
-  saveAndReturnToTaskList: Save and return to task list
-  returnToTaskList: Return to task list
   submit: Submit
   confirmAndSubmitUpdate: Confirm and submit update
-  saveAndContinueToLandlordResponsibilities: Save and continue to landlord responsibilities
-  saveAndContinueToEICR: Save and continue to EICR
-  saveAndContinueToEPC: Save and continue to EPC
-  findProperty: Find property
-  searchAgain: Search again
-  continueToCheckEpc: Continue to check EPC
-  continueToSearch: Continue to search
-  confirmAndSubmitCompliance: Confirm and submit compliance information
-  returnToPropertyRecord: Return to property record
   uploadAndContinue: Upload and continue
-  addAnother: Add another
   provideThisLater: Provide this later
   iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
@@ -34,11 +21,8 @@ buttons:
   continueAnyway: Continue anyway
 links:
   change: Change
-  view: View
   remove: Remove
   cancel: Cancel
-textArea:
-  infoText: 'You can enter up to {0,,limit} characters'
 radios:
   dividerText: or
   option:
@@ -203,7 +187,6 @@ identityNotVerified:
   paragraph:
     one: For this private beta, you can continue to use the service without proving your identity.
 confirmDetails:
-  title: Confirm your details
   heading: Confirm your name and date of birth
   summary: 'Check these details from your GOV.UK One Login:'
   rowHeading:
@@ -278,10 +261,6 @@ manualAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
-    addressLineOne:
-      label: Address 1
-    addressLineTwo:
-      label: Address 2 (optional)
   trusteeRegistration:
     fieldSetHeading: What is the lead trustee’s contact address?
   propertyRegistration:
@@ -355,9 +334,6 @@ leadTrusteeDob:
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
-  eicr:
-    fieldSetHeading: What is the issue date on the  Electrical Installation Condition Report (EICR)?
-    fieldSetHint: We’ll use this to calculate how long the report is valid for
 alreadyRegistered:
   heading: This property is registered on the database.
   paragraph:
@@ -448,13 +424,6 @@ numberOfHouseholds:
   input:
     error: 'Enter how many separate households, like 1 or 2'
   label: Enter how many households live in your property
-  details:
-    summary:
-      text: What is a household?
-    text:
-      paragraph:
-        one: A household consists of either a single person or members of the same family who live together. It includes people who are married or living together and people in same-sex relationships.
-        two: Unrelated adults who are not a couple or part of a family are separate households.
 numberOfPeople:
   input:
     error:
@@ -594,35 +563,6 @@ rentAmount:
       two: the equivalent monthly amount is £500
   fieldSetHint: Do not use the £ sign or commas.
   error: Rent amount must only include numbers (and a decimal point), like 600 or 193.54
-declaration:
-  fieldSetHeading: Declaration
-  paragraph:
-    one: It’s an offence to provide false or misleading information on the database.
-    two: 'If you do, you can be fined by a local council.'
-    three:
-      beforeLink: Understand more about your legal responsibilities as a landlord in the
-      link: guide to the database for landlords
-      afterLink: .
-  fines:
-    heading: 'The fines include:'
-    bullet:
-      one:
-        beforeAmount: up to £
-        afterAmount: for knowingly giving false or misleading information on the database
-      two:
-        beforeAmount: up to £
-        afterAmount: for repeated offences or continuing to provide false information
-    propertyRegistrationJourneyAmount: X
-  warning: 'By registering for this service, you agree that all the information you’ve provided is accurate or you’ll be subject to fines.'
-  confirm:
-    heading: 'By continuing, I confirm that:'
-    bullet:
-      one: all the information I have submitted is correct and my record is accurate and up to date
-      two: I understand I may be fined if I provide false or misleading information on the database
-  checkbox:
-    label: I agree
-    error:
-      missing: You must agree to the declaration to continue
 licensingType:
   fieldSetHeading: Select the type of licence you have for your property
   fieldSetHint: Select which type of property licence applies to this property
@@ -691,22 +631,13 @@ checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
   propertyDetails:
     heading: Property details
-    hint: Check the property address is correct
-    detail:
-      summary: What is a UPRN?
-      text: Unique property reference numbers (UPRNs) are unique identifiers for every address in Great Britain.
     address: Property address
     localCouncil: Local council
     type: Property type
     bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
-    licensingNumber: Licensing number
     noLicensing: None
-  additionalLandlords:
-    heading: Additional landlords
-  interestedParties:
-    heading: Interested parties
   tenancyDetails:
     heading: Tenancy and rental information
     occupied: Occupied by tenants
@@ -771,33 +702,7 @@ update:
       summaryName: You updated the tenancy and rent details for this property
     notOccupied:
       summaryName: You have updated whether the property is occupied by tenants
-    numberOfHouseholds:
-      fieldSetHeading: Households in your property
   warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
-  gasSafetyType:
-    fieldSetHeading: Do you want to add a new gas safety certificate or add an exemption?
-    certificate: Add a new gas safety certificate
-    exemption: Add an exemption
-    error:
-      missing: Select whether you want to add a new certificate or exemption
-  checkGasSafety:
-    summary: Update this property’s gas safety
-  epc:
-    fieldSetHeading: Do you want to add a new Energy Performance Certificate (EPC) for this property?
-    certificate: Add a new EPC
-    exemption: This property does not need an EPC
-    error:
-      missing: Select whether you want to add a new EPC for this property
-    checkYourAnswers:
-      summary: Update this property’s energy performance
-  eicr:
-    fieldSetHeading: Do you want to add a new Electrical Installation Condition Report (EICR) or add an exemption?
-    certificate: Add a new EICR
-    exemption: Add an exemption
-    error:
-      missing: Select whether you want to add a new EICR or exemption
-    checkYourAnswers:
-      summary: Update this property’s electrical safety
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
 warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
@@ -821,8 +726,6 @@ reason:
     error:
       tooLong: Your reason for deleting your account must be 200 characters or fewer.
 gasSafety:
-  fieldSetHeading: 'Do you have a gas safety certificate for {0,,address}?'
-  fieldSetHint: You’re legally required to carry out a gas safety assessment every year for a rented property. This should be carried out by a registered engineer.
   error:
     missing: Select whether you have a gas safety certificate
 invalidGasSafety:
@@ -852,17 +755,6 @@ invalidGasSafety:
       one: prosecution
       two: unlimited fines
       three: 'imprisonment, in the most serious cases'
-gasSafetyOutdated:
-  heading: This property’s gas safety certificate has expired
-  paragraph:
-    one: 'To keep tenants safe, you must have a valid gas safety certificate for each rented property. You must renew it every 12 months.'
-    two: 'Without a valid gas safety certificate for this property, you break the law. You should never let a property without one.'
-    three: 'You have <strong>28 days</strong> from the day this gas safety certificate expired to upload a new one to the database.'
-eicr:
-  fieldSetHeading: 'Do you have an Electrical Installation Condition Report (EICR) for {0,,address}?'
-  fieldSetHint: You’re legally required to carry out an electrical safety assessment every five years for a rented property
-  error:
-    missing: Select whether you have an EICR for this property
 invalidEicr:
   whatNext:
     heading: What you need to do next
@@ -886,11 +778,6 @@ invalidEicr:
       one: order you to fix any electrical problems
       two: do remedial work on your property and charge you for it
       three: 'fine you up to £30,000'
-eicrOutdated:
-  heading: This property’s Electrical Installation Condition Report (EICR) has expired
-  paragraph:
-    one: You must make sure the electrics in your rented property are safe. This means getting an Electrical Installation Condition Report (EICR) every 5 years.
-    two: 'You have <strong>28 days</strong> from the day this EICR expired to upload a new one to the database.'
 uploadCertificate:
   gasSafety:
     fieldSetHeading: Upload the gas safety certificate
@@ -898,175 +785,32 @@ uploadCertificate:
       missing: Select a gas safety certificate
   eicr:
     fieldSetHeading: Upload the Electrical Installation Condition Report (EICR)
-    error:
-      missing: Select an EICR
   eic:
     fieldSetHeading: Upload the Electrical Installation Certificate (EIC)
   electricalSafety:
     error:
       missing: Select an electrical safety certificate
-  fieldSetHint: 'Your file should be in PDF, JPG or PNG file format. The maximum file size you can upload is 15MB.'
   label: Upload a file
   error:
     wrongType: 'The selected file must be a PDF, PNG or JPG'
     tooBig: The selected file must be smaller than 15MB
     unsuccessfulUpload: The selected file could not be uploaded - try again
   noScript: You do not have JavaScript enabled.
-  insetText: 'You have already uploaded a file. If you upload a new file, you will replace the existing one.'
-  continueLink: Continue with existing file
   body:
     first: 'Your file must be:'
     bullet:
       one: a PDF, JPEG or PNG
       two: no more than 15MB (you’ll need to compress your file if it’s too big)
     second: If your certificate has multiple files, you can add them on the next page.
-  details:
-    heading: If your file is too big
-    bullet:
-      heading: 'To make the file smaller, try these steps:'
-      one: Use an image editing tool or online file compressor to make the file smaller
-      two: Save the file as a PDF with a smaller resolution size
-uploadCertificateConfirmation:
-  heading: Your file is being scanned
-  paragraph: Your file will be scanned for viruses. It will upload automatically if there are no issues found.
-  subsection:
-    heading: If the file fails to upload
-    paragraph: 'If there are any issues with the virus scan, you will get an email letting you know what to do next.'
-epc:
-  error:
-    missing: Select whether you have an EPC for this property
-  fieldSetHeading: 'Do you have an Energy Performance Certificate (EPC) for {0,,address}?'
-  fieldSetHint: An EPC gives a property an energy efficiency rating from A (best) to G (worst) and is valid for 10 years
-  radios:
-    option:
-      notRequired:
-        label: This property does not need an EPC
-isEpcRequired:
-  error:
-    missing: Select whether an EPC is required for this property
-  fieldSetHeading: Is an EPC required to let this property?
-epcNotAutoMatched:
-  heading: You must add this property’s EPC using the certificate number
-  paragraph:
-    one: We could not find this property’s EPC using its address or Unique Property Reference Number (UPRN).
-    two: Search for the EPC using the certificate number to add it to the database.
-epcMissing:
-  heading: You must get a valid energy performance certificate (EPC) for this property
-  paragraph:
-    one: You need an energy performance certificate (EPC) for your rented property. This certificate shows how energy efficient your property is.
-    two: It’s against the law to rent a property without a valid EPC.
-  ifNoEpc:
-    heading: If you do not get a new EPC or register an exemption
-    paragraph:
-      one: Your local council can contact you if you do not have an EPC or minimum energy efficient standard exemption for this property.
-      two:
-        beforeLink: Find out more about
-        link: your responsibilities when it comes to energy efficiency standards (opens in new tab)
-        afterLink: .
-      three: 'In the meantime, you can add other compliance information to the database.'
-    bullet:
-      heading: 'They can:'
-      one: 'issue a fine of up to £5,000'
-      two: stop you serving a Section 21 eviction notice
 epcExemptionReason:
-  missing: Select why your property does not need an EPC
-  fieldSetHeading: Why does this property not need an EPC?
-  paragraph:
-    one:
-      beforeLink: Check whether your property needs an EPC by
-      link: following this guide to energy performance certificates (opens in new tab)
   radios:
-    annualUseLessThan4Months:
-      label: The building will be used less than 4 months of the year
     annualEnergyConsumptionLessThan25Percent:
       label: 'The building is used or intended to be used for a limited time in the year, with an expected energy use of less than 25% of what it would be if used all year round'
-    temporaryBuilding:
-      label: Temporary building with a planned use for 2 years or less
-    standaloneSmallBuilding:
-      label: Stand-alone building with a total useful floor area of less than 50m²
-      hint: 'For example, buildings entirely detached from any other building'
-    dueForDemolition:
-      label: You can demonstrate that the building is due to be demolished
-epcExemptionConfirmation:
-  heading: You’ve marked this property as not needing an energy performance certificate (EPC)
-  paragraph:
-    one: A local council can check to make sure this is accurate.
-    two: 'If they have any issues, they can contact you.'
-    three: 'If at any point your property requires an EPC, you should get one and add it to the database.'
-checkMatchedEpc:
-  error:
-    missing: Select Yes or No to continue
-  heading: 'Check if this is the correct EPC information for {0,,address}'
-  insetText:
-    beforeLink: The EPC information is generated from the Energy Performance of Buildings Register.
-    link: View the full EPC certificate (opens in new tab)
-  summaryList:
-    address:
-      heading: Address
-    energyRating:
-      heading: Energy rating
-    expiryDate:
-      heading: Expiry date
-  isThisTheCorrectEpc:
-    heading: Is this the correct EPC for the property?
-  mode:
-    epcIncorrect: 'No, this is not the correct EPC'
-    epcCompliant: 'Yes, this is the correct EPC and it is compliant'
-    epcOlderThan10Years: 'Yes, this is the correct EPC and it is older than 10 years'
-    epcLowEnergyRating: 'Yes, this is the correct EPC and it has a low energy rating'
-  radios:
-    'no':
-      label: 'No, search for the EPC using the certificate number'
 epcLookup:
   error:
-    missing: Enter your EPC certificate number
     invalidFormat: Enter a 20 digit certificate number
-  fieldSetHeading: Search for the EPC using the certificate number
-  fieldSetHint: We’ll use this to upload the property’s certificate from the Energy Performance of Buildings Register.
-  certificateNumber:
-    label: Enter the certificate number
-    hint: For example 9002-3775-9101-5482-3149
-  searchButton:
-    text: Search for this EPC
-  explanation:
-    heading: Find this property’s EPC number
-    paragraph:
-      one:
-        beforeLink: 'The EPC number should be located on the certificate. If you do not have your property’s energy certificate, go to'
-        link: find an energy certificate (opens in new tab)
-        afterLink: .
-      two:
-        beforeLink: 'If your property does not have an energy certificate, you can'
-        link: get a new energy certificate (opens in new tab)
-        afterLink: .
-epcNotFound:
-  heading: This property’s EPC could not be found
-  paragraph:
-    one: 'There was no EPC found with the number: {0,,certificateNumber}.'
-    two:
-      beforeLink: 'To find the right EPC for your property,'
-      link: contact the EPC assessor (opens in new tab)
-      afterLink: who evaluated the property.
-    three:
-      beforeLink: Or
-      link: get a new energy certificate (opens in new tab)
-      afterLink: .
-    four: 'In the meantime, you can add other compliance information to the database.'
-  subsection:
-    heading: How to find your EPC number
-epcSuperseded:
-  heading: This property has a newer EPC available
-  paragraph:
-    one: The EPC number you entered is not the most recent one for this property. This EPC is out of date.
-    two: 'We’ve found the latest EPC with the certificate number: {0,,certificateNumber}.'
-    three: You can check the newer certificate is correct on the next screen before you save.
 epcExpiryCheck:
   missing: Select Yes or No to continue
-  heading: Your EPC expiry date
-  paragraph:
-    one: 'An EPC is valid for 10 years. After 10 years, you only need a new EPC for the property if new tenants move in after the EPC expires.'
-    two: 'If the same tenants remain, the EPC is stays valid even after 10 years.'
-    three: 'To check if you need a new EPC, did the current tenancy start before {0,,expiryDate}?'
 invalidEpc:
   whatNext:
     heading: What you need to do next
@@ -1105,69 +849,6 @@ invalidEpc:
         link: your responsibilities when it comes to energy efficiency standards (opens in new tab)
         afterLink: .
       two: 'In the meantime, you can add other compliance information to the database.'
-epcExpired:
-  heading: This property’s energy performance certificate (EPC) has expired
-  paragraph:
-    one: 'Your property’s energy performance certificate (EPC) expired on {0,,expiryDate}.'
-    two: You need a new EPC for your rented property.
-    three: 'You have <strong>28 days</strong> from the day this EPC expired to add a new one to the database.'
-epcExpiredLowRating:
-  heading: The energy performance certificate (EPC) for this property has expired and has a rating below E
-  paragraph:
-    one: 'Your property’s energy performance certificate (EPC) has expired on {0,,expiryDate}. It also has an energy rating below E.'
-    two:
-      beforeLink: You must
-      link: get a new EPC for this property (opens in new tab)
-      afterLink: .
-  bullet:
-    heading: 'It’s against the law to:'
-    one: rent a property without a valid EPC
-    two: 'rent a property with an EPC rating below E, unless you have a valid Minimum Energy Efficiency Standard (MEES) exemption'
-  whatNext:
-    heading: What you need to do next
-    one: 'Since this property’s EPC had an energy rating below E, you should improve the property’s energy rating by doing remedial work.'
-    two:
-      beforeLink: 'If you cannot improve this property’s energy rating, register a'
-      link: MEES exemption (opens in new tab)
-      afterLink: .
-meesExemptionConfirmation:
-  heading: You marked this property as having a MEES exemption
-  paragraph:
-    one: A local council can check to make sure this is accurate.
-    two: 'If they have any issues, they can contact you.'
-    three: 'If at any point your property is no longer exempt, your property’s energy certificate must meet the energy standard of E or higher.'
-  bullet:
-    heading: 'If this happens, you should:'
-    one:
-      beforeLink: improve the property’s energy rating by doing remedial work or register a new
-      link: Minimum Energy Efficient Standard (MEES) exemption (opens in new tab)
-    two: return to the database to update this information
-lowEnergyRating:
-  heading: Your property’s energy rating is too low (below E)
-  paragraph:
-    one:
-      beforeLink: 'You cannot let or continue to let this property if its energy performance certificate (EPC) rating is below E, unless you have a'
-      link: valid MEES exemption (opens in new tab)
-      afterLink: .
-    two: Your local council can review this information and follow up with an inspection.
-  remedialWork:
-    subheading: Do remedial work on your property
-    paragraph:
-      one: 'If your property’s rating is below E, you must improve it. This is usually called doing remedial work.'
-      two: For current tenancies you must improve the rating to E or above.
-      three: 'For new tenancies, you cannot enter into a new tenancy until the rating is improved to E or above.'
-  registerMees:
-    subheading: Register a MEES exemption
-    bullet:
-      heading:
-        beforeLink: You can
-        link: register an exemption (opens in new tab)
-        afterLink: 'on the PRS Exemptions Register if your property:'
-      one: cannot be improved to a rating of E or above
-      two: is legally required to have an EPC
-      three: is let on a relevant tenancy type
-    paragraph:
-      one: An exemption means your property does not need an energy rating of E or above.
 epcRequirements:
   heading: Requirements for letting a property
   paragraph:
@@ -1181,7 +862,6 @@ epcRequirements:
     two: do improvement work to the property
 landlordResponsibilities:
   fireSafety:
-    heading: Fire safety in your property
     paragraph:
       one: You must make sure your property and tenants are safe from fire.
       two: There might be other fire safety rules depending on the type of property.
@@ -1204,22 +884,7 @@ landlordResponsibilities:
         heading: 'You must:'
         one: install the right automatic fire detection system
         two: provide the correct fire extinguishers
-    checkbox:
-      label: I confirm I have read this guidance and understand my responsibilities
-      error:
-        missing: You must confirm that you have read and understood your responsibilities
-  fireSafetyRisk:
-    heading: Your property is at risk of fire
-    paragraph:
-      one: You must follow fire safety regulations in your property. A fire can put your tenants’ lives in danger.
-      two: A local council may inspect your property if you have not met your responsibilities as a landlord.
-      three: You can continue to confirm your other landlord responsibilities.
   keepPropertySafe:
-    checkbox:
-      error:
-        missing: You must confirm that you have read and understood your responsibilities
-      label: I confirm I have read this guidance and understand my responsibilities
-    heading: Health and safety in rental properties
     paragraph:
       one: You’re responsible for your tenants’ health and safety in your property.
     bullet:
@@ -1262,11 +927,6 @@ landlordResponsibilities:
         one: carry out repairs or improvements
         two: pay compensation to your tenant
   responsibilityToTenants:
-    checkbox:
-      error:
-        missing: You must confirm that you have read and understood your responsibilities
-      label: I confirm I have read this guidance and understand my responsibilities
-    heading: Your responsibilities to your tenants
     paragraph:
       one:
         beforeLink: 'Before you let out a property, you must follow the responsibilities listed in the'
@@ -1294,35 +954,6 @@ landlordResponsibilities:
         four: the Electrical Installation Condition Report (EICR) for the property
         five: the energy performance certificate (EPC) for the property
         six: any proof that the smoke and carbon monoxide alarms work at the start of the tenancy
-checkComplianceAnswers:
-  heading: 'Check the compliance information for: {0,,address}'
-  summaryName: Details you provided
-  certificate:
-    expired: Expired
-    notRequired: Not required
-    notAdded: Not added
-    issueDate: Issue date
-    validUntil: Valid until
-    exemption: Exemption
-  gasSafety:
-    heading: Gas safety
-    certificate: Gas safety certificate
-    download: Download certificate
-    engineerNumber: Gas Safe engineer number
-  eicr:
-    heading: Electrical safety
-    certificate: Electrical Installation Condition Report (EICR)
-    download: Download EICR
-  epc:
-    heading: Energy performance
-    certificate: Energy Performance Certificate (EPC)
-    view: View EPC (opens in new tab)
-    viewExpired: View expired EPC (opens in new tab)
-    expiryDate: Expiry date
-    expiryCheck: Did the tenancy start before the EPC expired?
-    energyRating: Energy rating
-    exemption: EPC exemption
-    meesExemption: MEES exemption
 inviteLocalCouncilAdminUser:
   title: Invite Local Council Admin
   fieldSetHeading: Invite someone to be a Local Council Admin on the database.
