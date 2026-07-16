@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
@@ -27,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
@@ -142,16 +140,6 @@ class LandlordStateSessionBuilder(
     fun withCharityRegisteredWith(regulator: CharityRegulator): LandlordStateSessionBuilder {
         val formModel = CharityRegisteredWithFormModel().apply { this.charityRegisteredWith = regulator }
         withSubmittedValue(OrgCharityRegisteredWithStep.ROUTE_SEGMENT, formModel)
-        return self()
-    }
-
-    fun withOrgDirectors(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgDirectorsStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
-    fun withOrgTrustees(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgTrusteesStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -301,11 +289,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCharityNumberScotland() = beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.SCOTLAND)
 
-        fun beforeOrgDirectors() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
-
-        fun beforeOrgTrustees() = beforeOrgDirectors().withOrgDirectors()
-
-        fun beforeLeadTrusteeName() = beforeOrgTrustees().withOrgTrustees()
+        fun beforeLeadTrusteeName() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
 
         fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
 

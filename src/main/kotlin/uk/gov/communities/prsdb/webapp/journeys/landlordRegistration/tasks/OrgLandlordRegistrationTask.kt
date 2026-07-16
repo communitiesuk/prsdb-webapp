@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
@@ -34,7 +33,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -57,8 +55,6 @@ class OrgLandlordRegistrationTask(
     override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
     override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
     override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
-    override val orgDirectorsStep: OrgDirectorsStep,
-    override val orgTrusteesStep: OrgTrusteesStep,
     override val leadTrusteeNameStep: LeadTrusteeNameStep,
     override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
     override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
@@ -134,7 +130,7 @@ class OrgLandlordRegistrationTask(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
-                        YesOrNo.NO -> Destination(journey.orgDirectorsStep)
+                        YesOrNo.NO -> Destination(journey.leadTrusteeNameStep)
                     }
                 }
             }
@@ -146,27 +142,28 @@ class OrgLandlordRegistrationTask(
                         CharityRegulator.ENGLAND_AND_WALES -> Destination(journey.orgCharityNumberEnglandAndWalesStep)
                         CharityRegulator.NORTHERN_IRELAND -> Destination(journey.orgCharityNumberNorthernIrelandStep)
                         CharityRegulator.SCOTLAND -> Destination(journey.orgCharityNumberScotlandStep)
-                        CharityRegulator.NONE -> Destination(journey.orgDirectorsStep)
+                        CharityRegulator.NONE -> Destination(journey.leadTrusteeNameStep)
                     }
                 }
             }
             step(journey.orgCharityNumberEnglandAndWalesStep) {
                 routeSegment(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.ENGLAND_AND_WALES) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.leadTrusteeNameStep }
             }
             step(journey.orgCharityNumberNorthernIrelandStep) {
                 routeSegment(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NORTHERN_IRELAND) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.leadTrusteeNameStep }
             }
             step(journey.orgCharityNumberScotlandStep) {
                 routeSegment(OrgCharityNumberScotlandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.SCOTLAND) }
-                nextStep { journey.orgDirectorsStep }
+                nextStep { journey.leadTrusteeNameStep }
             }
-            step(journey.orgDirectorsStep) {
-                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+            // TODO: PDJB-1257 Make sure this is the correct place
+            step(journey.leadTrusteeNameStep) {
+                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.orgCharityStep.hasOutcome(YesOrNo.NO),
@@ -176,17 +173,6 @@ class OrgLandlordRegistrationTask(
                         journey.orgCharityNumberScotlandStep.isComplete(),
                     )
                 }
-                nextStep { journey.orgTrusteesStep }
-            }
-            step(journey.orgTrusteesStep) {
-                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
-                parents { journey.orgDirectorsStep.isComplete() }
-                nextStep { journey.leadTrusteeNameStep }
-            }
-            // TODO: PDJB-1257 Make sure this is the correct place
-            step(journey.leadTrusteeNameStep) {
-                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
                 nextStep { journey.leadTrusteeEmailStep }
             }
             step(journey.leadTrusteeEmailStep) {
