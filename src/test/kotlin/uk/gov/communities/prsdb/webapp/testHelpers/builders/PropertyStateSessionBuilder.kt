@@ -94,6 +94,13 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOccupancy() = beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.NO_LICENSING)
 
+        fun beforePropertyRegistrationRentedOutLicensingType() =
+            beforePropertyRegistrationOwnershipType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+                .withOccupancyStatus(true)
+
         fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()

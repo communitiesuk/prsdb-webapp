@@ -226,34 +226,33 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             }
         }
 
-        // todo
         @Nested
         inner class LicensingTypeStep {
             @Test
             fun `Submitting with no licensingType selected returns an error`(page: Page) {
-                val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
+                val licensingTypePage = navigator.skipToPropertyRegistrationRentedOutLicensingTypePage()
                 licensingTypePage.form.submit()
                 assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
             }
 
             @Test
             fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
-                val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
+                val licensingTypePage = navigator.skipToPropertyRegistrationRentedOutLicensingTypePage()
                 licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
                 val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
                 BaseComponent
                     .assertThat(licenseNumberPage.form.sectionHeader)
-                    .containsText("Section 1 of 2 — Add property details")
+                    .containsText("Tell us if your property needs a license")
             }
 
             @Test
             fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
-                val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
+                val licensingTypePage = navigator.skipToPropertyRegistrationRentedOutLicensingTypePage()
                 licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
                 val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
                 BaseComponent
                     .assertThat(licenseNumberPage.form.sectionHeader)
-                    .containsText("Section 1 of 2 — Add property details")
+                    .containsText("Tell us if your property needs a license")
             }
         }
 
