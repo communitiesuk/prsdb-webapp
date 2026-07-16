@@ -8,10 +8,12 @@ The system operator metrics page (`/system-operator/metrics`) shows a single sum
   [AnalyticsReadMe](AnalyticsReadMe.md)).
 - **Transaction counts** — completed transactions from the Plausible `Transaction` custom event
   (`PlausibleMetricsService`), described below.
+- **Cost metrics** — account-wide AWS costs from Cost Explorer (`CostExplorerMetricsService`), described
+  below. Cost per transaction combines the Cost Explorer cost with the Plausible transaction count.
 - **Infrastructure metrics** — from Amazon CloudWatch (`CloudWatchMetricsService`), described below.
 
 The page (`MetricsController`) shows no rows until the operator submits a **reporting period** (From/To
-dates); on submit, the four services are queried for that period and their results are rendered as one
+dates); on submit, five metric queries are run for that period and their results are rendered as one
 combined summary list (`getMetricRows`). Counts are formatted as integers, durations via
 `MetricsDurationHelper`, and rates/utilisations as `0.00%`. Any value that is missing — or whose upstream
 call failed — renders as **"No data"** rather than erroring the page. Row labels come from
@@ -19,7 +21,7 @@ call failed — renders as **"No data"** rather than erroring the page. Row labe
 
 ## Dashboard rows
 
-The summary list contains the following rows, in display order:
+The summary list contains 19 rows, in display order:
 
 | # | Dashboard label | Source | Derivation |
 |---|-----------------|--------|------------|
@@ -40,6 +42,8 @@ The summary list contains the following rows, in display order:
 | 15 | Client error rate (HTTP 4xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 16 | Server error rate (HTTP 5xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 17 | Total number of transactions | Plausible (`PlausibleMetricsService.getTransactionCounts`) | See [Transaction counts](#transaction-counts). |
+| 18 | Total AWS cost | Cost Explorer (`CostExplorerMetricsService`) | Account-wide daily `UnblendedCost` summed for the selected period. |
+| 19 | Cost per transaction | Cost Explorer and Plausible (`CostExplorerMetricsService`, `PlausibleMetricsService.getTransactionCounts`) | Total AWS cost ÷ total transactions; **No data** when the transaction count is zero. |
 
 > **Completion rates** use visitors for landlord and local council user registration but page views for
 > property registration, because a single landlord may register multiple properties. This is surfaced on
@@ -67,6 +71,33 @@ deregistration step itself has no button to tag.
 minimal (a landlord with no properties leaving the service) and there is no clean solution that avoids
 over-counting. Landlord deregistrations where the landlord *does* have properties, and all property
 deregistrations, are counted as normal.
+
+## Cost and cost per transaction
+
+The deployed `AwsCostExplorerMetricsClient` calls Cost Explorer's `GetCostAndUsage` operation in
+`us-east-1`. Its query is account-wide: it has no tag, service, or resource filter and no grouping. It
+uses `DAILY` granularity and the `UnblendedCost` metric.
+
+The dashboard reporting range is inclusive in UK time. Cost Explorer's end date is exclusive, so the
+client sends the selected end date plus one day. It follows all pagination tokens, sums the returned daily
+cost strings with `BigDecimal`, and returns one consistent currency unit. Valid zero and negative costs
+are preserved.
+
+Costs are displayed to two decimal places as `amount CURRENCY`. If any returned daily result is estimated,
+both the total-cost and cost-per-transaction rows are marked `(estimated)`. A cost-source failure or an
+invalid response makes both rows **"No data"** without hiding the other metrics. When the transaction
+count is zero, the total AWS cost still displays, while cost per transaction is **"No data"**.
+
+### Operational prerequisites
+
+Cost Explorer must be enabled manually in AWS Billing and Cost Management; it cannot be enabled by API.
+Current-month data usually takes about 24 hours to appear and refreshes at least daily. Recent and
+current-month values may remain estimated until AWS completes billing reconciliation after month end. A
+management account can also restrict a member account's access.
+
+Infrastructure PR [`communitiesuk/prsdb-infra#309`](https://github.com/communitiesuk/prsdb-infra/pull/309)
+grants only `ce:GetCostAndUsage` and must be deployed before the live query can succeed. Enabling the
+account and populating data still require verification in the target environment.
 
 ## CloudWatch infrastructure metrics
 
@@ -135,3 +166,14 @@ exactly one bean is active at a time:
 
 So when you run locally you always get the stub, and **no AWS credentials are required**. Real
 CloudWatch is only called in deployed (non-`local`) environments.
+
+There are also two implementations of `CostExplorerMetricsClient`, selected by Spring profile so that
+exactly one bean is active at a time:
+
+| Implementation                   | Profile expression | Behaviour                                                   |
+|----------------------------------|--------------------|-------------------------------------------------------------|
+| `StubCostExplorerMetricsClient`  | `local`            | Returns `123.45 USD` marked as estimated.                   |
+| `AwsCostExplorerMetricsClient`   | `!local`           | Calls Cost Explorer through the AWS SDK.                     |
+
+The local stub does not confirm that Cost Explorer is enabled or populated in any environment; the AWS
+client is used only in deployed (non-`local`) environments.

@@ -14,14 +14,18 @@ import uk.gov.communities.prsdb.webapp.constants.METRICS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.helpers.MetricsDurationHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.CloudWatchMetricsDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.CostMetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MetricsDateRangeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CloudWatchMetricsService
+import uk.gov.communities.prsdb.webapp.services.CostExplorerMetricsService
 import uk.gov.communities.prsdb.webapp.services.MetricsService
 import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.Duration
 import java.util.Locale
@@ -33,6 +37,7 @@ class MetricsController(
     private val metricsService: MetricsService,
     private val plausibleMetricsService: PlausibleMetricsService,
     private val cloudWatchMetricsService: CloudWatchMetricsService,
+    private val costExplorerMetricsService: CostExplorerMetricsService,
     private val messageSource: MessageSource,
 ) {
     @GetMapping
@@ -51,11 +56,13 @@ class MetricsController(
         val metricRows =
             getReportingPeriodOrNull(bindingResult, formModel)
                 ?.let { period ->
+                    val totalTransactions = plausibleMetricsService.getTransactionCounts(period)
                     getMetricRows(
                         metricsService.getMetrics(period),
                         plausibleMetricsService.getCompletionRates(period),
                         cloudWatchMetricsService.getMetrics(period),
-                        plausibleMetricsService.getTransactionCounts(period),
+                        totalTransactions,
+                        costExplorerMetricsService.getMetrics(period, totalTransactions),
                     )
                 }
                 ?: emptyList()
@@ -78,6 +85,7 @@ class MetricsController(
         completionRates: JourneyCompletionRatesDataModel,
         cloudWatch: CloudWatchMetricsDataModel,
         totalTransactions: Long,
+        costMetrics: CostMetricsDataModel,
     ): List<SummaryListRowViewModel> =
         listOf(
             countRow("metrics.rows.landlordRegistrations", metrics.numberOfLandlordRegistrations),
@@ -100,6 +108,8 @@ class MetricsController(
             percentRow("metrics.rows.cloudFrontClientErrorRate", cloudWatch.cloudFrontClientErrorRate),
             percentRow("metrics.rows.cloudFrontServerErrorRate", cloudWatch.cloudFrontServerErrorRate),
             countRow("metrics.rows.totalTransactions", totalTransactions),
+            costRow("metrics.rows.totalAwsCost", costMetrics.totalCost, costMetrics),
+            costRow("metrics.rows.costPerTransaction", costMetrics.costPerTransaction, costMetrics),
         )
 
     private fun percentRow(
@@ -128,6 +138,36 @@ class MetricsController(
             fieldHeading = headingKey,
             fieldValue = NumberFormat.getIntegerInstance(Locale.UK).format(count),
         )
+
+    private fun costRow(
+        headingKey: String,
+        amount: BigDecimal?,
+        costMetrics: CostMetricsDataModel,
+    ): SummaryListRowViewModel {
+        val currencyCode = costMetrics.currencyCode
+        if (amount == null || currencyCode == null) {
+            return SummaryListRowViewModel(
+                fieldHeading = headingKey,
+                fieldValue = "metrics.saveAndReturn.noData",
+            )
+        }
+
+        val formattedCost =
+            "${
+                NumberFormat.getNumberInstance(Locale.UK).apply {
+                    isGroupingUsed = true
+                    minimumFractionDigits = 2
+                    maximumFractionDigits = 2
+                    roundingMode = RoundingMode.HALF_UP
+                }.format(amount)
+            } $currencyCode"
+
+        return SummaryListRowViewModel(
+            fieldHeading = headingKey,
+            fieldValue = if (costMetrics.isEstimated) "metrics.cost.estimated" else formattedCost,
+            optionalFieldValueParam = if (costMetrics.isEstimated) formattedCost else null,
+        )
+    }
 
     private fun durationRow(
         headingKey: String,
