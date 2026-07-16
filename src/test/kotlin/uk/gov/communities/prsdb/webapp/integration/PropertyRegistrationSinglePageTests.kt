@@ -1254,7 +1254,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             @Test
             fun `the gas supply change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
-                val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder
+                            .beforePropertyRegistrationCheckAnswers()
+                            .withBedrooms(),
+                    )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
                 checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
                 val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
                 hasGasSupplyPage.submitHasNoGasSupply()
