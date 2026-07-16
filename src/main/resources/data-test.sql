@@ -225,9 +225,6 @@ VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1,
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
--- Properties with no license where the landlord has indicated they will provide it later:
--- id=1 is occupied (license currently required), id=2 is unoccupied (license required once occupied)
-UPDATE property_ownership SET license_provide_later = true WHERE id IN (1, 2);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
