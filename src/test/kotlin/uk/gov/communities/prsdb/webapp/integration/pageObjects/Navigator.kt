@@ -872,9 +872,7 @@ class Navigator(
         return createValidPage(page, RentAmountFormPagePropertyRegistration::class)
     }
 
-    fun skipToTenancyDetailsRentAmountPage(
-        rentFrequency: RentFrequency = RentFrequency.MONTHLY,
-    ): RentAmountFormPagePropertyRegistration {
+    fun skipToTenancyDetailsRentAmountPage(rentFrequency: RentFrequency = RentFrequency.MONTHLY): RentAmountFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforeTenancyDetailsRentAmount(rentFrequency).build(),
         )
