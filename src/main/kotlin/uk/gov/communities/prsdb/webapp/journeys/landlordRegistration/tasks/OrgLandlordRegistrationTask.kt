@@ -34,7 +34,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -73,6 +75,8 @@ class OrgLandlordRegistrationTask(
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep,
     override val saveGovBodyMemberStep: SaveGovBodyMemberStep,
+    override val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep,
+    override val removeGovBodyMemberStep: RemoveGovBodyMemberStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
@@ -83,6 +87,7 @@ class OrgLandlordRegistrationTask(
         "governingBodyMembersMap",
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
 
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
@@ -225,9 +230,31 @@ class OrgLandlordRegistrationTask(
                     }
                 }
             }
+            step(journey.setStateForGovBodyMemberEditStep) {
+                routeSegment(SetStateForGovBodyMemberEditStep.ROUTE_SEGMENT)
+                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
+                nextStep { journey.orgGovBodyWhoToProvideStep }
+            }
+            step(journey.removeGovBodyMemberStep) {
+                routeSegment(RemoveGovBodyMemberStep.ROUTE_SEGMENT)
+                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.orgGovBodyMemberListStep
+                        AnyMembers.NO_MEMBERS -> journey.orgGovBodyDetailsStep
+                    }
+                }
+            }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS) }
+                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
+                backDestination {
+                    if (journey.governingBodyMembersMap.isNullOrEmpty()) {
+                        Destination(journey.orgGovBodyDetailsStep)
+                    } else {
+                        Destination(journey.orgGovBodyMemberListStep)
+                    }
+                }
                 nextStep { journey.orgGovBodyMemberNameStep }
             }
             step(journey.orgGovBodyMemberNameStep) {

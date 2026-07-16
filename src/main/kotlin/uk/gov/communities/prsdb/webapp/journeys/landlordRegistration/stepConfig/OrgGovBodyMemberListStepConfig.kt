@@ -1,17 +1,21 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
-class OrgGovBodyMemberListStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, LandlordRegistrationOrgLandlordState>() {
+class OrgGovBodyMemberListStepConfig(
+    private val urlParameterService: CollectionKeyParameterService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LandlordRegistrationOrgLandlordState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: LandlordRegistrationOrgLandlordState) =
@@ -23,8 +27,7 @@ class OrgGovBodyMemberListStepConfig :
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "addAnotherButtonText" to "forms.orgGovBodyMemberList.buttons.addAnother",
             "summaryListData" to getMemberRows(state),
-            // TODO: PDJB-1290 - Replace with real "add another" URL once implemented
-            "addAnotherUrl" to "#",
+            "addAnotherUrl" to Destination(state.orgGovBodyWhoToProvideStep).toUrlStringOrNull(),
         )
 
     private fun getMemberRows(state: LandlordRegistrationOrgLandlordState): List<SummaryListRowViewModel> {
@@ -32,17 +35,33 @@ class OrgGovBodyMemberListStepConfig :
         return membersMap
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (_, member) ->
+            .mapIndexed { displayIndex, (internalIndex, member) ->
                 SummaryListRowViewModel(
                     fieldHeading = "forms.orgGovBodyMemberList.memberName",
                     fieldValue = member.name,
                     optionalFieldHeadingParam = displayIndex + 1,
                     actions =
                         listOf(
-                            // TODO: PDJB-1290 - Replace with real change URL
-                            SummaryListRowActionsViewModel(text = "forms.links.change", url = "#"),
-                            // TODO: PDJB-1290 - Replace with real remove URL
-                            SummaryListRowActionsViewModel(text = "forms.links.remove", url = "#"),
+                            SummaryListRowActionsViewModel(
+                                text = "forms.links.change",
+                                url =
+                                    Destination(state.setStateForGovBodyMemberEditStep)
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex))
+                                        .toUrlStringOrNull()
+                                        ?: throw PrsdbWebException(
+                                            "Unable to generate change URL for governing body member $internalIndex",
+                                        ),
+                            ),
+                            SummaryListRowActionsViewModel(
+                                text = "forms.links.remove",
+                                url =
+                                    Destination(state.removeGovBodyMemberStep)
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex))
+                                        .toUrlStringOrNull()
+                                        ?: throw PrsdbWebException(
+                                            "Unable to generate remove URL for governing body member $internalIndex",
+                                        ),
+                            ),
                         ),
                 )
             }
