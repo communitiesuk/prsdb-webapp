@@ -3,10 +3,13 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import org.springframework.mock.web.MockHttpServletRequest
@@ -17,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
@@ -261,6 +265,21 @@ class GlobalModelAttributesTests {
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
         assertNull(model["navLinks"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes does no page setup work for the healthcheck route`() {
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = HealthCheckController.HEALTHCHECK_ROUTE
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        verify(backUrlStorageService, never()).storeCurrentUrlReturningKey()
+        verify(dashboardUrlProvider, never()).getDashboardUrlForCurrentUser()
+        verifyNoInteractions(messageSource)
+        assertTrue(model.asMap().isEmpty())
     }
 
     private fun createOAuth2AuthenticationToken(registrationId: String): OAuth2AuthenticationToken {

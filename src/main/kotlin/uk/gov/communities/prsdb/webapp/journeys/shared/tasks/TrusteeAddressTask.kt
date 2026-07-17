@@ -36,6 +36,6 @@ class TrusteeAddressTask(
         )
 
     companion object {
-        const val LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT = "lead-trustee-address"
+        const val ROUTE_SEGMENT = "lead-trustee-address"
     }
 }

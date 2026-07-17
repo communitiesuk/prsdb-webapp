@@ -177,7 +177,7 @@ class LandlordStateSessionBuilder(
         // The lead trustee address is a routed instance of the shared address task, so its data is stored under
         // keys prefixed with the task route. Provide a full "found and selected an address" path so the task is
         // complete and the journey can proceed past it.
-        val routePrefix = TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = TrusteeAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",
@@ -312,11 +312,17 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
-        fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
+        fun beforeLeadTrusteeName() = beforeOrgType().withOrgType()
 
-        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
+        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
 
-        fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+        fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
+
+        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
+
+        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
+
+        fun beforeOrgCharity() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
 
         fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
 
@@ -328,17 +334,11 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCharityNumberScotland() = beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.SCOTLAND)
 
-        fun beforeLeadTrusteeName() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
+        fun beforeOrgCompaniesHouse() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
 
-        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
+        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
 
-        fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
-
-        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
-
-        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
-
-        fun beforeOrgGovBodyDetails() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
+        fun beforeOrgGovBodyDetails() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
 
         fun beforeOrgGovBodyMustProvideInfo() = beforeOrgGovBodyDetails().withOrgGovBodyDetails(OrgGovBodyDetailsMode.NO_DETAILS)
 
