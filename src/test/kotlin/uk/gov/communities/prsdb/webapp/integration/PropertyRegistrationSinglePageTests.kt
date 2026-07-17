@@ -232,7 +232,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             @Test
             fun `Submitting with no licensingType selected returns an error`(page: Page) {
                 val licensingTypePage = navigator.skipToPropertyRegistrationOccupiedLicensingTypePage()
-                licensingTypePage.form.submit()
+                licensingTypePage.form.submitPrimaryButton()
                 assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
             }
 

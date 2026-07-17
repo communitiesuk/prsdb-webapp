@@ -1684,8 +1684,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             householdsPage.submitNumberOfHouseholds(2)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
-            val bedroomsPage2 = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
-            bedroomsPage2.submitNumOfBedrooms(3)
             val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
             rentIncludesBillsPage.submitIsNotIncluded()
             val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
