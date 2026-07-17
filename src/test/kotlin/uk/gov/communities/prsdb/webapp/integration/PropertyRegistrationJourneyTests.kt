@@ -1717,7 +1717,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
     }
 
-    // TODO: Remove tests when the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING Feature Flag is removed
+    // TODO PDJB-1340: Remove tests when the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING Feature Flag is removed
     @Nested
     inner class RestructureAndSkippingDisabled {
         private val propertyRegistrationSectionHeader = "Section 1 of 2 — Add property details"

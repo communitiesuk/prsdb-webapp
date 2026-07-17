@@ -666,7 +666,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
     }
 
-    // TODO: Remove tests when the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING Feature Flag is removed
+    // TODO PDJB-1340: Remove tests when the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING Feature Flag is removed
     @Nested
     inner class RestructureAndSkippingDisabled {
         @BeforeEach
