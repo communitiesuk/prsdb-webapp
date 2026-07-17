@@ -7,8 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 
 interface InviteJointLandlordState : LandlordInvitingState {
-    // The context supplied by the enclosing journey (existing/logged-in emails). On the task, this resolves to the
-    // enclosing state bound at the mount site via withDependencies { }.
     val dependencies: InviteJointLandlordsTaskDependencies
 
     val inviteJointLandlordStep: InviteJointLandlordStep

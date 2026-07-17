@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -98,6 +99,21 @@ interface CheckYourAnswersJourneyState : JourneyState {
         ) {
             duplicableTask(task) {
                 route?.let { routeSegment(it) }
+                initialStep()
+                backDestination { journey.returnToCyaPageDestination }
+                nextStep { journey.finishCyaStep }
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
+            task: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+            dependencies: () -> TDependencies,
+            route: String? = null,
+        ) {
+            duplicableTask(task) {
+                route?.let { routeSegment(it) }
+                withDependencies(dependencies)
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
