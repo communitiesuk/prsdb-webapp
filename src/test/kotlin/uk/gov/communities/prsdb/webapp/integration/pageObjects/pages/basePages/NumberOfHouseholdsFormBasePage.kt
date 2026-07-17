@@ -15,7 +15,6 @@ abstract class NumberOfHouseholdsFormBasePage(
 
     val form = NumOfHouseholdsForm(page)
     val header = Heading(page.locator("h1"))
-    val subHeader = Heading(page.locator("h2.govuk-heading-m"))
     val sectionHeader = SectionHeader(page.locator("main"))
 
     fun submitNumberOfHouseholds(num: Int) = submitNumberOfHouseholds(num.toString())
