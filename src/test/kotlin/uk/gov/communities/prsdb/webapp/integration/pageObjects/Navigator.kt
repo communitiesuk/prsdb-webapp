@@ -685,7 +685,7 @@ class Navigator(
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRentedOutLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationOccupiedLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationOccupiedLicensingType().build(),
         )
@@ -701,7 +701,7 @@ class Navigator(
         return createValidPage(page, SelectiveLicenceFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRentedOutSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationOccupiedSelectiveLicencePage(): SelectiveLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutSelectiveLicence().build(),
         )
@@ -717,7 +717,7 @@ class Navigator(
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRentedOutHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationOccupiedHmoMandatoryLicencePage(): HmoMandatoryLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutHmoMandatoryLicence().build(),
         )
@@ -725,7 +725,7 @@ class Navigator(
         return createValidPage(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationRentedOutHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationOccupiedHmoAdditionalLicencePage(): HmoAdditionalLicenceFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutHmoAdditionalLicence().build(),
         )
