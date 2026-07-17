@@ -98,7 +98,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             orgRow(
                 state,
                 "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationAddress",
-                orgAddressSingleLine(org.orgAddressStep.formModel),
+                orgAddressLines(org.orgAddressStep.formModel),
                 org.orgAddressStep,
             )
         rows +=
@@ -226,7 +226,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 ),
                 orgCardRow(
                     "registerAsALandlord.orgCheckAnswers.governingBody.address",
-                    org.trusteeAddressTask.getAddress().singleLineAddress,
+                    org.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
                 ),
             )
         // TODO: PDJB-1289 - render an additional summary card per governing body member once member enumeration exists.
@@ -286,7 +286,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             },
         )
 
-    private fun orgAddressSingleLine(address: ManualAddressFormModel) =
+    private fun orgAddressLines(address: ManualAddressFormModel) =
         AddressDataModel
             .fromManualAddressData(
                 addressLineOne = address.notNullValue(ManualAddressFormModel::addressLineOne),
@@ -294,7 +294,8 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 townOrCity = address.notNullValue(ManualAddressFormModel::townOrCity),
                 county = address.county,
                 postcode = address.notNullValue(ManualAddressFormModel::postcode),
-            ).singleLineAddress
+            ).toMultiLineAddress()
+            .split("\n")
 
     private fun orgTypeMessageKey(orgTypeName: String) =
         when (orgTypeName) {
