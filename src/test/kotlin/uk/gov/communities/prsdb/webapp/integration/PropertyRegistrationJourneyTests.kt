@@ -1684,23 +1684,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             householdsPage.submitNumberOfHouseholds(2)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
-            val bedroomsPage2 = assertPageIs(page, OccupancyNumberOfBedroomsFormPagePropertyRegistration::class)
+            val bedroomsPage2 = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
             bedroomsPage2.submitNumOfBedrooms(3)
-            val rentIncludesBillsPage = assertPageIs(page, OccupancyRentIncludesBillsFormPagePropertyRegistration::class)
+            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
             rentIncludesBillsPage.submitIsNotIncluded()
-            val furnishedPage = assertPageIs(page, OccupancyFurnishedStatusFormPagePropertyRegistration::class)
+            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
             furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-            val rentFrequencyPage = assertPageIs(page, OccupancyRentFrequencyFormPagePropertyRegistration::class)
+            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
             rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
             rentFrequencyPage.form.submit()
-            val rentAmountPage = assertPageIs(page, OccupancyRentAmountFormPagePropertyRegistration::class)
+            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
             rentAmountPage.submitRentAmount("400")
 
             taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            assertThat(checkAnswersPage.summaryList.licensingTypeRow.value).containsText("Provide this later")
+            assertThat(checkAnswersPage.summaryList.licensingRow.value).containsText("Provide this later")
         }
 
         @Test
