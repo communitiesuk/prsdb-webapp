@@ -124,5 +124,5 @@ orgGovBodyMemberDob:
   fieldSetHeading: What is their date of birth?
   fieldSetHint: 'For example, 27 03 1968'
   error:
-    invalidDate: The date of birth cannot be in the future
+    invalidAge: The minimum age is 16
 
