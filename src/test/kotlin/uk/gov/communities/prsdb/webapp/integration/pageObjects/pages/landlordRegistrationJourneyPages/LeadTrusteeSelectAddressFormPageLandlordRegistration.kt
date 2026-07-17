@@ -10,5 +10,5 @@ class LeadTrusteeSelectAddressFormPageLandlordRegistration(
     page: Page,
 ) : SelectAddressFormPage(
         page,
-        "$LANDLORD_REGISTRATION_ROUTE/${TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        "$LANDLORD_REGISTRATION_ROUTE/${TrusteeAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
     )

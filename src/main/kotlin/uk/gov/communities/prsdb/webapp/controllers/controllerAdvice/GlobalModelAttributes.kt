@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
@@ -42,6 +43,10 @@ class GlobalModelAttributes(
         model: Model,
         request: HttpServletRequest,
     ) {
+        if (request.requestURI == HEALTHCHECK_ROUTE) {
+            return
+        }
+
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/pa-$plausibleSiteId.js")
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
