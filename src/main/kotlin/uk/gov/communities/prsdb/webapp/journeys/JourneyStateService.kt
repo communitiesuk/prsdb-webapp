@@ -198,11 +198,11 @@ class JourneyStateService(
             journeyId: String,
         ): String {
             if (path.startsWith("/")) return path
-            val basePath = journeyBasePath(journeyId)
-            // Fallback for journeys whose controller has not yet been ported to the journey dispatcher: no base
-            // path is stored, so the URL stays relative and behaves exactly as before. This fallback (and the
-            // relative-URL branch below) can be removed once every journey controller uses the dispatcher, at
-            // which point a base path is always stored and all journey URLs become absolute.
+            // Prefer the base path stored against the journey. When none is stored - for example the journey has
+            // expired from the session but its id is still in the URL - fall back to the base path the dispatcher
+            // derived for the current request. This keeps redirects absolute: a relative URL would be resolved by
+            // the browser against the current path and duplicate the task route segment.
+            val basePath = journeyBasePath(journeyId) ?: currentRequestBasePath()
             return if (!basePath.isNullOrEmpty()) "$basePath/$path" else path
         }
 
