@@ -27,7 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.ProvideHouseholdDetailsLaterFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyBillsIncludedFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFurnishedStatusFormPagePropertyDetailsUpdate
@@ -445,11 +445,11 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                         assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     
                     // Check landlord is taken to provide details later page
-                    assertThat(provideHouseholdDetailsLaterPage.sectionHeader).containsText("Households in your property")
-                    assertThat(provideHouseholdDetailsLaterPage.heading).containsText("Provide the number of households later")
-                    assertPageIs(provideHouseholdDetailsLaterPage.page)
+                    assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Households in your property")
+                    assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide the number of households later")
+                    assertPageIs(provideTenancyDetailsLaterPage.page)
 
-                    provideHouseholdDetailsLaterPage.form.submit()
+                    provideTenancyDetailsLaterPage.form.submit()
                     val checkOccupancyAnswersPage =
                         assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 

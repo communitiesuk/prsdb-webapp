@@ -87,7 +87,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideHouseholdDetailsLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
@@ -1614,18 +1614,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(householdsPage.header).containsText("Households in your property")
 
             householdsPage.submitProvideThisLater()
-            val provideHouseholdDetailsLaterPage =
-                assertPageIs(page, ProvideHouseholdDetailsLaterFormPagePropertyRegistration::class)
+            val provideTenancyDetailsLaterPage =
+                assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
 
-            assertThat(provideHouseholdDetailsLaterPage.sectionHeader).containsText("Households in your property")
-            assertThat(provideHouseholdDetailsLaterPage.heading).containsText("Provide the number of households later")
+            assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Households in your property")
+            assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide the number of households later")
             assertTrue(
-                provideHouseholdDetailsLaterPage.page
+                provideTenancyDetailsLaterPage.page
                     .content()
                     .contains("You can continue with the rest of the registration now, but you must come back and provide the number of households later."),
             )
 
-            provideHouseholdDetailsLaterPage.form.submit()
+            provideTenancyDetailsLaterPage.form.submit()
             assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
