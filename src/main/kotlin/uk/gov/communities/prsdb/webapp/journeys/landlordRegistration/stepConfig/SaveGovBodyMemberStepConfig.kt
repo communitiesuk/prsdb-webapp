@@ -47,9 +47,10 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
         state.nextGoverningBodyMemberId = nextKey + 1
 
         // Clear the individual step form data so the next member starts fresh
-        state.clearStepData(OrgGovBodyMemberNameStep.ROUTE_SEGMENT)
-        state.clearStepData(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
-        state.clearStepData(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
+        state.orgGovBodyWhoToProvideStep.clearFormData()
+        state.orgGovBodyMemberNameStep.clearFormData()
+        state.orgGovBodyMemberDobStep.clearFormData()
+        state.govBodyMemberAddressTask.clearFormData()
     }
 }
 
