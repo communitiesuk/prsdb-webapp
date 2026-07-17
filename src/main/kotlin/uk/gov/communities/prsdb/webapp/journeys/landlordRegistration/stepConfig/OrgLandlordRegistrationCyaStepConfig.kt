@@ -121,6 +121,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationType",
                 org.orgTypeStep.formModel.orgTypes
                     .filterNotNull()
+                    .filter { it.isNotBlank() }
                     .map { orgTypeMessageKey(it) },
                 org.orgTypeStep,
             )
@@ -300,7 +301,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             OrgType.COMPANY.name -> "registerAsALandlord.orgType.checkbox.company"
             OrgType.CHARITY.name -> "registerAsALandlord.orgType.checkbox.charity"
             OrgType.TRUST.name -> "registerAsALandlord.orgType.checkbox.trust"
-            else -> "registerAsALandlord.orgType.checkbox.none"
+            else -> "commonText.other"
         }
 
     private fun regulatorMessageKey(regulator: CharityRegulator) =
@@ -308,7 +309,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             CharityRegulator.ENGLAND_AND_WALES -> "forms.orgCharityRegisteredWith.radios.option.englandAndWales"
             CharityRegulator.NORTHERN_IRELAND -> "forms.orgCharityRegisteredWith.radios.option.northernIreland"
             CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
-            CharityRegulator.NONE -> "forms.orgCharityRegisteredWith.radios.option.none"
+            CharityRegulator.NONE -> "commonText.other"
         }
 }
 
