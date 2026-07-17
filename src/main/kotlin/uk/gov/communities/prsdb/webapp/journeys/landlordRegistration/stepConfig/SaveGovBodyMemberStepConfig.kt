@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -16,22 +15,19 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
 
     override fun afterStepIsReached(state: LandlordRegistrationOrgLandlordState) {
         val name =
-            state.getStepData(OrgGovBodyMemberNameStep.ROUTE_SEGMENT)?.get("name") as? String
+            state.orgGovBodyMemberNameStep.formModelOrNull?.name
                 ?: throw PrsdbWebException("Governing body member name step data is missing")
 
         val type =
-            state.getStepData(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)?.get("whoToProvide") as? GoverningBodyMemberType
+            state.orgGovBodyWhoToProvideStep.formModelOrNull?.whoToProvide
                 ?: throw PrsdbWebException("Governing body member type step data is missing")
 
-        val dobData =
-            state.getStepData(OrgGovBodyMemberDobStep.ROUTE_SEGMENT)
+        val dobFormModel =
+            state.orgGovBodyMemberDobStep.formModelOrNull
                 ?: throw PrsdbWebException("Governing body member date of birth step data is missing")
         val dateOfBirth =
-            DateTimeHelper.parseDateOrNull(
-                day = dobData["day"] as? String ?: "",
-                month = dobData["month"] as? String ?: "",
-                year = dobData["year"] as? String ?: "",
-            ) ?: throw PrsdbWebException("Governing body member date of birth is invalid")
+            DateTimeHelper.parseDateOrNull(dobFormModel.day, dobFormModel.month, dobFormModel.year)
+                ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
         val address = state.govBodyMemberAddressTask.getAddress()
 
