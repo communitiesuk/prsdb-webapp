@@ -427,13 +427,6 @@ numberOfHouseholdsOld:
       two: a family living together
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
-  details:
-    summary:
-      text: What is a household?
-    text:
-      paragraph:
-        one: A household consists of either a single person or members of the same family who live together. It includes people who are married or living together and people in same-sex relationships.
-        two: Unrelated adults who are not a couple or part of a family are separate households.
 numberOfHouseholdsRestructureAndSkipping:
   heading: Households in your property
   paragraph:
