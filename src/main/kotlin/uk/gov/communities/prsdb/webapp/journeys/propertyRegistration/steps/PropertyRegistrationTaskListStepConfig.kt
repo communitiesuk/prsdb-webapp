@@ -88,9 +88,16 @@ class PropertyRegistrationTaskListStepConfig(
                     ),
                 )
 
+        val registerSectionHeading =
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                "registerProperty.taskList.register.restructureAndSkipping.heading"
+            } else {
+                "registerProperty.taskList.register.old.heading"
+            }
+
         return listOf(
             TaskSectionViewModel(
-                "registerProperty.taskList.register.heading",
+                registerSectionHeading,
                 "register-property",
                 registerTaskItems,
             ),

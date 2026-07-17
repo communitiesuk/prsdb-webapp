@@ -2,7 +2,7 @@
 
 The system operator metrics page (`/system-operator/metrics`) shows a single summary list combining:
 
-- **Service usage metrics** — landlord/property registration counts and time-to-first-property
+- **Service usage metrics** — landlord/property registration counts and registration-to-first-property-association
   percentiles, from the database (`MetricsService`).
 - **Journey completion rates** — from the Plausible Stats API (`PlausibleMetricsService`, see
   [AnalyticsReadMe](AnalyticsReadMe.md)).
@@ -26,10 +26,10 @@ The summary list contains the following rows, in display order:
 | 1 | Number of registrations (landlords) | Database (`MetricsService`) | Landlords created in the period. |
 | 2 | Landlords verified by One Login | Database (`MetricsService`) | Landlords created in the period with `isVerified = true`. |
 | 3 | Number of properties | Database (`MetricsService`) | Property ownerships created in the period. |
-| 4 | Number of landlords with at least 1 property | Database (`MetricsService`) | Distinct landlords owning a property created in the period. |
-| 5 | Median time between registration and first property | Database (`MetricsService`) | Median (p50) of registration→first-property durations; ignores joint landlords. |
-| 6 | 90th percentile time between registration and first property | Database (`MetricsService`) | p90 of the same durations. |
-| 7 | 95th percentile time between registration and first property | Database (`MetricsService`) | p95 of the same durations. |
+| 4 | Number of landlords with at least 1 property | Database (`MetricsService`) | Distinct landlords whose ownership link was created in the period. |
+| 5 | Median time between registration and first property registration or joining an existing property | Database (`MetricsService`) | Median (p50) of registration→earliest-ownership-link durations. |
+| 6 | 90th percentile time between registration and first property registration or joining an existing property | Database (`MetricsService`) | p90 of the same durations. |
+| 7 | 95th percentile time between registration and first property registration or joining an existing property | Database (`MetricsService`) | p95 of the same durations. |
 | 8 | Landlord registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | Unique **visitors** at the confirmation page ÷ start page. |
 | 9 | Property registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | **Page views** at confirmation ÷ start (a landlord may register several properties). |
 | 10 | Local council user registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | Unique **visitors** at confirmation ÷ privacy-notice page. |
