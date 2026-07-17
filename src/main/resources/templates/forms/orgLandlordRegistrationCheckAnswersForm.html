@@ -1,0 +1,34 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="yourDetailsCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
+<!--/*@thymesVar id="landlordDetails" type="java.util.List"*/-->
+<!--/*@thymesVar id="leadTrusteeCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
+<!--/*@thymesVar id="mainContactCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
+<!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{registerAsALandlord.orgCheckAnswers.heading}">Check your answers</h1>
+
+        <div th:replace="~{fragments/summaryCard :: summaryCard(#{${yourDetailsCard.title}}, ${yourDetailsCard.cardNumber}, ${yourDetailsCard.actions}, ${yourDetailsCard.summaryList})}"></div>
+
+        <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.landlordDetails.heading}">Landlord details</h2>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+
+        <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.governingBody.heading}">Members of the governing body</h2>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(#{${leadTrusteeCard.title}}, ${leadTrusteeCard.cardNumber}, ${leadTrusteeCard.actions}, ${leadTrusteeCard.summaryList})}"></div>
+        <!--/* TODO: PDJB-1289 - render a summary card per governing body member once member enumeration exists. */-->
+
+        <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.mainContact.heading}">Main contact details</h2>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(#{${mainContactCard.title}}, ${mainContactCard.cardNumber}, ${mainContactCard.actions}, ${mainContactCard.summaryList})}"></div>
+
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.warning</div>
+    </th:block>
+    <th:block id="form-content">
+        <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>
+        <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>
