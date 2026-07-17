@@ -85,7 +85,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideHouseholdDetailsLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
@@ -614,7 +614,7 @@ class PropertyRegistrationJourney(
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
-    override val provideHouseholdDetailsLaterStep: ProvideHouseholdDetailsLaterStep,
+    override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
@@ -799,7 +799,7 @@ interface PropertyRegistrationJourneyState :
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
     val tenancyDetailsTask: TenancyDetailsTask
-    override val provideHouseholdDetailsLaterStep: ProvideHouseholdDetailsLaterStep
+    override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep
     override val finishCyaStep: FinishCyaJourneyStep
     val gasSafetyTask: GasSafetyTask
     val electricalSafetyTask: ElectricalSafetyTask

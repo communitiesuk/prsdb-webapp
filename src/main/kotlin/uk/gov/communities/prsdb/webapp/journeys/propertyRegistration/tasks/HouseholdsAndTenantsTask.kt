@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStepMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideHouseholdDetailsLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -21,7 +21,7 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
                 nextStep { mode ->
                     when (mode) {
                         HouseholdStepMode.COMPLETE -> journey.tenants
-                        HouseholdStepMode.PROVIDE_THIS_LATER -> journey.provideHouseholdDetailsLaterStep
+                        HouseholdStepMode.PROVIDE_THIS_LATER -> journey.provideTenancyDetailsLaterStep
                     }
                 }
                 savable()
@@ -32,8 +32,8 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
                 nextStep { exitStep }
                 savable()
             }
-            step(journey.provideHouseholdDetailsLaterStep) {
-                routeSegment(ProvideHouseholdDetailsLaterStep.ROUTE_SEGMENT)
+            step(journey.provideTenancyDetailsLaterStep) {
+                routeSegment(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)
                 parents { journey.households.hasOutcome(HouseholdStepMode.PROVIDE_THIS_LATER) }
                 nextStep { exitStep }
                 savable()
@@ -41,7 +41,7 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
             exitStep {
                 parents {
                     OrParents(
-                        journey.provideHouseholdDetailsLaterStep.isComplete(),
+                        journey.provideTenancyDetailsLaterStep.isComplete(),
                         journey.tenants.hasOutcome(Complete.COMPLETE),
                     )
                 }
