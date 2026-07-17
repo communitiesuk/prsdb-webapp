@@ -28,7 +28,7 @@ class CompleteInviteJointLandlordStepConfig(
                         "Landlord record not found for logged in user with baseUserId $baseUserId",
                     )
 
-            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.inviteJointLandlordsTask.propertyId)
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
 
             propertyOwnershipService.markAsJointLandlord(propertyOwnership)
             jointLandlordInvitationService.sendInvitationEmails(

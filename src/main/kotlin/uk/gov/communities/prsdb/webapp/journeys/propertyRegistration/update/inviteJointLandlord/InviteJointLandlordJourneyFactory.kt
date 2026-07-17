@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -19,7 +20,10 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.StartInviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -32,17 +36,18 @@ class InviteJointLandlordJourneyFactory(
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            state.inviteJointLandlordsTask.propertyId = propertyId
+            state.propertyId = propertyId
             state.isStateInitialized = true
         }
 
-        if (state.inviteJointLandlordsTask.propertyId != propertyId) {
+        if (state.propertyId != propertyId) {
             throw PrsdbWebException(
-                "Journey state propertyId ${state.inviteJointLandlordsTask.propertyId} does not match provided propertyId $propertyId",
+                "Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId",
             )
         }
 
-        val propertyMarkedAsJointLandlord = propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
+        val propertyMarkedAsJointLandlord =
+            propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
 
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         val propertyDetailsLandlordTab = "$propertyDetailsRoute#$LANDLORD_DETAILS_FRAGMENT"
@@ -73,6 +78,7 @@ class InviteJointLandlordJourneyFactory(
                 nextStep { journey.inviteJointLandlordsTask.firstStep }
             }
             duplicableTask(journey.inviteJointLandlordsTask) {
+                withDependencies { journey }
                 parents { journey.startInviteJointLandlordStep.isComplete() }
                 backUrl { propertyDetailsLandlordTab }
                 nextDestination { _ ->
@@ -121,6 +127,7 @@ class InviteJointLandlordJourneyFactory(
                 }
             }
             duplicableTask(journey.inviteJointLandlordsTask) {
+                withDependencies { journey }
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 backUrl { propertyDetailsLandlordTab }
                 nextDestination { _ ->
@@ -163,18 +170,32 @@ class InviteJointLandlordJourneyFactory(
 class InviteJointLandlordJourney(
     override val startInviteJointLandlordStep: StartInviteJointLandlordStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val inviteJointLandlordsTask: UpdateInviteJointLandlordsTask,
+    override val inviteJointLandlordsTask: InviteJointLandlordsTask,
     override val checkInvitationsStep: CheckInvitationsStep,
     override val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     journeyStateService: JourneyStateService,
     journeyName: String = "inviteJointLandlord",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
-    InviteJointLandlordJourneyState
+    InviteJointLandlordJourneyState {
+    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
-interface InviteJointLandlordJourneyState : JourneyState {
+    override val existingInvitedEmails: List<String>
+        get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
+
+    // TODO: PDJB-1274: Update emails to account for org landlord
+    override val existingLandlordEmails: List<String>
+        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { (it as IndividualLandlord).email }
+}
+
+interface InviteJointLandlordJourneyState :
+    JourneyState,
+    InviteJointLandlordsTaskDependencies {
     val startInviteJointLandlordStep: StartInviteJointLandlordStep
     val hasJointLandlordsStep: HasJointLandlordsStep
-    val inviteJointLandlordsTask: UpdateInviteJointLandlordsTask
+    val inviteJointLandlordsTask: InviteJointLandlordsTask
     val checkInvitationsStep: CheckInvitationsStep
     val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep
+    var propertyId: Long
 }

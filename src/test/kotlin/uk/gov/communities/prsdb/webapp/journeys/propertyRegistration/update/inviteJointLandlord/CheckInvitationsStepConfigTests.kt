@@ -10,6 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -19,7 +20,7 @@ class CheckInvitationsStepConfigTests {
     private lateinit var mockJourneyState: InviteJointLandlordJourneyState
 
     @Mock
-    private lateinit var mockInviteJointLandlordsTask: UpdateInviteJointLandlordsTask
+    private lateinit var mockInviteJointLandlordsTask: InviteJointLandlordsTask
 
     @Mock
     private lateinit var mockCheckJointLandlordsStep: CheckJointLandlordsStep
@@ -29,7 +30,12 @@ class CheckInvitationsStepConfigTests {
     @Test
     fun `getStepSpecificContent returns summary rows with invited emails`() {
         val stepConfig = setupStepConfig()
-        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("first@example.com", "second@example.com"))
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(
+            listOf(
+                "first@example.com",
+                "second@example.com",
+            ),
+        )
 
         val content = stepConfig.getStepSpecificContent(mockJourneyState)
         val rows = content["summaryListData"] as List<SummaryListRowViewModel>
@@ -39,10 +45,21 @@ class CheckInvitationsStepConfigTests {
             listOf("first@example.com", "second@example.com"),
             rows.first().fieldValue,
         )
-        assertEquals("forms.links.change", rows.first().actions.single().text)
+        assertEquals(
+            "forms.links.change",
+            rows
+                .first()
+                .actions
+                .single()
+                .text,
+        )
         assertEquals(
             "${CheckJointLandlordsStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId",
-            rows.first().actions.single().url,
+            rows
+                .first()
+                .actions
+                .single()
+                .url,
         )
     }
 

@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -39,7 +40,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     private lateinit var mockState: InviteJointLandlordJourneyState
 
     @Mock
-    private lateinit var mockInviteJointLandlordsTask: UpdateInviteJointLandlordsTask
+    private lateinit var mockInviteJointLandlordsTask: InviteJointLandlordsTask
 
     private val propertyId = 123L
     private val invitedEmails = listOf("first@example.com", "second@example.com")
@@ -75,7 +76,8 @@ class CompleteInviteJointLandlordStepConfigTests {
         // Arrange
         val baseUserId = "test-user"
         val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
         val stepConfig =
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
@@ -83,7 +85,7 @@ class CompleteInviteJointLandlordStepConfigTests {
                 mockLandlordService,
             )
         whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
-        whenever(mockInviteJointLandlordsTask.propertyId).thenReturn(propertyId)
+        whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         setMockPrincipal(baseUserId)

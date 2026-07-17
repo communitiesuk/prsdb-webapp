@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -110,12 +111,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationInviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -126,6 +127,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @PrsdbWebService
@@ -618,7 +620,7 @@ class PropertyRegistrationJourney(
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val inviteJointLandlordsTask: PropertyRegistrationInviteJointLandlordsTask,
+    override val inviteJointLandlordsTask: InviteJointLandlordsTask,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels) when the old journey is removed.
@@ -687,6 +689,7 @@ class PropertyRegistrationJourney(
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
+    private val landlordService: LandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
@@ -715,11 +718,12 @@ class PropertyRegistrationJourney(
     // is wired up (parent journey context). The cache is essential when a CYA child journey reads this
     // value: in that context only steps in the child's journey graph are wired up, so the fallback would
     // throw. The cache is populated on step submission (see OccupiedStepConfig.afterStepDataIsAdded).
-    override val isOccupied: Boolean get() {
-        cachedOccupied?.let { return it }
-        return occupied.formModelOrNull?.occupied
-            ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
-    }
+    override val isOccupied: Boolean
+        get() {
+            cachedOccupied?.let { return it }
+            return occupied.formModelOrNull?.occupied
+                ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+        }
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
@@ -732,11 +736,12 @@ class PropertyRegistrationJourney(
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
     // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
-    override val uprn: Long? get() {
-        cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
-        val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
-        return getMatchingAddress(submittedAddress)?.uprn
-    }
+    override val uprn: Long?
+        get() {
+            cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
+            val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
+            return getMatchingAddress(submittedAddress)?.uprn
+        }
 
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
@@ -750,6 +755,13 @@ class PropertyRegistrationJourney(
 
     override val invitedJointLandlords: List<String>
         get() = inviteJointLandlordsTask.invitedJointLandlords
+
+    override val loggedInLandlordEmail: String?
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        get() =
+            landlordService
+                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
+                ?.email
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"

@@ -48,6 +48,7 @@ class JointLandlordsPropertyRegistrationTask(
                 savable()
             }
             duplicableTask(journey.inviteJointLandlordsTask) {
+                withDependencies { journey }
                 parents {
                     OrParents(
                         journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES),

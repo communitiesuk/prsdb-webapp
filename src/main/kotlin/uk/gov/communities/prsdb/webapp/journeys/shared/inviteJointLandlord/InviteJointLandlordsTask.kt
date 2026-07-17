@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord
 
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -9,14 +10,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 
-abstract class InviteJointLandlordsTask(
+@JourneyFrameworkComponent
+class InviteJointLandlordsTask(
     journeyStateService: JourneyStateService,
     private val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
-) : DuplicableTask<InviteJointLandlordState>(journeyStateService),
+) : DuplicableTaskWithDependencies<InviteJointLandlordState, InviteJointLandlordsTaskDependencies>(journeyStateService),
     InviteJointLandlordState {
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
