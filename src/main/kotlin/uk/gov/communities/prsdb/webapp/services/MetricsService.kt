@@ -18,7 +18,7 @@ class MetricsService(
 ) {
     @Transactional
     fun getMetrics(period: ReportingPeriod): MetricsDataModel {
-        val timesToFirstProperty = getTimesToFirstProperty(period)
+        val timesToFirstPropertyOwnership = getTimesToFirstPropertyOwnership(period)
         return MetricsDataModel(
             numberOfLandlordRegistrations =
                 individualLandlordRepository.countByCreatedDateBetween(period.start, period.end),
@@ -27,18 +27,21 @@ class MetricsService(
             numberOfProperties =
                 propertyOwnershipRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfLandlordsWithAProperty =
-                propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(period.start, period.end),
-            medianTimeToFirstProperty = percentile(timesToFirstProperty, 0.5),
-            p90TimeToFirstProperty = percentile(timesToFirstProperty, 0.9),
-            p95TimeToFirstProperty = percentile(timesToFirstProperty, 0.95),
+                propertyOwnershipRepository.countDistinctLandlordsWithOwnershipLinkCreatedBetween(
+                    period.start,
+                    period.end,
+                ),
+            medianTimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.5),
+            p90TimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.9),
+            p95TimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.95),
         )
     }
 
-    private fun getTimesToFirstProperty(period: ReportingPeriod): List<Duration> =
+    private fun getTimesToFirstPropertyOwnership(period: ReportingPeriod): List<Duration> =
         propertyOwnershipRepository
-            .findLandlordAndFirstPropertyCreatedDates(period.start, period.end)
-            .map { (landlordCreatedDate, firstPropertyCreatedDate) ->
-                Duration.between(landlordCreatedDate, firstPropertyCreatedDate)
+            .findLandlordAndFirstOwnershipLinkCreatedDates(period.start, period.end)
+            .map { (landlordCreatedDate, firstOwnershipLinkCreatedDate) ->
+                Duration.between(landlordCreatedDate, firstOwnershipLinkCreatedDate)
             }
 
     private fun percentile(
