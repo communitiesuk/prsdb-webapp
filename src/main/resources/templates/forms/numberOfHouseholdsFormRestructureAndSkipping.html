@@ -2,6 +2,11 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showSecondarySubmitButton" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -33,6 +38,14 @@
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfHouseholds', null, 2)}">
         </div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <th:block th:if="${showSecondarySubmitButton}">
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+            <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
+        </div>
+    </th:block>
+    <th:block th:unless="${showSecondarySubmitButton}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    </th:block>
 </th:block>
 </html>

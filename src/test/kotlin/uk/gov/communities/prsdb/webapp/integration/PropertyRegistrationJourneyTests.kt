@@ -87,6 +87,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideHouseholdDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
@@ -1603,6 +1604,29 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Cannot start yet", taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim())
             assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals("Cannot start yet", taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim())
+        }
+
+        @Test
+        fun `restructured households page can continue via provide this later`(page: Page) {
+            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+            val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
+            assertThat(householdsPage.header).containsText("Households in your property")
+
+            householdsPage.submitProvideThisLater()
+            val provideHouseholdDetailsLaterPage =
+                assertPageIs(page, ProvideHouseholdDetailsLaterFormPagePropertyRegistration::class)
+
+            assertThat(provideHouseholdDetailsLaterPage.sectionHeader).containsText("Households in your property")
+            assertThat(provideHouseholdDetailsLaterPage.heading).containsText("Provide the number of households later")
+            assertTrue(
+                provideHouseholdDetailsLaterPage.page
+                    .content()
+                    .contains("You can continue with the rest of the registration now, but you must come back and provide the number of households later."),
+            )
+
+            provideHouseholdDetailsLaterPage.form.submit()
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
         @Test

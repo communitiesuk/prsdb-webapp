@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.ProvideHouseholdDetailsLaterFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyBillsIncludedFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFurnishedStatusFormPagePropertyDetailsUpdate
@@ -428,6 +429,33 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Check CYA page displays values without leading zeros
                     assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText("3")
                     assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText("7")
+                }
+
+                @Test
+                fun `Provide this later on the households page goes through the explanation page`(page: Page) {
+                    // Details page
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+                    val updateNumberOfHouseholdsPage =
+                        assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                    // Submit provide this later on households page
+                    updateNumberOfHouseholdsPage.submitProvideThisLater()
+                    val provideTenancyDetailsLaterPage =
+                        assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                    
+                    // Check landlord is taken to provide details later page
+                    assertThat(provideHouseholdDetailsLaterPage.sectionHeader).containsText("Households in your property")
+                    assertThat(provideHouseholdDetailsLaterPage.heading).containsText("Provide the number of households later")
+                    assertPageIs(provideHouseholdDetailsLaterPage.page)
+
+                    provideHouseholdDetailsLaterPage.form.submit()
+                    val checkOccupancyAnswersPage =
+                        assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).isHidden()
+                    checkOccupancyAnswersPage.confirm()
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
                 }
             }
 

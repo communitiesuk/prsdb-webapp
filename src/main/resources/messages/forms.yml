@@ -442,6 +442,8 @@ numberOfHouseholdsRestructureAndSkipping:
   input:
     error: 'Enter how many separate households, like 1 or 2'
   label: Enter how many households live in your property
+provideTenancyDetailsLater:
+  heading: 'TODO: PDJB-942'
 numberOfPeople:
   input:
     error:

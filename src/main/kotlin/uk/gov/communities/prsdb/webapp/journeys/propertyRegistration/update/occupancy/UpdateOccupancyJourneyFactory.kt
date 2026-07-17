@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideHouseholdDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -180,6 +181,7 @@ class UpdateOccupancyJourney(
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
+    override val provideHouseholdDetailsLaterStep: ProvideHouseholdDetailsLaterStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
