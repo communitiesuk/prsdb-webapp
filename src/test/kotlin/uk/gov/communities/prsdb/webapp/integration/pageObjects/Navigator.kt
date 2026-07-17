@@ -687,7 +687,7 @@ class Navigator(
 
     fun skipToPropertyRegistrationRentedOutLicensingTypePage(): LicensingTypeFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationRentedOutLicensingType().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationOccupiedLicensingType().build(),
         )
         navigateToPropertyRegistrationJourneyStep(LicensingTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, LicensingTypeFormPagePropertyRegistration::class)
