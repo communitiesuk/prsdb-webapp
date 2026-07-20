@@ -18,8 +18,8 @@ import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -43,42 +43,25 @@ class RegisterLandlordController(
         return "registerAsALandlord"
     }
 
-    @GetMapping("/{stepRouteSegment}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable stepRouteSegment: String,
+        @PathVariable stepPath: String,
         principal: Principal,
     ): ModelAndView =
-        if (stepRouteSegment == PrivacyNoticeStep.ROUTE_SEGMENT &&
+        if (stepPath.trimStart('/') == PrivacyNoticeStep.ROUTE_SEGMENT &&
             userRolesService.getHasLandlordUserRole(principal.name)
         ) {
             ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
-            try {
-                val journeyMap = getJourneySteps()
-                journeyMap[stepRouteSegment]?.getStepModelAndView()
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = initializeJourneyState(principal)
-                val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
-                ModelAndView("redirect:$redirectUrl")
-            }
+            dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
         }
 
-    @PostMapping("/{stepRouteSegment}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable stepRouteSegment: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
         principal: Principal,
-    ): ModelAndView =
-        try {
-            val journeyMap = getJourneySteps()
-            journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -99,9 +82,17 @@ class RegisterLandlordController(
         return "registerAsALandlordConfirmation"
     }
 
-    private fun getJourneySteps() = landlordRegistrationJourneyFactory.createJourneySteps()
-
-    private fun initializeJourneyState(principal: Principal) = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            stepPath,
+            { landlordRegistrationJourneyFactory.createJourneySteps() },
+            { landlordRegistrationJourneyFactory.initializeJourneyState(principal) },
+            dispatch,
+        )
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"

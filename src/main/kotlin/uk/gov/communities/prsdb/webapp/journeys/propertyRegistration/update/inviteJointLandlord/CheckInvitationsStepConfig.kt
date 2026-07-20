@@ -28,8 +28,8 @@ class CheckInvitationsStepConfig :
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                state.invitedJointLandlords,
-                destination = Destination(state.checkJointLandlordsStep),
+                state.inviteJointLandlordsTask.invitedJointLandlords,
+                destination = Destination(state.inviteJointLandlordsTask.checkJointLandlordsStep),
             ),
         )
 }

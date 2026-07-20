@@ -6,8 +6,6 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
     journeyStateService: JourneyStateService,
     private val updateJourneyName: String,
 ) : AbstractJourneyState(journeyStateService) {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override fun generateJourneyId(seed: Any?): String {

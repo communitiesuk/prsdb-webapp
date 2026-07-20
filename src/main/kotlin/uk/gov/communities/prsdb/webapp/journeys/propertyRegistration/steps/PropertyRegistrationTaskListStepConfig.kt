@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -20,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationTaskListStepConfig(
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val featureFlagManager: FeatureFlagManager,
     private val httpServletRequest: HttpServletRequest,
     private val backUrlStorageService: BackUrlStorageService,
@@ -68,7 +66,13 @@ class PropertyRegistrationTaskListStepConfig(
                 TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", state.ownershipTypeStep),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addTenancyInfo", state.occupationTask),
-            ) + jointLandlordsStrategy.getJointLandlordsTaskListItems(state) +
+            ) +
+                listOf(
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.register.inviteJointLandlords",
+                        state.jointLandlordsTask,
+                    ),
+                ) +
                 listOf(
                     TaskListItemViewModel.fromTask(
                         "registerProperty.taskList.gasSafety",
@@ -84,9 +88,16 @@ class PropertyRegistrationTaskListStepConfig(
                     ),
                 )
 
+        val registerSectionHeading =
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                "registerProperty.taskList.register.restructureAndSkipping.heading"
+            } else {
+                "registerProperty.taskList.register.old.heading"
+            }
+
         return listOf(
             TaskSectionViewModel(
-                "registerProperty.taskList.register.heading",
+                registerSectionHeading,
                 "register-property",
                 registerTaskItems,
             ),

@@ -1,76 +1,39 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
+// AddressTask specialised with the field-set content for a landlord's own address (used by the registration,
+// change-answers and update flows). Structure and route-scoped state come from AddressTask; this only supplies
+// the landlord content. Genuinely flow-specific extras (e.g. the update flow's submit button/warning) are still
+// layered on at the DSL call site.
 @JourneyFrameworkComponent
-class LandlordAddressTask : Task<AddressState>() {
-    override fun makeSubJourney(state: AddressState) =
-        subJourney(state) {
-            step(journey.lookupAddressStep) {
-                routeSegment(LookupAddressStep.ROUTE_SEGMENT)
-                nextStep { mode ->
-                    when (mode) {
-                        LookupAddressMode.ADDRESSES_FOUND -> journey.selectAddressStep
-                        LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noAddressFoundStep
-                    }
-                }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
-                        "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
-                    )
-                }
-            }
-            step(journey.selectAddressStep) {
-                routeSegment(SelectAddressStep.ROUTE_SEGMENT)
-                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
-                nextStep { mode ->
-                    when (mode) {
-                        SelectAddressMode.MANUAL_ADDRESS -> journey.manualAddressStep
-                        else -> exitStep
-                    }
-                }
-            }
-            step(journey.noAddressFoundStep) {
-                routeSegment(NoAddressFoundStep.ROUTE_SEGMENT)
-                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
-                nextStep { journey.manualAddressStep }
-            }
-            step(journey.manualAddressStep) {
-                routeSegment(ManualAddressStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.selectAddressStep.hasOutcome(SelectAddressMode.MANUAL_ADDRESS),
-                        journey.noAddressFoundStep.isComplete(),
-                    )
-                }
-                nextStep { exitStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
-                        "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
-                    )
-                }
-            }
-            exitStep {
-                parents {
-                    OrParents(
-                        journey.selectAddressStep.doesNotHaveOutcome(SelectAddressMode.MANUAL_ADDRESS),
-                        journey.manualAddressStep.isComplete(),
-                    )
-                }
-            }
-        }
+class LandlordAddressTask(
+    journeyStateService: JourneyStateService,
+    lookupAddressStep: LookupAddressStep,
+    selectAddressStep: SelectAddressStep,
+    noAddressFoundStep: NoAddressFoundStep,
+    manualAddressStep: ManualAddressStep,
+) : AddressTask(
+        journeyStateService,
+        lookupAddressStep,
+        selectAddressStep,
+        noAddressFoundStep,
+        manualAddressStep,
+    ) {
+    override val lookupAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
+        )
+
+    override val manualAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+        )
 }

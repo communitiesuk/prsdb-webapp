@@ -2,8 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IdentityState
@@ -13,9 +14,22 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifiedMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 
 @JourneyFrameworkComponent
-class IdentityTask : Task<IdentityState>() {
+class IdentityTask(
+    journeyStateService: JourneyStateService,
+    override val identityVerifyingStep: IdentityVerifyingStep,
+    override val confirmIdentityStep: ConfirmIdentityStep,
+    override val identityNotVerifiedStep: IdentityNotVerifiedStep,
+    override val nameStep: NameStep,
+    override val dateOfBirthStep: DateOfBirthStep,
+) : DuplicableTask<IdentityState>(journeyStateService),
+    IdentityState {
+    override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
+
+    override val taskState get() = this
+
     override fun makeSubJourney(state: IdentityState) =
         subJourney(state) {
             step(journey.identityVerifyingStep) {
