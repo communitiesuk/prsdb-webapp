@@ -17,9 +17,9 @@ rows:
   verifiedLandlords: Landlords verified by One Login
   properties: Number of properties
   landlordsWithProperty: Number of landlords with at least 1 property
-  medianTimeToFirstProperty: Median time between registration and first property (does not account for joint landlords)
-  p90TimeToFirstProperty: 90th percentile time between registration and first property (does not account for joint landlords)
-  p95TimeToFirstProperty: 95th percentile time between registration and first property (does not account for joint landlords)
+  medianTimeToFirstProperty: Median time between registration and first property registration or joining an existing property
+  p90TimeToFirstProperty: 90th percentile time between registration and first property registration or joining an existing property
+  p95TimeToFirstProperty: 95th percentile time between registration and first property registration or joining an existing property
   landlordRegistrationCompletionRate: Landlord registration completion rate
   propertyRegistrationCompletionRate: Property registration completion rate
   localCouncilUserRegistrationCompletionRate: Local council user registration completion rate

@@ -9,22 +9,43 @@ import kotlin.reflect.KProperty
 
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
-) {
+) : DelegateKeysOwner {
     private val keysInUse = mutableSetOf<String>()
 
+    private var registry: DelegateKeyRegistry? = null
+
+    // registerKey guarantees that, within this provider, no two delegates share a key. Once bindKeyRegistry attaches
+    // this provider to a journey-build-wide DelegateKeyRegistry, each key is ALSO registered there in its final
+    // route-scoped form, so collisions across the journey state and every task are detected at build time.
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
         } else {
             keysInUse.add(propertyKey)
         }
+        registry?.register(scopedKey(propertyKey))
     }
+
+    private var routePrefix: String? = null
+
+    fun bindRoutePrefix(routePrefix: String?) {
+        this.routePrefix = routePrefix
+    }
+
+    // Attach this provider to the shared registry, flushing its already-collected keys in their final route-scoped
+    // form. Must be called AFTER bindRoutePrefix so scopedKey resolves correctly; keys registered later forward live.
+    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
+        this.registry = registry
+        keysInUse.forEach { registry.register(scopedKey(it)) }
+    }
+
+    fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
 
     final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
         propertyKey: String,
     ): NullableJourneyStateDelegate<TJourney, TProperty> {
         registerKey(propertyKey)
-        return NullableJourneyStateDelegate(journeyStateService, propertyKey, serializer())
+        return NullableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 
     /**
@@ -49,7 +70,8 @@ class JourneyStateDelegateProvider(
         defaultValue: TProperty? = null,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
         registerKey(propertyKey)
-        val delegate = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer(), defaultValue)
+        val delegate =
+            RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, { scopedKey(propertyKey) }, serializer(), defaultValue)
         return delegate
     }
 
@@ -76,19 +98,25 @@ class JourneyStateDelegateProvider(
         propertyKey: String,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
         registerKey(propertyKey)
-        return RequiredImmutableJourneyStateDelegate(journeyStateService, propertyKey, serializer())
+        return RequiredImmutableJourneyStateDelegate(journeyStateService, { scopedKey(propertyKey) }, serializer())
     }
 
     class NullableJourneyStateDelegate<TJourney, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
-        private val innerKey: String,
+        private val keyProvider: () -> String,
         private val serializer: KSerializer<TProperty>,
     ) {
+        constructor(
+            journeyStateService: JourneyStateService,
+            innerKey: String,
+            serializer: KSerializer<TProperty>,
+        ) : this(journeyStateService, { innerKey }, serializer)
+
         operator fun getValue(
             thisRef: TJourney,
             property: KProperty<*>,
         ): TProperty? =
-            journeyStateService.getValue(innerKey)?.let {
+            journeyStateService.getValue(keyProvider())?.let {
                 decodeFromStringOrNull(
                     serializer,
                     it as String,
@@ -101,13 +129,13 @@ class JourneyStateDelegateProvider(
             value: TProperty?,
         ) {
             val encodedValue = value?.let { Json.encodeToString(serializer, value) }
-            journeyStateService.setValue(innerKey, encodedValue)
+            journeyStateService.setValue(keyProvider(), encodedValue)
         }
     }
 
     open class RequiredJourneyStateDelegate<TJourney, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
-        private val innerKey: String,
+        private val keyProvider: () -> String,
         private val serializer: KSerializer<TProperty>,
         private val startingValue: TProperty?,
     ) {
@@ -115,6 +143,7 @@ class JourneyStateDelegateProvider(
             thisRef: TJourney,
             property: KProperty<*>,
         ): TProperty {
+            val innerKey = keyProvider()
             val value =
                 journeyStateService.getValue(innerKey)?.let {
                     decodeFromStringOrNull(
@@ -131,7 +160,7 @@ class JourneyStateDelegateProvider(
         }
 
         fun getValueOrNull(): TProperty? =
-            journeyStateService.getValue(innerKey)?.let {
+            journeyStateService.getValue(keyProvider())?.let {
                 decodeFromStringOrNull(
                     serializer,
                     it as String,
@@ -144,18 +173,18 @@ class JourneyStateDelegateProvider(
             value: TProperty,
         ) {
             val encodedValue = value?.let { Json.encodeToString(serializer, value) }
-            journeyStateService.setValue(innerKey, encodedValue)
+            journeyStateService.setValue(keyProvider(), encodedValue)
         }
     }
 
     class RequiredImmutableJourneyStateDelegate<TJourney, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
-        private val innerKey: String,
+        private val keyProvider: () -> String,
         private val serializer: KSerializer<TProperty>,
         startingValue: TProperty? = null,
     ) : RequiredJourneyStateDelegate<TJourney, TProperty>(
             journeyStateService,
-            innerKey,
+            keyProvider,
             serializer,
             startingValue,
         ) {
@@ -164,6 +193,7 @@ class JourneyStateDelegateProvider(
             property: KProperty<*>?,
             value: TProperty,
         ) {
+            val innerKey = keyProvider()
             val rawValue = journeyStateService.getValue(innerKey)
             if (rawValue == null) {
                 val encodedValue = value?.let { Json.encodeToString(serializer, value) }

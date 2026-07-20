@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -20,11 +18,6 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
     private val propertyOwnershipIdWithJointLandlord = 8L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
     private val urlArgumentsJoint = mapOf("propertyOwnershipId" to propertyOwnershipIdWithJointLandlord.toString())
-
-    @BeforeEach
-    fun setUp() {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
-    }
 
     @Test
     fun `Landlord can complete the standalone invite joint landlord journey`(page: Page) {

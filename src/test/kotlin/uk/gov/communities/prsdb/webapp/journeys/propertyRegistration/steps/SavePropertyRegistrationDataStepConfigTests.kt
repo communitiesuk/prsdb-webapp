@@ -27,14 +27,15 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
@@ -54,9 +55,6 @@ class SavePropertyRegistrationDataStepConfigTests {
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    private lateinit var mockJointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
-
-    @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
@@ -70,7 +68,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             SavePropertyRegistrationDataStepConfig(
                 propertyRegistrationService = mockPropertyRegistrationService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-                jointLandlordsStrategy = mockJointLandlordsStrategy,
                 featureFlagManager = mockFeatureFlagManager,
             )
     }
@@ -331,6 +328,15 @@ class SavePropertyRegistrationDataStepConfigTests {
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
         whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
+
+        val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
+        whenever(mockState.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+
+        val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
+        val hasJointLandlordsFormModel = HasJointLandlordsFormModel().apply { hasJointLandlords = false }
+        whenever(mockJointLandlordsTask.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
+        whenever(mockHasJointLandlordsStep.formModel).thenReturn(hasJointLandlordsFormModel)
+        whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mock())
     }
 
     private fun setupStateForComplianceData(

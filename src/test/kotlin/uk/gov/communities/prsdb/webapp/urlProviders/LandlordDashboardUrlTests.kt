@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -97,9 +96,6 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
-
-    @MockitoBean
-    private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager

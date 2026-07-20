@@ -64,21 +64,21 @@ interface PropertyOwnershipRepository :
     @Query(
         "SELECT COUNT(DISTINCT ol.landlord) FROM PropertyOwnership po " +
             "JOIN po.ownershipLinks ol " +
-            "WHERE po.createdDate BETWEEN :start AND :end",
+            "WHERE ol.createdDate BETWEEN :start AND :end",
     )
-    fun countDistinctLandlordsWithPropertyCreatedBetween(
+    fun countDistinctLandlordsWithOwnershipLinkCreatedBetween(
         @Param("start") start: Instant,
         @Param("end") end: Instant,
     ): Long
 
     @Query(
-        "SELECT l.createdDate, MIN(po.createdDate) FROM PropertyOwnership po " +
+        "SELECT l.createdDate, MIN(ol.createdDate) FROM PropertyOwnership po " +
             "JOIN po.ownershipLinks ol " +
             "JOIN ol.landlord l " +
             "GROUP BY l.id, l.createdDate " +
-            "HAVING MIN(po.createdDate) BETWEEN :start AND :end",
+            "HAVING MIN(ol.createdDate) BETWEEN :start AND :end",
     )
-    fun findLandlordAndFirstPropertyCreatedDates(
+    fun findLandlordAndFirstOwnershipLinkCreatedDates(
         @Param("start") start: Instant,
         @Param("end") end: Instant,
     ): List<Array<Instant>>

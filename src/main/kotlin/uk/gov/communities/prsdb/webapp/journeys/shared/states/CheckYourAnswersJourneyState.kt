@@ -3,12 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.urlPath
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
@@ -18,12 +21,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     var cyaJourneys: Map<String, String>
 
-    var cyaRouteSegment: String?
+    var cyaUrlPath: String?
 
     var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        get() = cyaUrlPath?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
         set(destination) {
-            cyaRouteSegment =
+            cyaUrlPath =
                 when (destination) {
                     is Destination.StepRoute -> destination.routeSegment
                     is Destination.VisitableStep -> destination.step.routeSegment
@@ -44,22 +47,22 @@ interface CheckYourAnswersJourneyState : JourneyState {
     }
 
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
-        if (!cyaJourneys.containsKey(checkableStep.routeSegment)) {
+        if (!cyaJourneys.containsKey(checkableStep.urlPath)) {
             cyaJourneys += makePair(checkableStep)
         }
-        return cyaJourneys[checkableStep.routeSegment]
-            ?: throw IllegalStateException("CYA Journey ID should have been created for ${checkableStep.routeSegment}")
+        return cyaJourneys[checkableStep.urlPath]
+            ?: throw IllegalStateException("CYA Journey ID should have been created for ${checkableStep.urlPath}")
     }
 
     private fun makePair(step: JourneyStep.RequestableStep<*, *, *>): Pair<String, String> {
-        val routeSegment = step.routeSegment
-        val cyaJourneyId = generateJourneyId("$baseJourneyId-$routeSegment")
+        val urlPath = step.urlPath
+        val cyaJourneyId = generateJourneyId("$baseJourneyId-$urlPath")
         val childJourney = createChildJourneyState(cyaJourneyId)
-        childJourney.checkingAnswersFor = routeSegment
+        childJourney.checkingAnswersFor = urlPath
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
         childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
 
-        return (routeSegment to cyaJourneyId)
+        return (urlPath to cyaJourneyId)
     }
 
     val isCheckingAnswers: Boolean
@@ -70,15 +73,47 @@ interface CheckYourAnswersJourneyState : JourneyState {
     fun clearCyaFields() {
         checkingAnswersFor = null
         originalJourneyUpdated = null
-        cyaRouteSegment = null
+        cyaUrlPath = null
     }
 
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(
+            task: Task<T>,
+            route: String? = null,
+        ) {
             task(task) {
+                route?.let { routeSegment(it) }
+                initialStep()
+                backDestination { journey.returnToCyaPageDestination }
+                nextStep { journey.finishCyaStep }
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
+            task: DuplicableTask<TTaskState>,
+            route: String? = null,
+        ) {
+            duplicableTask(task) {
+                route?.let { routeSegment(it) }
+                initialStep()
+                backDestination { journey.returnToCyaPageDestination }
+                nextStep { journey.finishCyaStep }
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
+            task: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+            dependencies: () -> TDependencies,
+            route: String? = null,
+        ) {
+            duplicableTask(task) {
+                route?.let { routeSegment(it) }
+                withDependencies(dependencies)
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
