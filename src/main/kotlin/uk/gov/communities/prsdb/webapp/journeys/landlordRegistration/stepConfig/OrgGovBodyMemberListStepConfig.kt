@@ -1,14 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
@@ -36,33 +35,25 @@ class OrgGovBodyMemberListStepConfig(
             .toList()
             .sortedBy { it.first }
             .mapIndexed { displayIndex, (internalIndex, member) ->
-                SummaryListRowViewModel(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     fieldHeading = "forms.orgGovBodyMemberList.memberName",
                     fieldValue = member.name,
-                    optionalFieldHeadingParam = displayIndex + 1,
                     actions =
                         listOf(
-                            SummaryListRowActionsViewModel(
+                            SummaryListRowActionsInputWithDestination(
                                 text = "forms.links.change",
-                                url =
+                                destination =
                                     Destination(state.setStateForGovBodyMemberEditStep)
-                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex))
-                                        .toUrlStringOrNull()
-                                        ?: throw PrsdbWebException(
-                                            "Unable to generate change URL for governing body member $internalIndex",
-                                        ),
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
-                            SummaryListRowActionsViewModel(
+                            SummaryListRowActionsInputWithDestination(
                                 text = "forms.links.remove",
-                                url =
+                                destination =
                                     Destination(state.removeGovBodyMemberStep)
-                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex))
-                                        .toUrlStringOrNull()
-                                        ?: throw PrsdbWebException(
-                                            "Unable to generate remove URL for governing body member $internalIndex",
-                                        ),
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
                         ),
+                    optionalFieldHeadingParam = displayIndex + 1,
                 )
             }
     }
