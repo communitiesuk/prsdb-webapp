@@ -546,13 +546,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows not provided paragraphs for licensing and tenancy`(page: Page) {
+            fun `local council view shows a not provided licensing paragraph and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(9)
 
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
-                ).hasCount(2)
+                ).hasCount(1)
             }
         }
 
@@ -594,14 +594,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the licensing type and a not provided tenancy paragraph`(page: Page) {
+            fun `local council view shows the licensing type and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
-                ).hasCount(1)
+                ).hasCount(0)
             }
         }
     }

@@ -158,7 +158,6 @@ propertyRecord:
     rowName: Tenancy
     provideLaterOccupied: Provide this later (before {0})
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
-    councilNotProvided: These details have not been provided yet.
   licensingInformation:
     licensingType: Licensing type
     licensingNumber: Licensing number

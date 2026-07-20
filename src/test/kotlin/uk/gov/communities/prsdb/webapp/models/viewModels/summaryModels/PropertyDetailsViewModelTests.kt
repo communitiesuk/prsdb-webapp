@@ -761,7 +761,6 @@ class PropertyDetailsViewModelTests {
                 featureFlagManager = flagOn,
             )
 
-        assertTrue(viewModel.showTenancySection)
         assertEquals("propertyDetails.propertyRecord.tenancy.heading", viewModel.tenancyHeadingKey)
         assertEquals(
             listOf("propertyDetails.propertyRecord.tenancy.rowName"),
@@ -782,12 +781,11 @@ class PropertyDetailsViewModelTests {
                 featureFlagManager = flagOn,
             )
 
-        assertFalse(viewModel.showTenancySection)
         assertTrue(viewModel.tenancySection.isEmpty())
     }
 
     @Test
-    fun `shows a tenancy not-provided paragraph for a council when the property is unoccupied`() {
+    fun `hides the tenancy section for a council when the property is unoccupied`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
         val viewModel =
@@ -798,12 +796,8 @@ class PropertyDetailsViewModelTests {
                 featureFlagManager = flagOn,
             )
 
-        assertTrue(viewModel.showTenancySection)
         assertTrue(viewModel.tenancySection.isEmpty())
-        assertEquals(
-            "Message for propertyDetails.propertyRecord.tenancy.councilNotProvided",
-            viewModel.tenancyProvideLaterParagraph,
-        )
+        assertNull(viewModel.tenancyProvideLaterParagraph)
     }
 
     @Test
@@ -828,7 +822,6 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
-        assertTrue(viewModel.showTenancySection)
         assertEquals(expectedHeaderList, viewModel.tenancySection.map { it.fieldHeading })
         assertEquals("propertyDetails.propertyRecord.tenancy.heading", viewModel.tenancyHeadingKey)
         assertNull(viewModel.tenancyProvideLaterParagraph)

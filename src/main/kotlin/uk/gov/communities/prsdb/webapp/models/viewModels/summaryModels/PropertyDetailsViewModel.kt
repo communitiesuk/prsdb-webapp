@@ -62,7 +62,7 @@ class PropertyDetailsViewModel(
 
     val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
-    val showTenancySection: Boolean = !isLandlordView || isOccupied
+    val showTenancySection: Boolean = isOccupied
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
@@ -105,7 +105,6 @@ class PropertyDetailsViewModel(
     val tenancySection: List<SummaryListRowViewModel> by lazy {
         when {
             !showTenancySection -> emptyList()
-            !isOccupied -> emptyList()
             isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
             isTenancyProvideLater && !isLandlordView -> emptyList()
             else ->
@@ -124,7 +123,6 @@ class PropertyDetailsViewModel(
     val tenancyProvideLaterParagraph: String? by lazy {
         when {
             !showTenancySection || isLandlordView -> null
-            !isOccupied -> messageSource.getMessageForKey("propertyDetails.propertyRecord.tenancy.councilNotProvided")
             isTenancyProvideLater ->
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
             else -> null
