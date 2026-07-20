@@ -779,11 +779,12 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a future date returns an error`() {
+        fun `submitting a date of birth under the minimum age returns an error`() {
             val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
-            govBodyMemberDobPage.submitDate("1", "1", "2999")
+            val underageDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 5))
+            govBodyMemberDobPage.submitDate(underageDate)
             assertThat(govBodyMemberDobPage.form.getErrorMessage())
-                .containsText("The date of birth cannot be in the future")
+                .containsText("The minimum age is 16")
         }
 
         @Test
