@@ -87,7 +87,7 @@
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
                         <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.occupation.heading}">propertyDetails.propertyRecord.occupation.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.occupationSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupationSection})}"></dl>
+                        <dl th:if="${not #lists.isEmpty(propertyDetails.occupiedSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupiedSection})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h3>
                         <th:block th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}">
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>

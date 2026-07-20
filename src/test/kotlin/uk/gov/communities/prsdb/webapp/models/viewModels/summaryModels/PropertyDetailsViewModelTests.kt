@@ -624,7 +624,7 @@ class PropertyDetailsViewModelTests {
         )
         assertEquals(
             listOf("propertyDetails.propertyRecord.occupation.isOccupied"),
-            viewModel.occupationSection.map { it.fieldHeading },
+            viewModel.occupiedSection.map { it.fieldHeading },
         )
     }
 

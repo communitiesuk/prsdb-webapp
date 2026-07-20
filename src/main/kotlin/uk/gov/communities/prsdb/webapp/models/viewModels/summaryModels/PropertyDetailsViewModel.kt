@@ -54,22 +54,17 @@ class PropertyDetailsViewModel(
 
     val isOccupied = propertyOwnership.isOccupied
 
-    // An occupied property may still have its tenancy details "skipped" during registration (PDJB-942),
-    // in which case the household/tenant/rent/furnishing fields are not populated. The beforePdjb939 tenancy rows
-    // are driven by whether tenancy details were provided rather than by occupancy alone.
     private val tenancyInformationProvided = propertyOwnership.currentNumTenants > 0
 
     val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
     val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
 
-    val isTenancyProvideLater: Boolean = isOccupied && propertyOwnership.tenancyProvideLater == true
+    val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
     val showTenancySection: Boolean = !isLandlordView || isOccupied
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
-
-    // ---- Base (post-PDJB-939 registration-flow) layout: primary output, rendered when the flag is enabled ----
 
     val registrationDetails: List<SummaryListRowViewModel> by lazy {
         listOf(registrationNumberRow(), registrationDateRow())
@@ -83,7 +78,7 @@ class PropertyDetailsViewModel(
         listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
     }
 
-    val occupationSection: List<SummaryListRowViewModel> by lazy {
+    val occupiedSection: List<SummaryListRowViewModel> by lazy {
         listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
     }
 
@@ -112,7 +107,7 @@ class PropertyDetailsViewModel(
             !showTenancySection -> emptyList()
             !isOccupied -> emptyList()
             isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
-            isTenancyProvideLater -> emptyList()
+            isTenancyProvideLater && !isLandlordView -> emptyList()
             else ->
                 buildList {
                     add(householdsRow())
@@ -136,43 +131,6 @@ class PropertyDetailsViewModel(
         }
     }
 
-    // ---- beforePdjb939 (flag-off) layout: rendered only when the flag is disabled. ----
-    // TODO(PDJB-939): delete everything named beforePdjb939* and its message keys when the flag is permanently on.
-
-    val beforePdjb939PropertyRecord: List<SummaryListRowViewModel> by lazy {
-        listOfNotNull(
-            registrationDateRow(),
-            registrationNumberRow(),
-            beforePdjb939AddressRow(),
-            uprnRow(),
-            localCouncilRow(),
-            propertyTypeRow(),
-            ownershipTypeRow("propertyDetails.propertyRecord.beforePdjb939.ownershipType"),
-        )
-    }
-
-    val beforePdjb939LicensingInformation: List<SummaryListRowViewModel> by lazy {
-        listOfNotNull(licensingTypeRow(), licensingNumberRow())
-    }
-
-    val beforePdjb939TenancyAndRentalInformation: List<SummaryListRowViewModel> by lazy {
-        buildList {
-            add(occupiedRow("propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied"))
-            if (tenancyInformationProvided) {
-                add(householdsRow())
-                add(tenantsRow())
-                add(bedroomsRow())
-                add(rentIncludesBillsRow())
-                if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                add(furnishedStatusRow())
-                add(rentFrequencyRow(withoutBottomBorder = true))
-                add(rentAmountRow(includeChangeLink = false))
-            }
-        }
-    }
-
-    // ---- Atomic row builders shared by both layouts ----
-
     private fun registrationNumberRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.registrationNumber",
@@ -187,29 +145,8 @@ class PropertyDetailsViewModel(
             withActionLink = false,
         )
 
-    private fun beforePdjb939AddressRow(): SummaryListRowViewModel =
-        row("propertyDetails.propertyRecord.beforePdjb939.address", address, withActionLink = false)
-
     private fun addressRow(): SummaryListRowViewModel =
         row("propertyDetails.propertyRecord.propertyDetails.address", addressParts, withActionLink = false)
-
-    private fun uprnRow(): SummaryListRowViewModel? =
-        when {
-            propertyOwnership.address.uprn != null ->
-                row(
-                    "propertyDetails.propertyRecord.beforePdjb939.uprn",
-                    propertyOwnership.address.uprn
-                        .toString(),
-                    withActionLink = false,
-                )
-            !isLandlordView ->
-                row(
-                    "propertyDetails.propertyRecord.beforePdjb939.uprn",
-                    "propertyDetails.propertyRecord.beforePdjb939.uprn.unavailable",
-                    withActionLink = false,
-                )
-            else -> null
-        }
 
     private fun localCouncilRow(): SummaryListRowViewModel =
         row(
@@ -435,6 +372,60 @@ class PropertyDetailsViewModel(
         when (isOccupied) {
             true -> "propertyDetails.occupationStatus.occupied"
             false -> "propertyDetails.occupationStatus.unoccupied"
+        }
+
+    // TODO PDJB-939: delete everything named beforePdjb939* and its message keys when the flag is permanently on.
+    val beforePdjb939PropertyRecord: List<SummaryListRowViewModel> by lazy {
+        listOfNotNull(
+            registrationDateRow(),
+            registrationNumberRow(),
+            beforePdjb939AddressRow(),
+            beforePdjb939UprnRow(),
+            localCouncilRow(),
+            propertyTypeRow(),
+            ownershipTypeRow("propertyDetails.propertyRecord.beforePdjb939.ownershipType"),
+        )
+    }
+
+    val beforePdjb939LicensingInformation: List<SummaryListRowViewModel> by lazy {
+        listOfNotNull(licensingTypeRow(), licensingNumberRow())
+    }
+
+    val beforePdjb939TenancyAndRentalInformation: List<SummaryListRowViewModel> by lazy {
+        buildList {
+            add(occupiedRow("propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied"))
+            if (tenancyInformationProvided) {
+                add(householdsRow())
+                add(tenantsRow())
+                add(bedroomsRow())
+                add(rentIncludesBillsRow())
+                if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+                add(furnishedStatusRow())
+                add(rentFrequencyRow(withoutBottomBorder = true))
+                add(rentAmountRow(includeChangeLink = false))
+            }
+        }
+    }
+
+    private fun beforePdjb939AddressRow(): SummaryListRowViewModel =
+        row("propertyDetails.propertyRecord.beforePdjb939.address", address, withActionLink = false)
+
+    private fun beforePdjb939UprnRow(): SummaryListRowViewModel? =
+        when {
+            propertyOwnership.address.uprn != null ->
+                row(
+                    "propertyDetails.propertyRecord.beforePdjb939.uprn",
+                    propertyOwnership.address.uprn
+                        .toString(),
+                    withActionLink = false,
+                )
+            !isLandlordView ->
+                row(
+                    "propertyDetails.propertyRecord.beforePdjb939.uprn",
+                    "propertyDetails.propertyRecord.beforePdjb939.uprn.unavailable",
+                    withActionLink = false,
+                )
+            else -> null
         }
 
     companion object {
