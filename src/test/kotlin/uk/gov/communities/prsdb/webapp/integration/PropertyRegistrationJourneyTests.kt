@@ -1426,8 +1426,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured task list shows three sections with expected task order`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1462,8 +1460,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
 
@@ -1487,8 +1483,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         @Suppress("ktlint:standard:max-line-length")
         fun `restructured occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1566,8 +1560,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1589,8 +1581,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured task list shows a grouping task as in progress when it is partially completed`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
             // grouping task (which now contains all three) is partway through.
             val taskListPage =
@@ -1607,8 +1597,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured task list shows grouping tasks as complete when their answers are provided`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
