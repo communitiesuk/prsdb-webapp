@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -37,6 +38,9 @@ class CompleteInviteJointLandlordStepConfigTests {
 
     @Mock
     private lateinit var mockState: InviteJointLandlordJourneyState
+
+    @Mock
+    private lateinit var mockInviteJointLandlordsTask: InviteJointLandlordsTask
 
     private val propertyId = 123L
     private val invitedEmails = listOf("first@example.com", "second@example.com")
@@ -58,7 +62,8 @@ class CompleteInviteJointLandlordStepConfigTests {
         val baseUserId = "unknown-user"
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
-        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
 
         // Act, Assert
         assertThrows<PrsdbWebException> {
@@ -71,15 +76,17 @@ class CompleteInviteJointLandlordStepConfigTests {
         // Arrange
         val baseUserId = "test-user"
         val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
         val stepConfig =
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
                 mockLandlordService,
             )
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
@@ -104,7 +111,8 @@ class CompleteInviteJointLandlordStepConfigTests {
                 mockPropertyOwnershipService,
                 mockLandlordService,
             )
-        whenever(mockState.invitedJointLandlords).thenReturn(emptyList())
+        whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(emptyList())
 
         stepConfig.afterStepIsReached(mockState)
 

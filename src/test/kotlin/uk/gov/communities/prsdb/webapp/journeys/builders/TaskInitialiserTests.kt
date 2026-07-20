@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -39,7 +40,7 @@ class TaskInitialiserTests {
     @Test
     fun `once a nextStep is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mockTask(), mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
@@ -57,7 +58,7 @@ class TaskInitialiserTests {
     @Test
     fun `once a nextDestination is set, the destinationProvider cannot be set again`() {
         // Arrange
-        val builder = TaskInitialiser(mockTask(), mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(mockTask(), mock())
         builder.parents { mock() }
 
         // Act
@@ -82,7 +83,7 @@ class TaskInitialiserTests {
         whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { mock() }
         builder.nextStep { _: SubjourneyComplete -> nextStepMock }
 
@@ -117,7 +118,7 @@ class TaskInitialiserTests {
 
         val nextStepSegment = "nextStepSegment"
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { mock() }
         val initiationDestination = Destination.ExternalUrl(nextStepSegment)
         builder.nextDestination { _: SubjourneyComplete -> initiationDestination }
@@ -147,7 +148,7 @@ class TaskInitialiserTests {
         // Arrange
         val taskMock = mockTask()
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { mock() }
 
         // Act & Assert
@@ -160,7 +161,7 @@ class TaskInitialiserTests {
     fun `build binds the task to its route prefix`() {
         // Arrange
         val taskMock = mockTask()
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { NoParents() }
         builder.nextDestination { Destination.ExternalUrl("url") }
         builder.routeSegment("lead-trustee-address")
@@ -176,7 +177,7 @@ class TaskInitialiserTests {
     fun `build binds a null route prefix when no route segment is set`() {
         // Arrange
         val taskMock = mockTask()
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { NoParents() }
         builder.nextDestination { Destination.ExternalUrl("url") }
 
@@ -191,7 +192,7 @@ class TaskInitialiserTests {
     fun `a parentage cannot be set more than once`() {
         // Arrange
         val taskMock = mockTask()
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.parents { NoParents() }
 
         // Act & Assert
@@ -202,7 +203,7 @@ class TaskInitialiserTests {
     fun `a parentage is passed to the task when mapped to step initialisers`() {
         // Arrange
         val taskMock = mockTask()
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         val parentageProvider = { NoParents() }
         builder.nextDestination { mock() }
         builder.parents(parentageProvider)
@@ -226,7 +227,7 @@ class TaskInitialiserTests {
     fun `if no parentage is set, buildSteps throws an exception`() {
         // Arrange
         val taskMock = mockTask()
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.nextDestination { mock() }
 
         val internalBuilder = mock<SubJourneyBuilder<JourneyState>>()
@@ -251,7 +252,7 @@ class TaskInitialiserTests {
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         val firstKey = "firstKey"
         val firstValue = "firstValue"
         val secondKey = "secondKey"
@@ -289,7 +290,7 @@ class TaskInitialiserTests {
             ),
         ).thenReturn(subJourneyBuilderMock)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         val firstKey = "firstKey"
         val firstValue = "firstValue"
         val secondKey = "secondKey"
@@ -329,7 +330,7 @@ class TaskInitialiserTests {
             ),
         ).thenReturn(subJourneyBuilderMock)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         val backDestination = Destination.ExternalUrl("backUrl")
         builder.backDestination { backDestination }
         builder.nextDestination { mock() }
@@ -365,7 +366,7 @@ class TaskInitialiserTests {
             ),
         ).thenReturn(subJourneyBuilderMock)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         val customExitStepMock = mock<SubjourneyExitStep>()
         builder.customExitStep(customExitStepMock)
         builder.nextDestination { mock() }
@@ -390,7 +391,7 @@ class TaskInitialiserTests {
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -414,7 +415,7 @@ class TaskInitialiserTests {
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("outer-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -437,7 +438,7 @@ class TaskInitialiserTests {
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
@@ -459,7 +460,7 @@ class TaskInitialiserTests {
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -482,7 +483,7 @@ class TaskInitialiserTests {
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -503,7 +504,7 @@ class TaskInitialiserTests {
         val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
@@ -524,7 +525,7 @@ class TaskInitialiserTests {
         val firstStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
         whenever(taskMock.firstStep).thenReturn(firstStep)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -549,7 +550,7 @@ class TaskInitialiserTests {
         whenever(firstStep.currentJourneyId).thenReturn("journey-id")
         whenever(taskMock.firstStep).thenReturn(firstStep)
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -576,7 +577,7 @@ class TaskInitialiserTests {
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(innerLandingStep))
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
-        val builder = TaskInitialiser(taskMock, mock())
+        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("outer-route")
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
@@ -587,6 +588,53 @@ class TaskInitialiserTests {
         // Assert
         assertEquals("outer-route", innerLandingStep.urlPathPrefix)
         assertEquals("outer-route/inner-route", innerLandingStep.urlPath)
+    }
+
+    @Test
+    fun `building a dependency task without calling withDependencies throws`() {
+        // Arrange
+        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        whenever(dependencyTask.requiresDependencies).thenReturn(true)
+        whenever(dependencyTask.areDependenciesBound).thenReturn(false)
+        val builder = TaskInitialiser<JourneyState, Any>(dependencyTask, mock())
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> { builder.build() }
+    }
+
+    @Test
+    fun `building a dependency task binds the provided dependencies before building the sub-journey`() {
+        // Arrange
+        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        whenever(dependencyTask.requiresDependencies).thenReturn(true)
+        whenever(dependencyTask.areDependenciesBound).thenReturn(true)
+        val internalBuilder = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(dependencyTask.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(internalBuilder)
+
+        val dependencies = Any()
+        val builder = TaskInitialiser<JourneyState, Any>(dependencyTask, mock())
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+        builder.withDependencies { dependencies }
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(dependencyTask).bindDependencies(dependencies)
+    }
+
+    @Test
+    fun `withDependencies cannot be set twice`() {
+        // Arrange
+        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        val builder = TaskInitialiser<JourneyState, Any>(dependencyTask, mock())
+        builder.withDependencies { Any() }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> { builder.withDependencies { Any() } }
     }
 
     private class RouteTestFormModel : FormModel

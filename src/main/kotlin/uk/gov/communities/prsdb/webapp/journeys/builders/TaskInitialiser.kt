@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -13,7 +14,11 @@ import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
 
-class TaskInitialiser<TStateInit : JourneyState>(
+// The single initialiser for tasks, whether journey-stated (task { }) or self-stated/duplicable (duplicableTask { }).
+// TDependencies is the type of the enclosing state a self-stated task reads through DuplicableTaskWithDependencies;
+// journey-stated tasks and dependency-free duplicable tasks use Nothing, making withDependencies { } uncallable for
+// them. Dependency binding + validation only applies when the task is a DuplicableTaskWithDependencies.
+class TaskInitialiser<TStateInit : JourneyState, TDependencies>(
     private val task: Task<TStateInit>,
     private val state: TStateInit,
     private val elementConfiguration: ElementConfiguration<SubjourneyComplete> =
@@ -24,7 +29,8 @@ class TaskInitialiser<TStateInit : JourneyState>(
 
     // Per-step content/config supplied at the DSL call site (e.g. instance-specific field-set
     // headings), applied to the task's own named steps by identity before the sub-journey builds.
-    private val stepConfigurations: MutableList<Pair<JourneyStep<*, *, *>, ConfigurableElement<*>.() -> Unit>> = mutableListOf()
+    private val stepConfigurations: MutableList<Pair<JourneyStep<*, *, *>, ConfigurableElement<*>.() -> Unit>> =
+        mutableListOf()
 
     fun configureStep(
         step: JourneyStep<*, *, *>,
@@ -35,12 +41,36 @@ class TaskInitialiser<TStateInit : JourneyState>(
 
     private var taskRoute: String? = null
 
-    fun routeSegment(segment: String): TaskInitialiser<TStateInit> {
+    fun routeSegment(segment: String): TaskInitialiser<TStateInit, TDependencies> {
         taskRoute = segment
         return this
     }
 
+    // Provides the live enclosing state a self-stated task reads through DuplicableTaskWithDependencies.dependencies.
+    // For journey-stated or dependency-free tasks TDependencies is Nothing, so this cannot be called.
+    private var dependenciesProvider: (() -> TDependencies)? = null
+
+    fun withDependencies(provider: () -> TDependencies) {
+        if (dependenciesProvider != null) {
+            throw JourneyInitialisationException("withDependencies has already been set")
+        }
+        dependenciesProvider = provider
+    }
+
     override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
+        // Bind the enclosing state (if this task declares a dependency contract) before its sub-journey builds.
+        // dependencies is only read at runtime, so ordering relative to bindRoute/bindKeyRegistry is immaterial.
+        if (task is DuplicableTaskWithDependencies<*, *>) {
+            @Suppress("UNCHECKED_CAST")
+            val dependencyTask = task as DuplicableTaskWithDependencies<TStateInit, TDependencies>
+            dependenciesProvider?.let { dependencyTask.bindDependencies(it()) }
+            if (dependencyTask.requiresDependencies && !dependencyTask.areDependenciesBound) {
+                throw JourneyInitialisationException(
+                    "Task ${dependencyTask::class.simpleName} requires dependencies but withDependencies { } was not called",
+                )
+            }
+        }
+
         // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime.
         // No-op for journey-stated tasks; self-stated tasks use it to namespace their stored data keys.
         task.bindRoute(taskRoute)

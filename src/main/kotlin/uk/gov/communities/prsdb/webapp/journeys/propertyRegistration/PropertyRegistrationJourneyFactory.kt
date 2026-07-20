@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipAndLandlordsState
@@ -63,7 +62,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
@@ -117,12 +115,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -220,7 +216,7 @@ class PropertyRegistrationJourneyFactory(
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.jointLandlordsTask)
+                    duplicableCheckAnswerTask(journey.jointLandlordsTask, { journey })
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
@@ -328,7 +324,8 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.jointLandlordsTask.firstStep }
                     saveProgress()
                 }
-                task(journey.jointLandlordsTask) {
+                duplicableTask(journey.jointLandlordsTask) {
+                    withDependencies { journey }
                     parents { journey.occupationTask.isComplete() }
                     nextStep { journey.gasSafetyTask.firstStep }
                     saveProgress()
@@ -626,13 +623,6 @@ class PropertyRegistrationJourney(
     override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
-    override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
-    override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val inviteJointLandlordsTask: InviteJointLandlordsTask,
-    override val inviteJointLandlordStep: InviteJointLandlordStep,
-    override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
-    override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
-    override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels) when the old journey is removed.
@@ -701,8 +691,8 @@ class PropertyRegistrationJourney(
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
-    override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val landlordService: LandlordService,
+    override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
@@ -711,15 +701,7 @@ class PropertyRegistrationJourney(
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
-    override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
-    override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
 
-    override val loggedInLandlordEmail: String?
-        get() =
-            // TODO: PDJB-1274: Update emails to account for org landlord
-            landlordService
-                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
-                ?.email
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
@@ -738,11 +720,12 @@ class PropertyRegistrationJourney(
     // is wired up (parent journey context). The cache is essential when a CYA child journey reads this
     // value: in that context only steps in the child's journey graph are wired up, so the fallback would
     // throw. The cache is populated on step submission (see OccupiedStepConfig.afterStepDataIsAdded).
-    override val isOccupied: Boolean get() {
-        cachedOccupied?.let { return it }
-        return occupied.formModelOrNull?.occupied
-            ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
-    }
+    override val isOccupied: Boolean
+        get() {
+            cachedOccupied?.let { return it }
+            return occupied.formModelOrNull?.occupied
+                ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+        }
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
@@ -755,11 +738,12 @@ class PropertyRegistrationJourney(
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
     // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
     // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
-    override val uprn: Long? get() {
-        cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
-        val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
-        return getMatchingAddress(submittedAddress)?.uprn
-    }
+    override val uprn: Long?
+        get() {
+            cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
+            val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
+            return getMatchingAddress(submittedAddress)?.uprn
+        }
 
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
@@ -771,6 +755,13 @@ class PropertyRegistrationJourney(
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
+    override val loggedInLandlordEmail: String?
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        get() =
+            landlordService
+                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
+                ?.email
+
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
@@ -780,7 +771,6 @@ interface PropertyRegistrationJourneyState :
     PropertyRegistrationAddressState,
     LicensingState,
     OccupationState,
-    InviteJointLandlordPropertyRegistrationState,
     PropertyDetailsState,
     OwnershipAndLandlordsState,
     TenancyDetailsState,
