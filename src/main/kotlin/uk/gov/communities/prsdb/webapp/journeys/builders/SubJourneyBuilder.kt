@@ -94,7 +94,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState : JourneyState, TDependencies> duplicableTask(
+    override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
         uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
         routeSegment: String?,
         init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,

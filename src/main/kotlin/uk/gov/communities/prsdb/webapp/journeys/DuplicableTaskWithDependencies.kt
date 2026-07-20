@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 // declares a TDependencies contract, surfaces `dependencies` on its own state interface, and reads through it. The
 // mount site binds the live enclosing state via `withDependencies { journey }`. A task that needs no such access
 // uses DuplicableTask (TDependencies = Nothing, requiresDependencies = false).
-abstract class DuplicableTaskWithDependencies<TState : JourneyState, TDependencies>(
+abstract class DuplicableTaskWithDependencies<TState : JourneyState, TDependencies : Any>(
     journeyStateService: JourneyStateService,
 ) : Task<TState>(),
     JourneyState by object : AbstractJourneyState(journeyStateService) {} {

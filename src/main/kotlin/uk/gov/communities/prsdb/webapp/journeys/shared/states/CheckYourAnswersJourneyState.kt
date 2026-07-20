@@ -106,7 +106,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
             task: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
             dependencies: () -> TDependencies,
             route: String? = null,

@@ -28,7 +28,7 @@ interface JourneyBuilderDsl<TState : JourneyState> {
     // (each instance isolated by its route) without the journey state gaining per-instance fields. When
     // `routeSegment` is null the task's steps keep bare URLs and data keys. A task declaring a TDependencies contract
     // binds the enclosing state via withDependencies { }; dependency-free tasks (TDependencies = Nothing) do not.
-    fun <TTaskState : JourneyState, TDependencies> duplicableTask(
+    fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
         uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
         routeSegment: String? = null,
         init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
@@ -106,7 +106,7 @@ open class JourneyBuilder<TState : JourneyState>(
             }
         }
 
-        override fun <TTaskState : JourneyState, TDependencies> duplicableTask(
+        override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
             uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
             routeSegment: String?,
             init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
