@@ -69,6 +69,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
                 address = MANUAL_ADDRESS_CHOSEN
             }
         withSubmittedValue(selectAddressKey, selectAddressFormModel)
+        additionalDataMap["cachedSelectedAddress"] = Json.encodeToString(serializer(), MANUAL_ADDRESS_CHOSEN)
 
         return self()
     }
@@ -101,6 +102,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
                 address = singleLineAddress
             }
         withSubmittedValue(selectAddressKey, selectAddressFormModel)
+        additionalDataMap["cachedSelectedAddress"] = Json.encodeToString(serializer(), singleLineAddress)
 
         return self()
     }
