@@ -299,33 +299,29 @@ SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM lice
 -- Each QA property claims a distinct existing active address not already used by an active property.
 -- available_addresses(6) returns 6 free addresses ranked 1..6 so every row below picks a different one.
 WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
-                     furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date) AS (
-         VALUES (1, 49, 57, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
-                (2, 50, 58, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days'),
-                (3, 51, 59, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
-                (4, 52, 60, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days'),
-                (5, 53, 61, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
-                (6, 54, 62, null, 0, 0, null, null, null, false, null))
+                     furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
+                     license_provide_later, tenancy_provide_later) AS (
+         VALUES (1, 49, 57, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (2, 50, 58, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (3, 51, 59, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
+                (4, 52, 60, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
+                (5, 53, 61, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (6, 54, 62, null, 0, 0, null, null, null, false, null, true, false))
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
+                                license_provide_later, tenancy_provide_later)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
        aa.address_id, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
-       np.rent_amount, null, false, np.is_occupied, np.last_occupied_date
+       np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
+       np.license_provide_later, np.tenancy_provide_later
 FROM new_properties np
          JOIN available_addresses(6) aa ON aa.rn = np.rn
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
-
--- PDJB-1048 provide-later flags for the QA properties above: set to true where licensing/tenancy
--- details were skipped during registration.
---   49 both skipped, 52 licensing skipped, 53 both skipped, 54 unoccupied licensing skipped
---   49 both skipped, 51 tenancy skipped, 53 both skipped
-UPDATE property_ownership SET license_provide_later = true WHERE id IN (49, 52, 53, 54);
-UPDATE property_ownership SET tenancy_provide_later = true WHERE id IN (49, 51, 53);
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
