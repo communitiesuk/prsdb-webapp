@@ -7,10 +7,11 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 class NumberOfHouseholdsFormModelTests {
     @Test
     fun `Number of households is valid when provideThisLater action is submitted`() {
-        val form = NumberOfHouseholdsFormModel().apply {
-            action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
-            numberOfHouseholds = ""
-        }
+        val form =
+            NumberOfHouseholdsFormModel().apply {
+                action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+                numberOfHouseholds = ""
+            }
 
         assertTrue(form.numberOfHouseholdsIsValidForAction())
     }

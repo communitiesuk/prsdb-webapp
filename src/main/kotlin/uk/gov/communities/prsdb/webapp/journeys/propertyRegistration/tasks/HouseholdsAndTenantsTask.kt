@@ -6,10 +6,10 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
