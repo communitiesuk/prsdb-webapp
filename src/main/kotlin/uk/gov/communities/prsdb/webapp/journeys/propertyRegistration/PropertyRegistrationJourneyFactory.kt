@@ -291,7 +291,11 @@ class PropertyRegistrationJourneyFactory(
                 noNextDestination()
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.register.heading")
+                if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                    withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
+                } else {
+                    withHeadingMessageKey("registerProperty.taskList.register.old.heading")
+                }
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.addToLandlordIncompletePropertiesStep }

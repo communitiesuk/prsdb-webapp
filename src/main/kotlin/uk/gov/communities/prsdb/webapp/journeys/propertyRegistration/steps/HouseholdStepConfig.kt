@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
@@ -8,16 +10,23 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 
 @JourneyFrameworkComponent
-class HouseholdStepConfig : AbstractRequestableStepConfig<Complete, NumberOfHouseholdsFormModel, HouseholdsAndTenantsState>() {
+class HouseholdStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractRequestableStepConfig<Complete, NumberOfHouseholdsFormModel, HouseholdsAndTenantsState>() {
     override val formModelClass = NumberOfHouseholdsFormModel::class
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholds.heading",
-            "label" to "forms.numberOfHouseholds.label",
+            "fieldSetHeading" to "forms.numberOfHouseholdsRestructureAndSkipping.heading",
+            "label" to "forms.numberOfHouseholdsRestructureAndSkipping.label",
         )
 
-    override fun chooseTemplate(state: HouseholdsAndTenantsState): String = "forms/numberOfHouseholdsForm"
+    override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            "forms/numberOfHouseholdsFormRestructureAndSkipping"
+        } else {
+            "forms/numberOfHouseholdsFormOld"
+        }
 
     override fun mode(state: HouseholdsAndTenantsState) = getFormModelFromStateOrNull(state)?.numberOfHouseholds?.let { Complete.COMPLETE }
 }

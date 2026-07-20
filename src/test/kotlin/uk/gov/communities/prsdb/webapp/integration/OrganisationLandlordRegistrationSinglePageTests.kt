@@ -2,11 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
@@ -368,11 +371,12 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a future date returns an error`() {
+        fun `submitting a date of birth under the minimum age returns an error`() {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
-            leadTrusteeDobPage.submitDate("1", "1", "2999")
+            val underageDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 5))
+            leadTrusteeDobPage.submitDate(underageDate)
             assertThat(leadTrusteeDobPage.form.getErrorMessage())
-                .containsText("The trustee’s date of birth cannot be in the future")
+                .containsText("The minimum age of a lead trustee is 16")
         }
 
         @Test
@@ -778,11 +782,12 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a future date returns an error`() {
+        fun `submitting a date of birth under the minimum age returns an error`() {
             val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
-            govBodyMemberDobPage.submitDate("1", "1", "2999")
+            val underageDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 5))
+            govBodyMemberDobPage.submitDate(underageDate)
             assertThat(govBodyMemberDobPage.form.getErrorMessage())
-                .containsText("The date of birth cannot be in the future")
+                .containsText("The minimum age is 16")
         }
 
         @Test
