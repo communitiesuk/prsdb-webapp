@@ -55,8 +55,11 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
-        val jointLandlordEmails: List<String>? = state.invitedJointLandlordEmailsMap?.values?.toList()
-        val markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val jointLandlordEmails: List<String>? =
+            state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
+                ?.values
+                ?.toList()
+        val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
             addressModel = state.getAddress(),

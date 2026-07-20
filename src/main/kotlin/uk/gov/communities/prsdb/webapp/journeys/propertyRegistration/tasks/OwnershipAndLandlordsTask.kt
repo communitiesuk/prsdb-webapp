@@ -15,7 +15,8 @@ class OwnershipAndLandlordsTask : Task<OwnershipAndLandlordsState>() {
                 nextStep { journey.jointLandlordsTask.firstStep }
                 savable()
             }
-            task(journey.jointLandlordsTask) {
+            duplicableTask(journey.jointLandlordsTask) {
+                withDependencies { journey }
                 parents { journey.ownershipTypeStep.isComplete() }
                 nextStep { exitStep }
                 savable()
