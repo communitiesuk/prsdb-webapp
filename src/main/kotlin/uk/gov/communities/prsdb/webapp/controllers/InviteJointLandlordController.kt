@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
@@ -40,7 +38,6 @@ class InviteJointLandlordController(
     private val landlordService: LandlordService,
 ) {
     @GetMapping("{stepName}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -59,7 +56,6 @@ class InviteJointLandlordController(
     }
 
     @PostMapping("{stepName}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postUpdateStep(
         model: Model,
         principal: Principal,
@@ -81,7 +77,6 @@ class InviteJointLandlordController(
 
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
     @GetMapping("$RESEND_PATH_SEGMENT/{invitationId}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun resendInvitation(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -99,7 +94,6 @@ class InviteJointLandlordController(
     }
 
     @GetMapping(CONFIRMATION_PATH_SEGMENT)
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(
         model: Model,
         principal: Principal,

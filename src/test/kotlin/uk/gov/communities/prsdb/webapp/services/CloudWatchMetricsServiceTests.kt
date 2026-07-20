@@ -27,7 +27,7 @@ class CloudWatchMetricsServiceTests {
     private fun service() =
         CloudWatchMetricsService(
             client,
-            ecsNamespace = "ECS/ContainerInsights",
+            ecsNamespace = "AWS/ECS",
             ecsMemoryMetric = "MemoryUtilization",
             ecsCpuMetric = "CPUUtilization",
             ecsClusterName = "cluster",
@@ -45,7 +45,7 @@ class CloudWatchMetricsServiceTests {
     fun `getMetrics maps memory, cpu, elasticache and cloudfront error rate values`() {
         whenever(
             client.getMetricStatistic(
-                eq("ECS/ContainerInsights"),
+                eq("AWS/ECS"),
                 eq("MemoryUtilization"),
                 any(),
                 eq(Statistic.MAXIMUM),
@@ -55,7 +55,7 @@ class CloudWatchMetricsServiceTests {
         ).thenReturn(73.42)
         whenever(
             client.getMetricStatistic(
-                eq("ECS/ContainerInsights"),
+                eq("AWS/ECS"),
                 eq("MemoryUtilization"),
                 any(),
                 eq(Statistic.AVERAGE),
@@ -64,7 +64,7 @@ class CloudWatchMetricsServiceTests {
             ),
         ).thenReturn(41.21)
         whenever(
-            client.getMetricStatistic(eq("ECS/ContainerInsights"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+            client.getMetricStatistic(eq("AWS/ECS"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
         ).thenReturn(62.5)
         whenever(
             client.getMetricStatistic(eq("AWS/ElastiCache"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
@@ -112,5 +112,27 @@ class CloudWatchMetricsServiceTests {
         assertNull(result.elastiCacheCpuUtilisation)
         assertNull(result.cloudFrontClientErrorRate)
         assertNull(result.cloudFrontServerErrorRate)
+    }
+
+    @Test
+    fun `getMetrics isolates a failing metric so other rows still populate`() {
+        whenever(
+            client.getMetricStatistic(
+                eq("AWS/CloudFront"),
+                eq("4xxErrorRate"),
+                any(),
+                eq(Statistic.AVERAGE),
+                any(),
+                eq(Region.US_EAST_1),
+            ),
+        ).thenThrow(RuntimeException("boom"))
+        whenever(
+            client.getMetricStatistic(eq("AWS/ECS"), eq("MemoryUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+        ).thenReturn(73.42)
+
+        val result = service().getMetrics(period)
+
+        assertNull(result.cloudFrontClientErrorRate)
+        assertEquals(73.42, result.peakMemoryUtilisation)
     }
 }

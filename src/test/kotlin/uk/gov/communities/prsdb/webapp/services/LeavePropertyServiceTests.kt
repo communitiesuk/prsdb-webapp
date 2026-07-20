@@ -32,6 +32,9 @@ class LeavePropertyServiceTests {
     @Mock
     private lateinit var emailSender: EmailNotificationService<EmailTemplateModel>
 
+    @Mock
+    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
     @InjectMocks
     private lateinit var leavePropertyService: LeavePropertyService
 
@@ -104,6 +107,19 @@ class LeavePropertyServiceTests {
         val sentEmail = emailCaptor.firstValue
         assertEquals("Alice", sentEmail.recipientName)
         assertEquals(address.toMultiLineAddress(), sentEmail.propertyAddress)
+    }
+
+    @Test
+    fun `leavePropertyOwnership sends swap to individual nudge email`() {
+        val landlord = MockLandlordData.createLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createLandlord(name = "Bob")),
+            )
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
     @Test

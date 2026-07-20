@@ -21,6 +21,7 @@ inviteJointLandlord:
     label: Enter their email address
   error:
     invalidEmail: Enter an email address in the correct format, like name@example.com
+    cannotInviteSelf: You cannot invite yourself as a joint landlord
     alreadyInvited: You have already invited this email address
     alreadyOnProperty: This email address is already being used by another joint landlord
 checkJointLandlords:

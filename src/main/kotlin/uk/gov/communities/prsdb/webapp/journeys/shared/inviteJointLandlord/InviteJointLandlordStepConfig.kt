@@ -58,12 +58,13 @@ class InviteJointLandlordStepConfig(
         formData: FormData,
     ): FormData {
         val emailBeingEdited = getEmailToEditOrNull(state)
-        val allInvitedEmails = state.invitedJointLandlords + state.existingInvitedEmails
+        val allInvitedEmails = state.invitedJointLandlords + state.dependencies.existingInvitedEmails
 
         return super.enrichSubmittedDataBeforeValidation(state, formData) +
             (InviteJointLandlordsFormModel::invitedEmailAddresses.name to allInvitedEmails) +
-            (InviteJointLandlordsFormModel::existingLandlordEmails.name to state.existingLandlordEmails) +
-            (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited)
+            (InviteJointLandlordsFormModel::existingLandlordEmails.name to state.dependencies.existingLandlordEmails) +
+            (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited) +
+            (InviteJointLandlordsFormModel::loggedInLandlordEmail.name to state.dependencies.loggedInLandlordEmail)
     }
 
     override fun afterStepDataIsAdded(state: InviteJointLandlordState) {

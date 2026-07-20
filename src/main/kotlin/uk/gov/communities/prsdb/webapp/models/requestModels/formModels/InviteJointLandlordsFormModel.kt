@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
@@ -15,6 +17,8 @@ class InviteJointLandlordsFormModel : FormModel {
 
     var emailBeingEdited: String? = null
 
+    var loggedInLandlordEmail: String? = null
+
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -24,6 +28,11 @@ class InviteJointLandlordsFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "jointLandlords.inviteJointLandlord.error.invalidEmail",
                 validatorType = EmailConstraintValidator::class,
+            ),
+            ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.cannotInviteSelf",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isEmailNotLoggedInLandlord",
             ),
             ConstraintDescriptor(
                 messageKey = "jointLandlords.inviteJointLandlord.error.alreadyOnProperty",
@@ -41,11 +50,17 @@ class InviteJointLandlordsFormModel : FormModel {
 
     fun isEmailNotAlreadyInvited(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+        return submittedEmail.isSameEmailAs(emailBeingEdited) ||
+            !invitedEmailAddresses.containsEmail(submittedEmail)
     }
 
     fun isEmailNotAlreadyOnProperty(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return !existingLandlordEmails.contains(submittedEmail)
+        return !existingLandlordEmails.containsEmail(submittedEmail)
+    }
+
+    fun isEmailNotLoggedInLandlord(): Boolean {
+        val submittedEmail = emailAddress ?: return true
+        return !submittedEmail.isSameEmailAs(loggedInLandlordEmail)
     }
 }

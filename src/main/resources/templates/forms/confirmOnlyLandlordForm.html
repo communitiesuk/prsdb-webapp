@@ -23,7 +23,7 @@
             </p>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
-                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{switchToIndividual.confirm.confirmButton})}"></button>
+                    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{switchToIndividual.confirm.confirmButton})}"></button>
                     <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{switchToIndividual.confirm.cancelLink}">
                         switchToIndividual.confirm.cancelLink
                     </a>

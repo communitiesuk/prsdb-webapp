@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -178,13 +177,14 @@ class UpdateEpcJourney(
     override val stateFactory: ObjectFactory<UpdateEpcJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateEpcJourneyState {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
+    override var epcRetrievedByUprnUpdatedSinceUserReview: Boolean?
+        by delegateProvider.nullableDelegate("epcRetrievedByUprnUpdatedSinceUserReview")
     override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
     override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
         by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
@@ -197,7 +197,7 @@ class UpdateEpcJourney(
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
-    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val cyaStep get() = updateCheckEpcAnswersStep
 }

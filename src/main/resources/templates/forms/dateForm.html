@@ -12,5 +12,5 @@
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </html>

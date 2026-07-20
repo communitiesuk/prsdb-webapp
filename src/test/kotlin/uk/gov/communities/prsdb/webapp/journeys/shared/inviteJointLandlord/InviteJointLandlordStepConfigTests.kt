@@ -19,6 +19,9 @@ class InviteJointLandlordStepConfigTests {
     lateinit var mockJourneyState: InviteJointLandlordState
 
     @Mock
+    lateinit var mockDependencies: InviteJointLandlordsTaskDependencies
+
+    @Mock
     lateinit var urlParameterService: CollectionKeyParameterService
 
     @Mock
@@ -33,7 +36,12 @@ class InviteJointLandlordStepConfigTests {
     fun `afterStepDataIsAdded uses nextJointLandlordMemberId when adding a new email`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("emailAddress" to "new@example.com"))
-        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(mapOf(1 to "one@example.com", 4 to "four@example.com"))
+        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(
+            mapOf(
+                1 to "one@example.com",
+                4 to "four@example.com",
+            ),
+        )
         whenever(mockJourneyState.nextJointLandlordMemberId).thenReturn(7)
         whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
 
@@ -51,7 +59,12 @@ class InviteJointLandlordStepConfigTests {
     fun `afterStepDataIsAdded initializes next id from current max key when counter is null`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("emailAddress" to "new@example.com"))
-        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(mapOf(2 to "two@example.com", 4 to "four@example.com"))
+        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(
+            mapOf(
+                2 to "two@example.com",
+                4 to "four@example.com",
+            ),
+        )
         whenever(mockJourneyState.nextJointLandlordMemberId).thenReturn(null)
         whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
 
@@ -67,7 +80,12 @@ class InviteJointLandlordStepConfigTests {
     fun `afterStepDataIsAdded updates existing email without changing next id`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("emailAddress" to "updated@example.com"))
-        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(mapOf(2 to "two@example.com", 4 to "old@example.com"))
+        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(
+            mapOf(
+                2 to "two@example.com",
+                4 to "old@example.com",
+            ),
+        )
         whenever(urlParameterService.getParameterOrNull()).thenReturn(4)
 
         stepConfig.afterStepDataIsAdded(mockJourneyState)
@@ -84,8 +102,10 @@ class InviteJointLandlordStepConfigTests {
         stepConfig.routeSegment = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("session@example.com"))
-        whenever(mockJourneyState.existingInvitedEmails).thenReturn(listOf("existing@example.com"))
-        whenever(mockJourneyState.existingLandlordEmails).thenReturn(listOf("landlord@example.com"))
+        whenever(mockJourneyState.dependencies).thenReturn(mockDependencies)
+        whenever(mockDependencies.existingInvitedEmails).thenReturn(listOf("existing@example.com"))
+        whenever(mockDependencies.existingLandlordEmails).thenReturn(listOf("landlord@example.com"))
+        whenever(mockDependencies.loggedInLandlordEmail).thenReturn("me@example.com")
         whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
 
         val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
@@ -96,6 +116,7 @@ class InviteJointLandlordStepConfigTests {
         @Suppress("UNCHECKED_CAST")
         val landlordEmails = result["existingLandlordEmails"] as List<String>
         assertEquals(listOf("landlord@example.com"), landlordEmails)
+        assertEquals("me@example.com", result["loggedInLandlordEmail"])
     }
 
     private fun setupStepConfig(): InviteJointLandlordStepConfig {

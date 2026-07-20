@@ -9,13 +9,11 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block th:with="fieldSetHeadingLabelTo=${label == null ? 'name' : null}">
-        <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'name', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-            <div th:replace="~{fragments/forms/basicTextInput :: textInput(${label != null ? #messages.msg(label) : null}, 'name', null)}"></div>
-        </th:block>
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='name', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, fieldSetHeadingLabelTo=${label == null ? 'name' : null})}">
+        <div th:replace="~{fragments/forms/basicTextInput :: textInput(${label != null ? #messages.msg(label) : null}, 'name', null)}"></div>
     </th:block>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </html>

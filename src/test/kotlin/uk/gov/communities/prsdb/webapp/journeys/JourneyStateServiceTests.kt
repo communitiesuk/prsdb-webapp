@@ -15,7 +15,10 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpSession
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -441,6 +444,33 @@ class JourneyStateServiceTests {
 
         // Assert
         assertEquals("$baseUrl?journeyId=$journeyId", urlWithParam)
+    }
+
+    @Test
+    fun `urlWithJourneyState falls back to the request base path when the journey has no stored base path`() {
+        // Arrange
+        val journeyId = "test-journey-id"
+        val requestBasePath = "/landlord/register-as-a-landlord"
+
+        // The journey is in the session but has no stored base path (e.g. it expired from the session but its id
+        // is still in the URL), so the base path must come from the current request.
+        val session = MockHttpSession()
+        session.setJourneyStateMetadataStore(JourneyMetadataStore(mapOf(journeyId to JourneyMetadata.createNew(journeyId))))
+
+        val request = MockHttpServletRequest()
+        request.setSession(session)
+        request.setAttribute(JourneyStateService.JOURNEY_BASE_PATH_ATTRIBUTE, requestBasePath)
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(request))
+
+        try {
+            // Act
+            val url = JourneyStateService.urlWithJourneyState("lead-trustee-address/select-address", journeyId)
+
+            // Assert
+            assertEquals("$requestBasePath/lead-trustee-address/select-address?journeyId=$journeyId", url)
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
     }
 
     @Test

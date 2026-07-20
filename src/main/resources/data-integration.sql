@@ -128,9 +128,9 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
-INSERT INTO landlord (id, registration_number_id, address_id, created_date, email, non_england_or_wales_address, is_active,
-                      last_modified_date, name, phone_number, subject_identifier, date_of_birth, country_of_residence, is_verified,
-                      has_accepted_privacy_notice)
+INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+                      last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
+                      individual_has_accepted_privacy_notice)
 VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
         '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
@@ -164,103 +164,103 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
-                                custom_rent_frequency, rent_amount, custom_property_type)
+                                custom_rent_frequency, rent_amount, custom_property_type, is_occupied)
 VALUES (1, true, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (2, true, 0, 0, 0, 10, 2, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (3, true, 0, 0, 0, 11, 3, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (4, true, 0, 0, 0, 12, 4, '2025-01-15 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (5, true, 1, 1, 2, 13, 5, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (6, true, 1, 1, 2, 14, 6, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (7, true, 1, 1, 2, 15, 7, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (8, true, 1, 1, 2, 16, 8, '2024-10-15 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (9, true, 1, 1, 2, 17, 9, '2025-07-24 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (10, true, 1, 1, 2, 18, 10, '2026-02-27 00:00:00+00', null, 4,
-        1, null, null, 2, 1, null, 123.12, 'End terrace'),
+        1, null, null, 2, 1, null, 123.12, 'End terrace', true),
        (11, true, 1, 1, 2, 19, 7449159, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (12, true, 1, 1, 2, 20, 7449160, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (13, true, 1, 1, 2, 21, 7449165, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (14, true, 1, 1, 2, 22, 7449169, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (15, true, 1, 1, 2, 23, 7449173, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (16, true, 1, 1, 2, 24, 7449174, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (17, true, 1, 1, 2, 25, 7449179, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (18, true, 1, 1, 2, 26, 7449180, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (19, true, 1, 1, 2, 27, 7449185, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (20, true, 1, 1, 2, 28, 7449193, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (21, true, 1, 1, 2, 29, 7449194, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (22, true, 1, 1, 2, 30, 7449198, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (23, true, 1, 1, 2, 31, 7449199, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (24, true, 1, 1, 2, 32, 7449203, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (25, true, 1, 1, 2, 33, 7449206, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (26, true, 1, 1, 2, 34, 7449208, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (27, true, 1, 1, 2, 35, 7449213, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (28, true, 1, 1, 2, 36, 7449214, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (29, true, 1, 1, 2, 37, 7449217, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (30, true, 1, 1, 2, 38, 7449222, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (31, true, 1, 1, 2, 39, 7449226, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (32, true, 1, 1, 2, 40, 7449227, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (33, true, 1, 1, 2, 41, 7449231, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (34, true, 1, 1, 2, 42, 7449235, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (35, true, 1, 1, 2, 43, 7449239, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (36, true, 1, 1, 2, 44, 7449250, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (37, true, 1, 1, 2, 45, 7449252, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (38, true, 1, 1, 2, 46, 7449253, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (39, true, 1, 1, 2, 47, 7449254, '2026-03-02 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (40, true, 1, 1, 2, 48, 7449161, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (41, true, 1, 1, 2, 49, 7449162, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (42, true, 1, 1, 2, 50, 7449163, '2026-04-14 00:00:00+00', null, 1,
-        1, null, null, 2, 1, null, 123.12, null),
+        1, null, null, 2, 1, null, 123.12, null, true),
        (43, true, 0, 0, 0, 51, 7449166, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (44, true, 0, 0, 0, 52, 7449167, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (45, true, 0, 0, 0, 53, 7449170, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (46, true, 0, 0, 0, 54, 7449175, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (47, true, 0, 0, 0, 55, 7449181, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null, false),
        (48, true, 0, 0, 0, 56, 7449182, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null) ON CONFLICT DO NOTHING;
+        null, null, null, null, null, null, null, null, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -451,9 +451,9 @@ SELECT 1200 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
-                      has_accepted_privacy_notice)
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
        'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
@@ -462,7 +462,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
-                               property_build_type, num_bedrooms, marked_joint_landlord)
+                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied)
 WITH free_address AS (
     SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn
     FROM (
@@ -476,7 +476,7 @@ WITH free_address AS (
 )
 SELECT 1200 + i, true, 1, 1, 2, 1200 + i, fa.id,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
-       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false
+       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true
 FROM generate_series(1, 101) AS s(i)
 JOIN free_address fa ON fa.rn = i
 ON CONFLICT DO NOTHING;
@@ -523,9 +523,9 @@ SELECT 1600 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- pr
 FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
-                      has_accepted_privacy_notice)
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        NULL, 1400 + i, 1, DATE '1985-06-15', true, '07222222222',
@@ -542,7 +542,7 @@ ON CONFLICT DO NOTHING;
 -- These exact boundary values make median/p90/p95 land on 22 minutes / 1 day / 2 days.
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
-                               property_build_type, num_bedrooms, marked_joint_landlord)
+                               property_build_type, num_bedrooms, marked_joint_landlord, is_occupied)
 WITH p AS (
     SELECT i,
            TIMESTAMPTZ '2028-01-01 00:00:00+00'
@@ -566,7 +566,7 @@ free_address AS (
         LIMIT 100
     ) limited
 )
-SELECT 1600 + i, true, 1, 1, 2, 1600 + i, fa.id, created, created, NULL, 1, 2, false
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, fa.id, created, created, NULL, 1, 2, false, true
 FROM p
 JOIN free_address fa ON fa.rn = p.i
 ON CONFLICT DO NOTHING;

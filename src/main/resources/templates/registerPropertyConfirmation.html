@@ -43,13 +43,11 @@
                 </p>
             </th:block>
 
-            <th:block th:if="${isFirstProperty}">
-                <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-                    #{common.confirmationPage.feedback.heading},
-                    #{registerProperty.confirmation.feedback.body},
-                    ${propertyRegistrationSurveyUrl})}">
-                </div>
-            </th:block>
+            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                #{common.confirmationPage.feedback.heading},
+                #{registerProperty.confirmation.feedback.body},
+                ${propertyRegistrationSurveyUrl})}">
+            </div>
 
             <p class="govuk-body">
                 <a class="govuk-link"

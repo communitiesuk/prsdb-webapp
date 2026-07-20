@@ -4,12 +4,13 @@ import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -27,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 class SavePropertyRegistrationDataStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
@@ -53,13 +54,13 @@ class SavePropertyRegistrationDataStepConfig(
 
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
-        var jointLandlordEmails: List<String>? = null
-        var markedJointLandlord = false
-        jointLandlordsStrategy.ifEnabled {
-            jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
-            markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
-        }
+        val jointLandlordEmails: List<String>? =
+            state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
+                ?.values
+                ?.toList()
+        val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
             addressModel = state.getAddress(),
@@ -73,6 +74,7 @@ class SavePropertyRegistrationDataStepConfig(
             licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             licenceNumber = state.getLicenceNumberOrNull() ?: "",
             ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
                     state.households.formModel
@@ -90,7 +92,7 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numBedrooms =
-                if (isOccupied) {
+                if (isOccupied || isRestructured) {
                     state.bedrooms.formModel
                         .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         .toInt()

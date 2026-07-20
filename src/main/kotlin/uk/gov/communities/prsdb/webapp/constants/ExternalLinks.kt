@@ -99,7 +99,7 @@ const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"
 
 const val LANDLORD_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqB_dtrhMqbRMjKdHcjEPmsZUMjU1TzVWUlpQUEo2MllLSzZMOFQwS0FUNSQlQCN0PWcu"
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUMFFDVVZKQU85N0oyRURSQ0dUNFpRRDRJSC4u"
 
 const val PROPERTY_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
@@ -112,3 +112,9 @@ const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL =
 const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL =
     "https://forms.office.com/Pages/" +
         "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ1ZUWEEzRzNROUo5UFJGVTNSOVozQzVDMC4u"
+
+const val ENGLAND_AND_WALES_CHARITY_REGISTER_URL = "https://register-of-charities.charitycommission.gov.uk/charity-search"
+
+const val SCOTLAND_CHARITY_REGISTER_URL = "https://www.oscr.org.uk/"
+
+const val NORTHERN_IRELAND_CHARITY_REGISTER_URL = "https://www.charitycommissionni.org.uk/"

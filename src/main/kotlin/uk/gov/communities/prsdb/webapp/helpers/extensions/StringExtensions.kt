@@ -9,5 +9,11 @@ class StringExtensions {
         }
 
         fun String.toNormalizedIntegerString(): String = toIntOrNull()?.toString() ?: this
+
+        fun String.toNormalizedEmail(): String = trim().lowercase()
+
+        fun String.isSameEmailAs(other: String?): Boolean = other != null && toNormalizedEmail() == other.toNormalizedEmail()
+
+        fun Iterable<String>.containsEmail(email: String): Boolean = any { it.isSameEmailAs(email) }
     }
 }

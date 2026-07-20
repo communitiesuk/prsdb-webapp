@@ -6,6 +6,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
@@ -30,7 +31,20 @@ class PlausibleMetricsServiceTests {
             Instant.parse("2025-01-20T23:59:59Z"),
         )
 
-    private fun service() = PlausibleMetricsService(plausibleClient, domainId)
+    private fun service(transactionEventStartDate: String = "2099-01-01") =
+        PlausibleMetricsService(plausibleClient, domainId, transactionEventStartDate)
+
+    private fun stubByEventName(
+        flowCount: Double,
+        transactionCount: Double,
+    ) {
+        whenever(plausibleClient.query(any())).thenAnswer { invocation ->
+            val query = invocation.getArgument<PlausibleQuery>(0)
+            val isTransactionEventQuery = query.filters.toString().contains("event:name")
+            val count = if (isTransactionEventQuery) transactionCount else flowCount
+            PlausibleQueryResponse(listOf(aggregateRow(count)))
+        }
+    }
 
     private fun row(
         page: String,
@@ -184,5 +198,61 @@ class PlausibleMetricsServiceTests {
         assertTrue(serialised.contains("/landlord/register-as-a-landlord/confirmation"))
         assertTrue(serialised.contains("check-gas-safety-answers"))
         assertTrue(!serialised.contains("update-bedrooms"))
+    }
+
+    @Test
+    fun `getTransactionCounts uses only the Flow query when the period ends before the cutover`() {
+        stubByEventName(flowCount = 100.0, transactionCount = 999.0)
+
+        val count = service("2025-02-01").getTransactionCounts(period)
+
+        assertEquals(100L, count)
+        val captor = argumentCaptor<PlausibleQuery>()
+        verify(plausibleClient).query(captor.capture())
+        assertTrue(captor.firstValue.filters.toString().contains("event:props:currentUrl"))
+        assertEquals(listOf("2025-01-10", "2025-01-20"), captor.firstValue.dateRange)
+    }
+
+    @Test
+    fun `getTransactionCounts uses only the Transaction event query when the period starts on or after the cutover`() {
+        stubByEventName(flowCount = 999.0, transactionCount = 250.0)
+
+        val count = service("2025-01-01").getTransactionCounts(period)
+
+        assertEquals(250L, count)
+        val captor = argumentCaptor<PlausibleQuery>()
+        verify(plausibleClient).query(captor.capture())
+        val query = captor.firstValue
+        assertEquals(listOf("events"), query.metrics)
+        assertTrue(query.dimensions.isEmpty())
+        assertEquals(listOf("2025-01-10", "2025-01-20"), query.dateRange)
+        val serialised = query.filters.toString()
+        assertTrue(serialised.contains("event:name"))
+        assertTrue(serialised.contains("Transaction"))
+    }
+
+    @Test
+    fun `getTransactionCounts sums Flow before the cutover and Transaction events on or after it`() {
+        stubByEventName(flowCount = 30.0, transactionCount = 12.0)
+
+        val count = service("2025-01-15").getTransactionCounts(period)
+
+        assertEquals(42L, count)
+
+        val captor = argumentCaptor<PlausibleQuery>()
+        verify(plausibleClient, times(2)).query(captor.capture())
+        val flowQuery = captor.allValues.single { !it.filters.toString().contains("event:name") }
+        val txnQuery = captor.allValues.single { it.filters.toString().contains("event:name") }
+        assertEquals(listOf("2025-01-10", "2025-01-14"), flowQuery.dateRange)
+        assertEquals(listOf("2025-01-15", "2025-01-20"), txnQuery.dateRange)
+    }
+
+    @Test
+    fun `getTransactionCounts returns zero when a split query throws`() {
+        whenever(plausibleClient.query(any())).thenThrow(RuntimeException("boom"))
+
+        val count = service("2025-01-15").getTransactionCounts(period)
+
+        assertEquals(0L, count)
     }
 }

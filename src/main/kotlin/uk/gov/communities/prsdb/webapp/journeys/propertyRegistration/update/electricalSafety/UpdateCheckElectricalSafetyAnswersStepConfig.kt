@@ -24,6 +24,7 @@ class UpdateCheckElectricalSafetyAnswersStepConfig(
             "rows" to factory.createRows(),
             "insetTextKey" to factory.getInsetTextKey(),
             "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButton" to "transactionSubmitButton",
         )
     }
 

@@ -108,4 +108,36 @@ class EpcLookupByUprnStepConfigTests {
         assertNull(mockState.epcRetrievedByUprn)
         verify(mockEpcLookupService, never()).getEpcByUprn(any())
     }
+
+    @Test
+    fun `afterStepIsReached sets epcRetrievedByUprnUpdatedSinceUserReview to true when epcRetrievedByUprn changes`() {
+        // Arrange
+        val stepConfig = EpcLookupByUprnStepConfig(mockEpcLookupService)
+        val uprn = 123456789L
+        whenever(mockState.uprn).thenReturn(uprn)
+        whenever(mockState.epcRetrievedByUprn).thenReturn(null)
+        whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(epcDataModel)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState).epcRetrievedByUprnUpdatedSinceUserReview = true
+    }
+
+    @Test
+    fun `afterStepIsReached does not set epcRetrievedByUprnUpdatedSinceUserReview when epcRetrievedByUprn does not change`() {
+        // Arrange
+        val stepConfig = EpcLookupByUprnStepConfig(mockEpcLookupService)
+        val uprn = 123456789L
+        whenever(mockState.uprn).thenReturn(uprn)
+        whenever(mockState.epcRetrievedByUprn).thenReturn(epcDataModel)
+        whenever(mockEpcLookupService.getEpcByUprn(uprn)).thenReturn(epcDataModel)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockState, never()).epcRetrievedByUprnUpdatedSinceUserReview = true
+    }
 }

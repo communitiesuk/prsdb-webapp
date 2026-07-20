@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -10,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,21 +34,6 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.viewIncompletePropertiesButton.clickAndWait()
         assertPageIs(page, LandlordIncompletePropertiesPage::class)
-    }
-
-    @Test
-    fun `the join registered property button links to the join property start page`(page: Page) {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        val dashboard = navigator.goToLandlordDashboard()
-        dashboard.joinRegisteredPropertyButton.clickAndWait()
-        assertPageIs(page, JoinPropertyStartPage::class)
-    }
-
-    @Test
-    fun `the join registered property button is not shown when the joint landlords feature flag is disabled`(page: Page) {
-        featureFlagManager.disableFeature(JOINT_LANDLORDS)
-        val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.joinRegisteredPropertyButton).isHidden()
     }
 
     @Test

@@ -84,10 +84,13 @@ plausible:
   domain-id: ${PLAUSIBLE_DOMAIN_ID}
   base-url: https://plausible.io
   api-key: ${PLAUSIBLE_API_KEY}
+  # Date the Transaction custom event went live in production. Until set to the real go-live date, the
+  # far-future default keeps the total-transactions metric on the legacy Flow-event counting method.
+  transaction-event-start-date: ${PLAUSIBLE_TRANSACTION_EVENT_START_DATE:2099-01-01}
 
 cloudwatch-metrics:
   ecs:
-    namespace: ${CLOUDWATCH_ECS_NAMESPACE:ECS/ContainerInsights}
+    namespace: ${CLOUDWATCH_ECS_NAMESPACE:AWS/ECS}
     memory-utilisation-metric: ${CLOUDWATCH_ECS_MEMORY_METRIC:MemoryUtilization}
     cpu-utilisation-metric: ${CLOUDWATCH_ECS_CPU_METRIC:CPUUtilization}
     cluster-name: ${CLOUDWATCH_ECS_CLUSTER_NAME:}
@@ -114,23 +117,18 @@ features:
     - name: "failover-test-endpoints"
       enabled: false
       expiry-date: "2026-12-31"
-    - name: "joint-landlords"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "compliance-actions-may2026-redesign"
-      enabled: false
-      expiry-date: "2026-12-31"
-      release: "private-beta-release-2"
     - name: "pdjb-1097-organisation-landlord-registration"
       enabled: false
       expiry-date: "2026-12-31"
-  releases:
-    - name: "private-beta-release-2"
+    - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
-
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1053-dashboard-nav-link"
+      enabled: false
+      expiry-date: "2026-12-31"
 
 ---
 

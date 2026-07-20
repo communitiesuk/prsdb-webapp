@@ -15,12 +15,11 @@ class OrgCharityStepConfig : AbstractRequestableStepConfig<YesOrNo, OrgCharityFo
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "forms.orgCharity.fieldSetHeading",
-            "fieldName" to "charity",
+            "fieldSetHint" to "forms.orgCharity.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            "todoComment" to "TODO: PDJB-1140 - Is your organisation a registered charity",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: JourneyState) = "forms/orgCharityForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.charity?.let {

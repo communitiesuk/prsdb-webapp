@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
@@ -13,32 +13,35 @@ import kotlin.math.roundToLong
 
 @PrsdbWebService
 class MetricsService(
-    private val landlordRepository: LandlordRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) {
     @Transactional
     fun getMetrics(period: ReportingPeriod): MetricsDataModel {
-        val timesToFirstProperty = getTimesToFirstProperty(period)
+        val timesToFirstPropertyOwnership = getTimesToFirstPropertyOwnership(period)
         return MetricsDataModel(
             numberOfLandlordRegistrations =
-                landlordRepository.countByCreatedDateBetween(period.start, period.end),
+                individualLandlordRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfVerifiedLandlords =
-                landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(period.start, period.end),
+                individualLandlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(period.start, period.end),
             numberOfProperties =
                 propertyOwnershipRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfLandlordsWithAProperty =
-                propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(period.start, period.end),
-            medianTimeToFirstProperty = percentile(timesToFirstProperty, 0.5),
-            p90TimeToFirstProperty = percentile(timesToFirstProperty, 0.9),
-            p95TimeToFirstProperty = percentile(timesToFirstProperty, 0.95),
+                propertyOwnershipRepository.countDistinctLandlordsWithOwnershipLinkCreatedBetween(
+                    period.start,
+                    period.end,
+                ),
+            medianTimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.5),
+            p90TimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.9),
+            p95TimeToFirstProperty = percentile(timesToFirstPropertyOwnership, 0.95),
         )
     }
 
-    private fun getTimesToFirstProperty(period: ReportingPeriod): List<Duration> =
+    private fun getTimesToFirstPropertyOwnership(period: ReportingPeriod): List<Duration> =
         propertyOwnershipRepository
-            .findLandlordAndFirstPropertyCreatedDates(period.start, period.end)
-            .map { (landlordCreatedDate, firstPropertyCreatedDate) ->
-                Duration.between(landlordCreatedDate, firstPropertyCreatedDate)
+            .findLandlordAndFirstOwnershipLinkCreatedDates(period.start, period.end)
+            .map { (landlordCreatedDate, firstOwnershipLinkCreatedDate) ->
+                Duration.between(landlordCreatedDate, firstOwnershipLinkCreatedDate)
             }
 
     private fun percentile(

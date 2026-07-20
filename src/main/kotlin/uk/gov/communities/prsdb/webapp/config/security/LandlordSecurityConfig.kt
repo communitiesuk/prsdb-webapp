@@ -118,6 +118,8 @@ class LandlordSecurityConfig(
         http
             .securityMatcher(
                 "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${IdentityVerifyingStep.ROUTE_SEGMENT}",
+                "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/" +
+                    IdentityVerifyingStep.ROUTE_SEGMENT,
                 "/id-verification/**",
             ).authorizeHttpRequests { requests ->
                 requests

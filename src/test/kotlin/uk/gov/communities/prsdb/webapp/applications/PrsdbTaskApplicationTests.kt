@@ -34,9 +34,12 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
@@ -89,14 +92,9 @@ class PrsdbTaskApplicationTests {
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
                 AuditingConfig::class.simpleBeanName,
-                // when the feature flagged variant is removed the name overrides from JointLandlordInvitationExpiryEmailService can be removed.
-                // then, this can be replaced by JointLandlordInvitationExpiryEmailService::class.simpleBeanName
-                "joint-landlord-invitation-expiry-email-flag-off",
-                "joint-landlord-invitation-expiry-email-flag-on",
-                "jl-invitation-deletion-flag-off",
-                "jl-invitation-deletion-flag-on",
-                "swap-to-individual-nudge-email-flag-off",
-                "swap-to-individual-nudge-email-flag-on",
+                JointLandlordInvitationExpiryEmailService::class.simpleBeanName,
+                JointLandlordInvitationDeletionService::class.simpleBeanName,
+                SwapToIndividualNudgeEmailService::class.simpleBeanName,
                 IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
                 DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,

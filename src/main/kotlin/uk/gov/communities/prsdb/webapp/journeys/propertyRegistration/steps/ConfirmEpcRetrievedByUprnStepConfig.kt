@@ -60,6 +60,13 @@ class ConfirmEpcRetrievedByUprnStepConfig(
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsByUprnForm"
+
+    override fun afterStepIsReached(state: EpcState) {
+        if (state.epcRetrievedByUprnUpdatedSinceUserReview == true) {
+            state.clearStepData(stepDataKey)
+            state.epcRetrievedByUprnUpdatedSinceUserReview = false
+        }
+    }
 }
 
 @JourneyFrameworkComponent

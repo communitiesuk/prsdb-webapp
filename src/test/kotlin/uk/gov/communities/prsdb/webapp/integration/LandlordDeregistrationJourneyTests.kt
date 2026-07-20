@@ -5,16 +5,24 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ConfirmationPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
+    @MockitoBean
+    private lateinit var swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
     @Nested
     inner class LandlordWithProperties :
         NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-properties-and-incomplete-property.sql") {
@@ -163,6 +171,19 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             assertEquals(0, soleCount)
             assertEquals(1, jointCount)
             assertEquals(1, coOwnerMembership)
+        }
+
+        @Test
+        fun `deregistering sends the swap to individual nudge email exactly once per jointly-owned property`(page: Page) {
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
+            areYouSurePage.submitWantsToProceed()
+            val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
+            reasonPage.form.submit()
+            assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
+
+            verify(swapToIndividualNudgeEmailService, times(1)).sendNudgeEmailIfApplicable(any())
         }
     }
 }

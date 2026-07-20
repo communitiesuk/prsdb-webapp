@@ -12,7 +12,7 @@ class NumberOfHouseholdsFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.numberOfHouseholds.input.error",
+                messageKey = "forms.numberOfHouseholdsRestructureAndSkipping.input.error",
                 validatorType = PositiveIntegerValidator::class,
             ),
         ],
