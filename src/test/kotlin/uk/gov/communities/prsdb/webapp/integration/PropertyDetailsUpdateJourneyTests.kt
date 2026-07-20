@@ -681,7 +681,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             fun `A property can have its ownership type updated`(page: Page) {
                 // Details page
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsPage.beforePdjb939SummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
                 val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update Ownership Type page
@@ -689,7 +689,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
                 // Check changes have occurred
-                assertThat(propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).containsText("Leasehold")
+                assertThat(propertyDetailsPage.beforePdjb939SummaryList.ownershipTypeRow.value).containsText("Leasehold")
             }
         }
 
@@ -701,7 +701,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Details page
                 var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
                 val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update licence to selective
@@ -720,8 +720,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
                 // Check changes have occurred
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("Selective licence")
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.value).containsText("Selective licence")
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             }
 
             @Test
@@ -730,7 +730,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Details page
                 var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
                 val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update licence to HMO mandatory
@@ -750,9 +750,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Check changes have occurred
                 assertThat(
-                    propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value,
+                    propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.value,
                 ).containsText("HMO mandatory licence")
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             }
 
             @Test
@@ -761,7 +761,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Details page
                 var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
                 val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update licence to HMO additional
@@ -781,9 +781,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Check changes have occurred
                 assertThat(
-                    propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value,
+                    propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.value,
                 ).containsText("HMO additional licence")
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingNumberRow.value).containsText(newLicenceNumber)
             }
 
             @Test
@@ -794,7 +794,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Details page
                 var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
                 val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update licence to no licensing
@@ -808,7 +808,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
                 // Check changes have occurred
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("None")
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.value).containsText("None")
             }
 
             @Test
@@ -818,7 +818,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Details page
                 var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
                 val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
                 // Update licence to selective
@@ -847,9 +847,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 propertyDetailsUpdatePage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
 
                 // Check changes have occurred
-                assertThat(propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("Selective licence")
+                assertThat(propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingTypeRow.value).containsText("Selective licence")
                 assertThat(
-                    propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value,
+                    propertyDetailsUpdatePage.beforePdjb939SummaryList.licensingNumberRow.value,
                 ).containsText(secondNewLicenceNumber)
             }
         }
@@ -868,7 +868,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.occupancyRow.clickFirstActionLinkAndWait()
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -886,14 +886,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
                     // Check changes have occurred
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.occupancyRow.value).containsText("No")
                 }
 
                 @Test
                 fun `A property can have its occupancy updated from vacant to occupied`(page: Page) {
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.occupancyRow.clickFirstActionLinkAndWait()
                     val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
                     // Update occupancy to occupied
@@ -974,20 +974,20 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
                     // Check changes have occurred
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfHouseholdsRow.value)
                         .containsText(newNumberOfHouseholds.toString())
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfPeopleRow.value)
                         .containsText(newNumberOfPeople.toString())
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfBedroomsRow.value)
                         .containsText(newNumberOfBedrooms.toString())
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value).containsText("Yes")
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow.value).containsText(expectedBillsIncluded)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.billsIncludedRow.value).containsText(expectedBillsIncluded)
                     assertThat(
-                        propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value,
+                        propertyDetailsPage.beforePdjb939SummaryList.furnishedStatusRow.value,
                     ).containsText(expectedFurnishedStatus)
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.value).containsText(expectedRentFrequency)
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value).containsText(expectedRentAmount)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentFrequencyRow.value).containsText(expectedRentFrequency)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentAmountRow.value).containsText(expectedRentAmount)
                 }
             }
 
@@ -997,7 +997,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 fun `A property can have just their number of households and people updated`(page: Page) {
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
                     val updateNumberOfHouseholdsPage =
                         assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1022,9 +1022,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
                     // Check changes have occurred
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfHouseholdsRow.value)
                         .containsText(newNumberOfHouseholds.toString())
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfPeopleRow.value)
                         .containsText(newNumberOfPeople.toString())
                 }
 
@@ -1032,7 +1032,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 fun `leading zeros are stripped from households and people on the CYA page`(page: Page) {
                     // Details page
                     val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
                     val updateNumberOfHouseholdsPage =
                         assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1060,10 +1060,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     // Assert initial number of bedrooms is not 4
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfBedroomsRow.value)
                         .not()
                         .containsText(newNumberOfBedrooms.toString())
-                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
                     val updateNumberOfBedroomsPage =
                         assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1073,7 +1073,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
                     // Check change has occurred
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.numberOfBedroomsRow.value)
                         .containsText(newNumberOfBedrooms.toString())
                 }
             }
@@ -1085,10 +1085,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     // Assert initial rent includes bills status is not Yes
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.value)
                         .not()
                         .containsText("Yes")
-                    propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
                     val updateRentIncludesBillsPage =
                         assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1112,16 +1112,16 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     checkYourAnswersPage.confirm()
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.value)
                         .containsText("Yes")
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow).containsText(expectedBillsIncluded)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.billsIncludedRow).containsText(expectedBillsIncluded)
                 }
 
                 @Test
                 fun `Changing the rent includes bills status from the CYA page updates the property with the correct values`(page: Page) {
                     // start update journey
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
                     var updateRentIncludesBillsPage =
                         assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     // Select yes for rent includes bills
@@ -1149,16 +1149,16 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
                     // Check update is correct
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.value)
                         .containsText("No")
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow).isHidden()
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.billsIncludedRow).isHidden()
                 }
 
                 @Test
                 fun `Changing the bills included answer from the CYA page updates the property with the correct values`(page: Page) {
                     // Start update journey and reach the CYA page with bills included set
                     val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
                     val updateRentIncludesBillsPage =
                         assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     updateRentIncludesBillsPage.submitIsIncluded()
@@ -1186,7 +1186,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     checkYourAnswersPage.confirm()
                     val updatedPropertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-                    assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow)
+                    assertThat(updatedPropertyDetailsPage.beforePdjb939SummaryList.billsIncludedRow)
                         .containsText(expectedBillsIncluded)
                 }
             }
@@ -1199,10 +1199,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     // Assert initial furnished status is not FurnishedStatus.PART_FURNISHED
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.furnishedStatusRow.value)
                         .not()
                         .containsText(newFurnishedStatusValue)
-                    propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.furnishedStatusRow.clickFirstActionLinkAndWait()
                     val updateFurnishedStatusPage =
                         assertPageIs(page, FurnishedStatusFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1214,7 +1214,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
                     // Check change has occurred
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.furnishedStatusRow.value)
                         .containsText(newFurnishedStatusValue)
                 }
             }
@@ -1229,14 +1229,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Details page
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     // Assert initial rent frequency is not newRentFrequency
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentFrequencyRow.value)
                         .not()
                         .containsText(newRentFrequencyDisplayName)
                     // Assert initial rent amount is not newRentAmount
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentAmountRow.value)
                         .not()
                         .containsText(newRentAmount)
-                    propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
                     val rentFrequencyPage =
                         assertPageIs(page, RentFrequencyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -1258,15 +1258,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     checkYourAnswersPage.confirm()
                     propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow).containsText(newRentFrequencyDisplayName)
-                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow).containsText(newRentAmount)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentFrequencyRow).containsText(newRentFrequencyDisplayName)
+                    assertThat(propertyDetailsPage.beforePdjb939SummaryList.rentAmountRow).containsText(newRentAmount)
                 }
 
                 @Test
                 fun `leading zeros are stripped from rent amount on the CYA page`(page: Page) {
                     // Details page
                     val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-                    propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+                    propertyDetailsPage.beforePdjb939SummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
                     val rentFrequencyPage =
                         assertPageIs(page, RentFrequencyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
