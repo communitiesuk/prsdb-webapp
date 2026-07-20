@@ -5,12 +5,18 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
 class OrganisationLandlord() : Landlord() {
+    @get:Transient
+    override val landlordType: LandlordType
+        get() = LandlordType.ORGANISATION
+
     @Column(name = "organisation_landlord_name")
     var name: String? = null
 

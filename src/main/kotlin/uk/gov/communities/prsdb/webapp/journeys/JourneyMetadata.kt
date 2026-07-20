@@ -9,11 +9,13 @@ data class JourneyMetadata(
     val journeyId: String,
     val lastUpdated: Instant,
     val baseJourneyId: String? = null,
+    val basePath: String? = null,
 ) {
     companion object {
         fun createNew(
             journeyId: String,
             baseJourneyId: String? = null,
-        ) = JourneyMetadata(journeyId, Clock.System.now(), baseJourneyId)
+            basePath: String? = null,
+        ) = JourneyMetadata(journeyId, Clock.System.now(), baseJourneyId, basePath)
     }
 }

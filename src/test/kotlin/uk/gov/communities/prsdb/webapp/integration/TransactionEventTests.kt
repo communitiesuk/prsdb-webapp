@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -145,7 +144,6 @@ class AcceptJointLandlordInvitationTransactionEventTests :
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 

@@ -27,7 +27,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockExpiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
-    private lateinit var expiryService: JointLandlordInvitationExpiryEmailServiceImplFlagOn
+    private lateinit var expiryService: JointLandlordInvitationExpiryEmailService
 
     private val expiredCreatedDate: Instant =
         Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong() + 1, ChronoUnit.DAYS)
@@ -39,7 +39,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         mockAbsoluteUrlProvider = mock()
         mockSwapToIndividualNudgeEmailService = mock()
         expiryService =
-            JointLandlordInvitationExpiryEmailServiceImplFlagOn(
+            JointLandlordInvitationExpiryEmailService(
                 mockJointLandlordInvitationRepository,
                 mockExpiryEmailNotificationService,
                 mockAbsoluteUrlProvider,
@@ -197,15 +197,5 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         expiryService.sendExpiryEmailsForExpiredInvitations()
 
         verify(mockSwapToIndividualNudgeEmailService, never()).sendNudgeEmailIfApplicable(any())
-    }
-
-    @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationExpiryEmailServiceImplFlagOff()
-
-        flagOff.sendExpiryEmailsForExpiredInvitations()
-
-        verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
-        verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 }

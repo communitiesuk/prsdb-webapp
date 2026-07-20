@@ -2,25 +2,17 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.switchToIndividualJourneyPages.CheckInvitationsPageSwitchToIndividual
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.switchToIndividualJourneyPages.ConfirmPageSwitchToIndividual
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.switchToIndividualJourneyPages.ConfirmationPageSwitchToIndividual
-import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 
 class SwitchToIndividualJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
         const val PROPERTY_OWNERSHIP_ID_WITH_PENDING_INVITATIONS_AND_NO_JOINT_LANDLORDS = 13L
-    }
-
-    @BeforeEach
-    fun enableJointLandlords() {
-        FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
     }
 
     @Test
