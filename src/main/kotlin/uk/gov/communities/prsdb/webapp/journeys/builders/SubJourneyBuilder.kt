@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -52,7 +52,12 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
-        additionalConfiguration.add(ConditionalElementConfiguration({ journeyElements.any { this === it } }, configuration))
+        additionalConfiguration.add(
+            ConditionalElementConfiguration(
+                { journeyElements.any { this === it } },
+                configuration,
+            ),
+        )
     }
 
     override fun configureFirst(configuration: ConfigurableElement<*>.() -> Unit) {
@@ -81,21 +86,21 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     override fun task(
         uninitialisedTask: Task<TState>,
         routeSegment: String?,
-        init: TaskInitialiser<TState>.() -> Unit,
+        init: TaskInitialiser<TState, Nothing>.() -> Unit,
     ) {
-        val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
+        val taskInitialiser = TaskInitialiser<TState, Nothing>(uninitialisedTask, journey)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState : JourneyState> duplicableTask(
-        uninitialisedTask: DuplicableTask<TTaskState>,
+    override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
+        uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
         routeSegment: String?,
-        init: TaskInitialiser<TTaskState>.() -> Unit,
+        init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
     ) {
         // The task provides its own state, so build its sub-journey against that.
-        val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
+        val taskInitialiser = TaskInitialiser<TTaskState, TDependencies>(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
@@ -153,7 +158,8 @@ open class SubJourneyBuilder<TState : JourneyState>(
     journey: TState,
     exitStepOverride: SubjourneyExitStep? = null,
 ) : AbstractJourneyBuilder<TState>(journey) {
-    var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> = mutableListOf()
+    var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> =
+        mutableListOf()
         private set
 
     val exitStep = exitStepOverride ?: SubjourneyExitStep(SubjourneyExitStepConfig())

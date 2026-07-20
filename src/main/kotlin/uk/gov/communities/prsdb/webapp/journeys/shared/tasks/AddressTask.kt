@@ -42,6 +42,16 @@ abstract class AddressTask(
 
     override val taskState get() = this
 
+    fun clearFormData() {
+        lookupAddressStep.clearFormData()
+        selectAddressStep.clearFormData()
+        noAddressFoundStep.clearFormData()
+        manualAddressStep.clearFormData()
+        cachedAddresses = null
+        cachedSelectedAddress = null
+        isAddressAlreadyRegistered = null
+    }
+
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
             step(journey.lookupAddressStep) {

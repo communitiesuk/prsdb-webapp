@@ -438,7 +438,7 @@ class JourneyBuilderTest {
             )
 
         mockConstruction(TaskInitialiser::class.java) { mock, context ->
-            whenever((mock as TaskInitialiser<JourneyState>).build(any())).thenReturn(builtSteps)
+            whenever((mock as TaskInitialiser<JourneyState, Nothing>).build(any())).thenReturn(builtSteps)
         }.use { taskConstruction ->
 
             // Act 1
@@ -448,7 +448,7 @@ class JourneyBuilderTest {
             }
 
             // Assert 1
-            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
+            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState, Nothing>
             verify(mockTaskInitialiser).parents(any())
             verify(mockTaskInitialiser).nextDestination(any())
 
@@ -477,7 +477,7 @@ class JourneyBuilderTest {
         whenever(landingStep.lifecycleOrchestrator).thenReturn(RedirectingStepLifecycleOrchestrator(landingStep))
 
         mockConstruction(TaskInitialiser::class.java) { mock, _ ->
-            whenever((mock as TaskInitialiser<JourneyState>).build(any())).thenReturn(listOf(landingStep))
+            whenever((mock as TaskInitialiser<JourneyState, Nothing>).build(any())).thenReturn(listOf(landingStep))
         }.use {
             jb.task(uninitialisedTask) {
                 parents { NoParents() }
@@ -928,7 +928,7 @@ class JourneyBuilderTest {
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             mockConstruction(TaskInitialiser::class.java) { mock, _ ->
-                whenever((mock as TaskInitialiser<JourneyState>).build(any())).thenReturn(listOf(builtStep))
+                whenever((mock as TaskInitialiser<JourneyState, Nothing>).build(any())).thenReturn(listOf(builtStep))
             }.use { taskConstruction ->
                 val jb = JourneyBuilder(mock<JourneyState>())
 
@@ -940,7 +940,7 @@ class JourneyBuilderTest {
                 val map = jb.buildRoutingMap()
 
                 // Assert
-                val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
+                val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState, Nothing>
                 verify(mockTaskInitialiser).routeSegment("lead-trustee-address")
                 verify(mockTaskInitialiser).build(any())
 
@@ -961,7 +961,7 @@ class JourneyBuilderTest {
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             mockConstruction(TaskInitialiser::class.java) { mock, _ ->
-                whenever((mock as TaskInitialiser<JourneyState>).build(any())).thenReturn(listOf(builtStep))
+                whenever((mock as TaskInitialiser<JourneyState, Nothing>).build(any())).thenReturn(listOf(builtStep))
             }.use { taskConstruction ->
                 val jb = JourneyBuilder(mock<JourneyState>())
 
@@ -973,7 +973,7 @@ class JourneyBuilderTest {
                 val map = jb.buildRoutingMap()
 
                 // Assert
-                val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
+                val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState, Nothing>
                 verify(mockTaskInitialiser, times(0)).routeSegment(any())
                 verify(mockTaskInitialiser).build(any())
 

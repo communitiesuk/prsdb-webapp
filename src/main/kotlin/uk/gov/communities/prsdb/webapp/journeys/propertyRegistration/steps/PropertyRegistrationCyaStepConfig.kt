@@ -66,18 +66,27 @@ class PropertyRegistrationCyaStepConfig(
     ): Destination = defaultDestination
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
+        val hasJointLandlords =
+            state.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+                HasJointLandlordsFormModel::hasJointLandlords,
+            )
         return if (hasJointLandlords) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                state.invitedJointLandlords,
-                Destination.VisitableStep(state.checkJointLandlordsStep, state.getCyaJourneyId(state.checkJointLandlordsStep)),
+                state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlords,
+                Destination.VisitableStep(
+                    state.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep,
+                    state.getCyaJourneyId(state.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep),
+                ),
             )
         } else {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
-                Destination.VisitableStep(state.hasJointLandlordsStep, state.getCyaJourneyId(state.hasJointLandlordsStep)),
+                Destination.VisitableStep(
+                    state.jointLandlordsTask.hasJointLandlordsStep,
+                    state.getCyaJourneyId(state.jointLandlordsTask.hasJointLandlordsStep),
+                ),
             )
         }
     }

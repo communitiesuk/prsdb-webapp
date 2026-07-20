@@ -20,7 +20,7 @@ class CompleteInviteJointLandlordStepConfig(
     override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: InviteJointLandlordJourneyState) {
-        if (state.invitedJointLandlords.isNotEmpty()) {
+        if (state.inviteJointLandlordsTask.invitedJointLandlords.isNotEmpty()) {
             val baseUserId = SecurityContextHolder.getContext().authentication.name
             val loggedInLandlord =
                 landlordService.retrieveLandlordByBaseUserId(baseUserId)
@@ -32,7 +32,7 @@ class CompleteInviteJointLandlordStepConfig(
 
             propertyOwnershipService.markAsJointLandlord(propertyOwnership)
             jointLandlordInvitationService.sendInvitationEmails(
-                jointLandlordEmails = state.invitedJointLandlords,
+                jointLandlordEmails = state.inviteJointLandlordsTask.invitedJointLandlords,
                 propertyOwnership = propertyOwnership,
                 invitingLandlord = loggedInLandlord,
             )

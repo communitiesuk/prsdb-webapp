@@ -10,6 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -19,6 +20,9 @@ class CheckInvitationsStepConfigTests {
     private lateinit var mockJourneyState: InviteJointLandlordJourneyState
 
     @Mock
+    private lateinit var mockInviteJointLandlordsTask: InviteJointLandlordsTask
+
+    @Mock
     private lateinit var mockCheckJointLandlordsStep: CheckJointLandlordsStep
 
     private val journeyId = "journey-123"
@@ -26,7 +30,12 @@ class CheckInvitationsStepConfigTests {
     @Test
     fun `getStepSpecificContent returns summary rows with invited emails`() {
         val stepConfig = setupStepConfig()
-        whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("first@example.com", "second@example.com"))
+        whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(
+            listOf(
+                "first@example.com",
+                "second@example.com",
+            ),
+        )
 
         val content = stepConfig.getStepSpecificContent(mockJourneyState)
         val rows = content["summaryListData"] as List<SummaryListRowViewModel>
@@ -36,10 +45,21 @@ class CheckInvitationsStepConfigTests {
             listOf("first@example.com", "second@example.com"),
             rows.first().fieldValue,
         )
-        assertEquals("forms.links.change", rows.first().actions.single().text)
+        assertEquals(
+            "forms.links.change",
+            rows
+                .first()
+                .actions
+                .single()
+                .text,
+        )
         assertEquals(
             "${CheckJointLandlordsStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId",
-            rows.first().actions.single().url,
+            rows
+                .first()
+                .actions
+                .single()
+                .url,
         )
     }
 
@@ -78,7 +98,8 @@ class CheckInvitationsStepConfigTests {
         stepConfig.routeSegment = CheckInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
-        whenever(mockJourneyState.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
+        whenever(mockJourneyState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
+        whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
         whenever(mockCheckJointLandlordsStep.routeSegment).thenReturn(CheckJointLandlordsStep.ROUTE_SEGMENT)
         whenever(mockCheckJointLandlordsStep.currentJourneyId).thenReturn(journeyId)
         whenever(mockCheckJointLandlordsStep.isStepReachable).thenReturn(true)
