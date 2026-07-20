@@ -118,10 +118,12 @@ class SavePropertyRegistrationDataStepConfig(
             gasSafetyCertIssueDate = state.gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater = state.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
-            electricalSafetyFileUploadIds = state.electricalUploadIds,
-            electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
-            electricalSafetyCertProvideLater = state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
+            electricalSafetyFileUploadIds = state.electricalSafetyDetailsTask.electricalUploadIds,
+            electricalSafetyExpiryDate =
+                state.electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+            electricalCertType = state.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
+            electricalSafetyCertProvideLater =
+                state.electricalSafetyDetailsTask.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
                 state.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)

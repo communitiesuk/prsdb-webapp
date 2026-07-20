@@ -16,6 +16,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.CompleteElectricalSafetyUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -28,6 +29,9 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
 
     @Mock
     private lateinit var mockState: UpdateElectricalSafetyJourneyState
+
+    @Mock
+    private lateinit var mockElectricalSafetyDetailsTask: ElectricalSafetyDetailsTask
 
     @Mock
     private lateinit var mockUploadService: UploadService
@@ -56,9 +60,10 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
 
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
-            whenever(mockState.electricalUploadIds).thenReturn(uploadIds)
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
+            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(uploadIds)
 
             stepConfig.afterStepIsReached(mockState)
 
@@ -75,9 +80,10 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
         fun `calls updateElectricalSafety with null expiry date and empty uploads`() {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-            whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 
@@ -94,6 +100,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
         fun `deletes the journey then rethrows when it gets an UpdateConflictException`() {
             // Arrange
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
 
             whenever(
                 mockPropertyComplianceService.updateElectricalSafety(
@@ -115,9 +122,10 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
 
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-            whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 

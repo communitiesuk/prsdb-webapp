@@ -8,7 +8,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyContainerState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class CheckElectricalSafetyAnswersStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyState
+    lateinit var mockState: ElectricalSafetyContainerState
 
     private val mockUploadService: UploadService = mock()
 

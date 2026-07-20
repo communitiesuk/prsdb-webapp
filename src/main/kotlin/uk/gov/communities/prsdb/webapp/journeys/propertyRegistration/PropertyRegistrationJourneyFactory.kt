@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyContainerState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyContainerState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipAndLandlordsState
@@ -41,9 +41,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
@@ -57,7 +55,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindY
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
@@ -79,9 +76,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -89,7 +84,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
@@ -225,7 +219,7 @@ class PropertyRegistrationJourneyFactory(
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.electricalSafetyDetailsTask)
+                    duplicableCheckAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
 
                 StartEpcStep.ROUTE_SEGMENT,
@@ -616,15 +610,6 @@ class PropertyRegistrationJourney(
     // Electrical safety task
     override val electricalSafetyTask: ElectricalSafetyTask,
     override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
-    override val hasElectricalCertStep: HasElectricalCertStep,
-    override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
-    override val uploadElectricalCertStep: UploadElectricalCertStep,
-    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
-    override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
-    override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
-    override val electricalCertExpiredStep: ElectricalCertExpiredStep,
-    override val electricalCertMissingStep: ElectricalCertMissingStep,
-    override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
@@ -692,9 +677,6 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
-    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
-    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
-
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
@@ -736,6 +718,7 @@ interface PropertyRegistrationJourneyState :
     TenancyDetailsState,
     CombinedComplianceCheckState,
     GasSafetyContainerState,
+    ElectricalSafetyContainerState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask

@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
@@ -66,6 +67,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockGasSafetyDetailsTask: GasSafetyDetailsTask
+
+    @Mock
+    private lateinit var mockElectricalSafetyDetailsTask: ElectricalSafetyDetailsTask
 
     @Mock
     private lateinit var mockAddressTask: PropertyRegistrationAddressTask
@@ -179,8 +183,9 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupStateForComplianceData()
         whenever(mockGasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+        whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+        whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+        whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
         whenever(
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
@@ -370,8 +375,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     ) {
         whenever(mockState.gasSafetyDetailsTask).thenReturn(mockGasSafetyDetailsTask)
         whenever(mockGasSafetyDetailsTask.gasUploadIds).thenReturn(gasUploadIds)
-        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
+        whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+        whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(electricalUploadIds)
+        whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockGasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
@@ -382,7 +388,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
-        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(mockElectricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
 
         val mockHasEpcStep = mock<HasEpcStep>()
@@ -390,7 +396,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
         whenever(mockGasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+        whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
 
         if (acceptedEpc != null) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
@@ -424,8 +430,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     private fun setupStateForComplianceDataWithNullValues() {
         whenever(mockState.gasSafetyDetailsTask).thenReturn(mockGasSafetyDetailsTask)
         whenever(mockGasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+        whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+        whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+        whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockGasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
@@ -436,7 +443,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
-        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(mockElectricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
         whenever(mockHasElectricalCertStep.outcome).thenReturn(null)
 
         val mockHasEpcStep = mock<HasEpcStep>()
@@ -444,7 +451,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
         whenever(mockGasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+        whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
         whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()

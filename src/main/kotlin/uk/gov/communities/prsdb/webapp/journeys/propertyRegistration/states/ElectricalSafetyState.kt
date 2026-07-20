@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -14,12 +13,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 
 interface ElectricalSafetyState : JourneyState {
     val allowProvideCertificateLaterRoute: Boolean
-
-    val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
 
     fun getElectricalCertificateExpiryDateIfReachable() =
         electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->
@@ -64,5 +60,4 @@ interface ElectricalSafetyState : JourneyState {
     val electricalCertExpiredStep: ElectricalCertExpiredStep
     val electricalCertMissingStep: ElectricalCertMissingStep
     val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
-    val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep
 }

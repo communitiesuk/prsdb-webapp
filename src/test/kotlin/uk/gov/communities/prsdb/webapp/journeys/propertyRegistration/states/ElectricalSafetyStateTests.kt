@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -21,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import java.time.LocalDate
@@ -94,14 +92,16 @@ class ElectricalSafetyStateTests {
 
     @Test
     fun `getElectricalCertificateType returns HAS_EIC when EIC is selected`() {
-        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
+        val formModel =
+            HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
         val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
         assertEquals(HasElectricalSafetyCertificate.HAS_EIC, state.getElectricalCertificateType())
     }
 
     @Test
     fun `getElectricalCertificateType returns HAS_EICR when EICR is selected`() {
-        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EICR }
+        val formModel =
+            HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EICR }
         val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
         assertEquals(HasElectricalSafetyCertificate.HAS_EICR, state.getElectricalCertificateType())
     }
@@ -114,14 +114,16 @@ class ElectricalSafetyStateTests {
 
     @Test
     fun `mapElectricalCertificateTypeToGlobalCertificateType returns Eic when HAS_EIC is selected`() {
-        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
+        val formModel =
+            HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
         val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
         assertEquals(CertificateType.Eic, state.mapElectricalCertificateTypeToGlobalCertificateType())
     }
 
     @Test
     fun `mapElectricalCertificateTypeToGlobalCertificateType returns Eicr when HAS_EICR is selected`() {
-        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EICR }
+        val formModel =
+            HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EICR }
         val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
         assertEquals(CertificateType.Eicr, state.mapElectricalCertificateTypeToGlobalCertificateType())
     }
@@ -134,7 +136,8 @@ class ElectricalSafetyStateTests {
 
     @Test
     fun `mapElectricalCertificateTypeToGlobalCertificateType returns null when step is not reachable`() {
-        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.NO_CERTIFICATE }
+        val formModel =
+            HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.NO_CERTIFICATE }
         val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
         assertNull(state.mapElectricalCertificateTypeToGlobalCertificateType())
     }
@@ -157,10 +160,6 @@ class ElectricalSafetyStateTests {
             override val electricalCertMissingStep = mock<ElectricalCertMissingStep>()
             override val allowProvideCertificateLaterRoute: Boolean = true
             override val provideElectricalCertLaterStep = mock<ProvideElectricalCertLaterStep>()
-            override val checkElectricalSafetyAnswersStep = mock<CheckElectricalSafetyAnswersStep>()
-            override val electricalSafetyDetailsTask =
-                mock<ElectricalSafetyDetailsTask>()
-
             override val hasElectricalCertStep =
                 mock<HasElectricalCertStep>().apply {
                     if (hasElectricalCertStepShouldBeReachable) {

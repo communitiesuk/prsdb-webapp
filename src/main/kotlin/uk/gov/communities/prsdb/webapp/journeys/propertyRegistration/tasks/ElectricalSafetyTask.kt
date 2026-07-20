@@ -3,14 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyContainerState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 
 @JourneyFrameworkComponent
-class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
-    override fun makeSubJourney(state: ElectricalSafetyState) =
+class ElectricalSafetyTask : Task<ElectricalSafetyContainerState>() {
+    override fun makeSubJourney(state: ElectricalSafetyContainerState) =
         subJourney(state) {
-            task(journey.electricalSafetyDetailsTask) {
+            duplicableTask(journey.electricalSafetyDetailsTask) {
+                withDependencies { journey }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
                 savable()
             }

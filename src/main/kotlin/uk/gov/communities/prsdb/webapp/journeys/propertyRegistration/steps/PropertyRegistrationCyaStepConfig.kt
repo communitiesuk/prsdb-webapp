@@ -54,7 +54,7 @@ class PropertyRegistrationCyaStepConfig(
         content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
 
         content += complianceDetailsHelper.getGasSafetyCyaContent(state.gasSafetyDetailsTask, state)
-        content += complianceDetailsHelper.getElectricalSafetyCyaContent(state)
+        content += complianceDetailsHelper.getElectricalSafetyCyaContent(state.electricalSafetyDetailsTask, state)
         content += complianceDetailsHelper.getEpcCyaContent(state)
 
         return content

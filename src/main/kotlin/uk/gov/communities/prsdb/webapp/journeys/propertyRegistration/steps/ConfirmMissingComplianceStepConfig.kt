@@ -16,7 +16,7 @@ class ConfirmMissingComplianceStepConfig :
         mapOf(
             "title" to "registerProperty.confirmMissingCompliance.heading",
             "isGasMissing" to HasMissingComplianceStepConfig.isGasCertInvalid(state.gasSafetyDetailsTask),
-            "isElectricalMissing" to HasMissingComplianceStepConfig.isElectricalCertInvalid(state),
+            "isElectricalMissing" to HasMissingComplianceStepConfig.isElectricalCertInvalid(state.electricalSafetyDetailsTask),
             "isEpcMissing" to HasMissingComplianceStepConfig.isEpcInvalid(state),
             "radioOptions" to
                 listOf(
