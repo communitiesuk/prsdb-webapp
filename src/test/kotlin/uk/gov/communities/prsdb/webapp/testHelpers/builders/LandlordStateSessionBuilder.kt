@@ -326,13 +326,13 @@ class LandlordStateSessionBuilder(
 
         fun beforeLeadTrusteeName() = beforeOrgType().withOrgType()
 
-        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
+        fun beforeLeadTrusteeDob() = beforeLeadTrusteeName().withLeadTrusteeName()
+
+        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeDob().withLeadTrusteeDob()
 
         fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
 
-        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
-
-        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
+        fun beforeLeadTrusteeAddress() = beforeLeadTrusteePhone().withLeadTrusteePhone()
 
         fun beforeOrgCharity() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
 
