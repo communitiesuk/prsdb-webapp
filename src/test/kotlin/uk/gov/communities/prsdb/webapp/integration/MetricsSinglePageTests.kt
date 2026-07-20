@@ -124,9 +124,9 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.metricsList.rowValue(1)).containsText("72")
         assertThat(reloadedPage.metricsList.rowValue(2)).containsText("100")
         assertThat(reloadedPage.metricsList.rowValue(3)).containsText("100")
-        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("22 minutes")
-        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("1 day, 6 hours, 21 minutes")
-        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("2 days, 43 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(4)).hasText("22 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(5)).hasText("1 day, 6 hours, 21 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(6)).hasText("2 days, 43 minutes")
     }
 
     @Test
