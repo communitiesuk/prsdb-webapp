@@ -1,8 +1,5 @@
 title: Property record
 heading: Property record
-beforePdjb939:
-  propertyRecord:
-    heading: Property details
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied

@@ -597,15 +597,6 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `property details section does not show the uprn`() {
-        val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
-
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
-
-        assertNull(viewModel.propertyDetailsSection.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.uprn" })
-    }
-
-    @Test
     fun `registration, ownership and occupation sections contain the expected rows`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 

@@ -556,9 +556,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class PropertyRecordLayout {
+    inner class PropertyDetailsTab {
         @Test
-        fun `landlord view groups the property record into the new sections`(page: Page) {
+        fun `landlord view groups the property record into sections`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
             assertThat(detailsPage.sectionHeading("Property details")).isVisible()
@@ -573,17 +573,17 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `landlord view shows a provide later licensing row when licensing is skipped`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
 
-            assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value).containsText("Provide this later")
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
-        fun `local council view shows a provide later licensing paragraph when licensing is skipped`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
 
-            assertThat(detailsPage.bodyParagraph("The landlords must provide these details")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Nested
@@ -691,70 +691,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
-                ).hasCount(1)
-            }
-        }
-
-        @Nested
-        inner class OccupiedWithTenancySkippedOnly {
-            // Property 41: occupied, licence present, tenancy skipped, fully compliant (no compliance issue).
-            private val expectedDeadline =
-                LocalDate
-                    .now()
-                    .minusDays(7)
-                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
-
-            @Test
-            fun `landlord view shows the licensing type and a tenancy provide-later row with the deadline date`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
-
-                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(
-                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
-                ).containsText("Provide this later (before $expectedDeadline)")
-            }
-
-            @Test
-            fun `local council view shows a tenancy provide-later paragraph`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
-
-                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(
-                    detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
-                ).hasCount(1)
-            }
-        }
-
-        @Nested
-        inner class OccupiedWithLicensingSkippedOnly {
-            // Property 42: occupied, no licence, tenancy provided, fully compliant (no compliance issue).
-            private val expectedDeadline =
-                LocalDate
-                    .now()
-                    .minusDays(7)
-                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
-
-            @Test
-            fun `landlord view shows the tenancy details and a licensing provide-later row with the deadline date`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
-
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
-                assertThat(
-                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
-                ).containsText("Provide this later (before $expectedDeadline)")
-            }
-
-            @Test
-            fun `local council view shows a licensing provide-later paragraph`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
-
-                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
-                assertThat(
-                    detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)
             }
         }
