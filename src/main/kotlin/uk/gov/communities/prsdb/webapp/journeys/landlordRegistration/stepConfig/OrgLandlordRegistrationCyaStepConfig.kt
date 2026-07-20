@@ -88,7 +88,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             orgRow(
                 state,
                 "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordType",
-                "registerAsALandlord.landlordType.radios.organisation.label",
+                "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordTypeValue",
                 state.landlordTypeStep,
             )
         rows +=

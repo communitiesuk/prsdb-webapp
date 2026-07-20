@@ -42,6 +42,7 @@ orgCheckAnswers:
   landlordDetails:
     heading: Landlord details
     landlordType: Landlord type
+    landlordTypeValue: Organisation
     organisationName: Organisation name
     organisationAddress: Organisation address
     organisationEmail: Organisation email

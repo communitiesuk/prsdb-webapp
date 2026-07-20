@@ -328,7 +328,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
         assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
-        assertThat(checkAnswersPage.landlordDetails.landlordTypeRow).containsText("An organisation")
+        assertThat(checkAnswersPage.landlordDetails.landlordTypeRow).containsText("Organisation")
         assertThat(checkAnswersPage.landlordDetails.organisationNameRow).containsText("Test Organisation Name")
         assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Company")
         assertThat(checkAnswersPage.leadTrusteeCard.title).hasText("Lead trustee")
