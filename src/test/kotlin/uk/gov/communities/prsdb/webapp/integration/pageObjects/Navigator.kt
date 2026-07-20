@@ -480,7 +480,7 @@ class Navigator(
     fun skipToOrgLandlordRegistrationGovBodyMemberListPage(
         members: Map<Int, GoverningBodyMemberDataModel>,
     ): OrgGovBodyMemberListFormPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberListWithMembers(members).build())
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMemberList(members).build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
     }
