@@ -27,13 +27,6 @@ import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun disableProvideLaterFlagByDefault() {
-        // The existing tests assert the released (legacy) property record layout. The new layout is covered
-        // separately in the NewRegistrationLayout nested class, which re-enables the flag.
-        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    }
-
     @Nested
     inner class PropertyDetailsLandlordView {
         @Test
@@ -86,13 +79,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 DeregisterPropertyInfoPage::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        }
-
-        @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
@@ -335,13 +321,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
-        @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
-        }
-
         @Nested
         inner class LandlordDetails {
             @Test
@@ -554,12 +533,30 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class NewRegistrationLayout {
+    inner class BeforePdjb939Layout {
+        // Flag-off (legacy) property record layout. Delete this class when PDJB-939 is permanently on.
         @BeforeEach
-        fun enableFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        fun disableFlag() {
+            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         }
 
+        @Test
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+    }
+
+    @Nested
+    inner class PropertyRecordLayout {
         @Test
         fun `landlord view groups the property record into the new sections`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
@@ -568,8 +565,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.sectionHeading("Ownership")).isVisible()
             assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
-            assertThat(detailsPage.newLayoutSummaryList.ownershipTypeRow.value).isVisible()
-            assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
 
             assertThat(detailsPage.sectionHeading("Licensing information")).not().isVisible()
             assertThat(detailsPage.sectionHeading("Tenancy and rental information")).not().isVisible()
@@ -579,7 +576,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         fun `landlord view shows a provide later licensing row when licensing is skipped`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
-            assertThat(detailsPage.newLayoutSummaryList.licensingRow.value).containsText("Provide this later")
+            assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value).containsText("Provide this later")
         }
 
         @Test
@@ -605,12 +602,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows provide later rows with the deadline date for both licensing and tenancy`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(
-                    detailsPage.newLayoutSummaryList.licensingRow.value,
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
                 ).containsText("Provide this later (before $expectedDeadline)")
-                assertThat(detailsPage.newLayoutSummaryList.tenancyRow.value).containsText("Provide this later (before $expectedDeadline)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
             }
 
             @Test
@@ -630,8 +629,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows a provide later licensing row and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("No")
-                assertThat(detailsPage.newLayoutSummaryList.licensingRow.value)
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value)
                     .containsText("Provide this later (within 28 days of the property being occupied)")
                 assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
             }
@@ -655,8 +654,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
             }
 
             @Test
@@ -664,8 +663,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
@@ -679,8 +678,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows the licensing type and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("No")
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
             }
 
@@ -688,7 +687,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `local council view shows the licensing type and a not provided tenancy paragraph`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
@@ -710,16 +709,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows the licensing type and a tenancy provide-later row with the deadline date`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.tenancyRow.value).containsText("Provide this later (before $expectedDeadline)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
             }
 
             @Test
             fun `local council view shows a tenancy provide-later paragraph`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)
@@ -741,9 +742,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
-                    detailsPage.newLayoutSummaryList.licensingRow.value,
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
                 ).containsText("Provide this later (before $expectedDeadline)")
             }
 
@@ -751,7 +752,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `local council view shows a licensing provide-later paragraph`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
 
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)

@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -47,12 +45,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
-    @BeforeEach
-    fun disableProvideLaterFlag() {
-        // These tests assert the released (legacy) property record layout, which shows the editable summary rows.
-        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    }
-
     @Nested
     inner class OwnershipTypeUpdates {
         @Test
@@ -73,6 +65,11 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
     @Nested
     inner class LicenceUpdates {
+        // Property 1 is licensing-provide-later, so the standard layout shows a "Provide this later" row rather than an
+        // editable "Licensing type" row. These update-an-existing-licence tests use property 7, which has a real licence.
+        private val propertyOwnershipId = 7L
+        private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+
         @Test
         fun `A property can have its licensing updated to a selective licence`(page: Page) {
             val newLicenceNumber = "SL123"
@@ -162,10 +159,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `A property can have its licensing removed`(page: Page) {
-            // A property ownership with an existing licence
-            val propertyOwnershipId = 7L
-            val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
-
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
             propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()

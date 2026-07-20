@@ -10,7 +10,7 @@ abstract class PropertyDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = PropertyDetailsTabs(page)
-    val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
+    val beforePdjb939SummaryList = PropertyDetailsBeforePdjb939SummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = ElectricalSafetySummaryCard(page, "Electrical safety certificate")
@@ -19,8 +19,7 @@ abstract class PropertyDetailsBasePage(
 
     val backLink = BackLink.default(page)
 
-    // New registration-flow layout (PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    val newLayoutSummaryList = PropertyDetailsNewLayoutSummaryList(page)
+    val propertyDetailsSummaryList = PropertyDetailsSummaryList(page)
 
     fun sectionHeading(text: String) =
         page.locator(
@@ -42,7 +41,7 @@ abstract class PropertyDetailsBasePage(
         }
 
         fun goToPropertyDetails() {
-            goToTab("Property details")
+            goToTab("Property and tenancy details")
         }
 
         fun goToComplianceInformation() {
@@ -50,7 +49,7 @@ abstract class PropertyDetailsBasePage(
         }
     }
 
-    class PropertyDetailsPropertyInformationSummaryList(
+    class PropertyDetailsBeforePdjb939SummaryList(
         page: Page,
     ) : SummaryList(page) {
         val propertyTypeRow = getRow("Property type")
@@ -68,7 +67,7 @@ abstract class PropertyDetailsBasePage(
         val licensingNumberRow = getRow("Licensing number")
     }
 
-    class PropertyDetailsNewLayoutSummaryList(
+    class PropertyDetailsSummaryList(
         page: Page,
     ) : SummaryList(page) {
         val addressRow = getRow("Address")
@@ -76,8 +75,16 @@ abstract class PropertyDetailsBasePage(
         val occupancyRow = getRow("Is this property occupied by tenants?")
         val licensingRow = getRow("Licensing")
         val licensingTypeRow = getRow("Licensing type")
+        val licensingNumberRow = getRow("Licensing number")
         val tenancyRow = getRow("Tenancy")
         val numberOfHouseholdsRow = getRow("Number of households")
+        val numberOfPeopleRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val rentAmountRow = getRow("Rent amount")
     }
 
     class PropertyComplianceSummaryList(
