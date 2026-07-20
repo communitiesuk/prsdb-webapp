@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -22,6 +26,16 @@ import java.time.LocalDate
 class PropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
+    private val flagOn =
+        mock<FeatureFlagManager> {
+            on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn true
+        }
+
+    private val flagOff =
+        mock<FeatureFlagManager> {
+            on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn false
+        }
+
     @Test
     fun `Property details are in the correct order`() {
         // Arrange
@@ -34,16 +48,16 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.propertyRecord.registrationDate",
                 "propertyDetails.propertyRecord.registrationNumber",
-                "propertyDetails.propertyRecord.address",
-                "propertyDetails.propertyRecord.uprn",
+                "propertyDetails.propertyRecord.beforePdjb939.address",
+                "propertyDetails.propertyRecord.beforePdjb939.uprn",
                 "propertyDetails.propertyRecord.localCouncil",
                 "propertyDetails.propertyRecord.propertyType",
-                "propertyDetails.propertyRecord.ownershipType",
+                "propertyDetails.propertyRecord.beforePdjb939.ownershipType",
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.propertyRecord.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939PropertyRecord.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -64,8 +78,8 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.licensingInformation.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939LicensingInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -85,7 +99,7 @@ class PropertyDetailsViewModelTests {
 
         val expectedHeaderList =
             listOf(
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
@@ -96,8 +110,8 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939TenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -117,7 +131,7 @@ class PropertyDetailsViewModelTests {
 
         val expectedHeaderList =
             listOf(
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
@@ -129,8 +143,8 @@ class PropertyDetailsViewModelTests {
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939TenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -146,12 +160,12 @@ class PropertyDetailsViewModelTests {
 
         val expectedHeaderList =
             listOf(
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied",
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939TenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -175,12 +189,12 @@ class PropertyDetailsViewModelTests {
 
         val expectedHeaderList =
             listOf(
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied",
             )
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.tenancyAndRentalInformation.map { it.fieldHeading }
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val headerList = viewModel.beforePdjb939TenancyAndRentalInformation.map { it.fieldHeading }
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
@@ -194,10 +208,10 @@ class PropertyDetailsViewModelTests {
                 license = License(LicensingType.NO_LICENSING, ""),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         assertNull(
-            viewModel.licensingInformation.firstOrNull {
+            viewModel.beforePdjb939LicensingInformation.firstOrNull {
                 it.fieldHeading ==
                     "propertyDetails.propertyRecord.licensingInformation.licensingNumber"
             },
@@ -212,10 +226,10 @@ class PropertyDetailsViewModelTests {
                 license = null,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         assertNull(
-            viewModel.licensingInformation.firstOrNull {
+            viewModel.beforePdjb939LicensingInformation.firstOrNull {
                 it.fieldHeading ==
                     "propertyDetails.propertyRecord.licensingInformation.licensingNumber"
             },
@@ -225,10 +239,11 @@ class PropertyDetailsViewModelTests {
     @Test
     fun `the correct message keys are returned for occupancy tab and occupancy row value when property is occupied`() {
         val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
-        val occupiedViewModel = PropertyDetailsViewModel(occupiedPropertyOwnership, messageSource = mockMessageSource)
+        val occupiedViewModel =
+            PropertyDetailsViewModel(occupiedPropertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
         val occupiedPropertyDetailsRow =
-            occupiedViewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
+            occupiedViewModel.beforePdjb939TenancyAndRentalInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied" }
         assertEquals("propertyDetails.occupationStatus.occupied", occupiedViewModel.isOccupiedKey)
         assertEquals("commonText.yes", occupiedPropertyDetailsRow.fieldValue)
     }
@@ -236,10 +251,11 @@ class PropertyDetailsViewModelTests {
     @Test
     fun `the correct message key are returned for occupancy tab and occupancy row value when property is unoccupied`() {
         val unoccupiedPropertyOwnership = createUnoccupiedPropertyOwnership()
-        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
+        val unoccupiedViewModel =
+            PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
         val unoccupiedPropertyDetailsRow =
-            unoccupiedViewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
+            unoccupiedViewModel.beforePdjb939TenancyAndRentalInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied" }
         assertEquals("propertyDetails.occupationStatus.unoccupied", unoccupiedViewModel.isOccupiedKey)
         assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
     }
@@ -267,28 +283,28 @@ class PropertyDetailsViewModelTests {
                 rentAmount = rentAmount,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         val propertyRecordNumberOfPeople =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople" }
         val propertyRecordNumberOfHouseholds =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName" }
         val propertyRecordNumberOfBedrooms =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms" }
         val propertyRecordRentIncludesBills =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordFurnishedStatus =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus" }
         val propertyRecordRentFrequency =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName" }
         val propertyRecordRentAmount =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
 
         assertEquals(numberOfPeople, propertyRecordNumberOfPeople.fieldValue)
@@ -320,22 +336,22 @@ class PropertyDetailsViewModelTests {
                 rentAmount = rentAmount,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         val propertyRecordRentIncludesBills =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordBillsIncluded =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded" }
         val propertyRecordFurnishedStatus =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus" }
         val propertyRecordRentFrequency =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName" }
         val propertyRecordRentAmount =
-            viewModel.tenancyAndRentalInformation
+            viewModel.beforePdjb939TenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
 
         assertEquals("commonText.yes", propertyRecordRentIncludesBills.fieldValue)
@@ -353,14 +369,14 @@ class PropertyDetailsViewModelTests {
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, licenseNumber),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         val propertyRecordLicenseType =
-            viewModel.licensingInformation
+            viewModel.beforePdjb939LicensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         val propertyRecordLicenseNumber =
-            viewModel.licensingInformation
+            viewModel.beforePdjb939LicensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingNumber" }
 
         assertEquals("forms.licensingType.radios.option.hmoMandatory.label", propertyRecordLicenseType.fieldValue)
@@ -373,9 +389,10 @@ class PropertyDetailsViewModelTests {
             createPropertyOwnership(
                 license = License(LicensingType.NO_LICENSING, ""),
             )
-        val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense, messageSource = mockMessageSource)
+        val viewModelDeclaredNoLicense =
+            PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense, messageSource = mockMessageSource, featureFlagManager = flagOff)
         val propertyRecordDeclaredNoLicense =
-            viewModelDeclaredNoLicense.licensingInformation
+            viewModelDeclaredNoLicense.beforePdjb939LicensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals(
@@ -385,9 +402,10 @@ class PropertyDetailsViewModelTests {
 
         val propertyOwnershipNullLicense =
             createPropertyOwnership()
-        val viewModelNullLicense = PropertyDetailsViewModel(propertyOwnershipNullLicense, messageSource = mockMessageSource)
+        val viewModelNullLicense =
+            PropertyDetailsViewModel(propertyOwnershipNullLicense, messageSource = mockMessageSource, featureFlagManager = flagOff)
         val propertyRecordNullLicense =
-            viewModelNullLicense.licensingInformation
+            viewModelNullLicense.beforePdjb939LicensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing", propertyRecordNullLicense.fieldValue)
@@ -402,10 +420,10 @@ class PropertyDetailsViewModelTests {
                 customPropertyType = customType,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         val propertyTypeRow =
-            viewModel.propertyRecord
+            viewModel.beforePdjb939PropertyRecord
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.propertyType" }
 
         assertEquals(customType, propertyTypeRow.fieldValue)
@@ -419,10 +437,10 @@ class PropertyDetailsViewModelTests {
                 customPropertyType = null,
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         val propertyTypeRow =
-            viewModel.propertyRecord
+            viewModel.beforePdjb939PropertyRecord
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.propertyType" }
 
         assertEquals("forms.propertyType.radios.option.semiDetachedHouse.label", propertyTypeRow.fieldValue)
@@ -436,12 +454,12 @@ class PropertyDetailsViewModelTests {
         val propertyOwnership = createPropertyOwnership(address = address)
 
         // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
 
         // Assert
         val uprn =
-            viewModel.propertyRecord
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.uprn" }
+            viewModel.beforePdjb939PropertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.uprn" }
                 .fieldValue
 
         assertEquals(address.singleLineAddress, viewModel.address)
@@ -452,23 +470,37 @@ class PropertyDetailsViewModelTests {
     fun `Property details hides null uprn if hideNullUprn is true`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = true, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                featureFlagManager = flagOff,
+            )
 
-        assertNull(viewModel.propertyRecord.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.uprn" })
+        assertNull(
+            viewModel.beforePdjb939PropertyRecord.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.uprn" },
+        )
     }
 
     @Test
     fun `Property details declares null uprn unavailable if hideNullUprn is false`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = false, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                featureFlagManager = flagOff,
+            )
 
         val uprnKey =
-            viewModel.propertyRecord
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.uprn" }
+            viewModel.beforePdjb939PropertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.uprn" }
                 .fieldValue
 
-        assertEquals("propertyDetails.propertyRecord.uprn.unavailable", uprnKey)
+        assertEquals("propertyDetails.propertyRecord.beforePdjb939.uprn.unavailable", uprnKey)
     }
 
     @Test
@@ -479,13 +511,19 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                featureFlagManager = flagOff,
+            )
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
+        val propertyRecordChangeLinkCount = viewModel.beforePdjb939PropertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
+        val licensingInformationChangeLinkCount = viewModel.beforePdjb939LicensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
+        val tenancyInformationChangeLinkCount = viewModel.beforePdjb939TenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
@@ -500,20 +538,26 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                featureFlagManager = flagOff,
+            )
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
+        val propertyRecordChangeLinkCount = viewModel.beforePdjb939PropertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
+        val licensingInformationChangeLinkCount = viewModel.beforePdjb939LicensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
+        val tenancyInformationChangeLinkCount = viewModel.beforePdjb939TenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
         assertEquals(0, totalChangeLinkCount)
     }
 
-    // ---- New registration-flow layout (provideLaterEnabled = true) ----
+    // ---- New registration-flow layout (featureFlagManager = flagOn) ----
 
     @Test
     fun `New layout property details section is in the correct order`() {
@@ -525,13 +569,13 @@ class PropertyDetailsViewModelTests {
 
         val expectedHeaderList =
             listOf(
-                "propertyDetails.propertyRecord.newLayout.propertyDetails.address",
+                "propertyDetails.propertyRecord.propertyDetails.address",
                 "propertyDetails.propertyRecord.localCouncil",
                 "propertyDetails.propertyRecord.propertyType",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
         assertEquals(expectedHeaderList, viewModel.propertyDetailsSection.map { it.fieldHeading })
     }
@@ -540,11 +584,11 @@ class PropertyDetailsViewModelTests {
     fun `New layout property details section renders the address as multiple lines`() {
         val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
         val addressValue =
             viewModel.propertyDetailsSection
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.newLayout.propertyDetails.address" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.propertyDetails.address" }
                 .fieldValue
 
         assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), addressValue)
@@ -554,16 +598,16 @@ class PropertyDetailsViewModelTests {
     fun `New layout property details section does not show the uprn`() {
         val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
-        assertNull(viewModel.propertyDetailsSection.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.uprn" })
+        assertNull(viewModel.propertyDetailsSection.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.uprn" })
     }
 
     @Test
     fun `New layout registration, ownership and occupation sections contain the expected rows`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
         assertEquals(
             listOf(
@@ -573,11 +617,11 @@ class PropertyDetailsViewModelTests {
             viewModel.registrationDetails.map { it.fieldHeading },
         )
         assertEquals(
-            listOf("propertyDetails.propertyRecord.newLayout.ownership.ownershipType"),
+            listOf("propertyDetails.propertyRecord.ownership.ownershipType"),
             viewModel.ownershipSection.map { it.fieldHeading },
         )
         assertEquals(
-            listOf("propertyDetails.propertyRecord.newLayout.occupation.isOccupied"),
+            listOf("propertyDetails.propertyRecord.occupation.isOccupied"),
             viewModel.occupationSection.map { it.fieldHeading },
         )
     }
@@ -594,13 +638,13 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = true,
+                isLandlordView = true,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertEquals(
-            listOf("propertyDetails.propertyRecord.newLayout.licensing.rowName"),
+            listOf("propertyDetails.propertyRecord.licensing.rowName"),
             viewModel.licensingSection.map { it.fieldHeading },
         )
         assertNull(viewModel.licensingProvideLaterParagraph)
@@ -618,14 +662,14 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = false,
+                isLandlordView = false,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertTrue(viewModel.licensingSection.isEmpty())
         assertEquals(
-            "Message for propertyDetails.propertyRecord.newLayout.licensing.councilOccupied",
+            "Message for propertyDetails.propertyRecord.licensing.councilOccupied",
             viewModel.licensingProvideLaterParagraph,
         )
     }
@@ -639,13 +683,16 @@ class PropertyDetailsViewModelTests {
                 licenseProvideLater = true,
             )
 
-        assertThrows<IllegalStateException> {
+        val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = false,
+                isLandlordView = false,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
+
+        assertThrows<IllegalStateException> {
+            viewModel.licensingProvideLaterParagraph
         }
     }
 
@@ -656,13 +703,13 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = false,
+                isLandlordView = false,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertEquals(
-            "Message for propertyDetails.propertyRecord.newLayout.licensing.councilNotProvided",
+            "Message for propertyDetails.propertyRecord.licensing.councilNotProvided",
             viewModel.licensingProvideLaterParagraph,
         )
     }
@@ -674,14 +721,14 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = true,
+                isLandlordView = true,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         val licensingRow = viewModel.licensingSection.single()
-        assertEquals("propertyDetails.propertyRecord.newLayout.licensing.rowName", licensingRow.fieldHeading)
-        assertEquals("propertyDetails.propertyRecord.newLayout.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
+        assertEquals("propertyDetails.propertyRecord.licensing.rowName", licensingRow.fieldHeading)
+        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
         assertNull(viewModel.licensingProvideLaterParagraph)
     }
 
@@ -692,7 +739,7 @@ class PropertyDetailsViewModelTests {
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
         assertEquals(
             listOf(
@@ -716,15 +763,15 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = true,
+                isLandlordView = true,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertTrue(viewModel.showTenancySection)
-        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.heading", viewModel.tenancyHeadingKey)
+        assertEquals("propertyDetails.propertyRecord.tenancy.heading", viewModel.tenancyHeadingKey)
         assertEquals(
-            listOf("propertyDetails.propertyRecord.newLayout.tenancy.rowName"),
+            listOf("propertyDetails.propertyRecord.tenancy.rowName"),
             viewModel.tenancySection.map { it.fieldHeading },
         )
         assertNull(viewModel.tenancyProvideLaterParagraph)
@@ -737,9 +784,9 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = true,
+                isLandlordView = true,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertFalse(viewModel.showTenancySection)
@@ -753,15 +800,15 @@ class PropertyDetailsViewModelTests {
         val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
-                withChangeLinks = false,
+                isLandlordView = false,
                 messageSource = mockMessageSource,
-                provideLaterEnabled = true,
+                featureFlagManager = flagOn,
             )
 
         assertTrue(viewModel.showTenancySection)
         assertTrue(viewModel.tenancySection.isEmpty())
         assertEquals(
-            "Message for propertyDetails.propertyRecord.newLayout.tenancy.councilNotProvided",
+            "Message for propertyDetails.propertyRecord.tenancy.councilNotProvided",
             viewModel.tenancyProvideLaterParagraph,
         )
     }
@@ -786,35 +833,31 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = true)
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
         assertTrue(viewModel.showTenancySection)
         assertEquals(expectedHeaderList, viewModel.tenancySection.map { it.fieldHeading })
-        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.heading", viewModel.tenancyHeadingKey)
+        assertEquals("propertyDetails.propertyRecord.tenancy.heading", viewModel.tenancyHeadingKey)
         assertNull(viewModel.tenancyProvideLaterParagraph)
     }
 
     @Test
-    fun `New layout sections are empty and legacy sections are unchanged when the flag is disabled`() {
+    fun `provideLaterEnabled reflects the feature flag and legacy sections are populated when the flag is disabled`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, provideLaterEnabled = false)
+        val flagOffViewModel =
+            PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOff)
+        val flagOnViewModel =
+            PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
 
-        assertTrue(viewModel.registrationDetails.isEmpty())
-        assertTrue(viewModel.propertyDetailsSection.isEmpty())
-        assertTrue(viewModel.ownershipSection.isEmpty())
-        assertTrue(viewModel.occupationSection.isEmpty())
-        assertTrue(viewModel.licensingSection.isEmpty())
-        assertTrue(viewModel.tenancySection.isEmpty())
-        assertFalse(viewModel.showTenancySection)
-        assertEquals("", viewModel.tenancyHeadingKey)
-        assertNull(viewModel.licensingProvideLaterParagraph)
-        assertNull(viewModel.tenancyProvideLaterParagraph)
-        assertTrue(viewModel.propertyRecord.isNotEmpty())
-        assertTrue(viewModel.licensingInformation.isNotEmpty())
-        assertTrue(viewModel.tenancyAndRentalInformation.isNotEmpty())
+        assertFalse(flagOffViewModel.provideLaterEnabled)
+        assertTrue(flagOnViewModel.provideLaterEnabled)
+
+        assertTrue(flagOffViewModel.beforePdjb939PropertyRecord.isNotEmpty())
+        assertTrue(flagOffViewModel.beforePdjb939LicensingInformation.isNotEmpty())
+        assertTrue(flagOffViewModel.beforePdjb939TenancyAndRentalInformation.isNotEmpty())
     }
 }

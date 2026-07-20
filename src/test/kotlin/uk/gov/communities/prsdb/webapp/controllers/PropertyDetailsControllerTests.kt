@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasProperty
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
@@ -155,7 +157,7 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("provideLaterEnabled", true) }
+                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(true))) }
             }
         }
 
@@ -170,7 +172,7 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("provideLaterEnabled", false) }
+                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(false))) }
             }
         }
 

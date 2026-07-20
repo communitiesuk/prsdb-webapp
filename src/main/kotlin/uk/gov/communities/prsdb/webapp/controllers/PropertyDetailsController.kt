@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -51,9 +50,6 @@ class PropertyDetailsController(
     val jointLandlordsIsEnabled: Boolean
         get() = featureFlagManager.checkFeature(JOINT_LANDLORDS)
 
-    val provideLaterIsEnabled: Boolean
-        get() = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
@@ -71,10 +67,9 @@ class PropertyDetailsController(
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
-                withChangeLinks = true,
-                hideNullUprn = true,
+                isLandlordView = true,
                 messageSource = messageSource,
-                provideLaterEnabled = provideLaterIsEnabled,
+                featureFlagManager = featureFlagManager,
             )
 
         val propertyComplianceDetails =
@@ -113,7 +108,6 @@ class PropertyDetailsController(
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
-        modelAndView.addObject("provideLaterEnabled", provideLaterIsEnabled)
         jointLandlordsStrategy.ifEnabled {
             if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
                 modelAndView.addObject(
@@ -177,10 +171,9 @@ class PropertyDetailsController(
         val propertyDetails =
             PropertyDetailsViewModel(
                 propertyOwnership = propertyOwnership,
-                withChangeLinks = false,
-                hideNullUprn = false,
+                isLandlordView = false,
                 messageSource = messageSource,
-                provideLaterEnabled = provideLaterIsEnabled,
+                featureFlagManager = featureFlagManager,
             )
 
         if (jointLandlordsIsEnabled) {
@@ -224,7 +217,6 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
 
-        model.addAttribute("provideLaterEnabled", provideLaterIsEnabled)
         model.addAttribute("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
