@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GoverningBodyMemberNameFormModel
@@ -269,6 +271,12 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withGoverningBodyMembers(members: Map<Int, GoverningBodyMemberDataModel>): LandlordStateSessionBuilder {
+        additionalDataMap["governingBodyMembersMap"] =
+            Json.encodeToString(serializer(), members)
+        return self()
+    }
+
     fun withOrgMainContact(): LandlordStateSessionBuilder {
         val formModel =
             OrgMainContactFormModel().apply {
@@ -281,6 +289,17 @@ class LandlordStateSessionBuilder(
     }
 
     companion object {
+        private val DEFAULT_GOVERNING_BODY_MEMBERS =
+            mapOf(
+                1 to
+                    GoverningBodyMemberDataModel(
+                        name = "Test Member",
+                        type = GoverningBodyMemberType.DIRECTOR,
+                        dateOfBirth = LocalDate(1970, 1, 1),
+                        address = AddressDataModel(singleLineAddress = "1 Test Street, London, SW1A 1AA"),
+                    ),
+            )
+
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
         fun beforeDob() = beforeName().withName()
@@ -345,9 +364,14 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgGovBodyMemberSelectAddress() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberLookupAddress()
 
-        fun beforeOrgGovBodyMemberList() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberAddress()
+        fun beforeOrgGovBodyMemberList(members: Map<Int, GoverningBodyMemberDataModel> = DEFAULT_GOVERNING_BODY_MEMBERS) =
+            beforeOrgGovBodyDetails()
+                .withOrgGovBodyDetails(OrgGovBodyDetailsMode.HAS_DETAILS)
+                .withGoverningBodyMembers(members)
 
-        fun beforeOrgMainContact() = beforeOrgGovBodyMemberList().withOrgGovBodyMemberList()
+        fun beforeOrgMainContact() =
+            beforeOrgGovBodyMemberList()
+                .withOrgGovBodyMemberList()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
