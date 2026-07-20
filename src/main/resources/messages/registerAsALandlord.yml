@@ -56,7 +56,11 @@ orgCheckAnswers:
   governingBody:
     heading: Members of the governing body
     leadTrusteeCardTitle: Lead trustee
-    memberCardTitle: '{0}'
+    memberCardTitle:
+      director: '{0}. Director'
+      trustee: '{0}. Trustee'
+      partner: '{0}. Partner'
+      other: '{0}. Other'
     role: Role
     name: Name
     dateOfBirth: Date of birth

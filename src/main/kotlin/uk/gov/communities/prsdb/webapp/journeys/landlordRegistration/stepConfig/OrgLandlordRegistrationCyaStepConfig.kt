@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -40,7 +41,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),
             "leadTrusteeCard" to getLeadTrusteeCard(state),
-            "governingBodyMemberCards" to getGovBodyMemberCards(),
+            "governingBodyMemberCards" to getGovBodyMemberCards(state),
             "mainContactCard" to getMainContactCard(state),
         )
 
@@ -233,7 +234,6 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                     org.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
                 ),
             )
-        // TODO: PDJB-1289 - dummy governing body member cards are rendered separately; replace with real member enumeration.
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.governingBody.leadTrusteeCardTitle",
             summaryList = rows,
@@ -241,30 +241,46 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         )
     }
 
-    // TODO: PDJB-1289 - replace these dummy governing body member cards with real member enumeration once it exists.
-    private fun getGovBodyMemberCards(): List<SummaryCardViewModel> =
-        listOf(
-            dummyMemberCard("1. Director", "Director", "Indiana jones", "18 March 1874"),
-            dummyMemberCard("2. Partner", "Partner", "George Goof", "8 March 2001"),
-        )
+    private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
+        val members = state.orgLandlordRegistrationTask.governingBodyMembersMap ?: emptyMap()
+        return members
+            .toList()
+            .sortedBy { it.first }
+            .mapIndexed { displayIndex, (_, member) ->
+                SummaryCardViewModel(
+                    title = memberCardTitleKey(member.type),
+                    cardNumber = (displayIndex + 1).toString(),
+                    summaryList =
+                        listOf(
+                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.role", memberRoleKey(member.type)),
+                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.name", member.name),
+                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth", member.dateOfBirth),
+                            orgCardRow(
+                                "registerAsALandlord.orgCheckAnswers.governingBody.address",
+                                member.address.toMultiLineAddress().split("\n"),
+                            ),
+                        ),
+                    // TODO: PDJB-1290 - replace with the real change URL once governing body member editing is wired up.
+                    actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = PLACEHOLDER_CHANGE_URL)),
+                )
+            }
+    }
 
-    private fun dummyMemberCard(
-        numberedTitle: String,
-        role: String,
-        name: String,
-        dateOfBirth: String,
-    ) = SummaryCardViewModel(
-        title = "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle",
-        cardNumber = numberedTitle,
-        summaryList =
-            listOf(
-                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.role", role),
-                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.name", name),
-                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth", dateOfBirth),
-                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.address", DUMMY_ADDRESS_LINES),
-            ),
-        actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = DUMMY_CHANGE_URL)),
-    )
+    private fun memberCardTitleKey(type: GoverningBodyMemberType) =
+        when (type) {
+            GoverningBodyMemberType.DIRECTOR -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.director"
+            GoverningBodyMemberType.TRUSTEE -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.trustee"
+            GoverningBodyMemberType.PARTNER -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.partner"
+            GoverningBodyMemberType.OTHER -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.other"
+        }
+
+    private fun memberRoleKey(type: GoverningBodyMemberType) =
+        when (type) {
+            GoverningBodyMemberType.DIRECTOR -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.director"
+            GoverningBodyMemberType.TRUSTEE -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.trustee"
+            GoverningBodyMemberType.PARTNER -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.partner"
+            GoverningBodyMemberType.OTHER -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.otherMember"
+        }
 
     private fun getMainContactCard(state: LandlordRegistrationState): SummaryCardViewModel {
         val org = state.orgLandlordRegistrationTask
@@ -307,7 +323,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
     ) = SummaryListRowViewModel(
         fieldHeading = headingKey,
         fieldValue = value,
-        actions = listOf(SummaryListRowActionsViewModel("forms.links.change", DUMMY_CHANGE_URL)),
+        actions = listOf(SummaryListRowActionsViewModel("forms.links.change", PLACEHOLDER_CHANGE_URL)),
     )
 
     private fun orgChangeDestination(
@@ -354,9 +370,9 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         }
 
     companion object {
-        // TODO: PDJB-1172 / PDJB-1289 - dummy placeholders for sections whose data is not yet collected.
-        private const val DUMMY_CHANGE_URL = "#"
-        private val DUMMY_ADDRESS_LINES = listOf("3rd Floor", "88 Kingsway Square", "London", "ZX1 4QP")
+        // TODO: PDJB-1172 (your details email/phone) / PDJB-1290 (governing body member change link) -
+        // non-functional Change link placeholder until the underlying steps exist.
+        private const val PLACEHOLDER_CHANGE_URL = "#"
     }
 }
 
