@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.HasAnyGovBodyMembersStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -33,10 +34,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
@@ -67,11 +71,18 @@ class OrgLandlordRegistrationTask(
     override val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep,
     override val govBodyMemberAddressTask: GovBodyMemberAddressTask,
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
+    override val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep,
+    override val saveGovBodyMemberStep: SaveGovBodyMemberStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
+
+    override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>? by delegateProvider.nullableDelegate(
+        "governingBodyMembersMap",
+    )
+    override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
 
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
@@ -195,7 +206,7 @@ class OrgLandlordRegistrationTask(
                 parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
                 nextDestination { mode ->
                     when (mode) {
-                        OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.orgGovBodyWhoToProvideStep)
+                        OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.hasAnyGovBodyMembersStep)
                         OrgGovBodyDetailsMode.NO_DETAILS -> Destination(journey.orgGovBodyMustProvideInfoStep)
                     }
                 }
@@ -205,9 +216,18 @@ class OrgLandlordRegistrationTask(
                 parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.NO_DETAILS) }
                 noNextDestination()
             }
+            step(journey.hasAnyGovBodyMembersStep) {
+                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.orgGovBodyWhoToProvideStep
+                        AnyMembers.SOME_MEMBERS -> journey.orgGovBodyMemberListStep
+                    }
+                }
+            }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
-                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
+                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS) }
                 nextStep { journey.orgGovBodyMemberNameStep }
             }
             step(journey.orgGovBodyMemberNameStep) {
@@ -222,6 +242,10 @@ class OrgLandlordRegistrationTask(
             }
             duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
+                nextStep { journey.saveGovBodyMemberStep }
+            }
+            step(journey.saveGovBodyMemberStep) {
+                parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
                 configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
                     withAdditionalContentProperties {
@@ -231,7 +255,9 @@ class OrgLandlordRegistrationTask(
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                parents { journey.govBodyMemberAddressTask.isComplete() }
+                parents {
+                    journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
