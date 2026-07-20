@@ -15,9 +15,9 @@ class OrgGovBodyMemberDobFormModel : DateFormModel() {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "registerAsALandlord.orgGovBodyMemberDob.error.invalidDate",
+                messageKey = "registerAsALandlord.orgGovBodyMemberDob.error.invalidAge",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isNotInFuture",
+                targetMethod = "isValidForMinimumAge",
             ),
         ],
     )
@@ -29,7 +29,7 @@ class OrgGovBodyMemberDobFormModel : DateFormModel() {
             ConstraintDescriptor(
                 messageKey = "_",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isNotInFuture",
+                targetMethod = "isValidForMinimumAge",
             ),
         ],
     )
@@ -41,15 +41,15 @@ class OrgGovBodyMemberDobFormModel : DateFormModel() {
             ConstraintDescriptor(
                 messageKey = "_",
                 validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isNotInFuture",
+                targetMethod = "isValidForMinimumAge",
             ),
         ],
     )
     override var year: String = ""
 
-    fun isNotInFuture(): Boolean {
-        val date = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
-        val today = DateTimeHelper().getCurrentDateInUK()
-        return date <= today
+    fun isValidForMinimumAge(): Boolean {
+        val dateOfBirth = DateTimeHelper.parseDateOrNull(day, month, year) ?: return true
+        val age = DateTimeHelper().getAgeFromBirthDate(dateOfBirth)
+        return age >= 16
     }
 }
