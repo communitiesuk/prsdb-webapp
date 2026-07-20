@@ -19,7 +19,7 @@
     <h1 class="govuk-heading-l"
         th:text="#{${addAnotherTitle}(${optionalAddAnotherTitleParam})}">
     </h1>
-    <p class="govuk-body" th:text="#{${summaryText}}" id="summary-text">summary text</p>
+    <p class="govuk-body" th:if="${summaryText}" th:text="#{${summaryText}}" id="summary-text">summary text</p>
     <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>

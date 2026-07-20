@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Com
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -83,7 +82,6 @@ class LandlordDeregistrationJourney(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     LandlordDeregistrationJourneyState {
-    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var userHasRegisteredProperties: Boolean by delegateProvider.requiredDelegate("userHasRegisteredProperties")
 

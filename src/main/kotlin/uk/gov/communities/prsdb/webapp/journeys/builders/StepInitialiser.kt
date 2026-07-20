@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -99,7 +100,8 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         if (nextDestinationProvider != null) {
             throw JourneyInitialisationException("$initialiserName already has a next destination defined")
         }
-        nextDestinationProvider = { throw PrsdbWebException("$initialiserName has no next destination so cannot be posted to") }
+        nextDestinationProvider =
+            { throw PrsdbWebException("$initialiserName has no next destination so cannot be posted to") }
         return this
     }
 
@@ -188,7 +190,9 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         return this
     }
 
-    override fun build(): List<JourneyStep<*, *, *>> = listOf(build(state))
+    // Steps own no delegate keys of their own (their state does, bound at journey/task level), so the registry is
+    // accepted only to satisfy the BuildableElement contract and is not used here.
+    override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> = listOf(build(state))
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()
 

@@ -7,12 +7,18 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("0")
 class IndividualLandlord() : Landlord() {
+    @get:Transient
+    override val landlordType: LandlordType
+        get() = LandlordType.INDIVIDUAL
+
     @OneToOne
     @JoinColumn(name = "individual_subject_identifier", unique = true)
     lateinit var baseUser: PrsdbUser
