@@ -47,9 +47,6 @@ class PropertyDetailsViewModel(
     // Change links are only shown to landlords; the local council view is read-only.
     private val withChangeLinks: Boolean = isLandlordView
 
-    // Legacy-only: the flag-off layout hides an unavailable UPRN from landlords. Deleted with beforePdjb939.
-    private val hideNullUprn: Boolean = isLandlordView
-
     private val changeLinkMessageKey = "forms.links.change"
 
     val address: String = propertyOwnership.address.singleLineAddress
@@ -58,7 +55,7 @@ class PropertyDetailsViewModel(
     val isOccupied = propertyOwnership.isOccupied
 
     // An occupied property may still have its tenancy details "skipped" during registration (PDJB-942),
-    // in which case the household/tenant/rent/furnishing fields are not populated. The legacy tenancy rows
+    // in which case the household/tenant/rent/furnishing fields are not populated. The beforePdjb939 tenancy rows
     // are driven by whether tenancy details were provided rather than by occupancy alone.
     private val tenancyInformationProvided = propertyOwnership.currentNumTenants > 0
 
@@ -72,14 +69,14 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    // ---- Base (new registration-flow) layout: primary output, rendered when the flag is enabled ----
+    // ---- Base (post-PDJB-939 registration-flow) layout: primary output, rendered when the flag is enabled ----
 
     val registrationDetails: List<SummaryListRowViewModel> by lazy {
         listOf(registrationNumberRow(), registrationDateRow())
     }
 
     val propertyDetailsSection: List<SummaryListRowViewModel> by lazy {
-        listOf(newAddressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
+        listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
     }
 
     val ownershipSection: List<SummaryListRowViewModel> by lazy {
@@ -139,14 +136,14 @@ class PropertyDetailsViewModel(
         }
     }
 
-    // ---- Legacy (flag-off) layout: rendered only when the flag is disabled. ----
+    // ---- beforePdjb939 (flag-off) layout: rendered only when the flag is disabled. ----
     // TODO(PDJB-939): delete everything named beforePdjb939* and its message keys when the flag is permanently on.
 
     val beforePdjb939PropertyRecord: List<SummaryListRowViewModel> by lazy {
         listOfNotNull(
             registrationDateRow(),
             registrationNumberRow(),
-            legacyAddressRow(),
+            beforePdjb939AddressRow(),
             uprnRow(),
             localCouncilRow(),
             propertyTypeRow(),
@@ -190,10 +187,10 @@ class PropertyDetailsViewModel(
             withActionLink = false,
         )
 
-    private fun legacyAddressRow(): SummaryListRowViewModel =
+    private fun beforePdjb939AddressRow(): SummaryListRowViewModel =
         row("propertyDetails.propertyRecord.beforePdjb939.address", address, withActionLink = false)
 
-    private fun newAddressRow(): SummaryListRowViewModel =
+    private fun addressRow(): SummaryListRowViewModel =
         row("propertyDetails.propertyRecord.propertyDetails.address", addressParts, withActionLink = false)
 
     private fun uprnRow(): SummaryListRowViewModel? =
@@ -205,7 +202,7 @@ class PropertyDetailsViewModel(
                         .toString(),
                     withActionLink = false,
                 )
-            !hideNullUprn ->
+            !isLandlordView ->
                 row(
                     "propertyDetails.propertyRecord.beforePdjb939.uprn",
                     "propertyDetails.propertyRecord.beforePdjb939.uprn.unavailable",

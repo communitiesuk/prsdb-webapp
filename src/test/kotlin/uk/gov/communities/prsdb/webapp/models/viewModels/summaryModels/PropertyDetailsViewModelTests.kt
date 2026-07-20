@@ -36,6 +36,8 @@ class PropertyDetailsViewModelTests {
             on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn false
         }
 
+    // ---- beforePdjb939 (flag-off) layout: rendered only when the flag is disabled ----
+
     @Test
     fun `Property details are in the correct order`() {
         // Arrange
@@ -467,7 +469,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Property details hides null uprn if hideNullUprn is true`() {
+    fun `Property details hides null uprn for a landlord`() {
         val propertyOwnership = createPropertyOwnership()
 
         val viewModel =
@@ -484,7 +486,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Property details declares null uprn unavailable if hideNullUprn is false`() {
+    fun `Property details declares null uprn unavailable for a council`() {
         val propertyOwnership = createPropertyOwnership()
 
         val viewModel =
@@ -504,7 +506,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Change links are included on the relevant rows if withChangeLinks is true`() {
+    fun `Change links are included on the relevant rows for a landlord`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
@@ -531,7 +533,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `Change links are not included if withChangeLinks is false`() {
+    fun `Change links are not included for a council`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
@@ -557,10 +559,10 @@ class PropertyDetailsViewModelTests {
         assertEquals(0, totalChangeLinkCount)
     }
 
-    // ---- New registration-flow layout (featureFlagManager = flagOn) ----
+    // ---- Standard (post-PDJB-939 registration-flow) layout (featureFlagManager = flagOn) ----
 
     @Test
-    fun `New layout property details section is in the correct order`() {
+    fun `property details section is in the correct order`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 address = createAddress(uprn = 1234.toLong()),
@@ -581,7 +583,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout property details section renders the address as multiple lines`() {
+    fun `property details section renders the address as multiple lines`() {
         val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
@@ -595,7 +597,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout property details section does not show the uprn`() {
+    fun `property details section does not show the uprn`() {
         val propertyOwnership = createOccupiedPropertyOwnership(address = createAddress(uprn = 1234.toLong()))
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
@@ -604,7 +606,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout registration, ownership and occupation sections contain the expected rows`() {
+    fun `registration, ownership and occupation sections contain the expected rows`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource, featureFlagManager = flagOn)
@@ -627,7 +629,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a licensing provide-later row for a landlord when licensing is skipped on an occupied property`() {
+    fun `shows a licensing provide-later row for a landlord when licensing is skipped on an occupied property`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = null,
@@ -651,7 +653,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a licensing deadline paragraph for a council when licensing is skipped on an occupied property`() {
+    fun `shows a licensing deadline paragraph for a council when licensing is skipped on an occupied property`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = null,
@@ -675,7 +677,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout throws when building a council licensing paragraph for an occupied property with no occupied date`() {
+    fun `throws when building a council licensing paragraph for an occupied property with no occupied date`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = null,
@@ -697,7 +699,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a licensing not-provided paragraph for a council when licensing is skipped on an unoccupied property`() {
+    fun `shows a licensing not-provided paragraph for a council when licensing is skipped on an unoccupied property`() {
         val propertyOwnership = createPropertyOwnership(license = null, licenseProvideLater = true)
 
         val viewModel =
@@ -715,7 +717,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a no-deadline licensing provide-later row for a landlord when licensing is skipped on an unoccupied property`() {
+    fun `shows a no-deadline licensing provide-later row for a landlord when licensing is skipped on an unoccupied property`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership(licenseProvideLater = true)
 
         val viewModel =
@@ -733,7 +735,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows the licensing type row when a license is present`() {
+    fun `shows the licensing type row when a license is present`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
@@ -752,7 +754,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a tenancy provide-later row for a landlord when tenancy is skipped on an occupied property`() {
+    fun `shows a tenancy provide-later row for a landlord when tenancy is skipped on an occupied property`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 currentNumHouseholds = 0,
@@ -778,7 +780,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout hides the tenancy section for a landlord when the property is unoccupied`() {
+    fun `hides the tenancy section for a landlord when the property is unoccupied`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
         val viewModel =
@@ -794,7 +796,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows a tenancy not-provided paragraph for a council when the property is unoccupied`() {
+    fun `shows a tenancy not-provided paragraph for a council when the property is unoccupied`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
         val viewModel =
@@ -814,7 +816,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `New layout shows the full tenancy rows when tenancy details are provided`() {
+    fun `shows the full tenancy rows when tenancy details are provided`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 billsIncludedList = null,
@@ -842,7 +844,7 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `provideLaterEnabled reflects the feature flag and legacy sections are populated when the flag is disabled`() {
+    fun `provideLaterEnabled reflects the feature flag and beforePdjb939 sections are populated when the flag is disabled`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),

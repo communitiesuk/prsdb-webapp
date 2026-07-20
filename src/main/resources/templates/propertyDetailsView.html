@@ -64,14 +64,14 @@
             </p>
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', ${propertyDetails.provideLaterEnabled} ? #{propertyDetails.propertyRecord.heading} : #{propertyDetails.propertyDetails.heading})}"></li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', ${propertyDetails.provideLaterEnabled} ? #{propertyDetails.propertyRecord.heading} : #{propertyDetails.beforePdjb939.propertyRecord.heading})}"></li>
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${complianceInfoTabId}, #{propertyDetails.complianceInformation.heading})}"></li>
                 </ul>
 
                 <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
-                    <h2 class="govuk-heading-m" th:text="${propertyDetails.provideLaterEnabled} ? #{propertyDetails.propertyRecord.heading} : #{propertyDetails.propertyDetails.heading}">propertyDetails.heading</h2>
                     <th:block th:unless="${propertyDetails.provideLaterEnabled}">
+                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.beforePdjb939.propertyRecord.heading}">propertyDetails.beforePdjb939.propertyRecord.heading</h2>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939PropertyRecord})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.beforePdjb939.licensingInformation.heading}">propertyDetails.propertyRecord.beforePdjb939.licensingInformation.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939LicensingInformation})}"></dl>
@@ -80,6 +80,7 @@
                         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939TenancyAndRentalInformation})}"></dl>
                     </th:block>
                     <th:block th:if="${propertyDetails.provideLaterEnabled}">
+                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.heading}">propertyDetails.propertyRecord.heading</h2>
                         <dl th:if="${not #lists.isEmpty(propertyDetails.registrationDetails)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.registrationDetails})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
                         <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>

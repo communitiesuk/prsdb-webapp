@@ -242,10 +242,10 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 -- For manual QA of the new-layout notification banners and "Provide this later"
 -- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Like the rest of
 -- this seed, addresses are NOT inserted: each property claims a distinct existing
--- active AddressBase/NGD address not already used by an active property (so these
--- are INSERT ... SELECT, not plain VALUES rows). Occupied properties set
--- last_occupied_date so the "within 28 days" deadline renders. Fixed ids + ON
--- CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
+-- active AddressBase/NGD address not already used by an active property (the
+-- combined insert below picks them via the available_addresses CTE). Occupied
+-- properties set last_occupied_date so the "within 28 days" deadline renders.
+-- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
 --   18  occupied, licensing + tenancy skipped, no compliance   -> COMBINED banner
 --   19  occupied, everything provided, fully compliant          -> no banner (control)
 --   20  occupied, tenancy skipped (licence held), compliant     -> TENANCY banner
@@ -259,76 +259,32 @@ VALUES (1, 1, 'LQA0000019'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
+-- Each QA property claims a distinct existing active address not already used by an active property.
+-- available_addresses ranks the free addresses so every row below picks a different one (the equivalent
+-- of the sequential INSERT ... SELECT ... LIMIT 1 statements this replaces).
+WITH available_addresses AS (SELECT a.id,
+                                    ROW_NUMBER() OVER (ORDER BY a.id) AS rn
+                             FROM address a
+                             WHERE a.is_active
+                               AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)),
+     new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
+                     furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date) AS (
+         VALUES (1, 18, 43, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
+                (2, 19, 44, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days'),
+                (3, 20, 45, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
+                (4, 21, 46, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days'),
+                (5, 22, 47, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days'),
+                (6, 23, 48, null, 0, 0, null, null, null, false, null))
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
                                 address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
                                 bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 18, true, 1, 0, 0, 43, a.id, current_date, current_date, null, 1, 1,
-       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
-ON CONFLICT DO NOTHING;
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 19, true, 1, 1, 2, 44, a.id, current_date, current_date, 1, 1, 1,
-       null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
-ON CONFLICT DO NOTHING;
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 20, true, 1, 0, 0, 45, a.id, current_date, current_date, 2, 1, 1,
-       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
-ON CONFLICT DO NOTHING;
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 21, true, 1, 1, 2, 46, a.id, current_date, current_date, null, 1, 1,
-       null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days'
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
-ON CONFLICT DO NOTHING;
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 22, true, 1, 0, 0, 47, a.id, current_date, current_date, null, 1, 1,
-       null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days'
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
-ON CONFLICT DO NOTHING;
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
-                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
-                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date)
-SELECT 23, true, 1, 0, 0, 48, a.id, current_date, current_date, null, 1, 1,
-       null, null, null, null, null, null, null, false, false, null
-FROM address a
-WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
-ORDER BY a.id
-LIMIT 1
+SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
+       aa.id, current_date, current_date, np.license_id, 1, 1,
+       null, null, np.furnished_status, np.rent_frequency, null,
+       np.rent_amount, null, false, np.is_occupied, np.last_occupied_date
+FROM new_properties np
+         JOIN available_addresses aa ON aa.rn = np.rn
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

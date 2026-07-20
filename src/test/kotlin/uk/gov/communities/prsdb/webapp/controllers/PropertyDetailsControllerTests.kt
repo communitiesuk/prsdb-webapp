@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasProperty
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
@@ -146,33 +148,19 @@ class PropertyDetailsControllerTests(
             verify(jointLandlordInvitationService, never()).getPendingAndExpiredInvitations(any())
         }
 
-        @Test
+        @ParameterizedTest(name = "when the provide later feature is {0}")
+        @ValueSource(booleans = [true, false])
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails adds provideLaterEnabled to the model when the provide later feature is enabled`() {
+        fun `getPropertyDetails adds provideLaterEnabled to the model reflecting the provide later feature`(featureEnabled: Boolean) {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(featureEnabled)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(true))) }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails adds provideLaterEnabled false to the model when the provide later feature is disabled`() {
-            val propertyOwnership = createPropertyOwnership()
-
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
-                .thenReturn(propertyOwnership)
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-
-            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
-                status { isOk() }
-                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(false))) }
+                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(featureEnabled))) }
             }
         }
 
