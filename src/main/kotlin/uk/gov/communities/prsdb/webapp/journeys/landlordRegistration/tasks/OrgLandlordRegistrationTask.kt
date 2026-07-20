@@ -256,10 +256,7 @@ class OrgLandlordRegistrationTask(
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.saveGovBodyMemberStep.isComplete(),
-                        journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS),
-                    )
+                    journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS)
                 }
                 nextStep { journey.orgMainContactStep }
             }
