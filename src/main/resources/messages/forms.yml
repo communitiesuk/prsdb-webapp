@@ -159,6 +159,11 @@ orgGovBodyMemberName:
   fieldSetHeading: What is their full name?
   error:
     missing: Enter a full name
+orgGovBodyMemberList:
+  heading: '{0,choice,1#You’ve added 1 person|1<You’ve added {0} people}'
+  memberName: 'Person {0}'
+  buttons:
+    addAnother: Add another person
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
