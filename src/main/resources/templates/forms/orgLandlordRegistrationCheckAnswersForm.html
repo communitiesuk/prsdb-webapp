@@ -20,7 +20,9 @@
 
         <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.governingBody.heading}">Members of the governing body</h2>
         <div th:replace="~{fragments/summaryCard :: summaryCard(#{${leadTrusteeCard.title}}, ${leadTrusteeCard.cardNumber}, ${leadTrusteeCard.actions}, ${leadTrusteeCard.summaryList})}"></div>
-        <!--/* TODO: PDJB-1289 - render a summary card per governing body member once member enumeration exists. */-->
+        <th:block th:each="memberCard : ${governingBodyMemberCards}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${memberCard.title}, ${memberCard.cardNumber}, ${memberCard.actions}, ${memberCard.summaryList})}"></div>
+        </th:block>
 
         <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.mainContact.heading}">Main contact details</h2>
         <div th:replace="~{fragments/summaryCard :: summaryCard(#{${mainContactCard.title}}, ${mainContactCard.cardNumber}, ${mainContactCard.actions}, ${mainContactCard.summaryList})}"></div>

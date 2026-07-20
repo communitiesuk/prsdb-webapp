@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 @JourneyFrameworkComponent
@@ -39,6 +40,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),
             "leadTrusteeCard" to getLeadTrusteeCard(state),
+            "governingBodyMemberCards" to getGovBodyMemberCards(),
             "mainContactCard" to getMainContactCard(state),
         )
 
@@ -68,7 +70,9 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                     state.identityTask.getDateOfBirth(),
                     if (verified) Destination.Nowhere() else orgChangeDestination(state, state.identityTask.dateOfBirthStep),
                 ),
-                // TODO: PDJB-1172 - add email and phone rows once the user's own contact details are collected.
+                // TODO: PDJB-1172 - replace these dummy email and phone rows with the user's real contact details once collected.
+                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.email", "Indiana.jones@marshallCollege.com"),
+                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber", "020 7123 4567"),
             )
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.yourDetails.cardTitle",
@@ -229,13 +233,38 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                     org.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
                 ),
             )
-        // TODO: PDJB-1289 - render an additional summary card per governing body member once member enumeration exists.
+        // TODO: PDJB-1289 - dummy governing body member cards are rendered separately; replace with real member enumeration.
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.governingBody.leadTrusteeCardTitle",
             summaryList = rows,
             actions = orgCardChangeAction(state, org.leadTrusteeNameStep),
         )
     }
+
+    // TODO: PDJB-1289 - replace these dummy governing body member cards with real member enumeration once it exists.
+    private fun getGovBodyMemberCards(): List<SummaryCardViewModel> =
+        listOf(
+            dummyMemberCard("1. Director", "Director", "Indiana jones", "18 March 1874"),
+            dummyMemberCard("2. Partner", "Partner", "George Goof", "8 March 2001"),
+        )
+
+    private fun dummyMemberCard(
+        numberedTitle: String,
+        role: String,
+        name: String,
+        dateOfBirth: String,
+    ) = SummaryCardViewModel(
+        title = "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle",
+        cardNumber = numberedTitle,
+        summaryList =
+            listOf(
+                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.role", role),
+                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.name", name),
+                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth", dateOfBirth),
+                orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.address", DUMMY_ADDRESS_LINES),
+            ),
+        actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = DUMMY_CHANGE_URL)),
+    )
 
     private fun getMainContactCard(state: LandlordRegistrationState): SummaryCardViewModel {
         val org = state.orgLandlordRegistrationTask
@@ -271,6 +300,16 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         value: Any?,
     ) = SummaryListRowViewModel.forCheckYourAnswersPage(headingKey, value, Destination.Nowhere())
 
+    // TODO: PDJB-1172 - dummy row with a non-functional Change link; replace once the underlying step exists.
+    private fun dummyRow(
+        headingKey: String,
+        value: Any?,
+    ) = SummaryListRowViewModel(
+        fieldHeading = headingKey,
+        fieldValue = value,
+        actions = listOf(SummaryListRowActionsViewModel("forms.links.change", DUMMY_CHANGE_URL)),
+    )
+
     private fun orgChangeDestination(
         state: LandlordRegistrationState,
         step: RequestableStep<*, *, *>,
@@ -286,6 +325,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             },
         )
 
+    // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun orgAddressLines(address: ManualAddressFormModel) =
         AddressDataModel
             .fromManualAddressData(
@@ -312,6 +352,12 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
             CharityRegulator.NONE -> "commonText.other"
         }
+
+    companion object {
+        // TODO: PDJB-1172 / PDJB-1289 - dummy placeholders for sections whose data is not yet collected.
+        private const val DUMMY_CHANGE_URL = "#"
+        private val DUMMY_ADDRESS_LINES = listOf("3rd Floor", "88 Kingsway Square", "London", "ZX1 4QP")
+    }
 }
 
 @JourneyFrameworkComponent

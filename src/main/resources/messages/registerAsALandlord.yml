@@ -37,6 +37,8 @@ orgCheckAnswers:
     cardTitle: Your details
     name: Name
     dateOfBirth: Date of birth
+    email: Email
+    phoneNumber: Phone number
   landlordDetails:
     heading: Landlord details
     landlordType: Landlord type
@@ -53,6 +55,8 @@ orgCheckAnswers:
   governingBody:
     heading: Members of the governing body
     leadTrusteeCardTitle: Lead trustee
+    memberCardTitle: '{0}'
+    role: Role
     name: Name
     dateOfBirth: Date of birth
     email: Email
