@@ -586,6 +586,16 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
+        @Test
+        fun `landlord view hides the tenancy section for an unoccupied property`(page: Page) {
+            // Property 12: unoccupied, no licence, tenancy details not applicable.
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(12)
+
+            assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+            assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+        }
+
         @Nested
         inner class OccupiedWithLicensingAndTenancySkipped {
             // Property 39: occupied (0 tenants, 0 households), no licence, no tenancy details.
