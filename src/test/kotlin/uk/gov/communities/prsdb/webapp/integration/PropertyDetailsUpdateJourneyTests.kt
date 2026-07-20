@@ -1028,7 +1028,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 }
 
                 @Test
-                fun `leading zeros are stripped from households and people on the CYA page`(page: Page) {
+                fun `Leading zeros are stripped from households and people on the CYA page`(page: Page) {
                     // Details page
                     val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
@@ -1262,7 +1262,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 }
 
                 @Test
-                fun `leading zeros are stripped from rent amount on the CYA page`(page: Page) {
+                fun `Leading zeros are stripped from rent amount on the CYA page`(page: Page) {
                     // Details page
                     val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
