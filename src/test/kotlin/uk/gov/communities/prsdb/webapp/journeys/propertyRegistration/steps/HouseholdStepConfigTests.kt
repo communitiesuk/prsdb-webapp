@@ -28,7 +28,7 @@ class HouseholdStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
         // Assert
-        assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.heading", content["fieldSetHeading"])
+        assertEquals("forms.numberOfHouseholds.restructureAndSkipping.heading", content["fieldSetHeading"])
         assertEquals("forms/numberOfHouseholdsFormRestructureAndSkipping", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 
@@ -42,8 +42,8 @@ class HouseholdStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
         // Assert
-        assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.heading", content["fieldSetHeading"])
-        assertEquals("forms.numberOfHouseholdsRestructureAndSkipping.label", content["label"])
+        assertEquals("forms.numberOfHouseholds.restructureAndSkipping.heading", content["fieldSetHeading"])
+        assertEquals("forms.numberOfHouseholds.restructureAndSkipping.label", content["label"])
         assertEquals("forms/numberOfHouseholdsFormOld", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 }

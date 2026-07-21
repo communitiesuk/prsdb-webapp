@@ -17,8 +17,8 @@ class HouseholdStepConfig(
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholdsRestructureAndSkipping.heading",
-            "label" to "forms.numberOfHouseholdsRestructureAndSkipping.label",
+            "fieldSetHeading" to "forms.numberOfHouseholds.restructureAndSkipping.heading",
+            "label" to "forms.numberOfHouseholds.restructureAndSkipping.label",
         )
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
