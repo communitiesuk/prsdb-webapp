@@ -66,31 +66,26 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    val registrationDetails: List<SummaryListRowViewModel> by lazy {
+    val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
-    }
 
-    val propertyDetailsSection: List<SummaryListRowViewModel> by lazy {
+    val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
-    }
 
-    val ownershipSection: List<SummaryListRowViewModel> by lazy {
+    val ownershipSection: List<SummaryListRowViewModel> =
         listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
-    }
 
-    val occupiedSection: List<SummaryListRowViewModel> by lazy {
+    val occupiedSection: List<SummaryListRowViewModel> =
         listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
-    }
 
-    val licensingSection: List<SummaryListRowViewModel> by lazy {
+    val licensingSection: List<SummaryListRowViewModel> =
         when {
             !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
             isLandlordView -> listOf(licensingProvideLaterRow())
             else -> emptyList()
         }
-    }
 
-    val licensingProvideLaterParagraph: String? by lazy {
+    val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
             if (isOccupied) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
@@ -100,9 +95,8 @@ class PropertyDetailsViewModel(
         } else {
             null
         }
-    }
 
-    val tenancySection: List<SummaryListRowViewModel> by lazy {
+    val tenancySection: List<SummaryListRowViewModel> =
         when {
             !showTenancySection -> emptyList()
             isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
@@ -111,23 +105,21 @@ class PropertyDetailsViewModel(
                 buildList {
                     add(householdsRow())
                     add(tenantsRow())
-                    add(rentFrequencyRow(withoutBottomBorder = false))
+                    add(rentFrequencyRow())
                     add(furnishedStatusRow())
                     add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = true))
-                    add(rentAmountRow(includeChangeLink = true))
+                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow())
+                    add(rentAmountRow())
                 }
         }
-    }
 
-    val tenancyProvideLaterParagraph: String? by lazy {
+    val tenancyProvideLaterParagraph: String? =
         when {
             !showTenancySection || isLandlordView -> null
             isTenancyProvideLater ->
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
             else -> null
         }
-    }
 
     private fun registrationNumberRow(): SummaryListRowViewModel =
         row(
@@ -224,7 +216,7 @@ class PropertyDetailsViewModel(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.changeLinkAriaLabel",
         )
 
-    private fun billsIncludedRow(includeChangeLink: Boolean): SummaryListRowViewModel {
+    private fun billsIncludedRow(includeChangeLink: Boolean = true): SummaryListRowViewModel {
         val value = BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource)
         return if (includeChangeLink) {
             row(
@@ -243,7 +235,7 @@ class PropertyDetailsViewModel(
     private fun furnishedStatusRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
-            // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
+            // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
             changeLinkMessageKey,
             UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
@@ -251,10 +243,10 @@ class PropertyDetailsViewModel(
             withChangeLinks,
         )
 
-    private fun rentFrequencyRow(withoutBottomBorder: Boolean): SummaryListRowViewModel =
+    private fun rentFrequencyRow(withoutBottomBorder: Boolean = false): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-            // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
+            // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
             changeLinkMessageKey,
             UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
@@ -265,8 +257,8 @@ class PropertyDetailsViewModel(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
         )
 
-    private fun rentAmountRow(includeChangeLink: Boolean): SummaryListRowViewModel {
-        // TODO PDJB-548 remove not-null assertions !! once occupancy is embedded in PropertyOwnership
+    private fun rentAmountRow(includeChangeLink: Boolean = true): SummaryListRowViewModel {
+        // TODO PDJB-548 remove not-null assertions !! once tenancyDetails is embedded in PropertyOwnership
         val value =
             RentDataHelper.getRentAmount(
                 propertyOwnership.rentAmount!!.toString(),
@@ -358,8 +350,7 @@ class PropertyDetailsViewModel(
 
     private fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
         // Matches the compliance tab (ComplianceViewModelFactoryBase): an occupied property in a provide-later
-        // state is expected to always have a lastOccupiedDate. TODO(PDJB-548) revisit once occupancy is embedded
-        // in PropertyOwnership.
+        // state is expected to always have a lastOccupiedDate.
         val deadline =
             propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                 ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")

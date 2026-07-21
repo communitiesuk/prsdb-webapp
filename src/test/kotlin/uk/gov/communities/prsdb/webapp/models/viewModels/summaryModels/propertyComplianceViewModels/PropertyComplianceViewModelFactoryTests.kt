@@ -140,6 +140,8 @@ class PropertyComplianceViewModelFactoryTests {
     abstract inner class NotificationTests {
         abstract val landlordView: Boolean
 
+        open val restructureAndSkippingEnabled: Boolean = true
+
         abstract val expectedMissingMainText: String
 
         @Test
@@ -158,6 +160,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -180,6 +183,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -202,6 +206,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -224,6 +229,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -249,6 +255,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -274,6 +281,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -299,6 +307,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -313,6 +322,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -328,6 +338,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -343,6 +354,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -358,6 +370,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -373,6 +386,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -388,6 +402,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -403,6 +418,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -426,6 +442,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -448,6 +465,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -476,6 +494,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -498,6 +517,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -527,6 +547,7 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
+                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -545,5 +566,70 @@ class PropertyComplianceViewModelFactoryTests {
     inner class NonLandlordViewNotifications : NotificationTests() {
         override val landlordView = false
         override val expectedMissingMainText = "propertyDetails.complianceInformation.notificationBanner.missing.localCouncil.mainText"
+    }
+
+    @Nested
+    inner class LocalCouncilViewNotifications {
+        @Test
+        fun `notificationMessages is empty when occupied property has all certs missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when all certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when occupied property has missing and expired certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withExpiredGasSafetyCert()
+                    .withElectricalCertType()
+                    .withEpc()
+                    .build()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when epc rating is low`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
     }
 }

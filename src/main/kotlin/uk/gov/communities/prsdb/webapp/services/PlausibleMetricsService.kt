@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateCheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateCheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateCheckGasSafetyAnswersStep
@@ -34,7 +35,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @PrsdbWebService
@@ -179,8 +179,6 @@ class PlausibleMetricsService(
     private fun Instant.toUkLocalDate(): LocalDate = this.atZone(UK_ZONE).toLocalDate()
 
     companion object {
-        private val UK_ZONE = ZoneId.of("Europe/London")
-
         // The name of the Plausible custom event fired on journey completion (see templates/fragments/layout.html).
         const val TRANSACTION_EVENT_NAME = "Transaction"
 

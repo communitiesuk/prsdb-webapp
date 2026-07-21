@@ -21,6 +21,7 @@ class PropertyComplianceViewModelFactory(
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
+        restructureAndSkippingEnabled: Boolean = false,
         propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
@@ -101,7 +102,12 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val notificationMessages = notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
+        val notificationMessages =
+            if (landlordView || restructureAndSkippingEnabled) {
+                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
+            } else {
+                emptyList()
+            }
 
         val isAllValid = notificationBannerViewModelFactory.getIsAllValid(propertyCompliance)
 

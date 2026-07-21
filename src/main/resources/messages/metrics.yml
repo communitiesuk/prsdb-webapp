@@ -30,7 +30,11 @@ rows:
   cloudFrontClientErrorRate: Client error rate (HTTP 4xx)
   cloudFrontServerErrorRate: Server error rate (HTTP 5xx)
   totalTransactions: Total number of transactions
+  totalAwsCost: Total AWS cost
+  costPerTransaction: Cost per transaction
 completionRateExplanation: Completion rates for landlord and local council user registration are based on unique visitors. Property registration completion rate is based on page views, as a single landlord may register multiple properties.
+cost:
+  estimated: '{0,,cost} (estimated)'
 saveAndReturn:
   day: '{0} day'
   days: '{0} days'

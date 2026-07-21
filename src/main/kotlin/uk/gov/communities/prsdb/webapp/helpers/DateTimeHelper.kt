@@ -27,8 +27,12 @@ class DateTimeHelper(
     fun isDateInPast(date: LocalDate): Boolean = date < getCurrentDateInUK()
 
     companion object {
+        private const val UK_TIME_ZONE_ID = "Europe/London"
+        val UK_ZONE: ZoneId = ZoneId.of(UK_TIME_ZONE_ID)
+        private val UK_TIME_ZONE = TimeZone.of(UK_TIME_ZONE_ID)
+
         fun getDateInUK(instant: Instant): LocalDate {
-            val dateTimeInUK = instant.toLocalDateTime(TimeZone.of("Europe/London"))
+            val dateTimeInUK = instant.toLocalDateTime(UK_TIME_ZONE)
             return dateTimeInUK.date
         }
 
@@ -50,8 +54,7 @@ class DateTimeHelper(
         fun getJavaInstantFromLocalDate(localDate: java.time.LocalDate): java.time.Instant =
             localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
 
-        fun getEndOfDayInstantInUK(date: java.time.LocalDate): java.time.Instant =
-            date.atTime(LocalTime.MAX).atZone(ZoneId.of("Europe/London")).toInstant()
+        fun getEndOfDayInstantInUK(date: java.time.LocalDate): java.time.Instant = date.atTime(LocalTime.MAX).atZone(UK_ZONE).toInstant()
 
         fun java.time.LocalDate.toInstant(): java.time.Instant = getJavaInstantFromLocalDate(this)
 
