@@ -1567,8 +1567,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(householdsPage.provideThisLaterButton).isVisible()
 
             householdsPage.submitProvideThisLater()
-            val provideTenancyDetailsLaterPage = assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class) 
-            
+            val provideTenancyDetailsLaterPage = assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
+
             // Provide Tenancy Details Later - render page
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
             assertThat(provideTenancyDetailsLaterPage.heading).containsText("TODO: PDJB-942 - Provide tenancy details later")
