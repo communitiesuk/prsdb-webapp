@@ -20,7 +20,7 @@ class OrgGovBodyMemberListStepConfig :
             "optionalAddAnotherTitleParam" to (state.governingBodyMembersMap?.size ?: 0),
             "summaryText" to null,
             "showWarning" to false,
-            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.continue",
             "addAnotherButtonText" to "forms.orgGovBodyMemberList.buttons.addAnother",
             "summaryListData" to getMemberRows(state),
             // TODO: PDJB-1290 - Replace with real "add another" URL once implemented
