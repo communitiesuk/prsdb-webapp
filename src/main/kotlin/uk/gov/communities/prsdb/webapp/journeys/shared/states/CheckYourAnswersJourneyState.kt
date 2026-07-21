@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.builders.EmbedBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -132,15 +133,13 @@ interface CheckYourAnswersJourneyState : JourneyState {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TMode : Enum<TMode>> JourneyBuilder<TJourneyState>.duplicableCheckAnswerStep(
-            task: DuplicableTask<TTaskState>,
-            step: JourneyStep<TMode, *, TTaskState>,
+        fun <TEmbeddedState : JourneyState, TOuterState : CheckYourAnswersJourneyState, TMode : Enum<TMode>> EmbedBuilder<TEmbeddedState, TOuterState>.checkAnswerStep(
+            step: JourneyStep<TMode, *, TEmbeddedState>,
             route: String,
         ) {
-            val cyaJourney = journey
-            duplicableStep(task, step) {
+            step(step) {
                 initialStep()
-                nextStep { cyaJourney.finishCyaStep }
+                nextStep { outerState.finishCyaStep }
                 routeSegment(route)
             }
         }

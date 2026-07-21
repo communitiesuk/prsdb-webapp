@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -94,14 +94,19 @@ class UpdateRentIncludesBillsJourneyFactory(
 
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                RentIncludesBillsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT ->
-                    duplicableCheckAnswerStep(
-                        journey.rentIncludesBillsTask,
-                        journey.rentIncludesBillsTask.billsIncluded,
-                        BillsIncludedStep.ROUTE_SEGMENT,
-                    )
-                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                RentIncludesBillsStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                }
+
+                BillsIncludedStep.ROUTE_SEGMENT -> {
+                    embed(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -152,8 +157,7 @@ class UpdateRentIncludesBillsJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
-interface UpdateRentIncludesBillsJourneyState :
-    CheckYourAnswersJourneyState {
+interface UpdateRentIncludesBillsJourneyState : CheckYourAnswersJourneyState {
     val rentIncludesBillsTask: RentIncludesBillsTask
     override val cyaStep: UpdateRentIncludesBillsCyaStep
     val propertyId: Long

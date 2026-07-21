@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -103,20 +102,39 @@ class UpdateOccupancyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
-                BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
-                RentIncludesBillsStep.ROUTE_SEGMENT -> duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT ->
-                    duplicableCheckAnswerStep(
-                        journey.rentIncludesBillsTask,
-                        journey.rentIncludesBillsTask.billsIncluded,
-                        BillsIncludedStep.ROUTE_SEGMENT,
-                    )
-                FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT ->
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.occupationTask)
+                }
+
+                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
+                }
+
+                BedroomsStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                }
+
+                RentIncludesBillsStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                }
+
+                BillsIncludedStep.ROUTE_SEGMENT -> {
+                    embed(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                FurnishedStatusStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                }
+
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
                     duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
-                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
             }
             replaceHeadings(state)
             step(journey.finishCyaStep) {
