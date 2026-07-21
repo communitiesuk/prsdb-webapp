@@ -1571,7 +1571,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Provide Tenancy Details Later - render page
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
-            assertThat(provideTenancyDetailsLaterPage.heading).containsText("TODO: PDJB-942 - Provide tenancy details later")
+            assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
         }
 
         @Test
