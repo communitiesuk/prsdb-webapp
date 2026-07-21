@@ -93,7 +93,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Check
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
@@ -133,7 +132,9 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerStep(journey.addressTask, journey.addressTask.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                    embed(journey.addressTask) {
+                        checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 PropertyTypeStep.ROUTE_SEGMENT -> {
@@ -173,11 +174,9 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerStep(
-                        journey.rentIncludesBillsTask,
-                        journey.rentIncludesBillsTask.billsIncluded,
-                        BillsIncludedStep.ROUTE_SEGMENT,
-                    )
+                    embed(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 FurnishedStatusStep.ROUTE_SEGMENT -> {
