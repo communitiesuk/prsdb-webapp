@@ -29,6 +29,12 @@ class OrgGovBodyMemberListStepConfig(
             "addAnotherUrl" to Destination(state.orgGovBodyWhoToProvideStep).toUrlStringOrNull(),
         )
 
+    override fun afterStepIsReached(state: LandlordRegistrationOrgLandlordState) {
+        // ensure that if you ever get to this page we reset any state that is used by one of the buttons.
+        // this means we can be certain all the buttons will always work even if you use the browser back buttons.
+        state.editingGovBodyMemberId = null
+    }
+
     private fun getMemberRows(state: LandlordRegistrationOrgLandlordState): List<SummaryListRowViewModel> {
         val membersMap = state.governingBodyMembersMap ?: emptyMap()
         return membersMap
