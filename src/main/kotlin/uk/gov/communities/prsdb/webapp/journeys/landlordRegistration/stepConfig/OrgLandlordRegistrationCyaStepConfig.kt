@@ -64,12 +64,23 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.yourDetails.name",
                     state.identityTask.getName(),
-                    if (verified) Destination.Nowhere() else orgChangeDestination(state, state.identityTask.nameStep),
+                    if (verified) {
+                        Destination.Nowhere()
+                    } else {
+                        Destination.VisitableStep(state.identityTask.nameStep, state.getCyaJourneyId(state.identityTask.nameStep))
+                    },
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.yourDetails.dateOfBirth",
                     state.identityTask.getDateOfBirth(),
-                    if (verified) Destination.Nowhere() else orgChangeDestination(state, state.identityTask.dateOfBirthStep),
+                    if (verified) {
+                        Destination.Nowhere()
+                    } else {
+                        Destination.VisitableStep(
+                            state.identityTask.dateOfBirthStep,
+                            state.getCyaJourneyId(state.identityTask.dateOfBirthStep),
+                        )
+                    },
                 ),
                 // TODO: PDJB-1172 - replace these dummy email and phone rows with the user's real contact details once collected.
                 dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.email", "Indiana.jones@marshallCollege.com"),
@@ -83,95 +94,100 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
 
     private fun getLandlordDetailsRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> {
         val org = state.orgLandlordRegistrationTask
-        val rows = mutableListOf<SummaryListRowViewModel>()
 
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordType",
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordTypeValue",
-                state.landlordTypeStep,
+        return buildList {
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordType",
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.landlordTypeValue",
+                    Destination.VisitableStep(state.landlordTypeStep, state.getCyaJourneyId(state.landlordTypeStep)),
+                ),
             )
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationName",
-                org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
-                org.orgNameStep,
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationName",
+                    org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
+                    Destination.VisitableStep(org.orgNameStep, state.getCyaJourneyId(org.orgNameStep)),
+                ),
             )
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationAddress",
-                orgAddressLines(org.orgAddressStep.formModel),
-                org.orgAddressStep,
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationAddress",
+                    orgAddressLines(org.orgAddressStep.formModel),
+                    Destination.VisitableStep(org.orgAddressStep, state.getCyaJourneyId(org.orgAddressStep)),
+                ),
             )
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationEmail",
-                org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
-                org.orgEmailStep,
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationEmail",
+                    org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                    Destination.VisitableStep(org.orgEmailStep, state.getCyaJourneyId(org.orgEmailStep)),
+                ),
             )
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationPhone",
-                org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
-                org.orgPhoneNumberStep,
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationPhone",
+                    org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
+                    Destination.VisitableStep(org.orgPhoneNumberStep, state.getCyaJourneyId(org.orgPhoneNumberStep)),
+                ),
             )
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationType",
-                org.orgTypeStep.formModel.orgTypes
-                    .filterNotNull()
-                    .filter { it.isNotBlank() }
-                    .map { orgTypeMessageKey(it) },
-                org.orgTypeStep,
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationType",
+                    org.orgTypeStep.formModel.orgTypes
+                        .filterNotNull()
+                        .filter { it.isNotBlank() }
+                        .map { orgTypeMessageKey(it) },
+                    Destination.VisitableStep(org.orgTypeStep, state.getCyaJourneyId(org.orgTypeStep)),
+                ),
             )
 
-        val isCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
-                isCharity,
-                org.orgCharityStep,
+            val isCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
+                    isCharity,
+                    Destination.VisitableStep(org.orgCharityStep, state.getCyaJourneyId(org.orgCharityStep)),
+                ),
             )
-        if (isCharity) {
-            val regulator = org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith
-            if (regulator != null) {
-                rows +=
-                    orgRow(
-                        state,
-                        "registerAsALandlord.orgCheckAnswers.landlordDetails.charityCommission",
-                        regulatorMessageKey(regulator),
-                        org.orgCharityRegisteredWithStep,
+            if (isCharity) {
+                val regulator = org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith
+                if (regulator != null) {
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "registerAsALandlord.orgCheckAnswers.landlordDetails.charityCommission",
+                            regulatorMessageKey(regulator),
+                            Destination.VisitableStep(
+                                org.orgCharityRegisteredWithStep,
+                                state.getCyaJourneyId(org.orgCharityRegisteredWithStep),
+                            ),
+                        ),
                     )
-                charityNumberRow(state, regulator)?.let { rows += it }
+                    charityNumberRow(state, regulator)?.let { add(it) }
+                }
+            }
+
+            val registeredWithCompaniesHouse =
+                org.orgCompaniesHouseStep.formModel.notNullValue(
+                    OrgCompaniesHouseFormModel::companiesHouse,
+                )
+            add(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
+                    registeredWithCompaniesHouse,
+                    Destination.VisitableStep(org.orgCompaniesHouseStep, state.getCyaJourneyId(org.orgCompaniesHouseStep)),
+                ),
+            )
+            if (registeredWithCompaniesHouse) {
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "registerAsALandlord.orgCheckAnswers.landlordDetails.companiesHouseNumber",
+                        org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber),
+                        Destination.VisitableStep(org.orgCompanyNumberStep, state.getCyaJourneyId(org.orgCompanyNumberStep)),
+                    ),
+                )
             }
         }
-
-        val registeredWithCompaniesHouse = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
-        rows +=
-            orgRow(
-                state,
-                "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
-                registeredWithCompaniesHouse,
-                org.orgCompaniesHouseStep,
-            )
-        if (registeredWithCompaniesHouse) {
-            rows +=
-                orgRow(
-                    state,
-                    "registerAsALandlord.orgCheckAnswers.landlordDetails.companiesHouseNumber",
-                    org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber),
-                    org.orgCompanyNumberStep,
-                )
-        }
-
-        return rows
     }
 
     private fun charityNumberRow(
@@ -182,27 +198,33 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         val headingKey = "registerAsALandlord.orgCheckAnswers.landlordDetails.charityNumber"
         return when (regulator) {
             CharityRegulator.ENGLAND_AND_WALES ->
-                orgRow(
-                    state,
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
                     org.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(OrgCharityNumberEnglandAndWalesFormModel::charityNumber),
-                    org.orgCharityNumberEnglandAndWalesStep,
+                    Destination.VisitableStep(
+                        org.orgCharityNumberEnglandAndWalesStep,
+                        state.getCyaJourneyId(org.orgCharityNumberEnglandAndWalesStep),
+                    ),
                 )
 
             CharityRegulator.NORTHERN_IRELAND ->
-                orgRow(
-                    state,
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
                     org.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(OrgCharityNumberNorthernIrelandFormModel::charityNumber),
-                    org.orgCharityNumberNorthernIrelandStep,
+                    Destination.VisitableStep(
+                        org.orgCharityNumberNorthernIrelandStep,
+                        state.getCyaJourneyId(org.orgCharityNumberNorthernIrelandStep),
+                    ),
                 )
 
             CharityRegulator.SCOTLAND ->
-                orgRow(
-                    state,
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     headingKey,
                     org.orgCharityNumberScotlandStep.formModel.notNullValue(OrgCharityNumberScotlandFormModel::charityNumber),
-                    org.orgCharityNumberScotlandStep,
+                    Destination.VisitableStep(
+                        org.orgCharityNumberScotlandStep,
+                        state.getCyaJourneyId(org.orgCharityNumberScotlandStep),
+                    ),
                 )
 
             CharityRegulator.NONE -> null
@@ -213,25 +235,30 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         val org = state.orgLandlordRegistrationTask
         val rows =
             listOf(
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.name",
                     org.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name),
+                    Destination.Nowhere(),
                 ),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth",
                     org.leadTrusteeDobStep.formModel.toLocalDateOrNull(),
+                    Destination.Nowhere(),
                 ),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.email",
                     org.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress),
+                    Destination.Nowhere(),
                 ),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.phoneNumber",
                     org.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
+                    Destination.Nowhere(),
                 ),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.address",
                     org.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
+                    Destination.Nowhere(),
                 ),
             )
         return SummaryCardViewModel(
@@ -252,12 +279,25 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                     cardNumber = (displayIndex + 1).toString(),
                     summaryList =
                         listOf(
-                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.role", memberRoleKey(member.type)),
-                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.name", member.name),
-                            orgCardRow("registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth", member.dateOfBirth),
-                            orgCardRow(
+                            SummaryListRowViewModel.forCheckYourAnswersPage(
+                                "registerAsALandlord.orgCheckAnswers.governingBody.role",
+                                memberRoleKey(member.type),
+                                Destination.Nowhere(),
+                            ),
+                            SummaryListRowViewModel.forCheckYourAnswersPage(
+                                "registerAsALandlord.orgCheckAnswers.governingBody.name",
+                                member.name,
+                                Destination.Nowhere(),
+                            ),
+                            SummaryListRowViewModel.forCheckYourAnswersPage(
+                                "registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth",
+                                member.dateOfBirth,
+                                Destination.Nowhere(),
+                            ),
+                            SummaryListRowViewModel.forCheckYourAnswersPage(
                                 "registerAsALandlord.orgCheckAnswers.governingBody.address",
                                 member.address.toMultiLineAddress().split("\n"),
+                                Destination.Nowhere(),
                             ),
                         ),
                     // TODO: PDJB-1290 - replace with the real change URL once governing body member editing is wired up.
@@ -287,14 +327,20 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         val mainContact = org.orgMainContactStep.formModel
         val rows =
             listOf(
-                orgCardRow("registerAsALandlord.orgCheckAnswers.mainContact.name", mainContact.notNullValue(OrgMainContactFormModel::name)),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.mainContact.name",
+                    mainContact.notNullValue(OrgMainContactFormModel::name),
+                    Destination.Nowhere(),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.mainContact.email",
                     mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
+                    Destination.Nowhere(),
                 ),
-                orgCardRow(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.mainContact.phoneNumber",
                     mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
+                    Destination.Nowhere(),
                 ),
             )
         return SummaryCardViewModel(
@@ -303,18 +349,6 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             actions = orgCardChangeAction(state, org.orgMainContactStep),
         )
     }
-
-    private fun orgRow(
-        state: LandlordRegistrationState,
-        headingKey: String,
-        value: Any?,
-        step: RequestableStep<*, *, *>,
-    ) = SummaryListRowViewModel.forCheckYourAnswersPage(headingKey, value, orgChangeDestination(state, step))
-
-    private fun orgCardRow(
-        headingKey: String,
-        value: Any?,
-    ) = SummaryListRowViewModel.forCheckYourAnswersPage(headingKey, value, Destination.Nowhere())
 
     // TODO: PDJB-1172 - dummy row with a non-functional Change link; replace once the underlying step exists.
     private fun dummyRow(
@@ -326,17 +360,12 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         actions = listOf(SummaryListRowActionsViewModel("forms.links.change", PLACEHOLDER_CHANGE_URL)),
     )
 
-    private fun orgChangeDestination(
-        state: LandlordRegistrationState,
-        step: RequestableStep<*, *, *>,
-    ) = Destination.VisitableStep(step, state.getCyaJourneyId(step))
-
     private fun orgCardChangeAction(
         state: LandlordRegistrationState,
         step: RequestableStep<*, *, *>,
     ): List<SummaryCardActionViewModel> =
         listOfNotNull(
-            orgChangeDestination(state, step).toUrlStringOrNull()?.let {
+            Destination.VisitableStep(step, state.getCyaJourneyId(step)).toUrlStringOrNull()?.let {
                 SummaryCardActionViewModel(text = "forms.links.change", url = it)
             },
         )
