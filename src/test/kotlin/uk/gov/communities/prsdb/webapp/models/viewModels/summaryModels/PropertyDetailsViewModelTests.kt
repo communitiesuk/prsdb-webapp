@@ -734,16 +734,13 @@ class PropertyDetailsViewModelTests {
                 licenseProvideLater = true,
             )
 
-        val viewModel =
+        assertThrows<IllegalStateException> {
             PropertyDetailsViewModel(
                 propertyOwnership,
                 isLandlordView = false,
                 messageSource = mockMessageSource,
                 featureFlagManager = featureFlagManager,
             )
-
-        assertThrows<IllegalStateException> {
-            viewModel.licensingProvideLaterParagraph
         }
     }
 

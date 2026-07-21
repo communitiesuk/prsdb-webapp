@@ -66,31 +66,26 @@ class PropertyDetailsViewModel(
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    val registrationDetails: List<SummaryListRowViewModel> by lazy {
+    val registrationDetails: List<SummaryListRowViewModel> =
         listOf(registrationNumberRow(), registrationDateRow())
-    }
 
-    val propertyDetailsSection: List<SummaryListRowViewModel> by lazy {
+    val propertyDetailsSection: List<SummaryListRowViewModel> =
         listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
-    }
 
-    val ownershipSection: List<SummaryListRowViewModel> by lazy {
+    val ownershipSection: List<SummaryListRowViewModel> =
         listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
-    }
 
-    val occupiedSection: List<SummaryListRowViewModel> by lazy {
+    val occupiedSection: List<SummaryListRowViewModel> =
         listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
-    }
 
-    val licensingSection: List<SummaryListRowViewModel> by lazy {
+    val licensingSection: List<SummaryListRowViewModel> =
         when {
             !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
             isLandlordView -> listOf(licensingProvideLaterRow())
             else -> emptyList()
         }
-    }
 
-    val licensingProvideLaterParagraph: String? by lazy {
+    val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
             if (isOccupied) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
@@ -100,9 +95,8 @@ class PropertyDetailsViewModel(
         } else {
             null
         }
-    }
 
-    val tenancySection: List<SummaryListRowViewModel> by lazy {
+    val tenancySection: List<SummaryListRowViewModel> =
         when {
             !showTenancySection -> emptyList()
             isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
@@ -118,16 +112,14 @@ class PropertyDetailsViewModel(
                     add(rentAmountRow())
                 }
         }
-    }
 
-    val tenancyProvideLaterParagraph: String? by lazy {
+    val tenancyProvideLaterParagraph: String? =
         when {
             !showTenancySection || isLandlordView -> null
             isTenancyProvideLater ->
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
             else -> null
         }
-    }
 
     private fun registrationNumberRow(): SummaryListRowViewModel =
         row(
