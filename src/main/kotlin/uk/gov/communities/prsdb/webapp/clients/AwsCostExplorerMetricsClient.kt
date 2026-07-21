@@ -6,10 +6,10 @@ import software.amazon.awssdk.services.costexplorer.model.DateInterval
 import software.amazon.awssdk.services.costexplorer.model.GetCostAndUsageRequest
 import software.amazon.awssdk.services.costexplorer.model.Granularity
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
 import uk.gov.communities.prsdb.webapp.models.dataModels.CostExplorerCostDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import java.math.BigDecimal
-import java.time.ZoneId
 
 @Profile("!local")
 @PrsdbWebService
@@ -81,6 +81,5 @@ class AwsCostExplorerMetricsClient(
 
     companion object {
         private const val UNBLENDED_COST = "UnblendedCost"
-        private val UK_ZONE = ZoneId.of("Europe/London")
     }
 }

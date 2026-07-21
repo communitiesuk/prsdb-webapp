@@ -104,9 +104,7 @@ Live integration testing showed that, when `BillingViewArn` is omitted, AWS auth
 grant only the `ce:GetCostAndUsage` action with `Resource = "*"`. The wildcard resource applies only to
 that action; it does not grant any other Cost Explorer or billing actions. The application does not
 enumerate or inspect billing views and does not use the billing console, so it does not require
-`billing:ListBillingViews`, `billing:GetBillingView`, or legacy `aws-portal:ViewBilling`. The infra
-policy must be deployed before the live query can succeed. Enabling the account and populating data
-still require verification in the target environment.
+`billing:ListBillingViews`, `billing:GetBillingView`, or legacy `aws-portal:ViewBilling`.
 
 ## CloudWatch infrastructure metrics
 

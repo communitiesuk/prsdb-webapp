@@ -62,7 +62,7 @@ class AwsCostExplorerMetricsClientTests {
     }
 
     @Test
-    fun `getCost maps reporting period to inclusive UK dates with an exclusive end date`() {
+    fun `getCost requests an exclusive end date for an inclusive reporting period`() {
         stubResponse(response())
 
         client().getCost(period)
