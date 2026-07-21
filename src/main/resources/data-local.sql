@@ -144,7 +144,10 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (72, '01/15/25', 1502423334, 0),
        (73, '01/15/25', 1502423335, 0),
        (74, '01/15/25', 1502423336, 0),
-       (75, '01/15/25', 1502423337, 0);
+       (75, '01/15/25', 1502423337, 0),
+       (76, '01/15/25', 1502423338, 0),
+       (77, '01/15/25', 1502423339, 0),
+       (78, '01/15/25', 1502423340, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -194,7 +197,10 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (48, '09/13/24', '09/13/24', 5002, '11 Complete Fields Road, CO1 1AA', 1, 'CO1 1AA', '11'),
        (49, '09/13/24', '09/13/24', 5003, '12 Tenancy Skipped Road, TS1 1AA', 1, 'TS1 1AA', '12'),
        (50, '09/13/24', '09/13/24', 5004, '13 Licensing Skipped Road, LS1 1AA', 1, 'LS1 1AA', '13'),
-       (51, '09/13/24', '09/13/24', 5005, '14 Both Skipped Road, BS1 1AA', 1, 'BS1 1AA', '14');
+       (51, '09/13/24', '09/13/24', 5005, '14 Both Skipped Road, BS1 1AA', 1, 'BS1 1AA', '14'),
+       (52, '09/13/24', '09/13/24', 5006, '15 Gas Expired Road, GE1 1AA', 1, 'GE1 1AA', '15'),
+       (53, '09/13/24', '09/13/24', 5007, '16 Certs Expired Road, CE1 1AA', 1, 'CE1 1AA', '16'),
+       (54, '09/13/24', '09/13/24', 5008, '17 Gas Provide Later Road, GP1 1AA', 1, 'GP1 1AA', '17');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_name)
 VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
@@ -357,7 +363,13 @@ VALUES (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1,
        (42, true, 1, 1, 2, 74, 50, '05/02/25', '05/02/25', null, 1,
         1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, null),
        (43, true, 1, 0, 0, 75, 51, '05/02/25', '05/02/25', null, 1,
-        1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true);
+        1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true),
+       (44, true, 1, 1, 2, 76, 52, '05/02/25', '05/02/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false),
+       (45, true, 1, 1, 2, 77, 53, '05/02/25', '05/02/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false),
+       (46, true, 1, 1, 2, 78, 54, '05/02/25', '05/02/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -412,6 +424,9 @@ VALUES (1, 1, '2025-01-15'),
        (1, 41, '2025-01-15'),
        (1, 42, '2025-01-15'),
        (1, 43, '2025-01-15'),
+       (1, 44, '2025-01-15'),
+       (1, 45, '2025-01-15'),
+       (1, 46, '2025-01-15'),
        (2, 4, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
@@ -467,6 +482,30 @@ VALUES
        (39, 41, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
        (40, 42, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
        (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true);
+
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+-- PDJB-1305 compliance-banner QA compliance records.
+--   42  scenario A (PO 39): all three certs "provide later" -> COMBINED banner, backed by data.
+--   43  PO 44: gas cert expired, electrical + EPC valid      -> single "certificate expired" banner.
+--   44  PO 45: gas cert + EPC expired, electrical valid      -> "multiple certificates expired" banner.
+--   45  PO 46: gas cert "provide later", electrical + EPC valid -> "add compliance certificates" (missing) banner.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
+                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
+VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
+        null, null, null, null, true, true, true, true, true, true),
+       (43, 44, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false),
+       (44, 45, '01/01/25', '01/01/25', current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
+        false, 'c', null, null, true, true, true, false, false, false),
+       (45, 46, '01/01/25', '01/01/25', null, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
