@@ -1,10 +1,13 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
@@ -19,9 +22,11 @@ import kotlin.test.assertTrue
 
 class PropertyComplianceViewModelFactoryTests {
     private val mockMessageSource: MessageSource = mock()
+    private val mockFeatureFlagManager: FeatureFlagManager = mock()
 
     init {
         whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
     }
 
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
@@ -32,6 +37,7 @@ class PropertyComplianceViewModelFactoryTests {
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
             NotificationBannerViewModelService(),
+            mockFeatureFlagManager,
         )
 
     private val propertyOwnershipId = 1L
@@ -140,8 +146,6 @@ class PropertyComplianceViewModelFactoryTests {
     abstract inner class NotificationTests {
         abstract val landlordView: Boolean
 
-        open val restructureAndSkippingEnabled: Boolean = true
-
         abstract val expectedMissingMainText: String
 
         @Test
@@ -160,7 +164,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -183,7 +186,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -206,7 +208,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -229,7 +230,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -255,7 +255,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -281,7 +280,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -307,7 +305,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -322,7 +319,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -338,7 +334,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -354,7 +349,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -370,7 +364,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -386,7 +379,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -402,7 +394,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -418,7 +409,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -442,7 +432,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -465,7 +454,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -494,7 +482,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -517,7 +504,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -547,7 +533,6 @@ class PropertyComplianceViewModelFactoryTests {
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
                     landlordView = landlordView,
-                    restructureAndSkippingEnabled = restructureAndSkippingEnabled,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -570,6 +555,11 @@ class PropertyComplianceViewModelFactoryTests {
 
     @Nested
     inner class LocalCouncilViewNotifications {
+        @BeforeEach
+        fun disableProvideLater() {
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
+        }
+
         @Test
         fun `notificationMessages is empty when occupied property has all certs missing`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
