@@ -77,6 +77,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3-transfer-manager")
     implementation("software.amazon.awssdk:aws-crt-client")
     implementation("software.amazon.awssdk:cloudwatch")
+    implementation("software.amazon.awssdk:costexplorer")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
