@@ -419,7 +419,7 @@ occupancy:
         hint: There are no tenants living in the property
   fieldSetHeading: Is your property occupied by tenants?
   fieldSetHint: What you choose here decides which compliance and rent details you need to add.
-numberOfHouseholdsOld:
+numberOfHouseholds:
   paragraph:
     one: The number of households in your property helps local authorities understand if your property needs a House in Multiple Occupation (HMO) licence.
     two: 'A household is:'
