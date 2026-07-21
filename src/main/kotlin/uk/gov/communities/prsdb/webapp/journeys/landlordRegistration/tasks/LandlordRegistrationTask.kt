@@ -21,7 +21,21 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IndividualLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -52,6 +66,15 @@ class LandlordRegistrationTask(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val taskState get() = this
+
+    override val activeCyaStep get() =
+        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
+            landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
+        ) {
+            orgCyaStep
+        } else {
+            cyaStep
+        }
 
     override fun makeSubJourney(state: LandlordRegistrationState) =
         if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
@@ -164,6 +187,53 @@ class LandlordRegistrationTask(
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
                         duplicableCheckAnswerTask(journey.individualLandlordRegistrationTask.addressTask, null)
+                    }
+
+                    LandlordTypeStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.landlordTypeStep, LandlordTypeStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgNameStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgNameStep, OrgNameStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgAddressStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgAddressStep, OrgAddressStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgEmailStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgEmailStep, OrgEmailStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgPhoneNumberStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgPhoneNumberStep, OrgPhoneNumberStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgTypeStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgTypeStep, OrgTypeStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgCharityStep.ROUTE_SEGMENT,
+                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
+                    OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
+                    OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
+                    OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
+                    -> {
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.charityTask, null)
+                    }
+
+                    OrgCompaniesHouseStep.ROUTE_SEGMENT,
+                    OrgCompanyNumberStep.ROUTE_SEGMENT,
+                    -> {
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.companiesHouseTask, null)
+                    }
+
+                    LeadTrusteeNameStep.ROUTE_SEGMENT -> {
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
+                    }
+
+                    OrgMainContactStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgMainContactStep, OrgMainContactStep.ROUTE_SEGMENT)
                     }
                 }
                 step(journey.finishCyaStep) {

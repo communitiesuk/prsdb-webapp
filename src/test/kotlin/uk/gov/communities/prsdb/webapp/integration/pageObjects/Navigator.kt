@@ -346,6 +346,12 @@ class Navigator(
         return createValidPage(page, OrgCompanyNumberFormPageLandlordRegistration::class)
     }
 
+    fun skipToLandlordRegistrationOrgCheckAnswersPage(): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCheckAnswers().build())
+        navigateToLandlordRegistrationJourneyStep(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationPrivacyNoticePage(): PrivacyNoticePageLandlordRegistration {
         navigate("$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
         return createValidPage(page, PrivacyNoticePageLandlordRegistration::class)
