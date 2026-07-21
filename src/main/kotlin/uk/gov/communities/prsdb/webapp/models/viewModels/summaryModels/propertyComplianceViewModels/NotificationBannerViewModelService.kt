@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataMod
 class NotificationBannerViewModelService {
     fun getNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
+        isLandlordView: Boolean,
     ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> {
         val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
@@ -17,30 +18,32 @@ class NotificationBannerViewModelService {
         val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
 
-        val mainTextKey =
+        val (mainTextKey, linkTextKey) =
             when {
                 statusModel.displayAnyMissingOrFaulty && statusModel.expiredCertificateCount > 0 -> {
-                    "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText" to VIEW_COMPLIANCE_CERTIFICATES_KEY
                 }
 
                 statusModel.displayAnyMissingOrFaulty -> {
-                    "$NOTIFICATION_KEY_PREFIX.missing.mainText"
+                    val viewSegment = if (isLandlordView) "landlord" else "localCouncil"
+                    "$NOTIFICATION_KEY_PREFIX.missing.$viewSegment.mainText" to VIEW_COMPLIANCE_CERTIFICATES_KEY
                 }
 
                 statusModel.expiredCertificateCount > 1 -> {
-                    "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText" to VIEW_COMPLIANCE_CERTIFICATES_KEY
                 }
 
                 isGasExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText" to "$NOTIFICATION_KEY_PREFIX.gasCert.expired.linkText"
                 }
 
                 isElectricalExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText" to
+                        "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.linkText"
                 }
 
                 isEpcExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText" to "$NOTIFICATION_KEY_PREFIX.epc.expired.linkText"
                 }
 
                 else -> {
@@ -54,7 +57,7 @@ class NotificationBannerViewModelService {
                 linkMessage =
                     PropertyComplianceViewModel.PropertyComplianceLinkMessage(
                         linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
-                        linkText = "$NOTIFICATION_KEY_PREFIX.viewComplianceCertificates",
+                        linkText = linkTextKey,
                         afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
                         isAfterLinkTextFullStop = true,
                     ),
@@ -67,5 +70,6 @@ class NotificationBannerViewModelService {
 
     companion object {
         private const val NOTIFICATION_KEY_PREFIX = "propertyDetails.complianceInformation.notificationBanner"
+        private const val VIEW_COMPLIANCE_CERTIFICATES_KEY = "$NOTIFICATION_KEY_PREFIX.viewComplianceCertificates"
     }
 }

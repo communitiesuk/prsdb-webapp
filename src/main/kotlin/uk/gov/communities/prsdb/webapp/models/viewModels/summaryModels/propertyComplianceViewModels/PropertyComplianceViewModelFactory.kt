@@ -101,7 +101,7 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val notificationMessages = notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance)
+        val notificationMessages = notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
 
         val isAllValid = notificationBannerViewModelFactory.getIsAllValid(propertyCompliance)
 

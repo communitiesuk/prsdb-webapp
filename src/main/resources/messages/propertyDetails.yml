@@ -111,16 +111,22 @@ complianceInformation:
     gasCert:
       expired:
         mainText: This property’s gas safety certificate has expired.
+        linkText: View gas safety certificate
     electricalCert:
       expired:
         mainText: This property’s electrical safety certificate has expired.
+        linkText: View electrical safety certificate
     epc:
       expired:
         mainText: This property’s EPC has expired.
+        linkText: View EPC
     multipleExpired:
       mainText: Multiple compliance certificates for this property have expired.
     missing:
-      mainText: You must add compliance certificates for this property.
+      landlord:
+        mainText: You must finish adding this property’s compliance certificates for this property.
+      localCouncil:
+        mainText: This property is missing compliance certificates.
     missingAndExpired:
       mainText: There are problems with this property's compliance certificates.
 

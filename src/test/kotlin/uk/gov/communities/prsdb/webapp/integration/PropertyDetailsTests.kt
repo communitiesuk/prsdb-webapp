@@ -117,7 +117,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(
+                    detailsPage.notificationBanner,
+                ).containsText("You must finish adding this property’s compliance certificates for this property")
             }
 
             @Test
@@ -135,7 +137,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(
+                    detailsPage.notificationBanner,
+                ).containsText("You must finish adding this property’s compliance certificates for this property")
             }
 
             @Test
@@ -327,7 +331,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(detailsPage.notificationBanner).containsText("This property is missing compliance certificates")
             }
 
             @Test
@@ -345,7 +349,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(detailsPage.notificationBanner).containsText("This property is missing compliance certificates")
             }
 
             @Test
