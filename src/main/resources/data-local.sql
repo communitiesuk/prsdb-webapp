@@ -36,7 +36,9 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:Y', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '01/15/25'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25'),
-       ('ia-mock-user-12345', '10/14/24');
+       ('ia-mock-user-12345', '10/14/24'),
+       ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'); -- benjamin.johnson@madetech.com
 
 
 -- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
@@ -57,7 +59,9 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Pref
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24',
         'PRSDB La User',
         'Team-PRSDB+lauser@softwire.com', true),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true);
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', true, 1, '07/01/26', '07/01/26', 'Danielle Dias', 'danielle.dias@madetech.com', true),
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', true, 1, '07/02/26', '07/02/26', 'Ben Johnson', 'benjamin.johnson@madetech.com', true);
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -140,14 +144,16 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (68, '2025-01-15', 1502423330, 0),
        (69, '2026-02-27', 1502423331, 0),
        (70, '01/15/25', 1502423332, 0),
-       (71, '01/15/25', 1502423333, 0),
-       (72, '01/15/25', 1502423334, 0),
+       (71, '07/01/26', 1502423333, 1),
+       (72, '07/02/26', 1502423334, 1),
        (73, '01/15/25', 1502423335, 0),
        (74, '01/15/25', 1502423336, 0),
        (75, '01/15/25', 1502423337, 0),
        (76, '01/15/25', 1502423338, 0),
        (77, '01/15/25', 1502423339, 0),
-       (78, '01/15/25', 1502423340, 0);
+       (78, '01/15/25', 1502423340, 0),
+       (79, '01/15/25', 1502423341, 0),
+       (80, '01/15/25', 1502423342, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -254,7 +260,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (30, '01/15/25', '01/15/25', 30, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:W', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
        (31, '01/15/25', '01/15/25', 31, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:X', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
        (32, '01/15/25', '01/15/25', 32, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Y', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
-       (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com', 'England or Wales', true, true);
+       (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
+       (34, '07/01/26', '07/01/26', 71, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', 'Danielle Dias', 'danielle.dias@madetech.com', 'England or Wales', true, true),
+       (35, '07/02/26', '07/02/26', 72, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', 'Ben Johnson', 'benjamin.johnson@madetech.com', 'England or Wales', true, true);
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -354,9 +362,9 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later, tenancy_provide_later)
-VALUES (39, true, 1, 0, 0, 71, 47, '05/02/25', '05/02/25', null, 1,
+VALUES (39, true, 1, 0, 0, 79, 47, '05/02/25', '05/02/25', null, 1,
         1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true),
-       (40, true, 1, 1, 2, 72, 48, '05/02/25', '05/02/25', 9, 1,
+       (40, true, 1, 1, 2, 80, 48, '05/02/25', '05/02/25', 9, 1,
         1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', null, null),
        (41, true, 1, 0, 0, 73, 49, '05/02/25', '05/02/25', 10, 1,
         1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', null, true),

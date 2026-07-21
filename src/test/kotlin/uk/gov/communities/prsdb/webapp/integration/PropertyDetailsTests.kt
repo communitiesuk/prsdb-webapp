@@ -322,30 +322,27 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class NotificationBanner {
             @Test
-            fun `is visible and includes correct messages when all certs are missing`(page: Page) {
+            fun `is not visible when certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
 
             @Test
-            fun `is visible and includes correct messages when all certs are expired`(page: Page) {
+            fun `is not visible when certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
 
             @Test
-            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
+            fun `is not visible when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
 
             @Test
