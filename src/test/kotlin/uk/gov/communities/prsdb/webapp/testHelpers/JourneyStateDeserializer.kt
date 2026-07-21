@@ -29,10 +29,29 @@ class JourneyStateDeserializer : StdDeserializer<FormData>(Map::class.java) {
                     this.asText()
                 }
             }
-            this.isNumber -> this.numberValue()
-            this.isBoolean -> this.booleanValue()
-            this.isNull -> null
-            this.isObject -> deserialize(this.traverse(parser.codec), context)
-            else -> this
+
+            this.isNumber -> {
+                this.numberValue()
+            }
+
+            this.isBoolean -> {
+                this.booleanValue()
+            }
+
+            this.isNull -> {
+                null
+            }
+
+            this.isArray -> {
+                this.map { it.deserializeValue(parser, context) }
+            }
+
+            this.isObject -> {
+                deserialize(this.traverse(parser.codec), context)
+            }
+
+            else -> {
+                this
+            }
         }
 }
