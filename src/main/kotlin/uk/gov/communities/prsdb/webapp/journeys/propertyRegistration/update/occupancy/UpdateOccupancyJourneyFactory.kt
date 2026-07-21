@@ -215,6 +215,8 @@ class UpdateOccupancyJourney(
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
 interface UpdateOccupancyJourneyState :

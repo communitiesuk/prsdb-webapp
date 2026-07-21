@@ -2,113 +2,95 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
+@ExtendWith(MockitoExtension::class)
 class HouseholdStepConfigProvideLaterTests {
     private val realFeatureFlagManager = FeatureFlagManager(uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser())
 
     private val routeSegment = HouseholdStep.ROUTE_SEGMENT
 
-    private fun makeState(data: Map<String, Any?>?): HouseholdsAndTenantsState =
-        object : HouseholdsAndTenantsState {
-            override val households = HouseholdStep(HouseholdStepConfig(realFeatureFlagManager))
-            override val tenants = TenantsStep(TenantsStepConfig())
-            override val provideTenancyDetailsLaterStep = ProvideTenancyDetailsLaterStep(ProvideTenancyDetailsLaterStepConfig())
+    @Mock
+    lateinit var mockJourneyState: HouseholdsAndTenantsState
 
-            override fun getStepData(key: String) = data
-
-            override fun addStepData(
-                key: String,
-                value: uk.gov.communities.prsdb.webapp.journeys.FormData,
-            ) {}
-
-            override fun clearStepData(key: String) {}
-
-            override fun getSubmittedStepData(): Map<String, Any?> = mapOf()
-
-            override val journeyId: String = "test"
-            override val journeyMetadata: JourneyMetadata = JourneyMetadata.createNew("test")
-
-            override fun deleteJourney() {}
-
-            override fun initializeState(seed: Any?): String = "test"
-
-            override fun initializeOrRestoreState(seed: Any?) = "test"
-
-            override fun save(): uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState =
-                uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState(
-                    uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser("test"),
-                    "test",
-                )
-
-            override fun setJourneyId(newJourneyId: String) {}
-
-            override fun copyJourneyTo(newJourneyId: String) {}
-
-            override fun bindKeyRegistry(registry: uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry) {}
-        }
+    private fun setupStepConfig(): HouseholdStepConfig {
+        val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
+        stepConfig.routeSegment = routeSegment
+        stepConfig.validator = AlwaysTrueValidator()
+        return stepConfig
+    }
 
     @Test
     fun `Mode returns null when form model is not present`() {
-        val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
-        stepConfig.routeSegment = HouseholdStep.ROUTE_SEGMENT
-        stepConfig.validator =
-            object : org.springframework.validation.Validator {
-                override fun supports(clazz: Class<*>): Boolean = true
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(null)
 
-                override fun validate(
-                    target: Any,
-                    errors: org.springframework.validation.Errors,
-                ) {}
-            }
-        val state = makeState(null)
-
-        val result = stepConfig.mode(state)
+        val result = stepConfig.mode(mockJourneyState)
 
         assertNull(result)
     }
 
     @Test
     fun `Mode returns COMPLETE when numberOfHouseholds present and action is not provideThisLater`() {
-        val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
-        stepConfig.routeSegment = HouseholdStep.ROUTE_SEGMENT
-        stepConfig.validator =
-            object : org.springframework.validation.Validator {
-                override fun supports(clazz: Class<*>): Boolean = true
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("numberOfHouseholds" to "2", "action" to "continue"))
 
-                override fun validate(
-                    target: Any,
-                    errors: org.springframework.validation.Errors,
-                ) {}
-            }
-        val state = makeState(mapOf("numberOfHouseholds" to "2", "action" to "continue"))
-
-        val result = stepConfig.mode(state)
+        val result = stepConfig.mode(mockJourneyState)
 
         assertEquals(HouseholdMode.COMPLETE, result)
     }
 
     @Test
     fun `Mode returns PROVIDE_THIS_LATER when action is provideThisLater`() {
-        val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
-        stepConfig.routeSegment = HouseholdStep.ROUTE_SEGMENT
-        stepConfig.validator =
-            object : org.springframework.validation.Validator {
-                override fun supports(clazz: Class<*>): Boolean = true
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(true)
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("numberOfHouseholds" to "", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME))
 
-                override fun validate(
-                    target: Any,
-                    errors: org.springframework.validation.Errors,
-                ) {}
-            }
-        val state = makeState(mapOf("numberOfHouseholds" to "", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME))
-
-        val result = stepConfig.mode(state)
+        val result = stepConfig.mode(mockJourneyState)
 
         assertEquals(HouseholdMode.PROVIDE_THIS_LATER, result)
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ["", "2"]) 
+    fun `Mode returns PROVIDE_THIS_LATER for various numberOfHouseholds when action is provideThisLater`(numberOfHouseholds: String?) {
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(true)
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf("numberOfHouseholds" to numberOfHouseholds, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+        )
+
+        val result = stepConfig.mode(mockJourneyState)
+
+        assertEquals(HouseholdMode.PROVIDE_THIS_LATER, result)
+    }
+
+    @Test
+    fun `Mode throws when action is provideThisLater but route is disallowed`() {
+        val stepConfig = setupStepConfig()
+
+        whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test")
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf("numberOfHouseholds" to "", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+        )
+
+        assertThrows(UnrecoverableJourneyStateException::class.java) {
+            stepConfig.mode(mockJourneyState)
+        }
     }
 }

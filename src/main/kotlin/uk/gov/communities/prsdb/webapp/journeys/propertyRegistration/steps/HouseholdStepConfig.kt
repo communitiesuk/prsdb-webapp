@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 
@@ -24,9 +25,7 @@ class HouseholdStepConfig(
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
-            // Show secondary button for registration journeys
-            // TODO: PDJB-942: Update journeys should override this behaviour
-            "showSecondarySubmitButton" to true,
+            "showSecondarySubmitButton" to state.allowProvideTenancyDetailsLaterRoute,
         )
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
@@ -39,7 +38,15 @@ class HouseholdStepConfig(
     override fun mode(state: HouseholdsAndTenantsState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                HouseholdMode.PROVIDE_THIS_LATER
+                if (state.allowProvideTenancyDetailsLaterRoute) {
+                    HouseholdMode.PROVIDE_THIS_LATER
+                } else {
+                    // This should never happen as the button to trigger this action should not be shown
+                    throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "The 'Provide this later' route is not available for this journey",
+                    )
+                }
             } else {
                 HouseholdMode.COMPLETE
             }

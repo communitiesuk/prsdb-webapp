@@ -9,4 +9,5 @@ interface HouseholdsAndTenantsState : JourneyState {
     val households: HouseholdStep
     val tenants: TenantsStep
     val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep
+    val allowProvideTenancyDetailsLaterRoute: Boolean
 }

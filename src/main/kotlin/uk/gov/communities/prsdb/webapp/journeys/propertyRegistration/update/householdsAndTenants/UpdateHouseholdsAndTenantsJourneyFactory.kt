@@ -141,6 +141,8 @@ class UpdateHouseholdsAndTenantsJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
 interface UpdateHouseholdsAndTenantsJourneyState :
