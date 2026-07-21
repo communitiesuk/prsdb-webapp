@@ -46,7 +46,12 @@ class HouseholdStepConfigProvideLaterTests {
     @Test
     fun `Mode returns COMPLETE when numberOfHouseholds present and action is not provideThisLater`() {
         val stepConfig = setupStepConfig()
-        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("numberOfHouseholds" to "2", "action" to "continue"))
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf(
+                "numberOfHouseholds" to "2",
+                "action" to "continue",
+            ),
+        )
 
         val result = stepConfig.mode(mockJourneyState)
 
@@ -57,7 +62,12 @@ class HouseholdStepConfigProvideLaterTests {
     fun `Mode returns PROVIDE_THIS_LATER when action is provideThisLater`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(true)
-        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("numberOfHouseholds" to "", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME))
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf(
+                "numberOfHouseholds" to "",
+                "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
+            ),
+        )
 
         val result = stepConfig.mode(mockJourneyState)
 
@@ -66,12 +76,15 @@ class HouseholdStepConfigProvideLaterTests {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(strings = ["", "2"]) 
+    @ValueSource(strings = ["", "2"])
     fun `Mode returns PROVIDE_THIS_LATER for various numberOfHouseholds when action is provideThisLater`(numberOfHouseholds: String?) {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(true)
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
-            mapOf("numberOfHouseholds" to numberOfHouseholds, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+            mapOf(
+                "numberOfHouseholds" to numberOfHouseholds,
+                "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
+            ),
         )
 
         val result = stepConfig.mode(mockJourneyState)
@@ -86,7 +99,10 @@ class HouseholdStepConfigProvideLaterTests {
         whenever(mockJourneyState.allowProvideTenancyDetailsLaterRoute).thenReturn(false)
         whenever(mockJourneyState.journeyId).thenReturn("test")
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
-            mapOf("numberOfHouseholds" to "", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+            mapOf(
+                "numberOfHouseholds" to "",
+                "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
+            ),
         )
 
         assertThrows(UnrecoverableJourneyStateException::class.java) {
