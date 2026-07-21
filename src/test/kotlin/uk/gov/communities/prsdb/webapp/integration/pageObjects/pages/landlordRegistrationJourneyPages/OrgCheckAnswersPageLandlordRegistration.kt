@@ -27,8 +27,6 @@ class OrgCheckAnswersPageLandlordRegistration(
 
     val mainContactCard = SummaryCard(page, "Main contact")
 
-    // The flat "Landlord details" summary list is the second summary list on the page
-    // (after the "Your details" card's list).
     val landlordDetails = LandlordDetailsSummaryList(page)
 
     class LandlordDetailsSummaryList(
