@@ -121,18 +121,18 @@ class PropertyDetailsControllerTests(
         @ParameterizedTest(name = "when the provide later feature is {0}")
         @ValueSource(booleans = [true, false])
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails adds provideLaterEnabled to the model reflecting the provide later feature`(featureEnabled: Boolean) {
+        fun `getPropertyDetails adds provideLaterEnabled to the model reflecting the provide later feature`(isFeatureEnabled: Boolean) {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(featureEnabled)
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(isFeatureEnabled)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(featureEnabled))) }
+                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(isFeatureEnabled))) }
             }
         }
 
