@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -96,7 +96,6 @@ class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutable
 
     @BeforeEach
     fun setUp() {
-        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("example.com"))
         whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
@@ -119,6 +118,24 @@ class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutable
         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
         assertThat(propertyDetailsPage.page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
     }
+
+    @Nested
+    inner class BeforePdjb939Layout {
+        // Flag-off (legacy) property record layout. Delete this class when PDJB-939 is permanently on.
+        @BeforeEach
+        fun disableFlag() {
+            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        }
+
+        @Test
+        fun `the property bedrooms update commit button is tagged for the Plausible Transaction event`(page: Page) {
+            val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            propertyDetailsPage.beforePdjb939SummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+
+            assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+            assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
+        }
+    }
 }
 
 class AcceptJointLandlordInvitationTransactionEventTests :
@@ -127,7 +144,6 @@ class AcceptJointLandlordInvitationTransactionEventTests :
 
     @BeforeEach
     fun setup() {
-        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 

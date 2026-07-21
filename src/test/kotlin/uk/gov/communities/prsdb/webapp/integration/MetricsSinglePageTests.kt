@@ -130,6 +130,28 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
     }
 
     @Test
+    fun `the 2031 cohort counts joint landlord joins and reports positive durations`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("1", "1", "2031", "31", "12", "2031")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.metricsList.rowValue(0)).containsText("4")
+        assertThat(reloadedPage.metricsList.rowValue(1)).containsText("4")
+        assertThat(reloadedPage.metricsList.rowValue(2)).containsText("1")
+        assertThat(reloadedPage.metricsList.rowValue(3)).containsText("4")
+        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("2 days")
+        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("2 days")
+        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("2 days")
+        assertThat(reloadedPage.metricsList.rowKey(4))
+            .containsText("Median time between registration and first property registration or joining an existing property")
+        assertThat(reloadedPage.metricsList.rowKey(5))
+            .containsText("90th percentile time between registration and first property registration or joining an existing property")
+        assertThat(reloadedPage.metricsList.rowKey(6))
+            .containsText("95th percentile time between registration and first property registration or joining an existing property")
+    }
+
+    @Test
     fun `submitting a valid date range renders the CloudWatch utilisation and error rate rows from the local stub`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()
 

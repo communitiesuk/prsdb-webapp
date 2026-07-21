@@ -6,20 +6,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -27,13 +20,6 @@ import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun disableProvideLaterFlagByDefault() {
-        // The existing tests assert the released (legacy) property record layout. The new layout is covered
-        // separately in the NewRegistrationLayout nested class, which re-enables the flag.
-        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-    }
-
     @Nested
     inner class PropertyDetailsLandlordView {
         @Test
@@ -89,16 +75,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
-        }
-
-        @Test
         fun `individual property shows invite text link and not invite button on landlord tab`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -109,8 +86,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `joint property with multiple landlords shows invite button on landlord tab`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -121,8 +96,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `joint property with sole landlord shows mark as single landlord inset text on landlord tab and invite button`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
             val detailsPage = navigator.goToPropertyDetailsLandlordView(13)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -229,8 +202,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -241,8 +212,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `multiple landlord cards are displayed with logged in user first then alphabetically`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -258,37 +227,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val thirdCard = detailsPage.landlordSummaryCards[2]
                 assertEquals("Tobias Evans", thirdCard.title.getText())
                 assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
-            }
-        }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled {
-            @Test
-            fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                detailsPage.landlordSummaryList.nameRow
-                    .valueLinkByText("Alexander Smith")
-                    .clickAndWait()
-
-                val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-
-                landlordDetailsPage.backLink.clickAndWait()
-                val detailsPageAfterBack =
-                    assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
-                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
-            }
-
-            @Test
-            fun `when joint landlords flag is disabled the landlord tab shows the old landlord details list`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                assertEquals(0, detailsPage.landlordSummaryCards.size)
-                assertThat(detailsPage.landlordSummaryList.nameRow).isVisible()
             }
         }
     }
@@ -335,19 +273,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
-        @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
-        }
-
         @Nested
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -359,8 +288,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -373,8 +300,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             @Test
             fun `when joint landlords flag is enabled the landlord cards have a view landlord record action`(page: Page) {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -386,31 +311,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 )
                 assertThat(actionLink).hasAttribute("target", "_blank")
                 assertThat(actionLink).hasAttribute("rel", "noreferrer noopener")
-            }
-        }
-
-        @Nested
-        inner class LandlordDetailsJointLandlordsDisabled {
-            @Test
-            fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
-                featureFlagManager.disableFeature(JOINT_LANDLORDS)
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-                detailsPage.tabs.goToLandlordDetails()
-
-                detailsPage.landlordSummaryList.nameRow
-                    .valueLinkByText("Alexander Smith")
-                    .clickAndWait()
-
-                val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
-
-                landlordDetailsPage.backLink.clickAndWait()
-                val detailsPageAfterBack =
-                    assertPageIs(
-                        page,
-                        PropertyDetailsPageLocalCouncilView::class,
-                        mapOf("propertyOwnershipId" to "1"),
-                    )
-                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
             }
         }
 
@@ -460,11 +360,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
     @Nested
     inner class PropertyDetailsInvitations : NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
-        @BeforeEach
-        fun enableJointLandlordsFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `property details page shows pending invitations section with correct email`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
@@ -501,17 +396,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired on")
         }
-
-        @Test
-        fun `invitation sections are not shown when feature flag is disabled`(page: Page) {
-            featureFlagManager.disableFeature(JOINT_LANDLORDS)
-
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
-            detailsPage.tabs.goToLandlordDetails()
-
-            assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)
-            assertThat(detailsPage.expiredInvitationsDetails).hasCount(0)
-        }
     }
 
     @Nested
@@ -519,11 +403,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
             "data-joint-landlord-invitation.sql",
         ) {
-        @BeforeEach
-        fun setup() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-        }
-
         @Test
         fun `clicking send new invitation email on a pending invitation shows success banner`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
@@ -554,39 +433,67 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class NewRegistrationLayout {
+    inner class BeforePdjb939Layout {
+        // Flag-off (legacy) property record layout. Delete this class when PDJB-939 is permanently on.
         @BeforeEach
-        fun enableFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        fun disableFlag() {
+            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         }
 
         @Test
-        fun `landlord view groups the property record into the new sections`(page: Page) {
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsTab {
+        @Test
+        fun `landlord view groups the property record into sections`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
 
             assertThat(detailsPage.sectionHeading("Property details")).isVisible()
             assertThat(detailsPage.sectionHeading("Ownership")).isVisible()
             assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
             assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
-            assertThat(detailsPage.newLayoutSummaryList.ownershipTypeRow.value).isVisible()
-            assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
 
             assertThat(detailsPage.sectionHeading("Licensing information")).not().isVisible()
             assertThat(detailsPage.sectionHeading("Tenancy and rental information")).not().isVisible()
         }
 
         @Test
-        fun `landlord view shows a provide later licensing row when licensing is skipped`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
 
-            assertThat(detailsPage.newLayoutSummaryList.licensingRow.value).containsText("Provide this later")
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
-        fun `local council view shows a provide later licensing paragraph when licensing is skipped`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
 
-            assertThat(detailsPage.bodyParagraph("The landlords must provide these details")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `landlord view hides the tenancy section for an unoccupied property`(page: Page) {
+            // Property 12: unoccupied, no licence, tenancy details not applicable.
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(12)
+
+            assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+            assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
         }
 
         @Nested
@@ -605,12 +512,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows provide later rows with the deadline date for both licensing and tenancy`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(
-                    detailsPage.newLayoutSummaryList.licensingRow.value,
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
                 ).containsText("Provide this later (before $expectedDeadline)")
-                assertThat(detailsPage.newLayoutSummaryList.tenancyRow.value).containsText("Provide this later (before $expectedDeadline)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
             }
 
             @Test
@@ -646,20 +555,20 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows a provide later licensing row and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("No")
-                assertThat(detailsPage.newLayoutSummaryList.licensingRow.value)
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value)
                     .containsText("Provide this later (within 28 days of the property being occupied)")
                 assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
             }
 
             @Test
-            fun `local council view shows not provided paragraphs for licensing and tenancy`(page: Page) {
+            fun `local council view shows a not provided licensing paragraph and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(9)
 
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
-                ).hasCount(2)
+                ).hasCount(1)
             }
 
             @Test
@@ -679,8 +588,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
             }
 
             @Test
@@ -688,8 +597,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(40)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
@@ -711,20 +620,20 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows the licensing type and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
 
-                assertThat(detailsPage.newLayoutSummaryList.occupancyRow.value).containsText("No")
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
             }
 
             @Test
-            fun `local council view shows the licensing type and a not provided tenancy paragraph`(page: Page) {
+            fun `local council view shows the licensing type and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
-                ).hasCount(1)
+                ).hasCount(0)
             }
         }
 
@@ -742,9 +651,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `landlord view shows the licensing type and a tenancy provide-later row with the deadline date`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.tenancyRow.value).containsText("Provide this later (before $expectedDeadline)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
             }
 
             @Test
@@ -761,7 +672,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `local council view shows a tenancy provide-later paragraph and a tenancy-only notification banner`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
 
-                assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)
@@ -787,9 +698,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
 
                 assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
-                    detailsPage.newLayoutSummaryList.licensingRow.value,
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
                 ).containsText("Provide this later (before $expectedDeadline)")
             }
 
@@ -807,7 +718,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             fun `local council view shows a licensing provide-later paragraph and a licensing-only notification banner`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
 
-                assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(1)

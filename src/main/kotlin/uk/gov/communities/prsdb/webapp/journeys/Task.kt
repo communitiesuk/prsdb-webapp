@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<in TState : JourneyState> {
+abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit
@@ -46,6 +46,20 @@ abstract class Task<in TState : JourneyState> {
     }
 
     abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
+
+    // A duplicable task (one that owns its own steps and acts as its own state) sources its
+    // JourneyState behaviour from its own journeyStateService; the only value it needs at
+    // build time is its route prefix, used to namespace its stored data keys. The TaskInitialiser
+    // calls this from build(). The default no-op keeps journey-stated tasks unaffected.
+    // End state: once every task is duplicable, this stops being open/no-op and the route becomes
+    // a plain field the TaskInitialiser always populates.
+    open fun bindRoute(routePrefix: String?) {}
+
+    // A task that owns delegate keys (a duplicable task) attaches its own provider to the journey-build-wide
+    // DelegateKeyRegistry here, so its route-scoped keys are checked for collisions against the journey state and
+    // every other task. The TaskInitialiser calls this from build(), AFTER bindRoute so keys resolve to their final
+    // route-scoped form. The default no-op keeps journey-stated tasks (which own no keys) unaffected.
+    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {}
 
     fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
 
