@@ -1564,6 +1564,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `User can choose to provide tenancy details later if their property is occupied`(page: Page) {
             navigator.skipToTenancyDetailsHouseholdsPage()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            assertThat(householdsPage.provideThisLaterButton).isVisible()
 
             householdsPage.submitProvideThisLater()
             val provideTenancyDetailsLaterPage = assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class) 
@@ -1800,6 +1801,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Number of households - render page
             assertThat(householdsPage.header).containsText("Households in your property")
             assertThat(householdsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
+            assertThat(householdsPage.provideThisLaterButton).isHidden()
             // fill in and submit
             householdsPage.submitNumberOfHouseholds(2)
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)

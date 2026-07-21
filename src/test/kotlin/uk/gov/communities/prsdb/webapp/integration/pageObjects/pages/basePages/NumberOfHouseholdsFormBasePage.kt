@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -18,6 +19,7 @@ abstract class NumberOfHouseholdsFormBasePage(
     val form = NumOfHouseholdsForm(page)
     val header = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
+    val provideThisLaterButton = Button.byText(page, "Provide this later")
 
     fun submitNumberOfHouseholds(num: Int) = submitNumberOfHouseholds(num.toString())
 
