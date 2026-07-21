@@ -5,15 +5,12 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 
 data class ReportingPeriod(
     val start: Instant,
     val end: Instant,
 ) {
     companion object {
-        private val UK_ZONE = ZoneId.of("Europe/London")
-
         /**
          * Builds an inclusive reporting period for the given date range, interpreted in UK time:
          * the period starts at 00:00:00 on the [from] date and ends at the last instant of the [to] date.
@@ -28,7 +25,7 @@ data class ReportingPeriod(
             val now = clock.instant()
             val todayInUk = DateTimeHelper(clock).getCurrentDateInUK().toJavaLocalDate()
 
-            val start = from.atStartOfDay(UK_ZONE).toInstant()
+            val start = from.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
             val end =
                 if (to == todayInUk) {
                     now
