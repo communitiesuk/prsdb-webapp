@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -113,12 +114,16 @@ class OrgLandlordRegistrationTask(
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 parents { journey.orgPhoneNumberStep.isComplete() }
-                nextStep { journey.leadTrusteeNameStep }
+                nextDestination { mode ->
+                    when (mode) {
+                        OrgTypeMode.INCLUDES_TRUST -> Destination(journey.leadTrusteeNameStep)
+                        OrgTypeMode.EXCLUDES_TRUST -> Destination(journey.orgCharityStep)
+                    }
+                }
             }
-            // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.leadTrusteeNameStep) {
                 routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
+                parents { journey.orgTypeStep.hasOutcome(OrgTypeMode.INCLUDES_TRUST) }
                 nextStep { journey.leadTrusteeDobStep }
             }
             step(journey.leadTrusteeDobStep) {
@@ -137,13 +142,17 @@ class OrgLandlordRegistrationTask(
                 nextStep { journey.trusteeAddressTask.firstStep }
             }
             duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT) {
-                parents { journey.leadTrusteePhoneStep.isComplete() }
-                // TODO PDJB-1257: reroute to the exit point of the trustee section
+                parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgCharityStep }
             }
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents { journey.trusteeAddressTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.trusteeAddressTask.isComplete(),
+                        journey.orgTypeStep.hasOutcome(OrgTypeMode.EXCLUDES_TRUST),
+                    )
+                }
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
