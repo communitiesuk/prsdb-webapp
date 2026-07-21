@@ -78,9 +78,8 @@ The deployed `AwsCostExplorerMetricsClient` calls Cost Explorer's `GetCostAndUsa
 `us-east-1`. Its query is account-wide: it has no tag, service, or resource filter and no grouping. It
 uses `DAILY` granularity and the `UnblendedCost` metric.
 
-The request intentionally omits `BillingViewArn`, so Cost Explorer uses the hosting environment
-account's primary billing view. For a member or standalone account, that view contains the costs for
-that account, which is the dashboard's required scope.
+The request intentionally omits `BillingViewArn`. Cost Explorer therefore returns the costs available
+to the hosting AWS account, which is the dashboard's required scope.
 
 The dashboard reporting range is inclusive in UK time. Cost Explorer's end date is exclusive, so the
 client sends the selected end date plus one day. It follows all pagination tokens, sums the returned daily
@@ -99,13 +98,15 @@ Current-month data usually takes about 24 hours to appear and refreshes at least
 current-month values may remain estimated until AWS completes billing reconciliation after month end. A
 management account can also restrict a member account's access.
 
-Infrastructure PR [`communitiesuk/prsdb-infra#309`](https://github.com/communitiesuk/prsdb-infra/pull/309)
-grants `ce:GetCostAndUsage` only for
-`arn:aws:billing::<environment-account-id>:billingview/primary`, matching the client's implicit
-primary-view request. The application does not enumerate or inspect billing views and does not use the
-billing console, so it does not require `billing:ListBillingViews`, `billing:GetBillingView`, or legacy
-`aws-portal:ViewBilling`. The infra policy must be deployed before the live query can succeed. Enabling
-the account and populating data still require verification in the target environment.
+Live integration testing showed that, when `BillingViewArn` is omitted, AWS authorizes
+`ce:GetCostAndUsage` against `arn:aws:ce:us-east-1:<account-id>:/GetCostAndUsage`. Infrastructure PR
+[`communitiesuk/prsdb-infra#309`](https://github.com/communitiesuk/prsdb-infra/pull/309) must therefore
+grant only the `ce:GetCostAndUsage` action with `Resource = "*"`. The wildcard resource applies only to
+that action; it does not grant any other Cost Explorer or billing actions. The application does not
+enumerate or inspect billing views and does not use the billing console, so it does not require
+`billing:ListBillingViews`, `billing:GetBillingView`, or legacy `aws-portal:ViewBilling`. The infra
+policy must be deployed before the live query can succeed. Enabling the account and populating data
+still require verification in the target environment.
 
 ## CloudWatch infrastructure metrics
 

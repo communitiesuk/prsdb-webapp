@@ -102,6 +102,7 @@ class AwsCostExplorerMetricsClientTests {
         val request = requestCaptor.firstValue
         assertEquals(Granularity.DAILY, request.granularity())
         assertEquals(listOf("UnblendedCost"), request.metrics())
+        assertNull(request.billingViewArn())
         assertNull(request.filter())
         assertEquals(emptyList(), request.groupBy())
     }
