@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
@@ -347,10 +347,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a valid lead trustee phone number advances to the lead trustee date of birth step`(page: Page) {
+        fun `submitting a valid lead trustee phone number advances to the lead trustee address step`(page: Page) {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
             leadTrusteePhonePage.submitPhoneNumber("07123456789")
-            assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
         }
     }
 
@@ -380,17 +380,17 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a valid date of birth advances to the lead trustee address step`(page: Page) {
+        fun `submitting a valid date of birth advances to the lead trustee email step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("15", "6", "1980")
-            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
         }
 
         @Test
-        fun `submitting a valid date of birth with leading zeros advances to the lead trustee address step`(page: Page) {
+        fun `submitting a valid date of birth with leading zeros advances to the lead trustee email step`(page: Page) {
             val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
             leadTrusteeDobPage.submitDate("05", "06", "1980")
-            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+            assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
         }
     }
 
