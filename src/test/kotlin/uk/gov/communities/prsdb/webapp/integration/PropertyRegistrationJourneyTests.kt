@@ -88,6 +88,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
@@ -1556,6 +1557,20 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        // TODO PDJB-942: Add test for unoccupied when branching logic is added
+        @Test
+        fun `User can choose to provide tenancy details later if their property is occupied`(page: Page) {
+            navigator.skipToTenancyDetailsHouseholdsPage()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+
+            householdsPage.submitProvideThisLater()
+            val provideTenancyDetailsLaterPage = assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class) 
+            
+            // Provide Tenancy Details Later - render page
+            assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
+            assertThat(provideTenancyDetailsLaterPage.heading).containsText("TODO: PDJB-942 - Provide tenancy details later")
         }
 
         @Test
