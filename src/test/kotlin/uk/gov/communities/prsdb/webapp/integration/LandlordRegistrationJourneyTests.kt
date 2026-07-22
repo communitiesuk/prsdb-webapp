@@ -290,24 +290,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
-        leadTrusteeNamePage.submitName("Test Lead Trustee Name")
-
-        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
-        leadTrusteeDobPage.submitDate("15", "6", "1980")
-
-        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
-        leadTrusteeEmailPage.submitEmail("trustee@test.com")
-
-        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
-        leadTrusteePhonePage.submitPhoneNumber("07123456789")
-
-        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
-        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-
-        val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
-        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
-
         val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitYes()
 
@@ -330,6 +312,36 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
 
         // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+    }
+
+    @Test
+    fun `Selecting trust on org type shows lead trustee questions before proceeding to charity`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
+        leadTrusteeNamePage.submitName("Test Lead Trustee Name")
+
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
+
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        leadTrusteeEmailPage.submitEmail("trustee@test.com")
+
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
+        leadTrusteePhonePage.submitPhoneNumber("07123456789")
+
+        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val leadTrusteeSelectAddressPage =
+            assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
+        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
     }
 
     @Test
