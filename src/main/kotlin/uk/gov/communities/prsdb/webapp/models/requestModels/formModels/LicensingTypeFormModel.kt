@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
@@ -22,7 +23,7 @@ class LicensingTypeFormModel : FormModel {
 
     var action: String? = null
 
-    fun licensingTypeIsValidForAction(): Boolean = action == "provideThisLater" || licensingType != null
+    fun licensingTypeIsValidForAction(): Boolean = action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME || licensingType != null
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): LicensingTypeFormModel =
