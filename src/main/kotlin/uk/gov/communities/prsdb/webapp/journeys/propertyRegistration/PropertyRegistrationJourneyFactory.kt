@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -98,14 +97,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithProvideLaterAllowed
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
@@ -508,7 +504,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
-                task(journey.tenancyDetailsTask) {
+                duplicableTask(journey.tenancyDetailsTask) {
                     parents {
                         AndParents(
                             journey.epcTask.isComplete(),
@@ -594,13 +590,6 @@ class PropertyRegistrationJourney(
     override val licensingTask: LicensingTask,
     // Occupation steps
     override val occupied: OccupiedStep,
-    // Nested households and tenants task
-    override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    // Nested rent includes bills task
-    override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val furnishedStatus: FurnishedStatusStep,
-    // Nested rent frequency and amount task
-    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels, bedrooms override) when the old journey is removed.
@@ -702,7 +691,12 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
-    override val bedrooms: BedroomsStep = propertyDetailsTask.bedrooms
+    // Legacy steps and tasks that should be removed when the legacy structure is retired
+    override val bedrooms = propertyDetailsTask.bedrooms
+    override val householdsAndTenantsTask = tenancyDetailsTask.householdsAndTenantsTask
+    override val rentIncludesBillsTask = tenancyDetailsTask.rentIncludesBillsTask
+    override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
+    override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
@@ -748,7 +742,6 @@ class PropertyRegistrationJourney(
 interface PropertyRegistrationJourneyState :
     OccupationState,
     InviteJointLandlordsTaskDependencies,
-    TenancyDetailsState,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
