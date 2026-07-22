@@ -291,7 +291,7 @@ class PropertyRegistrationJourneyFactory(
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                     withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
                 } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.old.heading")
+                    withHeadingMessageKey("registerProperty.taskList.register.heading")
                 }
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }

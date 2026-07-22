@@ -92,7 +92,7 @@ class PropertyRegistrationTaskListStepConfig(
             if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                 "registerProperty.taskList.register.restructureAndSkipping.heading"
             } else {
-                "registerProperty.taskList.register.old.heading"
+                "registerProperty.taskList.register.heading"
             }
 
         return listOf(
