@@ -1559,7 +1559,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        // TODO PDJB-942: Add test for unoccupied when branching logic is added
         @Test
         fun `User can choose to provide tenancy details later if their property is occupied`(page: Page) {
             navigator.skipToTenancyDetailsHouseholdsPage()
