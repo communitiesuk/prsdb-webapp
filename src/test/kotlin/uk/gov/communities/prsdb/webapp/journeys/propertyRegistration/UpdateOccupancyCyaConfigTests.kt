@@ -166,6 +166,9 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
         lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn("500")
+        lenient()
+            .`when`(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING))
+            .thenReturn(false)
     }
 
     @Test
@@ -396,5 +399,63 @@ class UpdateOccupancyCyaConfigTests {
             rentAmount = if (isOccupied) "500".toBigDecimal() else null,
             initialLastModifiedDate = initialLastModifiedDate,
         )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded only updates the occupancy status when the restructure feature is enabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockPropertyOwnershipService).updateIsOccupied(
+            id = propertyId,
+            isOccupied = true,
+            initialLastModifiedDate = initialLastModifiedDate,
+        )
+        verify(mockPropertyOwnershipService, never()).updateOccupancy(
+            id = org.mockito.kotlin.any(),
+            isOccupied = org.mockito.kotlin.any(),
+            numberOfHouseholds = org.mockito.kotlin.any(),
+            numberOfPeople = org.mockito.kotlin.any(),
+            numBedrooms = org.mockito.kotlin.anyOrNull(),
+            billsIncludedList = org.mockito.kotlin.anyOrNull(),
+            customBillsIncluded = org.mockito.kotlin.anyOrNull(),
+            furnishedStatus = org.mockito.kotlin.anyOrNull(),
+            rentFrequency = org.mockito.kotlin.anyOrNull(),
+            customRentFrequency = org.mockito.kotlin.anyOrNull(),
+            rentAmount = org.mockito.kotlin.anyOrNull(),
+            initialLastModifiedDate = org.mockito.kotlin.any(),
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded only sends the occupancy bullet when the restructure feature is enabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
+            eq(propertyId),
+            eq(listOf("Whether the property is occupied by tenants")),
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded deletes the journey then rethrows an UpdateConflictException when the restructure feature is enabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+        whenever(
+            mockPropertyOwnershipService.updateIsOccupied(
+                id = propertyId,
+                isOccupied = true,
+                initialLastModifiedDate = initialLastModifiedDate,
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 }

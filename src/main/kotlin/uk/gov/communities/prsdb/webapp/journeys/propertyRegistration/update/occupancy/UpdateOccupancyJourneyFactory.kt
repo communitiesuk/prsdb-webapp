@@ -4,14 +4,18 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -29,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -40,6 +45,7 @@ import java.security.Principal
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -58,14 +64,86 @@ class UpdateOccupancyJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
+        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            if (isRestructured) {
+                restructuredMainJourneyMap(state, propertyId)
+            } else {
+                legacyMainJourneyMap(state, propertyId)
+            }
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            if (isRestructured) {
+                restructuredCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            } else {
+                legacyCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            }
         }
     }
 
-    private fun mainJourneyMap(
+    private fun restructuredMainJourneyMap(
+        state: UpdateOccupancyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            step(journey.occupied) {
+                routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                initialStep()
+                backUrl { propertyDetailsRoute }
+                nextStep { journey.cyaStep }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                    )
+                }
+            }
+            step(journey.cyaStep) {
+                routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.YES),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                    )
+                }
+                nextUrl { propertyDetailsRoute }
+            }
+        }
+    }
+
+    private fun restructuredCheckYourAnswersJourneyMap(
+        state: UpdateOccupancyJourney,
+        checkingAnswersFor: String,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            configure {
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                OccupiedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+            }
+            configureStep(journey.occupied) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+    }
+
+    // Legacy (flag-off) journey — delete when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun legacyMainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -90,7 +168,8 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun checkYourAnswersJourneyMap(
+    // Legacy (flag-off) journey — delete when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun legacyCheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,

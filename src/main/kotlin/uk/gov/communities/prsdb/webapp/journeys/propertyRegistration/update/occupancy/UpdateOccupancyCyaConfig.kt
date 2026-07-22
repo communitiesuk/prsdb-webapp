@@ -26,18 +26,15 @@ class UpdateOccupancyCyaConfig(
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> {
-        val isRestructureAndSkippingEnabled =
-            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
-        return mapOf(
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
+        mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
             "summaryListData" to
-                if (isRestructureAndSkippingEnabled) {
-                    occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)
+                if (isRestructured()) {
+                    occupancyDetailsHelper.getOccupancyStatusOnlySummaryList(state)
                 } else {
                     occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
                 },
@@ -48,11 +45,35 @@ class UpdateOccupancyCyaConfig(
                     "forms.update.checkOccupancy.notOccupied.summaryName"
                 },
         )
-    }
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
-        val isRestructureAndSkippingEnabled =
-            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        if (isRestructured()) {
+            updateOccupancyStatusOnly(state)
+            return
+        }
+        legacyUpdateOccupancy(state)
+    }
+
+    private fun updateOccupancyStatusOnly(state: UpdateOccupancyJourneyState) {
+        val isOccupied = isOccupied(state)
+        try {
+            propertyOwnershipService.updateIsOccupied(
+                id = state.propertyId,
+                isOccupied = isOccupied,
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
+        propertyUpdateEmailService.sendUpdateEmails(
+            state.propertyId,
+            listOf("Whether the property is occupied by tenants"),
+        )
+    }
+
+    // Legacy (flag-off) behaviour — delete when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun legacyUpdateOccupancy(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
@@ -76,7 +97,7 @@ class UpdateOccupancyCyaConfig(
                         0
                     },
                 numBedrooms =
-                    if (isRestructureAndSkippingEnabled) {
+                    if (isRestructured()) {
                         state.initialNumberOfBedrooms
                     } else if (isOccupied) {
                         state.bedrooms.formModel
@@ -122,6 +143,8 @@ class UpdateOccupancyCyaConfig(
     }
 
     private fun isOccupied(state: UpdateOccupancyJourneyState) = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+
+    private fun isRestructured() = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 }
 
 @JourneyFrameworkComponent

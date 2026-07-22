@@ -128,7 +128,8 @@ class PropertyOwnershipService(
         propertyOwnershipId: Long,
         baseUserId: String,
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
+    ): Boolean =
+        getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,
@@ -145,12 +146,14 @@ class PropertyOwnershipService(
         landlordId: Long,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLocalCouncilViewModel> =
-        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
-            RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
-                propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
-            )
-        }
+        propertyOwnershipRepository
+            .findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)
+            .map { propertyOwnership ->
+                RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
+                    propertyOwnership,
+                    currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
+                )
+            }
 
     fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =
         propertyOwnershipRepository
@@ -269,6 +272,25 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        if (!wasOccupied && propertyOwnership.isOccupied) {
+            propertyOwnership.lastOccupiedDate = LocalDate.now()
+        }
+        if (!propertyOwnership.isOccupied) {
+            propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
+        }
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateIsOccupied(
+        id: Long,
+        isOccupied: Boolean,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val wasOccupied = propertyOwnership.isOccupied
+        propertyOwnership.isOccupied = isOccupied
         if (!wasOccupied && propertyOwnership.isOccupied) {
             propertyOwnership.lastOccupiedDate = LocalDate.now()
         }
