@@ -38,8 +38,8 @@ class OccupancyDetailsHelper {
                 if (isOccupied) addAll(getRestructuredOccupiedTenancyDetailsSummaryList(state, messageSource))
             }
 
-    fun <T : CheckYourAnswersJourneyState> getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
-        state: T,
+    fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
         householdsAndTenantsState: HouseholdsAndTenantsState,
     ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
@@ -62,8 +62,8 @@ class OccupancyDetailsHelper {
                 )
             }
 
-    fun <T : CheckYourAnswersJourneyState> getCheckYourRentIncludesBillsAnswersSummaryList(
-        state: T,
+    fun getCheckYourRentIncludesBillsAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
         rentIncludesBillsState: RentIncludesBillsState,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> =
@@ -90,8 +90,8 @@ class OccupancyDetailsHelper {
                 }
             }
 
-    fun <T : CheckYourAnswersJourneyState> getCheckYourRentFrequencyAndAmountAnswersSummaryList(
-        state: T,
+    fun getCheckYourRentFrequencyAndAmountAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
         rentFrequencyAndAmountState: RentFrequencyAndAmountState,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> =

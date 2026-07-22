@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class LicensingDetailsHelper(
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun <T : CheckYourAnswersJourneyState> getCheckYourAnswersSummaryList(
-        state: T,
+    fun getCheckYourAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
         licensingState: LicensingState,
     ): List<SummaryListRowViewModel> {
         // TODO(PDJB-990): show 'Provide this later' in the licensing CYA row (property registration only) behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
