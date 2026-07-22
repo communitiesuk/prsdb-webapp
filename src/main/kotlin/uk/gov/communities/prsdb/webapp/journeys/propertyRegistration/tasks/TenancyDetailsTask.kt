@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -15,7 +16,13 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             task(journey.householdsAndTenantsTask) {
-                nextStep { if (state.getStepData(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT) != null) exitStep else journey.rentIncludesBillsTask.firstStep }
+                nextStep {
+                    if (state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
+                        exitStep
+                    } else {
+                        journey.rentIncludesBillsTask.firstStep
+                    }
+                }
                 savable()
             }
             task(journey.rentIncludesBillsTask) {

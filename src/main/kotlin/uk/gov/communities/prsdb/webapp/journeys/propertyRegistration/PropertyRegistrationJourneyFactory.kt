@@ -178,7 +178,7 @@ class PropertyRegistrationJourneyFactory(
                 SelectiveLicenceStep.ROUTE_SEGMENT,
                 HmoMandatoryLicenceStep.ROUTE_SEGMENT,
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
-                    -> {
+                -> {
                     checkAnswerTask(journey.licensingTask)
                 }
 
@@ -216,7 +216,7 @@ class PropertyRegistrationJourneyFactory(
 
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
-                    -> {
+                -> {
                     duplicableCheckAnswerTask(journey.jointLandlordsTask, { journey })
                 }
 
@@ -224,14 +224,14 @@ class PropertyRegistrationJourneyFactory(
                 HasGasCertStep.ROUTE_SEGMENT,
                 GasCertIssueDateStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
-                    -> {
+                -> {
                     checkAnswerTask(journey.gasSafetyDetailsTask)
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
-                    -> {
+                -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask)
                 }
 
@@ -242,7 +242,7 @@ class PropertyRegistrationJourneyFactory(
                 MeesExemptionStep.ROUTE_SEGMENT,
                 IsEpcRequiredStep.ROUTE_SEGMENT,
                 EpcExemptionStep.ROUTE_SEGMENT,
-                    -> {
+                -> {
                     checkAnswerTask(journey.epcDetailsTask)
                 }
 
