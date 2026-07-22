@@ -7,8 +7,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
@@ -57,7 +57,6 @@ class LandlordService(
 
     fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
 
-    // TODO: PDJB-1180: Update to potentially save an org landlord to the database
     @Transactional
     fun createIndividualLandlord(
         baseUserId: String,

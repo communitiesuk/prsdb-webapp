@@ -24,6 +24,9 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -100,6 +103,18 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
 
+    @MockitoBean
+    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
+
+    @MockitoBean
+    private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
+
+    @MockitoBean
+    private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
+
+    @MockitoBean
+    private lateinit var mockOrganisationUserRepository: OrganisationUserRepository
+
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
@@ -110,10 +125,12 @@ class LandlordDashboardUrlTests(
         val prsdbUserService = mock<PrsdbUserService>()
         val addressService = mock<AddressService>()
         val registrationNumberService = mock<RegistrationNumberService>()
-        val repository = mock<IndividualLandlordRepository>()
         val landlordService =
             LandlordService(
-                repository,
+                mockIndividualLandlordRepository,
+                mockOrganisationLandlordRepository,
+                mockOrganisationGoverningBodyMemberRepository,
+                mockOrganisationUserRepository,
                 prsdbUserService,
                 addressService,
                 registrationNumberService,
@@ -129,7 +146,7 @@ class LandlordDashboardUrlTests(
             .thenReturn(mock())
         whenever(registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))
             .thenReturn(mock())
-        whenever(repository.save(any()))
+        whenever(mockIndividualLandlordRepository.save(any()))
             .thenReturn(createIndividualLandlord())
 
         val confirmationCaptor = argumentCaptor<LandlordRegistrationConfirmationEmail>()

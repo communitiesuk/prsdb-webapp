@@ -33,6 +33,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
@@ -53,6 +56,15 @@ import kotlin.test.assertNull
 class LandlordServiceTests {
     @Mock
     private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
+
+    @Mock
+    private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
+
+    @Mock
+    private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
+
+    @Mock
+    private lateinit var mockOrganisationUserRepository: OrganisationUserRepository
 
     @Mock
     private lateinit var mockPrsdbUserService: PrsdbUserService
@@ -83,6 +95,9 @@ class LandlordServiceTests {
         landlordService =
             LandlordService(
                 mockIndividualLandlordRepository,
+                mockOrganisationLandlordRepository,
+                mockOrganisationGoverningBodyMemberRepository,
+                mockOrganisationUserRepository,
                 mockPrsdbUserService,
                 mockAddressService,
                 mockRegistrationNumberService,
