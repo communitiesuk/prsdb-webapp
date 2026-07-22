@@ -7,10 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-// AddressTask specialised with the field-set content for an organisation's lead trustee address. Structure and
-// route-scoped state come from AddressTask; this only supplies the trustee content.
 @JourneyFrameworkComponent
-class TrusteeAddressTask(
+class OrgAddressTask(
     journeyStateService: JourneyStateService,
     lookupAddressStep: LookupAddressStep,
     selectAddressStep: SelectAddressStep,
@@ -25,19 +23,22 @@ class TrusteeAddressTask(
     ) {
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.lookupAddress.trusteeRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.lookupAddress.trusteeRegistration.fieldSetHint",
+            "fieldSetHeading" to "forms.lookupAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.lookupAddress.organisationLandlordRegistration.fieldSetHint",
         )
 
-    override val selectAddressContentProperties: Map<String, Any?> = emptyMap()
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "forms.selectAddress.organisationLandlordRegistration.fieldSetHeading",
+        )
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
-            "fieldSetHint" to null,
+            "fieldSetHeading" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHint",
         )
 
     companion object {
-        const val ROUTE_SEGMENT = "lead-trustee-address"
+        const val ORGANISATION_ADDRESS_ROUTE_SEGMENT = "organisation-address"
     }
 }

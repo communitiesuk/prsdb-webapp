@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
@@ -34,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberData
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val yourDetailsStep: YourDetailsStep
     val orgNameStep: OrgNameStep
-    val orgAddressStep: OrgAddressStep
+    val orgAddressTask: AddressTask
     val orgEmailStep: OrgEmailStep
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep

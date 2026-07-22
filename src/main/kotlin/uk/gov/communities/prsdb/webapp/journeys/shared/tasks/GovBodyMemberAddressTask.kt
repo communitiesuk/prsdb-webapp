@@ -27,6 +27,8 @@ class GovBodyMemberAddressTask(
             "fieldSetHint" to "forms.lookupAddress.govBodyMemberRegistration.fieldSetHint",
         )
 
+    override val selectAddressContentProperties: Map<String, Any?> = emptyMap()
+
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
             "fieldSetHeading" to "forms.manualAddress.govBodyMemberRegistration.fieldSetHeading",

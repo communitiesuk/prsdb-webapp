@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LookupAddressFormPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SelectAddressFormPage
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
-class OrgAddressFormPageLandlordRegistration(
+class OrgSelectAddressFormPageLandlordRegistration(
     page: Page,
-) : LookupAddressFormPage(
+) : SelectAddressFormPage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/lookup-address",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/select-address",
     )

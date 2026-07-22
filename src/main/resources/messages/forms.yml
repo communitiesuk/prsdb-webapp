@@ -230,6 +230,9 @@ lookupAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
+  organisationLandlordRegistration:
+    fieldSetHeading: What is your organisation’s address?
+    fieldSetHint: Enter a UK postal address, not a PO Box
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'
@@ -244,6 +247,8 @@ selectAddress:
   fieldSetHeading: Select your address
   govBodyMemberRegistration:
     fieldSetHeading: Select their address
+  organisationLandlordRegistration:
+    fieldSetHeading: Select your organisation’s address
   fieldSetHint:
     beforePostcode: '{0,,addressCount} addresses found for'
     beforeHouseNameOrNumber: and

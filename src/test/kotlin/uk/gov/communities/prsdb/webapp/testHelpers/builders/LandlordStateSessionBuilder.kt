@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
@@ -34,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -46,7 +46,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrust
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
@@ -103,13 +102,23 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgAddress(): LandlordStateSessionBuilder {
-        val manualAddressFormModel =
-            ManualAddressFormModel().apply {
-                addressLineOne = "1 Example Street"
-                townOrCity = "Exampleton"
+        val routePrefix = OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT
+        val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
                 postcode = "EG1 2AB"
-            }
-        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, manualAddressFormModel)
+                houseNameOrNumber = "1"
+            },
+        )
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = singleLineAddress },
+        )
         return self()
     }
 

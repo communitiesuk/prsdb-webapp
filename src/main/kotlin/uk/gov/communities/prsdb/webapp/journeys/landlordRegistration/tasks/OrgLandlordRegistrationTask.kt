@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
@@ -40,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
@@ -49,7 +49,7 @@ class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
     override val yourDetailsStep: YourDetailsStep,
     override val orgNameStep: OrgNameStep,
-    override val orgAddressStep: OrgAddressStep,
+    override val orgAddressTask: OrgAddressTask,
     override val orgEmailStep: OrgEmailStep,
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
@@ -94,16 +94,15 @@ class OrgLandlordRegistrationTask(
             step(journey.orgNameStep) {
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
                 parents { journey.yourDetailsStep.isComplete() }
-                nextStep { journey.orgAddressStep }
+                nextStep { journey.orgAddressTask.firstStep }
             }
-            step(journey.orgAddressStep) {
-                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+            duplicableTask(journey.orgAddressTask, OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.orgNameStep.isComplete() }
                 nextStep { journey.orgEmailStep }
             }
             step(journey.orgEmailStep) {
                 routeSegment(OrgEmailStep.ROUTE_SEGMENT)
-                parents { journey.orgAddressStep.isComplete() }
+                parents { journey.orgAddressTask.isComplete() }
                 nextStep { journey.orgPhoneNumberStep }
             }
             step(journey.orgPhoneNumberStep) {
