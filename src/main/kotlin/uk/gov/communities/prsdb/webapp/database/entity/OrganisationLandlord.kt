@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
-class OrganisationLandlord() : Landlord() {
+class OrganisationLandlord : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION
@@ -29,6 +29,18 @@ class OrganisationLandlord() : Landlord() {
 
     @Column(name = "organisation_phone_number")
     var phoneNumber: String? = null
+
+    @Column(name = "organisation_registrant_name")
+    var registrantName: String? = null
+
+    @Column(name = "organisation_registrant_date_of_birth")
+    var registrantDateOfBirth: LocalDate? = null
+
+    @Column(name = "organisation_registrant_email")
+    var registrantEmail: String? = null
+
+    @Column(name = "organisation_registrant_phone_number")
+    var registrantPhoneNumber: String? = null
 
     @Column(name = "organisation_is_company")
     var isCompany: Boolean? = null
