@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
-class OrganisationLandlord : Landlord() {
+class OrganisationLandlord() : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION
@@ -84,4 +84,54 @@ class OrganisationLandlord : Landlord() {
 
     @Column(name = "organisation_main_contact_phone")
     var mainContactPhone: String? = null
+
+    constructor(
+        registrationNumber: RegistrationNumber,
+        name: String,
+        address: Address,
+        email: String,
+        phoneNumber: String,
+        registrantName: String,
+        registrantDateOfBirth: LocalDate,
+        registrantEmail: String,
+        registrantPhoneNumber: String,
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+        companyNumber: String?,
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+        leadTrusteeName: String?,
+        leadTrusteeDateOfBirth: LocalDate?,
+        leadTrusteeEmail: String?,
+        leadTrusteePhone: String?,
+        leadTrusteeAddress: Address?,
+        mainContactName: String,
+        mainContactEmail: String,
+        mainContactPhone: String,
+    ) : this() {
+        this.registrationNumber = registrationNumber
+        this.name = name
+        this.address = address
+        this.email = email
+        this.phoneNumber = phoneNumber
+        this.registrantName = registrantName
+        this.registrantDateOfBirth = registrantDateOfBirth
+        this.registrantEmail = registrantEmail
+        this.registrantPhoneNumber = registrantPhoneNumber
+        this.isCompany = isCompany
+        this.isCharity = isCharity
+        this.isTrust = isTrust
+        this.companyNumber = companyNumber
+        this.charityRegisteredWith = charityRegisteredWith
+        this.charityNumber = charityNumber
+        this.leadTrusteeName = leadTrusteeName
+        this.leadTrusteeDateOfBirth = leadTrusteeDateOfBirth
+        this.leadTrusteeEmail = leadTrusteeEmail
+        this.leadTrusteePhone = leadTrusteePhone
+        this.leadTrusteeAddress = leadTrusteeAddress
+        this.mainContactName = mainContactName
+        this.mainContactEmail = mainContactEmail
+        this.mainContactPhone = mainContactPhone
+    }
 }

@@ -1,19 +1,28 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -25,6 +34,9 @@ import kotlin.String
 @PrsdbWebService
 class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
+    private val organisationLandlordRepository: OrganisationLandlordRepository,
+    private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
+    private val organisationUserRepository: OrganisationUserRepository,
     private val prsdbUserService: PrsdbUserService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -89,6 +101,87 @@ class LandlordService(
         )
 
         return landlord
+    }
+
+    @Transactional
+    fun createOrganisationLandlord(
+        baseUserId: String,
+        organisationName: String,
+        organisationAddress: AddressDataModel,
+        organisationEmail: String,
+        organisationPhoneNumber: String,
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+        companyNumber: String?,
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+        leadTrusteeName: String?,
+        leadTrusteeDateOfBirth: LocalDate?,
+        leadTrusteeEmail: String?,
+        leadTrusteePhoneNumber: String?,
+        leadTrusteeAddress: AddressDataModel?,
+        mainContactName: String,
+        mainContactEmail: String,
+        mainContactPhoneNumber: String,
+        registrantName: String,
+        registrantDateOfBirth: LocalDate,
+        registrantEmail: String,
+        registrantPhoneNumber: String,
+        governingBodyMembers: List<GoverningBodyMemberDataModel>,
+    ): OrganisationLandlord {
+        val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
+        val orgAddress = addressService.findOrCreateAddress(organisationAddress)
+        val trusteeAddress = leadTrusteeAddress?.let { addressService.findOrCreateAddress(it) }
+        val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
+
+        val landlord =
+            OrganisationLandlord(
+                registrationNumber = registrationNumber,
+                name = organisationName,
+                address = orgAddress,
+                email = organisationEmail,
+                phoneNumber = organisationPhoneNumber,
+                registrantName = registrantName,
+                registrantDateOfBirth = registrantDateOfBirth,
+                registrantEmail = registrantEmail,
+                registrantPhoneNumber = registrantPhoneNumber,
+                isCompany = isCompany,
+                isCharity = isCharity,
+                isTrust = isTrust,
+                companyNumber = companyNumber,
+                charityRegisteredWith = charityRegisteredWith,
+                charityNumber = charityNumber,
+                leadTrusteeName = leadTrusteeName,
+                leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
+                leadTrusteeEmail = leadTrusteeEmail,
+                leadTrusteePhone = leadTrusteePhoneNumber,
+                leadTrusteeAddress = trusteeAddress,
+                mainContactName = mainContactName,
+                mainContactEmail = mainContactEmail,
+                mainContactPhone = mainContactPhoneNumber,
+            )
+
+        val savedLandlord = organisationLandlordRepository.save(landlord)
+
+        organisationUserRepository.save(OrganisationUser(savedLandlord, baseUser))
+
+        governingBodyMembers.forEach { member ->
+            val memberAddress = addressService.findOrCreateAddress(member.address)
+            organisationGoverningBodyMemberRepository.save(
+                OrganisationGoverningBodyMember().apply {
+                    organisationLandlord = savedLandlord
+                    type = member.type
+                    name = member.name
+                    dateOfBirth = member.dateOfBirth.toJavaLocalDate()
+                    address = memberAddress
+                },
+            )
+        }
+
+        // TODO: PDJB-1260: Send registration confirmation email
+
+        return savedLandlord
     }
 
     @Transactional
