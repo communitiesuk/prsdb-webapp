@@ -75,7 +75,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     fun `afterStepIsReached marks property as joint landlord and sends invitation emails when invites are present`() {
         // Arrange
         val baseUserId = "test-user"
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
         val stepConfig =
