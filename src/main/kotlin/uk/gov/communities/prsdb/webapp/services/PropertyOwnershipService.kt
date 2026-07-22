@@ -293,12 +293,11 @@ class PropertyOwnershipService(
         propertyOwnership.isOccupied = isOccupied
         if (!wasOccupied && propertyOwnership.isOccupied) {
             propertyOwnership.lastOccupiedDate = LocalDate.now()
-            // The occupancy-only journey doesn't collect tenancy details. If a newly occupied property is
-            // missing them, flag it as "provide later" so the property record shows the deadline prompt
-            // (lastOccupiedDate + 28 days) rather than failing to render the absent tenancy fields.
-            if (isMissingTenancyDetails(propertyOwnership)) {
-                propertyOwnership.tenancyProvideLater = true
-            }
+            // Becoming occupied always defaults to "provide tenancy details later": clear any stale tenancy
+            // details and flag the property so the record shows the deadline prompt (lastOccupiedDate + 28 days)
+            // until the landlord provides the details, rather than retaining previous information.
+            clearTenancyDetails(propertyOwnership)
+            propertyOwnership.tenancyProvideLater = true
         }
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
@@ -306,10 +305,46 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    private fun isMissingTenancyDetails(propertyOwnership: PropertyOwnership): Boolean =
-        propertyOwnership.furnishedStatus == null ||
-            propertyOwnership.rentFrequency == null ||
-            propertyOwnership.rentAmount == null
+    private fun clearTenancyDetails(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.currentNumHouseholds = 0
+        propertyOwnership.currentNumTenants = 0
+        propertyOwnership.billsIncludedList = null
+        propertyOwnership.customBillsIncluded = null
+        propertyOwnership.furnishedStatus = null
+        propertyOwnership.rentFrequency = null
+        propertyOwnership.customRentFrequency = null
+        propertyOwnership.rentAmount = null
+    }
+
+    @Transactional
+    fun updateTenancyDetails(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        numBedrooms: Int,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus,
+        rentFrequency: RentFrequency,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.numBedrooms = numBedrooms
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        // The tenancy details are now provided, so the property record no longer needs to prompt for them.
+        propertyOwnership.tenancyProvideLater = false
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
 
     @Transactional
     fun updateHouseholdsAndTenants(

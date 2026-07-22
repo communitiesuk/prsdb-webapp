@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -1181,27 +1182,8 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateIsOccupied sets lastOccupiedDate and tenancyProvideLater when a property with no tenancy details becomes occupied`() {
-            // Arrange
-            val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1)
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
-
-            // Act
-            propertyOwnershipService.updateIsOccupied(
-                propertyOwnership.id,
-                isOccupied = true,
-                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
-            )
-
-            // Assert
-            assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
-            assertEquals(true, propertyOwnership.tenancyProvideLater)
-        }
-
-        @Test
-        fun `updateIsOccupied does not set tenancyProvideLater when an occupied property already has tenancy details`() {
+        @Suppress("ktlint:standard:max-line-length")
+        fun `updateIsOccupied sets lastOccupiedDate, defaults to provide-later and clears stale tenancy details when a property becomes occupied`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership(id = 1).apply {
@@ -1219,7 +1201,16 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertFalse(propertyOwnership.tenancyProvideLater!!)
+            assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
+            assertEquals(true, propertyOwnership.tenancyProvideLater)
+            assertEquals(0, propertyOwnership.currentNumHouseholds)
+            assertEquals(0, propertyOwnership.currentNumTenants)
+            assertNull(propertyOwnership.billsIncludedList)
+            assertNull(propertyOwnership.customBillsIncluded)
+            assertNull(propertyOwnership.furnishedStatus)
+            assertNull(propertyOwnership.rentFrequency)
+            assertNull(propertyOwnership.customRentFrequency)
+            assertNull(propertyOwnership.rentAmount)
         }
 
         @Test
