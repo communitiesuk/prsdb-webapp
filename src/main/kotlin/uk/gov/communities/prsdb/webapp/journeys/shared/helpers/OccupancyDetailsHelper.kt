@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
@@ -136,8 +137,18 @@ class OccupancyDetailsHelper {
         state: T,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
-        getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state) +
-            getRentBillsAndFurnishingsSummaryList(state, messageSource)
+        if (state.getStepData(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT) != null) {
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.tenancyDetails.numberOfTenants",
+                    "forms.checkPropertyAnswers.tenancyDetails.provideThisLater",
+                    Destination.VisitableStep(state.households, state.getCyaJourneyId(state.households)),
+                ),
+            )
+        } else {
+            getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state) +
+                getRentBillsAndFurnishingsSummaryList(state, messageSource)
+        }
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : OccupationState, T : CheckYourAnswersJourneyState {
         val bedroomsStep = state.bedrooms

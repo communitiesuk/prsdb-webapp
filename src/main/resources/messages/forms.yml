@@ -672,6 +672,8 @@ checkPropertyAnswers:
     furnishedStatus: Furniture provided
     rentFrequency: When rent is paid
     rentAmount: Rent amount
+    numberOfTenants: Number of tenants
+    provideThisLater: Provide this later
     customFrequencyRentAmountSuffix: per month
   jointLandlordsDetails:
     heading: Invite joint landlords
