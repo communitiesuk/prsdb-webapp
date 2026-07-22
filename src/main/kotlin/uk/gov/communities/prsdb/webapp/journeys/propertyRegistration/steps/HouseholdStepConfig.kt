@@ -23,9 +23,9 @@ class HouseholdStepConfig(
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/numberOfHouseholdsFormRestructureAndSkipping"
+            "forms/restructureAndSkipping/numberOfHouseholdsForm"
         } else {
-            "forms/numberOfHouseholdsFormOld"
+            "forms/numberOfHouseholdsForm"
         }
 
     override fun mode(state: HouseholdsAndTenantsState) = getFormModelFromStateOrNull(state)?.numberOfHouseholds?.let { Complete.COMPLETE }

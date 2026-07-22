@@ -29,7 +29,7 @@ class HouseholdStepConfigTests {
 
         // Assert
         assertEquals("forms.numberOfHouseholds.restructureAndSkipping.heading", content["fieldSetHeading"])
-        assertEquals("forms/numberOfHouseholdsFormRestructureAndSkipping", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms/restructureAndSkipping/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 
     @Test
@@ -44,6 +44,6 @@ class HouseholdStepConfigTests {
         // Assert
         assertEquals("forms.numberOfHouseholds.restructureAndSkipping.heading", content["fieldSetHeading"])
         assertEquals("forms.numberOfHouseholds.restructureAndSkipping.label", content["label"])
-        assertEquals("forms/numberOfHouseholdsFormOld", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals("forms/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 }
