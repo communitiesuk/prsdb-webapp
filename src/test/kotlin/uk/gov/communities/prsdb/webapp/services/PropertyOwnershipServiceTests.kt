@@ -1181,7 +1181,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateIsOccupied sets lastOccupiedDate when property transitions to occupied`() {
+        fun `updateIsOccupied sets lastOccupiedDate and tenancyProvideLater when a property with no tenancy details becomes occupied`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -1197,6 +1197,29 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
+            assertEquals(true, propertyOwnership.tenancyProvideLater)
+        }
+
+        @Test
+        fun `updateIsOccupied does not set tenancyProvideLater when an occupied property already has tenancy details`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(id = 1).apply {
+                    isOccupied = false
+                }
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = true,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertFalse(propertyOwnership.tenancyProvideLater!!)
         }
 
         @Test

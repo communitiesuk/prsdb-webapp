@@ -293,12 +293,23 @@ class PropertyOwnershipService(
         propertyOwnership.isOccupied = isOccupied
         if (!wasOccupied && propertyOwnership.isOccupied) {
             propertyOwnership.lastOccupiedDate = LocalDate.now()
+            // The occupancy-only journey doesn't collect tenancy details. If a newly occupied property is
+            // missing them, flag it as "provide later" so the property record shows the deadline prompt
+            // (lastOccupiedDate + 28 days) rather than failing to render the absent tenancy fields.
+            if (isMissingTenancyDetails(propertyOwnership)) {
+                propertyOwnership.tenancyProvideLater = true
+            }
         }
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
         }
         propertyOwnershipRepository.save(propertyOwnership)
     }
+
+    private fun isMissingTenancyDetails(propertyOwnership: PropertyOwnership): Boolean =
+        propertyOwnership.furnishedStatus == null ||
+            propertyOwnership.rentFrequency == null ||
+            propertyOwnership.rentAmount == null
 
     @Transactional
     fun updateHouseholdsAndTenants(
