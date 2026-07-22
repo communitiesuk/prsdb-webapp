@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipAndLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -100,7 +99,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithProvideLaterAllowed
@@ -111,6 +109,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -166,7 +165,9 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OwnershipTypeStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
+                    fromTask(journey.ownershipAndLandlordsTask) {
+                        checkAnswerStep(task.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 LicensingTypeStep.ROUTE_SEGMENT,
@@ -214,7 +215,7 @@ class PropertyRegistrationJourneyFactory(
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.jointLandlordsTask, { journey })
+                    duplicableCheckAnswerTask(journey.ownershipAndLandlordsTask.jointLandlordsTask, { journey })
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
@@ -303,35 +304,37 @@ class PropertyRegistrationJourneyFactory(
                     step(task.propertyTypeStep) {
                         routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
                         parents { task.addressTask.isComplete() }
-                        nextStep { journey.ownershipTypeStep }
+                        nextStep { journey.ownershipAndLandlordsTask.ownershipTypeStep }
                         saveProgress()
                     }
                 }
-                step(journey.ownershipTypeStep) {
-                    routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
-                    parents { journey.propertyDetailsTask.propertyTypeStep.isComplete() }
-                    nextStep { journey.licensingTask.firstStep }
-                    saveProgress()
+                fromTask(journey.ownershipAndLandlordsTask) {
+                    step(task.ownershipTypeStep) {
+                        routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
+                        parents { journey.propertyDetailsTask.propertyTypeStep.isComplete() }
+                        nextStep { journey.licensingTask.firstStep }
+                        saveProgress()
+                    }
                 }
                 duplicableTask(journey.licensingTask) {
-                    parents { journey.ownershipTypeStep.isComplete() }
+                    parents { journey.ownershipAndLandlordsTask.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
                 }
 
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { journey.jointLandlordsTask.firstStep }
+                    nextStep { journey.ownershipAndLandlordsTask.jointLandlordsTask.firstStep }
                     saveProgress()
                 }
-                duplicableTask(journey.jointLandlordsTask) {
+                duplicableTask(journey.ownershipAndLandlordsTask.jointLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.occupationTask.isComplete() }
                     nextStep { journey.gasSafetyTask.firstStep }
                     saveProgress()
                 }
                 task(journey.gasSafetyTask) {
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents { journey.ownershipAndLandlordsTask.jointLandlordsTask.isComplete() }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
@@ -448,7 +451,8 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
-                task(journey.ownershipAndLandlordsTask) {
+                duplicableTask(journey.ownershipAndLandlordsTask) {
+                    withDependencies { journey }
                     parents { journey.propertyDetailsTask.isComplete() }
                     nextStep { journey.occupied }
                     saveProgress()
@@ -586,8 +590,6 @@ class PropertyRegistrationJourneyFactory(
 class PropertyRegistrationJourney(
     // Task list step
     override val taskListStep: PropertyRegistrationTaskListStep,
-    // Property details steps
-    override val ownershipTypeStep: OwnershipTypeStep,
     // Licensing task
     override val licensingTask: LicensingTask,
     // Occupation steps
@@ -599,8 +601,6 @@ class PropertyRegistrationJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // Joint landlords task
-    override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels, bedrooms override) when the old journey is removed.
@@ -747,7 +747,7 @@ class PropertyRegistrationJourney(
 
 interface PropertyRegistrationJourneyState :
     OccupationState,
-    OwnershipAndLandlordsState,
+    InviteJointLandlordsTaskDependencies,
     TenancyDetailsState,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {

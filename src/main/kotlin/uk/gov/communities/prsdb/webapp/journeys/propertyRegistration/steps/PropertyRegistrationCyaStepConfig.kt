@@ -66,17 +66,18 @@ class PropertyRegistrationCyaStepConfig(
     ): Destination = defaultDestination
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val hasJointLandlords =
-            state.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+            jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
                 HasJointLandlordsFormModel::hasJointLandlords,
             )
         return if (hasJointLandlords) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-                state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlords,
+                jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlords,
                 Destination.VisitableStep(
-                    state.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep,
-                    state.getCyaJourneyId(state.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep),
+                    jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep,
+                    state.getCyaJourneyId(jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep),
                 ),
             )
         } else {
@@ -84,8 +85,8 @@ class PropertyRegistrationCyaStepConfig(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
                 Destination.VisitableStep(
-                    state.jointLandlordsTask.hasJointLandlordsStep,
-                    state.getCyaJourneyId(state.jointLandlordsTask.hasJointLandlordsStep),
+                    jointLandlordsTask.hasJointLandlordsStep,
+                    state.getCyaJourneyId(jointLandlordsTask.hasJointLandlordsStep),
                 ),
             )
         }
@@ -142,12 +143,14 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState) =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
+    private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+        val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
-            state.ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(state.ownershipTypeStep, state.getCyaJourneyId(state.ownershipTypeStep)),
+            ownershipTypeStep.formModel.ownershipType,
+            Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
         )
+    }
 }
 
 @JourneyFrameworkComponent

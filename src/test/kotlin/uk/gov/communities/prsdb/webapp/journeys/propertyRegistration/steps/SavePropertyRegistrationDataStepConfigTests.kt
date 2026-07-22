@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
@@ -69,6 +70,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockPropertyDetailsTask: PropertyDetailsTask
+
+    @Mock
+    private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
@@ -346,11 +350,12 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
-        whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
 
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
-        whenever(mockState.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
 
         val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
         val hasJointLandlordsFormModel = HasJointLandlordsFormModel().apply { hasJointLandlords = false }

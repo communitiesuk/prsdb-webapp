@@ -56,11 +56,12 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
+        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
-            state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
+            jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
                 ?.values
                 ?.toList()
-        val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
             addressModel = state.propertyDetailsTask.addressTask.getAddress(),
@@ -73,7 +74,7 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             licenseType = state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            ownershipType = state.ownershipAndLandlordsTask.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
