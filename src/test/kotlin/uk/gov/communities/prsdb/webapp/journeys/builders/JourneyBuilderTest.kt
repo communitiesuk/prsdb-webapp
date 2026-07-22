@@ -766,6 +766,22 @@ class JourneyBuilderTest {
         }
 
         @Test
+        fun `nested sections throw JourneyInitialisationException`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+
+            // Act & Assert
+            assertThrows<JourneyInitialisationException> {
+                jb.section {
+                    withHeadingMessageKey("section.outer")
+                    section {
+                        withHeadingMessageKey("section.inner")
+                    }
+                }
+            }
+        }
+
+        @Test
         fun `a step inside a section has sectionHeaderInfo added to its content properties`() {
             // Arrange
             val jb = JourneyBuilder(mock())
