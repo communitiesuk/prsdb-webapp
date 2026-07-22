@@ -61,8 +61,8 @@ class PropertyRegistrationTaskListStepConfig(
     private fun legacySectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> {
         val registerTaskItems =
             listOf(
-                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
-                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyTypeStep),
+                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.propertyDetailsTask.addressTask),
+                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyDetailsTask.propertyTypeStep),
                 TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", state.ownershipTypeStep),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addTenancyInfo", state.occupationTask),

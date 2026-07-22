@@ -25,9 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Cert
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OwnershipAndLandlordsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddToLandlordIncompletePropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -108,7 +106,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithProvideLaterAllowed
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
@@ -153,17 +150,19 @@ class PropertyRegistrationJourneyFactory(
 
             when (checkingAnswersFor) {
                 LookupAddressStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.addressTask)
+                    duplicableCheckAnswerTask(journey.propertyDetailsTask.addressTask)
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.addressTask) {
+                    fromTask(journey.propertyDetailsTask.addressTask) {
                         checkAnswerStep(task.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
                     }
                 }
 
                 PropertyTypeStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.propertyTypeStep, PropertyTypeStep.ROUTE_SEGMENT)
+                    fromTask(journey.propertyDetailsTask) {
+                        checkAnswerStep(task.propertyTypeStep, PropertyTypeStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 OwnershipTypeStep.ROUTE_SEGMENT -> {
@@ -291,24 +290,26 @@ class PropertyRegistrationJourneyFactory(
                 } else {
                     withHeadingMessageKey("registerProperty.taskList.register.old.heading")
                 }
-                duplicableTask(journey.addressTask) {
-                    parents { journey.taskListStep.always() }
-                    nextStep { journey.addToLandlordIncompletePropertiesStep }
-                }
-                step(journey.addToLandlordIncompletePropertiesStep) {
-                    parents { journey.addressTask.isComplete() }
-                    nextStep { journey.propertyTypeStep }
-                    saveProgress()
-                }
-                step(journey.propertyTypeStep) {
-                    routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
-                    parents { journey.addressTask.isComplete() }
-                    nextStep { journey.ownershipTypeStep }
-                    saveProgress()
+                fromTask(journey.propertyDetailsTask) {
+                    duplicableTask(task.addressTask) {
+                        parents { journey.taskListStep.always() }
+                        nextStep { task.addToLandlordIncompletePropertiesStep }
+                    }
+                    step(task.addToLandlordIncompletePropertiesStep) {
+                        parents { task.addressTask.isComplete() }
+                        nextStep { task.propertyTypeStep }
+                        saveProgress()
+                    }
+                    step(task.propertyTypeStep) {
+                        routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
+                        parents { task.addressTask.isComplete() }
+                        nextStep { journey.ownershipTypeStep }
+                        saveProgress()
+                    }
                 }
                 step(journey.ownershipTypeStep) {
                     routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
-                    parents { journey.propertyTypeStep.isComplete() }
+                    parents { journey.propertyDetailsTask.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
                     saveProgress()
                 }
@@ -439,7 +440,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.propertyDetails", shouldUseNumbering = false)
-                task(journey.propertyDetailsTask) {
+                duplicableTask(journey.propertyDetailsTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.ownershipAndLandlordsTask.firstStep }
                     saveProgress()
@@ -585,12 +586,7 @@ class PropertyRegistrationJourneyFactory(
 class PropertyRegistrationJourney(
     // Task list step
     override val taskListStep: PropertyRegistrationTaskListStep,
-    // Address task
-    override val addressTask: PropertyRegistrationAddressTask,
-    // Add to LandlordIncompleteProperties join table
-    override val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep,
     // Property details steps
-    override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
     // Licensing task
     override val licensingTask: LicensingTask,
@@ -598,7 +594,6 @@ class PropertyRegistrationJourney(
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val furnishedStatus: FurnishedStatusStep,
@@ -608,7 +603,7 @@ class PropertyRegistrationJourney(
     override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
-    // legacySectionViewModels) when the old journey is removed.
+    // legacySectionViewModels, bedrooms override) when the old journey is removed.
     override val occupationTask: OccupationTaskWithProvideLaterAllowed,
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
@@ -707,6 +702,8 @@ class PropertyRegistrationJourney(
                 ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
         }
 
+    override val bedrooms: BedroomsStep = propertyDetailsTask.bedrooms
+
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
 
@@ -720,6 +717,7 @@ class PropertyRegistrationJourney(
     // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
     override val uprn: Long?
         get() {
+            val addressTask = propertyDetailsTask.addressTask
             addressTask.cachedSelectedAddress?.let { return addressTask.getMatchingAddress(it)?.uprn }
             val submittedAddress = addressTask.selectAddressStep.formModelOrNull?.address ?: return null
             return addressTask.getMatchingAddress(submittedAddress)?.uprn
@@ -749,7 +747,6 @@ class PropertyRegistrationJourney(
 
 interface PropertyRegistrationJourneyState :
     OccupationState,
-    PropertyDetailsState,
     OwnershipAndLandlordsState,
     TenancyDetailsState,
     CombinedComplianceCheckState,

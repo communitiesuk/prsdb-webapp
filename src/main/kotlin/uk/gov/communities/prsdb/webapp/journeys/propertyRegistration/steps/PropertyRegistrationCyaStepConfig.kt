@@ -35,7 +35,7 @@ class PropertyRegistrationCyaStepConfig(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
-                "propertyName" to state.addressTask.getAddress().singleLineAddress,
+                "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
                 "propertyDetails" to
                     if (isRestructured) {
                         getRestructuredPropertyDetailsSummaryList(state)
@@ -110,34 +110,35 @@ class PropertyRegistrationCyaStepConfig(
         )
 
     private fun getAddressRows(state: PropertyRegistrationJourneyState) =
-        state.addressTask.getAddress().let { address ->
+        state.propertyDetailsTask.addressTask.getAddress().let { address ->
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
                     Destination.VisitableStep(
-                        state.addressTask.lookupAddressStep,
-                        state.getCyaJourneyId(state.addressTask.lookupAddressStep),
+                        state.propertyDetailsTask.addressTask.lookupAddressStep,
+                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),
                     ),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
                     Destination.VisitableStep(
-                        state.addressTask.localCouncilStep,
-                        state.getCyaJourneyId(state.addressTask.localCouncilStep),
+                        state.propertyDetailsTask.addressTask.localCouncilStep,
+                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.localCouncilStep),
                     ),
                 ),
             )
         }
 
     private fun getPropertyTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
-        val propertyType = state.propertyTypeStep.formModel.propertyType
-        val customType = state.propertyTypeStep.formModel.customPropertyType
+        val propertyTypeStep = state.propertyDetailsTask.propertyTypeStep
+        val propertyType = propertyTypeStep.formModel.propertyType
+        val customType = propertyTypeStep.formModel.customPropertyType
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination.VisitableStep(state.propertyTypeStep, state.getCyaJourneyId(state.propertyTypeStep)),
+            Destination.VisitableStep(propertyTypeStep, state.getCyaJourneyId(propertyTypeStep)),
         )
     }
 
