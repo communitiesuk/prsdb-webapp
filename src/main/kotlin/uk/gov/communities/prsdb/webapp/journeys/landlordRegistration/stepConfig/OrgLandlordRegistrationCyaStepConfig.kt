@@ -82,7 +82,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                         )
                     },
                 ),
-                // TODO: PDJB-1172 - replace these dummy email and phone rows with the user's real contact details once collected.
+                // TODO: PDJB-1282 - replace these dummy email and phone rows with the user's real contact details once collected.
                 dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.email", "Indiana.jones@marshallCollege.com"),
                 dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber", "020 7123 4567"),
             )
@@ -350,7 +350,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         )
     }
 
-    // TODO: PDJB-1172 - dummy row with a non-functional Change link; replace once the underlying step exists.
+    // TODO: PDJB-1282 - dummy row with a non-functional Change link; replace once the underlying step exists.
     private fun dummyRow(
         headingKey: String,
         value: Any?,
@@ -399,7 +399,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         }
 
     companion object {
-        // TODO: PDJB-1172 (your details email/phone) / PDJB-1290 (governing body member change link) -
+        // TODO: PDJB-1282 (your details email/phone) / PDJB-1290 (governing body member change link) -
         // non-functional Change link placeholder until the underlying steps exist.
         private const val PLACEHOLDER_CHANGE_URL = "#"
     }

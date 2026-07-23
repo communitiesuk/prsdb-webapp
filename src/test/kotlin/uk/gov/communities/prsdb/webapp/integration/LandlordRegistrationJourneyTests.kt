@@ -266,7 +266,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitOrganisation()
 
-        // TODO: PDJB-1172 - Submit real your details data once the step is implemented
+        // TODO: PDJB-1282 - Submit real your details data once the step is implemented
         val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
         yourDetailsPage.form.submit()
 
