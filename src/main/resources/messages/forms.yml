@@ -419,7 +419,8 @@ occupancy:
         hint: There are no tenants living in the property
   fieldSetHeading: Is your property occupied by tenants?
   fieldSetHint: What you choose here decides which compliance and rent details you need to add.
-numberOfHouseholdsOld:
+numberOfHouseholds:
+  heading: Households in your property
   paragraph:
     one: The number of households in your property helps local authorities understand if your property needs a House in Multiple Occupation (HMO) licence.
     two: 'A household is:'
@@ -432,21 +433,22 @@ numberOfHouseholdsOld:
       two: a family living together
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
-numberOfHouseholdsRestructureAndSkipping:
-  heading: Households in your property
-  paragraph:
-    one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.
-    two: 'A household is one person living alone or a family living together. A family includes people who are:'
-    three: Unrelated adults (who are not a couple) are separate households.
-  bullet:
-    point:
-      one: married
-      two: related (like aunts or cousins)
-      three: living together as a couple
-  questionHeading: How many households are in your property?
-  input:
-    error: 'Enter how many separate households, like 1 or 2'
   label: Enter how many households live in your property
+  restructureAndSkipping:
+    heading: Households in your property
+    paragraph:
+      one: The number of households in your property helps local councils understand if your property needs a House in Multiple Occupation (HMO) licence.
+      two: 'A household is one person living alone or a family living together. A family includes people who are:'
+      three: Unrelated adults (who are not a couple) are separate households.
+    bullet:
+      point:
+        one: married
+        two: related (like aunts or cousins)
+        three: living together as a couple
+    questionHeading: How many households are in your property?
+    input:
+      error: 'Enter how many separate households, like 1 or 2'
+    label: Enter how many households live in your property
 numberOfPeople:
   input:
     error:
