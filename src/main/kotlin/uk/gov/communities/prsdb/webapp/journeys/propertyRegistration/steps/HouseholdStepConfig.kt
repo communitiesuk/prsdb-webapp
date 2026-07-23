@@ -39,7 +39,7 @@ class HouseholdStepConfig(
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
             "forms/restructureAndSkipping/numberOfHouseholdsForm"
         } else {
-            "forms/numberOfHouseholdsForm"
+            "forms/restructureAndSkipping/numberOfHouseholdsFormLegacy"
         }
 
     override fun mode(state: HouseholdsAndTenantsState) =
