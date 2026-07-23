@@ -65,18 +65,13 @@ class UpdateOccupancyJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        return if (checkingAnswersFor == null) {
-            if (isRestructured) {
-                restructuredMainJourneyMap(state, propertyId)
-            } else {
-                legacyMainJourneyMap(state, propertyId)
-            }
+        return if (isRestructured) {
+            // The restructured occupancy update is a single-page update (no check-your-answers page)
+            restructuredMainJourneyMap(state, propertyId)
+        } else if (checkingAnswersFor == null) {
+            legacyMainJourneyMap(state, propertyId)
         } else {
-            if (isRestructured) {
-                restructuredCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
-            } else {
-                legacyCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
-            }
+            legacyCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
 
@@ -92,16 +87,18 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.cyaStep }
+                nextStep { journey.completeOccupancyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "submitButton" to "transactionSubmitButton",
+                        "showWarning" to true,
                     )
                 }
             }
-            step(journey.cyaStep) {
-                routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
+            step(journey.completeOccupancyUpdateStep) {
                 parents {
                     OrParents(
                         journey.occupied.hasOutcome(YesOrNo.YES),
@@ -109,35 +106,6 @@ class UpdateOccupancyJourneyFactory(
                     )
                 }
                 nextUrl { propertyDetailsRoute }
-            }
-        }
-    }
-
-    private fun restructuredCheckYourAnswersJourneyMap(
-        state: UpdateOccupancyJourney,
-        checkingAnswersFor: String,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            when (checkingAnswersFor) {
-                OccupiedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
-                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
-            }
-            configureStep(journey.occupied) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
-                }
-            }
-            step(journey.finishCyaStep) {
-                initialStep()
-                nextDestination { Destination.Nowhere() }
             }
         }
     }
@@ -295,6 +263,8 @@ class UpdateOccupancyJourney(
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Completion step for the restructured single-page update
+    override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -322,6 +292,7 @@ interface UpdateOccupancyJourneyState :
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
+    val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean

@@ -41,13 +41,6 @@ class OccupancyDetailsHelper {
                 if (isOccupied) addAll(getRestructuredOccupiedTenancyDetailsSummaryList(state, messageSource))
             }
 
-    fun <T> getOccupancyStatusOnlySummaryList(
-        state: T,
-    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState {
-        val isOccupied = state.occupied.formModel.occupied ?: false
-        return listOf(getOccupancyStatusRow(isOccupied, state.occupied, state.getCyaJourneyId(state.occupied)))
-    }
-
     fun <T> getCheckYourTenancyDetailsAnswersSummaryList(
         state: T,
         messageSource: MessageSource,

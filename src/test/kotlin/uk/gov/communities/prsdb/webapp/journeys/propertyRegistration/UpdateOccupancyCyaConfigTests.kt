@@ -10,12 +10,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -55,13 +52,19 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockMessageSource: MessageSource
 
     @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
-
-    @Mock
     private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateOccupancyJourneyState
+
+    @Mock
+    private lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
+
+    @Mock
+    private lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
+
+    @Mock
+    private lateinit var mockRentFrequencyAndAmountTask: RentFrequencyAndAmountTask
 
     @Mock
     private lateinit var mockOccupiedStep: OccupiedStep
@@ -97,9 +100,6 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockRentFrequencyStep: RentFrequencyStep
 
     @Mock
-    private lateinit var mockRentFrequencyAndAmountTask: RentFrequencyAndAmountTask
-
-    @Mock
     private lateinit var mockRentFrequencyFormModel: RentFrequencyFormModel
 
     @Mock
@@ -111,15 +111,8 @@ class UpdateOccupancyCyaConfigTests {
     @Mock
     private lateinit var mockBillsIncludedStep: BillsIncludedStep
 
-    @Mock
-    private lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
-
-    @Mock
-    private lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
-
     private val propertyId = 123L
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
-    private val initialNumberOfBedrooms = 4
 
     @Mock
     private lateinit var stepConfig: UpdateOccupancyCyaConfig
@@ -132,18 +125,19 @@ class UpdateOccupancyCyaConfigTests {
                 propertyOwnershipService = mockPropertyOwnershipService,
                 messageSource = mockMessageSource,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
-                featureFlagManager = mockFeatureFlagManager,
             )
         stepConfig.routeSegment = UpdateOccupancyCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
-        lenient().`when`(mockState.propertyId).thenReturn(propertyId)
-        lenient().`when`(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
         lenient().`when`(mockState.wasOccupied).thenReturn(false)
         lenient().`when`(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        lenient().`when`(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        lenient().`when`(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
         lenient().`when`(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
         lenient().`when`(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
         lenient().`when`(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn("2")
@@ -153,12 +147,10 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
         lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
         lenient().`when`(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn("3")
-        lenient().`when`(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         lenient().`when`(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
         lenient().`when`(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
         lenient().`when`(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
         lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(null)
-        lenient().`when`(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
         lenient().`when`(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         lenient().`when`(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
         lenient().`when`(mockRentFrequencyFormModel.rentFrequency).thenReturn(null)
@@ -166,135 +158,6 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
         lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn("500")
-        lenient()
-            .`when`(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING))
-            .thenReturn(false)
-    }
-
-    @Test
-    fun `getStepSpecificContent uses the restructured summary when restructure and skipping is enabled`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(true)
-
-        stepConfig.getStepSpecificContent(mockState)
-
-        verify(mockOccupancyDetailsHelper)
-            .getRestructuredCheckYourAnswersSummaryList(mockState, mockMessageSource)
-        verify(mockOccupancyDetailsHelper, never())
-            .getCheckYourAnswersSummaryList(mockState, mockMessageSource)
-    }
-
-    @Test
-    fun `getStepSpecificContent uses the existing summary when restructure and skipping is disabled`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(false)
-
-        stepConfig.getStepSpecificContent(mockState)
-
-        verify(mockOccupancyDetailsHelper)
-            .getCheckYourAnswersSummaryList(mockState, mockMessageSource)
-        verify(mockOccupancyDetailsHelper, never())
-            .getRestructuredCheckYourAnswersSummaryList(mockState, mockMessageSource)
-    }
-
-    @Test
-    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and occupancy changes from occupied to unoccupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(true)
-        whenever(mockState.wasOccupied).thenReturn(true)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = false,
-            numBedrooms = initialNumberOfBedrooms,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and occupancy changes from unoccupied to occupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(true)
-        whenever(mockState.wasOccupied).thenReturn(false)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = true,
-            numBedrooms = initialNumberOfBedrooms,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and property remains occupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(true)
-        whenever(mockState.wasOccupied).thenReturn(true)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = true,
-            numBedrooms = initialNumberOfBedrooms,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and property remains unoccupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(true)
-        whenever(mockState.wasOccupied).thenReturn(false)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = false,
-            numBedrooms = initialNumberOfBedrooms,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded uses submitted bedrooms when restructure is disabled and property is occupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(false)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = true,
-            numBedrooms = 3,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded clears bedrooms when restructure is disabled and property is unoccupied`() {
-        whenever(
-            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-        ).thenReturn(false)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verifyOccupancyUpdate(
-            isOccupied = false,
-            numBedrooms = null,
-        )
     }
 
     @Test
@@ -376,84 +239,6 @@ class UpdateOccupancyCyaConfigTests {
         ).thenThrow(UpdateConflictException::class.java)
 
         // Act, assert
-        assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
-
-        verify(mockState).deleteJourney()
-    }
-
-    private fun verifyOccupancyUpdate(
-        isOccupied: Boolean,
-        numBedrooms: Int?,
-    ) {
-        verify(mockPropertyOwnershipService).updateOccupancy(
-            id = propertyId,
-            isOccupied = isOccupied,
-            numberOfHouseholds = if (isOccupied) 2 else 0,
-            numberOfPeople = if (isOccupied) 5 else 0,
-            numBedrooms = numBedrooms,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = null,
-            customRentFrequency = null,
-            rentAmount = if (isOccupied) "500".toBigDecimal() else null,
-            initialLastModifiedDate = initialLastModifiedDate,
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded only updates the occupancy status when the restructure feature is enabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(mockPropertyOwnershipService).updateIsOccupied(
-            id = propertyId,
-            isOccupied = true,
-            initialLastModifiedDate = initialLastModifiedDate,
-        )
-        verify(mockPropertyOwnershipService, never()).updateOccupancy(
-            id = org.mockito.kotlin.any(),
-            isOccupied = org.mockito.kotlin.any(),
-            numberOfHouseholds = org.mockito.kotlin.any(),
-            numberOfPeople = org.mockito.kotlin.any(),
-            numBedrooms = org.mockito.kotlin.anyOrNull(),
-            billsIncludedList = org.mockito.kotlin.anyOrNull(),
-            customBillsIncluded = org.mockito.kotlin.anyOrNull(),
-            furnishedStatus = org.mockito.kotlin.anyOrNull(),
-            rentFrequency = org.mockito.kotlin.anyOrNull(),
-            customRentFrequency = org.mockito.kotlin.anyOrNull(),
-            rentAmount = org.mockito.kotlin.anyOrNull(),
-            initialLastModifiedDate = org.mockito.kotlin.any(),
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded only sends the occupancy bullet when the restructure feature is enabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
-            eq(propertyId),
-            eq(listOf("Whether the property is occupied by tenants")),
-        )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded deletes the journey then rethrows an UpdateConflictException when the restructure feature is enabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-        whenever(
-            mockPropertyOwnershipService.updateIsOccupied(
-                id = propertyId,
-                isOccupied = true,
-                initialLastModifiedDate = initialLastModifiedDate,
-            ),
-        ).thenThrow(UpdateConflictException::class.java)
-
         assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
 
         verify(mockState).deleteJourney()

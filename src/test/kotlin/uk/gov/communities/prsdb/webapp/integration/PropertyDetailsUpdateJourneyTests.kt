@@ -285,21 +285,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
-                    // Update occupancy to vacant
+                    // Update occupancy to vacant and submit directly (single-page update, no check answers page)
                     assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
                     updateOccupancyPage.submitIsVacant()
-                    val checkOccupancyAnswersPage =
-                        assertPageIs(
-                            page,
-                            CheckOccupancyAnswersPagePropertyDetailsUpdate::class,
-                            occupiedPropertyUrlArguments,
-                        )
-
-                    // Check occupancy answers
-                    assertThat(checkOccupancyAnswersPage.summaryList.occupancyRow).containsText("No")
-                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).isHidden()
-                    checkOccupancyAnswersPage.confirm()
                     propertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -318,32 +306,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
-                    // Update occupancy to occupied
+                    // Update occupancy to occupied and submit directly (single-page update, no check answers page)
                     assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
                     updateOccupancyPage.submitIsOccupied()
-
-                    // The occupancy-only journey goes straight to the check answers page without asking any tenancy questions
-                    val checkOccupancyAnswersPage =
-                        assertPageIs(
-                            page,
-                            CheckOccupancyAnswersPagePropertyDetailsUpdate::class,
-                            vacantPropertyUrlArguments,
-                        )
-                    assertThat(checkOccupancyAnswersPage.summaryList.occupancyRow).containsText("Yes")
-                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.numberOfBedroomsRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.rentIncludesBillsRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.billsIncludedRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.furnishedStatusRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.rentFrequencyRow).isHidden()
-                    assertThat(checkOccupancyAnswersPage.summaryList.rentAmountRow).isHidden()
-                    checkOccupancyAnswersPage.confirm()
                     propertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
 
-                    // Only the occupancy status is updated; tenancy details are left untouched
+                    // The occupancy status is updated and the property defaults to providing tenancy details later
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
                 }
             }
 
