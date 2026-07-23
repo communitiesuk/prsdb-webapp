@@ -7,6 +7,7 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
@@ -54,6 +55,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBod
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -122,8 +124,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgType(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgType(orgTypes: List<OrgType> = listOf(OrgType.COMPANY)): LandlordStateSessionBuilder {
+        val formModel = OrgTypeFormModel().apply { this.orgTypes = orgTypes.map { it.name }.toMutableList() }
+        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -324,7 +327,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
-        fun beforeLeadTrusteeName() = beforeOrgType().withOrgType()
+        fun beforeLeadTrusteeName() = beforeOrgType().withOrgType(listOf(OrgType.TRUST))
 
         fun beforeLeadTrusteeDob() = beforeLeadTrusteeName().withLeadTrusteeName()
 

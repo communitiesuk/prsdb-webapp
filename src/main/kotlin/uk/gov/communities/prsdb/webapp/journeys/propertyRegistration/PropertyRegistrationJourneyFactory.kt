@@ -86,6 +86,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
@@ -682,6 +683,8 @@ class PropertyRegistrationJourney(
     override val epcMissingStep: EpcMissingStep,
     override val provideEpcLaterStep: ProvideEpcLaterStep,
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
+    // Tenancy details steps
+    override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep,
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -748,6 +751,8 @@ class PropertyRegistrationJourney(
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
+
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

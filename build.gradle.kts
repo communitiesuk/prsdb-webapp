@@ -77,6 +77,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3-transfer-manager")
     implementation("software.amazon.awssdk:aws-crt-client")
     implementation("software.amazon.awssdk:cloudwatch")
+    implementation("software.amazon.awssdk:costexplorer")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -250,7 +251,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.11")
+        classpath("org.postgresql:postgresql:42.7.12")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
     }
     configurations.classpath {

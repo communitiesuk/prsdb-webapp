@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCounci
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 
-class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.sql") {
+class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-invite-local-council-users.sql") {
     @MockitoBean
     private lateinit var invitationConfirmationSenderAdmin: EmailNotificationService<LocalCouncilUserInvitationInformAdminEmail>
 
@@ -31,7 +31,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
         val successPage = assertPageIs(page, InviteNewLocalCouncilUserSuccessPage::class, mapOf("localCouncilId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve invited test@example.com")
 
-        verify(invitationConfirmationSenderAdmin, times(6)).sendEmail(
+        verify(invitationConfirmationSenderAdmin, times(3)).sendEmail(
             any(),
             any(),
         )

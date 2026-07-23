@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-class InviteLocalCouncilUsersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+class InviteLocalCouncilUsersSinglePageTests : IntegrationTestWithImmutableData("data-invite-local-council-users.sql") {
     @Test
     fun `inviting a new LocalCouncil user shows validation errors if the email addresses don't match`() {
         val invitePage = navigator.goToInviteNewLocalCouncilUser(1)

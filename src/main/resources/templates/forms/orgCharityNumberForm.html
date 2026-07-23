@@ -7,7 +7,7 @@
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block th:with="fieldSetHeadingLabelTo=${'charityNumber'}">
         <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'charityNumber', #{forms.orgCharityNumber.fieldSetHeading}, #{forms.orgCharityNumber.fieldSetHint})}">
-            <div th:replace="~{fragments/forms/basicTextInput :: textInput(null, 'charityNumber', null)}"></div>
+            <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(null, 'charityNumber', null, 10)}"></div>
         </th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>

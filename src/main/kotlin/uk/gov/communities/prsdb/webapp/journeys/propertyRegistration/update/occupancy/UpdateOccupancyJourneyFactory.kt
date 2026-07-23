@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -191,6 +192,8 @@ class UpdateOccupancyJourney(
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
+    // Tenancy details steps
+    override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep,
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -212,6 +215,8 @@ class UpdateOccupancyJourney(
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
 interface UpdateOccupancyJourneyState :
