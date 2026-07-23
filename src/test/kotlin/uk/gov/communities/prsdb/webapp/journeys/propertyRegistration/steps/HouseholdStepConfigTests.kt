@@ -44,6 +44,9 @@ class HouseholdStepConfigTests {
         // Assert
         assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
         assertEquals("forms.numberOfHouseholds.label", content["label"])
-        assertEquals("forms/restructureAndSkipping/numberOfHouseholdsFormLegacy", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
+        assertEquals(
+            "forms/restructureAndSkipping/numberOfHouseholdsFormLegacy",
+            stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState),
+        )
     }
 }
