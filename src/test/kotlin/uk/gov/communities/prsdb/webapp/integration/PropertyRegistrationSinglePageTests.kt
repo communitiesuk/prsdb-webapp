@@ -1970,7 +1970,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                     .containsText("Enter how many separate households, like 1 or 2")
             }
         }
-
+        
         @Nested
         inner class ProvideTenancyDetailsLaterStep {
             @Test
