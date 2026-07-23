@@ -1,6 +1,7 @@
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
-       ('urn:fdc:gov.uk:2022:ABCDE', '10/14/24');
+       ('urn:fdc:gov.uk:2022:ABCDE', '10/14/24'),
+       ('ia-mock-user-12345', '10/14/24');
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
@@ -39,6 +40,11 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (2, 1, '2025-01-15'),
        (1, 2, '2025-01-15');
+
+INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
+                                name, email, has_accepted_privacy_notice)
+VALUES ('ia-mock-user-12345', true, 2, '10/14/24', '10/14/24', 'Mock User IA', 'test@example.com', true);
+SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES
