@@ -29,12 +29,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationCyaStepConfig(
-    private val urlParameterService: CollectionKeyParameterService,
-) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
+class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) = "forms/orgLandlordRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
@@ -278,7 +275,7 @@ class OrgLandlordRegistrationCyaStepConfig(
         return members
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (internalIndex, member) ->
+            .mapIndexed { displayIndex, (_, member) ->
                 SummaryCardViewModel(
                     title = memberCardTitleKey(member.type),
                     cardNumber = (displayIndex + 1).toString(),
@@ -305,7 +302,8 @@ class OrgLandlordRegistrationCyaStepConfig(
                                 Destination.Nowhere(),
                             ),
                         ),
-                    actions = govBodyMemberChangeAction(state, internalIndex),
+                    // TODO: PDJB-1168 (PR2) - wire this to the real governing-body-member edit round-trip that returns to the CYA page.
+                    actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = PLACEHOLDER_CHANGE_URL)),
                 )
             }
     }
@@ -373,19 +371,6 @@ class OrgLandlordRegistrationCyaStepConfig(
                 SummaryCardActionViewModel(text = "forms.links.change", url = it)
             },
         )
-
-    private fun govBodyMemberChangeAction(
-        state: LandlordRegistrationState,
-        memberKey: Int,
-    ): List<SummaryCardActionViewModel> {
-        val org = state.orgLandlordRegistrationTask
-        return listOfNotNull(
-            Destination(org.setStateForGovBodyMemberEditStep)
-                .withUrlParameter(urlParameterService.createParameterPair(memberKey))
-                .toUrlStringOrNull()
-                ?.let { SummaryCardActionViewModel(text = "forms.links.change", url = it) },
-        )
-    }
 
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun orgAddressLines(address: ManualAddressFormModel) =
