@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -41,7 +42,12 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
             }
             exitStep {
                 savable()
-                parents { journey.rentFrequencyAndAmountTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.rentFrequencyAndAmountTask.isComplete(),
+                        journey.provideTenancyDetailsLaterStep.isComplete(),
+                    )
+                }
             }
         }
 }

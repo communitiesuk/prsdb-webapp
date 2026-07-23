@@ -71,6 +71,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
@@ -515,7 +516,7 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextDestination { _ ->
                         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
-                            state.getStepData(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT) != null
+                            state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
                         ) {
                             Destination(journey.cyaStep)
                         } else {

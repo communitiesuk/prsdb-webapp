@@ -1575,20 +1575,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Occupied journey reaches check answers after provide tenancy details later`(page: Page) {
+        fun `Occupied journey reaches check answers after choosing to provide tenancy details later`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
             assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
-            
-            //todo: update test
+
             provideTenancyDetailsLaterPage.form.submit()
 
-            // Verify we've reached the Check Your Answers page by heading and that the rent row is hidden
-            assertThat(page.locator("h1")).containsText("Check your answers")
-            //assertThat(page.locator("dt", Page.LocatorOptions().setHasText("Rent amount"))).isHidden()
+            // Check Your Answers - render page
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
         }
-
-
+        
         @Test
         fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
