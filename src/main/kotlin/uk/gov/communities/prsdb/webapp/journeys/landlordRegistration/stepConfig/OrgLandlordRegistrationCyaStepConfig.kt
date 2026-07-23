@@ -29,9 +29,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
+class OrgLandlordRegistrationCyaStepConfig(
+    private val urlParameterService: CollectionKeyParameterService,
+) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) = "forms/orgLandlordRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
@@ -40,8 +43,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),
-            "leadTrusteeCard" to getLeadTrusteeCard(state),
-            "governingBodyMemberCards" to getGovBodyMemberCards(state),
+            "governingBodyMemberCards" to (listOfNotNull(getLeadTrusteeCard(state)) + getGovBodyMemberCards(state)),
             "mainContactCard" to getMainContactCard(state),
         )
 
@@ -231,8 +233,11 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         }
     }
 
-    private fun getLeadTrusteeCard(state: LandlordRegistrationState): SummaryCardViewModel {
+    private fun getLeadTrusteeCard(state: LandlordRegistrationState): SummaryCardViewModel? {
         val org = state.orgLandlordRegistrationTask
+        if (OrgType.TRUST !in org.orgTypeStep.formModel.getSelectedOrgTypes()) {
+            return null
+        }
         val rows =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -273,7 +278,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         return members
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (_, member) ->
+            .mapIndexed { displayIndex, (internalIndex, member) ->
                 SummaryCardViewModel(
                     title = memberCardTitleKey(member.type),
                     cardNumber = (displayIndex + 1).toString(),
@@ -300,8 +305,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                                 Destination.Nowhere(),
                             ),
                         ),
-                    // TODO: PDJB-1290 - replace with the real change URL once governing body member editing is wired up.
-                    actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = PLACEHOLDER_CHANGE_URL)),
+                    actions = govBodyMemberChangeAction(state, internalIndex),
                 )
             }
     }
@@ -370,6 +374,19 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             },
         )
 
+    private fun govBodyMemberChangeAction(
+        state: LandlordRegistrationState,
+        memberKey: Int,
+    ): List<SummaryCardActionViewModel> {
+        val org = state.orgLandlordRegistrationTask
+        return listOfNotNull(
+            Destination(org.setStateForGovBodyMemberEditStep)
+                .withUrlParameter(urlParameterService.createParameterPair(memberKey))
+                .toUrlStringOrNull()
+                ?.let { SummaryCardActionViewModel(text = "forms.links.change", url = it) },
+        )
+    }
+
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun orgAddressLines(address: ManualAddressFormModel) =
         AddressDataModel
@@ -399,8 +416,8 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         }
 
     companion object {
-        // TODO: PDJB-1282 (your details email/phone) / PDJB-1290 (governing body member change link) -
-        // non-functional Change link placeholder until the underlying steps exist.
+        // TODO: PDJB-1282 - non-functional Change link placeholder for the your-details email/phone rows
+        // until those steps exist.
         private const val PLACEHOLDER_CHANGE_URL = "#"
     }
 }

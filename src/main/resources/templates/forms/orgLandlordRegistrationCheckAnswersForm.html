@@ -4,8 +4,8 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="yourDetailsCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
 <!--/*@thymesVar id="landlordDetails" type="java.util.List"*/-->
-<!--/*@thymesVar id="leadTrusteeCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
 <!--/*@thymesVar id="mainContactCard" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel"*/-->
+<!--/*@thymesVar id="governingBodyMemberCards" type="java.util.List"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -19,7 +19,6 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
 
         <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.orgCheckAnswers.governingBody.heading}">registerAsALandlord.orgCheckAnswers.governingBody.heading</h2>
-        <div th:replace="~{fragments/summaryCard :: summaryCard(#{${leadTrusteeCard.title}}, ${leadTrusteeCard.cardNumber}, ${leadTrusteeCard.actions}, ${leadTrusteeCard.summaryList})}"></div>
         <th:block th:each="memberCard : ${governingBodyMemberCards}">
             <div th:replace="~{fragments/summaryCard :: summaryCard(${memberCard.title}, ${memberCard.cardNumber}, ${memberCard.actions}, ${memberCard.summaryList})}"></div>
         </th:block>

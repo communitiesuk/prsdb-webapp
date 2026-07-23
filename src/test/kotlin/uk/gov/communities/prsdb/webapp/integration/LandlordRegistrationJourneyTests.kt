@@ -322,7 +322,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(checkAnswersPage.landlordDetails.landlordTypeRow).containsText("Organisation")
         assertThat(checkAnswersPage.landlordDetails.organisationNameRow).containsText("Test Organisation Name")
         assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Company")
-        assertThat(checkAnswersPage.leadTrusteeCard.title).hasText("Lead trustee")
         assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
 
         // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
