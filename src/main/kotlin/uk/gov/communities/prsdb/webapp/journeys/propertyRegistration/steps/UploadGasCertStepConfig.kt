@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -38,15 +39,18 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
+            val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
+                subjectIdentifier,
             )
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
+                subjectIdentifier,
             )
 
             val formModel = getFormModelFromState(state)

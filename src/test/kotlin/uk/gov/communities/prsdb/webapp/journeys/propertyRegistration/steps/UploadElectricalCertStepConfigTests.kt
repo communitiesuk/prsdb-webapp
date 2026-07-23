@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -10,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -37,6 +41,16 @@ class UploadElectricalCertStepConfigTests {
 
     @Mock
     lateinit var uploadElectricalCertStep: UploadElectricalCertStep
+
+    @BeforeEach
+    fun setupSecurityContext() {
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("subject-1", null)
+    }
+
+    @AfterEach
+    fun clearSecurityContext() {
+        SecurityContextHolder.clearContext()
+    }
 
     @Test
     fun `getStepSpecificContent returns EIC heading when EIC is selected`() {
@@ -99,8 +113,8 @@ class UploadElectricalCertStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(virusScanCallbackService).saveEmailForJourney("test-journey-id", 42L, CertificateType.Eicr)
-        verify(virusScanCallbackService).saveEmailToMonitoringTeam("test-journey-id", 42L, CertificateType.Eicr)
+        verify(virusScanCallbackService).saveEmailForJourney("test-journey-id", 42L, CertificateType.Eicr, "subject-1")
+        verify(virusScanCallbackService).saveEmailToMonitoringTeam("test-journey-id", 42L, CertificateType.Eicr, "subject-1")
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()

@@ -7,8 +7,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.IncompletePropertyEmailNotification
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification
@@ -16,9 +19,11 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.VirusMonit
 
 @PrsdbTaskService
 class VirusNotificationEmailHandler(
-    private val emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>,
+    private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
+    private val savedJourneyStateRepository: SavedJourneyStateRepository,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
     fun handleCallback(callback: VirusScanCallback) =
@@ -27,8 +32,7 @@ class VirusNotificationEmailHandler(
 
             is VirusMonitoringEmailNotification -> sendAlertToMonitoringTeam(callbackData)
 
-            // TODO PDJB-717: Handle notifying the user and the monitoring team for incomplete journeys
-            is IncompletePropertyEmailNotification -> TODO("PDJB-717")
+            is IncompletePropertyEmailNotification -> sendAlertForIncompleteProperty(callbackData)
         }
 
     private fun sendAlertToOwners(
@@ -37,17 +41,44 @@ class VirusNotificationEmailHandler(
     ) {
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
-        val email = buildAlertEmail(ownership, notification.certificateType)
-
         if (emailAddress != null) {
-            emailNotificationService.sendEmail(emailAddress, email)
+            val firstLandlord = ownership.landlords.first()
+            check(firstLandlord is IndividualLandlord)
+            emailNotificationService.sendEmail(
+                emailAddress,
+                buildAlertEmail(ownership, notification.certificateType, firstLandlord.name),
+            )
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
                 check(landlord is IndividualLandlord)
-                emailNotificationService.sendEmail(landlord.email, email)
+                emailNotificationService.sendEmail(landlord.email, buildAlertEmail(ownership, notification.certificateType, landlord.name))
             }
         }
+    }
+
+    private fun sendAlertForIncompleteProperty(
+        notification: IncompletePropertyEmailNotification,
+        emailAddress: String? = null,
+    ) {
+        val landlord =
+            individualLandlordRepository.findByBaseUser_Id(notification.subjectIdentifier)
+                ?: throw IllegalStateException(
+                    "No individual landlord found for subject identifier: ${notification.subjectIdentifier}",
+                )
+        val savedJourneyState =
+            savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, notification.subjectIdentifier)
+                ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
+
+        val email =
+            VirusScanUnsuccessfulEmail(
+                certificateType = certificateDescriptionForBody(notification.certificateType),
+                recipientName = landlord.name,
+                propertyAddress = savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                registerRentalPropertyURL = absoluteUrlProvider.buildLandlordDashboardUri(),
+            )
+
+        emailNotificationService.sendEmail(emailAddress ?: landlord.email, email)
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
@@ -57,7 +88,7 @@ class VirusNotificationEmailHandler(
             }
 
             is IncompletePropertyEmailNotification -> {
-                TODO("PDJB-717")
+                sendAlertForIncompleteProperty(internalNotification, virusMonitoringEmail)
             }
 
             is VirusMonitoringEmailNotification -> {
@@ -72,29 +103,14 @@ class VirusNotificationEmailHandler(
     private fun buildAlertEmail(
         propertyOwnership: PropertyOwnership,
         certificateType: CertificateType,
+        recipientName: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
-            certificateDescriptionForSubject(certificateType),
-            certificateDescriptionForHeading(certificateType),
-            certificateDescriptionForBody(certificateType),
-            propertyOwnership.address.singleLineAddress,
-            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-            absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            certificateType = certificateDescriptionForBody(certificateType),
+            recipientName = recipientName,
+            propertyAddress = propertyOwnership.address.singleLineAddress,
+            registerRentalPropertyURL = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
-
-    private fun certificateDescriptionForSubject(certificateType: CertificateType): String =
-        when (certificateType) {
-            CertificateType.GasSafetyCert -> "A gas safety certificate"
-            CertificateType.Eicr -> "An EICR"
-            CertificateType.Eic -> "An EIC"
-        }
-
-    private fun certificateDescriptionForHeading(certificateType: CertificateType): String =
-        when (certificateType) {
-            CertificateType.GasSafetyCert -> "gas safety certificate"
-            CertificateType.Eicr -> "Electrical Installation Condition Report (EICR)"
-            CertificateType.Eic -> "Electrical Installation Certificate (EIC)"
-        }
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
         when (category) {

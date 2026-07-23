@@ -36,14 +36,42 @@ class VirusScanCallbackServiceTests {
     private fun callbackFor(data: EmailNotificationData) = VirusScanCallback(fileUpload, Json.encodeToString<EmailNotificationData>(data))
 
     @Test
+    fun `saveEmailForJourney persists the subject identifier in the callback payload`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveEmailForJourney("journey-1", 42L, CertificateType.Eicr, "subject-1")
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository).save(captor.capture())
+        assertEquals(
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, "subject-1"),
+            Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
+        )
+    }
+
+    @Test
     fun `updateCallbacksToOwner re-points journey-target callbacks to the owner in place`() {
         // Arrange
         val directCallback =
-            callbackFor(EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr))
+            callbackFor(
+                EmailNotificationData.IncompletePropertyEmailNotification(
+                    "journey-1",
+                    CertificateType.Eicr,
+                    "subject-1",
+                ),
+            )
         val monitoringCallback =
             callbackFor(
                 EmailNotificationData.VirusMonitoringEmailNotification(
-                    EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr),
+                    EmailNotificationData.IncompletePropertyEmailNotification(
+                        "journey-1",
+                        CertificateType.Eicr,
+                        "subject-1",
+                    ),
                 ),
             )
         whenever(virusScanCallbackRepository.findAllByFileUpload_Id(42L))

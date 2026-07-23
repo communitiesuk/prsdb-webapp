@@ -18,6 +18,7 @@ class VirusScanCallbackService(
         journeyId: String,
         fileUploadId: Long,
         certificateType: CertificateType,
+        subjectIdentifier: String,
     ): VirusScanCallback {
         val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
 
@@ -25,6 +26,7 @@ class VirusScanCallbackService(
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
                 certificateType = certificateType,
+                subjectIdentifier = subjectIdentifier,
             )
 
         return virusScanCallbackRepository.save(
@@ -39,6 +41,7 @@ class VirusScanCallbackService(
         journeyId: String,
         fileUploadId: Long,
         certificateType: CertificateType,
+        subjectIdentifier: String,
     ): VirusScanCallback {
         val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
 
@@ -46,6 +49,7 @@ class VirusScanCallbackService(
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
                 certificateType = certificateType,
+                subjectIdentifier = subjectIdentifier,
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
@@ -101,6 +105,7 @@ sealed class EmailNotificationData {
     data class IncompletePropertyEmailNotification(
         val journeyId: String,
         val certificateType: CertificateType,
+        val subjectIdentifier: String,
     ) : EmailNotificationData()
 
     @Serializable
