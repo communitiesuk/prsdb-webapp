@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 @JourneyFrameworkComponent
-class LandlordRegistrationCyaStepConfig(
+class IndividualLandlordRegistrationCyaStepConfig(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
@@ -140,6 +140,6 @@ class LandlordRegistrationCyaStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class LandlordRegistrationCyaStep(
-    stepConfig: LandlordRegistrationCyaStepConfig,
+final class IndividualLandlordRegistrationCyaStep(
+    stepConfig: IndividualLandlordRegistrationCyaStepConfig,
 ) : AbstractCheckYourAnswersStep<LandlordRegistrationState>(stepConfig)

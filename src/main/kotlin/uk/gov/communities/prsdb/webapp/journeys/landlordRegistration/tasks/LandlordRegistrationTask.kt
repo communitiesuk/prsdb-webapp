@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IndividualLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
@@ -39,7 +39,7 @@ class LandlordRegistrationTask(
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
-    override val cyaStep: LandlordRegistrationCyaStep,
+    override val cyaStep: IndividualLandlordRegistrationCyaStep,
     override val orgCyaStep: OrgLandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
