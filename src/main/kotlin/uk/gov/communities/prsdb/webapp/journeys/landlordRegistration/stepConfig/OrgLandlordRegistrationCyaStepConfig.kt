@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -57,6 +56,9 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
     ): Destination = defaultDestination
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
+        // TODO: PDJB-1282 - review this identity-verification branch; whether organisation landlords can be
+        // identity-verified at all (and so whether the name/date-of-birth Change links should ever be suppressed)
+        // may change.
         val verified = state.identityTask.getIsIdentityVerified()
         val rows =
             listOf(
@@ -141,29 +143,33 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 ),
             )
 
-            val isCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
-                    isCharity,
+                    isRegisteredCharity,
                     Destination.VisitableStep(org.orgCharityStep, state.getCyaJourneyId(org.orgCharityStep)),
                 ),
             )
-            if (isCharity) {
-                val regulator = org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith
-                if (regulator != null) {
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "registerAsALandlord.orgCheckAnswers.landlordDetails.charityCommission",
-                            regulatorMessageKey(regulator),
-                            Destination.VisitableStep(
-                                org.orgCharityRegisteredWithStep,
-                                state.getCyaJourneyId(org.orgCharityRegisteredWithStep),
-                            ),
+
+            val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
+            val showCharityRegulator = charityRegulator != null
+            val showCharityNumber = charityRegulator != null && charityRegulator != CharityRegulator.NONE
+
+            if (showCharityRegulator) {
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "registerAsALandlord.orgCheckAnswers.landlordDetails.charityCommission",
+                        regulatorMessageKey(charityRegulator!!),
+                        Destination.VisitableStep(
+                            org.orgCharityRegisteredWithStep,
+                            state.getCyaJourneyId(org.orgCharityRegisteredWithStep),
                         ),
-                    )
-                    charityNumberRow(state, regulator)?.let { add(it) }
-                }
+                    ),
+                )
+            }
+            if (showCharityNumber) {
+                add(charityNumberRow(state, charityRegulator!!))
             }
 
             val registeredWithCompaniesHouse =
@@ -192,7 +198,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
     private fun charityNumberRow(
         state: LandlordRegistrationState,
         regulator: CharityRegulator,
-    ): SummaryListRowViewModel? {
+    ): SummaryListRowViewModel {
         val org = state.orgLandlordRegistrationTask
         val headingKey = "registerAsALandlord.orgCheckAnswers.landlordDetails.charityNumber"
         return when (regulator) {
@@ -226,7 +232,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                     ),
                 )
 
-            CharityRegulator.NONE -> null
+            CharityRegulator.NONE -> error("charityNumberRow should only be called for a regulator that issues a charity number")
         }
     }
 
@@ -266,7 +272,10 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.governingBody.leadTrusteeCardTitle",
             summaryList = rows,
-            actions = orgCardChangeAction(state, org.leadTrusteeNameStep),
+            actions =
+                SummaryCardActionViewModel.forCheckYourAnswersPage(
+                    Destination.VisitableStep(org.leadTrusteeNameStep, state.getCyaJourneyId(org.leadTrusteeNameStep)),
+                ),
         )
     }
 
@@ -348,7 +357,10 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.mainContact.cardTitle",
             summaryList = rows,
-            actions = orgCardChangeAction(state, org.orgMainContactStep),
+            actions =
+                SummaryCardActionViewModel.forCheckYourAnswersPage(
+                    Destination.VisitableStep(org.orgMainContactStep, state.getCyaJourneyId(org.orgMainContactStep)),
+                ),
         )
     }
 
@@ -361,16 +373,6 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         fieldValue = value,
         actions = listOf(SummaryListRowActionsViewModel("forms.links.change", PLACEHOLDER_CHANGE_URL)),
     )
-
-    private fun orgCardChangeAction(
-        state: LandlordRegistrationState,
-        step: RequestableStep<*, *, *>,
-    ): List<SummaryCardActionViewModel> =
-        listOfNotNull(
-            Destination.VisitableStep(step, state.getCyaJourneyId(step)).toUrlStringOrNull()?.let {
-                SummaryCardActionViewModel(text = "forms.links.change", url = it)
-            },
-        )
 
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun orgAddressLines(address: ManualAddressFormModel) =
