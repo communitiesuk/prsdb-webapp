@@ -31,7 +31,7 @@ class LandlordRegistrationCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
-        landlordService.createLandlord(
+        landlordService.createIndividualLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             name = state.identityTask.getName(),
             email =

@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
@@ -200,7 +200,7 @@ class PropertyDetailsControllerTests(
             val propertyOwnership =
                 createPropertyOwnership(
                     markedJointLandlord = true,
-                    landlords = mutableSetOf(createLandlord(name = "Landlord 1"), createLandlord(name = "Landlord 2")),
+                    landlords = mutableSetOf(createIndividualLandlord(name = "Landlord 1"), createIndividualLandlord(name = "Landlord 2")),
                 )
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
@@ -234,8 +234,8 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails includes correct landlord count`() {
-            val landlord1 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
-            val landlord2 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+            val landlord1 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+            val landlord2 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
             val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord1, landlord2))
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
