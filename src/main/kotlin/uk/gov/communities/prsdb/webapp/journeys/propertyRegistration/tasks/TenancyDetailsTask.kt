@@ -13,6 +13,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             duplicableTask(journey.householdsAndTenantsTask) {
+                withDependencies { HouseHoldsAndTenantsDependencies(true) }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }

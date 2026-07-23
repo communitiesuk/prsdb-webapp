@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
@@ -56,6 +57,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
+                withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }

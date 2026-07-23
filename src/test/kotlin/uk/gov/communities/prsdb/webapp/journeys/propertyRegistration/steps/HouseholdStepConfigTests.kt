@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -23,6 +24,7 @@ class HouseholdStepConfigTests {
         // Arrange
         val stepConfig = HouseholdStepConfig(mockFeatureFlagManager)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockHouseholdsAndTenantsState.dependencies).thenReturn(mock())
 
         // Act
         val content = stepConfig.getStepSpecificContent(mockHouseholdsAndTenantsState)
