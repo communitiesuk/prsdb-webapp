@@ -1,14 +1,12 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
@@ -43,12 +41,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
             }
             exitStep {
                 savable()
-                parents {
-                    OrParents(
-                        journey.rentFrequencyAndAmountTask.isComplete(),
-                        journey.provideTenancyDetailsLaterStep.isComplete(),
-                    )
-                }
+                parents { journey.rentFrequencyAndAmountTask.isComplete() }
             }
         }
 }
