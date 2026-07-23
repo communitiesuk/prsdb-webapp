@@ -28,10 +28,12 @@ interface BuildableElement {
     )
 }
 
-abstract class AbstractJourneyBuilder<TState : JourneyState>(
-    val journey: TState,
+abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneyState : JourneyState>(
+    private val privateJourney: TInternalState,
 ) : BuildableElement,
-    JourneyBuilderDsl<TState> {
+    JourneyBuilderDsl<TInternalState> {
+    abstract val journey: TJourneyState
+
     private val journeyElements: MutableList<BuildableElement> = mutableListOf()
 
     private var defaultUnreachableStepDestination: (() -> Destination)? = null
@@ -72,11 +74,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         }
     }
 
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TInternalState>> step(
+        uninitialisedStep: JourneyStep<TMode, *, TInternalState>,
+        init: StepInitialiser<TStep, TInternalState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TInternalState, TMode>(uninitialisedStep, privateJourney)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {
@@ -87,11 +89,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun task(
-        uninitialisedTask: Task<TState>,
+        uninitialisedTask: Task<TInternalState>,
         routeSegment: String?,
-        init: TaskInitialiser<TState, Nothing>.() -> Unit,
+        init: TaskInitialiser<TInternalState, Nothing>.() -> Unit,
     ) {
-        val taskInitialiser = TaskInitialiser<TState, Nothing>(uninitialisedTask, journey)
+        val taskInitialiser = TaskInitialiser<TInternalState, Nothing>(uninitialisedTask, privateJourney)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
@@ -109,11 +111,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
-    fun <TEmbeddedState : JourneyState> embed(
-        embedState: TEmbeddedState,
-        init: EmbedBuilder<TEmbeddedState, TState>.() -> Unit,
+    fun <TEmbeddedState : JourneyState> fromTask(
+        task: TEmbeddedState,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
     ) {
-        val builder = EmbedBuilder(embedState, journey)
+        val builder = EmbedBuilder(task, privateJourney)
         builder.init()
         if (journeyElements.isEmpty()) {
             builder.configureFirst { additionalFirstElementConfiguration.forEach { it() } }
@@ -171,9 +173,9 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 }
 
 open class SubJourneyBuilder<TState : JourneyState>(
-    journey: TState,
+    override val journey: TState,
     exitStepOverride: SubjourneyExitStep? = null,
-) : AbstractJourneyBuilder<TState>(journey) {
+) : AbstractJourneyBuilder<TState, TState>(journey) {
     var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> =
         mutableListOf()
         private set

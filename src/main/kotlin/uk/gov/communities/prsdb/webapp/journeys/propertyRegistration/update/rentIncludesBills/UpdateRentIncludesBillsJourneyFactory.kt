@@ -99,8 +99,8 @@ class UpdateRentIncludesBillsJourneyFactory(
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    embed(journey.rentIncludesBillsTask) {
-                        checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    fromTask(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 

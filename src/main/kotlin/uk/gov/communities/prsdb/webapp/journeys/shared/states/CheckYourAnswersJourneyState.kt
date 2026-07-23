@@ -139,7 +139,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         ) {
             step(step) {
                 initialStep()
-                nextStep { outerState.finishCyaStep }
+                nextStep { journey.finishCyaStep }
                 routeSegment(route)
             }
         }

@@ -5,6 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 // EmbedBuilder allows one "journey" to be embedded in another. The outer journey can be accessed as `outerState` and the embedded
 // journey can be accessed as `journey` as usual
 class EmbedBuilder<TEmbeddedState : JourneyState, TOuterState : JourneyState>(
-    journey: TEmbeddedState,
-    val outerState: TOuterState,
-) : JourneyBuilder<TEmbeddedState>(journey)
+    val task: TEmbeddedState,
+    override val journey: TOuterState,
+) : AbstractJourneyBuilder<TEmbeddedState, TOuterState>(task)

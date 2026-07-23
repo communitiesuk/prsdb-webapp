@@ -155,8 +155,8 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
-                    embed(journey.addressTask) {
-                        checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                    fromTask(journey.addressTask) {
+                        checkAnswerStep(task.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
                     }
                 }
 
@@ -197,8 +197,8 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
-                    embed(journey.rentIncludesBillsTask) {
-                        checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    fromTask(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                     }
                 }
 
