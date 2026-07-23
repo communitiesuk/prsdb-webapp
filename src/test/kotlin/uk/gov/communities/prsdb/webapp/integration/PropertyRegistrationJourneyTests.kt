@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
@@ -1608,7 +1607,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            
+
             val changeLink =
                 checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
                     .getActionLink("Change")
@@ -1616,8 +1615,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             changeLink.clickAndWait()
             assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
-        }        
-        
+        }
+
         @Test
         fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
