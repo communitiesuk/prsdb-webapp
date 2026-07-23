@@ -15,6 +15,8 @@ class OrgTypeFormPageLandlordRegistration(
 
     fun selectCompany() = form.orgTypeCheckboxes.checkCheckbox(OrgType.COMPANY.toString())
 
+    fun selectTrust() = form.orgTypeCheckboxes.checkCheckbox(OrgType.TRUST.toString())
+
     fun selectNoneOfThese() = form.orgTypeCheckboxes.checkCheckbox(OrgType.NONE.toString())
 
     class OrgTypeForm(
