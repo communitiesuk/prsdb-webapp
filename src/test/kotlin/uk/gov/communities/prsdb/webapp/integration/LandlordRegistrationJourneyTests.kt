@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -518,6 +519,48 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             .clickAndWait()
 
         assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `pressing back after starting to edit resets editing state and allows adding a new member`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val memberListPage =
+            navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                mapOf(1 to createTestGovBodyMember("Alice Smith")),
+            )
+
+        memberListPage.summaryList
+            .getRowByIndex(0)
+            .actions
+            .getActionLink("Change")
+            .clickAndWait()
+
+        assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        BackLink.default(page).clickAndWait()
+
+        val returnedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        returnedListPage.addAnotherButton.click()
+
+        val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        whoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.TRUSTEE)
+
+        val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
+        namePage.submitName("Bob Jones")
+
+        val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
+        dobPage.submitDate("10", "3", "1975")
+
+        val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val updatedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        assertThat(updatedListPage.heading).containsText("added 2 people")
+        assertThat(updatedListPage.summaryList.getRowByIndex(0).value).containsText("Alice Smith")
+        assertThat(updatedListPage.summaryList.getRowByIndex(1).value).containsText("Bob Jones")
     }
 
     private fun createTestGovBodyMember(name: String) =
