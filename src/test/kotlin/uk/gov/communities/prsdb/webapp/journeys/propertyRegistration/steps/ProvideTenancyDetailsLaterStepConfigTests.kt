@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -40,6 +41,16 @@ class ProvideTenancyDetailsLaterStepConfigTests {
 
         // Assert
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
+    }
+
+    @Test
+    fun `Mode returns null when form model is not saved`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)).thenReturn(null)
+
+        // Act & Assert
+        assertNull(stepConfig.mode(mockState))
     }
 
     private fun setupStepConfig(): ProvideTenancyDetailsLaterStepConfig {

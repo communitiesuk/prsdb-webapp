@@ -55,7 +55,12 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val isProvideTenancyDetailsLater = state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
+        val isProvideTenancyDetailsLater =
+            if (isOccupied) {
+                state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
+            } else {
+                false
+            }
         val shouldRequireTenancyDetails = isOccupied && !isProvideTenancyDetailsLater
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         val jointLandlordEmails: List<String>? =

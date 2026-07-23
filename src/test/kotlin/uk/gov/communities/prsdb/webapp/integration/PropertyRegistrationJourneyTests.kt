@@ -41,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
@@ -1575,17 +1576,47 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Occupied journey reaches check answers after choosing to provide tenancy details later`(page: Page) {
+        fun `Occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
             assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
-
             provideTenancyDetailsLaterPage.form.submit()
 
             // Check Your Answers - render page
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("Provide this later")
         }
+
+        @Test
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+
+            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+
+            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertTrue(checkAndSubmitTask.hasLink)
+        }
+
+        @Test
+        fun `CYA number of tenants row shows a change link after landlord has chosen to provide tenancy details later`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            
+            val changeLink =
+                checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+                    .getActionLink("Change")
+            assertThat(changeLink).isVisible()
+
+            changeLink.clickAndWait()
+            assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        }        
         
         @Test
         fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
