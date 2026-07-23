@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -124,6 +125,7 @@ class UpdateHouseholdsAndTenantsJourney(
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
+    override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep,
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
     journeyStateService: JourneyStateService,
@@ -139,6 +141,8 @@ class UpdateHouseholdsAndTenantsJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val allowProvideTenancyDetailsLaterRoute: Boolean = false
 }
 
 interface UpdateHouseholdsAndTenantsJourneyState :

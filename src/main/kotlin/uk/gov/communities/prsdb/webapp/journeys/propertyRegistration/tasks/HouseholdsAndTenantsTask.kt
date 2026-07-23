@@ -4,8 +4,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -15,12 +18,23 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
         subJourney(state) {
             step(journey.households) {
                 routeSegment(HouseholdStep.ROUTE_SEGMENT)
-                nextStep { journey.tenants }
+                nextStep { mode ->
+                    when (mode) {
+                        HouseholdMode.PROVIDE_THIS_LATER -> journey.provideTenancyDetailsLaterStep
+                        else -> journey.tenants
+                    }
+                }
                 savable()
             }
             step(journey.tenants) {
                 routeSegment(TenantsStep.ROUTE_SEGMENT)
-                parents { journey.households.hasOutcome(Complete.COMPLETE) }
+                parents { journey.households.hasOutcome(HouseholdMode.COMPLETE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.provideTenancyDetailsLaterStep) {
+                routeSegment(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)
+                parents { journey.households.hasOutcome(HouseholdMode.PROVIDE_THIS_LATER) }
                 nextStep { exitStep }
                 savable()
             }
@@ -28,6 +42,7 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
                 parents {
                     OrParents(
                         journey.tenants.hasOutcome(Complete.COMPLETE),
+                        journey.provideTenancyDetailsLaterStep.isComplete(),
                     )
                 }
             }
