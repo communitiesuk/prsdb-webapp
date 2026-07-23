@@ -24,6 +24,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Land
 import java.time.LocalDate
 import kotlin.String
 
+/**
+ * Given you have a reference to a landlord, perform actions on it
+ */
 @PrsdbWebService
 class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
