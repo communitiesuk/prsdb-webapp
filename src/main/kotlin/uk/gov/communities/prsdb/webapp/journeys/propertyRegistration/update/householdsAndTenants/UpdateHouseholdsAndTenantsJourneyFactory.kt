@@ -136,8 +136,7 @@ class UpdateHouseholdsAndTenantsJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
-interface UpdateHouseholdsAndTenantsJourneyState :
-    CheckYourAnswersJourneyState {
+interface UpdateHouseholdsAndTenantsJourneyState : CheckYourAnswersJourneyState {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep
     val propertyId: Long

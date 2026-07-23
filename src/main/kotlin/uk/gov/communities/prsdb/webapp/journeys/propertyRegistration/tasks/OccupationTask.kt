@@ -13,7 +13,19 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
-class OccupationTask : Task<OccupationState>() {
+class OccupationTaskWithProvideLaterAllowed : OccupationTask() {
+    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
+}
+
+@JourneyFrameworkComponent
+class OccupationTaskWithOccupationRequired : OccupationTask() {
+    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
+}
+
+abstract class OccupationTask : Task<OccupationState>() {
+    // TODO PDJB-896: Remerge the three versions of occupation task when this class uses DuplicableTaskWithDependencies
+    abstract val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
+
     override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
             step(journey.occupied) {
@@ -28,6 +40,7 @@ class OccupationTask : Task<OccupationState>() {
             }
             duplicableTask(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
+                withDependencies { householdsAndTenantsDependencies }
                 nextStep { journey.bedrooms }
                 savable()
             }

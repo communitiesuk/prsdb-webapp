@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -95,7 +94,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
         @Suppress("ktlint:standard:max-line-length")
         fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTask<TTaskState>,
+            task: DuplicableTaskWithDependencies<TTaskState, *>,
             route: String? = null,
         ) {
             duplicableTask(task) {
