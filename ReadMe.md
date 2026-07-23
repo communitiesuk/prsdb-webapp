@@ -308,8 +308,13 @@ We release to integration by merging to `main`. There is no special process for 
 
 ### Testing a branch in integration
 
-Integration is a shared environment. Before temporarily deploying a branch, check that nobody else is using it and tell
-the team that the environment will be overwritten.
+Use this process when a change needs to be tested in the deployed integration environment and cannot be adequately
+tested locally. Integration is a shared environment, so before temporarily deploying a branch, check that nobody else
+is using it and tell the team that the environment will be overwritten.
+
+If the branch contains database migrations, agree how to restore or reset the integration database before using this
+process. Deploying the branch applies its migrations to the shared database, and redeploying `main` does not reverse
+them.
 
 1. Open [Build and Deploy - Integration](https://github.com/communitiesuk/prsdb-webapp/actions/workflows/build-and-deploy-integration.yml)
    in GitHub Actions and record the latest successful run from `main`.
@@ -322,17 +327,19 @@ the team that the environment will be overwritten.
      - <your-branch-name>
    ```
 
-3. Commit and push the temporary workflow change. Wait for the branch's `Build and Deploy - Integration` run to finish,
-   then complete the required testing.
-4. Restore integration after testing, or if the branch deployment fails or testing is abandoned:
-   - If a newer successful run from `main` completed after the branch deployment, integration has already been restored.
-     If it completed before testing finished, stop testing because integration no longer contains the branch; re-coordinate
-     and redeploy the branch if more testing is needed.
-   - Otherwise, open the recorded `main` run, select **Re-run jobs**, then **Re-run all jobs**.
-5. Wait for a successful `main` deployment and confirm that integration has been restored. If restoration fails, investigate,
-   retry, or seek help; do not clean up the temporary branch change until restoration succeeds.
-6. Once integration is restored, remove the temporary workflow change from the branch using your preferred Git method.
-   Confirm that the feature PR no longer includes the workflow trigger change.
+3. Check that the recorded run is still the latest successful run from `main`, and record the newer run if needed.
+   Commit the temporary workflow change to the branch you want to test and push that branch. Wait for the branch's
+   `Build and Deploy - Integration` run to finish, then complete the required testing.
+4. After testing, or if the branch deployment fails or testing is abandoned, remove the temporary workflow change from
+   the branch and push the cleanup commit. Confirm that the feature PR no longer includes the workflow trigger change.
+5. Restore integration:
+   - If the branch deployment applied database migrations, follow the agreed recovery or reset plan to restore both the
+     database and the application to compatible versions from `main`. A `main` deployment alone does not reverse the
+     migrations, and a database reset alone does not replace the feature-branch application image.
+   - For a branch without migrations, integration is already restored if a newer successful deployment from `main`
+     completed after the branch deployment. Any testing after that deployment did not exercise the branch.
+   - If neither applies, open the recorded `main` run, select **Re-run jobs**, then **Re-run all jobs**.
+6. Confirm that integration has been restored successfully. If restoration fails, investigate, retry, or seek help.
 
 We also manage **feature releases** — config-only releases that change feature-flag values for a single environment
 without shipping any other code. These are built differently to the code releases above; see
