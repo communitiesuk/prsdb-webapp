@@ -7,7 +7,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import java.time.Duration
@@ -18,7 +18,7 @@ import kotlin.test.assertNull
 @ExtendWith(MockitoExtension::class)
 class MetricsServiceTests {
     @Mock
-    private lateinit var landlordRepository: LandlordRepository
+    private lateinit var individualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -31,21 +31,21 @@ class MetricsServiceTests {
     private val period = ReportingPeriod(start, end)
 
     private fun stubCounts() {
-        whenever(landlordRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
-        whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(any(), any())).thenReturn(0L)
+        whenever(individualLandlordRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
+        whenever(individualLandlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(any(), any())).thenReturn(0L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
-        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(any(), any())).thenReturn(0L)
+        whenever(propertyOwnershipRepository.countDistinctLandlordsWithOwnershipLinkCreatedBetween(any(), any())).thenReturn(0L)
     }
 
     private fun durationsOfDays(vararg days: Long): List<Array<Instant>> = days.map { arrayOf(start, start.plus(Duration.ofDays(it))) }
 
     @Test
     fun `getMetrics returns the counts computed over the period`() {
-        whenever(landlordRepository.countByCreatedDateBetween(start, end)).thenReturn(7L)
-        whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(start, end)).thenReturn(5L)
+        whenever(individualLandlordRepository.countByCreatedDateBetween(start, end)).thenReturn(7L)
+        whenever(individualLandlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(start, end)).thenReturn(5L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(start, end)).thenReturn(4L)
-        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(start, end)).thenReturn(3L)
-        whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(start, end))
+        whenever(propertyOwnershipRepository.countDistinctLandlordsWithOwnershipLinkCreatedBetween(start, end)).thenReturn(3L)
+        whenever(propertyOwnershipRepository.findLandlordAndFirstOwnershipLinkCreatedDates(start, end))
             .thenReturn(emptyList())
 
         val metrics = metricsService.getMetrics(period)
@@ -59,7 +59,7 @@ class MetricsServiceTests {
     @Test
     fun `getMetrics returns null time-to-first-property percentiles when there is no data`() {
         stubCounts()
-        whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(any(), any()))
+        whenever(propertyOwnershipRepository.findLandlordAndFirstOwnershipLinkCreatedDates(any(), any()))
             .thenReturn(emptyList())
 
         val metrics = metricsService.getMetrics(period)
@@ -72,7 +72,7 @@ class MetricsServiceTests {
     @Test
     fun `getMetrics returns the single value for every percentile when there is one data point`() {
         stubCounts()
-        whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(any(), any()))
+        whenever(propertyOwnershipRepository.findLandlordAndFirstOwnershipLinkCreatedDates(any(), any()))
             .thenReturn(durationsOfDays(7))
 
         val metrics = metricsService.getMetrics(period)
@@ -86,7 +86,7 @@ class MetricsServiceTests {
     fun `getMetrics computes median p90 and p95 with linear interpolation`() {
         stubCounts()
         // Eleven values 10,20,...,110 days, supplied unsorted to confirm sorting.
-        whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(any(), any()))
+        whenever(propertyOwnershipRepository.findLandlordAndFirstOwnershipLinkCreatedDates(any(), any()))
             .thenReturn(durationsOfDays(110, 30, 70, 10, 90, 50, 20, 100, 40, 80, 60))
 
         val metrics = metricsService.getMetrics(period)
@@ -102,7 +102,7 @@ class MetricsServiceTests {
         stubCounts()
         // Three landlords whose first property followed registration after 27 minutes,
         // 1 day 3 hours 42 minutes, and 2 days 12 hours 38 minutes respectively.
-        whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(any(), any()))
+        whenever(propertyOwnershipRepository.findLandlordAndFirstOwnershipLinkCreatedDates(any(), any()))
             .thenReturn(
                 listOf(
                     arrayOf(start, start.plus(Duration.ofMinutes(27))),

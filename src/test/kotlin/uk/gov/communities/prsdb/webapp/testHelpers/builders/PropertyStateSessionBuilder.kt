@@ -94,9 +94,38 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationOccupancy() = beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.NO_LICENSING)
 
+        fun beforePropertyRegistrationOccupiedLicensingType() =
+            beforePropertyRegistrationOwnershipType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+                .withOccupancyStatus(true)
+
+        fun beforePropertyRegistrationRestructuredOccupancy() =
+            beforePropertyRegistrationOwnershipType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+
+        fun beforePropertyRegistrationRentedOutSelectiveLicence() =
+            beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)
+
+        fun beforePropertyRegistrationRentedOutHmoMandatoryLicence() =
+            beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
+
+        fun beforePropertyRegistrationRentedOutHmoAdditionalLicence() =
+            beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
+
         fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
+
+        fun beforeTenancyDetails() =
+            beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied()
+                .withNoTenants()
+                .withBedrooms()
+                .withOccupancyStatus(true)
+                .withCheckEpcAnswersComplete()
 
         fun beforePropertyRegistrationBedrooms() = beforePropertyRegistrationPeople().withPeople()
 
@@ -399,5 +428,22 @@ class PropertyStateSessionBuilder(
                 .withAcceptedEpcFoundByCertificateNumber()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
+
+        fun beforeTenancyDetailsHouseholds() = beforeTenancyDetails().withHouseholds()
+
+        fun beforeTenancyDetailsPeople() = beforeTenancyDetailsHouseholds().withPeople()
+
+        fun beforeTenancyDetailsBedrooms() = beforeTenancyDetailsPeople().withPeople()
+
+        fun beforeTenancyDetailsRentIncludesBills() = beforeTenancyDetailsBedrooms().withBedrooms()
+
+        fun beforeTenancyDetailsBillsIncluded() = beforeTenancyDetailsRentIncludesBills().withRentIncludesBills(true)
+
+        fun beforeTenancyDetailsFurnished() = beforeTenancyDetailsBillsIncluded().withBillsIncluded()
+
+        fun beforeTenancyDetailsRentFrequency() = beforeTenancyDetailsFurnished().withFurnished()
+
+        fun beforeTenancyDetailsRentAmount(rentFrequency: RentFrequency) =
+            beforeTenancyDetailsRentFrequency().withRentFrequency(rentFrequency)
     }
 }

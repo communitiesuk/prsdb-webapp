@@ -79,7 +79,7 @@ class LandlordDetailsController(
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
-        val landlordViewModel = LandlordViewModel(landlord = landlord, withChangeLinks = false)
+        val landlordViewModel = LandlordViewModel(baseLandlord = landlord, withChangeLinks = false)
 
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("lastModifiedDate", lastModifiedDate)

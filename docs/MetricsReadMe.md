@@ -2,7 +2,7 @@
 
 The system operator metrics page (`/system-operator/metrics`) shows a single summary list combining:
 
-- **Service usage metrics** — landlord/property registration counts and time-to-first-property
+- **Service usage metrics** — landlord/property registration counts and registration-to-first-property-association
   percentiles, from the database (`MetricsService`).
 - **Journey completion rates** — from the Plausible Stats API (`PlausibleMetricsService`, see
   [AnalyticsReadMe](AnalyticsReadMe.md)).
@@ -26,10 +26,10 @@ The summary list contains the following rows, in display order:
 | 1 | Number of registrations (landlords) | Database (`MetricsService`) | Landlords created in the period. |
 | 2 | Landlords verified by One Login | Database (`MetricsService`) | Landlords created in the period with `isVerified = true`. |
 | 3 | Number of properties | Database (`MetricsService`) | Property ownerships created in the period. |
-| 4 | Number of landlords with at least 1 property | Database (`MetricsService`) | Distinct landlords owning a property created in the period. |
-| 5 | Median time between registration and first property | Database (`MetricsService`) | Median (p50) of registration→first-property durations; ignores joint landlords. |
-| 6 | 90th percentile time between registration and first property | Database (`MetricsService`) | p90 of the same durations. |
-| 7 | 95th percentile time between registration and first property | Database (`MetricsService`) | p95 of the same durations. |
+| 4 | Number of landlords with at least 1 property | Database (`MetricsService`) | Distinct landlords whose ownership link was created in the period. |
+| 5 | Median time between registration and first property registration or joining an existing property | Database (`MetricsService`) | Median (p50) of registration→earliest-ownership-link durations. |
+| 6 | 90th percentile time between registration and first property registration or joining an existing property | Database (`MetricsService`) | p90 of the same durations. |
+| 7 | 95th percentile time between registration and first property registration or joining an existing property | Database (`MetricsService`) | p95 of the same durations. |
 | 8 | Landlord registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | Unique **visitors** at the confirmation page ÷ start page. |
 | 9 | Property registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | **Page views** at confirmation ÷ start (a landlord may register several properties). |
 | 10 | Local council user registration completion rate | Plausible Stats API (`PlausibleMetricsService.getCompletionRates`) | Unique **visitors** at confirmation ÷ privacy-notice page. |
@@ -87,9 +87,41 @@ deregistrations, are counted as normal.
 > (`cloudFrontCloudWatchClient` in `CloudWatchConfig`). All other metrics use the application's
 > configured region (`eu-west-2`).
 
-If a metric returns no data (or any AWS call fails) the service logs
-`Failed to fetch CloudWatch metrics: ...` and the affected row renders **"No data"** rather than
-erroring the page.
+### Average statistics are volume-weighted
+
+For `Average` metrics (the CloudFront 4xx/5xx error rates and average memory utilisation) the client
+does **not** take a plain mean of the per-bucket averages — that "average of averages" is wrong for a
+rate and is sensitive to how CloudWatch buckets the data. Instead it requests `SampleCount` alongside
+`Average` and returns the volume-weighted mean:
+
+```
+Σ (average × sampleCount) / Σ sampleCount
+```
+
+This matches the AWS console's single-period `Average` and is invariant to the bucket size. It returns
+**"No data"** when the total sample count is zero (or the result is non-finite).
+
+### The query period is age-aware
+
+CloudWatch retains 1-minute data for 15 days and 5-minute data for 63 days, and a requested `period`
+must be a multiple of the finest resolution still available for the range. The client rounds the
+bucket size (the range divided into ~60 buckets) **up** to a valid resolution based on the age of the
+range start relative to now:
+
+| Age of range start | Resolution used |
+|--------------------|-----------------|
+| ≤ 15 days          | 60s             |
+| ≤ 63 days          | 300s            |
+| > 63 days          | 3600s           |
+
+with a 60-second floor. Without this, a fixed historic range would **drift** between refreshes: as
+wall-clock time advances the range aged past a retention boundary, CloudWatch re-served it from a
+coarser rollup, changing the datapoint set and — via the old average-of-averages — the displayed 2dp
+value. The weighted average above and this age-aware period together keep an aged fixed range stable.
+
+If a metric returns no data (or its AWS call fails) the service logs
+`Failed to fetch CloudWatch metrics: ...` and **only that row** renders **"No data"** — each of the six
+metrics is fetched in isolation, so one failing metric no longer blanks the others.
 
 ## Client selection by profile
 

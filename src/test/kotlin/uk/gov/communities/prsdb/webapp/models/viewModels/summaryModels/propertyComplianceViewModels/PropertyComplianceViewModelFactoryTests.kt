@@ -31,7 +31,7 @@ class PropertyComplianceViewModelFactoryTests {
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
-            NotificationBannerViewModelServiceRedesign(),
+            NotificationBannerViewModelService(),
         )
 
     private val propertyOwnershipId = 1L
@@ -522,7 +522,67 @@ class PropertyComplianceViewModelFactoryTests {
     }
 
     @Nested
-    inner class NonLandlordViewNotifications : NotificationTests() {
-        override val landlordView = false
+    inner class LocalCouncilViewNotifications {
+        @Test
+        fun `notificationMessages is empty when occupied property has all certs missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when all certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when occupied property has missing and expired certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withExpiredGasSafetyCert()
+                    .withElectricalCertType()
+                    .withEpc()
+                    .build()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages is empty when epc rating is low`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(emptyList(), result.notificationMessages)
+        }
     }
 }

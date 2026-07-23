@@ -19,8 +19,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -281,7 +281,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     private fun setupValidTokenWithLandlord(
         invitation: JointLandlordInvitation = MockJointLandlordData.createJointLandlordInvitation(),
-    ): Landlord {
+    ): IndividualLandlord {
         setupValidTokenWithInvitation(invitation)
         val landlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
@@ -290,7 +290,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     }
 
     private fun setupValidTokenWithLandlordAndOwnership(
-        acceptingLandlord: Landlord,
+        acceptingLandlord: IndividualLandlord,
         propertyOwnership: PropertyOwnership,
     ) {
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)

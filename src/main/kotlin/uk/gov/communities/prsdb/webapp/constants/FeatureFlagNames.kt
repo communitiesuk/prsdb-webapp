@@ -10,19 +10,19 @@ package uk.gov.communities.prsdb.webapp.constants
 
 const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
-const val JOINT_LANDLORDS = "joint-landlords"
-
 const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
 
-const val COMPLIANCE_ACTIONS_MAY2026_REDESIGN = "compliance-actions-may2026-redesign"
-
 const val ORGANISATION_LANDLORD_REGISTRATION = "pdjb-1097-organisation-landlord-registration"
+
+const val PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING = "pdjb-939-property-registration-restructure-and-skipping"
+
+const val DASHBOARD_NAV_LINK = "pdjb-1053-dashboard-nav-link"
 
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
-        JOINT_LANDLORDS,
         SUBJECT_IDENTIFIER_PAGE,
-        COMPLIANCE_ACTIONS_MAY2026_REDESIGN,
         ORGANISATION_LANDLORD_REGISTRATION,
+        PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING,
+        DASHBOARD_NAV_LINK,
     )

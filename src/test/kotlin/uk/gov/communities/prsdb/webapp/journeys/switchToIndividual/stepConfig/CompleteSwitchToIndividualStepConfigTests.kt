@@ -12,6 +12,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.SWITCHED_TO_INDIVIDUAL_PROPERTY_ID
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyState
@@ -164,7 +165,7 @@ class CompleteSwitchToIndividualStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockSwitchToIndividualConfirmationEmailSender).sendEmail(
-            eq(propertyOwnership.landlords.first().email),
+            eq((propertyOwnership.landlords.first() as IndividualLandlord).email),
             any<SwitchToIndividualConfirmationEmail>(),
         )
     }

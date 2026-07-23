@@ -73,19 +73,15 @@ features:
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "joint-landlords"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-03-30"
-    - name: "compliance-actions-may2026-redesign"
-      enabled: false
-      expiry-date: "2026-12-31"
-      release: "private-beta-release-2"
     - name: "pdjb-1097-organisation-landlord-registration"
       enabled: false
       expiry-date: "2026-12-31"
-  releases:
-    - name: "private-beta-release-2"
+    - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1053-dashboard-nav-link"
+      enabled: false
+      expiry-date: "2026-12-31"

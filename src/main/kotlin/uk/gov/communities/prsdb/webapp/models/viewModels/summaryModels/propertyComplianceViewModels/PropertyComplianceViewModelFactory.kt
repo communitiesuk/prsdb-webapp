@@ -13,10 +13,10 @@ private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswer
 
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
-    private val gasSafetyViewModelService: GasSafetyViewModelService,
-    private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
-    private val epcViewModelService: EpcViewModelService,
-    private val notificationBannerViewModelService: NotificationBannerViewModelService,
+    private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
+    private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
+    private val epcViewModelFactory: EpcViewModelFactory,
+    private val notificationBannerViewModelFactory: NotificationBannerViewModelService,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
@@ -59,20 +59,20 @@ class PropertyComplianceViewModelFactory(
                 null
             }
 
-        val gasSafetyInsetTextKey = gasSafetyViewModelService.getInsetTextKey(propertyCompliance)
+        val gasSafetyInsetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
         val gasSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.gasSafety.heading",
-                summaryList = gasSafetyViewModelService.fromEntity(propertyCompliance),
+                summaryList = gasSafetyViewModelFactory.fromEntity(propertyCompliance),
                 actions = gasSafetyChangeActions,
                 insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
-        val electricalSafetyInsetTextKey = electricalSafetyViewModelService.getInsetTextKey(propertyCompliance)
+        val electricalSafetyInsetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
         val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
-                summaryList = electricalSafetyViewModelService.fromEntity(propertyCompliance),
+                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
                 actions = electricalSafetyChangeActions,
                 insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
@@ -89,21 +89,26 @@ class PropertyComplianceViewModelFactory(
                 }
             }.ifEmpty { null }
 
-        val epcInsetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance)
-        val epcSupplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance)
+        val epcInsetTextKey = epcViewModelFactory.getInsetTextKey(propertyCompliance)
+        val epcSupplementarySections = epcViewModelFactory.getSupplementarySections(propertyCompliance)
         val epcSummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.energyPerformance.heading",
-                summaryList = epcViewModelService.fromEntity(propertyCompliance),
+                summaryList = epcViewModelFactory.fromEntity(propertyCompliance),
                 actions = epcActions,
                 insetViewModel = epcInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
-        val epcExpiredInsetViewModel = epcViewModelService.getEpcExpiredInsetViewModel(propertyCompliance)
+        val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val notificationMessages = notificationBannerViewModelService.getNotificationMessageKeys(propertyCompliance)
+        val notificationMessages =
+            if (landlordView) {
+                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance)
+            } else {
+                emptyList()
+            }
 
-        val isAllValid = notificationBannerViewModelService.getIsAllValid(propertyCompliance)
+        val isAllValid = notificationBannerViewModelFactory.getIsAllValid(propertyCompliance)
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,

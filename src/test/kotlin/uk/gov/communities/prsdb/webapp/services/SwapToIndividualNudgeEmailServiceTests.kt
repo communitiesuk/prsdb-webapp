@@ -21,7 +21,7 @@ class SwapToIndividualNudgeEmailServiceTests {
     private lateinit var mockInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockNudgeEmailNotificationService: EmailNotificationService<SwapToIndividualNudgeEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var nudgeService: SwapToIndividualNudgeEmailServiceImplFlagOn
+    private lateinit var nudgeService: SwapToIndividualNudgeEmailService
 
     @BeforeEach
     fun setup() {
@@ -29,7 +29,7 @@ class SwapToIndividualNudgeEmailServiceTests {
         mockNudgeEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
         nudgeService =
-            SwapToIndividualNudgeEmailServiceImplFlagOn(
+            SwapToIndividualNudgeEmailService(
                 mockInvitationRepository,
                 mockNudgeEmailNotificationService,
                 mockAbsoluteUrlProvider,
@@ -156,16 +156,5 @@ class SwapToIndividualNudgeEmailServiceTests {
         nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
 
         verify(mockNudgeEmailNotificationService).sendEmail(eq("bob@example.com"), any())
-    }
-
-    @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = SwapToIndividualNudgeEmailServiceImplFlagOff()
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(markedJointLandlord = true)
-
-        flagOff.sendNudgeEmailIfApplicable(propertyOwnership)
-
-        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
     }
 }

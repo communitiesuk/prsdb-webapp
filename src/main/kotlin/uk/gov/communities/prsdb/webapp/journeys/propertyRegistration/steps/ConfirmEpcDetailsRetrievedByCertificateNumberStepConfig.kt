@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep.Companion.ROUTE_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -74,7 +73,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
 
     override fun afterStepIsReached(state: EpcState) {
         if (state.epcRetrievedByCertificateNumberUpdatedSinceUserReview == true) {
-            state.clearStepData(ROUTE_SEGMENT)
+            state.clearStepData(stepDataKey)
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = false
         }
     }

@@ -66,7 +66,7 @@ class LandlordSearchRepositoryImpl(
             FROM (SELECT 1
                   FROM landlord l
                   ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
-                  WHERE gin_landlord_details(l.phone_number, l.email, l.name) %> :searchTerm
+                  WHERE gin_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) %> :searchTerm
                   ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_GROUP_BY else "" }
                   LIMIT $MAX_ENTRIES_IN_LANDLORDS_SEARCH
                  ) subquery;
@@ -85,13 +85,13 @@ class LandlordSearchRepositoryImpl(
                 SELECT l.id
                 FROM landlord l
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
-                WHERE gist_landlord_details(l.phone_number, l.email, l.name) %> :searchTerm
+                WHERE gist_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) %> :searchTerm
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_GROUP_BY else "" }
-                ORDER BY gist_landlord_details(l.phone_number, l.email, l.name) <->> :searchTerm
+                ORDER BY gist_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) <->> :searchTerm
                 LIMIT :limit OFFSET :offset
             )
             $SELECT_FROM_RESULTING_LANDLORDS
-            ORDER BY gist_landlord_details(l.phone_number, l.email, l.name) <->> :searchTerm;
+            ORDER BY gist_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) <->> :searchTerm;
             """
         return entityManager.getSearchResults(
             searchQuery,
@@ -127,14 +127,14 @@ class LandlordSearchRepositoryImpl(
 
         private const val SELECT_FROM_RESULTING_LANDLORDS =
             """
-            SELECT l.id, l.name, l.email, l.phone_number, r.number, a.single_line_address, count(po.id) as property_count
+            SELECT l.id, l.individual_name, l.individual_email, l.individual_phone_number, r.number, a.single_line_address, count(po.id) as property_count
             FROM resulting_landlords rl
             JOIN landlord l ON rl.id = l.id
             JOIN registration_number r ON l.registration_number_id = r.id
-            JOIN address a ON l.address_id = a.id
+            JOIN address a ON l.individual_address_id = a.id
             LEFT JOIN ownership_link lm ON l.id = lm.landlord_id
             LEFT JOIN property_ownership po ON lm.landlordship_id = po.id AND po.is_active
-            GROUP BY l.id, l.name, l.email, l.phone_number, r.number, a.single_line_address
+            GROUP BY l.id, l.individual_name, l.individual_email, l.individual_phone_number, r.number, a.single_line_address
             """
 
         private fun Query.setFilterParametersAndTimeout(

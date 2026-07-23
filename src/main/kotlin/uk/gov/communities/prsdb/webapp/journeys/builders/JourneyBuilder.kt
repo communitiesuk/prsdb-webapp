@@ -2,10 +2,13 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.urlPath
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 interface JourneyBuilderDsl<TState : JourneyState> {
@@ -16,7 +19,19 @@ interface JourneyBuilderDsl<TState : JourneyState> {
 
     fun task(
         uninitialisedTask: Task<TState>,
-        init: TaskInitialiser<TState>.() -> Unit,
+        routeSegment: String? = null,
+        init: TaskInitialiser<TState, Nothing>.() -> Unit,
+    )
+
+    // Adds a self-stated task: one that owns its own steps and acts as its own state. It is bound to the journey's
+    // state (for data storage) and an optional `routeSegment`, letting the same task be added more than once
+    // (each instance isolated by its route) without the journey state gaining per-instance fields. When
+    // `routeSegment` is null the task's steps keep bare URLs and data keys. A task declaring a TDependencies contract
+    // binds the enclosing state via withDependencies { }; dependency-free tasks (TDependencies = Nothing) do not.
+    fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
+        uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+        routeSegment: String? = null,
+        init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
     )
 }
 
@@ -28,10 +43,23 @@ open class JourneyBuilder<TState : JourneyState>(
 
     fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
         buildMap {
-            build().forEach { journeyStep ->
+            // One registry for the whole build. Bind the journey state first (its keys are bare - the root state has
+            // no route), then thread it through build() so every task registers its route-scoped keys into it and
+            // any cross-element key collision throws here, at build time.
+            val registry = DelegateKeyRegistry()
+            journey.bindKeyRegistry(registry)
+            build(registry).forEach { journeyStep ->
                 when (journeyStep) {
-                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, journeyStep.lifecycleOrchestrator)
-                    is JourneyStep.InternalStep<*, *> -> return@forEach
+                    is JourneyStep.RequestableStep<*, *, *> -> {
+                        put(
+                            journeyStep.urlPath,
+                            journeyStep.lifecycleOrchestrator,
+                        )
+                    }
+
+                    is JourneyStep.InternalStep<*, *> -> {
+                        return@forEach
+                    }
                 }
             }
         }
@@ -69,8 +97,20 @@ open class JourneyBuilder<TState : JourneyState>(
 
         override fun task(
             uninitialisedTask: Task<TState>,
-            init: TaskInitialiser<TState>.() -> Unit,
-        ) = journeyBuilder.task(uninitialisedTask) {
+            routeSegment: String?,
+            init: TaskInitialiser<TState, Nothing>.() -> Unit,
+        ) = journeyBuilder.task(uninitialisedTask, routeSegment) {
+            init()
+            withAdditionalContentProperty {
+                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+            }
+        }
+
+        override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
+            uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+            routeSegment: String?,
+            init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
+        ) = journeyBuilder.duplicableTask(uninitialisedTask, routeSegment) {
             init()
             withAdditionalContentProperty {
                 "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)

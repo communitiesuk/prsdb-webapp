@@ -2,13 +2,26 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -200,6 +213,34 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgGovBodyMustProvideInfoStep {
+        @Test
+        fun `the page renders the heading`() {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            assertThat(mustProvidePage.heading).containsText("You need to provide more information to register")
+        }
+
+        @Test
+        fun `the enter organisation details link navigates back to the org type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.enterOrgDetailsLink.clickAndWait()
+
+            assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `the register as an individual link navigates back to the landlord type page`(page: Page) {
+            val mustProvidePage = navigator.skipToOrgLandlordRegistrationMustProvideInfoPage()
+
+            mustProvidePage.registerAsIndividualLink.clickAndWait()
+
+            assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
     inner class OrgEmailStep {
         @Test
         fun `the org email page renders the heading as a label`(page: Page) {
@@ -248,6 +289,118 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             orgPhoneNumberPage.submitPhoneNumber("0")
             assertThat(orgPhoneNumberPage.form.getErrorMessage())
                 .containsText("Enter a phone number including the country code for international numbers")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeEmailStep {
+        @Test
+        fun `the lead trustee email page renders the heading as a label`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+
+            assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
+                .containsText("What is the lead trustee’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter email address")
+        }
+
+        @Test
+        fun `submitting an invalid email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("not-an-email")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteePhoneStep {
+        @Test
+        fun `the lead trustee phone number page renders the heading as a label`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+
+            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the lead trustee’s phone number?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee phone number returns an error`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("")
+            assertThat(leadTrusteePhonePage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `submitting an invalid lead trustee phone number returns an error`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("07189")
+            assertThat(leadTrusteePhonePage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `submitting a valid lead trustee phone number advances to the lead trustee address step`(page: Page) {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("07123456789")
+            assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeDobStep {
+        @Test
+        fun `the lead trustee date of birth page renders the heading`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+
+            assertThat(leadTrusteeDobPage.page.locator("h1")).containsText("What is the lead trustee’s date of birth?")
+        }
+
+        @Test
+        fun `submitting an empty date returns an error`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("", "", "")
+            assertThat(leadTrusteeDobPage.form.getErrorMessage()).containsText("Enter a date")
+        }
+
+        @Test
+        fun `submitting a date of birth under the minimum age returns an error`() {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            val underageDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 5))
+            leadTrusteeDobPage.submitDate(underageDate)
+            assertThat(leadTrusteeDobPage.form.getErrorMessage())
+                .containsText("The minimum age of a lead trustee is 16")
+        }
+
+        @Test
+        fun `submitting a valid date of birth advances to the lead trustee email step`(page: Page) {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("15", "6", "1980")
+            assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the lead trustee email step`(page: Page) {
+            val leadTrusteeDobPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeDobPage()
+            leadTrusteeDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeAddressTaskRoute {
+        @Test
+        fun `navigating to the bare lead trustee address task route redirects to the task's first step`() {
+            val leadTrusteeAddressLookupPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+
+            assertThat(leadTrusteeAddressLookupPage.form.postcodeInput).isVisible()
         }
     }
 
@@ -353,6 +506,26 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(companyNumberPage.form.getErrorMessage())
                 .containsText("Company number must only include numbers and letters A to Z")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeNameStep {
+        @Test
+        fun `the lead trustee name page renders the heading as a label`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+
+            assertThat(leadTrusteeNamePage.page.locator("h1 label"))
+                .containsText("What is the lead trustee’s full name?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee name returns an error`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+            leadTrusteeNamePage.submitName("")
+
+            assertThat(leadTrusteeNamePage.form.getErrorMessage())
+                .containsText("Enter the lead trustee’s full name")
         }
     }
 
@@ -501,5 +674,182 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             charityNumberPage.submitCharityNumber("SC-0123!")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
         }
+    }
+
+    @Nested
+    inner class OrgGovBodyDetailsStep {
+        @Test
+        fun `org governing body details page renders the expected content`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
+
+            assertThat(govBodyDetailsPage.heading)
+                .containsText("Providing details about your organisation’s governing body")
+        }
+
+        @Test
+        fun `org governing body details page Continue button navigates to the who to provide step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitHasDetails()
+
+            assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `org governing body details page secondary button navigates to the must provide info step`(page: Page) {
+            val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
+
+            govBodyDetailsPage.submitNoDetails()
+
+            assertPageIs(page, OrgGovBodyMustProvideInfoFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyWhoToProvideStep {
+        @Test
+        fun `the who to provide page renders the heading`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
+
+            assertThat(whoToProvidePage.form.fieldsetHeading)
+                .containsText("Who do you want to provide details for?")
+        }
+
+        @Test
+        fun `submitting with no option selected returns a validation error`(page: Page) {
+            val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
+
+            whoToProvidePage.form.submit()
+
+            assertThat(whoToProvidePage.form.getErrorMessage())
+                .containsText("Select who you are providing details for")
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberNameStep {
+        @Test
+        fun `the governing body member name page renders the caption and heading`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            assertThat(govBodyMemberNamePage.header).containsText("What is their full name?")
+        }
+
+        @Test
+        fun `submitting an empty governing body member name returns an error`(page: Page) {
+            val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
+
+            govBodyMemberNamePage.submitName("")
+
+            assertThat(govBodyMemberNamePage.form.getErrorMessage()).containsText("Enter a full name")
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberLookupAddressStep {
+        @Test
+        fun `the governing body member lookup address page renders the correct heading`() {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is their contact address?")
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberSelectAddressStep {
+        @Test
+        fun `the governing body member select address page renders the correct heading`() {
+            val selectAddressPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberSelectAddressPage()
+
+            assertThat(selectAddressPage.heading).containsText("Select their address")
+        }
+    }
+
+    @Nested
+    inner class OrgGovBodyMemberDobStep {
+        @Test
+        fun `the governing body member date of birth page renders the heading`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+
+            assertThat(govBodyMemberDobPage.heading).containsText("What is their date of birth?")
+        }
+
+        @Test
+        fun `submitting an empty date returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("", "", "")
+            assertThat(govBodyMemberDobPage.form.getErrorMessage()).containsText("Enter a date")
+        }
+
+        @Test
+        fun `submitting a date of birth under the minimum age returns an error`() {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            val underageDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = 5))
+            govBodyMemberDobPage.submitDate(underageDate)
+            assertThat(govBodyMemberDobPage.form.getErrorMessage())
+                .containsText("The minimum age is 16")
+        }
+
+        @Test
+        fun `submitting a valid date of birth advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("15", "6", "1980")
+            assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `submitting a valid date of birth with leading zeros advances to the governing body member address step`(page: Page) {
+            val govBodyMemberDobPage = navigator.skipToOrgLandlordRegistrationGovBodyMemberDobPage()
+            govBodyMemberDobPage.submitDate("05", "06", "1980")
+            assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class GovBodyMemberListStep {
+        @Test
+        fun `the member list page shows the correct heading for one member`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(1 to createTestMember("Alice Smith")),
+                )
+
+            assertThat(memberListPage.heading).containsText("added 1 person")
+        }
+
+        @Test
+        fun `the member list page shows the correct heading for multiple members`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(
+                        1 to createTestMember("Alice Smith"),
+                        2 to createTestMember("Bob Jones"),
+                    ),
+                )
+
+            assertThat(memberListPage.heading).containsText("added 2 people")
+        }
+
+        @Test
+        fun `the member list page shows member names in the summary list`(page: Page) {
+            val memberListPage =
+                navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                    mapOf(
+                        1 to createTestMember("Alice Smith"),
+                        2 to createTestMember("Bob Jones"),
+                    ),
+                )
+
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("Alice Smith")
+            assertThat(memberListPage.summaryList.getRowByIndex(1).value).containsText("Bob Jones")
+        }
+
+        private fun createTestMember(name: String) =
+            GoverningBodyMemberDataModel(
+                name = name,
+                type = GoverningBodyMemberType.DIRECTOR,
+                dateOfBirth = kotlinx.datetime.LocalDate(1970, 1, 1),
+                address = AddressDataModel(singleLineAddress = "Test Address"),
+            )
     }
 }

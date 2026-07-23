@@ -23,13 +23,17 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import java.util.Locale
 
 @PrsdbControllerAdvice
 class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
+    private val dashboardUrlProvider: DashboardUrlProvider,
 ) {
     @Value("\${plausible.site-id}")
     private lateinit var plausibleSiteId: String
@@ -39,6 +43,10 @@ class GlobalModelAttributes(
         model: Model,
         request: HttpServletRequest,
     ) {
+        if (request.requestURI == HEALTHCHECK_ROUTE) {
+            return
+        }
+
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/pa-$plausibleSiteId.js")
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
@@ -67,14 +75,24 @@ class GlobalModelAttributes(
         // Service name — LC/system operator routes use a different name from the default
         val uri = request.requestURI
         val isCustomServiceName =
-            uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")
+            uri.isServicePage(LOCAL_COUNCIL_PATH_SEGMENT) || uri.isServicePage(SYSTEM_OPERATOR_PATH_SEGMENT)
         val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
         val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
         model.addAttribute("serviceName", serviceName)
         if (isCustomServiceName) {
             model.addAttribute("isCustomServiceName", true)
         }
+
+        val dashboardUrl = dashboardUrlProvider.getDashboardUrlForCurrentUser()
+        if (dashboardUrl != null) {
+            model.addAttribute(
+                "navLinks",
+                listOf(NavigationLinkViewModel(dashboardUrl, "navLink.dashboard.title", uri == dashboardUrl)),
+            )
+        }
     }
+
+    private fun String.isServicePage(pathSegment: String): Boolean = this.startsWith("/$pathSegment/")
 
     private fun getCurrentNonce(): String {
         val context = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?
