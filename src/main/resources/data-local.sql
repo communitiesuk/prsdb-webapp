@@ -248,6 +248,23 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (34, '07/01/26', '07/01/26', 71, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', 'Danielle Dias', 'danielle.dias@madetech.com', 'England or Wales', true, true, false),
        (35, '07/02/26', '07/02/26', 72, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', 'Ben Johnson', 'benjamin.johnson@madetech.com', 'England or Wales', true, true, false);
 
+-- TODO: PDJB-1295: Add some more
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, landlord_type,
+                      organisation_landlord_name, organisation_address_id, organisation_email,
+                      organisation_phone_number, organisation_registrant_name,
+                      organisation_registrant_date_of_birth, organisation_registrant_email,
+                      organisation_registrant_phone_number, organisation_is_company,
+                      organisation_is_charity, organisation_is_trust, organisation_company_number,
+                      organisation_main_contact_name, organisation_main_contact_email,
+                      organisation_main_contact_phone)
+VALUES (36, '07/23/26', '07/23/26', 73, 1, 'Local Organisation Landlord', 5,
+        'local-org-landlord@example.com', '07111111111', 'Local Registrant', '01/01/1990',
+        'local-registrant@example.com', '07111111112', true, false, false, '12345678',
+        'Local Main Contact', 'local-main-contact@example.com', '07111111113');
+
+INSERT INTO organisation_users (organisation_landlord_id, subject_identifier, created_date)
+VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', '07/23/26');
+
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO license (id, license_type, license_number)
