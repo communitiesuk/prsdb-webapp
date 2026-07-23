@@ -16,10 +16,17 @@ class HouseholdStepConfig(
     override val formModelClass = NumberOfHouseholdsFormModel::class
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
-        mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholds.restructureAndSkipping.heading",
-            "label" to "forms.numberOfHouseholds.restructureAndSkipping.label",
-        )
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            mapOf(
+                "fieldSetHeading" to "forms.numberOfHouseholds.restructureAndSkipping.heading",
+                "label" to "forms.numberOfHouseholds.restructureAndSkipping.label",
+            )
+        } else {
+            mapOf(
+                "fieldSetHeading" to "forms.numberOfHouseholds.heading",
+                "label" to "forms.numberOfHouseholds.label",
+            )
+        }
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {

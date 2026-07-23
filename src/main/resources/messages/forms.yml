@@ -420,6 +420,7 @@ occupancy:
   fieldSetHeading: Is your property occupied by tenants?
   fieldSetHint: What you choose here decides which compliance and rent details you need to add.
 numberOfHouseholds:
+  heading: Households in your property
   paragraph:
     one: The number of households in your property helps local authorities understand if your property needs a House in Multiple Occupation (HMO) licence.
     two: 'A household is:'
@@ -432,6 +433,7 @@ numberOfHouseholds:
       two: a family living together
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
+  label: Enter how many households live in your property
   restructureAndSkipping:
     heading: Households in your property
     paragraph:

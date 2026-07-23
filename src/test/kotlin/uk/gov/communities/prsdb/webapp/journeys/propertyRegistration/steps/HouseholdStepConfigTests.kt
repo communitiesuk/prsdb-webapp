@@ -33,7 +33,7 @@ class HouseholdStepConfigTests {
     }
 
     @Test
-    fun `Content shows the old households content when feature flag is disabled`() {
+    fun `Content shows the legacy households content when feature flag is disabled`() {
         // Arrange
         val stepConfig = HouseholdStepConfig(mockFeatureFlagManager)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
@@ -42,8 +42,8 @@ class HouseholdStepConfigTests {
         val content = stepConfig.getStepSpecificContent(mockUpdateHouseholdsJourneyState)
 
         // Assert
-        assertEquals("forms.numberOfHouseholds.restructureAndSkipping.heading", content["fieldSetHeading"])
-        assertEquals("forms.numberOfHouseholds.restructureAndSkipping.label", content["label"])
+        assertEquals("forms.numberOfHouseholds.heading", content["fieldSetHeading"])
+        assertEquals("forms.numberOfHouseholds.label", content["label"])
         assertEquals("forms/numberOfHouseholdsForm", stepConfig.chooseTemplate(mockUpdateHouseholdsJourneyState))
     }
 }
