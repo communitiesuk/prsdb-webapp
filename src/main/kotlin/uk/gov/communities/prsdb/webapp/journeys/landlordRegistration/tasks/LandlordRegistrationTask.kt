@@ -179,7 +179,20 @@ class LandlordRegistrationTask(
                     }
 
                     LandlordTypeStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.landlordTypeStep, LandlordTypeStep.ROUTE_SEGMENT)
+                        step(journey.landlordTypeStep) {
+                            initialStep()
+                            routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
+                            nextStep { mode ->
+                                when (mode) {
+                                    LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask.firstStep
+                                    LandlordTypeMode.ORGANISATION -> journey.finishCyaStep
+                                }
+                            }
+                        }
+                        duplicableTask(journey.individualLandlordRegistrationTask) {
+                            parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                            nextStep { journey.finishCyaStep }
+                        }
                     }
 
                     OrgNameStep.ROUTE_SEGMENT -> {
