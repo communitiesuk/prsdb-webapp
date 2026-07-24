@@ -20,14 +20,12 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
-    private val landlordService: LandlordService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -58,18 +56,11 @@ class DeregisterLandlordController(
         )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(principal: Principal): String {
+    fun getConfirmation(): String {
         if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Landlord deregistration has not been performed in this session",
-            )
-        }
-
-        if (landlordService.retrieveLandlordByBaseUserId(principal.name) != null) {
-            throw ResponseStatusException(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Landlord with one-login id ${principal.name} was found in the database",
             )
         }
 

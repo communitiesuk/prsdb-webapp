@@ -17,22 +17,22 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
@@ -46,9 +46,8 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
-        val landlord =
-            landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+        check(landlord is IndividualLandlord)
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)

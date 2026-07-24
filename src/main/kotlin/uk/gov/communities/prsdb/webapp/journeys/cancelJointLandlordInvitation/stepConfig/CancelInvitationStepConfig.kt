@@ -14,14 +14,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class CancelInvitationStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val inviteeEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
     private val cancellerEmailSender: EmailNotificationService<JointLandlordInvitationCancellationCancellerEmail>,
@@ -36,7 +36,7 @@ class CancelInvitationStepConfig(
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl =
             absoluteUrlProvider.buildPropertyDetailsUri(state.propertyOwnershipId).toString()
-        val cancellerLandlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!
+        val cancellerLandlord = userToLandlordService.getCurrentLandlordForUser()
 
         // Cancel the invitation
         jointLandlordInvitationService.removeInvitation(invitation)
@@ -52,6 +52,8 @@ class CancelInvitationStepConfig(
         )
 
         // Email the canceller
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        check(cancellerLandlord is IndividualLandlord)
         cancellerEmailSender.sendEmail(
             cancellerLandlord.email,
             JointLandlordInvitationCancellationCancellerEmail(

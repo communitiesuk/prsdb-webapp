@@ -11,9 +11,6 @@ interface IndividualLandlordRepository :
     JpaRepository<IndividualLandlord?, Long?>,
     LandlordSearchRepository {
     // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
-    fun findByRegistrationNumber_Number(registrationNumber: Long): IndividualLandlord?
-
-    // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
     fun findByBaseUser_Id(subjectId: String): IndividualLandlord?
 
     fun deleteByBaseUser_Id(subjectId: String)

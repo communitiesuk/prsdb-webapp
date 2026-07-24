@@ -24,8 +24,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.StartInviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
@@ -35,7 +35,7 @@ class InviteJointLandlordController(
     private val journeyFactory: InviteJointLandlordJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -82,9 +82,7 @@ class InviteJointLandlordController(
     ): String {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-        val invitingLandlord =
-            landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord not found for user ${principal.name}")
+        val invitingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val email = jointLandlordInvitationService.resendInvitation(invitationId, propertyOwnership, invitingLandlord)
         redirectAttributes.addFlashAttribute("resendInvitationEmail", email)
         return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"

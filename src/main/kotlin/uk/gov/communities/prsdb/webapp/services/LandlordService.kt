@@ -31,22 +31,13 @@ import kotlin.String
 class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationLandlordRepository: OrganisationLandlordRepository,
+    private val userToLandlordService: UserToLandlordService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
     private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
-        if (regNum.type != RegistrationNumberType.LANDLORD) {
-            throw IllegalArgumentException("Invalid registration number type")
-        }
-        return individualLandlordRepository.findByRegistrationNumber_Number(regNum.number)
-    }
-
-    // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
-    fun retrieveLandlordByBaseUserId(baseUserId: String): IndividualLandlord? = individualLandlordRepository.findByBaseUser_Id(baseUserId)
-
     fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
 
     @Transactional
@@ -148,7 +139,8 @@ class LandlordService(
         checkUpdateIsValid: () -> Unit,
     ): Landlord {
         checkUpdateIsValid()
-        val landlordEntity = retrieveLandlordByBaseUserId(baseUserId)!!
+        val landlordEntity = userToLandlordService.getLandlordForBaseUserId(baseUserId)!!
+        check(landlordEntity is IndividualLandlord)
         // TODO: PDJB-1274: Update emails to account for org landlord
 
         val existingEmail = landlordEntity.email
