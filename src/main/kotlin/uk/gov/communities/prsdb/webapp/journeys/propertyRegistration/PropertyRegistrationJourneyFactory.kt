@@ -514,7 +514,7 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextDestination { _ ->
                         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
-                            state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
+                            state.householdsAndTenantsTask.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
                         ) {
                             Destination(journey.cyaStep)
                         } else {

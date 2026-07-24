@@ -55,6 +55,13 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isProvideTenancyDetailsLater =
+            if (isOccupied) {
+                state.householdsAndTenantsTask.households.outcome == HouseholdMode.PROVIDE_THIS_LATER
+            } else {
+                false
+            }
+        val shouldRequireTenancyDetails = isOccupied && !isProvideTenancyDetailsLater
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordEmails: List<String>? =
             state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
@@ -76,7 +83,7 @@ class SavePropertyRegistrationDataStepConfig(
             ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
@@ -84,7 +91,7 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numberOfPeople =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
@@ -92,7 +99,7 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numBedrooms =
-                if (isOccupied || isRestructured) {
+                if (isOccupied || isRestructured || shouldRequireTenancyDetails) {
                     state.bedrooms.formModel
                         .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         .toInt()
@@ -105,7 +112,7 @@ class SavePropertyRegistrationDataStepConfig(
             rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
             customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
             rentAmount =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
