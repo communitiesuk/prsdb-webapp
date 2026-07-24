@@ -11,10 +11,10 @@ import jakarta.persistence.UniqueConstraint
 
 @Entity
 @Table(
-    name = "organisation_users",
+    name = "organisation_landlord_user",
     uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_landlord_id", "subject_identifier"])],
 )
-class OrganisationUser() : AuditableEntity() {
+class OrganisationLandlordUser() : AuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -28,6 +28,7 @@ class OrganisationUser() : AuditableEntity() {
     lateinit var baseUser: PrsdbUser
 
     constructor(organisationLandlord: OrganisationLandlord, baseUser: PrsdbUser) : this() {
+
         this.organisationLandlord = organisationLandlord
         this.baseUser = baseUser
     }

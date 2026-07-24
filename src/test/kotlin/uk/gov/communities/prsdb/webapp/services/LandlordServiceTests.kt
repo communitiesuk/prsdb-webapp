@@ -33,13 +33,13 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -69,7 +69,7 @@ class LandlordServiceTests {
     private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
 
     @Mock
-    private lateinit var mockOrganisationUserRepository: OrganisationUserRepository
+    private lateinit var mockOrganisationLandlordUserRepository: OrganisationLandlordUserRepository
 
     @Mock
     private lateinit var mockPrsdbUserService: PrsdbUserService
@@ -102,7 +102,7 @@ class LandlordServiceTests {
                 mockIndividualLandlordRepository,
                 mockOrganisationLandlordRepository,
                 mockOrganisationGoverningBodyMemberRepository,
-                mockOrganisationUserRepository,
+                mockOrganisationLandlordUserRepository,
                 mockPrsdbUserService,
                 mockAddressService,
                 mockRegistrationNumberService,
@@ -339,11 +339,11 @@ class LandlordServiceTests {
         }
 
         @Test
-        fun `creates an OrganisationUser linking landlord to base user`() {
+        fun `creates an OrganisationLandlordUser linking landlord to base user`() {
             val result = createOrganisationLandlord()
 
-            val userCaptor = captor<OrganisationUser>()
-            verify(mockOrganisationUserRepository).save(userCaptor.capture())
+            val userCaptor = captor<OrganisationLandlordUser>()
+            verify(mockOrganisationLandlordUserRepository).save(userCaptor.capture())
 
             assertEquals(result, userCaptor.value.organisationLandlord)
             assertEquals(baseUser, userCaptor.value.baseUser)

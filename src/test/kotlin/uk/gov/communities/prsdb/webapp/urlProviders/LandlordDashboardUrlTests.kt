@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -113,7 +113,7 @@ class LandlordDashboardUrlTests(
     private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
 
     @MockitoBean
-    private lateinit var mockOrganisationUserRepository: OrganisationUserRepository
+    private lateinit var mockOrganisationLandlordUserRepository: OrganisationLandlordUserRepository
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -130,7 +130,7 @@ class LandlordDashboardUrlTests(
                 mockIndividualLandlordRepository,
                 mockOrganisationLandlordRepository,
                 mockOrganisationGoverningBodyMemberRepository,
-                mockOrganisationUserRepository,
+                mockOrganisationLandlordUserRepository,
                 prsdbUserService,
                 addressService,
                 registrationNumberService,

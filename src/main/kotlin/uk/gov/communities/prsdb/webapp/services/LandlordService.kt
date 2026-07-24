@@ -13,11 +13,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
@@ -36,7 +36,7 @@ class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationLandlordRepository: OrganisationLandlordRepository,
     private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
-    private val organisationUserRepository: OrganisationUserRepository,
+    private val organisationLandlordUserRepository: OrganisationLandlordUserRepository,
     private val prsdbUserService: PrsdbUserService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -163,7 +163,7 @@ class LandlordService(
 
         val savedLandlord = organisationLandlordRepository.save(landlord)
 
-        organisationUserRepository.save(OrganisationUser(savedLandlord, baseUser))
+        organisationLandlordUserRepository.save(OrganisationLandlordUser(savedLandlord, baseUser))
 
         governingBodyMembers.forEach { member ->
             val memberAddress = addressService.findOrCreateAddress(member.address)
