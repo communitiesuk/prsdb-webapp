@@ -236,9 +236,7 @@ class LandlordRegistrationTask(
                     }
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
-                        fromTask(journey.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask) {
-                            checkAnswerStep(task.orgGovBodyMemberListStep, OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                        }
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask, null)
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {
