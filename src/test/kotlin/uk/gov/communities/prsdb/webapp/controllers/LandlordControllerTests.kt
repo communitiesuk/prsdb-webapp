@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -20,10 +19,10 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 
 @WebMvcTest(LandlordController::class)
@@ -31,7 +30,7 @@ class LandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var localCouncilService: LocalCouncilService
@@ -94,7 +93,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard returns 200 for authorised landlord user`() {
         val landlord = createIndividualLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
@@ -106,7 +105,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
         val landlord = createIndividualLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
         mvc
             .get(LANDLORD_DASHBOARD_URL)

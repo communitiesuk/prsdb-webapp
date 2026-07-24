@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(InviteJointLandlordController::class)
@@ -31,7 +31,7 @@ class InviteJointLandlordControllerTests(
     private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -137,7 +137,7 @@ class InviteJointLandlordControllerTests(
             .thenReturn(true)
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(mockPropertyOwnership)
-        whenever(landlordService.retrieveLandlordByBaseUserId(LANDLORD_USER))
+        whenever(userToLandlordService.getCurrentLandlordForUser())
             .thenReturn(mockLandlord)
         whenever(jointLandlordInvitationService.resendInvitation(eq(123L), any<PropertyOwnership>(), any<Landlord>()))
             .thenReturn("joint@example.com")

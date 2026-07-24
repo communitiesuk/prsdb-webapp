@@ -20,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -36,7 +36,7 @@ class CancelInvitationStepConfigTests {
     lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
     @Mock
-    lateinit var mockLandlordService: LandlordService
+    lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
     lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -168,10 +168,14 @@ class CancelInvitationStepConfigTests {
         ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
 
         val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(cancellerLandlord), id = propertyOwnershipId)
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(cancellerLandlord),
+                id = propertyOwnershipId,
+            )
 
         if (includeOtherLandlord) {
-            val otherLandlord = MockLandlordData.createIndividualLandlord(name = otherLandlordName, email = otherLandlordEmail)
+            val otherLandlord =
+                MockLandlordData.createIndividualLandlord(name = otherLandlordName, email = otherLandlordEmail)
             ReflectionTestUtils.setField(otherLandlord, "id", 2L)
             propertyOwnership.addLandlord(otherLandlord)
         }
@@ -188,7 +192,7 @@ class CancelInvitationStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockJointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId, baseUserId))
             .thenReturn(invitation)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(cancellerLandlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(cancellerLandlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("example.com"))
 
         return invitation
@@ -198,7 +202,7 @@ class CancelInvitationStepConfigTests {
         CancelInvitationStepConfig(
             mockJointLandlordInvitationService,
             mockSwapToIndividualNudgeEmailService,
-            mockLandlordService,
+            mockUserToLandlordService,
             mockAbsoluteUrlProvider,
             mockInviteeEmailSender,
             mockCancellerEmailSender,

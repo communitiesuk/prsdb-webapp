@@ -58,6 +58,9 @@ class LandlordServiceTests {
     private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
 
     @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
     private lateinit var mockAddressService: AddressService
 
     @Mock
@@ -80,65 +83,13 @@ class LandlordServiceTests {
             LandlordService(
                 mockIndividualLandlordRepository,
                 mockOrganisationLandlordRepository,
+                mockUserToLandlordService,
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
                 updateConfirmationSender,
                 absoluteUrlProvider,
             )
-    }
-
-    @Test
-    fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
-        val regNumDataModel = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 0L)
-        val expectedLandlord = IndividualLandlord()
-
-        whenever(mockIndividualLandlordRepository.findByRegistrationNumber_Number(regNumDataModel.number)).thenReturn(
-            expectedLandlord,
-        )
-
-        val landlord = landlordService.retrieveLandlordByRegNum(regNumDataModel)
-
-        assertEquals(expectedLandlord, landlord)
-    }
-
-    @Test
-    fun `retrieveLandlordByRegNum returns a null given a non-existent landlord registration number`() {
-        assertNull(
-            landlordService.retrieveLandlordByRegNum(
-                RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 0L),
-            ),
-        )
-    }
-
-    @Test
-    fun `retrieveLandlordByRegNum throws an illegal argument exception when given a non-landlord registration number`() {
-        assertThrows<IllegalArgumentException> {
-            landlordService.retrieveLandlordByRegNum(
-                RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 0L),
-            )
-        }
-    }
-
-    @Test
-    fun `retrieveLandlordByBaseUserId returns a landlord given its base user ID`() {
-        val baseUserId = "baseUserId"
-        val expectedLandlord = IndividualLandlord()
-
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
-
-        val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)
-
-        assertEquals(expectedLandlord, landlord)
-    }
-
-    @Test
-    fun `retrieveLandlordByBaseUserId returns a null given an unregistered base user ID`() {
-        assertNull(
-            landlordService.retrieveLandlordByBaseUserId(
-                "unregisteredBaseUserId",
-            ),
-        )
     }
 
     @Test
@@ -496,7 +447,7 @@ class LandlordServiceTests {
             )
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
 
         // Act
         landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
@@ -531,7 +482,7 @@ class LandlordServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
@@ -554,7 +505,7 @@ class LandlordServiceTests {
         val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
 
         whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
@@ -585,7 +536,7 @@ class LandlordServiceTests {
             val address = Address(updateModel.address)
             whenever(mockAddressService.findOrCreateAddress(it)).thenReturn(address)
         }
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
@@ -628,7 +579,7 @@ class LandlordServiceTests {
                 dateOfBirth = LocalDate.of(1991, 1, 1),
             )
         val updateModel = LandlordUpdateModel(newCasingEmailAddress, null, null, null, null)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act

@@ -16,8 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(DeregisterLandlordController::class)
 class DeregisterLandlordControllerTests(
@@ -25,9 +23,6 @@ class DeregisterLandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory
-
-    @MockitoBean
-    private lateinit var landlordService: LandlordService
 
     @MockitoBean
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
@@ -106,7 +101,6 @@ class DeregisterLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the landlord was deregistered in the session`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
-        whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(null)
         whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
@@ -125,21 +119,6 @@ class DeregisterLandlordControllerTests(
             .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
-    fun `getConfirmation returns 500 if the landlord is still found in the database`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-
-        whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
-        whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
-
-        mvc
-            .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
-            .andExpect {
-                status { is5xxServerError() }
             }
     }
 }

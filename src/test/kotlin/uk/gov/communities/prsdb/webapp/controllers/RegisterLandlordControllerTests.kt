@@ -14,10 +14,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(RegisterLandlordController::class)
@@ -28,7 +29,7 @@ class RegisterLandlordControllerTests(
     private lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @Test
     fun `index redirects to start page for unauthenticated user`() {
@@ -93,7 +94,7 @@ class RegisterLandlordControllerTests(
     @WithMockUser
     fun `getConfirmation returns 200 for user registered as landlord`() {
         val landlord = MockLandlordData.createIndividualLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
@@ -104,13 +105,13 @@ class RegisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 400 for user not registered as landlord`() {
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(null)
+    fun `getConfirmation returns 500 for user not registered as landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
             .andExpect {
-                status { is4xxClientError() }
+                status { is5xxServerError() }
             }
     }
 
@@ -118,7 +119,7 @@ class RegisterLandlordControllerTests(
     @WithMockUser
     fun `getConfirmation includes survey URL in model`() {
         val landlord = MockLandlordData.createIndividualLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)

@@ -29,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -41,7 +41,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     lateinit var mockInvitationService: JointLandlordInvitationService
 
     @Mock
-    lateinit var mockLandlordService: LandlordService
+    lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
@@ -202,9 +202,15 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         val acceptingLandlord =
-            MockLandlordData.createIndividualLandlord(name = "Accepting Landlord", baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+            MockLandlordData.createIndividualLandlord(
+                name = "Accepting Landlord",
+                baseUser = MockLandlordData.createPrsdbUser(baseUserId),
+            )
         val otherLandlord =
-            MockLandlordData.createIndividualLandlord(name = "Other Landlord", baseUser = MockLandlordData.createPrsdbUser("other-user"))
+            MockLandlordData.createIndividualLandlord(
+                name = "Other Landlord",
+                baseUser = MockLandlordData.createPrsdbUser("other-user"),
+            )
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord, otherLandlord))
         setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
@@ -241,7 +247,8 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     fun `afterStepDataIsAdded does not send other landlord email to accepting landlord`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val acceptingLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val acceptingLandlord =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         setupValidTokenWithLandlordAndOwnership(
             acceptingLandlord,
             MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord)),
@@ -257,7 +264,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     private fun setupStepConfig() =
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
-            mockLandlordService,
+            mockUserToLandlordService,
             mockPropertyOwnershipService,
             mockAbsoluteUrlProvider,
             mockAcceptedEmailSender,
@@ -283,8 +290,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         invitation: JointLandlordInvitation = MockJointLandlordData.createJointLandlordInvitation(),
     ): IndividualLandlord {
         setupValidTokenWithInvitation(invitation)
-        val landlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
+        val landlord =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("https://example.com/property"))
         return landlord
     }
@@ -295,7 +303,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     ) {
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
         setupValidTokenWithInvitation(invitation)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(acceptingLandlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(acceptingLandlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("https://example.com/property"))
     }
 

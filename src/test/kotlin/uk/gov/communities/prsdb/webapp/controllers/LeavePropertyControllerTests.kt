@@ -84,7 +84,7 @@ class LeavePropertyControllerTests(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -104,7 +104,7 @@ class LeavePropertyControllerTests(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
@@ -122,7 +122,7 @@ class LeavePropertyControllerTests(
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
         whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
@@ -142,7 +142,7 @@ class LeavePropertyControllerTests(
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
         whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
@@ -197,7 +197,7 @@ class LeavePropertyControllerTests(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.postStepModelAndView(any()),
@@ -218,7 +218,7 @@ class LeavePropertyControllerTests(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
@@ -237,7 +237,7 @@ class LeavePropertyControllerTests(
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
         whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
@@ -258,7 +258,7 @@ class LeavePropertyControllerTests(
         whenever(
             leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
         whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 

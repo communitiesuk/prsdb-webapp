@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
@@ -23,7 +23,7 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
 
     @Mock
-    lateinit var mockLandlordService: LandlordService
+    lateinit var mockUserToLandlordService: UserToLandlordService
 
     private val baseUserId = "test-user"
 
@@ -35,10 +35,11 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
     @Test
     fun `afterStepIsReached sets userCompletedLandlordRegistrationThisJourney to true`() {
         // Arrange
-        val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockLandlordService)
+        val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockUserToLandlordService)
         setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+        val mockLandlord =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -50,11 +51,13 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
     @Test
     fun `afterStepIsReached saves the registered landlord registration number to state`() {
         // Arrange
-        val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockLandlordService)
+        val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockUserToLandlordService)
         setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
-        val expectedRegNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockLandlord.registrationNumber).toString()
+        val mockLandlord =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
+        val expectedRegNumber =
+            RegistrationNumberDataModel.fromRegistrationNumber(mockLandlord.registrationNumber).toString()
 
         // Act
         stepConfig.afterStepIsReached(mockState)
