@@ -484,7 +484,7 @@ class LandlordRegistrationCyaStepConfig(
     }
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
-        val members = state.orgLandlordRegistrationTask.governingBodyMembersMap ?: emptyMap()
+        val members = state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap()
         return members
             .toList()
             .sortedBy { it.first }
@@ -515,8 +515,15 @@ class LandlordRegistrationCyaStepConfig(
                                 Destination.Nowhere(),
                             ),
                         ),
-                    // TODO: PDJB-1168 (PR2) - wire this to the real governing-body-member edit round-trip that returns to the CYA page.
-                    actions = listOf(SummaryCardActionViewModel(text = "forms.links.change", url = PLACEHOLDER_CHANGE_URL)),
+                    actions =
+                        SummaryCardActionViewModel.changeAction(
+                            Destination.VisitableStep(
+                                state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                state.getCyaJourneyId(
+                                    state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                ),
+                            ),
+                        ),
                 )
             }
     }

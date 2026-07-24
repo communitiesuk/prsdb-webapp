@@ -31,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -232,6 +233,12 @@ class LandlordRegistrationTask(
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {
                         duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
+                    }
+
+                    OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
+                        fromTask(journey.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask) {
+                            checkAnswerStep(task.orgGovBodyMemberListStep, OrgGovBodyMemberListStep.ROUTE_SEGMENT)
+                        }
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {
