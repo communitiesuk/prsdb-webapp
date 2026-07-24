@@ -33,7 +33,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -287,13 +289,16 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration(isOccupied = true)
         setupStateForComplianceDataWithNullValues()
 
+        val mockHouseholdsAndTenantsTask = mock<HouseholdsAndTenantsTask>()
+        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+
         val mockHouseholdsStep = mock<HouseholdStep>()
-        whenever(mockState.households).thenReturn(mockHouseholdsStep)
+        whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdsStep)
         whenever(mockHouseholdsStep.outcome).thenReturn(HouseholdMode.COMPLETE)
         whenever(mockHouseholdsStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
 
         val mockTenantsStep = mock<TenantsStep>()
-        whenever(mockState.tenants).thenReturn(mockTenantsStep)
+        whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "3" })
 
         val mockBedroomsStep = mock<BedroomsStep>()
@@ -306,16 +311,19 @@ class SavePropertyRegistrationDataStepConfigTests {
             FurnishedStatusFormModel().apply { furnishedStatus = FurnishedStatus.FURNISHED },
         )
 
+        val mockRentFrequencyAndAmountTask = mock<RentFrequencyAndAmountTask>()
+        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+
         val mockRentFrequencyStep = mock<RentFrequencyStep>()
-        whenever(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
+        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         whenever(mockRentFrequencyStep.formModel).thenReturn(
             RentFrequencyFormModel().apply { rentFrequency = RentFrequency.MONTHLY },
         )
 
         val mockRentAmountStep = mock<RentAmountStep>()
-        whenever(mockState.rentAmount).thenReturn(mockRentAmountStep)
+        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         whenever(mockRentAmountStep.formModel).thenReturn(RentAmountFormModel().apply { rentAmount = "1200" })
-        whenever(mockState.getCustomRentFrequencyIfSelected()).thenReturn(null)
+        whenever(mockRentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()).thenReturn(null)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
