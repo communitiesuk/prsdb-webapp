@@ -12,11 +12,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
-            task(journey.householdsAndTenantsTask) {
+            duplicableTask(journey.householdsAndTenantsTask) {
+                withDependencies { HouseHoldsAndTenantsDependencies(true) }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }
-            task(journey.rentIncludesBillsTask) {
+            duplicableTask(journey.rentIncludesBillsTask) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
                 savable()
@@ -27,7 +28,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            task(journey.rentFrequencyAndAmountTask) {
+            duplicableTask(journey.rentFrequencyAndAmountTask) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()

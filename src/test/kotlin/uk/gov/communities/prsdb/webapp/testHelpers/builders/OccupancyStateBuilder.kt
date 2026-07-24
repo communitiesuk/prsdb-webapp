@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentInclu
 
 interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
+    val additionalDataMap: MutableMap<String, String>
 
     fun withSubmittedValue(
         key: String,
@@ -54,6 +57,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
                 occupied = false
             }
         withSubmittedValue("occupancy", occupancyFormModel)
+        additionalDataMap["cachedOccupied"] = Json.encodeToString(serializer(), false)
         return self()
     }
 
@@ -63,6 +67,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
                 this.occupied = occupied
             }
         withSubmittedValue(OccupiedStep.ROUTE_SEGMENT, occupancyFormModel)
+        additionalDataMap["cachedOccupied"] = Json.encodeToString(serializer(), occupied)
         return self()
     }
 
