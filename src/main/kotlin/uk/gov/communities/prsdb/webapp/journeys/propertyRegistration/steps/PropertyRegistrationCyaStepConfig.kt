@@ -35,6 +35,7 @@ class PropertyRegistrationCyaStepConfig(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
+                "isRestructured" to isRestructured,
                 "propertyName" to state.addressTask.getAddress().singleLineAddress,
                 "propertyDetails" to
                     if (isRestructured) {
@@ -43,6 +44,12 @@ class PropertyRegistrationCyaStepConfig(
                         getPropertyDetailsSummaryList(state)
                     },
                 "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask),
+                "occupancyDetails" to
+                    if (isRestructured) {
+                        occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
+                    } else {
+                        null
+                    },
                 "tenancyDetails" to
                     if (isRestructured) {
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)

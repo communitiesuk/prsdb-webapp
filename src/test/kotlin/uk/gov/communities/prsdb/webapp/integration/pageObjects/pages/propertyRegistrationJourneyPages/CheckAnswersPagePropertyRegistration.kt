@@ -30,6 +30,9 @@ class CheckAnswersPagePropertyRegistration(
     val complianceCertificatesHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
 
+    val occupancyDetailsHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
+    
     val gasSafetyHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
 
@@ -38,6 +41,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val epcHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
+
+    val tenancyDetailsSummaryList =
+        SummaryList(page, page.locator("main .govuk-summary-list").count() - 1)
 
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
@@ -48,6 +54,7 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val occupiedByTenantsRow = getRow("Is this property occupied by tenants?")
         val rentAmountRow = getRow("Rent amount")
         val jointLandlordsInvitationsRow = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")

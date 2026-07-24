@@ -3,8 +3,10 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="isRestructured" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="occupancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="jointLandlordsDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
@@ -39,8 +41,14 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
-        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
+        <th:block th:if="${isRestructured and occupancyDetails != null}">
+            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.occupancyDetails.heading}"></h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${occupancyDetails})}"></dl>
+        </th:block>
+        <th:block th:if="${!#lists.isEmpty(tenancyDetails)}">
+            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
+        </th:block>
         <th:block th:if="${jointLandlordsDetails != null}">
             <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>

@@ -663,6 +663,9 @@ checkPropertyAnswers:
     ownership: Ownership type
     licensingType: Licensing type
     noLicensing: None
+  occupancyDetails:
+    heading: Tell us if your property’s occupied
+    occupied: Is this property occupied by tenants?
   tenancyDetails:
     heading: Tenancy and rental information
     occupied: Occupied by tenants

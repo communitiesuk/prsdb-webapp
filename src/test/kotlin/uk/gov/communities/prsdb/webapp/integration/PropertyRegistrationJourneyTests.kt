@@ -1478,6 +1478,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
+            assertThat(checkAnswersPage.occupancyDetailsHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("No")
             assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
         }
 
@@ -1556,7 +1558,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.occupancyDetailsHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
+            assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("2")
+            assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£400")
+
+            val tenancySummaryListKeys =
+                page.locator("main .govuk-summary-list")
+                    .nth(3)
+                    .locator(".govuk-summary-list__key")
+                    .all()
+                    .map { it.textContent().trim() }
+            assertEquals(
+                listOf(
+                    "Number of households",
+                    "Number of tenants",
+                    "Furniture provided",
+                    "Rent includes bills",
+                    "When rent is paid",
+                    "Rent amount",
+                ),
+                tenancySummaryListKeys,
+            )
+            assertFalse(tenancySummaryListKeys.contains("Which bills are included"))
         }
 
         @Test
@@ -1584,6 +1610,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Your Answers - render page
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.occupancyDetailsHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("Yes")
             assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("Provide this later")
         }
 
@@ -3097,6 +3125,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            assertThat(checkAnswersPage.occupancyDetailsHeading).isHidden()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
