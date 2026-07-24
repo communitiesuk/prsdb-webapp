@@ -13,6 +13,13 @@ open class SummaryList(
 
     protected fun getRow(index: Int) = SummaryListRow.byIndex(locator, index)
 
+    fun rowKeyTexts(): List<String> {
+        val count = locator.locator(".govuk-summary-list__row").count()
+        return (0 until count).map { getRow(it).key.textContent().orEmpty().trim() }
+    }
+
+    fun hasRow(keyText: String): Boolean = rowKeyTexts().any { it == keyText }
+
     class SummaryListRow(
         locator: Locator,
     ) : BaseComponent(locator) {

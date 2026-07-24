@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
@@ -1123,6 +1125,10 @@ class Navigator(
         households: Int = 2,
         people: Int = 4,
         bedrooms: Int = 3,
+        includesBills: Boolean = true,
+        billsIncluded: MutableList<String?> = mutableListOf(BillsIncluded.ELECTRICITY.toString()),
+        furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
+        rentFrequency: RentFrequency = RentFrequency.MONTHLY,
         rentAmount: String = "400",
     ): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(
@@ -1132,7 +1138,18 @@ class Navigator(
                     people = people,
                     bedrooms = bedrooms,
                     rentAmount = rentAmount,
-                ).build(),
+                )
+                .withTenants(
+                    households = households,
+                    people = people,
+                    bedrooms = bedrooms,
+                    includesBills = includesBills,
+                    billsIncluded = billsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    rentAmount = rentAmount,
+                )
+                .build(),
         )
         navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)

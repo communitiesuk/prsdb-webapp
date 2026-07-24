@@ -39,6 +39,14 @@ class CheckAnswersPagePropertyRegistration(
     val epcHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
 
+    val tenancyDetailsHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+
+    val tenancyDetailsSummaryList =
+        SummaryList(page, page.locator("main .govuk-summary-list").count() - 1)
+
+    fun sectionHeadingTexts(): List<String> = page.locator("h2.govuk-heading-m").allInnerTexts()
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
@@ -47,6 +55,11 @@ class CheckAnswersPagePropertyRegistration(
         val licensingNumberRow = getRow("Licensing number")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val chargeRentRow = getRow("When you charge rent")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
         val jointLandlordsInvitationsRow = getRow("Invitations")

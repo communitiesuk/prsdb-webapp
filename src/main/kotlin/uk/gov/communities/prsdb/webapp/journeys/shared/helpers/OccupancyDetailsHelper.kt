@@ -35,8 +35,9 @@ class OccupancyDetailsHelper {
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = state.occupied.formModel.occupied ?: false
-                add(getOccupancyStatusRow(isOccupied, state.occupied, state.getCyaJourneyId(state.occupied)))
-                if (isOccupied) addAll(getRestructuredOccupiedTenancyDetailsSummaryList(state, messageSource))
+                if (isOccupied) {
+                    addAll(getRestructuredOccupiedTenancyDetailsSummaryList(state, messageSource))
+                }
             }
 
     fun <T> getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
@@ -158,7 +159,7 @@ class OccupancyDetailsHelper {
             getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state)
         } else {
             getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state) +
-                getRentBillsAndFurnishingsSummaryList(state, messageSource)
+                getRestructuredRentBillsAndFurnishingsSummaryList(state, messageSource)
         }
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : OccupationState, T : CheckYourAnswersJourneyState {
@@ -187,4 +188,36 @@ class OccupancyDetailsHelper {
                 )
                 addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource))
             }
+
+    private fun <T> getRestructuredRentBillsAndFurnishingsSummaryList(
+        state: T,
+        messageSource: MessageSource,
+    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val furnishedStatusStep = state.furnishedStatus
+                val rentFrequencyAndAmountRows = getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource)
+
+                add(rentFrequencyAndAmountRows.first())
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
+                        furnishedStatusStep.formModel.furnishedStatus,
+                        Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
+                    ),
+                )
+                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource))
+                add(getRestructuredChargeRentRow(state))
+                add(rentFrequencyAndAmountRows.last())
+            }
+
+    private fun <T> getRestructuredChargeRentRow(state: T): SummaryListRowViewModel where T : RentFrequencyAndAmountState, T : CheckYourAnswersJourneyState {
+        val rentFrequencyStep = state.rentFrequency
+        val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.rentFrequency",
+            RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
+            Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
+        )
+    }
 }

@@ -665,6 +665,9 @@ checkPropertyAnswers:
     noLicensing: None
   tenancyDetails:
     heading: Tenancy and rental information
+    restructureAndSkipping:
+      heading: Tenancy details
+      rentFrequency: When you charge rent
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later

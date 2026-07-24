@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -1586,6 +1587,53 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.heading).containsText("Check your answers")
             assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("Provide this later")
         }
+
+        @Test
+        fun `Restructured CYA shows tenancy details at the bottom`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
+                    includesBills = true,
+                    billsIncluded =
+                        mutableListOf(
+                            BillsIncluded.ELECTRICITY.toString(),
+                            BillsIncluded.GAS.toString(),
+                            BillsIncluded.WATER.toString(),
+                        ),
+                    rentFrequency = RentFrequency.WEEKLY,
+                )
+
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.tenancyDetailsHeading).isVisible()
+            val headings = checkAnswersPage.sectionHeadingTexts()
+            assertTrue(headings.indexOf("Compliance certificates") < headings.indexOf("Tenancy details"))
+            // TODO PDJB-942: This will be under the "If your property’s occupied" section
+            assertFalse(checkAnswersPage.tenancyDetailsSummaryList.hasRow("Occupied by tenants"))
+            assertEquals(
+                listOf(
+                        "Number of households",
+                        "Number of tenants",
+                        "When rent is paid",
+                        "Furniture provided",
+                        "Rent includes bills",
+                        "Which bills are included",
+                        "When you charge rent",
+                        "Rent amount",
+                ),
+                checkAnswersPage.tenancyDetailsSummaryList.rowKeyTexts(),
+            )
+            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
+            assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
+            //TODO PDJB-942: Find out if both "When rent is Paid" and "When you charge rent" are both needed
+            assertThat(checkAnswersPage.summaryList.rentFrequencyRow.value).containsText("Weekly")
+            assertThat(checkAnswersPage.summaryList.furnishedStatusRow.value).containsText("Furnished")
+            assertThat(checkAnswersPage.summaryList.rentIncludesBillsRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.summaryList.billsIncludedRow.value).containsText("Electricity, Gas, Water")
+            assertThat(checkAnswersPage.summaryList.chargeRentRow.value).containsText("Weekly")
+            assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£400.00")
+        }
+        
+        //TODO PDJB-942: Add test for Provide Later
+        //TODO PDJB-942: Add test for to check tenancy details is not displayed for unoccupied properties
 
         @Test
         fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
