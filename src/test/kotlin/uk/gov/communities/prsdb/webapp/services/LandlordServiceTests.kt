@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -46,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
 import java.net.URI
 import java.time.LocalDate
+import java.util.Optional
 import kotlin.reflect.full.hasAnnotation
 import kotlin.test.assertNull
 
@@ -56,6 +58,9 @@ class LandlordServiceTests {
 
     @Mock
     private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
+
+    @Mock
+    private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
     private lateinit var mockUserToLandlordService: UserToLandlordService
@@ -83,6 +88,7 @@ class LandlordServiceTests {
             LandlordService(
                 mockIndividualLandlordRepository,
                 mockOrganisationLandlordRepository,
+                mockLandlordRepository,
                 mockUserToLandlordService,
                 mockAddressService,
                 mockRegistrationNumberService,
@@ -90,6 +96,35 @@ class LandlordServiceTests {
                 updateConfirmationSender,
                 absoluteUrlProvider,
             )
+    }
+
+    @Test
+    fun `retrieveLandlordById returns an individual landlord`() {
+        val landlord = createIndividualLandlord()
+        whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+        val result = landlordService.retrieveLandlordById(landlord.id)
+
+        assertEquals(landlord, result)
+    }
+
+    @Test
+    fun `retrieveLandlordById returns an organisation landlord`() {
+        val landlord = OrganisationLandlord()
+        whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+        val result = landlordService.retrieveLandlordById(landlord.id)
+
+        assertEquals(landlord, result)
+    }
+
+    @Test
+    fun `retrieveLandlordById returns null when landlord does not exist`() {
+        whenever(mockLandlordRepository.findById(123L)).thenReturn(Optional.empty())
+
+        val result = landlordService.retrieveLandlordById(123L)
+
+        assertNull(result)
     }
 
     @Test

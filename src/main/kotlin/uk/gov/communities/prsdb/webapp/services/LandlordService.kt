@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
@@ -31,6 +32,7 @@ import kotlin.String
 class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationLandlordRepository: OrganisationLandlordRepository,
+    private val landlordRepository: LandlordRepository,
     private val userToLandlordService: UserToLandlordService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
@@ -38,7 +40,7 @@ class LandlordService(
     private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
-    fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
+    fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
     @Transactional
     fun createIndividualLandlord(
