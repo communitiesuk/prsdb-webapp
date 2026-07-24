@@ -468,7 +468,6 @@ class LandlordServiceTests {
     @Test
     fun `when update landlord is passed an update model, null fields provided do not change the entity`() {
         // Arrange
-        val userId = "my id"
         val originalName = "original name"
         val originalEmail = "original email"
         val originalPhoneNumber = "original phone number"
@@ -482,10 +481,10 @@ class LandlordServiceTests {
             )
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
-        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+        landlordService.updateLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(originalName, landlordEntity.name)
@@ -497,7 +496,6 @@ class LandlordServiceTests {
     @Test
     fun `when update landlord is passed an update model, non-null fields provided are applied to the entity`() {
         // Arrange
-        val userId = "my id"
         val landlordEntity =
             createIndividualLandlord(
                 name = "original name",
@@ -517,11 +515,11 @@ class LandlordServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(updateModel.address!!)).thenReturn(newAddress)
-        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+        landlordService.updateLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(updateModel.name, landlordEntity.name)
@@ -534,17 +532,16 @@ class LandlordServiceTests {
     @Test
     fun `updateLandlordAddress applies the new address to the entity`() {
         // Arrange
-        val userId = "my id"
         val landlordEntity = createIndividualLandlord(address = createAddress("original address"))
         val newAddress = createAddress("new address")
         val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
 
         whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
-        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        landlordService.updateLandlordAddress(userId, newAddressDataModel)
+        landlordService.updateLandlordAddress(newAddressDataModel)
 
         // Assert
         assertEquals(newAddress, landlordEntity.address)
@@ -558,7 +555,6 @@ class LandlordServiceTests {
     ) {
         // Arrange
         val originalEmailAddress = "original email"
-        val userId = "my id"
         val landlordEntity =
             createIndividualLandlord(
                 name = "original name",
@@ -571,12 +567,12 @@ class LandlordServiceTests {
             val address = Address(updateModel.address)
             whenever(mockAddressService.findOrCreateAddress(it)).thenReturn(address)
         }
-        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+        landlordService.updateLandlordForUser(updateModel) {}
 
         // Assert
         val expectedEmailModel =
@@ -602,7 +598,6 @@ class LandlordServiceTests {
     @Test
     fun `when a landlord updates their email by case only, a single confirmation email is sent and the new casing is stored`() {
         // Arrange
-        val userId = "my id"
         val originalEmailAddress = "landlord@example.com"
         val newCasingEmailAddress = "Landlord@Example.com"
         val landlordEntity =
@@ -614,11 +609,11 @@ class LandlordServiceTests {
                 dateOfBirth = LocalDate.of(1991, 1, 1),
             )
         val updateModel = LandlordUpdateModel(newCasingEmailAddress, null, null, null, null)
-        whenever(mockUserToLandlordService.getLandlordForBaseUserId(userId)).thenReturn(landlordEntity)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        val updatedLandlord = landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+        val updatedLandlord = landlordService.updateLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
@@ -629,7 +624,6 @@ class LandlordServiceTests {
     @Test
     fun `when checkUpdateIsValid throws an exception, no update occurs`() {
         // Arrange
-        val userId = "my id"
         val originalName = "original name"
         val originalEmail = "original email"
         val originalPhoneNumber = "original phone number"
@@ -653,7 +647,7 @@ class LandlordServiceTests {
 
         // Act
         try {
-            landlordService.updateLandlordForBaseUserId(userId, updateModel) { throw Exception("Invalid update") }
+            landlordService.updateLandlordForUser(updateModel) { throw Exception("Invalid update") }
         } catch (_: Exception) {
             // Expected exception, do nothing
         }
@@ -666,8 +660,8 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateLandlordForBaseUserId is annotated with @Transactional`() {
-        assertTrue(landlordService::updateLandlordForBaseUserId.hasAnnotation<Transactional>())
+    fun `updateLandlordForUser is annotated with @Transactional`() {
+        assertTrue(landlordService::updateLandlordForUser.hasAnnotation<Transactional>())
     }
 
     companion object {

@@ -135,13 +135,12 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateLandlordForBaseUserId(
-        baseUserId: String,
+    fun updateLandlordForUser(
         landlordUpdate: LandlordUpdateModel,
         checkUpdateIsValid: () -> Unit,
     ): Landlord {
         checkUpdateIsValid()
-        val landlordEntity = userToLandlordService.getLandlordForBaseUserId(baseUserId)!!
+        val landlordEntity = userToLandlordService.getCurrentLandlordForUser()
         check(landlordEntity is IndividualLandlord)
         // TODO: PDJB-1274: Update emails to account for org landlord
 
@@ -164,56 +163,36 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateLandlordEmail(
-        baseUserId: String,
-        email: String,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
+    fun updateLandlordEmail(email: String) {
+        updateLandlordForUser(
             LandlordUpdateModel(email = email),
         ) {}
     }
 
     @Transactional
-    fun updateLandlordPhoneNumber(
-        baseUserId: String,
-        phoneNumber: String,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
+    fun updateLandlordPhoneNumber(phoneNumber: String) {
+        updateLandlordForUser(
             LandlordUpdateModel(phoneNumber = phoneNumber),
         ) {}
     }
 
     @Transactional
-    fun updateLandlordName(
-        baseUserId: String,
-        name: String,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
+    fun updateLandlordName(name: String) {
+        updateLandlordForUser(
             LandlordUpdateModel(name = name),
         ) {}
     }
 
     @Transactional
-    fun updateLandlordAddress(
-        baseUserId: String,
-        address: AddressDataModel,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
+    fun updateLandlordAddress(address: AddressDataModel) {
+        updateLandlordForUser(
             LandlordUpdateModel(address = address),
         ) {}
     }
 
     @Transactional
-    fun updateLandlordDateOfBirth(
-        baseUserId: String,
-        dateOfBirth: LocalDate,
-    ) {
-        updateLandlordForBaseUserId(
-            baseUserId,
+    fun updateLandlordDateOfBirth(dateOfBirth: LocalDate) {
+        updateLandlordForUser(
             LandlordUpdateModel(
                 email = null,
                 name = null,

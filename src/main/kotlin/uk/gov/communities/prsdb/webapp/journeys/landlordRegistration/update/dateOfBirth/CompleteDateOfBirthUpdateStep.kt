@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.dateOfBirth
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -16,10 +15,7 @@ class CompleteDateOfBirthUpdateStepConfig(
 
     override fun afterStepIsReached(state: UpdateDateOfBirthJourneyState) {
         val dateOfBirth = state.dateOfBirthStep.formModel.toLocalDate()
-        landlordService.updateLandlordDateOfBirth(
-            SecurityContextHolder.getContext().authentication.name,
-            dateOfBirth,
-        )
+        landlordService.updateLandlordDateOfBirth(dateOfBirth)
     }
 
     override fun resolveNextDestination(

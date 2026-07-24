@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.email
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -18,10 +17,7 @@ class CompleteEmailUpdateStepConfig(
 
     override fun afterStepIsReached(state: UpdateEmailJourneyState) {
         val email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress)
-        landlordService.updateLandlordEmail(
-            SecurityContextHolder.getContext().authentication.name,
-            email,
-        )
+        landlordService.updateLandlordEmail(email)
     }
 
     override fun resolveNextDestination(
