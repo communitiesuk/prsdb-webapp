@@ -24,9 +24,6 @@ class LeavePropertyServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockLandlordService: LandlordService
-
-    @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @Mock
@@ -35,12 +32,16 @@ class LeavePropertyServiceTests {
     @Mock
     private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var leavePropertyService: LeavePropertyService
 
     @Test
     fun `getPropertyOwnershipIfUserCanLeave throws NOT_FOUND when the user is not a landlord on the property`() {
         val propertyOwnershipId = 1L
+        val currentLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("current-user"))
         val landlordOne = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
         val landlordTwo = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
         val propertyOwnership =
@@ -49,9 +50,10 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(currentLandlord)
 
         assertThrows<ResponseStatusException> {
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "not-a-landlord")
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
         }
     }
 
@@ -65,9 +67,10 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(soleLandlord),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(soleLandlord)
 
         assertThrows<ResponseStatusException> {
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
         }
     }
 
@@ -82,8 +85,9 @@ class LeavePropertyServiceTests {
                 landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordOne)
 
-        val result = leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+        val result = leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
 
         assertEquals(propertyOwnership, result)
     }

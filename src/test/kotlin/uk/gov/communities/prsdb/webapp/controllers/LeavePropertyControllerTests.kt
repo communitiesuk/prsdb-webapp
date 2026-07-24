@@ -67,7 +67,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for a landlord who cannot leave this property`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "not eligible"))
 
         mvc
@@ -81,7 +81,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord who can leave this property`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
             leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
@@ -101,7 +101,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
             leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
@@ -120,7 +120,7 @@ class LeavePropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
@@ -140,7 +140,7 @@ class LeavePropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
@@ -179,7 +179,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for a landlord who cannot leave this property`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "not eligible"))
 
         mvc
@@ -194,7 +194,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `postJourneyData returns the step's model and view for a landlord who can leave this property`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
             leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
@@ -215,7 +215,7 @@ class LeavePropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `postJourneyData returns 404 for an unknown step name`() {
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
             leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId),
@@ -235,7 +235,7 @@ class LeavePropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
@@ -256,7 +256,7 @@ class LeavePropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId)),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
