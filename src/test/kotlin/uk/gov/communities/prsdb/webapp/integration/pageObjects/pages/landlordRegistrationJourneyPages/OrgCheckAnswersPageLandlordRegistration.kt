@@ -41,6 +41,9 @@ class OrgCheckAnswersPageLandlordRegistration(
         val organisationPhoneRow = getRow("Organisation phone number")
         val organisationTypeRow = getRow("Organisation type")
         val registeredCharityRow = getRow("Registered charity")
+        val charityCommissionRow = getRow("Charity commission")
+        val charityNumberRow = getRow("Charity number")
         val registeredWithCompaniesHouseRow = getRow("Registered with Companies House")
+        val companiesHouseNumberRow = getRow("Companies House number")
     }
 }

@@ -15,9 +15,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
@@ -49,7 +53,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
@@ -149,6 +157,30 @@ class LandlordStateSessionBuilder(
     fun withCharityRegisteredWith(regulator: CharityRegulator): LandlordStateSessionBuilder {
         val formModel = CharityRegisteredWithFormModel().apply { this.charityRegisteredWith = regulator }
         withSubmittedValue(OrgCharityRegisteredWithStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberEnglandAndWales(charityNumber: String = "1234567"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberEnglandAndWalesFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberNorthernIreland(charityNumber: String = "123456"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberNorthernIrelandFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberScotland(charityNumber: String = "SC001234"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberScotlandFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberScotlandStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCompanyNumber(companyNumber: String = "12345678"): LandlordStateSessionBuilder {
+        val formModel = OrgCompanyNumberFormModel().apply { this.companyNumber = companyNumber }
+        withSubmittedValue(OrgCompanyNumberStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
