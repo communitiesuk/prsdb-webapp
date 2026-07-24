@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -178,22 +179,25 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getAllNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getNumberOfNonCompliantPropertiesForLandlord(landlord: Landlord) = getAllNonCompliantPropertiesForLandlord(landlord).size
 
     fun getNonCompliantPropertiesForLandlord(
-        landlordBaseUserId: String,
+        landlord: Landlord,
         requestedPageIndex: Int,
     ): Page<ComplianceStatusDataModel> {
-        val allNonCompliant = getAllNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val allNonCompliant = getAllNonCompliantPropertiesForLandlord(landlord)
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE)
         val fromIndex = pageRequest.offset.toInt().coerceAtMost(allNonCompliant.size)
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allNonCompliant.size)
         return PageImpl(allNonCompliant.subList(fromIndex, toIndex), pageRequest, allNonCompliant.size.toLong())
     }
 
-    private fun getAllNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
+    private fun getAllNonCompliantPropertiesForLandlord(landlord: Landlord): List<ComplianceStatusDataModel> {
+        val compliances =
+            propertyComplianceRepository
+                .findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                    landlord.id,
+                )
 
         return compliances
             .map {

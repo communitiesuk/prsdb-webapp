@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -148,7 +147,8 @@ class LandlordControllerTests(
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(listOf(nonCompliantDataModel)),
         )
 
@@ -176,7 +176,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList()),
         )
 
@@ -191,7 +192,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions redirects to first page when requested page exceeds total pages`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(5, 10), 10),
         )
 
@@ -205,7 +207,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions includes paginationViewModel`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(0, 10), 20),
         )
 

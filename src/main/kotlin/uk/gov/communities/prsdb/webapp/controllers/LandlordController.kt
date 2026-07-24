@@ -42,15 +42,12 @@ class LandlordController(
 
     // TODO: PDJB-1278: Update landlord dashboard for org landlords
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
-    fun landlordDashboard(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun landlordDashboard(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         check(landlord is IndividualLandlord)
         val numberOfComplianceActions =
-            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -88,8 +85,9 @@ class LandlordController(
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
         val pagedNonCompliantProperties =
-            propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name, page - 1)
+            propertyComplianceService.getNonCompliantPropertiesForLandlord(landlord, page - 1)
 
         if (pagedNonCompliantProperties.totalPages != 0 && pagedNonCompliantProperties.totalPages < page) {
             return "redirect:$COMPLIANCE_ACTIONS_URL"

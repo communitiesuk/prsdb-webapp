@@ -132,10 +132,10 @@ class PropertyOwnershipService(
         getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
-        baseUserId: String,
+        landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =
-        retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
+        retrieveAllActivePropertiesForLandlord(landlord).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
@@ -440,8 +440,8 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+    fun retrieveAllActivePropertiesForLandlord(landlord: Landlord): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
 
     fun deletePropertyOwnership(propertyOwnershipId: Long) {
         propertyOwnershipRepository.deleteById(propertyOwnershipId)
@@ -464,8 +464,8 @@ class PropertyOwnershipService(
         }
     }
 
-    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
-        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
+    fun getNumberOfIncompleteCompliancesForLandlord(landlord: Landlord): Int {
+        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(landlord)
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
     }
 

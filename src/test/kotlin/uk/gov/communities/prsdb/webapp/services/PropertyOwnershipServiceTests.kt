@@ -335,9 +335,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(
-                    currentLandlord.baseUser.id,
-                ),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -371,7 +369,7 @@ class PropertyOwnershipServiceTests {
 
             val result =
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                    currentLandlord.baseUser.id,
+                    currentLandlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 )
 
@@ -1594,7 +1592,7 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetNumberOfIncompleteCompliancesForLandlord {
-        val principalName = "principalName"
+        val landlord = MockLandlordData.createIndividualLandlord()
 
         @Test
         fun `returns the number of occupied properties without completed compliance`() {
@@ -1611,14 +1609,11 @@ class PropertyOwnershipServiceTests {
             val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(
-                    principalName,
-                ),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
             ).thenReturn(listOf(unoccupiedProperty, occupiedPropertyWithCompliance, occupiedPropertyWithoutCompliance))
 
             // Act
-            val numberOfIncompleteCompliances =
-                propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord)
 
             // Assert
             assertEquals(1, numberOfIncompleteCompliances)
@@ -1628,14 +1623,11 @@ class PropertyOwnershipServiceTests {
         fun `returns 0 if there are no incomplete compliances for a landlord`() {
             // Arrange
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(
-                    principalName,
-                ),
-            ).thenReturn(emptyList())
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
+            ).thenReturn(emptyList()
 
             // Act
-            val numberOfIncompleteCompliances =
-                propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord)
 
             // Assert
             assertEquals(0, numberOfIncompleteCompliances)

@@ -56,7 +56,7 @@ class LandlordDetailsController(
 
         val registeredPropertiesList =
             propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                principal.name,
+                landlord,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
             )
 

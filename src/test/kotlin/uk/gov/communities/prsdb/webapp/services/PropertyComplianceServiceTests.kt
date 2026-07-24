@@ -143,7 +143,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant occupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true),
@@ -158,11 +158,11 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(landlord.id),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         // Assert
         assertEquals(nonCompliantProperties.size, returnedCount)
@@ -171,7 +171,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNumberOfNonCompliantPropertiesForLandlord only includes non-compliant unoccupied properties if they are expired`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = false),
@@ -186,11 +186,11 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(landlord.id),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         // Assert
         assertEquals(1, returnedCount)
@@ -199,7 +199,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true),
@@ -214,7 +214,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(landlord.id),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -225,7 +225,7 @@ class PropertyComplianceServiceTests {
         // Act
         val returnedNonCompliantProperties =
             propertyComplianceService.getNonCompliantPropertiesForLandlord(
-                landlordBaseUserId,
+                landlord,
                 0,
             )
 
@@ -236,7 +236,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = false),
@@ -251,7 +251,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(landlord.id),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -260,7 +260,7 @@ class PropertyComplianceServiceTests {
         // Act
         val returnedNonCompliantProperties =
             propertyComplianceService.getNonCompliantPropertiesForLandlord(
-                landlordBaseUserId,
+                landlord,
                 0,
             )
 
