@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
@@ -27,26 +26,19 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
@@ -66,15 +58,6 @@ class LandlordServiceTests {
     private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
 
     @Mock
-    private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
-
-    @Mock
-    private lateinit var mockOrganisationLandlordUserRepository: OrganisationLandlordUserRepository
-
-    @Mock
-    private lateinit var mockPrsdbUserService: PrsdbUserService
-
-    @Mock
     private lateinit var mockAddressService: AddressService
 
     @Mock
@@ -87,29 +70,21 @@ class LandlordServiceTests {
     private lateinit var updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>
 
     @Mock
-    private lateinit var registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
-
-    @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var landlordService: LandlordService
 
-    // Need to inject mocks manually as "injectMocks" gets confused between the two EmailNotificationServices
     @BeforeEach
     fun setup() {
         landlordService =
             LandlordService(
                 mockIndividualLandlordRepository,
                 mockOrganisationLandlordRepository,
-                mockOrganisationGoverningBodyMemberRepository,
-                mockOrganisationLandlordUserRepository,
-                mockPrsdbUserService,
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
                 updateConfirmationSender,
                 absoluteUrlProvider,
-                registrationConfirmationSender,
             )
     }
 
@@ -169,10 +144,9 @@ class LandlordServiceTests {
     @Test
     fun `createIndividualLandlord creates a landlord and returns the landlord created`() {
         // Arrange
-        val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
 
-        val baseUser = PrsdbUser(baseUserId)
+        val baseUser = PrsdbUser("baseUserId")
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1233456)
 
@@ -188,21 +162,19 @@ class LandlordServiceTests {
                 true,
                 true,
                 null,
-                null,
+                LocalDate.of(1990, 1, 1),
             )
 
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(baseUserId)).thenReturn(baseUser)
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)).thenReturn(
             registrationNumber,
         )
         whenever(mockIndividualLandlordRepository.save(any())).thenReturn(expectedLandlord)
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
 
         // Act
         val createdLandlord =
             landlordService.createIndividualLandlord(
-                baseUserId,
+                baseUser,
                 "name",
                 "example@email.com",
                 "07123456789",
@@ -210,6 +182,7 @@ class LandlordServiceTests {
                 ENGLAND_OR_WALES,
                 true,
                 true,
+                dateOfBirth = LocalDate.of(1990, 1, 1),
             )
 
         // Assert
@@ -220,56 +193,17 @@ class LandlordServiceTests {
         assertEquals(expectedLandlord, createdLandlord)
     }
 
-    @Test
-    fun `createIndividualLandlord sends a confirmation email for the landlord created`() {
-        // Arrange
-        val expectedLandlord = createIndividualLandlord()
-
-        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(any())).thenReturn(expectedLandlord.baseUser)
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedLandlord.address)
-        whenever(mockRegistrationNumberService.createRegistrationNumber(any()))
-            .thenReturn(expectedLandlord.registrationNumber)
-
-        whenever(mockIndividualLandlordRepository.save(any())).thenReturn(expectedLandlord)
-        val dashboardUri = URI("example.com/dashboard")
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
-
-        // Act
-        landlordService.createIndividualLandlord(
-            "baseUserId",
-            "name",
-            "example@email.com",
-            "07123456789",
-            mock(),
-            ENGLAND_OR_WALES,
-            true,
-            true,
-        )
-
-        // Assert
-        verify(registrationConfirmationSender).sendEmail(
-            expectedLandlord.email,
-            LandlordRegistrationConfirmationEmail(
-                RegistrationNumberDataModel.fromRegistrationNumber(expectedLandlord.registrationNumber).toString(),
-                dashboardUri.toASCIIString(),
-            ),
-        )
-    }
-
     @Nested
     inner class CreateOrganisationLandlordTests {
-        private val baseUserId = "baseUserId"
         private val orgAddressDataModel = AddressDataModel("1 Org Street, OG1 2AB", postcode = "OG1 2AB")
         private val trusteeAddressDataModel = AddressDataModel("2 Trustee Road, TR1 3CD", postcode = "TR1 3CD")
 
-        private val baseUser = PrsdbUser(baseUserId)
         private val orgAddress = Address(orgAddressDataModel)
         private val trusteeAddress = Address(trusteeAddressDataModel)
         private val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 9999999)
 
         @BeforeEach
         fun stubCommonDependencies() {
-            whenever(mockPrsdbUserService.findOrCreatePrsdbUser(baseUserId)).thenReturn(baseUser)
             whenever(mockAddressService.findOrCreateAddress(orgAddressDataModel)).thenReturn(orgAddress)
             whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))
                 .thenReturn(registrationNumber)
@@ -282,10 +216,8 @@ class LandlordServiceTests {
             leadTrusteeEmail: String? = null,
             leadTrusteePhoneNumber: String? = null,
             leadTrusteeAddress: AddressDataModel? = null,
-            governingBodyMembers: List<GoverningBodyMemberDataModel> = emptyList(),
         ): OrganisationLandlord =
             landlordService.createOrganisationLandlord(
-                baseUserId = baseUserId,
                 organisationName = "Test Org",
                 organisationAddress = orgAddressDataModel,
                 organisationEmail = "org@test.com",
@@ -308,7 +240,6 @@ class LandlordServiceTests {
                 registrantDateOfBirth = LocalDate.of(1990, 1, 1),
                 registrantEmail = "registrant@test.com",
                 registrantPhoneNumber = "072",
-                governingBodyMembers = governingBodyMembers,
             )
 
         @Test
@@ -339,63 +270,16 @@ class LandlordServiceTests {
         }
 
         @Test
-        fun `creates an OrganisationLandlordUser linking landlord to base user`() {
-            val result = createOrganisationLandlord()
-
-            val userCaptor = captor<OrganisationLandlordUser>()
-            verify(mockOrganisationLandlordUserRepository).save(userCaptor.capture())
-
-            assertEquals(result, userCaptor.value.organisationLandlord)
-            assertEquals(baseUser, userCaptor.value.baseUser)
-        }
-
-        @Test
-        fun `saves governing body members with resolved addresses`() {
-            val memberAddress = AddressDataModel("3 Member Lane, ME1 4EF", postcode = "ME1 4EF")
-            val resolvedMemberAddress = Address(memberAddress)
-            whenever(mockAddressService.findOrCreateAddress(memberAddress)).thenReturn(resolvedMemberAddress)
-
-            val members =
-                listOf(
-                    GoverningBodyMemberDataModel(
-                        name = "Director Dave",
-                        type = GoverningBodyMemberType.DIRECTOR,
-                        dateOfBirth = kotlinx.datetime.LocalDate(1970, 5, 12),
-                        address = memberAddress,
-                    ),
-                )
-
-            createOrganisationLandlord(governingBodyMembers = members)
-
-            val memberCaptor = captor<OrganisationGoverningBodyMember>()
-            verify(mockOrganisationGoverningBodyMemberRepository).save(memberCaptor.capture())
-
-            val savedMember = memberCaptor.value
-            assertEquals("Director Dave", savedMember.name)
-            assertEquals(GoverningBodyMemberType.DIRECTOR, savedMember.type)
-            assertEquals(LocalDate.of(1970, 5, 12), savedMember.dateOfBirth)
-            assertEquals(resolvedMemberAddress, savedMember.address)
-        }
-
-        @Test
-        fun `does not save governing body members when list is empty`() {
-            createOrganisationLandlord(governingBodyMembers = emptyList())
-
-            verify(mockOrganisationGoverningBodyMemberRepository, never()).save(any())
-        }
-
-        @Test
         fun `resolves lead trustee address when provided`() {
             whenever(mockAddressService.findOrCreateAddress(trusteeAddressDataModel)).thenReturn(trusteeAddress)
 
-            val result =
-                createOrganisationLandlord(
-                    leadTrusteeName = "Jane Trustee",
-                    leadTrusteeDateOfBirth = LocalDate.of(1980, 6, 15),
-                    leadTrusteeEmail = "trustee@test.com",
-                    leadTrusteePhoneNumber = "07999",
-                    leadTrusteeAddress = trusteeAddressDataModel,
-                )
+            createOrganisationLandlord(
+                leadTrusteeName = "Jane Trustee",
+                leadTrusteeDateOfBirth = LocalDate.of(1980, 6, 15),
+                leadTrusteeEmail = "trustee@test.com",
+                leadTrusteePhoneNumber = "07999",
+                leadTrusteeAddress = trusteeAddressDataModel,
+            )
 
             verify(mockAddressService, times(2)).findOrCreateAddress(any())
 

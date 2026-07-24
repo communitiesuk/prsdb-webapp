@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -24,9 +23,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -35,9 +31,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -45,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
-import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -106,15 +101,6 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
 
-    @MockitoBean
-    private lateinit var mockOrganisationLandlordRepository: OrganisationLandlordRepository
-
-    @MockitoBean
-    private lateinit var mockOrganisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository
-
-    @MockitoBean
-    private lateinit var mockOrganisationLandlordUserRepository: OrganisationLandlordUserRepository
-
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
@@ -123,30 +109,20 @@ class LandlordDashboardUrlTests(
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val prsdbUserService = mock<PrsdbUserService>()
-        val addressService = mock<AddressService>()
-        val registrationNumberService = mock<RegistrationNumberService>()
-        val landlordService =
-            LandlordService(
-                mockIndividualLandlordRepository,
-                mockOrganisationLandlordRepository,
-                mockOrganisationGoverningBodyMemberRepository,
-                mockOrganisationLandlordUserRepository,
+        val landlordService = mock<LandlordService>()
+        val landlordRegistrationService =
+            LandlordRegistrationService(
+                landlordService,
                 prsdbUserService,
-                addressService,
-                registrationNumberService,
+                mock(),
                 mock(),
                 mockEmailNotificationService,
                 absoluteUrlProvider,
-                mockEmailNotificationService,
             )
 
         whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
             .thenReturn(PrsdbUser("baseUserId"))
-        whenever(addressService.findOrCreateAddress(any()))
-            .thenReturn(mock())
-        whenever(registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))
-            .thenReturn(mock())
-        whenever(mockIndividualLandlordRepository.save(any()))
+        whenever(landlordService.createIndividualLandlord(any(), any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull()))
             .thenReturn(createIndividualLandlord())
 
         val confirmationCaptor = argumentCaptor<LandlordRegistrationConfirmationEmail>()
@@ -156,17 +132,17 @@ class LandlordDashboardUrlTests(
             .sendEmail(any(), confirmationCaptor.capture())
 
         // Act
-        landlordService.createIndividualLandlord(
+        landlordRegistrationService.registerIndividualLandlord(
             "userId",
             "Test Name",
             "email",
             "phone",
             mock(),
-            "Test Country",
+            dateOfBirth = LocalDate.of(1990, 1, 1),
+            countryOfResidence = "Test Country",
             isVerified = true,
             hasAcceptedPrivacyNotice = true,
             nonEnglandOrWalesAddress = null,
-            dateOfBirth = LocalDate.of(1990, 1, 1),
         )
 
         // Assert

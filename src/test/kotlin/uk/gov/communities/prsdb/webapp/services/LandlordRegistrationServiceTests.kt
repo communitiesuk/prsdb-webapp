@@ -10,16 +10,23 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import java.net.URI
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -27,18 +34,43 @@ class LandlordRegistrationServiceTests {
     @Mock
     private lateinit var mockLandlordService: LandlordService
 
+    @Mock
+    private lateinit var mockPrsdbUserService: PrsdbUserService
+
+    @Mock
+    private lateinit var mockOrganisationLandlordUserService: OrganisationLandlordUserService
+
+    @Mock
+    private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
+
+    @Mock
+    private lateinit var mockRegistrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @Mock
+    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
     private lateinit var landlordRegistrationService: LandlordRegistrationService
+
+    private val baseUser = PrsdbUser("user-123")
 
     private val orgAddress = AddressDataModel(singleLineAddress = "1 Org St", postcode = "SW1A 1AA")
     private val trusteeAddress = AddressDataModel(singleLineAddress = "2 Trustee Rd", postcode = "W1 1AA")
 
     @BeforeEach
     fun setup() {
-        landlordRegistrationService = LandlordRegistrationService(mockLandlordService)
+        landlordRegistrationService =
+            LandlordRegistrationService(
+                mockLandlordService,
+                mockPrsdbUserService,
+                mockOrganisationLandlordUserService,
+                mockOrganisationGoverningBodyMemberService,
+                mockRegistrationConfirmationSender,
+                mockAbsoluteUrlProvider,
+            )
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser("user-123")).thenReturn(baseUser)
     }
 
     private fun verifyCreatedOrganisationLandlord(
-        baseUserId: () -> String = { any() },
         organisationName: () -> String = { any() },
         organisationAddress: () -> AddressDataModel = { any() },
         organisationEmail: () -> String = { any() },
@@ -61,10 +93,8 @@ class LandlordRegistrationServiceTests {
         registrantDateOfBirth: () -> LocalDate = { any() },
         registrantEmail: () -> String = { any() },
         registrantPhoneNumber: () -> String = { any() },
-        governingBodyMembers: () -> List<GoverningBodyMemberDataModel> = { any() },
     ) {
         verify(mockLandlordService).createOrganisationLandlord(
-            baseUserId(),
             organisationName(),
             organisationAddress(),
             organisationEmail(),
@@ -87,7 +117,6 @@ class LandlordRegistrationServiceTests {
             registrantDateOfBirth(),
             registrantEmail(),
             registrantPhoneNumber(),
-            governingBodyMembers(),
         )
     }
 
@@ -95,7 +124,7 @@ class LandlordRegistrationServiceTests {
         baseUserId: String = "user-123",
         organisationTypes: List<OrgType> = listOf(OrgType.NONE),
         organisationHasCompanyNumber: Boolean = false,
-        organisationHasCharityNumber: Boolean = false,
+        orgIsRegisteredCharity: Boolean = false,
         organisationName: String = "Test Org",
         organisationAddress: AddressDataModel = orgAddress,
         organisationEmail: String = "org@test.com",
@@ -117,12 +146,11 @@ class LandlordRegistrationServiceTests {
         organisationRegistrantPhoneNumber: String = "072",
         organisationGoverningBodyMembers: List<GoverningBodyMemberDataModel> = emptyList(),
     ) {
-        landlordRegistrationService.registerLandlord(
+        landlordRegistrationService.registerOrganisationLandlord(
             baseUserId = baseUserId,
-            landlordType = LandlordType.ORGANISATION,
             organisationTypes = organisationTypes,
             organisationHasCompanyNumber = organisationHasCompanyNumber,
-            organisationHasCharityNumber = organisationHasCharityNumber,
+            orgIsRegisteredCharity = orgIsRegisteredCharity,
             organisationName = organisationName,
             organisationAddress = organisationAddress,
             organisationEmail = organisationEmail,
@@ -148,39 +176,51 @@ class LandlordRegistrationServiceTests {
 
     @Nested
     inner class IndividualLandlordRegistration {
-        @Test
-        fun `registerLandlord calls createIndividualLandlord for INDIVIDUAL type`() {
-            val individualAddress = AddressDataModel(singleLineAddress = "3 Home Lane", postcode = "E1 1AA")
+        private val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1234567)
+        private val individualLandlord =
+            IndividualLandlord(
+                baseUser = baseUser,
+                name = "John Smith",
+                email = "john@test.com",
+                phoneNumber = "07123456789",
+                address = Address(AddressDataModel(singleLineAddress = "3 Home Lane")),
+                registrationNumber = registrationNumber,
+                countryOfResidence = "England",
+                isVerified = true,
+                hasAcceptedPrivacyNotice = true,
+                nonEnglandOrWalesAddress = null,
+                dateOfBirth = LocalDate.of(1990, 1, 1),
+            )
+        private val dashboardUri = URI("http://example.com/landlord-dashboard")
+
+        @BeforeEach
+        fun stubIndividualLandlord() {
             whenever(
                 mockLandlordService.createIndividualLandlord(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    anyOrNull(),
-                    anyOrNull(),
+                    any(), any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull(),
                 ),
-            ).thenReturn(IndividualLandlord())
+            ).thenReturn(individualLandlord)
+            whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
+        }
 
-            landlordRegistrationService.registerLandlord(
+        @Test
+        fun `registerIndividualLandlord calls createIndividualLandlord with resolved base user`() {
+            val individualAddress = AddressDataModel(singleLineAddress = "3 Home Lane", postcode = "E1 1AA")
+
+            landlordRegistrationService.registerIndividualLandlord(
                 baseUserId = "user-123",
-                landlordType = LandlordType.INDIVIDUAL,
-                individualName = "John Smith",
-                individualEmail = "john@test.com",
-                individualPhoneNumber = "07123456789",
-                individualAddress = individualAddress,
-                individualDateOfBirth = LocalDate.of(1990, 1, 1),
-                individualCountryOfResidence = "England",
-                individualIsVerified = true,
-                individualHasAcceptedPrivacyNotice = true,
+                name = "John Smith",
+                email = "john@test.com",
+                phoneNumber = "07123456789",
+                address = individualAddress,
+                dateOfBirth = LocalDate.of(1990, 1, 1),
+                countryOfResidence = "England",
+                isVerified = true,
+                hasAcceptedPrivacyNotice = true,
             )
 
             verify(mockLandlordService).createIndividualLandlord(
-                baseUserId = eq("user-123"),
+                baseUser = eq(baseUser),
                 name = eq("John Smith"),
                 email = eq("john@test.com"),
                 phoneNumber = eq("07123456789"),
@@ -190,6 +230,31 @@ class LandlordRegistrationServiceTests {
                 hasAcceptedPrivacyNotice = eq(true),
                 nonEnglandOrWalesAddress = isNull(),
                 dateOfBirth = eq(LocalDate.of(1990, 1, 1)),
+            )
+        }
+
+        @Test
+        fun `registerIndividualLandlord sends a registration confirmation email`() {
+            landlordRegistrationService.registerIndividualLandlord(
+                baseUserId = "user-123",
+                name = "John Smith",
+                email = "john@test.com",
+                phoneNumber = "07123456789",
+                address = AddressDataModel(singleLineAddress = "3 Home Lane", postcode = "E1 1AA"),
+                dateOfBirth = LocalDate.of(1990, 1, 1),
+                countryOfResidence = "England",
+                isVerified = true,
+                hasAcceptedPrivacyNotice = true,
+            )
+
+            verify(mockRegistrationConfirmationSender).sendEmail(
+                eq("john@test.com"),
+                eq(
+                    LandlordRegistrationConfirmationEmail(
+                        RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString(),
+                        dashboardUri.toString(),
+                    ),
+                ),
             )
         }
     }
@@ -207,7 +272,6 @@ class LandlordRegistrationServiceTests {
                     any(),
                     any(),
                     any(),
-                    any(),
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
@@ -216,7 +280,6 @@ class LandlordRegistrationServiceTests {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
-                    any(),
                     any(),
                     any(),
                     any(),
@@ -229,7 +292,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes company number when hasCompanyNumber is true`() {
+        fun `registerOrganisationLandlord passes company number when hasCompanyNumber is true`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.COMPANY),
                 organisationHasCompanyNumber = true,
@@ -240,7 +303,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes null company number when hasCompanyNumber is false`() {
+        fun `registerOrganisationLandlord passes null company number when hasCompanyNumber is false`() {
             registerOrganisationLandlord(
                 organisationHasCompanyNumber = false,
                 organisationCompanyNumber = "stale-data",
@@ -250,10 +313,10 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes charity number when hasCharityNumber is true and regulator is not NONE`() {
+        fun `registerOrganisationLandlord passes charity number when hasCharityNumber is true and regulator is not NONE`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.CHARITY),
-                organisationHasCharityNumber = true,
+                orgIsRegisteredCharity = true,
                 organisationCharityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
                 organisationCharityNumber = "1234567",
             )
@@ -265,10 +328,10 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes null charity number when hasCharityNumber is true but regulator is NONE`() {
+        fun `registerOrganisationLandlord passes null charity number when orgIsRegisteredCharity is true but regulator is NONE`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.CHARITY),
-                organisationHasCharityNumber = true,
+                orgIsRegisteredCharity = true,
                 organisationCharityRegisteredWith = CharityRegulator.NONE,
                 organisationCharityNumber = "stale-data",
             )
@@ -280,9 +343,9 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes null charity fields when hasCharityNumber is false`() {
+        fun `registerOrganisationLandlord passes null charity fields when orgIsRegisteredCharity is false`() {
             registerOrganisationLandlord(
-                organisationHasCharityNumber = false,
+                orgIsRegisteredCharity = false,
             )
 
             verifyCreatedOrganisationLandlord(
@@ -292,7 +355,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes lead trustee fields when org type includes TRUST`() {
+        fun `registerOrganisationLandlord passes lead trustee fields when org type includes TRUST`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.TRUST),
                 organisationLeadTrusteeName = "Jane Trustee",
@@ -312,7 +375,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes null lead trustee fields when org type does not include TRUST`() {
+        fun `registerOrganisationLandlord passes null lead trustee fields when org type does not include TRUST`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.COMPANY),
                 organisationHasCompanyNumber = true,
@@ -331,7 +394,7 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerLandlord passes governing body members when hasCompanyNumber is false`() {
+        fun `registerOrganisationLandlord passes governing body members when hasCompanyNumber is false`() {
             val members =
                 listOf(
                     GoverningBodyMemberDataModel(
@@ -346,11 +409,11 @@ class LandlordRegistrationServiceTests {
                 organisationGoverningBodyMembers = members,
             )
 
-            verifyCreatedOrganisationLandlord(governingBodyMembers = { eq(members) })
+            verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(any(), eq(members))
         }
 
         @Test
-        fun `registerLandlord passes empty governing body members when hasCompanyNumber is true`() {
+        fun `registerOrganisationLandlord does not create governing body members when hasCompanyNumber is true`() {
             val members =
                 listOf(
                     GoverningBodyMemberDataModel(
@@ -367,11 +430,11 @@ class LandlordRegistrationServiceTests {
                 organisationGoverningBodyMembers = members,
             )
 
-            verifyCreatedOrganisationLandlord(governingBodyMembers = { eq(emptyList()) })
+            verify(mockOrganisationGoverningBodyMemberService, never()).createGoverningBodyMembers(any(), any())
         }
 
         @Test
-        fun `registerLandlord derives isCompany, isCharity and isTrust from organisationTypes`() {
+        fun `registerOrganisationLandlord derives isCompany, isCharity and isTrust from organisationTypes`() {
             registerOrganisationLandlord(
                 organisationTypes = listOf(OrgType.COMPANY, OrgType.CHARITY),
             )
@@ -381,6 +444,13 @@ class LandlordRegistrationServiceTests {
                 isCharity = { eq(true) },
                 isTrust = { eq(false) },
             )
+        }
+
+        @Test
+        fun `registerOrganisationLandlord creates an OrganisationLandlordUser`() {
+            registerOrganisationLandlord()
+
+            verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(any(), eq(baseUser))
         }
     }
 }

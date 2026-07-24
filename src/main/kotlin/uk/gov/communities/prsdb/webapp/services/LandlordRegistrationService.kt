@@ -3,103 +3,138 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import java.time.LocalDate
 
 @PrsdbWebService
 class LandlordRegistrationService(
     private val landlordService: LandlordService,
+    private val prsdbUserService: PrsdbUserService,
+    private val organisationLandlordUserService: OrganisationLandlordUserService,
+    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
+    private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
-    fun registerLandlord(
+    fun registerIndividualLandlord(
         baseUserId: String,
-        landlordType: LandlordType,
-        // Individual landlord fields
-        individualName: String? = null,
-        individualEmail: String? = null,
-        individualPhoneNumber: String? = null,
-        individualAddress: AddressDataModel? = null,
-        individualDateOfBirth: LocalDate? = null,
-        individualCountryOfResidence: String? = null,
-        individualIsVerified: Boolean? = null,
-        individualHasAcceptedPrivacyNotice: Boolean? = null,
-        individualNonEnglandOrWalesAddress: String? = null,
-        // Organisation landlord fields
-        organisationTypes: List<OrgType> = emptyList(),
-        organisationHasCompanyNumber: Boolean = false,
-        organisationHasCharityNumber: Boolean = false,
-        organisationName: String? = null,
-        organisationAddress: AddressDataModel? = null,
-        organisationEmail: String? = null,
-        organisationPhoneNumber: String? = null,
-        organisationCompanyNumber: String? = null,
-        organisationCharityRegisteredWith: CharityRegulator? = null,
-        organisationCharityNumber: String? = null,
-        organisationLeadTrusteeName: String? = null,
-        organisationLeadTrusteeDateOfBirth: LocalDate? = null,
-        organisationLeadTrusteeEmail: String? = null,
-        organisationLeadTrusteePhoneNumber: String? = null,
-        organisationLeadTrusteeAddress: AddressDataModel? = null,
-        organisationMainContactName: String? = null,
-        organisationMainContactEmail: String? = null,
-        organisationMainContactPhoneNumber: String? = null,
-        organisationRegistrantName: String? = null,
-        organisationRegistrantDateOfBirth: LocalDate? = null,
-        organisationRegistrantEmail: String? = null,
-        organisationRegistrantPhoneNumber: String? = null,
-        organisationGoverningBodyMembers: List<GoverningBodyMemberDataModel> = emptyList(),
-    ): Landlord =
-        when (landlordType) {
-            LandlordType.INDIVIDUAL -> {
-                landlordService.createIndividualLandlord(
-                    baseUserId = baseUserId,
-                    name = individualName!!,
-                    email = individualEmail!!,
-                    phoneNumber = individualPhoneNumber!!,
-                    addressDataModel = individualAddress!!,
-                    countryOfResidence = individualCountryOfResidence!!,
-                    isVerified = individualIsVerified!!,
-                    hasAcceptedPrivacyNotice = individualHasAcceptedPrivacyNotice!!,
-                    nonEnglandOrWalesAddress = individualNonEnglandOrWalesAddress,
-                    dateOfBirth = individualDateOfBirth,
-                )
-            }
+        name: String,
+        email: String,
+        phoneNumber: String,
+        address: AddressDataModel,
+        dateOfBirth: LocalDate,
+        countryOfResidence: String,
+        isVerified: Boolean,
+        hasAcceptedPrivacyNotice: Boolean,
+        nonEnglandOrWalesAddress: String? = null,
+    ): IndividualLandlord {
+        val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
 
-            LandlordType.ORGANISATION -> {
-                val isTrust = OrgType.TRUST in organisationTypes
-                val hasCharityNumber =
-                    organisationHasCharityNumber && organisationCharityRegisteredWith != CharityRegulator.NONE
+        val landlord =
+            landlordService.createIndividualLandlord(
+                baseUser = baseUser,
+                name = name,
+                email = email,
+                phoneNumber = phoneNumber,
+                addressDataModel = address,
+                countryOfResidence = countryOfResidence,
+                isVerified = isVerified,
+                hasAcceptedPrivacyNotice = hasAcceptedPrivacyNotice,
+                nonEnglandOrWalesAddress = nonEnglandOrWalesAddress,
+                dateOfBirth = dateOfBirth,
+            )
 
-                landlordService.createOrganisationLandlord(
-                    baseUserId = baseUserId,
-                    organisationName = organisationName!!,
-                    organisationAddress = organisationAddress!!,
-                    organisationEmail = organisationEmail!!,
-                    organisationPhoneNumber = organisationPhoneNumber!!,
-                    isCompany = OrgType.COMPANY in organisationTypes,
-                    isCharity = OrgType.CHARITY in organisationTypes,
-                    isTrust = isTrust,
-                    companyNumber = if (organisationHasCompanyNumber) organisationCompanyNumber!! else null,
-                    charityRegisteredWith = if (organisationHasCharityNumber) organisationCharityRegisteredWith!! else null,
-                    charityNumber = if (hasCharityNumber) organisationCharityNumber!! else null,
-                    leadTrusteeName = if (isTrust) organisationLeadTrusteeName else null,
-                    leadTrusteeDateOfBirth = if (isTrust) organisationLeadTrusteeDateOfBirth else null,
-                    leadTrusteeEmail = if (isTrust) organisationLeadTrusteeEmail else null,
-                    leadTrusteePhoneNumber = if (isTrust) organisationLeadTrusteePhoneNumber else null,
-                    leadTrusteeAddress = if (isTrust) organisationLeadTrusteeAddress else null,
-                    mainContactName = organisationMainContactName!!,
-                    mainContactEmail = organisationMainContactEmail!!,
-                    mainContactPhoneNumber = organisationMainContactPhoneNumber!!,
-                    registrantName = organisationRegistrantName!!,
-                    registrantDateOfBirth = organisationRegistrantDateOfBirth!!,
-                    registrantEmail = organisationRegistrantEmail!!,
-                    registrantPhoneNumber = organisationRegistrantPhoneNumber!!,
-                    governingBodyMembers = if (!organisationHasCompanyNumber) organisationGoverningBodyMembers else emptyList(),
-                )
-            }
+        sendRegistrationConfirmationEmail(landlord)
+
+        return landlord
+    }
+
+    @Transactional
+    fun registerOrganisationLandlord(
+        baseUserId: String,
+        organisationTypes: List<OrgType>,
+        organisationHasCompanyNumber: Boolean,
+        orgIsRegisteredCharity: Boolean,
+        organisationName: String,
+        organisationAddress: AddressDataModel,
+        organisationEmail: String,
+        organisationPhoneNumber: String,
+        organisationCompanyNumber: String?,
+        organisationCharityRegisteredWith: CharityRegulator?,
+        organisationCharityNumber: String?,
+        organisationLeadTrusteeName: String?,
+        organisationLeadTrusteeDateOfBirth: LocalDate?,
+        organisationLeadTrusteeEmail: String?,
+        organisationLeadTrusteePhoneNumber: String?,
+        organisationLeadTrusteeAddress: AddressDataModel?,
+        organisationMainContactName: String,
+        organisationMainContactEmail: String,
+        organisationMainContactPhoneNumber: String,
+        organisationRegistrantName: String,
+        organisationRegistrantDateOfBirth: LocalDate,
+        organisationRegistrantEmail: String,
+        organisationRegistrantPhoneNumber: String,
+        organisationGoverningBodyMembers: List<GoverningBodyMemberDataModel>,
+    ): OrganisationLandlord {
+        val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
+
+        val isTrust = OrgType.TRUST in organisationTypes
+        val hasCharityNumber =
+            orgIsRegisteredCharity && organisationCharityRegisteredWith != CharityRegulator.NONE
+
+        val landlord =
+            landlordService.createOrganisationLandlord(
+                organisationName = organisationName,
+                organisationAddress = organisationAddress,
+                organisationEmail = organisationEmail,
+                organisationPhoneNumber = organisationPhoneNumber,
+                isCompany = OrgType.COMPANY in organisationTypes,
+                isCharity = OrgType.CHARITY in organisationTypes,
+                isTrust = isTrust,
+                companyNumber = if (organisationHasCompanyNumber) organisationCompanyNumber!! else null,
+                charityRegisteredWith = if (orgIsRegisteredCharity) organisationCharityRegisteredWith!! else null,
+                charityNumber = if (hasCharityNumber) organisationCharityNumber!! else null,
+                leadTrusteeName = if (isTrust) organisationLeadTrusteeName else null,
+                leadTrusteeDateOfBirth = if (isTrust) organisationLeadTrusteeDateOfBirth else null,
+                leadTrusteeEmail = if (isTrust) organisationLeadTrusteeEmail else null,
+                leadTrusteePhoneNumber = if (isTrust) organisationLeadTrusteePhoneNumber else null,
+                leadTrusteeAddress = if (isTrust) organisationLeadTrusteeAddress else null,
+                mainContactName = organisationMainContactName,
+                mainContactEmail = organisationMainContactEmail,
+                mainContactPhoneNumber = organisationMainContactPhoneNumber,
+                registrantName = organisationRegistrantName,
+                registrantDateOfBirth = organisationRegistrantDateOfBirth,
+                registrantEmail = organisationRegistrantEmail,
+                registrantPhoneNumber = organisationRegistrantPhoneNumber,
+            )
+
+        organisationLandlordUserService.createOrganisationLandlordUser(landlord, baseUser)
+
+        if (!organisationHasCompanyNumber) {
+            organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, organisationGoverningBodyMembers)
         }
+
+        // TODO: PDJB-1260: Send registration confirmation email for org landlords
+
+        return landlord
+    }
+
+    private fun sendRegistrationConfirmationEmail(landlord: Landlord) {
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        check(landlord is IndividualLandlord)
+        registrationConfirmationSender.sendEmail(
+            landlord.email,
+            LandlordRegistrationConfirmationEmail(
+                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+            ),
+        )
+    }
 }
