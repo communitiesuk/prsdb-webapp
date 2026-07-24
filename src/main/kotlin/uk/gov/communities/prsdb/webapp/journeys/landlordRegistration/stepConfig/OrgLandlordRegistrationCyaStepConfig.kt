@@ -273,7 +273,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             title = "registerAsALandlord.orgCheckAnswers.governingBody.leadTrusteeCardTitle",
             summaryList = rows,
             actions =
-                SummaryCardActionViewModel.forCheckYourAnswersPage(
+                SummaryCardActionViewModel.changeAction(
                     Destination.VisitableStep(org.leadTrusteeNameStep, state.getCyaJourneyId(org.leadTrusteeNameStep)),
                 ),
         )
@@ -358,7 +358,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
             title = "registerAsALandlord.orgCheckAnswers.mainContact.cardTitle",
             summaryList = rows,
             actions =
-                SummaryCardActionViewModel.forCheckYourAnswersPage(
+                SummaryCardActionViewModel.changeAction(
                     Destination.VisitableStep(org.orgMainContactStep, state.getCyaJourneyId(org.orgMainContactStep)),
                 ),
         )

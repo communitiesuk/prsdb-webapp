@@ -16,13 +16,15 @@ data class SummaryCardActionViewModel(
     val opensInNewTab: Boolean = false,
 ) {
     companion object {
-        fun forCheckYourAnswersPage(
+        fun changeAction(
             destination: Destination,
             actionText: String = "forms.links.change",
-        ): List<SummaryCardActionViewModel> =
-            destination.toUrlStringOrNull()?.let {
-                listOf(SummaryCardActionViewModel(text = actionText, url = it))
-            } ?: emptyList()
+        ): List<SummaryCardActionViewModel> = changeAction(destination.toUrlStringOrNull(), actionText)
+
+        fun changeAction(
+            url: String?,
+            actionText: String = "forms.links.change",
+        ): List<SummaryCardActionViewModel> = url?.let { listOf(SummaryCardActionViewModel(text = actionText, url = it)) } ?: emptyList()
     }
 }
 
