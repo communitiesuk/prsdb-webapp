@@ -852,4 +852,39 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 address = AddressDataModel(singleLineAddress = "Test Address"),
             )
     }
+
+    @Nested
+    inner class CheckAnswersStep {
+        @Test
+        fun `the check answers page renders every card for a trust organisation`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.sectionHeader).containsText("Register as a landlord")
+            assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
+            assertThat(checkAnswersPage.leadTrusteeCard.title).hasText("Lead trustee")
+            assertThat(checkAnswersPage.governingBodyMemberCard.title).hasText("1. Director")
+            assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
+        }
+
+        @Test
+        fun `the landlord details card shows the organisation's answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.landlordDetails.landlordTypeRow.value).containsText("Organisation")
+            assertThat(checkAnswersPage.landlordDetails.organisationNameRow.value).containsText("Test Organisation Name")
+            assertThat(checkAnswersPage.landlordDetails.organisationEmailRow.value).containsText("org@test.com")
+            assertThat(checkAnswersPage.landlordDetails.organisationPhoneRow.value).containsText("07123456789")
+            assertThat(checkAnswersPage.landlordDetails.organisationTypeRow.value).containsText("Trust")
+            assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("No")
+            assertThat(checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.value).containsText("No")
+        }
+
+        @Test
+        fun `the main contact card shows the submitted main contact details`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.mainContactCard).containsText("Jane Doe")
+            assertThat(checkAnswersPage.mainContactCard).containsText("jane@example.com")
+        }
+    }
 }

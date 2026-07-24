@@ -55,6 +55,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBod
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -97,8 +99,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgName(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgName(name: String = "Test Organisation Name"): LandlordStateSessionBuilder {
+        val formModel = OrgNameFormModel().apply { orgName = name }
+        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -119,8 +122,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgPhoneNumber(phoneNumber: String = "07123456789"): LandlordStateSessionBuilder {
+        val formModel = OrgPhoneNumberFormModel().apply { this.phoneNumber = phoneNumber }
+        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -375,6 +379,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgMainContact() =
             beforeOrgGovBodyMemberList()
                 .withOrgGovBodyMemberList()
+
+        fun beforeOrgCheckAnswers() = beforeOrgMainContact().withOrgMainContact()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 

@@ -25,6 +25,8 @@ class OrgCheckAnswersPageLandlordRegistration(
 
     val leadTrusteeCard = SummaryCard(page, "Lead trustee")
 
+    val governingBodyMemberCard = SummaryCard(page, "1. Director")
+
     val mainContactCard = SummaryCard(page, "Main contact")
 
     val landlordDetails = LandlordDetailsSummaryList(page)
@@ -34,6 +36,11 @@ class OrgCheckAnswersPageLandlordRegistration(
     ) : SummaryList(page, index = 1) {
         val landlordTypeRow = getRow("Landlord type")
         val organisationNameRow = getRow("Organisation name")
+        val organisationAddressRow = getRow("Organisation address")
+        val organisationEmailRow = getRow("Organisation email")
+        val organisationPhoneRow = getRow("Organisation phone number")
         val organisationTypeRow = getRow("Organisation type")
+        val registeredCharityRow = getRow("Registered charity")
+        val registeredWithCompaniesHouseRow = getRow("Registered with Companies House")
     }
 }
