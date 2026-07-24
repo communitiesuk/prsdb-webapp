@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IndividualLandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -53,8 +52,7 @@ class LandlordRegistrationTask(
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
-    override val cyaStep: IndividualLandlordRegistrationCyaStep,
-    override val orgCyaStep: OrgLandlordRegistrationCyaStep,
+    override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
@@ -66,15 +64,6 @@ class LandlordRegistrationTask(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val taskState get() = this
-
-    override val activeCyaStep get() =
-        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
-            landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
-        ) {
-            orgCyaStep
-        } else {
-            cyaStep
-        }
 
     override fun makeSubJourney(state: LandlordRegistrationState) =
         if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
@@ -129,7 +118,7 @@ class LandlordRegistrationTask(
             }
             duplicableTask(journey.orgLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
-                nextStep { journey.orgCyaStep }
+                nextStep { journey.cyaStep }
             }
             duplicableTask(journey.individualLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
@@ -137,16 +126,16 @@ class LandlordRegistrationTask(
             }
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.individualLandlordRegistrationTask.isComplete() }
-                nextStep { exitStep }
-            }
-            step(journey.orgCyaStep) {
-                routeSegment(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordRegistrationTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.individualLandlordRegistrationTask.isComplete(),
+                        journey.orgLandlordRegistrationTask.isComplete(),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { OrParents(journey.cyaStep.isComplete(), journey.orgCyaStep.isComplete()) }
+                parents { journey.cyaStep.isComplete() }
             }
         }
 

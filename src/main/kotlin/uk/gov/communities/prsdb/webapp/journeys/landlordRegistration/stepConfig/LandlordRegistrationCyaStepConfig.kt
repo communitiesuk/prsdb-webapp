@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
@@ -25,6 +27,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompan
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
@@ -33,69 +37,94 @@ import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationCyaStepConfig(
+class LandlordRegistrationCyaStepConfig(
     private val landlordRegistrationService: LandlordRegistrationService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
-    override fun chooseTemplate(state: LandlordRegistrationState) = "forms/orgLandlordRegistrationCheckAnswersForm"
+    override fun chooseTemplate(state: LandlordRegistrationState) =
+        if (isOrgLandlord(state)) {
+            "forms/orgLandlordRegistrationCheckAnswersForm"
+        } else {
+            "forms/checkAnswersForm"
+        }
 
     override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
-        mapOf(
-            "title" to "registerAsALandlord.title",
-            "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
-            "yourDetailsCard" to getYourDetailsCard(state),
-            "landlordDetails" to getLandlordDetailsRows(state),
-            "governingBodyMemberCards" to (listOfNotNull(getLeadTrusteeCard(state)) + getGovBodyMemberCards(state)),
-            "mainContactCard" to getMainContactCard(state),
-        )
+        if (isOrgLandlord(state)) {
+            getOrgStepContent(state)
+        } else {
+            getIndividualStepContent(state)
+        }
 
     override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
-        val org = state.orgLandlordRegistrationTask
+        if (isOrgLandlord(state)) {
+            val org = state.orgLandlordRegistrationTask
 
-        val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
-        val isTrust = OrgType.TRUST in organisationTypes
-        val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
-        val hasCompanyNumber = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
+            val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
+            val isTrust = OrgType.TRUST in organisationTypes
+            val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val hasCompanyNumber = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
 
-        val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
+            val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
 
-        val mainContact = org.orgMainContactStep.formModel
+            val mainContact = org.orgMainContactStep.formModel
 
-        val governingBodyMembers =
-            (org.governingBodyMembersMap ?: emptyMap())
-                .values
-                .toList()
+            val governingBodyMembers =
+                (org.governingBodyMembersMap ?: emptyMap())
+                    .values
+                    .toList()
 
-        landlordRegistrationService.registerOrganisationLandlord(
+            landlordRegistrationService.registerOrganisationLandlord(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                organisationTypes = organisationTypes,
+                organisationHasCompanyNumber = hasCompanyNumber,
+                orgIsRegisteredCharity = isRegisteredCharity,
+                organisationName = org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
+                organisationAddress = getOrgAddress(org.orgAddressStep.formModel),
+                organisationEmail = org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                organisationPhoneNumber = org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
+                organisationCompanyNumber =
+                    if (hasCompanyNumber) org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber) else null,
+                organisationCharityRegisteredWith = charityRegulator,
+                organisationCharityNumber = getCharityNumber(state, charityRegulator),
+                organisationLeadTrusteeName =
+                    if (isTrust) org.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
+                organisationLeadTrusteeDateOfBirth = if (isTrust) org.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
+                organisationLeadTrusteeEmail =
+                    if (isTrust) org.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress) else null,
+                organisationLeadTrusteePhoneNumber =
+                    if (isTrust) org.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber) else null,
+                organisationLeadTrusteeAddress = if (isTrust) org.trusteeAddressTask.getAddress() else null,
+                organisationMainContactName = mainContact.notNullValue(OrgMainContactFormModel::name),
+                organisationMainContactEmail = mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
+                organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
+                organisationRegistrantName = state.identityTask.getName(),
+                organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
+                // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
+                organisationRegistrantEmail = "",
+                organisationRegistrantPhoneNumber = "",
+                organisationGoverningBodyMembers = governingBodyMembers,
+            )
+
+            securityContextService.refreshContext()
+            return
+        }
+
+        landlordRegistrationService.registerIndividualLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
-            organisationTypes = organisationTypes,
-            organisationHasCompanyNumber = hasCompanyNumber,
-            orgIsRegisteredCharity = isRegisteredCharity,
-            organisationName = org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
-            organisationAddress = getOrgAddress(org.orgAddressStep.formModel),
-            organisationEmail = org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
-            organisationPhoneNumber = org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
-            organisationCompanyNumber =
-                if (hasCompanyNumber) org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber) else null,
-            organisationCharityRegisteredWith = charityRegulator,
-            organisationCharityNumber = getCharityNumber(state, charityRegulator),
-            organisationLeadTrusteeName =
-                if (isTrust) org.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
-            organisationLeadTrusteeDateOfBirth = if (isTrust) org.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
-            organisationLeadTrusteeEmail =
-                if (isTrust) org.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress) else null,
-            organisationLeadTrusteePhoneNumber =
-                if (isTrust) org.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber) else null,
-            organisationLeadTrusteeAddress = if (isTrust) org.trusteeAddressTask.getAddress() else null,
-            organisationMainContactName = mainContact.notNullValue(OrgMainContactFormModel::name),
-            organisationMainContactEmail = mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
-            organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
-            organisationRegistrantName = state.identityTask.getName(),
-            organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
-            // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
-            organisationRegistrantEmail = "",
-            organisationRegistrantPhoneNumber = "",
-            organisationGoverningBodyMembers = governingBodyMembers,
+            name = state.identityTask.getName(),
+            email =
+                state.individualLandlordRegistrationTask.emailStep.formModel
+                    .notNullValue(EmailFormModel::emailAddress),
+            phoneNumber =
+                state.individualLandlordRegistrationTask.phoneNumberStep.formModel.notNullValue(
+                    PhoneNumberFormModel::phoneNumber,
+                ),
+            address = state.individualLandlordRegistrationTask.addressTask.getAddress(),
+            countryOfResidence = ENGLAND_OR_WALES,
+            isVerified = state.identityTask.getIsIdentityVerified(),
+            hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
+            nonEnglandOrWalesAddress = null,
+            dateOfBirth = state.identityTask.getDateOfBirth(),
         )
 
         securityContextService.refreshContext()
@@ -108,6 +137,109 @@ class OrgLandlordRegistrationCyaStepConfig(
         state: LandlordRegistrationState,
         defaultDestination: Destination,
     ): Destination = defaultDestination
+
+    private fun isOrgLandlord(state: LandlordRegistrationState) = state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
+
+    // Individual landlord content
+
+    private fun getIndividualStepContent(state: LandlordRegistrationState): Map<String, Any?> =
+        mapOf(
+            "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
+            "showWarning" to true,
+            "submitButtonText" to "forms.buttons.confirmAndContinue",
+            "insetText" to false,
+            "summaryListData" to getSummaryList(state),
+        )
+
+    private fun getSummaryList(state: LandlordRegistrationState) =
+        getIdentityRows(state) +
+            getEmailAndPhoneRows(state) +
+            getAddressRows(state)
+
+    private fun getIdentityRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> {
+        val isIdentityVerified = state.identityTask.getIsIdentityVerified()
+        return listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.name",
+                state.identityTask.getName(),
+                if (isIdentityVerified) {
+                    Destination.Nowhere()
+                } else {
+                    Destination.VisitableStep(state.identityTask.nameStep, state.getCyaJourneyId(state.identityTask.nameStep))
+                },
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
+                state.identityTask.getDateOfBirth(),
+                if (isIdentityVerified) {
+                    Destination.Nowhere()
+                } else {
+                    Destination.VisitableStep(
+                        state.identityTask.dateOfBirthStep,
+                        state.getCyaJourneyId(state.identityTask.dateOfBirthStep),
+                    )
+                },
+            ),
+        )
+    }
+
+    private fun getEmailAndPhoneRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.email",
+                state.individualLandlordRegistrationTask.emailStep.formModel
+                    .notNullValue(EmailFormModel::emailAddress),
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.emailStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.emailStep),
+                ),
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
+                state.individualLandlordRegistrationTask.phoneNumberStep.formModel
+                    .notNullValue(PhoneNumberFormModel::phoneNumber),
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.phoneNumberStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.phoneNumberStep),
+                ),
+            ),
+        )
+
+    private fun getAddressRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
+                state.individualLandlordRegistrationTask.countryOfResidenceStep.formModel.notNullValue(
+                    CountryOfResidenceFormModel::livesInEnglandOrWales,
+                ),
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.countryOfResidenceStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.countryOfResidenceStep),
+                ),
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
+                state.individualLandlordRegistrationTask.addressTask
+                    .getAddress()
+                    .singleLineAddress,
+                Destination.VisitableStep(
+                    state.individualLandlordRegistrationTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.addressTask.lookupAddressStep),
+                ),
+            ),
+        )
+
+    // Organisation landlord content
+
+    private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> =
+        mapOf(
+            "title" to "registerAsALandlord.title",
+            "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
+            "yourDetailsCard" to getYourDetailsCard(state),
+            "landlordDetails" to getLandlordDetailsRows(state),
+            "governingBodyMemberCards" to (listOfNotNull(getLeadTrusteeCard(state)) + getGovBodyMemberCards(state)),
+            "mainContactCard" to getMainContactCard(state),
+        )
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
         // TODO: PDJB-1282 - review this identity-verification branch; whether organisation landlords can be
@@ -511,10 +643,6 @@ class OrgLandlordRegistrationCyaStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class OrgLandlordRegistrationCyaStep(
-    stepConfig: OrgLandlordRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LandlordRegistrationState>(stepConfig) {
-    companion object {
-        const val ROUTE_SEGMENT = "organisation-check-answers"
-    }
-}
+final class LandlordRegistrationCyaStep(
+    stepConfig: LandlordRegistrationCyaStepConfig,
+) : AbstractCheckYourAnswersStep<LandlordRegistrationState>(stepConfig)

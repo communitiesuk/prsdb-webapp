@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 class OrgCheckAnswersPageLandlordRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
     ) {
     fun confirmAndSubmit() = form.submit()
 

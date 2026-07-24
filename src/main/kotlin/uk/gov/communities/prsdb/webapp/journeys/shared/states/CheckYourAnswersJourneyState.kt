@@ -17,10 +17,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
 
-    // The CYA step that "Change" links should return to. Defaults to cyaStep; journeys with more than one CYA page
-    // (e.g. organisation vs individual landlord registration) override this to return to the page currently in use.
-    val activeCyaStep: JourneyStep.RequestableStep<*, *, *> get() = cyaStep
-
     var originalJourneyUpdated: Instant?
 
     var cyaJourneys: Map<String, String>
@@ -63,7 +59,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         val cyaJourneyId = generateJourneyId("$baseJourneyId-$urlPath")
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = urlPath
-        childJourney.returnToCyaPageDestination = Destination.VisitableStep(activeCyaStep, baseJourneyId)
+        childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
         childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
 
         return (urlPath to cyaJourneyId)
