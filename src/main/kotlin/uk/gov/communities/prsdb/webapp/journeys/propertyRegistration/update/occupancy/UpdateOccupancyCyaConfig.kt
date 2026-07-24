@@ -40,7 +40,7 @@ class UpdateOccupancyCyaConfig(
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,
@@ -49,7 +49,7 @@ class UpdateOccupancyCyaConfig(
                 //   For example, numBedrooms should no longer be set to null as that will be in the property details section
                 numberOfHouseholds =
                     if (isOccupied) {
-                        state.households.formModel
+                        state.householdsAndTenantsTask.households.formModel
                             .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                             .toInt()
                     } else {
@@ -57,7 +57,7 @@ class UpdateOccupancyCyaConfig(
                     },
                 numberOfPeople =
                     if (isOccupied) {
-                        state.tenants.formModel
+                        state.householdsAndTenantsTask.tenants.formModel
                             .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                             .toInt()
                     } else {
@@ -74,11 +74,11 @@ class UpdateOccupancyCyaConfig(
                 billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
                 customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
                 furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
                 rentAmount =
                     if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
+                        state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                             .toBigDecimal()
                     } else {
                         null

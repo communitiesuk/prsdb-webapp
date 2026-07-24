@@ -24,17 +24,23 @@ class UpdateRentFrequencyAndAmountCyaConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource),
+            "summaryListData" to
+                occupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(
+                    state,
+                    state.rentFrequencyAndAmountTask,
+                    messageSource,
+                ),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 
     override fun afterStepDataIsAdded(state: UpdateRentFrequencyAndAmountJourneyState) {
         try {
+            val rentTask = state.rentFrequencyAndAmountTask
             propertyOwnershipService.updateRentFrequencyAndAmount(
                 id = state.propertyId,
-                rentFrequency = state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
-                customRentFrequency = state.getCustomRentFrequencyIfSelected(),
-                rentAmount = state.rentAmount.formModel.rentAmount.toBigDecimal(),
+                rentFrequency = rentTask.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
+                customRentFrequency = rentTask.getCustomRentFrequencyIfSelected(),
+                rentAmount = rentTask.rentAmount.formModel.rentAmount.toBigDecimal(),
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
             )
         } catch (ex: UpdateConflictException) {

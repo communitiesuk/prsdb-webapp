@@ -102,6 +102,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberNorthernIrelandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberScotlandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
@@ -207,6 +208,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -460,6 +462,14 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgMainContact().build())
         navigateToLandlordRegistrationJourneyStep(OrgMainContactStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgMainContactFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationCheckAnswersPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeOrgCheckAnswers(),
+    ): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
+        navigateToLandlordRegistrationJourneyStep(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationMustProvideInfoPage(): OrgGovBodyMustProvideInfoFormPageLandlordRegistration {
