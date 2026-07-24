@@ -38,7 +38,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25'),
        ('ia-mock-user-12345', '10/14/24'),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
-       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'); -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'), -- benjamin.johnson@madetech.com
+        ('urn:fdc:gov.uk:2022:ORG01', '07/23/26');
 
 
 -- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
@@ -145,7 +146,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (69, '2026-02-27', 1502423331, 0),
        (70, '01/15/25', 1502423332, 0),
        (71, '07/01/26', 1502423333, 1),
-       (72, '07/02/26', 1502423334, 1);
+       (72, '07/02/26', 1502423334, 1),
+       (73, '07/23/26', 1502423335, 1);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -262,7 +264,7 @@ VALUES (36, '07/23/26', '07/23/26', 73, 1, 'Local Organisation Landlord', 5,
         'local-registrant@example.com', '07111111112', true, false, false, '12345678',
         'Local Main Contact', 'local-main-contact@example.com', '07111111113');
 
-INSERT INTO organisation_users (organisation_landlord_id, subject_identifier, created_date)
+INSERT INTO organisation_landlord_user (organisation_landlord_id, subject_identifier, created_date)
 VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', '07/23/26');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));

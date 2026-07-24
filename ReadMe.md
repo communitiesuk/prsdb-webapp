@@ -249,6 +249,11 @@ logging in.
 
 If anyone knows a better way to do this please add it here!
 
+### Testing Org Landlords
+
+If you need to instead log in as an org landlord to see their dashboard & other views locally, run the `local-org-landlord`
+run config or enable the `local-org-landlord` profile. You may need to log out & log in again after enabling this.
+
 ### Connecting to AWS
 
 When the service runs in AWS it has the profile of the ECS service it is running on.
