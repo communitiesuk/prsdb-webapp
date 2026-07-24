@@ -14,21 +14,22 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class LicensingDetailsHelper(
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun <T> getCheckYourAnswersSummaryList(
-        state: T,
-    ): List<SummaryListRowViewModel> where T : LicensingState, T : CheckYourAnswersJourneyState {
+    fun getCheckYourAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+    ): List<SummaryListRowViewModel> {
         // TODO(PDJB-990): show 'Provide this later' in the licensing CYA row (property registration only) behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-        return state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
+        return licensingState.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
             listOfNotNull(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     licensingType,
-                    Destination.VisitableStep(state.licensingTypeStep, state.getCyaJourneyId(state.licensingTypeStep)),
+                    Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
                 ),
                 when (licensingType) {
-                    LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> (state.getLicenceNumber() to state.hmoAdditionalLicenceStep)
-                    LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
+                    LicensingType.HMO_MANDATORY_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoMandatoryLicenceStep)
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoAdditionalLicenceStep)
+                    LicensingType.SELECTIVE_LICENCE -> (licensingState.getLicenceNumber() to licensingState.selectiveLicenceStep)
                     else -> null
                 }?.let { (licenceNumber, step) ->
                     SummaryListRowViewModel.forCheckYourAnswersPage(

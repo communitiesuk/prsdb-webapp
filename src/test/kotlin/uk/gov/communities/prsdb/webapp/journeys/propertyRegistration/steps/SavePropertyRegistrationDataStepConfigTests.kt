@@ -30,7 +30,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -67,6 +72,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
+
+    @Mock
+    private lateinit var mockAddressTask: PropertyRegistrationAddressTask
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
@@ -222,7 +230,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockState).isAddressAlreadyRegistered = true
+        verify(mockAddressTask).isAddressAlreadyRegistered = true
     }
 
     @Test
@@ -281,13 +289,16 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration(isOccupied = true)
         setupStateForComplianceDataWithNullValues()
 
+        val mockHouseholdsAndTenantsTask = mock<HouseholdsAndTenantsTask>()
+        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+
         val mockHouseholdsStep = mock<HouseholdStep>()
-        whenever(mockState.households).thenReturn(mockHouseholdsStep)
+        whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdsStep)
         whenever(mockHouseholdsStep.outcome).thenReturn(HouseholdMode.COMPLETE)
         whenever(mockHouseholdsStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
 
         val mockTenantsStep = mock<TenantsStep>()
-        whenever(mockState.tenants).thenReturn(mockTenantsStep)
+        whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "3" })
 
         val mockBedroomsStep = mock<BedroomsStep>()
@@ -300,16 +311,19 @@ class SavePropertyRegistrationDataStepConfigTests {
             FurnishedStatusFormModel().apply { furnishedStatus = FurnishedStatus.FURNISHED },
         )
 
+        val mockRentFrequencyAndAmountTask = mock<RentFrequencyAndAmountTask>()
+        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+
         val mockRentFrequencyStep = mock<RentFrequencyStep>()
-        whenever(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
+        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         whenever(mockRentFrequencyStep.formModel).thenReturn(
             RentFrequencyFormModel().apply { rentFrequency = RentFrequency.MONTHLY },
         )
 
         val mockRentAmountStep = mock<RentAmountStep>()
-        whenever(mockState.rentAmount).thenReturn(mockRentAmountStep)
+        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         whenever(mockRentAmountStep.formModel).thenReturn(RentAmountFormModel().apply { rentAmount = "1200" })
-        whenever(mockState.getCustomRentFrequencyIfSelected()).thenReturn(null)
+        whenever(mockRentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()).thenReturn(null)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -357,7 +371,8 @@ class SavePropertyRegistrationDataStepConfigTests {
     fun `resolveNextDestination deletes journey and returns default destination when address is not already registered`() {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
-        whenever(mockState.isAddressAlreadyRegistered).thenReturn(false)
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -373,8 +388,9 @@ class SavePropertyRegistrationDataStepConfigTests {
         val defaultDestination = Destination.ExternalUrl("redirect")
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn("test-journey-id")
-        whenever(mockState.isAddressAlreadyRegistered).thenReturn(true)
-        whenever(mockState.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
+        whenever(mockAddressTask.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
         // Act
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
@@ -392,9 +408,12 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(occupancyFormModel)
 
-        whenever(mockState.getBillsIncludedOrNull()).thenReturn(null)
+        val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
+        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
-        whenever(mockState.getAddress()).thenReturn(
+        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
         )
 
@@ -405,10 +424,12 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
         val licensingTypeFormModel = LicensingTypeFormModel().apply { licensingType = LicensingType.SELECTIVE_LICENCE }
-        whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
+        val mockLicensingTask = mock<LicensingTask>()
+        whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
+        whenever(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
         whenever(mockLicensingTypeStep.formModel).thenReturn(licensingTypeFormModel)
 
-        whenever(mockState.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }

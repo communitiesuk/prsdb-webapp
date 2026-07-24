@@ -14,9 +14,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
-            task(journey.householdsAndTenantsTask) {
+            duplicableTask(journey.householdsAndTenantsTask) {
+                withDependencies { HouseHoldsAndTenantsDependencies(true) }
                 nextStep {
-                    if (state.households.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
+                    if (state.householdsAndTenantsTask.households.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
                         exitStep
                     } else {
                         journey.rentIncludesBillsTask.firstStep
@@ -24,7 +25,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 }
                 savable()
             }
-            task(journey.rentIncludesBillsTask) {
+            duplicableTask(journey.rentIncludesBillsTask) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
                 savable()
@@ -35,7 +36,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            task(journey.rentFrequencyAndAmountTask) {
+            duplicableTask(journey.rentFrequencyAndAmountTask) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()
@@ -45,7 +46,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 parents {
                     OrParents(
                         journey.rentFrequencyAndAmountTask.isComplete(),
-                        journey.provideTenancyDetailsLaterStep.isComplete(),
+                        journey.householdsAndTenantsTask.provideTenancyDetailsLaterStep.isComplete(),
                     )
                 }
             }

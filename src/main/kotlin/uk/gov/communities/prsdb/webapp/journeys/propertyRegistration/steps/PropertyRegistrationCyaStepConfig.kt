@@ -40,14 +40,14 @@ class PropertyRegistrationCyaStepConfig(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
-                "propertyName" to state.getAddress().singleLineAddress,
+                "propertyName" to state.addressTask.getAddress().singleLineAddress,
                 "propertyDetails" to
                     if (isRestructured) {
                         getRestructuredPropertyDetailsSummaryList(state)
                     } else {
                         getPropertyDetailsSummaryList(state)
                     },
-                "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
+                "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask),
                 "tenancyDetails" to
                     if (isRestructured) {
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)
@@ -115,17 +115,23 @@ class PropertyRegistrationCyaStepConfig(
         )
 
     private fun getAddressRows(state: PropertyRegistrationJourneyState) =
-        state.getAddress().let { address ->
+        state.addressTask.getAddress().let { address ->
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(state.lookupAddressStep)),
+                    Destination.VisitableStep(
+                        state.addressTask.lookupAddressStep,
+                        state.getCyaJourneyId(state.addressTask.lookupAddressStep),
+                    ),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(state.localCouncilStep, state.getCyaJourneyId(state.localCouncilStep)),
+                    Destination.VisitableStep(
+                        state.addressTask.localCouncilStep,
+                        state.getCyaJourneyId(state.addressTask.localCouncilStep),
+                    ),
                 ),
             )
         }
