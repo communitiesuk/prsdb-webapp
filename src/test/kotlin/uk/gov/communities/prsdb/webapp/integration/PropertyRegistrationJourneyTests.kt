@@ -1585,7 +1585,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Your Answers - render page
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.heading).containsText("Check your answers")
-            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("Provide this later")
+            assertThat(checkAnswersPage.summaryList.tenancyDetailsRow.key).containsText("Tenancy details")
+            assertThat(checkAnswersPage.summaryList.tenancyDetailsRow.value).containsText("Provide this later")
         }
 
         @Test
@@ -1606,37 +1607,67 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.tenancyDetailsHeading).isVisible()
             val headings = checkAnswersPage.sectionHeadingTexts()
             assertTrue(headings.indexOf("Compliance certificates") < headings.indexOf("Tenancy details"))
-            // TODO PDJB-942: This will be under the "If your property’s occupied" section
+            // TODO PDJB-942: This will now be under the "If your property’s occupied" section
             assertFalse(checkAnswersPage.tenancyDetailsSummaryList.hasRow("Occupied by tenants"))
             assertEquals(
                 listOf(
                         "Number of households",
                         "Number of tenants",
-                        "When rent is paid",
                         "Furniture provided",
                         "Rent includes bills",
                         "Which bills are included",
-                        "When you charge rent",
+                        "When rent is paid",
                         "Rent amount",
                 ),
                 checkAnswersPage.tenancyDetailsSummaryList.rowKeyTexts(),
             )
+            assertThat(checkAnswersPage.summaryList.tenancyDetailsRow).isHidden()
             assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
             assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
-            //TODO PDJB-942: Find out if both "When rent is Paid" and "When you charge rent" are both needed
-            assertThat(checkAnswersPage.summaryList.rentFrequencyRow.value).containsText("Weekly")
             assertThat(checkAnswersPage.summaryList.furnishedStatusRow.value).containsText("Furnished")
             assertThat(checkAnswersPage.summaryList.rentIncludesBillsRow.value).containsText("Yes")
             assertThat(checkAnswersPage.summaryList.billsIncludedRow.value).containsText("Electricity, Gas, Water")
-            assertThat(checkAnswersPage.summaryList.chargeRentRow.value).containsText("Weekly")
+            assertThat(checkAnswersPage.summaryList.rentFrequencyRow.value).containsText("Weekly")
             assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£400.00")
         }
-        
-        //TODO PDJB-942: Add test for Provide Later
-        //TODO PDJB-942: Add test for to check tenancy details is not displayed for unoccupied properties
 
         @Test
-        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+        fun `Restructured occupied CYA hides bills included row when rent does not include bills`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
+                    includesBills = false,
+                    rentFrequency = RentFrequency.WEEKLY,
+                )
+
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.tenancyDetailsHeading).isVisible()
+            assertFalse(checkAnswersPage.tenancyDetailsSummaryList.hasRow("Which bills are included"))
+            assertEquals(
+                listOf(
+                    "Number of households",
+                    "Number of tenants",
+                    "Furniture provided",
+                    "Rent includes bills",
+                    "When rent is paid",
+                    "Rent amount",
+                ),
+                checkAnswersPage.tenancyDetailsSummaryList.rowKeyTexts(),
+            )
+            assertThat(checkAnswersPage.summaryList.rentIncludesBillsRow.value).containsText("No")
+        }
+
+        @Test
+        fun `Restructured CYA does not show tenancy details for unoccupied properties`(page: Page) {
+            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.tenancyDetailsHeading).isHidden()
+        }
+
+        @Test
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -1657,7 +1688,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             val changeLink =
-                checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+                checkAnswersPage.summaryList.tenancyDetailsRow.actions
                     .getActionLink("Change")
             assertThat(changeLink).isVisible()
 

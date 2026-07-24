@@ -667,10 +667,10 @@ checkPropertyAnswers:
     heading: Tenancy and rental information
     restructureAndSkipping:
       heading: Tenancy details
-      rentFrequency: When you charge rent
+      tenancyDetails: Tenancy details
+      provideLater: Provide this later
     occupied: Occupied by tenants
     households: Number of households
-    provideLater: Provide this later
     people: Number of tenants
     bedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills

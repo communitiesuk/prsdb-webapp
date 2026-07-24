@@ -49,8 +49,8 @@ class OccupancyDetailsHelper {
                 if (householdsStep.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.tenancyDetails.households",
-                            "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+                            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetails",
+                            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.provideLater",
                             Destination.VisitableStep(
                                 householdsStep,
                                 state.getCyaJourneyId(householdsStep),
@@ -196,9 +196,6 @@ class OccupancyDetailsHelper {
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val furnishedStatusStep = state.furnishedStatus
-                val rentFrequencyAndAmountRows = getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource)
-
-                add(rentFrequencyAndAmountRows.first())
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
@@ -207,17 +204,6 @@ class OccupancyDetailsHelper {
                     ),
                 )
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource))
-                add(getRestructuredChargeRentRow(state))
-                add(rentFrequencyAndAmountRows.last())
+                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource))
             }
-
-    private fun <T> getRestructuredChargeRentRow(state: T): SummaryListRowViewModel where T : RentFrequencyAndAmountState, T : CheckYourAnswersJourneyState {
-        val rentFrequencyStep = state.rentFrequency
-        val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-        return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.rentFrequency",
-            RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-            Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
-        )
-    }
 }
