@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
@@ -49,7 +50,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgLandlordCyaPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
@@ -275,7 +275,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitOrganisation()
 
-        // TODO: PDJB-1172 - Submit real your details data once the step is implemented
+        // TODO: PDJB-1282 - Submit real your details data once the step is implemented
         val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
         yourDetailsPage.form.submit()
 
@@ -317,8 +317,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
         orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
 
-        // TODO: PDJB-1168 - This should lead to the normal landlord registration CYA page not the placeholder one
-        assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
+        val checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
+        assertThat(checkAnswersPage.landlordDetails.landlordTypeRow).containsText("Organisation")
+        assertThat(checkAnswersPage.landlordDetails.organisationNameRow).containsText("Test Organisation Name")
+        assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Company")
+        assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
 
         // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
     }
