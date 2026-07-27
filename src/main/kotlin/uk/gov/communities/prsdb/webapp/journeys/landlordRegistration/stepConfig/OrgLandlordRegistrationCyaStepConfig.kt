@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrust
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
@@ -54,8 +54,8 @@ class OrgLandlordRegistrationCyaStepConfig(
 
         val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
         val isTrust = OrgType.TRUST in organisationTypes
-        val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
         val hasCompanyNumber = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
+        val isRegisteredCharity = org.orgIsRegisteredCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
 
         val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
 
@@ -206,12 +206,12 @@ class OrgLandlordRegistrationCyaStepConfig(
                 ),
             )
 
-            val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val isRegisteredCharity = org.orgIsRegisteredCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
                     isRegisteredCharity,
-                    Destination.VisitableStep(org.orgCharityStep, state.getCyaJourneyId(org.orgCharityStep)),
+                    Destination.VisitableStep(org.orgIsRegisteredCharityStep, state.getCyaJourneyId(org.orgIsRegisteredCharityStep)),
                 ),
             )
 

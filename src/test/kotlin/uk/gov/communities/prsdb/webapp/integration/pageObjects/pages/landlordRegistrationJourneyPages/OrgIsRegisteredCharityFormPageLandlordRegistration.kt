@@ -5,15 +5,15 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 
-class OrgCharityFormPageLandlordRegistration(
+class OrgIsRegisteredCharityFormPageLandlordRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgCharityStep.ROUTE_SEGMENT}",
+        "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}",
     ) {
-    val form = OrgCharityFormLandlord(page)
+    val form = OrgIsRegisteredCharityFormLandlord(page)
 
     fun submitYes() {
         form.selectYes()
@@ -25,7 +25,7 @@ class OrgCharityFormPageLandlordRegistration(
         form.submit()
     }
 
-    class OrgCharityFormLandlord(
+    class OrgIsRegisteredCharityFormLandlord(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val charityRadios = Radios(locator)

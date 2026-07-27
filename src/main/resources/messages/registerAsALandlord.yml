@@ -168,4 +168,10 @@ orgGovBodyMemberDob:
   fieldSetHint: 'For example, 27 03 1968'
   error:
     invalidAge: The minimum age is 16
+orgIsRegisteredCharity:
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
 

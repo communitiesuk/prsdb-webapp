@@ -37,13 +37,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberListFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
@@ -300,8 +300,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitYes()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitYes()
 
         val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
@@ -421,7 +421,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
-        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -480,9 +480,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Selecting no on charity skips the charity questions and goes to the companies house page`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        navigator.skipToOrgLandlordRegistrationCharityPage()
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitNo()
+        navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitNo()
 
         assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
     }
