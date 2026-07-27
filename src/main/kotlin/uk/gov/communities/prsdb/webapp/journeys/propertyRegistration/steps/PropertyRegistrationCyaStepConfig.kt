@@ -35,7 +35,10 @@ class PropertyRegistrationCyaStepConfig(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
-                "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
+                "propertyName" to
+                    state.propertyDetailsTask.addressTask
+                        .getAddress()
+                        .singleLineAddress,
                 "propertyDetails" to
                     if (isRestructured) {
                         getRestructuredPropertyDetailsSummaryList(state)
@@ -53,7 +56,7 @@ class PropertyRegistrationCyaStepConfig(
 
         content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
 
-        content += complianceDetailsHelper.getGasSafetyCyaContent(state)
+        content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
         content += complianceDetailsHelper.getElectricalSafetyCyaContent(state)
         content += complianceDetailsHelper.getEpcCyaContent(state)
 

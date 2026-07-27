@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
@@ -182,7 +183,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceData()
-        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.gasSafetyTask.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
         whenever(
@@ -376,16 +377,18 @@ class SavePropertyRegistrationDataStepConfigTests {
         epcExemptionReason: EpcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT,
         meesExemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
     ) {
-        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
+        val gasSafetyTask: GasSafetyTask = mock()
+
+        whenever(gasSafetyTask.gasUploadIds).thenReturn(gasUploadIds)
         whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
         whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
         val mockHasGasCertStep = mock<HasGasCertStep>()
-        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(gasSafetyTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
         whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
@@ -396,7 +399,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
+        whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
 
         if (acceptedEpc != null) {
@@ -426,19 +429,22 @@ class SavePropertyRegistrationDataStepConfigTests {
                 exemptionReason = meesExemptionReason
             },
         )
+        whenever(mockState.gasSafetyTask).thenReturn(gasSafetyTask)
     }
 
     private fun setupStateForComplianceDataWithNullValues() {
-        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        val gasSafetyTask: GasSafetyTask = mock()
+
+        whenever(gasSafetyTask.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
         val mockHasGasCertStep = mock<HasGasCertStep>()
-        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(gasSafetyTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
         whenever(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
@@ -449,9 +455,11 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+        whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
         whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+
+        whenever(mockState.gasSafetyTask).thenReturn(gasSafetyTask)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()

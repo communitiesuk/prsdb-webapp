@@ -69,7 +69,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.NO)
 
-            val content = helper.getGasSafetyCyaContent(mockState)
+            val content = helper.getGasSafetyCyaContent(mockState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>
@@ -103,7 +103,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
             whenever(mockUploadService.getDownloadUrlOrNull(any(), any())).thenReturn("/download/cert.pdf")
 
-            val content = helper.getGasSafetyCyaContent(mockState)
+            val content = helper.getGasSafetyCyaContent(mockState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>

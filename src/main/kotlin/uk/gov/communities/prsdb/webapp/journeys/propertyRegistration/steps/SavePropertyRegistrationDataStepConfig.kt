@@ -65,16 +65,22 @@ class SavePropertyRegistrationDataStepConfig(
 
         propertyRegistrationService.registerProperty(
             addressModel = state.propertyDetailsTask.addressTask.getAddress(),
-            propertyType = state.propertyDetailsTask.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+            propertyType =
+                state.propertyDetailsTask.propertyTypeStep.formModel
+                    .notNullValue(PropertyTypeFormModel::propertyType),
             customPropertyType =
                 if (state.propertyDetailsTask.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
                     state.propertyDetailsTask.propertyTypeStep.formModel.customPropertyType
                 } else {
                     null
                 },
-            licenseType = state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+            licenseType =
+                state.licensingTask.licensingTypeStep.formModel
+                    .notNullValue(LicensingTypeFormModel::licensingType),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            ownershipType = state.ownershipAndLandlordsTask.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            ownershipType =
+                state.ownershipAndLandlordsTask.ownershipTypeStep.formModel
+                    .notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
@@ -115,10 +121,10 @@ class SavePropertyRegistrationDataStepConfig(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
             markedJointLandlord = markedJointLandlord,
-            hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
-            gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploadIds = state.gasUploadIds,
-            gasSafetyCertProvideLater = state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
+            hasGasSupply = state.gasSafetyTask.hasGasSupplyStep.outcome == YesOrNo.YES,
+            gasSafetyCertIssueDate = state.gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
+            gasSafetyFileUploadIds = state.gasSafetyTask.gasUploadIds,
+            gasSafetyCertProvideLater = state.gasSafetyTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),

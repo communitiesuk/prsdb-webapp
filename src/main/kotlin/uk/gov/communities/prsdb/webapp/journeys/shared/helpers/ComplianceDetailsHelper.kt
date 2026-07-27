@@ -17,10 +17,13 @@ class ComplianceDetailsHelper(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val uploadService: UploadService,
 ) {
-    fun <T> getGasSafetyCyaContent(state: T): Map<String, Any?> where T : GasSafetyState, T : CheckYourAnswersJourneyState {
+    fun getGasSafetyCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        gasSafetyState: GasSafetyState,
+    ): Map<String, Any?> {
         val factory =
-            GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            GasSafetyRegistrationCyaSummaryRowsFactory(gasSafetyState, uploadService) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "gasSupplyRows" to factory.createGasSupplyRows(),

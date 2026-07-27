@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -138,7 +137,6 @@ class UpdateGasSafetyJourneyFactory(
 class UpdateGasSafetyJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "gasSafety",
-    override val gasSafetyTask: GasSafetyTask,
     override val gasSafetyDetailsTask: GasSafetyDetailsTask,
     override val hasGasSupplyStep: HasGasSupplyStep,
     override val hasGasCertStep: HasGasCertStep,
@@ -182,6 +180,5 @@ interface UpdateGasSafetyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val gasSafetyTask: GasSafetyTask
     val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
 }
