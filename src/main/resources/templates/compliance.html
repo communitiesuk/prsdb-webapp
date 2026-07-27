@@ -1,0 +1,16 @@
+<!--/*@thymesVar id="complianceInfoTabId" type="java.lang.String"*/-->
+<div th:fragment="complianceTabContent" th:remove="tag">
+                   <div th:if="${complianceDetails != null}">
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.heading}">propertyDetails.complianceInformation.heading</h2>
+
+                       <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
+                           propertyDetails.complianceInformation.insetText.allValid
+                       </div>
+
+                       <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList}, ~{fragments/insetText :: insetText(${complianceDetails.gasSafetySummaryCard.insetViewModel?.messageKey})})}"></div>
+
+                       <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.electricalSafetySummaryCard.title}, null, ${complianceDetails.electricalSafetySummaryCard.actions}, ${complianceDetails.electricalSafetySummaryCard.summaryList}, ~{fragments/insetText :: insetText(${complianceDetails.electricalSafetySummaryCard.insetViewModel?.messageKey})})}"></div>
+
+                       <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList}, ~{fragments/epcAdditionalContent :: epcAdditionalContent(${complianceDetails.epcSupplementarySections}, ${complianceDetails.epcSummaryCard.insetViewModel?.messageKey}, ${complianceDetails.epcExpiredInsetViewModel})})}"></div>
+                   </div>
+</div>
