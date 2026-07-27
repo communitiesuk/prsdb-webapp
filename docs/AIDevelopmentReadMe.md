@@ -125,6 +125,7 @@ to your MCP config:
 ```
 
 This requires the Figma desktop app to be running with Dev Mode MCP enabled.
+Once this is done, in the Copilot CLI, follow the `/mcp add` instructions.
 
 #### JetBrains MCP Server
 
