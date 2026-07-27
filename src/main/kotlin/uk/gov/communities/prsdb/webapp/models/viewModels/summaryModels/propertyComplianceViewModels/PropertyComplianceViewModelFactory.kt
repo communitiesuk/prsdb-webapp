@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
@@ -19,12 +17,12 @@ class PropertyComplianceViewModelFactory(
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val epcViewModelFactory: EpcViewModelFactory,
     private val notificationBannerViewModelFactory: NotificationBannerViewModelService,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
         propertyOwnershipId: Long,
+        provideLaterEnabled: Boolean = false,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             if (landlordView) {
@@ -104,11 +102,17 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
         val notificationMessages =
-            if (landlordView || provideLaterEnabled) {
+            if (provideLaterEnabled) {
                 notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
+            } else {
+                emptyList()
+            }
+
+        // TODO PDJB-939: remove beforePdjb939NotificationMessages when the provide-later flag is permanently on.
+        val beforePdjb939NotificationMessages =
+            if (!provideLaterEnabled && landlordView) {
+                notificationBannerViewModelFactory.getBeforePdjb939NotificationMessageKeys(propertyCompliance)
             } else {
                 emptyList()
             }
@@ -122,6 +126,7 @@ class PropertyComplianceViewModelFactory(
             epcSupplementarySections = epcSupplementarySections,
             epcExpiredInsetViewModel = epcExpiredInsetViewModel,
             notificationMessages = notificationMessages,
+            beforePdjb939NotificationMessages = beforePdjb939NotificationMessages,
             isAllValid = isAllValid,
         )
     }

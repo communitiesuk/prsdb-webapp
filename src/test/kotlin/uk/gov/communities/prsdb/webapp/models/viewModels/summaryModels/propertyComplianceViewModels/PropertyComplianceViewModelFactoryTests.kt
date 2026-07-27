@@ -1,13 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
@@ -24,11 +21,9 @@ import kotlin.test.assertTrue
 
 class PropertyComplianceViewModelFactoryTests {
     private val mockMessageSource: MessageSource = mock()
-    private val mockFeatureFlagManager: FeatureFlagManager = mock()
 
     init {
         whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
     }
 
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
@@ -39,7 +34,6 @@ class PropertyComplianceViewModelFactoryTests {
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
             NotificationBannerViewModelService(),
-            mockFeatureFlagManager,
         )
 
     private val propertyOwnershipId = 1L
@@ -152,6 +146,9 @@ class PropertyComplianceViewModelFactoryTests {
 
         abstract val expectedMissingMainText: String
 
+        // The NotificationTests scenarios all exercise the flag-on (provide-later) banner.
+        val provideLaterEnabled = true
+
         @Test
         fun `notificationMessages returns multipleExpired banner when all certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
@@ -169,6 +166,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -191,6 +189,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -213,6 +212,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -235,6 +235,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -260,6 +261,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -285,6 +287,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -310,6 +313,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -324,6 +328,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -339,6 +344,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -354,6 +360,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -369,6 +376,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -384,6 +392,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -399,6 +408,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -414,6 +424,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(emptyList(), result.notificationMessages)
@@ -437,6 +448,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -459,6 +471,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -487,6 +500,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -509,6 +523,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -538,6 +553,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     landlordView = landlordView,
                     propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = provideLaterEnabled,
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
@@ -559,11 +575,6 @@ class PropertyComplianceViewModelFactoryTests {
 
     @Nested
     inner class LocalCouncilViewNotifications {
-        @BeforeEach
-        fun disableProvideLater() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-        }
-
         @Test
         fun `notificationMessages is empty when occupied property has all certs missing`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
@@ -623,6 +634,78 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+    }
+
+    // TODO PDJB-939: delete this class when the provide-later flag is permanently on. It covers the legacy
+    //  (flag-off) compliance banner reproduced from the main branch.
+    @Nested
+    inner class BeforePdjb939Notifications {
+        private fun expectedBeforePdjb939Message(mainTextKey: String) =
+            listOf(
+                PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    mainText = mainTextKey,
+                    linkMessage =
+                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                            linkUrl = "#compliance-information",
+                            linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                            afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                            isAfterLinkTextFullStop = true,
+                        ),
+                ),
+            )
+
+        @Test
+        fun `landlord flag-off view populates the legacy missing banner`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = false,
+                )
+
+            assertEquals(
+                expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.missing.mainText"),
+                result.beforePdjb939NotificationMessages,
+            )
+            assertEquals(emptyList(), result.notificationMessages)
+        }
+
+        @Test
+        fun `landlord flag-off view populates the legacy multipleExpired banner`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = false,
+                )
+
+            assertEquals(
+                expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText"),
+                result.beforePdjb939NotificationMessages,
+            )
+        }
+
+        @Test
+        fun `local council flag-off view populates no legacy banner`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                    provideLaterEnabled = false,
+                )
+
+            assertEquals(emptyList(), result.beforePdjb939NotificationMessages)
             assertEquals(emptyList(), result.notificationMessages)
         }
     }
