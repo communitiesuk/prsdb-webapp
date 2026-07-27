@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.constants.LEAVE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.getLeavePropertyBasePath
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.getLeavePropertyPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyFactory
@@ -131,7 +130,7 @@ class LeavePropertyControllerTests(
             .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getLeavePropertyPath(testPropertyOwnershipId)}?journeyId=$journeyId")
             }
     }
 
@@ -151,7 +150,7 @@ class LeavePropertyControllerTests(
             .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getLeavePropertyPath(testPropertyOwnershipId)}?journeyId=$journeyId")
             }
     }
 
@@ -247,7 +246,7 @@ class LeavePropertyControllerTests(
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getLeavePropertyPath(testPropertyOwnershipId)}?journeyId=$journeyId")
             }
     }
 
@@ -268,7 +267,7 @@ class LeavePropertyControllerTests(
                 with(csrf())
             }.andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getLeavePropertyPath(testPropertyOwnershipId)}?journeyId=$journeyId")
             }
     }
 
