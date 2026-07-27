@@ -1636,15 +1636,12 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetPropertyCountForLandlord {
-        val baseUserId = "test-user-id"
-
         @Test
         fun `returns the count from the repository`() {
-            whenever(mockPropertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)).thenReturn(
-                3,
-            )
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)).thenReturn(3)
 
-            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
+            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(landlord))
         }
     }
 

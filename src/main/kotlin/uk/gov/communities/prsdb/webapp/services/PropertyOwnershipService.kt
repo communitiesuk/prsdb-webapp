@@ -469,11 +469,11 @@ class PropertyOwnershipService(
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
     }
 
-    fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
-        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+    fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
 
-    fun getPropertyCountForLandlord(baseUserId: String): Long =
-        propertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)
+    fun getPropertyCountForLandlord(landlord: Landlord): Long =
+        propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

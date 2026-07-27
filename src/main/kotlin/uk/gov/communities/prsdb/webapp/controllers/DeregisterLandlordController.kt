@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import java.security.Principal
 
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
@@ -32,25 +31,22 @@ class DeregisterLandlordController(
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
         stepPath: String,
-        principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { landlordDeregistrationJourneyFactory.createJourneySteps(principal.name) },
+            createRoutingMap = { landlordDeregistrationJourneyFactory.createJourneySteps() },
             initialiseJourney = { landlordDeregistrationJourneyFactory.initializeJourneyState() },
             dispatch = dispatch,
         )

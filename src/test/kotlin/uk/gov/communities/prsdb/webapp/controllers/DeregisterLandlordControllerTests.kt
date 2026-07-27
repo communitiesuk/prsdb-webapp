@@ -53,7 +53,7 @@ class DeregisterLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
-            landlordDeregistrationJourneyFactory.createJourneySteps("user"),
+            landlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -70,7 +70,7 @@ class DeregisterLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            landlordDeregistrationJourneyFactory.createJourneySteps("user"),
+            landlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
@@ -85,7 +85,7 @@ class DeregisterLandlordControllerTests(
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
-        whenever(landlordDeregistrationJourneyFactory.createJourneySteps("user"))
+        whenever(landlordDeregistrationJourneyFactory.createJourneySteps())
             .thenThrow(NoSuchJourneyException())
         whenever(landlordDeregistrationJourneyFactory.initializeJourneyState()).thenReturn(journeyId)
 
