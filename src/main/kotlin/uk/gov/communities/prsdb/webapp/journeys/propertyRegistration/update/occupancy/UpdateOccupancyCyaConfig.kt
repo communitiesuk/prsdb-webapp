@@ -4,6 +4,8 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -22,14 +24,23 @@ class UpdateOccupancyCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
-        mapOf(
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> {
+        val isRestructureAndSkippingEnabled =
+            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        return mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
+            "summaryListData" to
+                if (isRestructureAndSkippingEnabled) {
+                    occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(state, messageSource)
+                } else {
+                    occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+                },
             "summaryName" to
                 if (isOccupied(state)) {
                     "forms.update.checkOccupancy.occupied.summaryName"
@@ -37,16 +48,17 @@ class UpdateOccupancyCyaConfig(
                     "forms.update.checkOccupancy.notOccupied.summaryName"
                 },
         )
+    }
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
+        val isRestructureAndSkippingEnabled =
+            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,
                 isOccupied = isOccupied,
-                // TODO PDJB-1304 - check which of these fields should still be updated when occupancy is updated.
-                //   For example, numBedrooms should no longer be set to null as that will be in the property details section
                 numberOfHouseholds =
                     if (isOccupied) {
                         state.householdsAndTenantsTask.households.formModel
@@ -64,7 +76,9 @@ class UpdateOccupancyCyaConfig(
                         0
                     },
                 numBedrooms =
-                    if (isOccupied) {
+                    if (isRestructureAndSkippingEnabled) {
+                        state.initialNumberOfBedrooms
+                    } else if (isOccupied) {
                         state.bedrooms.formModel
                             .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                             .toInt()
