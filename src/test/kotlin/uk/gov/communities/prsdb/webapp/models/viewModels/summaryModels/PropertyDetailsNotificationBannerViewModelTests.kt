@@ -1,133 +1,224 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNull
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PropertyDetailsNotificationBannerViewModelTests {
-    @Test
-    fun `fromState returns null when the provide-later flag is disabled`() {
-        assertNull(
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = false,
-                isOccupied = true,
-                isLicensingProvideLater = true,
-                isTenancyProvideLater = true,
-                hasComplianceIssue = true,
-            ),
+    private val complianceMessage =
+        NotificationMessage(
+            mainText = "compliance.mainText",
+            links = listOf(NotificationBannerLink(linkUrl = "#compliance-information", linkText = "compliance.linkText")),
         )
+
+    private fun fromState(
+        isLandlordView: Boolean = true,
+        provideLaterEnabled: Boolean = true,
+        isOccupied: Boolean = true,
+        isLicensingProvideLater: Boolean = false,
+        isTenancyProvideLater: Boolean = false,
+        complianceMessages: List<NotificationMessage> = emptyList(),
+    ) = PropertyDetailsNotificationBannerViewModel.fromState(
+        isLandlordView = isLandlordView,
+        provideLaterEnabled = provideLaterEnabled,
+        isOccupied = isOccupied,
+        isLicensingProvideLater = isLicensingProvideLater,
+        isTenancyProvideLater = isTenancyProvideLater,
+        complianceMessages = complianceMessages,
+    )
+
+    @Test
+    fun `messages is empty when there is no provide-later state and no compliance issue`() {
+        assertTrue(fromState().messages.isEmpty())
     }
 
     @Test
-    fun `fromState returns null when the property is not occupied`() {
-        assertNull(
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
+    fun `shows only the compliance messages when there is no provide-later state`() {
+        val banner = fromState(complianceMessages = listOf(complianceMessage))
+
+        assertEquals(listOf(complianceMessage), banner.messages)
+    }
+
+    @Test
+    fun `ignores provide-later state and shows compliance messages when the flag is disabled`() {
+        val banner =
+            fromState(
+                provideLaterEnabled = false,
+                isLicensingProvideLater = true,
+                isTenancyProvideLater = true,
+                complianceMessages = listOf(complianceMessage),
+            )
+
+        assertEquals(listOf(complianceMessage), banner.messages)
+    }
+
+    @Test
+    fun `ignores provide-later state and shows compliance messages when the property is not occupied`() {
+        val banner =
+            fromState(
                 isOccupied = false,
                 isLicensingProvideLater = true,
-                isTenancyProvideLater = true,
-                hasComplianceIssue = true,
-            ),
-        )
+                complianceMessages = listOf(complianceMessage),
+            )
+
+        assertEquals(listOf(complianceMessage), banner.messages)
     }
 
     @Test
-    fun `fromState returns null when there is no provide-later state and no compliance issue`() {
-        assertNull(
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
-                isOccupied = true,
-                isLicensingProvideLater = false,
-                isTenancyProvideLater = false,
-                hasComplianceIssue = false,
-            ),
-        )
-    }
+    fun `shows the landlord licensing provide-later message`() {
+        val banner = fromState(isLicensingProvideLater = true)
 
-    @Test
-    fun `fromState returns null when only a compliance issue exists (compliance banner handles it)`() {
-        assertNull(
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
-                isOccupied = true,
-                isLicensingProvideLater = false,
-                isTenancyProvideLater = false,
-                hasComplianceIssue = true,
-            ),
-        )
-    }
-
-    @ParameterizedTest(name = "licensing={1} tenancy={2} complianceIssue={3} -> {4}")
-    @MethodSource("bannerVariantCases")
-    fun `fromState resolves the expected banner variant`(
-        @Suppress("UNUSED_PARAMETER") description: String,
-        isLicensingProvideLater: Boolean,
-        isTenancyProvideLater: Boolean,
-        hasComplianceIssue: Boolean,
-        expectedVariant: PropertyDetailsNotificationBannerViewModel.Variant,
-    ) {
-        val banner =
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
-                isOccupied = true,
-                isLicensingProvideLater = isLicensingProvideLater,
-                isTenancyProvideLater = isTenancyProvideLater,
-                hasComplianceIssue = hasComplianceIssue,
-            )
-
-        assertEquals(expectedVariant, banner?.variant)
-    }
-
-    @Test
-    fun `suppressesComplianceBanner is true only for the combined variant`() {
-        val combined =
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
-                isOccupied = true,
-                isLicensingProvideLater = true,
-                isTenancyProvideLater = true,
-                hasComplianceIssue = true,
-            )
-        val both =
-            PropertyDetailsNotificationBannerViewModel.fromState(
-                provideLaterEnabled = true,
-                isOccupied = true,
-                isLicensingProvideLater = true,
-                isTenancyProvideLater = true,
-                hasComplianceIssue = false,
-            )
-
-        assertEquals(PropertyDetailsNotificationBannerViewModel.Variant.COMBINED, combined?.variant)
-        assertEquals(true, combined?.suppressesComplianceBanner)
-        assertEquals(PropertyDetailsNotificationBannerViewModel.Variant.BOTH, both?.variant)
-        assertEquals(false, both?.suppressesComplianceBanner)
-    }
-
-    companion object {
-        @JvmStatic
-        fun bannerVariantCases() =
+        assertEquals(
             listOf(
-                Arguments.of("licensing only", true, false, false, PropertyDetailsNotificationBannerViewModel.Variant.LICENSING),
-                Arguments.of("tenancy only", false, true, false, PropertyDetailsNotificationBannerViewModel.Variant.TENANCY),
-                Arguments.of("both", true, true, false, PropertyDetailsNotificationBannerViewModel.Variant.BOTH),
-                Arguments.of(
-                    "licensing plus compliance issue",
-                    true,
-                    false,
-                    true,
-                    PropertyDetailsNotificationBannerViewModel.Variant.COMBINED,
+                NotificationMessage(
+                    mainText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensing.mainText",
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensing.linkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
                 ),
-                Arguments.of(
-                    "tenancy plus compliance issue",
-                    false,
-                    true,
-                    true,
-                    PropertyDetailsNotificationBannerViewModel.Variant.COMBINED,
+            ),
+            banner.messages,
+        )
+    }
+
+    @Test
+    fun `shows the local council tenancy provide-later message`() {
+        val banner = fromState(isLandlordView = false, isTenancyProvideLater = true)
+
+        assertEquals(
+            listOf(
+                NotificationMessage(
+                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.tenancy.mainText",
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.tenancy.linkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
                 ),
-                Arguments.of("both plus compliance issue", true, true, true, PropertyDetailsNotificationBannerViewModel.Variant.COMBINED),
+            ),
+            banner.messages,
+        )
+    }
+
+    @Test
+    fun `shows the landlord both provide-later message with two links`() {
+        val banner = fromState(isLicensingProvideLater = true, isTenancyProvideLater = true)
+
+        assertEquals(
+            listOf(
+                NotificationMessage(
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.licensingLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.middleText",
+                            ),
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.tenancyLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
+                ),
+            ),
+            banner.messages,
+        )
+    }
+
+    @Test
+    fun `shows the local council both provide-later message with a single link`() {
+        val banner = fromState(isLandlordView = false, isLicensingProvideLater = true, isTenancyProvideLater = true)
+
+        assertEquals(
+            listOf(
+                NotificationMessage(
+                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.both.mainText",
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.both.linkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
+                ),
+            ),
+            banner.messages,
+        )
+    }
+
+    @Test
+    fun `shows the landlord combined message when there is both a provide-later state and a compliance issue`() {
+        val banner =
+            fromState(
+                isLicensingProvideLater = true,
+                complianceMessages = listOf(complianceMessage),
             )
+
+        assertEquals(
+            listOf(
+                NotificationMessage(
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.propertyLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.middleText",
+                            ),
+                            NotificationBannerLink(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.complianceLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
+                ),
+            ),
+            banner.messages,
+        )
+    }
+
+    @Test
+    fun `shows the local council combined message when there is both a provide-later state and a compliance issue`() {
+        val banner =
+            fromState(
+                isLandlordView = false,
+                isTenancyProvideLater = true,
+                complianceMessages = listOf(complianceMessage),
+            )
+
+        assertEquals(
+            listOf(
+                NotificationMessage(
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#property-details",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.propertyLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.middleText",
+                            ),
+                            NotificationBannerLink(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.complianceLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                            ),
+                        ),
+                ),
+            ),
+            banner.messages,
+        )
     }
 }

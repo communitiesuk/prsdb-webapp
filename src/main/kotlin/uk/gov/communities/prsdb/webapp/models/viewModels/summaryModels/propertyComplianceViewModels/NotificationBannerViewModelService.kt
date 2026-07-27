@@ -5,13 +5,15 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 
 @PrsdbWebService
 class NotificationBannerViewModelService {
     fun getNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
-    ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> {
+    ): List<NotificationMessage> {
         val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
@@ -52,14 +54,15 @@ class NotificationBannerViewModelService {
             }
 
         return listOf(
-            PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+            NotificationMessage(
                 mainText = mainTextKey,
-                linkMessage =
-                    PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                        linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
-                        linkText = linkTextKey,
-                        afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
-                        isAfterLinkTextFullStop = true,
+                links =
+                    listOf(
+                        NotificationBannerLink(
+                            linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
+                            linkText = linkTextKey,
+                            afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
+                        ),
                     ),
             ),
         )

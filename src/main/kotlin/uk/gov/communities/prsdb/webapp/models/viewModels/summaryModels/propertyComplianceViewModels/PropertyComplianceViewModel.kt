@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
@@ -10,19 +11,6 @@ class PropertyComplianceViewModel(
     val epcSummaryCard: SummaryCardViewModel,
     val epcSupplementarySections: List<SummaryCardSupplementarySection> = emptyList(),
     val epcExpiredInsetViewModel: EpcExpiredInsetViewModel? = null,
-    val notificationMessages: List<PropertyComplianceNotificationMessage>,
+    val notificationMessages: List<NotificationMessage>,
     val isAllValid: Boolean,
-) {
-    data class PropertyComplianceNotificationMessage(
-        val mainText: String,
-        val linkMessage: PropertyComplianceLinkMessage? = null,
-    )
-
-    data class PropertyComplianceLinkMessage(
-        val linkUrl: String,
-        val linkText: String,
-        val afterLinkText: String? = null,
-        val beforeLinkText: String? = null,
-        val isAfterLinkTextFullStop: Boolean = false,
-    )
-}
+)

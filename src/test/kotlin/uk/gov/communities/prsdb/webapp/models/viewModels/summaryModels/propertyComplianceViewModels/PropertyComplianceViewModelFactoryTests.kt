@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
@@ -42,27 +44,29 @@ class PropertyComplianceViewModelFactoryTests {
 
     private val propertyOwnershipId = 1L
 
-    private val expectedLinkMessage =
-        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-            linkUrl = "#compliance-information",
-            linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
-            afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
-            isAfterLinkTextFullStop = true,
+    private val expectedLinks =
+        listOf(
+            NotificationBannerLink(
+                linkUrl = "#compliance-information",
+                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+            ),
         )
 
     private fun expectedCertLinkMessage(linkTextKey: String) =
-        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-            linkUrl = "#compliance-information",
-            linkText = linkTextKey,
-            afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
-            isAfterLinkTextFullStop = true,
+        listOf(
+            NotificationBannerLink(
+                linkUrl = "#compliance-information",
+                linkText = linkTextKey,
+                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+            ),
         )
 
     @Test
     fun `notificationMessages returns correctly populated list when property is compliant`() {
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
-        val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+        val expectedNotificationMessages = emptyList<NotificationMessage>()
 
         val result = propertyComplianceViewModelFactory.create(propertyCompliance, propertyOwnershipId = propertyOwnershipId)
 
@@ -154,9 +158,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -176,9 +180,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -198,9 +202,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -220,9 +224,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -242,9 +246,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        linkMessage =
+                        links =
                             expectedCertLinkMessage(
                                 "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                             ),
@@ -267,9 +271,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.electricalCert.expired.mainText",
-                        linkMessage =
+                        links =
                             expectedCertLinkMessage(
                                 "propertyDetails.complianceInformation.notificationBanner.electricalCert.expired.linkText",
                             ),
@@ -292,9 +296,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        linkMessage =
+                        links =
                             expectedCertLinkMessage(
                                 "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                             ),
@@ -422,9 +426,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = expectedMissingMainText,
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -444,9 +448,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = expectedMissingMainText,
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -472,9 +476,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.missingAndExpired.mainText",
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -494,9 +498,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = expectedMissingMainText,
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 
@@ -523,9 +527,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             val expectedNotificationMessages =
                 listOf(
-                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                    NotificationMessage(
                         mainText = expectedMissingMainText,
-                        linkMessage = expectedLinkMessage,
+                        links = expectedLinks,
                     ),
                 )
 

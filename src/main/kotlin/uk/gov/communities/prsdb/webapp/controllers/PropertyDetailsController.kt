@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -78,7 +77,12 @@ class PropertyDetailsController(
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        addProvideLaterBannerAttributes({ name, value -> modelAndView.addObject(name, value) }, propertyDetails, propertyComplianceDetails)
+        addProvideLaterBannerAttributes(
+            { name, value -> modelAndView.addObject(name, value) },
+            isLandlordView = true,
+            propertyDetails,
+            propertyComplianceDetails,
+        )
 
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
@@ -181,7 +185,12 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        addProvideLaterBannerAttributes({ name, value -> model.addAttribute(name, value) }, propertyDetails, propertyComplianceDetails)
+        addProvideLaterBannerAttributes(
+            { name, value -> model.addAttribute(name, value) },
+            isLandlordView = false,
+            propertyDetails,
+            propertyComplianceDetails,
+        )
         model.addAttribute("isLandlordView", false)
 
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
@@ -191,25 +200,33 @@ class PropertyDetailsController(
 
     private fun addProvideLaterBannerAttributes(
         addAttribute: (String, Any?) -> Unit,
+        isLandlordView: Boolean,
         propertyDetails: PropertyDetailsViewModel,
         propertyComplianceDetails: PropertyComplianceViewModel?,
     ) {
-        val hasComplianceIssue =
-            propertyComplianceDetails == null || propertyComplianceDetails.notificationMessages.isNotEmpty()
+        val complianceMessages =
+            propertyComplianceDetails?.notificationMessages
+                ?: listOf(PropertyDetailsNotificationBannerViewModel.NotificationMessage(mainText = noComplianceMessageKey(isLandlordView)))
 
-        val provideLaterBanner =
+        val notificationBanner =
             PropertyDetailsNotificationBannerViewModel.fromState(
+                isLandlordView = isLandlordView,
                 provideLaterEnabled = propertyDetails.provideLaterEnabled,
                 isOccupied = propertyDetails.isOccupied,
                 isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
                 isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
-                hasComplianceIssue = hasComplianceIssue,
+                complianceMessages = complianceMessages,
             )
 
-        addAttribute("provideLaterBanner", provideLaterBanner)
-        addAttribute("suppressComplianceBanner", provideLaterBanner?.suppressesComplianceBanner ?: false)
-        addAttribute("propertyDetailsFragment", PROPERTY_DETAILS_FRAGMENT)
+        addAttribute("notificationBanner", notificationBanner)
     }
+
+    private fun noComplianceMessageKey(isLandlordView: Boolean): String =
+        if (isLandlordView) {
+            "propertyDetails.complianceInformation.noCompliance.landlordView.mainText"
+        } else {
+            "propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText"
+        }
 
     companion object {
         const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
