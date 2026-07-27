@@ -1607,7 +1607,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.tenancyDetailsHeading).isVisible()
             val headings = checkAnswersPage.sectionHeadingTexts()
             assertTrue(headings.indexOf("Compliance certificates") < headings.indexOf("Tenancy details"))
-            // TODO PDJB-942: This will now be under the "If your property’s occupied" section
             assertFalse(checkAnswersPage.tenancyDetailsSummaryList.hasRow("Occupied by tenants"))
             assertEquals(
                 listOf(
