@@ -455,6 +455,28 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
                         .containsText(newNumberOfBedrooms.toString())
                 }
+
+                @Test
+                fun `An unoccupied property can have its number of bedrooms updated on the standalone page`(page: Page) {
+                    val newNumberOfBedrooms = 4
+
+                    // Details page
+                    var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow).isVisible()
+                    propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+                    val updateNumberOfBedroomsPage =
+                        assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+
+                    // Update number of bedrooms
+                    assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+                    updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
+                    propertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, vacantPropertyUrlArguments)
+
+                    // Check change has occurred
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                        .containsText(newNumberOfBedrooms.toString())
+                }
             }
 
             @Nested
