@@ -22,7 +22,7 @@ class ComplianceDetailsHelper(
         gasSafetyState: GasSafetyState,
     ): Map<String, Any?> {
         val factory =
-            GasSafetyRegistrationCyaSummaryRowsFactory(gasSafetyState, uploadService) { step ->
+            GasSafetyRegistrationCyaSummaryRowsFactory(gasSafetyState.gasSafetyDetailsTask, uploadService) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(

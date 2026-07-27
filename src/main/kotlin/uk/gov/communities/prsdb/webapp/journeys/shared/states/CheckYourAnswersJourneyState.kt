@@ -93,19 +93,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        fun <TEmbeddedState : JourneyState, TOuterState : CheckYourAnswersJourneyState, TMode : Enum<TMode>> EmbedBuilder<TEmbeddedState, TOuterState>.checkAnswerTask(
-            task: Task<TEmbeddedState>,
-            route: String? = null,
-        ) {
-            task(task) {
-                route?.let { routeSegment(it) }
-                initialStep()
-                backDestination { journey.returnToCyaPageDestination }
-                nextStep { journey.finishCyaStep }
-            }
-        }
-
-        @Suppress("ktlint:standard:max-line-length")
         fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
             task: DuplicableTaskWithDependencies<TTaskState, *>,
             route: String? = null,

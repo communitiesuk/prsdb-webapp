@@ -121,10 +121,14 @@ class SavePropertyRegistrationDataStepConfig(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
             markedJointLandlord = markedJointLandlord,
-            hasGasSupply = state.gasSafetyTask.hasGasSupplyStep.outcome == YesOrNo.YES,
-            gasSafetyCertIssueDate = state.gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploadIds = state.gasSafetyTask.gasUploadIds,
-            gasSafetyCertProvideLater = state.gasSafetyTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
+            hasGasSupply = state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,
+            gasSafetyCertIssueDate =
+                state.gasSafetyTask.gasSafetyDetailsTask
+                    .getGasSafetyCertificateIssueDateIfReachable()
+                    ?.toJavaLocalDate(),
+            gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
+            gasSafetyCertProvideLater =
+                state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),

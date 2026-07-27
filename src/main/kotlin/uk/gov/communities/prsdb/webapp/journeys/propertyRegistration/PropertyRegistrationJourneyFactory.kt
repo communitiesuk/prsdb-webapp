@@ -214,7 +214,7 @@ class PropertyRegistrationJourneyFactory(
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.gasSafetyTask, journey) {
-                        checkAnswerTask(task.gasSafetyDetailsTask)
+                        duplicableCheckAnswerTask(task.gasSafetyDetailsTask)
                     }
                 }
 

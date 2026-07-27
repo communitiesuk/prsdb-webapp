@@ -21,9 +21,13 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
-            if (state.hasGasSupplyStep.formModelIfReachableOrNull?.hasGasSupply != true) return false
-            if (state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
-            val isOutdated = state.getGasSafetyCertificateIsOutdated()
+            if (state.gasSafetyDetailsTask.hasGasSupplyStep.formModelIfReachableOrNull
+                    ?.hasGasSupply != true
+            ) {
+                return false
+            }
+            if (state.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
+            val isOutdated = state.gasSafetyDetailsTask.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 

@@ -6,15 +6,15 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasGasCertFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 @JourneyFrameworkComponent
-class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGasCertFormModel, GasSafetyState>() {
+class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGasCertFormModel, GasSafetyDetailState>() {
     override val formModelClass = HasGasCertFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState) =
+    override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasCert.heading",
             "fieldSetHint" to "propertyCompliance.gasSafetyTask.gasCert.hint",
@@ -29,9 +29,9 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
                 ),
         )
 
-    override fun chooseTemplate(state: GasSafetyState) = "forms/hasGasCertForm"
+    override fun chooseTemplate(state: GasSafetyDetailState) = "forms/hasGasCertForm"
 
-    override fun mode(state: GasSafetyState) =
+    override fun mode(state: GasSafetyDetailState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
                 if (state.allowProvideCertificateLaterRoute) {
@@ -57,7 +57,7 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
 @JourneyFrameworkComponent
 final class HasGasCertStep(
     stepConfig: HasGasCertStepConfig,
-) : RequestableStep<HasGasCertMode, HasGasCertFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<HasGasCertMode, HasGasCertFormModel, GasSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-gas-safety"
     }

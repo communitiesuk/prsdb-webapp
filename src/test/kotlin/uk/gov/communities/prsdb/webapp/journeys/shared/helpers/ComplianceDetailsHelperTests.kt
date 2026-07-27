@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,15 +29,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UploadService
-
-internal interface TestableGasSafetyState :
-    GasSafetyState,
-    CheckYourAnswersJourneyState
 
 internal interface TestableElectricalSafetyState :
     ElectricalSafetyState,
@@ -58,18 +56,29 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetGasSafetyCyaContent {
         @Mock
-        internal lateinit var mockState: TestableGasSafetyState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockGasState: GasSafetyState
+
+        @Mock
+        internal lateinit var mockGasDetailsTask: GasSafetyDetailsTask
 
         private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
         private val mockHasGasCertStep: HasGasCertStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockGasState.gasSafetyDetailsTask).thenReturn(mockGasDetailsTask)
+        }
+
         @Test
         fun `no gas supply returns gasSupplyRows with 1 row, empty certRows, and noGasSupply inset text key`() {
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.NO)
 
-            val content = helper.getGasSafetyCyaContent(mockState, mockState)
+            val content = helper.getGasSafetyCyaContent(mockCyaState, mockGasState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>
@@ -88,22 +97,22 @@ class ComplianceDetailsHelperTests {
             val mockGasCertIssueDateStep: GasCertIssueDateStep = mock()
             val mockCheckGasCertUploadsStep: CheckGasCertUploadsStep = mock()
 
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
-            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
-            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
-            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockState.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+            whenever(mockGasDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
+            whenever(mockGasDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
+            whenever(mockGasDetailsTask.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
+            whenever(mockGasDetailsTask.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
+            whenever(mockGasDetailsTask.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
             val mockFileUpload: FileUpload = mock()
             whenever(mockFileUpload.status).thenReturn(FileUploadStatus.SCANNED)
             whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
             whenever(mockUploadService.getDownloadUrlOrNull(any(), any())).thenReturn("/download/cert.pdf")
 
-            val content = helper.getGasSafetyCyaContent(mockState, mockState)
+            val content = helper.getGasSafetyCyaContent(mockCyaState, mockGasState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>
