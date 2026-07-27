@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.hasProperty
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -121,7 +119,7 @@ class PropertyDetailsControllerTests(
         @ParameterizedTest(name = "when the provide later feature is {0}")
         @ValueSource(booleans = [true, false])
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails adds provideLaterEnabled to the model reflecting the provide later feature`(isFeatureEnabled: Boolean) {
+        fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
@@ -130,9 +128,16 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
             whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(isFeatureEnabled)
 
+            val expectedView =
+                if (isFeatureEnabled) {
+                    PropertyDetailsController.PROPERTY_DETAILS_VIEW
+                } else {
+                    PropertyDetailsController.PROPERTY_DETAILS_BEFORE_PDJB939_VIEW
+                }
+
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("propertyDetails", hasProperty<Any>("provideLaterEnabled", equalTo(isFeatureEnabled))) }
+                view { name(expectedView) }
             }
         }
 
