@@ -1,13 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL
@@ -17,8 +15,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -31,41 +29,33 @@ class CancelJointLandlordInvitationController(
     private val journeyFactory: CancelJointLandlordInvitationJourneyFactory,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
-    @GetMapping("/{invitationId}/{stepName}")
+    @GetMapping("/{invitationId}/{*stepPath}")
     fun getJourneyStep(
         @PathVariable invitationId: Long,
-        @PathVariable stepName: String,
+        @PathVariable stepPath: String,
         principal: Principal,
-    ): ModelAndView =
-        try {
-            journeyFactory.createJourneySteps(invitationId, principal.name)[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(invitationId, stepName)
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId, principal) { getStepModelAndView() }
 
-    @PostMapping("/{invitationId}/{stepName}")
+    @PostMapping("/{invitationId}/{*stepPath}")
     fun postJourneyData(
         @PathVariable invitationId: Long,
-        @PathVariable stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
         principal: Principal,
-    ): ModelAndView =
-        try {
-            journeyFactory.createJourneySteps(invitationId, principal.name)[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(invitationId, stepName)
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId, principal) { postStepModelAndView(formData) }
 
-    private fun initializeAndRedirect(
+    private fun dispatchJourneyStep(
+        stepPath: String,
         invitationId: Long,
-        stepName: String,
-    ): ModelAndView {
-        val journeyId = journeyFactory.initializeJourneyState()
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-        return ModelAndView("redirect:$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$invitationId/$redirectUrl")
-    }
+        principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps(invitationId, principal.name) },
+            initialiseJourney = { journeyFactory.initializeJourneyState() },
+            dispatch = dispatch,
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
