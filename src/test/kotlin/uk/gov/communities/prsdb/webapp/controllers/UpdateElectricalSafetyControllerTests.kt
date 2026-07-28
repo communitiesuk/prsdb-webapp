@@ -110,7 +110,7 @@ class UpdateElectricalSafetyControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 400 for a valid user without a cookie`() {
-            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+            whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
                 .thenReturn(true)
 
             mvc
@@ -126,7 +126,7 @@ class UpdateElectricalSafetyControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep delegates to the certificate upload helper and redirects`() {
-            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+            whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
                 .thenReturn(true)
             whenever(certificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
                 .thenReturn(mapOf<String, Any>())

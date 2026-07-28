@@ -34,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbController
 @RequestMapping
@@ -53,8 +52,7 @@ class PropertyDetailsController(
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
@@ -74,6 +72,8 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
 
+        // TODO: PDJB-1275: Remove references to single landlord ID
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                 propertyOwnership.landlords,
@@ -134,10 +134,9 @@ class PropertyDetailsController(
     fun getPropertyDetailsLocalCouncilView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
-        principal: Principal,
     ): String {
         val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
+            propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 

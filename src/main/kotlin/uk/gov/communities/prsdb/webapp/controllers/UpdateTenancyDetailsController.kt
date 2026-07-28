@@ -37,7 +37,7 @@ class UpdateTenancyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         return try {
             val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.getStepModelAndView()
@@ -58,7 +58,7 @@ class UpdateTenancyDetailsController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         return try {
             val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.postStepModelAndView(formData)
@@ -70,14 +70,11 @@ class UpdateTenancyDetailsController(
         }
     }
 
-    private fun throwErrorIfUserIsNotAuthorized(
-        baseUserId: String,
-        propertyOwnershipId: Long,
-    ) {
-        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)) {
+    private fun throwErrorIfUserIsNotAuthorized(propertyOwnershipId: Long) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
+                "Current user is not authorized to update property ownership $propertyOwnershipId",
             )
         }
     }

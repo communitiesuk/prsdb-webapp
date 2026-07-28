@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
@@ -42,7 +43,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(false)
 
         mvc.get(updateStepRoute).andExpect {
@@ -53,7 +54,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 200 for a landlord user`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(true)
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.getStepModelAndView())
@@ -92,7 +93,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `postUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(false)
 
         mvc
@@ -110,7 +111,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     fun `postUpdateStep redirects for a valid landlord request`() {
         val redirectUrl = "/landlord/property-details/$propertyOwnershipId"
 
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(true)
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))

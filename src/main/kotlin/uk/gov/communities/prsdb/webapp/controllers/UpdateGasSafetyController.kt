@@ -47,7 +47,7 @@ class UpdateGasSafetyController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable stepPath: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
@@ -59,7 +59,7 @@ class UpdateGasSafetyController(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
 
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
@@ -75,7 +75,7 @@ class UpdateGasSafetyController(
         principal: Principal,
         request: HttpServletRequest,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
 
         val stepName = stepPath.trimStart('/')
         val formData =
@@ -102,14 +102,11 @@ class UpdateGasSafetyController(
             dispatch = dispatch,
         )
 
-    private fun throwErrorIfUserIsNotAuthorized(
-        baseUserId: String,
-        propertyOwnershipId: Long,
-    ) {
-        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)) {
+    private fun throwErrorIfUserIsNotAuthorized(propertyOwnershipId: Long) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
+                "Current user is not authorized to update property ownership $propertyOwnershipId",
             )
         }
     }

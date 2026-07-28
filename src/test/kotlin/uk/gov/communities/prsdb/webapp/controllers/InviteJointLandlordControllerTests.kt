@@ -75,7 +75,7 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(false)
 
         mvc.get(confirmationRoute).andExpect {
@@ -86,7 +86,7 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 200 for an authorised landlord user`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(true)
 
         mvc.get(confirmationRoute).andExpect {
@@ -117,7 +117,7 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(false)
 
         mvc
@@ -133,7 +133,7 @@ class InviteJointLandlordControllerTests(
         val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val mockLandlord = MockLandlordData.createIndividualLandlord()
 
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
             .thenReturn(true)
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(mockPropertyOwnership)

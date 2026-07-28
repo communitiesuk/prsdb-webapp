@@ -43,7 +43,7 @@ class InviteJointLandlordController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable stepPath: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
@@ -55,7 +55,7 @@ class InviteJointLandlordController(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
@@ -80,7 +80,7 @@ class InviteJointLandlordController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
         val invitingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val email = jointLandlordInvitationService.resendInvitation(invitationId, propertyOwnership, invitingLandlord)
@@ -94,7 +94,7 @@ class InviteJointLandlordController(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
     ): String {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
         model.addAttribute(
             "propertyDetailsUrl",
             PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) + "#$LANDLORD_DETAILS_FRAGMENT",
@@ -102,14 +102,11 @@ class InviteJointLandlordController(
         return "inviteJointLandlordConfirmation"
     }
 
-    private fun throwErrorIfUserIsNotAuthorized(
-        baseUserId: String,
-        propertyOwnershipId: Long,
-    ) {
-        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)) {
+    private fun throwErrorIfUserIsNotAuthorized(propertyOwnershipId: Long) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
+                "Current user is not authorized to update property ownership $propertyOwnershipId",
             )
         }
     }

@@ -25,6 +25,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
@@ -76,6 +79,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockEmailService: JointLandlordOtherLandlordLeftEmailService
+
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -430,16 +436,24 @@ class PropertyOwnershipServiceTests {
     }
 
     @Nested
-    inner class GetPropertyOwnershipIfAuthorizedUser {
+    inner class GetPropertyOwnershipIfCurrentUserAuthorized {
+        private fun setMockPrincipal(name: String) {
+            val authentication = mock<Authentication>()
+            whenever(authentication.name).thenReturn(name)
+            val context = mock<SecurityContext>()
+            whenever(context.authentication).thenReturn(authentication)
+            SecurityContextHolder.setContext(context)
+        }
+
         @Test
         fun `throws not found error if an active property ownership does not exist`() {
             val invalidId: Long = 1
-            val principalName = "landlord"
+            setMockPrincipal("landlord")
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(invalidId)).thenReturn(null)
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(invalidId, principalName)
+                    propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(invalidId)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
@@ -448,13 +462,16 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if user is not a landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
+            setMockPrincipal(principalName)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
+            whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull(principalName)).thenReturn(null)
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                    propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
@@ -468,15 +485,15 @@ class PropertyOwnershipServiceTests {
                     MockLocalCouncilData.createLocalCouncil(),
                 )
             val principalName = localCouncilUser.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(true)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
@@ -484,22 +501,18 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is only landlord`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val principalName =
-                (
-                    propertyOwnership
-                        .landlords
-                        .first() as IndividualLandlord
-                ).baseUser
-                    .id
+            val landlord = propertyOwnership.landlords.first() as IndividualLandlord
+            val principalName = landlord.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull(principalName)).thenReturn(landlord)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
@@ -513,84 +526,88 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             propertyOwnership.addLandlord(jointLandlord)
             val principalName = jointLandlord.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull(principalName)).thenReturn(jointLandlord)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
     }
 
     @Nested
-    inner class GetIsAuthorizedToEditRecord {
+    inner class GetCurrentUserIsAuthorizedToEditRecord {
         @Test
-        fun `returns true if getIsLandlord returns true`() {
-            // Arrange
-            val baseUserId = "baseUserId"
+        fun `returns true if isCurrentUserLandlord returns true`() {
             val propertyOwnershipId = 1L
             val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(true).whenever(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+            doReturn(true).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
 
-            // Act
-            val result = propertyOwnershipServiceSpy.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)
+            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
-            // Assert
             assertTrue(result)
-            verify(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+            verify(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
         }
     }
 
     @Nested
-    inner class GetIsLandlord {
-        @Test
-        fun `returns true when the user is the only landlord`() {
-            val baseUserId = "baseUserId"
-            val propertyOwnership =
-                MockLandlordData.createPropertyOwnership(
-                    landlords =
-                        mutableSetOf(
-                            MockLandlordData.createIndividualLandlord(
-                                baseUser = MockLandlordData.createPrsdbUser(baseUserId),
-                            ),
-                        ),
-                )
-
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
-
-            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsLandlord(propertyOwnership.id, baseUserId)
-
-            assertTrue(returnedIsPrimaryLandlord)
+    inner class IsCurrentUserLandlord {
+        private fun setMockPrincipal(name: String) {
+            val authentication = mock<Authentication>()
+            whenever(authentication.name).thenReturn(name)
+            val context = mock<SecurityContext>()
+            whenever(context.authentication).thenReturn(authentication)
+            SecurityContextHolder.setContext(context)
         }
 
         @Test
-        fun `returns true when the user is a joint landlord`() {
+        fun `returns true when the current user is the only landlord`() {
+            val landlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    landlords = mutableSetOf(landlord),
+                )
+            setMockPrincipal("baseUserId")
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull("baseUserId")).thenReturn(landlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `returns true when the current user is a joint landlord`() {
             val jointLandlord =
                 MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             propertyOwnership.addLandlord(jointLandlord)
+            setMockPrincipal("joint-landlord")
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull("joint-landlord")).thenReturn(jointLandlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
-
-            val result =
-                propertyOwnershipService.getIsLandlord(propertyOwnership.id, jointLandlord.baseUser.id)
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
 
             assertTrue(result)
         }
 
         @Test
-        fun `returns false when the user is not a landlord of the property`() {
+        fun `returns false when the current user is not a landlord of the property`() {
+            val otherLandlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                )
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     landlords =
@@ -600,25 +617,35 @@ class PropertyOwnershipServiceTests {
                             ),
                         ),
                 )
+            setMockPrincipal("other-user")
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull("other-user")).thenReturn(otherLandlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-                propertyOwnership,
-            )
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
 
-            val result =
-                propertyOwnershipService.getIsLandlord(
-                    propertyOwnership.id,
-                    "differentBaseUserId",
-                )
+            assertFalse(result)
+        }
+
+        @Test
+        fun `returns false when current user has no landlord record`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            setMockPrincipal("no-landlord-user")
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull("no-landlord-user")).thenReturn(null)
+
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
 
             assertFalse(result)
         }
 
         @Test
         fun `throws not found error if the property ownership does not exist`() {
+            setMockPrincipal("baseUserId")
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockUserToLandlordService.getLandlordForBaseUserIdOrNull("baseUserId")).thenReturn(landlord)
+
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getIsLandlord(1, "anyBaseUserId")
+                    propertyOwnershipService.isCurrentUserLandlord(1)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }

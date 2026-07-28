@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
-import java.security.Principal
 
 @PrsdbController
 @RequestMapping
@@ -39,10 +38,7 @@ class LandlordDetailsController(
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-    fun getUserLandlordDetails(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         if (landlord.landlordType == LandlordType.ORGANISATION) {
