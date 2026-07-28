@@ -238,7 +238,6 @@ class PropertyDetailsController(
         val notificationBanner =
             PropertyDetailsNotificationBannerViewModel.fromState(
                 isLandlordView = isLandlordView,
-                provideLaterEnabled = true,
                 isOccupied = propertyDetails.isOccupied,
                 isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
                 isTenancyProvideLater = propertyDetails.isTenancyProvideLater,

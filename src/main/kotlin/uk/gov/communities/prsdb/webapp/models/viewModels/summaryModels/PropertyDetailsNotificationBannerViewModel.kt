@@ -39,15 +39,13 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
 
         fun fromState(
             isLandlordView: Boolean,
-            provideLaterEnabled: Boolean,
             isOccupied: Boolean,
             isLicensingProvideLater: Boolean,
             isTenancyProvideLater: Boolean,
             complianceMessages: List<NotificationMessage>,
         ): PropertyDetailsNotificationBannerViewModel {
             val hasComplianceIssue = complianceMessages.isNotEmpty()
-            val hasPropertyProvideLater =
-                provideLaterEnabled && isOccupied && (isLicensingProvideLater || isTenancyProvideLater)
+            val hasPropertyProvideLater = isOccupied && (isLicensingProvideLater || isTenancyProvideLater)
 
             val messages =
                 when {

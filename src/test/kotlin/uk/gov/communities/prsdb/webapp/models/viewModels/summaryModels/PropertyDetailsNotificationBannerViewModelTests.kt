@@ -15,14 +15,12 @@ class PropertyDetailsNotificationBannerViewModelTests {
 
     private fun fromState(
         isLandlordView: Boolean = true,
-        provideLaterEnabled: Boolean = true,
         isOccupied: Boolean = true,
         isLicensingProvideLater: Boolean = false,
         isTenancyProvideLater: Boolean = false,
         complianceMessages: List<NotificationMessage> = emptyList(),
     ) = PropertyDetailsNotificationBannerViewModel.fromState(
         isLandlordView = isLandlordView,
-        provideLaterEnabled = provideLaterEnabled,
         isOccupied = isOccupied,
         isLicensingProvideLater = isLicensingProvideLater,
         isTenancyProvideLater = isTenancyProvideLater,
@@ -37,19 +35,6 @@ class PropertyDetailsNotificationBannerViewModelTests {
     @Test
     fun `shows only the compliance messages when there is no provide-later state`() {
         val banner = fromState(complianceMessages = listOf(complianceMessage))
-
-        assertEquals(listOf(complianceMessage), banner.messages)
-    }
-
-    @Test
-    fun `ignores provide-later state and shows compliance messages when the flag is disabled`() {
-        val banner =
-            fromState(
-                provideLaterEnabled = false,
-                isLicensingProvideLater = true,
-                isTenancyProvideLater = true,
-                complianceMessages = listOf(complianceMessage),
-            )
 
         assertEquals(listOf(complianceMessage), banner.messages)
     }
