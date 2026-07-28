@@ -26,11 +26,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -47,6 +49,7 @@ class UpdateOccupancyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.wasOccupied = propertyOwnership.isOccupied
+            state.initialNumberOfBedrooms = propertyOwnership.numBedrooms
             state.isStateInitialized = true
         }
 
@@ -101,14 +104,39 @@ class UpdateOccupancyJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
-                BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
-                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
-                FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.occupationTask)
+                }
+
+                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
+                }
+
+                BedroomsStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                }
+
+                RentIncludesBillsStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                }
+
+                BillsIncludedStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.rentIncludesBillsTask) {
+                        checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                FurnishedStatusStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                }
+
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
+                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
             }
             replaceHeadings(state)
             step(journey.finishCyaStep) {
@@ -129,12 +157,12 @@ class UpdateOccupancyJourneyFactory(
                 "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
             }
         }
-        configureStep(journey.households) {
+        configureStep(journey.householdsAndTenantsTask.households) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
             }
         }
-        configureStep(journey.tenants) {
+        configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
             }
@@ -144,12 +172,12 @@ class UpdateOccupancyJourneyFactory(
                 "heading" to "forms.update.numberOfBedrooms.heading"
             }
         }
-        configureStep(journey.rentIncludesBills) {
+        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
             }
         }
-        configureStep(journey.billsIncluded) {
+        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
             }
@@ -159,14 +187,14 @@ class UpdateOccupancyJourneyFactory(
                 "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
             }
         }
-        configureStep(journey.rentFrequency) {
+        configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
             withAdditionalContentProperty {
                 "heading" to "forms.update.rentFrequency.heading"
             }
         }
-        configureStep(journey.rentAmount) {
+        configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
             withAdditionalContentProperty {
-                "heading" to state.getUpdateRentAmountHeading()
+                "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
             }
         }
     }
@@ -175,22 +203,16 @@ class UpdateOccupancyJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateOccupancyJourney(
     // Occupancy task
-    override val occupationTask: OccupationTask,
+    override val occupationTask: OccupationTaskWithOccupationRequired,
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val households: HouseholdStep,
-    override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
-    override val rentIncludesBills: RentIncludesBillsStep,
-    override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    override val rentFrequency: RentFrequencyStep,
-    override val rentAmount: RentAmountStep,
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -211,6 +233,8 @@ class UpdateOccupancyJourney(
 
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
+    override var initialNumberOfBedrooms: Int? by delegateProvider.nullableDelegate("initialNumberOfBedrooms")
+
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
@@ -222,4 +246,5 @@ interface UpdateOccupancyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
+    val initialNumberOfBedrooms: Int?
 }

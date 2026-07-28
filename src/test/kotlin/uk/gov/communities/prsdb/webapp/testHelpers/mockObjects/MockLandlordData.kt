@@ -38,7 +38,7 @@ class MockLandlordData {
 
         var lastLandlordId = 0
 
-        fun createLandlord(
+        fun createIndividualLandlord(
             baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "name",
             email: String = "example@email.com",
@@ -95,7 +95,7 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             isOccupied: Boolean = currentNumTenants > 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-            landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
+            landlords: MutableSet<Landlord> = mutableSetOf(createIndividualLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -153,7 +153,7 @@ class MockLandlordData {
             currentNumHouseholds: Int = 2,
             currentNumTenants: Int = 1,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-            landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
+            landlords: MutableSet<Landlord> = mutableSetOf(createIndividualLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,

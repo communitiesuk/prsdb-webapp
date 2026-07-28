@@ -73,7 +73,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty throws an error if the given address is registered`() {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
 
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id("baseUserId")).thenReturn(landlord)
         whenever(
@@ -146,7 +146,7 @@ class PropertyRegistrationServiceTests {
         val isOccupied = true
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
@@ -257,7 +257,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty passes compliance data to saveRegistrationComplianceData`() {
         // Arrange
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
@@ -356,7 +356,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty sends a confirmation email and caches the registration number when it registers the property`() {
         // Arrange
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 5678)
 
         val expectedPropertyOwnership =
@@ -435,7 +435,7 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
@@ -540,7 +540,7 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyType = PropertyType.DETACHED_HOUSE
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
@@ -623,7 +623,7 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyType = PropertyType.DETACHED_HOUSE
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
@@ -700,7 +700,7 @@ class PropertyRegistrationServiceTests {
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
         val numberOfPeople = 2
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyType = PropertyType.DETACHED_HOUSE
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
@@ -773,7 +773,7 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty passes markedJointLandlord to createPropertyOwnership`() {
         // Arrange
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)

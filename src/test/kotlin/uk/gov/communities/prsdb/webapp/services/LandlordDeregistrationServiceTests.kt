@@ -65,7 +65,7 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterLandlord deletes properties the landlord solely owns`() {
         val baseUserId = "one-login-user"
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
         val soleProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 10L)
 
@@ -80,9 +80,9 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterLandlord does not delete properties with another co-owner`() {
         val baseUserId = "one-login-user"
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
-        val coLandlord = MockLandlordData.createLandlord()
+        val coLandlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 20L)
         jointProperty.addLandlord(coLandlord)
@@ -99,9 +99,9 @@ class LandlordDeregistrationServiceTests {
     @Test
     fun `deregisterLandlord deletes only solely-owned properties when the landlord owns a mix`() {
         val baseUserId = "one-login-user"
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
-        val coLandlord = MockLandlordData.createLandlord()
+        val coLandlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val soleProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 10L)
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord), id = 20L)

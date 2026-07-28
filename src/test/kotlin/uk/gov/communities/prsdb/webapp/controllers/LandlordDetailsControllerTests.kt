@@ -45,7 +45,7 @@ class LandlordDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getUserLandlordDetails returns 200 for a valid request from a landlord`() {
-            val landlord = MockLandlordData.createLandlord()
+            val landlord = MockLandlordData.createIndividualLandlord()
             whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
@@ -63,7 +63,7 @@ class LandlordDetailsControllerTests(
 
     @Nested
     inner class GetLandlordDetailsAsLcUserTests {
-        private val landlord = MockLandlordData.createLandlord()
+        private val landlord = MockLandlordData.createIndividualLandlord()
 
         @BeforeEach
         fun setUp() {

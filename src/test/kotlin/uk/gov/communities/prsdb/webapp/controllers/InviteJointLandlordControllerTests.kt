@@ -131,7 +131,7 @@ class InviteJointLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation redirects to property details with flash attribute for authorised user`() {
         val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
-        val mockLandlord = MockLandlordData.createLandlord()
+        val mockLandlord = MockLandlordData.createIndividualLandlord()
 
         whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
             .thenReturn(true)
