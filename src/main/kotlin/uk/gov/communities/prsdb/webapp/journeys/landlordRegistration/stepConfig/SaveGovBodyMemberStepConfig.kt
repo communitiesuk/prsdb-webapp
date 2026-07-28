@@ -32,7 +32,13 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
         val address = state.govBodyMemberAddressTask.getAddress()
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
-        val nextKey = state.nextGoverningBodyMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
+
+        val targetKey =
+            state.editingGovBodyMemberId ?: run {
+                val nextKey = state.nextGoverningBodyMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
+                state.nextGoverningBodyMemberId = nextKey + 1
+                nextKey
+            }
 
         val member =
             GoverningBodyMemberDataModel(
@@ -42,9 +48,9 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 address = address,
             )
 
-        currentMap[nextKey] = member
+        currentMap[targetKey] = member
         state.governingBodyMembersMap = currentMap
-        state.nextGoverningBodyMemberId = nextKey + 1
+        state.editingGovBodyMemberId = null
 
         // Clear the individual step form data so the next member starts fresh
         state.orgGovBodyWhoToProvideStep.clearFormData()

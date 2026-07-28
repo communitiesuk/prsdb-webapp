@@ -50,7 +50,28 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', '2026-05-05 00:00:00+00'),       -- Alexander.Read@communities.gov.uk
        ('a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', '2026-05-05 00:00:00+00'),       -- Travis.Woodward@communities.gov.uk
        ('cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', '2024-10-15 00:00:00+00'),       -- lcadmin.prsdb@softwire.com
-       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00')        -- lcuser.prsdb@softwire.com
+       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00'),       -- lcuser.prsdb@softwire.com
+       ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '2026-07-01 10:33:22.395944+00'), -- danielle.dias@madetech.com
+       ('8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', '2026-07-01 10:33:22.395944+00'), -- danielle.dias@madetech.com
+       ('a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', '2026-07-02 10:00:00+00'),          -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '2026-07-02 10:00:00+00'),          -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:wkm6PXI5bMeyS-iMYW9FoBp86EdijRr6usu6qTaA3Cg', '2026-07-21 00:00:00+00'),          -- Andrew Wilkins
+       ('4dfe12260771139d37db3b643569c5d1ca07ed069bd742928301caf629dcfb62', '2026-07-21 00:00:00+00'),          -- Andrew Wilkins
+       ('urn:fdc:gov.uk:2022:r4pLmSY3oYBWPaJVhw8U_wgdfXp3e7cuLSjctVWEJWo', '2026-07-21 00:00:00+00'),          -- William Gledhill
+       ('517d15e49a019d232e7eb9b4a0e556921f3ef90851dfced02ba2b67c3db1cd9f', '2026-07-21 00:00:00+00'),          -- William Gledhill
+       ('urn:fdc:gov.uk:2022:Flwl0DlDFArbsXtBSpBeVNLJ_OhhmnGl7s4Lo-qg3QI', '2026-07-21 00:00:00+00'),          -- Sean Hennity
+       ('fa1a153aeb8a7d4e9d01b51fb1f6f1561b8142e4b36d43b1e2af82478d6c9fbc', '2026-07-21 00:00:00+00'),          -- Sean Hennity
+       ('5bb8cb895fb6b32d581e1959ff56c43cb2a986a06f2e20c8e3fe0b5a7def320b', '2026-07-21 00:00:00+00'),          -- Sandra Lila
+       ('urn:fdc:gov.uk:2022:aOcUnYIpNfDHDfbexwINrPodEJLV5Fh451VDFOM5h_o', '2026-07-21 00:00:00+00'),          -- Denis Fazlji
+       ('40a91189913b428bd7140363ca597c58bfc7639966d6ce91341387fcb91fe12c', '2026-07-21 00:00:00+00'),          -- Denis Fazlji
+       ('urn:fdc:gov.uk:2022:kMCObIbxtdFvloXjqQUnFISalxA4bct23eJJxe3QDmI', '2026-07-21 00:00:00+00'),          -- Andreea Popescu
+       ('dbbbbf7ac4628a07a44a3f6a8f982d1b3bfb581a78ab2cfd2236c04ad7cb375b', '2026-07-21 00:00:00+00'),          -- Andreea Popescu
+       ('urn:fdc:gov.uk:2022:3vvs6mvUviJ6xMVqLKL2rS0BIrlszvGh4nRMdX3IFb8', '2026-07-21 00:00:00+00'),          -- Yvonne Andrews
+       ('8e5a90c023294deba4df135f7725a6df17d8d52840e10359748f252510df754d', '2026-07-21 00:00:00+00'),          -- Yvonne Andrews
+       ('urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '2026-07-21 00:00:00+00'),          -- Mobin Ibrahim Patel
+       ('a48e61f59b20cb7d65628f1a542ccf371de1339e37fccb7e874ccb1ddc91b0c2', '2026-07-21 00:00:00+00'),          -- Mobin Ibrahim Patel
+       ('urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '2026-07-21 00:00:00+00'),          -- Sarah Warren
+       ('df30c357a444cf8eb89169eca7779e7857b35361abddac3b77a91847288daf54', '2026-07-21 00:00:00+00')           -- Sarah Warren
     ON CONFLICT DO NOTHING;
 
 
@@ -80,7 +101,29 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (29, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2,
         'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
        (30, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2,
-        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true) ON CONFLICT DO NOTHING;
+        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true),
+       (31, '2026-07-01 00:00:00+00', null, '8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', true, 2,
+        'danielle.dias@madetech.com', 'Danielle Dias', true),
+       (32, '2026-07-02 10:00:00+00', null, 'a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', true, 2,
+        'benjamin.johnson@madetech.com', 'Ben Johnson', true),
+       (33, '2026-07-21 00:00:00+00', null, '4dfe12260771139d37db3b643569c5d1ca07ed069bd742928301caf629dcfb62', true, 2,
+        'andrew.wilkins@communities.gov.uk', 'Andrew Wilkins', true),
+       (34, '2026-07-21 00:00:00+00', null, '517d15e49a019d232e7eb9b4a0e556921f3ef90851dfced02ba2b67c3db1cd9f', true, 2,
+        'william.gledhill@communities.gov.uk', 'William Gledhill', true),
+       (35, '2026-07-21 00:00:00+00', null, 'fa1a153aeb8a7d4e9d01b51fb1f6f1561b8142e4b36d43b1e2af82478d6c9fbc', true, 2,
+        'sean.hennity@communities.gov.uk', 'Sean Hennity', true),
+       (36, '2026-07-21 00:00:00+00', null, '5bb8cb895fb6b32d581e1959ff56c43cb2a986a06f2e20c8e3fe0b5a7def320b', true, 2,
+        'sandra.lila@communities.gov.uk', 'Sandra Lila', true),
+       (37, '2026-07-21 00:00:00+00', null, '40a91189913b428bd7140363ca597c58bfc7639966d6ce91341387fcb91fe12c', true, 2,
+        'denis.fazlji@communities.gov.uk', 'Denis Fazlji', true),
+       (38, '2026-07-21 00:00:00+00', null, 'dbbbbf7ac4628a07a44a3f6a8f982d1b3bfb581a78ab2cfd2236c04ad7cb375b', true, 2,
+        'andreea.popescu@communities.gov.uk', 'Andreea Popescu', true),
+       (39, '2026-07-21 00:00:00+00', null, '8e5a90c023294deba4df135f7725a6df17d8d52840e10359748f252510df754d', true, 2,
+        'yvonne.andrews@communities.gov.uk', 'Yvonne Andrews', true),
+       (40, '2026-07-21 00:00:00+00', null, 'a48e61f59b20cb7d65628f1a542ccf371de1339e37fccb7e874ccb1ddc91b0c2', true, 2,
+        'mobin.patel@communities.gov.uk', 'Mobin Ibrahim Patel', true),
+       (41, '2026-07-21 00:00:00+00', null, 'df30c357a444cf8eb89169eca7779e7857b35361abddac3b77a91847288daf54', true, 2,
+        'sarah.warren@communities.gov.uk', 'Sarah Warren', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -126,59 +169,91 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (39, '2026-04-14 00:00:00+00', 210000000039, 0),
        (40, '2026-04-14 00:00:00+00', 210000000040, 0),
        (41, '2026-04-14 00:00:00+00', 210000000041, 0),
-       (42, '2026-04-14 00:00:00+00', 210000000042, 0) ON CONFLICT DO NOTHING;
+       (42, '2026-04-14 00:00:00+00', 210000000042, 0),
+       (43, '2026-07-01 00:00:00+00', 210000000043, 1),
+       (44, '2026-07-02 10:00:00+00', 210000000044, 1),
+       (45, '2026-07-21 00:00:00+00', 210000000045, 1), -- Andrew Wilkins
+       (46, '2026-07-21 00:00:00+00', 210000000046, 1), -- William Gledhill
+       (47, '2026-07-21 00:00:00+00', 210000000047, 1), -- Sean Hennity
+       (48, '2026-07-21 00:00:00+00', 210000000048, 1), -- Denis Fazlji
+       (49, '2026-07-21 00:00:00+00', 210000000049, 1), -- Andreea Popescu
+       (50, '2026-07-21 00:00:00+00', 210000000050, 1), -- Yvonne Andrews
+       (51, '2026-07-21 00:00:00+00', 210000000051, 1), -- Mobin Ibrahim Patel
+       (52, '2026-07-21 00:00:00+00', 210000000052, 1) ON CONFLICT DO NOTHING; -- Sarah Warren
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice)
+                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
 VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true, false),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true, false),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
         'KENNETH DECERQUEIRA', '07777777777', 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU', '1965-07-08',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (4, 4, 1, '2025-02-20 11:50:45.745273+00', 'kiran.randhawakukar@softwire.com', null, true, '2025-03-06 14:01:33.486684+00',
         'Not Kiran', '01234567890', 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU', '1965-07-08', 'England or Wales',
-        false, true),
+        false, true, false),
        (5, 5, 1, '2025-02-24 09:29:53.079945+00', 'jasmin.conterio@softwire.com', null, true, '2025-02-27 17:19:52.061638+00',
         'Jasmin Conterio', '01223 123 456', 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '1989-02-02',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (7, 7, 1, '2025-02-27 13:56:15.745135+00', 'geetika.kejriwal@communities.gov.uk', null, true, '2025-02-27 14:34:33.323661+00',
         'LISA S C LOOSELEY', '+447123456789', 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI', '1973-03-14',
-        'England or Wales', true, true),
+        'England or Wales', true, true, false),
        (9, 9, 1, '2025-02-27 13:58:02.81462+00', 'catherine.graham2@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '+447123456789', 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', '1973-03-14', 'England or Wales', true, true),
+        '+447123456789', 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', '1973-03-14', 'England or Wales', true, true, false),
        (10, 10, 1, '2025-03-06 08:22:41.002251+00', 'Team-PRSDB+Unverified@softwire.com', null, true, '2025-03-11 13:47:42.800533+00',
         'Unverified Landlord', '07777777777', 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24', '1996-03-03',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (11, 11, 1, '2025-03-06 10:33:22.395944+00', 'team-prsdb+verified@softwire.com', null, true, null, 'KENNETH DECERQUEIRA',
-        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true, false),
        (12, 12, 1, '2025-04-01 11:08:11.224604+00', 'norris.orighoye@communities.gov.uk', null, true, null, 'Norris Orighoye',
-        '07777777777', 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk', '1984-11-11', 'England or Wales', false, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk', '1984-11-11', 'England or Wales', false, true, false),
        (13, 13, 1, '2025-04-02 12:49:10.39148+00', 'sharan.flora@communities.gov.uk', null, true, null, 'JULIE SYED HABIB EYLES-SPENCER',
-        '07777777777', 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU', '1967-03-01', 'England or Wales', true, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU', '1967-03-01', 'England or Wales', true, true, false),
        (14, 14, 1, '2025-04-02 12:51:57.966276+00', 'rowan.hill@softwire.com', null, true, null, 'Rowan Hill', '07777777777',
-        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', '1908-03-27', 'England or Wales', false, true),
+        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', '1908-03-27', 'England or Wales', false, true, false),
        (18, 18, 1, '2025-04-22 10:52:32.910331+00', 'sandra.lila@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY', '07777777777',
-        'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '1973-03-14', 'England or Wales', true, true),
+        'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '1973-03-14', 'England or Wales', true, true, false),
        (19, 19, 1, '2025-10-09 12:44:47.460558+00', 'chris.lightfoot@communities.gov.uk', null, true, null, 'Hello Name', '07777777777',
-        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2001-01-01', 'England or Wales', false, true),
+        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2001-01-01', 'England or Wales', false, true, false),
        (20, 20, 1, '2025-10-17 14:16:57.295418+00', 'Ned.FrederickCalas-Hathaway@softwire.com', null, true, null, 'Ned Calas-Hathaway',
-        '07777777777', 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg', '1973-06-18', 'England or Wales', false, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg', '1973-06-18', 'England or Wales', false, true, false),
        (21, 25, 1, '2025-11-07 11:15:00+00', 'dani.swift@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY', '07427585544',
-        'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', '1973-03-14', 'England or Wales', true, true),
+        'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', '1973-03-14', 'England or Wales', true, true, false),
        (22, 26, 1, '2025-11-10 15:30:00+00', 'shannon.okyemba-tsambou@communities.gov.uk', null, true, null, 'KENNETH DECERQUEIRA',
-        '07432768528', 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', '1965-07-08', 'England or Wales', true, true),
+        '07432768528', 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', '1965-07-08', 'England or Wales', true, true, false),
        (23, 27, 1, '2025-11-10 16:10:00+00', 'rebecca.coll@communities.gov.uk', null, true, null, 'Rebecca Coll', '07764123456',
-        'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', '1989-03-08', 'England or Wales', false, true),
+        'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', '1989-03-08', 'England or Wales', false, true, false),
        (24, 28, 1, '2025-11-07 11:15:00+00', 'adam.jennings@softwire.com', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
-        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '1965-07-08', 'England or Wales', true, true),
+        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '1965-07-08', 'England or Wales', true, true, false),
        (26, 30, 1, '2025-11-07 11:15:00+00', 'Lewis.Jones@communities.gov.uk', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
-        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true,
-        true) ON CONFLICT DO NOTHING;
+        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true, true, false),
+       (27, 43, 1, '2026-07-01 10:33:22.395944+00', 'danielle.dias@madetech.com', null, true, null, 'Danielle Dias',
+        '07777777777', 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '1990-01-01', 'England or Wales', true,
+        true, false),
+       (28, 44, 1, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
+        '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
+        true, false),
+       (29, 45, 1, '2026-07-21 00:00:00+00', 'andrew.wilkins@communities.gov.uk', null, true, null, 'Andrew Wilkins',
+        '07777777777', 'urn:fdc:gov.uk:2022:wkm6PXI5bMeyS-iMYW9FoBp86EdijRr6usu6qTaA3Cg', '1990-01-01', 'England or Wales', true, true, false),
+       (30, 46, 1, '2026-07-21 00:00:00+00', 'william.gledhill@communities.gov.uk', null, true, null, 'William Gledhill',
+        '07777777777', 'urn:fdc:gov.uk:2022:r4pLmSY3oYBWPaJVhw8U_wgdfXp3e7cuLSjctVWEJWo', '1990-01-01', 'England or Wales', true, true, false),
+       (31, 47, 1, '2026-07-21 00:00:00+00', 'sean.hennity@communities.gov.uk', null, true, null, 'Sean Hennity',
+        '07777777777', 'urn:fdc:gov.uk:2022:Flwl0DlDFArbsXtBSpBeVNLJ_OhhmnGl7s4Lo-qg3QI', '1990-01-01', 'England or Wales', true, true, false),
+       (32, 48, 1, '2026-07-21 00:00:00+00', 'denis.fazlji@communities.gov.uk', null, true, null, 'Denis Fazlji',
+        '07777777777', 'urn:fdc:gov.uk:2022:aOcUnYIpNfDHDfbexwINrPodEJLV5Fh451VDFOM5h_o', '1990-01-01', 'England or Wales', true, true, false),
+       (33, 49, 1, '2026-07-21 00:00:00+00', 'andreea.popescu@communities.gov.uk', null, true, null, 'Andreea Popescu',
+        '07777777777', 'urn:fdc:gov.uk:2022:kMCObIbxtdFvloXjqQUnFISalxA4bct23eJJxe3QDmI', '1990-01-01', 'England or Wales', true, true, false),
+       (34, 50, 1, '2026-07-21 00:00:00+00', 'yvonne.andrews@communities.gov.uk', null, true, null, 'Yvonne Andrews',
+        '07777777777', 'urn:fdc:gov.uk:2022:3vvs6mvUviJ6xMVqLKL2rS0BIrlszvGh4nRMdX3IFb8', '1990-01-01', 'England or Wales', true, true, false),
+       (35, 51, 1, '2026-07-21 00:00:00+00', 'mobin.patel@communities.gov.uk', null, true, null, 'Mobin Ibrahim Patel',
+        '07777777777', 'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '1990-01-01', 'England or Wales', true, true, false),
+       (36, 52, 1, '2026-07-21 00:00:00+00', 'sarah.warren@communities.gov.uk', null, true, null, 'Sarah Warren',
+        '07777777777', 'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '1990-01-01', 'England or Wales', true,
+        true, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -321,7 +396,27 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null,
        (21, '2025-11-10 16:10:00.000000+00', null,
         'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), --Lewis.Jones@communities.gov.uk
        (22, '2025-12-01 10:33:22.395944+00', null,
-        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam.Jennings@softwire.com
+        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y'), -- Adam.Jennings@softwire.com
+       (23, '2026-07-01 10:33:22.395944+00', null,
+        'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA'), -- danielle.dias@madetech.com
+       (24, '2026-07-02 10:00:00+00', null,
+        'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w'),  -- benjamin.johnson@madetech.com
+       (25, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:wkm6PXI5bMeyS-iMYW9FoBp86EdijRr6usu6qTaA3Cg'), -- Andrew Wilkins
+       (26, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:r4pLmSY3oYBWPaJVhw8U_wgdfXp3e7cuLSjctVWEJWo'), -- William Gledhill
+       (27, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:Flwl0DlDFArbsXtBSpBeVNLJ_OhhmnGl7s4Lo-qg3QI'), -- Sean Hennity
+       (28, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:aOcUnYIpNfDHDfbexwINrPodEJLV5Fh451VDFOM5h_o'), -- Denis Fazlji
+       (29, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:kMCObIbxtdFvloXjqQUnFISalxA4bct23eJJxe3QDmI'), -- Andreea Popescu
+       (30, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:3vvs6mvUviJ6xMVqLKL2rS0BIrlszvGh4nRMdX3IFb8'), -- Yvonne Andrews
+       (31, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8'), -- Mobin Ibrahim Patel
+       (32, '2026-07-21 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow')  -- Sarah Warren
     ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));

@@ -306,6 +306,41 @@ There are 3 release pathways we manage:
 
 We release to integration by merging to `main`. There is no special process for this, just merge when the PR is approved.
 
+### Testing a branch in integration
+
+Use this process when a change needs to be tested in the deployed integration environment and cannot be adequately
+tested locally. Integration is a shared environment, so before temporarily deploying a branch, check that nobody else
+is using it and tell the team that the environment will be overwritten.
+
+If the branch contains database migrations, agree how to restore or reset the integration database before using this
+process. Deploying the branch applies its migrations to the shared database, and redeploying `main` does not reverse
+them.
+
+1. Temporarily add your branch to the `push.branches` list in
+   [`.github/workflows/build-and-deploy-integration.yml`](.github/workflows/build-and-deploy-integration.yml).
+   Make this change locally, but do not commit or push it yet:
+
+   ```yaml
+   branches:
+     - main
+     - <your-branch-name>
+   ```
+
+2. Open [Build and Deploy - Integration](https://github.com/communitiesuk/prsdb-webapp/actions/workflows/build-and-deploy-integration.yml)
+   in GitHub Actions and record the latest successful run from `main`. Commit the temporary workflow change to the
+   branch you want to test and push that branch. Wait for the branch's `Build and Deploy - Integration` run to finish,
+   then complete the required testing.
+3. After testing, or if the branch deployment fails or testing is abandoned, remove the temporary workflow change from
+   the branch and push the cleanup commit. Confirm that the feature PR no longer includes the workflow trigger change.
+4. Restore integration:
+    - If the branch deployment applied database migrations, follow the agreed recovery or reset plan to restore both the
+      database and the application to compatible versions from `main`. A `main` deployment alone does not reverse the
+      migrations, and a database reset alone does not replace the feature-branch application image.
+    - For a branch without migrations, integration is already restored if a newer successful deployment from `main`
+      completed after the branch deployment. Any testing after that deployment did not exercise the branch.
+    - If neither applies, open the recorded `main` run, select **Re-run jobs**, then **Re-run all jobs**.
+5. Confirm that integration has been restored successfully. If restoration fails, investigate, retry, or seek help.
+
 We also manage **feature releases** — config-only releases that change feature-flag values for a single environment
 without shipping any other code. These are built differently to the code releases above; see
 [Feature releases](#feature-releases).

@@ -29,12 +29,14 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -73,8 +75,9 @@ class OrgLandlordRegistrationTask(
     override val orgGovBodyMemberListStep: OrgGovBodyMemberListStep,
     override val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep,
     override val saveGovBodyMemberStep: SaveGovBodyMemberStep,
+    override val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep,
+    override val removeGovBodyMemberStep: RemoveGovBodyMemberStep,
     override val orgMainContactStep: OrgMainContactStep,
-    override val orgLandlordCyaStep: OrgLandlordCyaStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
@@ -83,6 +86,7 @@ class OrgLandlordRegistrationTask(
         "governingBodyMembersMap",
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
 
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
@@ -113,12 +117,16 @@ class OrgLandlordRegistrationTask(
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                 parents { journey.orgPhoneNumberStep.isComplete() }
-                nextStep { journey.leadTrusteeNameStep }
+                nextDestination { mode ->
+                    when (mode) {
+                        OrgTypeMode.INCLUDES_TRUST -> Destination(journey.leadTrusteeNameStep)
+                        OrgTypeMode.EXCLUDES_TRUST -> Destination(journey.orgCharityStep)
+                    }
+                }
             }
-            // TODO: PDJB-1257: branch to here conditionally based on orgTypeStep outcome
             step(journey.leadTrusteeNameStep) {
                 routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
+                parents { journey.orgTypeStep.hasOutcome(OrgTypeMode.INCLUDES_TRUST) }
                 nextStep { journey.leadTrusteeDobStep }
             }
             step(journey.leadTrusteeDobStep) {
@@ -137,13 +145,17 @@ class OrgLandlordRegistrationTask(
                 nextStep { journey.trusteeAddressTask.firstStep }
             }
             duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT) {
-                parents { journey.leadTrusteePhoneStep.isComplete() }
-                // TODO PDJB-1257: reroute to the exit point of the trustee section
+                parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgCharityStep }
             }
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents { journey.trusteeAddressTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.trusteeAddressTask.isComplete(),
+                        journey.orgTypeStep.hasOutcome(OrgTypeMode.EXCLUDES_TRUST),
+                    )
+                }
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
@@ -225,9 +237,31 @@ class OrgLandlordRegistrationTask(
                     }
                 }
             }
+            step(journey.setStateForGovBodyMemberEditStep) {
+                routeSegment(SetStateForGovBodyMemberEditStep.ROUTE_SEGMENT)
+                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
+                nextStep { journey.orgGovBodyWhoToProvideStep }
+            }
+            step(journey.removeGovBodyMemberStep) {
+                routeSegment(RemoveGovBodyMemberStep.ROUTE_SEGMENT)
+                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.orgGovBodyMemberListStep
+                        AnyMembers.NO_MEMBERS -> journey.orgGovBodyDetailsStep
+                    }
+                }
+            }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS) }
+                parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
+                backDestination {
+                    if (journey.governingBodyMembersMap.isNullOrEmpty()) {
+                        Destination(journey.orgGovBodyDetailsStep)
+                    } else {
+                        Destination(journey.orgGovBodyMemberListStep)
+                    }
+                }
                 nextStep { journey.orgGovBodyMemberNameStep }
             }
             step(journey.orgGovBodyMemberNameStep) {
@@ -268,15 +302,10 @@ class OrgLandlordRegistrationTask(
                         journey.orgGovBodyMemberListStep.isComplete(),
                     )
                 }
-                nextStep { journey.orgLandlordCyaStep }
-            }
-            step(journey.orgLandlordCyaStep) {
-                routeSegment(OrgLandlordCyaStep.ROUTE_SEGMENT)
-                parents { journey.orgMainContactStep.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.orgLandlordCyaStep.isComplete() }
+                parents { journey.orgMainContactStep.isComplete() }
             }
         }
 }

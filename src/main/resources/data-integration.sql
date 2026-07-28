@@ -18,7 +18,11 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', '2026-05-05 00:00:00+00'), -- Alexander.Read@communities.gov.uk
        ('a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', '2026-05-05 00:00:00+00'), -- Travis.Woodward@communities.gov.uk
        ('cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', '2024-10-15 00:00:00+00'), -- lcadmin.prsdb@softwire.com
-       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00')  -- lcuser.prsdb@softwire.com
+       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00'), -- lcuser.prsdb@softwire.com
+       ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '2026-07-01 10:33:22.395944+00'),  -- danielle.dias@madetech.com
+       ('8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', '2026-07-01 10:33:22.395944+00'),  -- danielle.dias@madetech.com
+       ('a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', '2026-07-02 10:00:00+00'), -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '2026-07-02 10:00:00+00') -- benjamin.johnson@madetech.com
     ON CONFLICT DO NOTHING;
 
 
@@ -39,7 +43,12 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (12, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2, -- pragma: allowlist secret
         'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
        (13, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2, -- pragma: allowlist secret
-        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true) ON CONFLICT DO NOTHING;
+        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true),
+       (14, '2026-07-01 00:00:00+00', null, '8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', true, 2, -- pragma: allowlist secret
+        'danielle.dias@madetech.com', 'Danielle Dias', true),
+       (15, '2026-07-02 10:00:00+00', null, 'a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', true, 2, -- pragma: allowlist secret
+        'benjamin.johnson@madetech.com', 'Ben Johnson', true)
+    ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -113,34 +122,42 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (53, '2026-04-14 00:00:00+00', 210000000053, 0),
        (54, '2026-04-14 00:00:00+00', 210000000054, 0),
        (55, '2026-04-14 00:00:00+00', 210000000055, 0),
-       (56, '2026-04-14 00:00:00+00', 210000000056, 0) ON CONFLICT DO NOTHING;
+       (56, '2026-04-14 00:00:00+00', 210000000056, 0),
+       (57, '2026-07-01 00:00:00+00', 210000000057, 1),
+       (58, '2026-07-02 10:00:00+00', 210000000058, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice)
+                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
 VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true, false),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', false, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', false, true, false),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
         'KENNETH DECERQUEIRA', '07777777777', 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU', '1965-07-08',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (4, 4, 1, '2025-02-20 11:50:45.745273+00', 'kiran.randhawakukar@softwire.com', null, true, '2025-03-06 14:01:33.486684+00',
         'Not Kiran', '01234567890', 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU', '1965-07-08', 'England or Wales',
-        false, true),
+        false, true, false),
        (5, 5, 1, '2025-02-24 09:29:53.079945+00', 'jasmin.conterio@softwire.com', null, true, '2025-02-27 17:19:52.061638+00',
         'Jasmin Conterio', '01223 123 456', 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '1989-02-02',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (6, 6, 1, '2025-03-06 08:22:41.002251+00', 'Team-PRSDB+Unverified@softwire.com', null, true, '2025-03-11 13:47:42.800533+00',
         'Unverified Landlord', '07777777777', 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24', '1996-03-03',
-        'England or Wales', false, true),
+        'England or Wales', false, true, false),
        (7, 7, 1, '2025-03-06 10:33:22.395944+00', 'team-prsdb+verified@softwire.com', null, true, null, 'KENNETH DECERQUEIRA',
-        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true),
+        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true, false),
        (8, 8, 1, '2025-02-27 13:58:02.81462+00', 'isobel.ibironke@softwire.com', null, true, null, 'Isobel Ibironke', '07123456789',
         'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', '1995-08-4', 'England or Wales', false,
-        true) ON CONFLICT DO NOTHING;
+        true, false),
+       (9, 57, 9073642, '2026-07-01 10:33:22.395944+00', 'danielle.dias@madetech.com', null, true, null, 'Danielle Dias',
+        '07777777777', 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '1990-01-01', 'England or Wales', true,
+        true, false),
+       (10, 58, 9073642, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
+        '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
+        true, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -308,7 +325,9 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzE
        (4, '2025-03-12 17:12:19.833105+00', null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'),
        (5, '2025-03-17 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),
        (6, '2025-03-18 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'),
-       (7, '2025-05-01 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0') ON CONFLICT DO NOTHING;
+       (7, '2025-05-01 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'),
+       (8, '2026-07-01 10:33:22.395944+00', null, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA'),
+       (9, '2026-07-02 10:00:00+00', null, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
@@ -434,7 +453,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice)
+                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
        'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
@@ -506,7 +525,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice)
+                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        NULL, 1400 + i, 1, DATE '1985-06-15', true, '07222222222',

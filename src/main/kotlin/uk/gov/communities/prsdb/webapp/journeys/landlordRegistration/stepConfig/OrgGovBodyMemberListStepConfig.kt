@@ -2,16 +2,19 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
-class OrgGovBodyMemberListStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, LandlordRegistrationOrgLandlordState>() {
+class OrgGovBodyMemberListStepConfig(
+    private val urlParameterService: CollectionKeyParameterService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LandlordRegistrationOrgLandlordState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: LandlordRegistrationOrgLandlordState) =
@@ -20,30 +23,43 @@ class OrgGovBodyMemberListStepConfig :
             "optionalAddAnotherTitleParam" to (state.governingBodyMembersMap?.size ?: 0),
             "summaryText" to null,
             "showWarning" to false,
-            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.continue",
             "addAnotherButtonText" to "forms.orgGovBodyMemberList.buttons.addAnother",
             "summaryListData" to getMemberRows(state),
-            // TODO: PDJB-1290 - Replace with real "add another" URL once implemented
-            "addAnotherUrl" to "#",
+            "addAnotherUrl" to Destination(state.orgGovBodyWhoToProvideStep).toUrlStringOrNull(),
         )
+
+    override fun afterStepIsReached(state: LandlordRegistrationOrgLandlordState) {
+        // ensure that if you ever get to this page we reset any state that is used by one of the buttons.
+        // this means we can be certain all the buttons will always work even if you use the browser back buttons.
+        state.editingGovBodyMemberId = null
+    }
 
     private fun getMemberRows(state: LandlordRegistrationOrgLandlordState): List<SummaryListRowViewModel> {
         val membersMap = state.governingBodyMembersMap ?: emptyMap()
         return membersMap
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (_, member) ->
-                SummaryListRowViewModel(
+            .mapIndexed { displayIndex, (internalIndex, member) ->
+                SummaryListRowViewModel.forCheckYourAnswersPage(
                     fieldHeading = "forms.orgGovBodyMemberList.memberName",
                     fieldValue = member.name,
-                    optionalFieldHeadingParam = displayIndex + 1,
                     actions =
                         listOf(
-                            // TODO: PDJB-1290 - Replace with real change URL
-                            SummaryListRowActionsViewModel(text = "forms.links.change", url = "#"),
-                            // TODO: PDJB-1290 - Replace with real remove URL
-                            SummaryListRowActionsViewModel(text = "forms.links.remove", url = "#"),
+                            SummaryListRowActionsInputWithDestination(
+                                text = "forms.links.change",
+                                destination =
+                                    Destination(state.setStateForGovBodyMemberEditStep)
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
+                            ),
+                            SummaryListRowActionsInputWithDestination(
+                                text = "forms.links.remove",
+                                destination =
+                                    Destination(state.removeGovBodyMemberStep)
+                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
+                            ),
                         ),
+                    optionalFieldHeadingParam = displayIndex + 1,
                 )
             }
     }

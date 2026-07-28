@@ -7,7 +7,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -43,6 +45,155 @@ class PropertyDetailsViewModelTests {
 
         // Assert
         assertEquals(expectedHeaderList, headerList)
+    }
+
+    @Test
+    fun `Bedrooms are placed after property type and before ownership type when restructure is enabled for an unoccupied property`() {
+        val propertyOwnership = createPropertyOwnership(numberOfBedrooms = 3)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isRestructureAndSkippingEnabled = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.registrationDate",
+                "propertyDetails.propertyRecord.registrationNumber",
+                "propertyDetails.propertyRecord.address",
+                "propertyDetails.propertyRecord.localCouncil",
+                "propertyDetails.propertyRecord.propertyType",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+                "propertyDetails.propertyRecord.ownershipType",
+            ),
+            viewModel.propertyRecord.map { it.fieldHeading },
+        )
+        assertNull(
+            viewModel.tenancyAndRentalInformation.firstOrNull {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            },
+        )
+    }
+
+    @Test
+    fun `Bedrooms are placed between property and ownership type exactly once when restructure is enabled for an occupied property`() {
+        val propertyOwnership = createOccupiedPropertyOwnership()
+        val bedroomsHeading = "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isRestructureAndSkippingEnabled = true,
+                messageSource = mockMessageSource,
+            )
+        val propertyRecordHeadings = viewModel.propertyRecord.map { it.fieldHeading }
+        val bedroomsIndex = propertyRecordHeadings.indexOf(bedroomsHeading)
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.propertyType",
+                bedroomsHeading,
+                "propertyDetails.propertyRecord.ownershipType",
+            ),
+            propertyRecordHeadings.subList(bedroomsIndex - 1, bedroomsIndex + 2),
+        )
+        assertEquals(
+            1,
+            (viewModel.propertyRecord + viewModel.tenancyAndRentalInformation).count {
+                it.fieldHeading == bedroomsHeading
+            },
+        )
+    }
+
+    @Test
+    fun `Bedrooms row has the update bedrooms action when restructure and change links are enabled`() {
+        val propertyOwnership = createPropertyOwnership(id = 123, numberOfBedrooms = 3)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = true,
+                isRestructureAndSkippingEnabled = true,
+                messageSource = mockMessageSource,
+            )
+
+        val bedroomsRow =
+            viewModel.propertyRecord.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            }
+
+        assertEquals(
+            UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) + "/${BedroomsStep.ROUTE_SEGMENT}",
+            bedroomsRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `Bedrooms row remains without actions when restructure is enabled and change links are disabled`() {
+        val propertyOwnership = createPropertyOwnership(numberOfBedrooms = 3)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                withChangeLinks = false,
+                isRestructureAndSkippingEnabled = true,
+                messageSource = mockMessageSource,
+            )
+
+        val bedroomsRow =
+            viewModel.propertyRecord.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            }
+
+        assertEquals(3, bedroomsRow.fieldValue)
+        assertEquals(emptyList<SummaryListRowActionsViewModel>(), bedroomsRow.actions)
+    }
+
+    @Test
+    fun `Bedrooms retain occupied tenancy placement and ordering when restructure is disabled`() {
+        val occupiedViewModel =
+            PropertyDetailsViewModel(
+                createOccupiedPropertyOwnership(),
+                isRestructureAndSkippingEnabled = false,
+                messageSource = mockMessageSource,
+            )
+        val unoccupiedViewModel =
+            PropertyDetailsViewModel(
+                createUnoccupiedPropertyOwnership(),
+                isRestructureAndSkippingEnabled = false,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            listOf(
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
+            ),
+            occupiedViewModel.tenancyAndRentalInformation.map { it.fieldHeading },
+        )
+        assertEquals(
+            listOf("propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied"),
+            unoccupiedViewModel.tenancyAndRentalInformation.map { it.fieldHeading },
+        )
+        assertNull(
+            occupiedViewModel.propertyRecord.firstOrNull {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            },
+        )
+        assertNull(
+            unoccupiedViewModel.propertyRecord.firstOrNull {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            },
+        )
     }
 
     @Test
@@ -203,7 +354,8 @@ class PropertyDetailsViewModelTests {
     @Test
     fun `the correct message key are returned for occupancy tab and occupancy row value when property is unoccupied`() {
         val unoccupiedPropertyOwnership = createUnoccupiedPropertyOwnership()
-        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
+        val unoccupiedViewModel =
+            PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
         val unoccupiedPropertyDetailsRow =
             unoccupiedViewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
@@ -274,7 +426,8 @@ class PropertyDetailsViewModelTests {
         val rentFrequency = RentFrequency.OTHER
         val customRentFrequency = "fortnightly"
         val rentAmount = BigDecimal(200)
-        val expectedRentAmount = "£$rentAmount Message for forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"
+        val expectedRentAmount =
+            "£$rentAmount Message for forms.checkPropertyAnswers.tenancyDetails.customFrequencyRentAmountSuffix"
         val expectedBillsIncluded =
             "Message for forms.billsIncluded.checkbox.electricity, Message for forms.billsIncluded.checkbox.water, Cat sitting"
 
@@ -340,7 +493,8 @@ class PropertyDetailsViewModelTests {
             createPropertyOwnership(
                 license = License(LicensingType.NO_LICENSING, ""),
             )
-        val viewModelDeclaredNoLicense = PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense, messageSource = mockMessageSource)
+        val viewModelDeclaredNoLicense =
+            PropertyDetailsViewModel(propertyOwnershipDeclaredNoLicense, messageSource = mockMessageSource)
         val propertyRecordDeclaredNoLicense =
             viewModelDeclaredNoLicense.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
@@ -352,7 +506,8 @@ class PropertyDetailsViewModelTests {
 
         val propertyOwnershipNullLicense =
             createPropertyOwnership()
-        val viewModelNullLicense = PropertyDetailsViewModel(propertyOwnershipNullLicense, messageSource = mockMessageSource)
+        val viewModelNullLicense =
+            PropertyDetailsViewModel(propertyOwnershipNullLicense, messageSource = mockMessageSource)
         val propertyRecordNullLicense =
             viewModelNullLicense.licensingInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
@@ -419,7 +574,8 @@ class PropertyDetailsViewModelTests {
     fun `Property details hides null uprn if hideNullUprn is true`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = true, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, hideNullUprn = true, messageSource = mockMessageSource)
 
         assertNull(viewModel.propertyRecord.firstOrNull { it.fieldHeading == "propertyDetails.propertyRecord.uprn" })
     }
@@ -428,7 +584,8 @@ class PropertyDetailsViewModelTests {
     fun `Property details declares null uprn unavailable if hideNullUprn is false`() {
         val propertyOwnership = createPropertyOwnership()
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, hideNullUprn = false, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, hideNullUprn = false, messageSource = mockMessageSource)
 
         val uprnKey =
             viewModel.propertyRecord
@@ -446,7 +603,8 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
 
         val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
@@ -454,7 +612,8 @@ class PropertyDetailsViewModelTests {
 
         val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
-        val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
+        val totalChangeLinkCount =
+            propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
         assertEquals(8, totalChangeLinkCount)
     }
@@ -467,7 +626,8 @@ class PropertyDetailsViewModelTests {
                 address = createAddress(uprn = 1234.toLong()),
             )
 
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
 
         val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
@@ -475,7 +635,8 @@ class PropertyDetailsViewModelTests {
 
         val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
-        val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
+        val totalChangeLinkCount =
+            propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
         assertEquals(0, totalChangeLinkCount)
     }

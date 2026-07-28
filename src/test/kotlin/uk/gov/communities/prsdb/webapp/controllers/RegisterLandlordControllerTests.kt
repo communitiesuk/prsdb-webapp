@@ -92,7 +92,7 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation returns 200 for user registered as landlord`() {
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
 
         mvc
@@ -117,7 +117,7 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation includes survey URL in model`() {
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
 
         mvc
