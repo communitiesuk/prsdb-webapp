@@ -119,7 +119,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isVisible()
                 assertThat(
                     detailsPage.notificationBanner,
-                ).containsText("You must finish adding this property’s compliance certificates for this property")
+                ).containsText("You must finish adding this property’s compliance certificates")
             }
 
             @Test
@@ -139,7 +139,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isVisible()
                 assertThat(
                     detailsPage.notificationBanner,
-                ).containsText("You must finish adding this property’s compliance certificates for this property")
+                ).containsText("You must finish adding this property’s compliance certificates")
             }
 
             @Test
