@@ -31,6 +31,49 @@ checkAnswers:
     englandOrWalesResident: Resident in England or Wales
     contactAddress: Contact address
     localCouncil: Local Council
+orgCheckAnswers:
+  heading: Check your answers
+  yourDetails:
+    cardTitle: Your details
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email
+    phoneNumber: Phone number
+  landlordDetails:
+    heading: Landlord details
+    landlordType: Landlord type
+    landlordTypeValue: Organisation
+    organisationName: Organisation name
+    organisationAddress: Organisation address
+    organisationEmail: Organisation email
+    organisationPhone: Organisation phone number
+    organisationType: Organisation type
+    registeredCharity: Registered charity
+    charityCommission: Charity commission
+    charityNumber: Charity number
+    registeredWithCompaniesHouse: Registered with Companies House
+    companiesHouseNumber: Companies House number
+  governingBody:
+    heading: Members of the governing body
+    leadTrusteeCardTitle: Lead trustee
+    memberCardTitle:
+      director: '{0}. Director'
+      trustee: '{0}. Trustee'
+      partner: '{0}. Partner'
+      other: '{0}. Other'
+    role: Role
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email
+    phoneNumber: Phone number
+    address: Address
+  mainContact:
+    heading: Main contact details
+    cardTitle: Main contact
+    name: Name
+    email: Email
+    phoneNumber: Phone number
+  submitButton: Confirm and submit
 confirmation:
   banner:
     heading: Registered as a landlord

@@ -164,14 +164,14 @@ class CancelInvitationStepConfigTests {
     private fun setupMocks(includeOtherLandlord: Boolean = true): uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation {
         JourneyTestHelper.setMockUser(baseUserId)
 
-        val cancellerLandlord = MockLandlordData.createLandlord(name = cancellerName, email = cancellerEmail)
+        val cancellerLandlord = MockLandlordData.createIndividualLandlord(name = cancellerName, email = cancellerEmail)
         ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
 
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(cancellerLandlord), id = propertyOwnershipId)
 
         if (includeOtherLandlord) {
-            val otherLandlord = MockLandlordData.createLandlord(name = otherLandlordName, email = otherLandlordEmail)
+            val otherLandlord = MockLandlordData.createIndividualLandlord(name = otherLandlordName, email = otherLandlordEmail)
             ReflectionTestUtils.setField(otherLandlord, "id", 2L)
             propertyOwnership.addLandlord(otherLandlord)
         }

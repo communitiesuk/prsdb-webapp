@@ -47,7 +47,7 @@ class LandlordService(
 
     // TODO: PDJB-1180: Update to potentially save an org landlord to the database
     @Transactional
-    fun createLandlord(
+    fun createIndividualLandlord(
         baseUserId: String,
         name: String,
         email: String,

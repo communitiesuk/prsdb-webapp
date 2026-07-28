@@ -13,7 +13,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
     inner class LandlordViewTests {
         val currentUserId = "current-user"
         val loggedInLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 baseUser = MockLandlordData.createPrsdbUser(currentUserId),
                 name = "John Smith",
                 email = "john@example.com",
@@ -42,12 +42,12 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             // Arrange
             val landlordList =
                 setOf(
-                    MockLandlordData.createLandlord(
+                    MockLandlordData.createIndividualLandlord(
                         baseUser = MockLandlordData.createPrsdbUser("other-user"),
                         name = "Alice Band",
                     ),
                     loggedInLandlord,
-                    MockLandlordData.createLandlord(
+                    MockLandlordData.createIndividualLandlord(
                         baseUser = MockLandlordData.createPrsdbUser("other-user"),
                         name = "Zack Anderson",
                     ),
@@ -71,9 +71,9 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         fun `returns cards sorted alphabetically by landlord name`() {
             val landlords =
                 setOf(
-                    MockLandlordData.createLandlord(name = "Zoe Adams"),
-                    MockLandlordData.createLandlord(name = "Alice Brown"),
-                    MockLandlordData.createLandlord(name = "Mike Clark"),
+                    MockLandlordData.createIndividualLandlord(name = "Zoe Adams"),
+                    MockLandlordData.createIndividualLandlord(name = "Alice Brown"),
+                    MockLandlordData.createIndividualLandlord(name = "Mike Clark"),
                 )
 
             val cards =
@@ -91,7 +91,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         @Test
         fun `each card contains LRN, email, phone, and contact address rows`() {
             val landlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     name = "John Smith",
                     email = "john@example.com",
                     phoneNumber = "07712345678",
@@ -115,7 +115,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
 
         @Test
         fun `each card has a view landlord record action that opens in new tab`() {
-            val landlord = MockLandlordData.createLandlord(name = "John Smith")
+            val landlord = MockLandlordData.createIndividualLandlord(name = "John Smith")
 
             val cards =
                 PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(

@@ -2,8 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
@@ -15,8 +16,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 
 @JourneyFrameworkComponent
 class LicensingTask(
+    journeyStateService: JourneyStateService,
     private val featureFlagManager: FeatureFlagManager,
-) : Task<LicensingState>() {
+    override val licensingTypeStep: LicensingTypeStep,
+    override val selectiveLicenceStep: SelectiveLicenceStep,
+    override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
+    override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
+) : DuplicableTask<LicensingState>(journeyStateService),
+    LicensingState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
             // TODO(PDJB-990): route to the 'provide details about licensing later' page when 'Provide this later' is selected behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING

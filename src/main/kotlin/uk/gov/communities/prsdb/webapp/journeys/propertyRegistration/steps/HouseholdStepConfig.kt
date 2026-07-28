@@ -26,7 +26,7 @@ class HouseholdStepConfig(
                 "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
                 "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
                 "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
-                "showSecondarySubmitButton" to state.allowProvideTenancyDetailsLaterRoute,
+                "showSecondarySubmitButton" to state.dependencies.allowProvideTenancyDetailsLaterRoute,
             )
         } else {
             mapOf(
@@ -45,7 +45,7 @@ class HouseholdStepConfig(
     override fun mode(state: HouseholdsAndTenantsState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                if (state.allowProvideTenancyDetailsLaterRoute) {
+                if (state.dependencies.allowProvideTenancyDetailsLaterRoute) {
                     HouseholdMode.PROVIDE_THIS_LATER
                 } else {
                     // This should never happen as the button to trigger this action should not be shown

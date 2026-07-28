@@ -35,7 +35,7 @@ class UserRolesServiceTests {
     fun `getAllRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
@@ -103,7 +103,7 @@ class UserRolesServiceTests {
     fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
@@ -167,7 +167,7 @@ class UserRolesServiceTests {
     fun `getLocalCouncilRolesForSubjectId returns no roles for landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
@@ -234,7 +234,7 @@ class UserRolesServiceTests {
     fun `getHasLandlordUserRole returns true for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
@@ -325,7 +325,7 @@ class UserRolesServiceTests {
     fun `getHasLocalCouncilRole returns false for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 
@@ -384,7 +384,7 @@ class UserRolesServiceTests {
     fun `getHasLocalCouncilAdminRole returns false for a landlord user`() {
         // Arrange
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val user = MockLandlordData.createLandlord(baseUser)
+        val user = MockLandlordData.createIndividualLandlord(baseUser)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUser.id))
             .thenReturn(user)
 

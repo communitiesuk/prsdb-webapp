@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -40,6 +41,9 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
     private lateinit var mockTenantsStep: TenantsStep
 
     @Mock
+    private lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
+
+    @Mock
     private lateinit var stepConfig: UpdateHouseholdsAndTenantsCyaConfig
 
     @Mock
@@ -64,8 +68,9 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             )
         stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.households).thenReturn(mockHouseholdStep)
-        whenever(mockState.tenants).thenReturn(mockTenantsStep)
+        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
+        whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
         whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
