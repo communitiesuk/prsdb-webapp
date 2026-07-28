@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 
 @PrsdbWebService
 class NotificationBannerViewModelService {
-    fun getNotificationMessageKeys(
+    fun getComplianceNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
         beforePdjb939: Boolean = false,

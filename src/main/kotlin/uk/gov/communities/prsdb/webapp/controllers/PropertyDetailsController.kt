@@ -247,7 +247,6 @@ class PropertyDetailsController(
         addAttribute("notificationBanner", notificationBanner)
     }
 
-    // Compliance-only banner for the flag-off path; sets the same "notificationBanner" attribute as the flag-on helper.
     private fun addBeforePdjb939BannerAttributes(
         addAttribute: (String, Any?) -> Unit,
         isLandlordView: Boolean,

@@ -95,14 +95,18 @@ class PropertyComplianceViewModelFactory(
 
         val complianceNotificationMessages =
             if (provideLaterEnabled) {
-                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
+                notificationBannerViewModelFactory.getComplianceNotificationMessageKeys(propertyCompliance, landlordView)
             } else {
                 emptyList()
             }
 
         val beforePdjb939ComplianceNotificationMessages =
             if (!provideLaterEnabled && landlordView) {
-                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView, beforePdjb939 = true)
+                notificationBannerViewModelFactory.getComplianceNotificationMessageKeys(
+                    propertyCompliance,
+                    landlordView,
+                    beforePdjb939 = true,
+                )
             } else {
                 emptyList()
             }
