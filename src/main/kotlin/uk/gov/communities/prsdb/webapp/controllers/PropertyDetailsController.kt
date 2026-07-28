@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -29,11 +28,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping
@@ -44,7 +43,7 @@ class PropertyDetailsController(
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -72,12 +71,11 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
 
-        // TODO: PDJB-1275: Remove references to single landlord ID
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                 propertyOwnership.landlords,
-                baseUserId,
+                landlord,
                 propertyOwnership.id,
             )
         modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
