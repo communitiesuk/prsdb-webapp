@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -30,8 +29,7 @@ class CancelInvitationStepConfig(
     override fun mode(state: CancelJointLandlordInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: CancelJointLandlordInvitationJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(state.invitationId, baseUserId)
+        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(state.invitationId)
         val propertyOwnership = invitation.registeredOwnership
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl =

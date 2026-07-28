@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import java.security.Principal
 
 @PrsdbController
 @PreAuthorize("hasRole('LANDLORD')")
@@ -33,26 +32,23 @@ class CancelJointLandlordInvitationController(
     fun getJourneyStep(
         @PathVariable invitationId: Long,
         @PathVariable stepPath: String,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId, principal) { getStepModelAndView() }
+    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId) { getStepModelAndView() }
 
     @PostMapping("/{invitationId}/{*stepPath}")
     fun postJourneyData(
         @PathVariable invitationId: Long,
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId, principal) { postStepModelAndView(formData) }
+    ): ModelAndView = dispatchJourneyStep(stepPath, invitationId) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
         stepPath: String,
         invitationId: Long,
-        principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(invitationId, principal.name) },
+            createRoutingMap = { journeyFactory.createJourneySteps(invitationId) },
             initialiseJourney = { journeyFactory.initializeJourneyState() },
             dispatch = dispatch,
         )

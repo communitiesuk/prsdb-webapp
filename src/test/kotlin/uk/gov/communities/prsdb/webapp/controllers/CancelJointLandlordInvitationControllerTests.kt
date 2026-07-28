@@ -57,7 +57,7 @@ class CancelJointLandlordInvitationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
-            journeyFactory.createJourneySteps(testInvitationId, "user"),
+            journeyFactory.createJourneySteps(testInvitationId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -74,7 +74,7 @@ class CancelJointLandlordInvitationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            journeyFactory.createJourneySteps(testInvitationId, "user"),
+            journeyFactory.createJourneySteps(testInvitationId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
@@ -89,7 +89,7 @@ class CancelJointLandlordInvitationControllerTests(
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
-        whenever(journeyFactory.createJourneySteps(testInvitationId, "user"))
+        whenever(journeyFactory.createJourneySteps(testInvitationId))
             .thenThrow(NoSuchJourneyException())
         whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
 

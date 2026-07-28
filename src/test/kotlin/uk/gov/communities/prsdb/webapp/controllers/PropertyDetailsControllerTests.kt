@@ -392,7 +392,7 @@ class PropertyDetailsControllerTests(
                 flash { attribute("inviteRemoved", true) }
             }
 
-            verify(jointLandlordInvitationService).hideExpiredInvitation(eq(1L), any())
+            verify(jointLandlordInvitationService).hideExpiredInvitation(eq(1L))
         }
     }
 }

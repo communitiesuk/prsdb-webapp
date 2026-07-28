@@ -123,8 +123,7 @@ class PropertyDetailsController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        jointLandlordInvitationService.hideExpiredInvitation(invitationId, baseUserId)
+        jointLandlordInvitationService.hideExpiredInvitation(invitationId)
         redirectAttributes.addFlashAttribute("inviteRemoved", true)
         return "redirect:${getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
     }

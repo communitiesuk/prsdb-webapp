@@ -26,9 +26,8 @@ class CancelJointLandlordInvitationJourneyFactory(
 ) {
     fun createJourneySteps(
         invitationId: Long,
-        baseUserId: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId, baseUserId)
+        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId)
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {

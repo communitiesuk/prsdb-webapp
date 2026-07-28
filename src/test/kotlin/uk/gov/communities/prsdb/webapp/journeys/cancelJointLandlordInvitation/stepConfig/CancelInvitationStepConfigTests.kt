@@ -190,7 +190,7 @@ class CancelInvitationStepConfigTests {
         whenever(mockState.invitationId).thenReturn(invitationId)
         whenever(mockState.invitedEmail).thenReturn(invitedEmail)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockJointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId, baseUserId))
+        whenever(mockJointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId))
             .thenReturn(invitation)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(cancellerLandlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("example.com"))
