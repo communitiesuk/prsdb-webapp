@@ -363,9 +363,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for organisation flow`(
-        page: Page,
-    ) {
+    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for organisation flow`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
