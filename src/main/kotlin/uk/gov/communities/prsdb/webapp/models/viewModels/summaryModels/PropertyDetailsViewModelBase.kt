@@ -49,8 +49,6 @@ abstract class PropertyDetailsViewModelBase(
 
     val isOccupied = propertyOwnership.isOccupied
 
-    protected val tenancyInformationProvided = propertyOwnership.currentNumTenants > 0
-
     val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
     protected fun registrationNumberRow(): SummaryListRowViewModel =

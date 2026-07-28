@@ -26,7 +26,7 @@ class PropertyDetailsBeforePdjb939ViewModel(
     val beforePdjb939TenancyAndRentalInformation: List<SummaryListRowViewModel> =
         buildList {
             add(occupiedRow("propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied"))
-            if (tenancyInformationProvided) {
+            if (isOccupied) {
                 add(householdsRow())
                 add(tenantsRow())
                 add(bedroomsRow())
