@@ -127,7 +127,7 @@ complianceInformation:
       #  banner uses the landlord/localCouncil variants below).
       mainText: You must add compliance certificates for this property.
       landlord:
-        mainText: You must finish adding this property’s compliance certificates for this property.
+        mainText: You must finish adding this property’s compliance certificates.
       localCouncil:
         mainText: This property is missing compliance certificates.
     missingAndExpired:
