@@ -49,6 +49,7 @@ class UpdateOccupancyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.wasOccupied = propertyOwnership.isOccupied
+            state.initialNumberOfBedrooms = propertyOwnership.numBedrooms
             state.isStateInitialized = true
         }
 
@@ -232,6 +233,8 @@ class UpdateOccupancyJourney(
 
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
+    override var initialNumberOfBedrooms: Int? by delegateProvider.nullableDelegate("initialNumberOfBedrooms")
+
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
@@ -243,4 +246,5 @@ interface UpdateOccupancyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
+    val initialNumberOfBedrooms: Int?
 }
