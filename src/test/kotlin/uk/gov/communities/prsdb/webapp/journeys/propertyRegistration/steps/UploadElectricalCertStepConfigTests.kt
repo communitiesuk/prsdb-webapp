@@ -10,18 +10,21 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -38,6 +41,9 @@ class UploadElectricalCertStepConfigTests {
 
     @Mock
     lateinit var memberIdService: CollectionKeyParameterService
+
+    @Mock
+    lateinit var landlordService: LandlordService
 
     @Mock
     lateinit var uploadElectricalCertStep: UploadElectricalCertStep
@@ -110,11 +116,14 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
+        val landlord = mock<IndividualLandlord>()
+        whenever(landlord.id).thenReturn(7L)
+        whenever(landlordService.retrieveLandlordByBaseUserId("subject-1")).thenReturn(landlord)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(virusScanCallbackService).saveEmailForJourney("test-journey-id", 42L, CertificateType.Eicr, "subject-1")
-        verify(virusScanCallbackService).saveEmailToMonitoringTeam("test-journey-id", 42L, CertificateType.Eicr, "subject-1")
+        verify(virusScanCallbackService).saveEmailForJourney("test-journey-id", 42L, CertificateType.Eicr, 7L)
+        verify(virusScanCallbackService).saveEmailToMonitoringTeam("test-journey-id", 42L, CertificateType.Eicr, 7L)
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
@@ -133,6 +142,9 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(3)
+        val landlord = mock<IndividualLandlord>()
+        whenever(landlord.id).thenReturn(7L)
+        whenever(landlordService.retrieveLandlordByBaseUserId("subject-1")).thenReturn(landlord)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -143,7 +155,7 @@ class UploadElectricalCertStepConfigTests {
     }
 
     private fun setupStepConfig(): UploadElectricalCertStepConfig {
-        val stepConfig = UploadElectricalCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService)
+        val stepConfig = UploadElectricalCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService, landlordService)
         stepConfig.routeSegment = UploadElectricalCertStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

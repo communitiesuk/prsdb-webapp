@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -21,6 +22,7 @@ class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
+    private val landlordService: LandlordService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -39,18 +41,18 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
+            val landlordId = getCurrentLandlordId()
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
-                subjectIdentifier,
+                landlordId,
             )
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
-                subjectIdentifier,
+                landlordId,
             )
 
             val formModel = getFormModelFromState(state)
@@ -66,6 +68,12 @@ class UploadGasCertStepConfig(
 
             state.uploadGasCertStep.clearFormData()
         }
+    }
+
+    private fun getCurrentLandlordId(): Long {
+        val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
+        return landlordService.retrieveLandlordByBaseUserId(subjectIdentifier)?.id
+            ?: throw IllegalStateException("No individual landlord found for subject identifier: $subjectIdentifier")
     }
 }
 

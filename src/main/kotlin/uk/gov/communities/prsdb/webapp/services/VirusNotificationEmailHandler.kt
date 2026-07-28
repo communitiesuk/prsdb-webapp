@@ -41,19 +41,13 @@ class VirusNotificationEmailHandler(
     ) {
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
-        if (emailAddress != null) {
-            val firstLandlord = ownership.landlords.first()
-            check(firstLandlord is IndividualLandlord)
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        ownership.landlords.forEach { landlord ->
+            check(landlord is IndividualLandlord)
             emailNotificationService.sendEmail(
-                emailAddress,
-                buildAlertEmail(ownership, notification.certificateType, firstLandlord.name),
+                emailAddress ?: landlord.email,
+                buildAlertEmail(ownership, notification.certificateType, landlord.name),
             )
-        } else {
-            // TODO: PDJB-1274: Update emails to account for org landlord
-            ownership.landlords.forEach { landlord ->
-                check(landlord is IndividualLandlord)
-                emailNotificationService.sendEmail(landlord.email, buildAlertEmail(ownership, notification.certificateType, landlord.name))
-            }
         }
     }
 
@@ -62,14 +56,13 @@ class VirusNotificationEmailHandler(
         emailAddress: String? = null,
     ) {
         val landlord =
-            individualLandlordRepository.findByBaseUser_Id(notification.subjectIdentifier)
-                ?: throw IllegalStateException(
-                    "No individual landlord found for subject identifier: ${notification.subjectIdentifier}",
-                )
+            individualLandlordRepository.findById(notification.landlordId).orElse(null)
+                ?: throw IllegalStateException("No individual landlord found for id: ${notification.landlordId}")
         val savedJourneyState =
-            savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, notification.subjectIdentifier)
+            savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, landlord.baseUser.id)
                 ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
 
+        // TODO: PDJB-1274: update to account for org landlords
         val email =
             VirusScanUnsuccessfulEmail(
                 certificateType = certificateDescriptionForBody(notification.certificateType),

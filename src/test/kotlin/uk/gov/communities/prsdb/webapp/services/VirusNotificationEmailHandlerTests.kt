@@ -10,10 +10,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -21,8 +23,10 @@ import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.net.URI
+import java.util.Optional
 
 class VirusNotificationEmailHandlerTests {
     private lateinit var virusNotificationEmailHandler: VirusNotificationEmailHandler
@@ -133,8 +137,13 @@ class VirusNotificationEmailHandlerTests {
         }
 
     private fun arrangeIncompletePropertyCallback(certType: CertificateType): VirusScanUnsuccessfulEmail {
-        val landlord = MockLandlordData.createIndividualLandlord(name = "Jane Smith", email = "jane@example.com")
-        whenever(individualLandlordRepository.findByBaseUser_Id("subject-1")).thenReturn(landlord)
+        val landlord =
+            MockLandlordData.createIndividualLandlord(
+                baseUser = MockPrsdbUserData.createPrsdbUser("subject-1"),
+                name = "Jane Smith",
+                email = "jane@example.com",
+            )
+        doReturn(Optional.of(landlord)).whenever(individualLandlordRepository).findById(7L)
         val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = "journey-1",
@@ -159,7 +168,7 @@ class VirusNotificationEmailHandlerTests {
         expectedCertString: String,
     ) {
         val expectedEmail = arrangeIncompletePropertyCallback(certType)
-        val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, "subject-1")
+        val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(
                 mock(),
@@ -181,7 +190,7 @@ class VirusNotificationEmailHandlerTests {
         expectedCertString: String,
     ) {
         val expectedEmail = arrangeIncompletePropertyCallback(certType)
-        val inner = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, "subject-1")
+        val inner = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
         val data = EmailNotificationData.VirusMonitoringEmailNotification(inner)
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(
@@ -199,9 +208,9 @@ class VirusNotificationEmailHandlerTests {
 
     @Test
     fun `handleCallback for incomplete property throws when the landlord cannot be found`() {
-        whenever(individualLandlordRepository.findByBaseUser_Id("subject-1")).thenReturn(null)
+        doReturn(Optional.empty<IndividualLandlord>()).whenever(individualLandlordRepository).findById(7L)
         val data =
-            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, "subject-1")
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L)
         assertThrows<IllegalStateException> {
             virusNotificationEmailHandler.handleCallback(
                 VirusScanCallback(
