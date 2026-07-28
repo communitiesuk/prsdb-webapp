@@ -433,10 +433,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class OrgCompaniesHouseStep {
+    inner class OrgIsRegisteredCompanyStep {
         @Test
         fun `the companies house page renders the heading and yes no radio options`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             assertThat(companiesHousePage.form.fieldsetHeading)
                 .containsText("Is your organisation registered with Companies House?")
@@ -446,7 +446,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns a validation error`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             companiesHousePage.form.submit()
 
@@ -952,7 +952,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
                         .beforeOrgCheckAnswers()
-                        .withOrgCompaniesHouse(true)
+                        .withOrgIsRegisteredCompany(true)
                         .withOrgCompanyNumber("12345678"),
                 )
 

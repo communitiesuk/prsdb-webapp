@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
@@ -29,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -52,7 +52,7 @@ class OrgLandlordRegistrationTask(
     override val orgEmailStep: OrgEmailStep,
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
-    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
     override val orgIsRegisteredCharityStep: OrgIsRegisteredCharityStep,
     override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
@@ -152,7 +152,7 @@ class OrgLandlordRegistrationTask(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
-                        YesOrNo.NO -> Destination(journey.orgCompaniesHouseStep)
+                        YesOrNo.NO -> Destination(journey.orgIsRegisteredCompanyStep)
                     }
                 }
             }
@@ -164,27 +164,27 @@ class OrgLandlordRegistrationTask(
                         CharityRegulator.ENGLAND_AND_WALES -> Destination(journey.orgCharityNumberEnglandAndWalesStep)
                         CharityRegulator.NORTHERN_IRELAND -> Destination(journey.orgCharityNumberNorthernIrelandStep)
                         CharityRegulator.SCOTLAND -> Destination(journey.orgCharityNumberScotlandStep)
-                        CharityRegulator.NONE -> Destination(journey.orgCompaniesHouseStep)
+                        CharityRegulator.NONE -> Destination(journey.orgIsRegisteredCompanyStep)
                     }
                 }
             }
             step(journey.orgCharityNumberEnglandAndWalesStep) {
                 routeSegment(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.ENGLAND_AND_WALES) }
-                nextStep { journey.orgCompaniesHouseStep }
+                nextStep { journey.orgIsRegisteredCompanyStep }
             }
             step(journey.orgCharityNumberNorthernIrelandStep) {
                 routeSegment(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NORTHERN_IRELAND) }
-                nextStep { journey.orgCompaniesHouseStep }
+                nextStep { journey.orgIsRegisteredCompanyStep }
             }
             step(journey.orgCharityNumberScotlandStep) {
                 routeSegment(OrgCharityNumberScotlandStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.SCOTLAND) }
-                nextStep { journey.orgCompaniesHouseStep }
+                nextStep { journey.orgIsRegisteredCompanyStep }
             }
-            step(journey.orgCompaniesHouseStep) {
-                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
+            step(journey.orgIsRegisteredCompanyStep) {
+                routeSegment(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.orgIsRegisteredCharityStep.hasOutcome(YesOrNo.NO),
@@ -203,12 +203,12 @@ class OrgLandlordRegistrationTask(
             }
             step(journey.orgCompanyNumberStep) {
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
+                parents { journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgGovBodyDetailsStep) {
                 routeSegment(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
+                parents { journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO) }
                 nextDestination { mode ->
                     when (mode) {
                         OrgGovBodyDetailsMode.HAS_DETAILS -> Destination(journey.hasAnyGovBodyMembersStep)
