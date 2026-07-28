@@ -355,7 +355,6 @@ class NftDataSeeder(
 
         val name = NftDataFaker.generateName()
         val isVerified = NftDataFaker.generateBoolean(probabilityTrue = 0.8)
-        val hasRespondedToFeedback = NftDataFaker.generateBoolean(probabilityTrue = 0.4)
 
         landlordStmt.setLong(1, coreDetails.id)
         landlordStmt.setTimestamp(2, coreDetails.createdDate)
@@ -367,8 +366,7 @@ class NftDataSeeder(
         landlordStmt.setLong(8, landlordAddressGenerator.next().id)
         landlordStmt.setDate(9, NftDataFaker.generateDateOfBirth())
         landlordStmt.setLong(10, registrationNumberId)
-        landlordStmt.setBoolean(11, hasRespondedToFeedback)
-        landlordStmt.setBoolean(12, isVerified)
+        landlordStmt.setBoolean(11, isVerified)
         landlordStmt.addBatch()
     }
 

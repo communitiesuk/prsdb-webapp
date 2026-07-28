@@ -12,11 +12,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -41,6 +43,7 @@ class PropertyDetailsController(
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -57,6 +60,8 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = true,
                 hideNullUprn = true,
+                isRestructureAndSkippingEnabled =
+                    featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
                 messageSource = messageSource,
             )
 
@@ -148,6 +153,8 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
+                isRestructureAndSkippingEnabled =
+                    featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
                 messageSource = messageSource,
             )
 
@@ -162,6 +169,18 @@ class PropertyDetailsController(
             )
         model.addAttribute("landlordSummaryCards", landlordSummaryCards)
         model.addAttribute("landlordCount", propertyOwnership.landlords.size)
+
+        val (pendingInvitations, expiredInvitations) =
+            jointLandlordInvitationService
+                .getPendingAndExpiredInvitations(propertyOwnership)
+                .let { (pending, expired) ->
+                    Pair(
+                        pending.map { InvitationViewModelBuilder.buildPendingViewModel(it) },
+                        expired.map { InvitationViewModelBuilder.buildExpiredViewModel(it) },
+                    )
+                }
+        model.addAttribute("pendingInvitations", pendingInvitations)
+        model.addAttribute("expiredInvitations", expiredInvitations)
 
         val propertyComplianceDetails =
             propertyCompliance?.let {

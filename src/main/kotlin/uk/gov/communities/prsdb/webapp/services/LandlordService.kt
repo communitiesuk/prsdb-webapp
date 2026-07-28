@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -180,13 +179,6 @@ class LandlordService(
         ) {}
     }
 
-    // TODO: PDJB-1294: Remove this
-    fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
-        check(landlord is IndividualLandlord)
-        landlord.hasRespondedToFeedback = true
-        return individualLandlordRepository.save(landlord)
-    }
-
     fun searchForLandlords(
         searchTerm: String,
         localCouncilBaseUserId: String,
@@ -253,13 +245,5 @@ class LandlordService(
                 )
             }
         }
-    }
-
-    // TODO: PDJB-1294: Remove this
-    fun getLandlordUserShouldSeeFeedbackPages(baseUserId: String): Boolean {
-        val landlord =
-            retrieveLandlordByBaseUserId(baseUserId)
-                ?: throw PrsdbWebException("User with id $baseUserId was not found in the Landlord repository")
-        return landlord.shouldSeeFeedback
     }
 }

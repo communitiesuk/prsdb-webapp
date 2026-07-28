@@ -10,9 +10,12 @@ import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -50,6 +53,9 @@ class UpdateOccupancyCyaConfigTests {
 
     @Mock
     private lateinit var mockMessageSource: MessageSource
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
@@ -113,6 +119,7 @@ class UpdateOccupancyCyaConfigTests {
 
     private val propertyId = 123L
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
+    private val initialNumberOfBedrooms = 4
 
     @Mock
     private lateinit var stepConfig: UpdateOccupancyCyaConfig
@@ -125,12 +132,13 @@ class UpdateOccupancyCyaConfigTests {
                 propertyOwnershipService = mockPropertyOwnershipService,
                 messageSource = mockMessageSource,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
+                featureFlagManager = mockFeatureFlagManager,
             )
         stepConfig.routeSegment = UpdateOccupancyCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        lenient().`when`(mockState.propertyId).thenReturn(propertyId)
+        lenient().`when`(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
@@ -158,6 +166,132 @@ class UpdateOccupancyCyaConfigTests {
         lenient().`when`(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
         lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn("500")
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the restructured summary when restructure and skipping is enabled`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(true)
+
+        stepConfig.getStepSpecificContent(mockState)
+
+        verify(mockOccupancyDetailsHelper)
+            .getRestructuredCheckYourAnswersSummaryList(mockState, mockMessageSource)
+        verify(mockOccupancyDetailsHelper, never())
+            .getCheckYourAnswersSummaryList(mockState, mockMessageSource)
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the existing summary when restructure and skipping is disabled`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(false)
+
+        stepConfig.getStepSpecificContent(mockState)
+
+        verify(mockOccupancyDetailsHelper)
+            .getCheckYourAnswersSummaryList(mockState, mockMessageSource)
+        verify(mockOccupancyDetailsHelper, never())
+            .getRestructuredCheckYourAnswersSummaryList(mockState, mockMessageSource)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and occupancy changes from occupied to unoccupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(true)
+        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = false,
+            numBedrooms = initialNumberOfBedrooms,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and occupancy changes from unoccupied to occupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(true)
+        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = true,
+            numBedrooms = initialNumberOfBedrooms,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and property remains occupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(true)
+        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = true,
+            numBedrooms = initialNumberOfBedrooms,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded preserves bedrooms when restructure is enabled and property remains unoccupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(true)
+        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+        whenever(mockState.initialNumberOfBedrooms).thenReturn(initialNumberOfBedrooms)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = false,
+            numBedrooms = initialNumberOfBedrooms,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded uses submitted bedrooms when restructure is disabled and property is occupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = true,
+            numBedrooms = 3,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded clears bedrooms when restructure is disabled and property is unoccupied`() {
+        whenever(
+            mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+        ).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verifyOccupancyUpdate(
+            isOccupied = false,
+            numBedrooms = null,
+        )
     }
 
     @Test
@@ -242,5 +376,25 @@ class UpdateOccupancyCyaConfigTests {
         assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
 
         verify(mockState).deleteJourney()
+    }
+
+    private fun verifyOccupancyUpdate(
+        isOccupied: Boolean,
+        numBedrooms: Int?,
+    ) {
+        verify(mockPropertyOwnershipService).updateOccupancy(
+            id = propertyId,
+            isOccupied = isOccupied,
+            numberOfHouseholds = if (isOccupied) 2 else 0,
+            numberOfPeople = if (isOccupied) 5 else 0,
+            numBedrooms = numBedrooms,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = if (isOccupied) "500".toBigDecimal() else null,
+            initialLastModifiedDate = initialLastModifiedDate,
+        )
     }
 }
