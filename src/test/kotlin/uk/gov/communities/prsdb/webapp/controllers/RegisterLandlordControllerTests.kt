@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -108,11 +110,9 @@ class RegisterLandlordControllerTests(
     fun `getConfirmation returns 500 for user not registered as landlord`() {
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
 
-        mvc
-            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
-            .andExpect {
-                status { is5xxServerError() }
-            }
+        assertThrows<ServletException> {
+            mvc.get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+        }
     }
 
     @Test

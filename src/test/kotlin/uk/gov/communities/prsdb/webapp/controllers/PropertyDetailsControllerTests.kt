@@ -54,6 +54,11 @@ class PropertyDetailsControllerTests(
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
+        @BeforeEach
+        fun setUpLandlord() {
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        }
+
         @Test
         fun `getPropertyDetails returns a redirect for an unauthenticated user`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
@@ -127,7 +132,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -351,7 +356,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetailsLocalCouncilView fetches invitations`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))

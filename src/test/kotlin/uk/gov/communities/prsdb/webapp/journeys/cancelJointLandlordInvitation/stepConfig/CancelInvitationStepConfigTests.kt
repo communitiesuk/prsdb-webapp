@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -162,8 +161,6 @@ class CancelInvitationStepConfigTests {
     }
 
     private fun setupMocks(includeOtherLandlord: Boolean = true): uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation {
-        JourneyTestHelper.setMockUser(baseUserId)
-
         val cancellerLandlord = MockLandlordData.createIndividualLandlord(name = cancellerName, email = cancellerEmail)
         ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
 

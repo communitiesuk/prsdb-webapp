@@ -448,7 +448,6 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `throws not found error if an active property ownership does not exist`() {
             val invalidId: Long = 1
-            setMockPrincipal("landlord")
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(invalidId)).thenReturn(null)
 
             val errorThrown =
@@ -1651,7 +1650,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             whenever(
                 mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
-            ).thenReturn(emptyList()
+            ).thenReturn(emptyList())
 
             // Act
             val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord)

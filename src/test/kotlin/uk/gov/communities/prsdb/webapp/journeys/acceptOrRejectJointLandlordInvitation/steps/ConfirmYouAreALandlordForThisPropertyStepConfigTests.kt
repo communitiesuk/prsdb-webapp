@@ -282,7 +282,6 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     ): JointLandlordInvitation {
         setupTokenValidation(true)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        setMockPrincipal(baseUserId)
         return invitation
     }
 

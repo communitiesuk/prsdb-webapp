@@ -1,12 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -14,9 +12,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
@@ -57,11 +52,6 @@ class PropertyUpdateEmailServiceTests {
             )
     }
 
-    @AfterEach
-    fun tearDown() {
-        SecurityContextHolder.clearContext()
-    }
-
     @Test
     fun `sendUpdateEmails throws PrsdbWebException when the acting landlord is not found`() {
         val baseUserId = "unknown-user"
@@ -69,11 +59,10 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
 
         val exception = assertThrows<PrsdbWebException> { notifier.sendUpdateEmails(propertyId, bullets) }
-        assert(exception.message!!.contains("Landlord record not found for logged in user with baseUserId $baseUserId"))
+        assert(exception.message == "Landlord not found")
     }
 
     @Test
@@ -88,7 +77,6 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
@@ -113,7 +101,6 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
@@ -140,20 +127,11 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
 
         notifier.sendUpdateEmails(propertyId, bullets)
 
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
-    }
-
-    private fun setMockPrincipal(name: String) {
-        val authentication = mock<Authentication>()
-        whenever(authentication.name).thenReturn(name)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
     }
 }

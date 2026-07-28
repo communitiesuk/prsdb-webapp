@@ -60,7 +60,6 @@ class CompleteInviteJointLandlordStepConfigTests {
                 mockUserToLandlordService,
             )
         val baseUserId = "unknown-user"
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
         whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
@@ -89,7 +88,6 @@ class CompleteInviteJointLandlordStepConfigTests {
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
 
         // Act

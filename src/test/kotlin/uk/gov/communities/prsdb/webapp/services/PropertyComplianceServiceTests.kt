@@ -20,12 +20,9 @@ import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -114,11 +111,6 @@ class PropertyComplianceServiceTests {
     }
 
     private fun setMockPrincipal() {
-        val authentication = mock<Authentication>()
-        whenever(authentication.name).thenReturn(loggedInBaseUserId)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLoggedInLandlord)
     }
 

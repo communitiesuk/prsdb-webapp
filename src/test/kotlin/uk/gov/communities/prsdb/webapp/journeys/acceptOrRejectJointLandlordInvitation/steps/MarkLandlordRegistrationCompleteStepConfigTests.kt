@@ -36,7 +36,6 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
     fun `afterStepIsReached sets userCompletedLandlordRegistrationThisJourney to true`() {
         // Arrange
         val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockUserToLandlordService)
-        setMockPrincipal(baseUserId)
         val mockLandlord =
             MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
@@ -52,7 +51,6 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
     fun `afterStepIsReached saves the registered landlord registration number to state`() {
         // Arrange
         val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockUserToLandlordService)
-        setMockPrincipal(baseUserId)
         val mockLandlord =
             MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
