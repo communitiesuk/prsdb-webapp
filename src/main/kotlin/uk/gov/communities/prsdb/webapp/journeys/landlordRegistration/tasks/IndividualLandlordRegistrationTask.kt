@@ -27,18 +27,8 @@ class IndividualLandlordRegistrationTask(
 
     override fun makeSubJourney(state: IndividualLandlordRegistrationState) =
         subJourney(state) {
-            step(journey.emailStep) {
-                routeSegment(EmailStep.ROUTE_SEGMENT)
-                nextStep { journey.phoneNumberStep }
-            }
-            step(journey.phoneNumberStep) {
-                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                parents { journey.emailStep.isComplete() }
-                nextStep { journey.countryOfResidenceStep }
-            }
             step(journey.countryOfResidenceStep) {
                 routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
-                parents { journey.phoneNumberStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
                         CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep

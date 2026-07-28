@@ -864,6 +864,8 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(checkAnswersPage.sectionHeader).containsText("Register as a landlord")
             assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
+            assertThat(checkAnswersPage.yourDetailsCard).containsText("email@test.com")
+            assertThat(checkAnswersPage.yourDetailsCard).containsText("01234567890")
             assertThat(checkAnswersPage.leadTrusteeCard.title).hasText("Lead trustee")
             assertThat(checkAnswersPage.governingBodyMemberCard.title).hasText("1. Director")
             assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")

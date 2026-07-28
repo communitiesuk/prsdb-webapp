@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -68,10 +69,20 @@ class LandlordRegistrationTask(
             }
             duplicableTask(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
+                nextStep { journey.individualLandlordRegistrationTask.emailStep }
+            }
+            step(journey.individualLandlordRegistrationTask.emailStep) {
+                routeSegment(EmailStep.ROUTE_SEGMENT)
+                parents { journey.identityTask.isComplete() }
+                nextStep { journey.individualLandlordRegistrationTask.phoneNumberStep }
+            }
+            step(journey.individualLandlordRegistrationTask.phoneNumberStep) {
+                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
+                parents { journey.individualLandlordRegistrationTask.emailStep.isComplete() }
                 nextStep { journey.individualLandlordRegistrationTask.firstStep }
             }
             duplicableTask(journey.individualLandlordRegistrationTask) {
-                parents { journey.identityTask.isComplete() }
+                parents { journey.individualLandlordRegistrationTask.phoneNumberStep.isComplete() }
                 nextStep { journey.cyaStep }
             }
             step(journey.cyaStep) {
@@ -92,24 +103,45 @@ class LandlordRegistrationTask(
             }
             duplicableTask(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
+                nextStep { journey.individualLandlordRegistrationTask.emailStep }
+            }
+            step(journey.individualLandlordRegistrationTask.emailStep) {
+                routeSegment(EmailStep.ROUTE_SEGMENT)
+                parents { journey.identityTask.isComplete() }
+                nextStep { journey.individualLandlordRegistrationTask.phoneNumberStep }
+            }
+            step(journey.individualLandlordRegistrationTask.phoneNumberStep) {
+                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
+                parents { journey.individualLandlordRegistrationTask.emailStep.isComplete() }
                 nextStep { journey.landlordTypeStep }
             }
             step(journey.landlordTypeStep) {
                 routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                parents { journey.identityTask.isComplete() }
-                nextStep { mode ->
-                    when (mode) {
+                parents { journey.individualLandlordRegistrationTask.phoneNumberStep.isComplete() }
+                nextStep {
+                    when (journey.landlordTypeStep.outcome) {
                         LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask.firstStep
                         LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.firstStep
+                        null -> journey.individualLandlordRegistrationTask.firstStep
                     }
                 }
             }
             duplicableTask(journey.orgLandlordRegistrationTask) {
-                parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
+                parents {
+                    AndParents(
+                        journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION),
+                        journey.individualLandlordRegistrationTask.phoneNumberStep.isComplete(),
+                    )
+                }
                 nextStep { journey.orgCyaStep }
             }
             duplicableTask(journey.individualLandlordRegistrationTask) {
-                parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                parents {
+                    AndParents(
+                        journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
+                        journey.individualLandlordRegistrationTask.phoneNumberStep.isComplete(),
+                    )
+                }
                 nextStep { journey.cyaStep }
             }
             step(journey.cyaStep) {
