@@ -170,6 +170,18 @@ class PropertyDetailsController(
         model.addAttribute("landlordSummaryCards", landlordSummaryCards)
         model.addAttribute("landlordCount", propertyOwnership.landlords.size)
 
+        val (pendingInvitations, expiredInvitations) =
+            jointLandlordInvitationService
+                .getPendingAndExpiredInvitations(propertyOwnership)
+                .let { (pending, expired) ->
+                    Pair(
+                        pending.map { InvitationViewModelBuilder.buildPendingViewModel(it) },
+                        expired.map { InvitationViewModelBuilder.buildExpiredViewModel(it) },
+                    )
+                }
+        model.addAttribute("pendingInvitations", pendingInvitations)
+        model.addAttribute("expiredInvitations", expiredInvitations)
+
         val propertyComplianceDetails =
             propertyCompliance?.let {
                 propertyComplianceViewModelFactory.create(

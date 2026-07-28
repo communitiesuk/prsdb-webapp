@@ -331,6 +331,8 @@ class PropertyDetailsControllerTests(
                 .thenReturn(
                     propertyOwnership,
                 )
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
@@ -346,6 +348,8 @@ class PropertyDetailsControllerTests(
                 .thenReturn(
                     propertyOwnership,
                 )
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
@@ -361,6 +365,8 @@ class PropertyDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             val result =
                 mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
@@ -377,6 +383,25 @@ class PropertyDetailsControllerTests(
             )
             assertFalse(viewModel.tenancyAndRentalInformation.any { it.fieldHeading == bedroomsHeading })
             assertEquals(0, viewModel.propertyRecord.single { it.fieldHeading == bedroomsHeading }.actions.size)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView fetches invitations`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { isOk() }
+                model { attributeExists("pendingInvitations") }
+                model { attributeExists("expiredInvitations") }
+            }
+
+            verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
     }
 
