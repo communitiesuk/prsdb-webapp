@@ -133,7 +133,7 @@ class VirusNotificationEmailHandlerTests {
         }
 
     private fun arrangeIncompletePropertyCallback(certType: CertificateType): VirusScanUnsuccessfulEmail {
-        val landlord = MockLandlordData.createLandlord(name = "Jane Smith", email = "jane@example.com")
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Jane Smith", email = "jane@example.com")
         whenever(individualLandlordRepository.findByBaseUser_Id("subject-1")).thenReturn(landlord)
         val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
