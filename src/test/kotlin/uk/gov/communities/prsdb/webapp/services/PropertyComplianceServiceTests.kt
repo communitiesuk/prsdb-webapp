@@ -48,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceU
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
@@ -75,6 +76,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -116,6 +120,7 @@ class PropertyComplianceServiceTests {
         val context = mock<SecurityContext>()
         whenever(context.authentication).thenReturn(authentication)
         SecurityContextHolder.setContext(context)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLoggedInLandlord)
     }
 
     @Test
