@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -13,21 +15,30 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
-class OccupationTaskWithProvideLaterAllowed : OccupationTask() {
+class OccupationTaskWithProvideLaterAllowed(
+    featureFlagManager: FeatureFlagManager,
+) : OccupationTask(featureFlagManager) {
     override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
 }
 
 @JourneyFrameworkComponent
-class OccupationTaskWithOccupationRequired : OccupationTask() {
+class OccupationTaskWithOccupationRequired(
+    featureFlagManager: FeatureFlagManager,
+) : OccupationTask(featureFlagManager) {
     override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
 }
 
-abstract class OccupationTask : Task<OccupationState>() {
+abstract class OccupationTask(
+    private val featureFlagManager: FeatureFlagManager,
+) : Task<OccupationState>() {
     // TODO PDJB-896: Remerge the three versions of occupation task when this class uses DuplicableTaskWithDependencies
     abstract val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 
     override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
+            val isRestructureAndSkippingEnabled =
+                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
             step(journey.occupied) {
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 nextStep { mode ->
@@ -41,17 +52,31 @@ abstract class OccupationTask : Task<OccupationState>() {
             duplicableTask(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                 withDependencies { householdsAndTenantsDependencies }
-                nextStep { journey.bedrooms }
+                nextStep {
+                    if (isRestructureAndSkippingEnabled) {
+                        journey.rentIncludesBillsTask.firstStep
+                    } else {
+                        journey.bedrooms
+                    }
+                }
                 savable()
             }
-            step(journey.bedrooms) {
-                routeSegment(BedroomsStep.ROUTE_SEGMENT)
-                parents { journey.householdsAndTenantsTask.isComplete() }
-                nextStep { journey.rentIncludesBillsTask.firstStep }
-                savable()
+            if (!isRestructureAndSkippingEnabled) {
+                step(journey.bedrooms) {
+                    routeSegment(BedroomsStep.ROUTE_SEGMENT)
+                    parents { journey.householdsAndTenantsTask.isComplete() }
+                    nextStep { journey.rentIncludesBillsTask.firstStep }
+                    savable()
+                }
             }
             duplicableTask(journey.rentIncludesBillsTask) {
-                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                parents {
+                    if (isRestructureAndSkippingEnabled) {
+                        journey.householdsAndTenantsTask.isComplete()
+                    } else {
+                        journey.bedrooms.hasOutcome(Complete.COMPLETE)
+                    }
+                }
                 nextStep { journey.furnishedStatus }
             }
             step(journey.furnishedStatus) {
