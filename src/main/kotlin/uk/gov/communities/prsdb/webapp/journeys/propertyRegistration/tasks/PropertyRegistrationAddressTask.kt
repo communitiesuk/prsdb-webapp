@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
@@ -17,9 +18,25 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @JourneyFrameworkComponent
-class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>() {
+class PropertyRegistrationAddressTask(
+    journeyStateService: JourneyStateService,
+    override val lookupAddressStep: LookupAddressStep,
+    override val selectAddressStep: SelectAddressStep,
+    override val noAddressFoundStep: NoAddressFoundStep,
+    override val manualAddressStep: ManualAddressStep,
+    override val alreadyRegisteredStep: AlreadyRegisteredStep,
+    override val localCouncilStep: LocalCouncilStep,
+) : DuplicableTask<PropertyRegistrationAddressState>(journeyStateService),
+    PropertyRegistrationAddressState {
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+
+    override val taskState get() = this
+
     override fun makeSubJourney(state: PropertyRegistrationAddressState) =
         subJourney(state) {
             step<LookupAddressMode, LookupAddressStepConfig>(journey.lookupAddressStep) {

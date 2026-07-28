@@ -29,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -79,7 +78,6 @@ class OrgLandlordRegistrationTask(
     override val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep,
     override val removeGovBodyMemberStep: RemoveGovBodyMemberStep,
     override val orgMainContactStep: OrgMainContactStep,
-    override val orgLandlordCyaStep: OrgLandlordCyaStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
@@ -304,15 +302,10 @@ class OrgLandlordRegistrationTask(
                         journey.orgGovBodyMemberListStep.isComplete(),
                     )
                 }
-                nextStep { journey.orgLandlordCyaStep }
-            }
-            step(journey.orgLandlordCyaStep) {
-                routeSegment(OrgLandlordCyaStep.ROUTE_SEGMENT)
-                parents { journey.orgMainContactStep.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.orgLandlordCyaStep.isComplete() }
+                parents { journey.orgMainContactStep.isComplete() }
             }
         }
 }

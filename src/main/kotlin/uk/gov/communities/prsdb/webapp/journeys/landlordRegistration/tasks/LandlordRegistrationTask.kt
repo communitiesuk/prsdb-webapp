@@ -18,9 +18,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IndividualLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -38,7 +39,8 @@ class LandlordRegistrationTask(
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
-    override val cyaStep: LandlordRegistrationCyaStep,
+    override val cyaStep: IndividualLandlordRegistrationCyaStep,
+    override val orgCyaStep: OrgLandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
@@ -104,7 +106,7 @@ class LandlordRegistrationTask(
             }
             duplicableTask(journey.orgLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
-                nextStep { exitStep }
+                nextStep { journey.orgCyaStep }
             }
             duplicableTask(journey.individualLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
@@ -115,13 +117,13 @@ class LandlordRegistrationTask(
                 parents { journey.individualLandlordRegistrationTask.isComplete() }
                 nextStep { exitStep }
             }
+            step(journey.orgCyaStep) {
+                routeSegment(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
+                parents { journey.orgLandlordRegistrationTask.isComplete() }
+                nextStep { exitStep }
+            }
             exitStep {
-                parents {
-                    OrParents(
-                        journey.cyaStep.isComplete(),
-                        journey.orgLandlordRegistrationTask.isComplete(),
-                    )
-                }
+                parents { OrParents(journey.cyaStep.isComplete(), journey.orgCyaStep.isComplete()) }
             }
         }
 

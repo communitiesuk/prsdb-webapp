@@ -31,6 +31,7 @@ class PropertyDetailsViewModel(
     private val propertyOwnership: PropertyOwnership,
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
+    private val isRestructureAndSkippingEnabled: Boolean = false,
     private val messageSource: MessageSource,
 ) {
     val address: String = propertyOwnership.address.singleLineAddress
@@ -70,8 +71,12 @@ class PropertyDetailsViewModel(
                 )
                 addRow(
                     "propertyDetails.propertyRecord.propertyType",
-                    propertyOwnership.customPropertyType ?: MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
+                    propertyOwnership.customPropertyType
+                        ?: MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
                 )
+                if (isRestructureAndSkippingEnabled) {
+                    addBedroomsRow()
+                }
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
@@ -130,14 +135,9 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                     )
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-                        propertyOwnership.numBedrooms,
-                        changeLinkMessageKey,
-                        UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
-                            "/${BedroomsStep.ROUTE_SEGMENT}",
-                        withChangeLinks,
-                    )
+                    if (!isRestructureAndSkippingEnabled) {
+                        addBedroomsRow()
+                    }
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                         MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
@@ -167,7 +167,10 @@ class PropertyDetailsViewModel(
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
-                        RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
+                        RentDataHelper.getRentFrequency(
+                            propertyOwnership.rentFrequency!!,
+                            propertyOwnership.customRentFrequency,
+                        ),
                         changeLinkMessageKey,
                         UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
                             "/${RentFrequencyStep.ROUTE_SEGMENT}",
@@ -187,6 +190,17 @@ class PropertyDetailsViewModel(
                     )
                 }
             }.toList()
+
+    private fun MutableList<SummaryListRowViewModel>.addBedroomsRow() {
+        addRow(
+            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
+            propertyOwnership.numBedrooms,
+            changeLinkMessageKey,
+            UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
+                "/${BedroomsStep.ROUTE_SEGMENT}",
+            withChangeLinks,
+        )
+    }
 
     private fun getIsTenantedKey(isOccupied: Boolean): String =
         when (isOccupied) {

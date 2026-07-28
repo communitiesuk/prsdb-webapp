@@ -218,7 +218,7 @@ class VirusNotificationEmailHandlerTests {
     ): Pair<Long, VirusScanUnsuccessfulEmail> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
-                landlords = emailAddresses.mapTo(mutableSetOf()) { MockLandlordData.createLandlord(email = it) },
+                landlords = emailAddresses.mapTo(mutableSetOf()) { MockLandlordData.createIndividualLandlord(email = it) },
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
             )
 

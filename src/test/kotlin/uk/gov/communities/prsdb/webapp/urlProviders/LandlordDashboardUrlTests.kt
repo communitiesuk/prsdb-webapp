@@ -44,7 +44,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.UploadService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import java.time.LocalDate
 import kotlin.test.Test
@@ -130,7 +130,7 @@ class LandlordDashboardUrlTests(
         whenever(registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))
             .thenReturn(mock())
         whenever(repository.save(any()))
-            .thenReturn(createLandlord())
+            .thenReturn(createIndividualLandlord())
 
         val confirmationCaptor = argumentCaptor<LandlordRegistrationConfirmationEmail>()
         Mockito
@@ -139,7 +139,7 @@ class LandlordDashboardUrlTests(
             .sendEmail(any(), confirmationCaptor.capture())
 
         // Act
-        landlordService.createLandlord(
+        landlordService.createIndividualLandlord(
             "userId",
             "Test Name",
             "email",
@@ -163,7 +163,7 @@ class LandlordDashboardUrlTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
         // Arrange
-        val landlord = createLandlord()
+        val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockIndividualLandlordRepository = mock<IndividualLandlordRepository>()
         val propertyRegistrationService =

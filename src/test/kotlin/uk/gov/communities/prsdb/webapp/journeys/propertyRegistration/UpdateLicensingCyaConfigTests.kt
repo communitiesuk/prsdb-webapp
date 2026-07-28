@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyState
@@ -41,6 +42,9 @@ class UpdateLicensingCyaConfigTests {
     private lateinit var mockLicensingTypeStep: LicensingTypeStep
 
     @Mock
+    private lateinit var mockLicensingTask: LicensingTask
+
+    @Mock
     private lateinit var mockLicensingTypeFormModel: LicensingTypeFormModel
 
     private val propertyId = 123L
@@ -61,10 +65,11 @@ class UpdateLicensingCyaConfigTests {
         stepConfig.afterStepIsReached(mockState)
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
-        whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
+        whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
+        whenever(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
         whenever(mockLicensingTypeStep.formModel).thenReturn(mockLicensingTypeFormModel)
         whenever(mockLicensingTypeFormModel.licensingType).thenReturn(LicensingType.NO_LICENSING)
-        whenever(mockState.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
     }
 
     @Test

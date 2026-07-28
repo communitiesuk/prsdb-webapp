@@ -38,7 +38,7 @@ class IncompletePropertyForLandlordServiceTests {
     fun `addIncompletePropertyToLandlord adds a new entry to the LandlordIncompleteProperties join table`() {
         val landlordPrsdbUserId = "user-123"
         val landlordPrsdbUser = MockLandlordData.createPrsdbUser(id = landlordPrsdbUserId)
-        val landlord = MockLandlordData.createLandlord(baseUser = landlordPrsdbUser)
+        val landlord = MockLandlordData.createIndividualLandlord(baseUser = landlordPrsdbUser)
         val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
                 baseUser = landlordPrsdbUser,
@@ -64,7 +64,7 @@ class IncompletePropertyForLandlordServiceTests {
     fun `getIncompletePropertiesForLandlord returns a page of incomplete properties data models`() {
         val principalName = "user-123"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = principalName)
-        val landlord = MockLandlordData.createLandlord(baseUser = prsdbUser)
+        val landlord = MockLandlordData.createIndividualLandlord(baseUser = prsdbUser)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
         val lip = LandlordIncompleteProperties(landlord, savedJourneyState)
         val pageRequest =

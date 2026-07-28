@@ -18,27 +18,34 @@ class HouseholdStepConfig(
     override val formModelClass = NumberOfHouseholdsFormModel::class
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
-        mapOf(
-            "fieldSetHeading" to "forms.numberOfHouseholdsRestructureAndSkipping.heading",
-            "label" to "forms.numberOfHouseholdsRestructureAndSkipping.label",
-            "submitButtonText" to "forms.buttons.saveAndContinue",
-            "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
-            "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
-            "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
-            "showSecondarySubmitButton" to state.allowProvideTenancyDetailsLaterRoute,
-        )
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            mapOf(
+                "fieldSetHeading" to "forms.numberOfHouseholds.restructureAndSkipping.heading",
+                "label" to "forms.numberOfHouseholds.restructureAndSkipping.label",
+                "submitButtonText" to "forms.buttons.saveAndContinue",
+                "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
+                "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
+                "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
+                "showSecondarySubmitButton" to state.dependencies.allowProvideTenancyDetailsLaterRoute,
+            )
+        } else {
+            mapOf(
+                "fieldSetHeading" to "forms.numberOfHouseholds.heading",
+                "label" to "forms.numberOfHouseholds.label",
+            )
+        }
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/numberOfHouseholdsFormRestructureAndSkipping"
+            "forms/restructureAndSkipping/numberOfHouseholdsForm"
         } else {
-            "forms/numberOfHouseholdsFormOld"
+            "forms/restructureAndSkipping/numberOfHouseholdsFormLegacy"
         }
 
     override fun mode(state: HouseholdsAndTenantsState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                if (state.allowProvideTenancyDetailsLaterRoute) {
+                if (state.dependencies.allowProvideTenancyDetailsLaterRoute) {
                     HouseholdMode.PROVIDE_THIS_LATER
                 } else {
                     // This should never happen as the button to trigger this action should not be shown
