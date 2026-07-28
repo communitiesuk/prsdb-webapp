@@ -85,7 +85,7 @@ class NotificationBannerViewModelService {
                 }
 
                 statusModel.displayAnyMissingOrFaulty -> {
-                    "$NOTIFICATION_KEY_PREFIX.missing.mainText"
+                    "$NOTIFICATION_KEY_PREFIX.missing.beforePdjb939.mainText"
                 }
 
                 statusModel.expiredCertificateCount > 1 -> {

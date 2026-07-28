@@ -669,7 +669,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(
-                expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.missing.mainText"),
+                expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.missing.beforePdjb939.mainText"),
                 result.beforePdjb939NotificationMessages,
             )
             assertEquals(emptyList(), result.notificationMessages)

@@ -123,9 +123,8 @@ complianceInformation:
     multipleExpired:
       mainText: Multiple compliance certificates for this property have expired.
     missing:
-      # TODO PDJB-939: remove this flag-off mainText when the provide-later flag is permanently on (the flag-on
-      #  banner uses the landlord/localCouncil variants below).
-      mainText: You must add compliance certificates for this property.
+      beforePdjb939:
+        mainText: You must add compliance certificates for this property.
       landlord:
         mainText: You must finish adding this property’s compliance certificates.
       localCouncil:
