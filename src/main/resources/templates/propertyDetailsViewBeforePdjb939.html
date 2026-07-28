@@ -72,7 +72,7 @@
                 <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
                         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h2>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939PropertyRecord})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.beforePdjb939.licensingInformation.heading}">propertyDetails.propertyRecord.beforePdjb939.licensingInformation.heading</h3>
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939LicensingInformation})}"></dl>
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.heading</h3>
                         <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.hintText</p>
@@ -84,11 +84,11 @@
                     </p>
                 </div>
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
-                    <div th:replace="~{landlordDetails :: landlordDetailsTabContent}"></div>
+                    <div th:replace="~{fragments/landlordDetails :: landlordDetailsTabContent}"></div>
                 </div>
 
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
-                    <div th:replace="~{compliance :: complianceTabContent}"></div>
+                    <div th:replace="~{fragments/compliance :: complianceTabContent}"></div>
                 </div>
             </div>
         </div>

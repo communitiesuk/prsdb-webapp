@@ -159,6 +159,7 @@ propertyRecord:
     provideLaterOccupied: Provide this later (before {0})
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
   licensingInformation:
+    heading: Licensing information
     licensingType: Licensing type
     licensingNumber: Licensing number
   tenancyAndRentalInformation:
@@ -181,8 +182,6 @@ propertyRecord:
     uprn: UPRN
     'uprn.unavailable': Not available
     ownershipType: Ownership type
-    licensingInformation:
-      heading: Licensing information
     tenancyAndRentalInformation:
       heading: Tenancy and rental information
       hintText: Information about tenants and rent for this property
