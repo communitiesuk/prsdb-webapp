@@ -48,7 +48,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceU
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
