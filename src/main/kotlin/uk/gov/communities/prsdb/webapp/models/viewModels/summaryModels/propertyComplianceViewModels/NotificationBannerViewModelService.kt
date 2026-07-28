@@ -13,6 +13,7 @@ class NotificationBannerViewModelService {
     fun getNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
+        beforePdjb939: Boolean = false,
     ): List<NotificationMessage> {
         val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
@@ -27,8 +28,7 @@ class NotificationBannerViewModelService {
                 }
 
                 statusModel.displayAnyMissingOrFaulty -> {
-                    val viewSegment = if (isLandlordView) "landlord" else "localCouncil"
-                    "$NOTIFICATION_KEY_PREFIX.missing.$viewSegment.mainText" to VIEW_COMPLIANCE_CERTIFICATES_KEY
+                    missingMainTextKey(isLandlordView, beforePdjb939) to VIEW_COMPLIANCE_CERTIFICATES_KEY
                 }
 
                 statusModel.expiredCertificateCount > 1 -> {
@@ -68,60 +68,16 @@ class NotificationBannerViewModelService {
         )
     }
 
-    // TODO PDJB-939: remove this flag-off banner method when the provide-later flag is permanently on.
-    fun getBeforePdjb939NotificationMessageKeys(
-        propertyCompliance: PropertyCompliance,
-    ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> {
-        val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
-
-        val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
-        val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
-        val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
-
-        val mainTextKey =
-            when {
-                statusModel.displayAnyMissingOrFaulty && statusModel.expiredCertificateCount > 0 -> {
-                    "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
-                }
-
-                statusModel.displayAnyMissingOrFaulty -> {
-                    "$NOTIFICATION_KEY_PREFIX.missing.beforePdjb939.mainText"
-                }
-
-                statusModel.expiredCertificateCount > 1 -> {
-                    "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
-                }
-
-                isGasExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
-                }
-
-                isElectricalExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
-                }
-
-                isEpcExpired -> {
-                    "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText"
-                }
-
-                else -> {
-                    return emptyList()
-                }
-            }
-
-        return listOf(
-            PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
-                mainText = mainTextKey,
-                linkMessage =
-                    PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                        linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
-                        linkText = "$NOTIFICATION_KEY_PREFIX.viewComplianceCertificates",
-                        afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
-                        isAfterLinkTextFullStop = true,
-                    ),
-            ),
-        )
-    }
+    // The flag-on banner uses view-specific "missing" copy; the flag-off (beforePdjb939) banner uses a single variant.
+    private fun missingMainTextKey(
+        isLandlordView: Boolean,
+        beforePdjb939: Boolean,
+    ): String =
+        when {
+            beforePdjb939 -> "$NOTIFICATION_KEY_PREFIX.missing.beforePdjb939.mainText"
+            isLandlordView -> "$NOTIFICATION_KEY_PREFIX.missing.landlord.mainText"
+            else -> "$NOTIFICATION_KEY_PREFIX.missing.localCouncil.mainText"
+        }
 
     fun getIsAllValid(propertyCompliance: PropertyCompliance): Boolean =
         ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid

@@ -64,7 +64,7 @@ class PropertyComplianceViewModelFactoryTests {
 
         val result = propertyComplianceViewModelFactory.create(propertyCompliance, propertyOwnershipId = propertyOwnershipId)
 
-        assertEquals(expectedNotificationMessages, result.notificationMessages)
+        assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         assertTrue(result.isAllValid)
     }
 
@@ -169,7 +169,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -192,7 +192,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -215,7 +215,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -238,7 +238,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -264,7 +264,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -290,7 +290,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -316,7 +316,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -331,7 +331,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -347,7 +347,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -363,7 +363,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -379,7 +379,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -395,7 +395,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -411,7 +411,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -427,7 +427,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -451,7 +451,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -474,7 +474,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -503,7 +503,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
         }
 
         @Test
@@ -526,7 +526,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
 
@@ -556,7 +556,7 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = provideLaterEnabled,
                 )
 
-            assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertEquals(expectedNotificationMessages, result.complianceNotificationMessages)
             assertFalse(result.isAllValid)
         }
     }
@@ -586,7 +586,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
 
         @Test
@@ -600,7 +600,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
 
         @Test
@@ -620,7 +620,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
 
         @Test
@@ -634,24 +634,24 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
     }
 
-    // TODO PDJB-939: delete this class when the provide-later flag is permanently on. It covers the legacy
-    //  (flag-off) compliance banner reproduced from the main branch.
+    // Covers the flag-off (beforePdjb939) compliance banner.
     @Nested
     inner class BeforePdjb939Notifications {
         private fun expectedBeforePdjb939Message(mainTextKey: String) =
             listOf(
-                PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                NotificationMessage(
                     mainText = mainTextKey,
-                    linkMessage =
-                        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                            linkUrl = "#compliance-information",
-                            linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
-                            afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
-                            isAfterLinkTextFullStop = true,
+                    links =
+                        listOf(
+                            NotificationBannerLink(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                            ),
                         ),
                 ),
             )
@@ -670,9 +670,9 @@ class PropertyComplianceViewModelFactoryTests {
 
             assertEquals(
                 expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.missing.beforePdjb939.mainText"),
-                result.beforePdjb939NotificationMessages,
+                result.beforePdjb939ComplianceNotificationMessages,
             )
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
 
         @Test
@@ -689,7 +689,7 @@ class PropertyComplianceViewModelFactoryTests {
 
             assertEquals(
                 expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText"),
-                result.beforePdjb939NotificationMessages,
+                result.beforePdjb939ComplianceNotificationMessages,
             )
         }
 
@@ -705,8 +705,8 @@ class PropertyComplianceViewModelFactoryTests {
                     provideLaterEnabled = false,
                 )
 
-            assertEquals(emptyList(), result.beforePdjb939NotificationMessages)
-            assertEquals(emptyList(), result.notificationMessages)
+            assertEquals(emptyList(), result.beforePdjb939ComplianceNotificationMessages)
+            assertEquals(emptyList(), result.complianceNotificationMessages)
         }
     }
 }

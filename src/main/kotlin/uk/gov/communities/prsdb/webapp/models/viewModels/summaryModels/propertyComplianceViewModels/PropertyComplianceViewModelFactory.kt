@@ -93,17 +93,16 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val notificationMessages =
+        val complianceNotificationMessages =
             if (provideLaterEnabled) {
                 notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView)
             } else {
                 emptyList()
             }
 
-        // TODO PDJB-939: remove beforePdjb939NotificationMessages when the provide-later flag is permanently on.
-        val beforePdjb939NotificationMessages =
+        val beforePdjb939ComplianceNotificationMessages =
             if (!provideLaterEnabled && landlordView) {
-                notificationBannerViewModelFactory.getBeforePdjb939NotificationMessageKeys(propertyCompliance)
+                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance, landlordView, beforePdjb939 = true)
             } else {
                 emptyList()
             }
@@ -116,8 +115,8 @@ class PropertyComplianceViewModelFactory(
             epcSummaryCard = epcSummaryCard,
             epcSupplementarySections = epcSupplementarySections,
             epcExpiredInsetViewModel = epcExpiredInsetViewModel,
-            notificationMessages = notificationMessages,
-            beforePdjb939NotificationMessages = beforePdjb939NotificationMessages,
+            complianceNotificationMessages = complianceNotificationMessages,
+            beforePdjb939ComplianceNotificationMessages = beforePdjb939ComplianceNotificationMessages,
             isAllValid = isAllValid,
         )
     }

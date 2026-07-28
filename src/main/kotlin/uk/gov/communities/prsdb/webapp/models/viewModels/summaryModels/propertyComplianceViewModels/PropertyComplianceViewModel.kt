@@ -11,22 +11,8 @@ class PropertyComplianceViewModel(
     val epcSummaryCard: SummaryCardViewModel,
     val epcSupplementarySections: List<SummaryCardSupplementarySection> = emptyList(),
     val epcExpiredInsetViewModel: EpcExpiredInsetViewModel? = null,
-    val notificationMessages: List<NotificationMessage>,
-    // TODO PDJB-939: remove beforePdjb939NotificationMessages and the two nested classes below when the
-    //  provide-later flag is permanently on; the flag-on banner uses notificationMessages above.
-    val beforePdjb939NotificationMessages: List<PropertyComplianceNotificationMessage> = emptyList(),
+    val complianceNotificationMessages: List<NotificationMessage>,
+    // Flag-off equivalent of complianceNotificationMessages, using the beforePdjb939 message keys where the copy differs.
+    val beforePdjb939ComplianceNotificationMessages: List<NotificationMessage> = emptyList(),
     val isAllValid: Boolean,
-) {
-    data class PropertyComplianceNotificationMessage(
-        val mainText: String,
-        val linkMessage: PropertyComplianceLinkMessage? = null,
-    )
-
-    data class PropertyComplianceLinkMessage(
-        val linkUrl: String,
-        val linkText: String,
-        val afterLinkText: String? = null,
-        val beforeLinkText: String? = null,
-        val isAfterLinkTextFullStop: Boolean = false,
-    )
-}
+)

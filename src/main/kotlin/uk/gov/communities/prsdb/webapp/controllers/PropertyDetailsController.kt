@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939NotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
@@ -83,6 +84,12 @@ class PropertyDetailsController(
                 { name, value -> modelAndView.addObject(name, value) },
                 isLandlordView = true,
                 propertyDetails as PropertyDetailsViewModel,
+                propertyComplianceDetails,
+            )
+        } else {
+            addBeforePdjb939BannerAttributes(
+                { name, value -> modelAndView.addObject(name, value) },
+                isLandlordView = true,
                 propertyComplianceDetails,
             )
         }
@@ -204,6 +211,12 @@ class PropertyDetailsController(
                 propertyDetails as PropertyDetailsViewModel,
                 propertyComplianceDetails,
             )
+        } else {
+            addBeforePdjb939BannerAttributes(
+                { name, value -> model.addAttribute(name, value) },
+                isLandlordView = false,
+                propertyComplianceDetails,
+            )
         }
         model.addAttribute("isLandlordView", false)
 
@@ -212,8 +225,6 @@ class PropertyDetailsController(
         return viewName
     }
 
-    // TODO PDJB-939: the provide-later branch of this flag-on banner helper can be simplified when the flag is
-    //  permanently on. It is only called from the flag-on path, so provideLaterEnabled is always true here.
     private fun addProvideLaterBannerAttributes(
         addAttribute: (String, Any?) -> Unit,
         isLandlordView: Boolean,
@@ -221,7 +232,7 @@ class PropertyDetailsController(
         propertyComplianceDetails: PropertyComplianceViewModel?,
     ) {
         val complianceMessages =
-            propertyComplianceDetails?.notificationMessages
+            propertyComplianceDetails?.complianceNotificationMessages
                 ?: listOf(PropertyDetailsNotificationBannerViewModel.NotificationMessage(mainText = noComplianceMessageKey(isLandlordView)))
 
         val notificationBanner =
@@ -237,6 +248,21 @@ class PropertyDetailsController(
         addAttribute("notificationBanner", notificationBanner)
     }
 
+    // Compliance-only banner for the flag-off path; sets the same "notificationBanner" attribute as the flag-on helper.
+    private fun addBeforePdjb939BannerAttributes(
+        addAttribute: (String, Any?) -> Unit,
+        isLandlordView: Boolean,
+        propertyComplianceDetails: PropertyComplianceViewModel?,
+    ) {
+        val notificationBanner =
+            PropertyDetailsBeforePdjb939NotificationBannerViewModel.fromState(
+                isLandlordView = isLandlordView,
+                complianceMessages = propertyComplianceDetails?.beforePdjb939ComplianceNotificationMessages,
+            )
+
+        addAttribute("notificationBanner", notificationBanner)
+    }
+
     private fun noComplianceMessageKey(isLandlordView: Boolean): String =
         if (isLandlordView) {
             "propertyDetails.complianceInformation.noCompliance.landlordView.mainText"
@@ -245,8 +271,6 @@ class PropertyDetailsController(
         }
 
     // Parse the provide-later feature flag exactly once and select the matching view model + template.
-    // TODO PDJB-939: remove the flag-off branch (and PropertyDetailsBeforePdjb939ViewModel /
-    // propertyDetailsViewBeforePdjb939.html) when the flag is permanently on.
     private fun getPropertyDetailsViewModelAndView(
         propertyOwnership: PropertyOwnership,
         provideLaterEnabled: Boolean,
@@ -267,7 +291,6 @@ class PropertyDetailsController(
     companion object {
         const val PROPERTY_DETAILS_VIEW = "propertyDetailsView"
 
-        // TODO PDJB-939: remove when the provide-later flag is permanently on.
         const val PROPERTY_DETAILS_BEFORE_PDJB939_VIEW = "propertyDetailsViewBeforePdjb939"
 
         const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
