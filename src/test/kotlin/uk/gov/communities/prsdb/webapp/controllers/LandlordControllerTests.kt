@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 
 @WebMvcTest(LandlordController::class)
 class LandlordControllerTests(
@@ -93,7 +93,7 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard returns 200 for authorised landlord user`() {
-        val landlord = createLandlord()
+        val landlord = createIndividualLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
@@ -105,7 +105,7 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
-        val landlord = createLandlord()
+        val landlord = createIndividualLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
         whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
         mvc

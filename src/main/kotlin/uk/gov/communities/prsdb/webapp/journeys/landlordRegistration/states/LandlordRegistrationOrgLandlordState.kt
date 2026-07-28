@@ -21,12 +21,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -51,7 +52,6 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeDobStep: LeadTrusteeDobStep
     val trusteeAddressTask: AddressTask
     val orgMainContactStep: OrgMainContactStep
-    val orgLandlordCyaStep: OrgLandlordCyaStep
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
     val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
@@ -61,6 +61,9 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
     val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
     val saveGovBodyMemberStep: SaveGovBodyMemberStep
+    val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep
+    val removeGovBodyMemberStep: RemoveGovBodyMemberStep
     var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
     var nextGoverningBodyMemberId: Int?
+    var editingGovBodyMemberId: Int?
 }

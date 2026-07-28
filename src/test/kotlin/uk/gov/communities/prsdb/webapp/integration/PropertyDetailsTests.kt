@@ -764,4 +764,46 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
         }
     }
+
+    @Nested
+    inner class PropertyDetailsLocalCouncilInvitations :
+        NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
+        @Test
+        fun `local council view shows pending invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).isVisible()
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Pending invitations (1)")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("pending@example.com")
+        }
+
+        @Test
+        fun `local council view shows expired invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).isVisible()
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired invitations (1)")
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("expired@example.com")
+        }
+
+        @Test
+        fun `local council view does not show action links on pending invitations`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.pendingInvitationsDetails.locator("summary").click()
+            assertThat(detailsPage.pendingInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
+        }
+
+        @Test
+        fun `local council view does not show action links on expired invitations`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.expiredInvitationsDetails.locator("summary").click()
+            assertThat(detailsPage.expiredInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
+        }
+    }
 }

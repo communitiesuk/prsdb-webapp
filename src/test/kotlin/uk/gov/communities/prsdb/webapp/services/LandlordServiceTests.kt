@@ -42,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordReg
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
 import java.net.URI
 import java.time.LocalDate
@@ -147,7 +147,7 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `createLandlord creates a landlord and returns the landlord created`() {
+    fun `createIndividualLandlord creates a landlord and returns the landlord created`() {
         // Arrange
         val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
@@ -181,7 +181,7 @@ class LandlordServiceTests {
 
         // Act
         val createdLandlord =
-            landlordService.createLandlord(
+            landlordService.createIndividualLandlord(
                 baseUserId,
                 "name",
                 "example@email.com",
@@ -201,9 +201,9 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `createLandlord sends a confirmation email for the landlord created`() {
+    fun `createIndividualLandlord sends a confirmation email for the landlord created`() {
         // Arrange
-        val expectedLandlord = createLandlord()
+        val expectedLandlord = createIndividualLandlord()
 
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser(any())).thenReturn(expectedLandlord.baseUser)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedLandlord.address)
@@ -215,7 +215,7 @@ class LandlordServiceTests {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
 
         // Act
-        landlordService.createLandlord(
+        landlordService.createIndividualLandlord(
             "baseUserId",
             "name",
             "example@email.com",
@@ -424,7 +424,12 @@ class LandlordServiceTests {
         val originalPhoneNumber = "original phone number"
         val originalDateOfBirth = LocalDate.of(1991, 1, 1)
         val landlordEntity =
-            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
+            createIndividualLandlord(
+                name = originalName,
+                email = originalEmail,
+                phoneNumber = originalPhoneNumber,
+                dateOfBirth = originalDateOfBirth,
+            )
         val updateModel = LandlordUpdateModel(null, null, null, null, null)
 
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
@@ -444,7 +449,7 @@ class LandlordServiceTests {
         // Arrange
         val userId = "my id"
         val landlordEntity =
-            createLandlord(
+            createIndividualLandlord(
                 name = "original name",
                 email = "original email",
                 phoneNumber = "original phone number",
@@ -480,7 +485,7 @@ class LandlordServiceTests {
     fun `updateLandlordAddress applies the new address to the entity`() {
         // Arrange
         val userId = "my id"
-        val landlordEntity = createLandlord(address = createAddress("original address"))
+        val landlordEntity = createIndividualLandlord(address = createAddress("original address"))
         val newAddress = createAddress("new address")
         val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
 
@@ -505,7 +510,7 @@ class LandlordServiceTests {
         val originalEmailAddress = "original email"
         val userId = "my id"
         val landlordEntity =
-            createLandlord(
+            createIndividualLandlord(
                 name = "original name",
                 email = originalEmailAddress,
                 phoneNumber = "original phone number",
@@ -551,7 +556,7 @@ class LandlordServiceTests {
         val originalEmailAddress = "landlord@example.com"
         val newCasingEmailAddress = "Landlord@Example.com"
         val landlordEntity =
-            createLandlord(
+            createIndividualLandlord(
                 name = "original name",
                 email = originalEmailAddress,
                 phoneNumber = "original phone number",
@@ -580,7 +585,12 @@ class LandlordServiceTests {
         val originalPhoneNumber = "original phone number"
         val originalDateOfBirth = LocalDate.of(1991, 1, 1)
         val landlordEntity =
-            createLandlord(name = originalName, email = originalEmail, phoneNumber = originalPhoneNumber, dateOfBirth = originalDateOfBirth)
+            createIndividualLandlord(
+                name = originalName,
+                email = originalEmail,
+                phoneNumber = originalPhoneNumber,
+                dateOfBirth = originalDateOfBirth,
+            )
         val newAddress = createAddress("new address")
         val updateModel =
             LandlordUpdateModel(

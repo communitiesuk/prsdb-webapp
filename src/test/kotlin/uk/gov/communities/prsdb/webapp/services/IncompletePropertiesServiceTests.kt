@@ -47,7 +47,7 @@ class IncompletePropertiesServiceTests {
 
     @Nested
     inner class GetIncompletePropertiesDueReminderPageTests {
-        private val landlord = MockLandlordData.createLandlord()
+        private val landlord = MockLandlordData.createIndividualLandlord()
         private val incompletePropertyCreatedDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS + 2L),
@@ -164,7 +164,7 @@ class IncompletePropertiesServiceTests {
 
     @Nested
     inner class DeleteIncompletePropertiesOlderThan28Days {
-        private val landlord = MockLandlordData.createLandlord()
+        private val landlord = MockLandlordData.createIndividualLandlord()
 
         private val incompletePropertyCreatedDate =
             DateTimeHelper.getJavaInstantFromLocalDate(

@@ -25,7 +25,11 @@ class UpdateHouseholdsAndTenantsCyaConfig(
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state),
+            "summaryListData" to
+                occupancyDetailsHelper.getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
+                    state,
+                    state.householdsAndTenantsTask,
+                ),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 
@@ -34,11 +38,11 @@ class UpdateHouseholdsAndTenantsCyaConfig(
             propertyOwnershipService.updateHouseholdsAndTenants(
                 id = state.propertyId,
                 numberOfHouseholds =
-                    state.households.formModel
+                    state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt(),
                 numberOfPeople =
-                    state.tenants.formModel
+                    state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt(),
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),

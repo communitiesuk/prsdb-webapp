@@ -26,11 +26,8 @@ class PropertyComplianceViewModelFactory(
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
                 )
             } else {
                 null
@@ -38,11 +35,8 @@ class PropertyComplianceViewModelFactory(
 
         val electricalSafetyChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
                 )
             } else {
                 null
@@ -50,11 +44,8 @@ class PropertyComplianceViewModelFactory(
 
         val gasSafetyChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                 )
             } else {
                 null

@@ -37,7 +37,7 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
         // Arrange
         val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockLandlordService)
         setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
 
         // Act
@@ -52,7 +52,7 @@ class MarkLandlordRegistrationCompleteStepConfigTests {
         // Arrange
         val stepConfig = MarkLandlordRegistrationCompleteStepConfig(mockLandlordService)
         setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
         val expectedRegNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockLandlord.registrationNumber).toString()
 

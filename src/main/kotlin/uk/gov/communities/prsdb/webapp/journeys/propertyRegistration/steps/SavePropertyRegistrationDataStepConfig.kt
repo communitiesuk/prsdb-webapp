@@ -36,7 +36,7 @@ class SavePropertyRegistrationDataStepConfig(
         try {
             registerProperty(state)
         } catch (_: EntityExistsException) {
-            state.isAddressAlreadyRegistered = true
+            state.addressTask.isAddressAlreadyRegistered = true
             return
         }
     }
@@ -45,8 +45,8 @@ class SavePropertyRegistrationDataStepConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination(state.alreadyRegisteredStep)
+        if (state.addressTask.isAddressAlreadyRegistered == true) {
+            Destination(state.addressTask.alreadyRegisteredStep)
         } else {
             state.deleteJourney()
             defaultDestination
@@ -55,7 +55,7 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordEmails: List<String>? =
             state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
                 ?.values
@@ -63,7 +63,7 @@ class SavePropertyRegistrationDataStepConfig(
         val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
-            addressModel = state.getAddress(),
+            addressModel = state.addressTask.getAddress(),
             propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
             customPropertyType =
                 if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
@@ -71,13 +71,13 @@ class SavePropertyRegistrationDataStepConfig(
                 } else {
                     null
                 },
-            licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-            licenceNumber = state.getLicenceNumberOrNull() ?: "",
+            licenseType = state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+            licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
             ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
-                    state.households.formModel
+                    state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
                 } else {
@@ -85,7 +85,7 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             numberOfPeople =
                 if (isOccupied) {
-                    state.tenants.formModel
+                    state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
                 } else {
@@ -102,11 +102,11 @@ class SavePropertyRegistrationDataStepConfig(
             billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
             furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-            rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-            customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+            rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
+            customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
             rentAmount =
                 if (isOccupied) {
-                    state.rentAmount.formModel.rentAmount
+                    state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
                     null

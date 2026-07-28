@@ -37,8 +37,8 @@ interface JourneyBuilderDsl<TState : JourneyState> {
 
 open class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
-    journey: TState,
-) : AbstractJourneyBuilder<TState>(journey) {
+    override val journey: TState,
+) : AbstractJourneyBuilder<TState, TState>(journey) {
     private val sections: MutableList<String> = mutableListOf()
 
     fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
