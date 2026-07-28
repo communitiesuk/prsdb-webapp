@@ -54,7 +54,10 @@ class UpdateTenancyDetailsCyaConfig(
                 billsIncludedList = billsIncludedDataModel?.standardBillsIncludedListAsString,
                 customBillsIncluded = billsIncludedDataModel?.customBillsIncluded,
                 furnishedStatus = state.furnishedStatus.formModel.notNullValue(FurnishedStatusFormModel::furnishedStatus),
-                rentFrequency = state.rentFrequencyAndAmountTask.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
+                rentFrequency =
+                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.notNullValue(
+                        RentFrequencyFormModel::rentFrequency,
+                    ),
                 customRentFrequency = state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected(),
                 rentAmount =
                     state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount

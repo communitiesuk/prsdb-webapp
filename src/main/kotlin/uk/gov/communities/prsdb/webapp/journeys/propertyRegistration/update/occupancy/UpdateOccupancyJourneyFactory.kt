@@ -11,11 +11,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -33,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -67,7 +65,7 @@ class UpdateOccupancyJourneyFactory(
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRestructured) {
             // The restructured occupancy update is a single-page update (no check-your-answers page)
-            restructuredMainJourneyMap(state, propertyId)
+            restructuredJourneyMap(state, propertyId)
         } else if (checkingAnswersFor == null) {
             legacyMainJourneyMap(state, propertyId)
         } else {
@@ -75,7 +73,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun restructuredMainJourneyMap(
+    private fun restructuredJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -100,17 +98,14 @@ class UpdateOccupancyJourneyFactory(
             }
             step(journey.completeOccupancyUpdateStep) {
                 parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
+                    journey.occupied.always()
                 }
                 nextUrl { propertyDetailsRoute }
             }
         }
     }
 
-    // Legacy (flag-off) journey — delete when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    // TODO(PDJB-1340): delete this legacy (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun legacyMainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
@@ -136,7 +131,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    // Legacy (flag-off) journey — delete when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    // TODO(PDJB-1340): delete this legacy (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun legacyCheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
@@ -198,6 +193,8 @@ class UpdateOccupancyJourneyFactory(
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
+    // TODO(PDJB-1340): delete this helper (only used by the legacy flag-off journeys above) when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
         configureStep(journey.occupied) {
             withAdditionalContentProperty {
@@ -260,7 +257,8 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // Check your answers step
+    // TODO(PDJB-1340): delete these legacy (flag-off) check-your-answers steps when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the restructured update is a single page).
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the restructured single-page update

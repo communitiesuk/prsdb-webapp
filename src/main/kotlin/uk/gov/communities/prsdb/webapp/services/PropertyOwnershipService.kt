@@ -292,12 +292,15 @@ class PropertyOwnershipService(
         val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.isOccupied = isOccupied
         if (!wasOccupied && propertyOwnership.isOccupied) {
+            // Becoming occupied defaults to "provide tenancy details later": flag the property so the record shows
+            // the deadline prompt (lastOccupiedDate + 28 days) until the landlord provides the details.
             propertyOwnership.lastOccupiedDate = LocalDate.now()
-            // Becoming occupied always defaults to "provide tenancy details later": clear any stale tenancy
-            // details and flag the property so the record shows the deadline prompt (lastOccupiedDate + 28 days)
-            // until the landlord provides the details, rather than retaining previous information.
-            clearTenancyDetails(propertyOwnership)
             propertyOwnership.tenancyProvideLater = true
+        }
+        if (wasOccupied && !propertyOwnership.isOccupied) {
+            // Becoming unoccupied: tenancy details no longer apply, so clear them rather than holding onto stale data.
+            clearTenancyDetails(propertyOwnership)
+            propertyOwnership.tenancyProvideLater = null
         }
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null

@@ -1146,17 +1146,10 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class UpdateIsOccupied {
         @Test
-        fun `updateIsOccupied changes only the occupancy status and leaves tenancy fields untouched`() {
+        fun `updateIsOccupied clears stale tenancy details when a property becomes unoccupied`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
-            val originalNumHouseholds = propertyOwnership.currentNumHouseholds
-            val originalNumTenants = propertyOwnership.currentNumTenants
             val originalNumBedrooms = propertyOwnership.numBedrooms
-            val originalBillsIncludedList = propertyOwnership.billsIncludedList
-            val originalCustomBillsIncluded = propertyOwnership.customBillsIncluded
-            val originalFurnishedStatus = propertyOwnership.furnishedStatus
-            val originalRentFrequency = propertyOwnership.rentFrequency
-            val originalRentAmount = propertyOwnership.rentAmount
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
@@ -1170,20 +1163,22 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(false, propertyOwnership.isOccupied)
-            assertEquals(originalNumHouseholds, propertyOwnership.currentNumHouseholds)
-            assertEquals(originalNumTenants, propertyOwnership.currentNumTenants)
+            assertEquals(0, propertyOwnership.currentNumHouseholds)
+            assertEquals(0, propertyOwnership.currentNumTenants)
             assertEquals(originalNumBedrooms, propertyOwnership.numBedrooms)
-            assertEquals(originalBillsIncludedList, propertyOwnership.billsIncludedList)
-            assertEquals(originalCustomBillsIncluded, propertyOwnership.customBillsIncluded)
-            assertEquals(originalFurnishedStatus, propertyOwnership.furnishedStatus)
-            assertEquals(originalRentFrequency, propertyOwnership.rentFrequency)
-            assertEquals(originalRentAmount, propertyOwnership.rentAmount)
+            assertNull(propertyOwnership.billsIncludedList)
+            assertNull(propertyOwnership.customBillsIncluded)
+            assertNull(propertyOwnership.furnishedStatus)
+            assertNull(propertyOwnership.rentFrequency)
+            assertNull(propertyOwnership.customRentFrequency)
+            assertNull(propertyOwnership.rentAmount)
+            assertNull(propertyOwnership.tenancyProvideLater)
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `updateIsOccupied sets lastOccupiedDate, defaults to provide-later and clears stale tenancy details when a property becomes occupied`() {
+        fun `updateIsOccupied sets lastOccupiedDate and defaults to provide-later when a property becomes occupied`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership(id = 1).apply {
@@ -1203,14 +1198,6 @@ class PropertyOwnershipServiceTests {
             // Assert
             assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
             assertEquals(true, propertyOwnership.tenancyProvideLater)
-            assertEquals(0, propertyOwnership.currentNumHouseholds)
-            assertEquals(0, propertyOwnership.currentNumTenants)
-            assertNull(propertyOwnership.billsIncludedList)
-            assertNull(propertyOwnership.customBillsIncluded)
-            assertNull(propertyOwnership.furnishedStatus)
-            assertNull(propertyOwnership.rentFrequency)
-            assertNull(propertyOwnership.customRentFrequency)
-            assertNull(propertyOwnership.rentAmount)
         }
 
         @Test
