@@ -56,9 +56,6 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
     ): Destination = defaultDestination
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
-        // TODO: PDJB-1282 - review this identity-verification branch; whether organisation landlords can be
-        // identity-verified at all (and so whether the name/date-of-birth Change links should ever be suppressed)
-        // may change.
         val verified = state.identityTask.getIsIdentityVerified()
         val rows =
             listOf(
