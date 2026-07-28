@@ -65,7 +65,7 @@ class PropertyUpdateEmailServiceTests {
     @Test
     fun `sendUpdateEmails throws PrsdbWebException when the acting landlord is not found`() {
         val baseUserId = "unknown-user"
-        val actor = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val actor = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         setMockPrincipal(baseUserId)
@@ -79,8 +79,8 @@ class PropertyUpdateEmailServiceTests {
     fun `sendUpdateEmails sends the confirmation to the acting landlord with the given bullets`() {
         val baseUserId = "acting-user"
         val actor =
-            MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
-        val other = MockLandlordData.createLandlord(email = "other@example.com")
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
+        val other = MockLandlordData.createIndividualLandlord(email = "other@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
@@ -101,8 +101,8 @@ class PropertyUpdateEmailServiceTests {
     fun `sendUpdateEmails notifies every other landlord but not the acting landlord`() {
         val baseUserId = "acting-user"
         val actor =
-            MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
-        val other = MockLandlordData.createLandlord(name = "Lois", email = "other@example.com")
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
+        val other = MockLandlordData.createIndividualLandlord(name = "Lois", email = "other@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
@@ -126,7 +126,7 @@ class PropertyUpdateEmailServiceTests {
     fun `sendUpdateEmails sends no notification when there are no other landlords`() {
         val baseUserId = "acting-user"
         val actor =
-            MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId), email = "actor@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         setMockPrincipal(baseUserId)

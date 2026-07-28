@@ -82,7 +82,10 @@ class PropertyComplianceServiceTests {
     private val propertyOwnershipId = 1L
     private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
     private val loggedInBaseUserId = "logged-in-base-user-id"
-    private val mockLoggedInLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId))
+    private val mockLoggedInLandlord =
+        MockLandlordData.createIndividualLandlord(
+            baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId),
+        )
     private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
@@ -734,7 +737,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `notifies other landlords with joint landlord email and does not send them the confirmation email`() {
             val otherLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
                     name = "Other Landlord",
                     email = "other@example.com",
@@ -784,7 +787,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `notifies other landlords with the expiry joint landlord email when an updated certificate is expired`() {
             val otherLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
                     name = "Other Landlord",
                     email = "other@example.com",

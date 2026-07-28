@@ -118,8 +118,8 @@ class CompleteSwitchToIndividualStepConfigTests {
                 id = propertyOwnershipId,
                 landlords =
                     mutableSetOf(
-                        MockLandlordData.createLandlord(name = "Landlord 1"),
-                        MockLandlordData.createLandlord(name = "Landlord 2"),
+                        MockLandlordData.createIndividualLandlord(name = "Landlord 1"),
+                        MockLandlordData.createIndividualLandlord(name = "Landlord 2"),
                     ),
             )
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)

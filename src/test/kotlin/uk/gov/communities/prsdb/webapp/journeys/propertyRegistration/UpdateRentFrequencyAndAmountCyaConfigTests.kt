@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentFrequencyAndAmount.UpdateRentFrequencyAndAmountCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentFrequencyAndAmount.UpdateRentFrequencyAndAmountJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -30,6 +31,9 @@ class UpdateRentFrequencyAndAmountCyaConfigTests {
 
     @Mock
     private lateinit var mockState: UpdateRentFrequencyAndAmountJourneyState
+
+    @Mock
+    private lateinit var mockRentFrequencyAndAmountTask: RentFrequencyAndAmountTask
 
     @Mock
     private lateinit var stepConfig: UpdateRentFrequencyAndAmountCyaConfig
@@ -63,13 +67,14 @@ class UpdateRentFrequencyAndAmountCyaConfigTests {
                 messageSource = mockMessageSource,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
-        whenever(mockState.rentAmount).thenReturn(mockRentAmountStep)
+        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
+        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
         whenever(mockRentAmountStep.formModel).thenReturn(mockRentAMountFormModel)
         whenever(mockRentFrequencyFormModel.rentFrequency).thenReturn(rentFrequency)
-        whenever(mockState.getCustomRentFrequencyIfSelected()).thenReturn(customRentFrequency)
+        whenever(mockRentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()).thenReturn(customRentFrequency)
         whenever(mockRentAMountFormModel.rentAmount).thenReturn(rentAmount.toString())
     }
 

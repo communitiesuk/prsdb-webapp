@@ -21,7 +21,6 @@
                             <a class="govuk-link" th:href="${inviteJointLandlordUrl}" th:text="#{propertyDetails.landlordDetails.inviteJointLandlord.individualText.linkText}">propertyDetails.landlordDetails.inviteJointLandlord.individualText.linkText</a><span th:remove="tag" th:text="#{propertyDetails.landlordDetails.inviteJointLandlord.individualText.afterLink}">propertyDetails.landlordDetails.inviteJointLandlord.individualText.afterLink</span>
                         </p>
                     </th:block>
-                    <th:block th:if="${isLandlordView}">
                         <details th:if="${pendingInvitations != null && !pendingInvitations.isEmpty()}" class="govuk-details">
                             <summary class="govuk-details__summary">
                                 <span class="govuk-details__summary-text"
@@ -52,7 +51,7 @@
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn
                                         </p>
-                                        <ul class="prsdb-link-group-list">
+                                        <ul th:if="${isLandlordView}" class="prsdb-link-group-list">
                                             <li class="prsdb-link-group-item">
                                                 <a class="govuk-link" th:href="${invitation.resendInvitationUrl}"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail}">
@@ -86,7 +85,7 @@
                                            th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn(${invitation.expiredDate})}">
                                             propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn
                                         </p>
-                                        <ul class="prsdb-link-group-list">
+                                        <ul th:if="${isLandlordView}" class="prsdb-link-group-list">
                                             <li class="prsdb-link-group-item">
                                                 <a class="govuk-link" th:href="${invitation.resendInvitationUrl}"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail}">propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail</a>
@@ -101,5 +100,4 @@
                                 </th:block>
                             </div>
                         </details>
-                    </th:block>
 </div>

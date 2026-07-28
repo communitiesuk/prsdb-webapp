@@ -87,7 +87,7 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
@@ -163,7 +163,7 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
@@ -231,7 +231,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership sets lastOccupiedDate when property is occupied`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
 
@@ -268,7 +268,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership does not set lastOccupiedDate when property is unoccupied`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
 
@@ -304,7 +304,7 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetLandlordRegisteredPropertiesDetails {
-        private val currentLandlord = MockLandlordData.createLandlord()
+        private val currentLandlord = MockLandlordData.createIndividualLandlord()
         private val registeredLandlords: MutableSet<Landlord> = mutableSetOf(currentLandlord)
         private val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
@@ -506,7 +506,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is a joint landlord`() {
             val jointLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -554,7 +554,7 @@ class PropertyOwnershipServiceTests {
                 MockLandlordData.createPropertyOwnership(
                     landlords =
                         mutableSetOf(
-                            MockLandlordData.createLandlord(
+                            MockLandlordData.createIndividualLandlord(
                                 baseUser = MockLandlordData.createPrsdbUser(baseUserId),
                             ),
                         ),
@@ -570,7 +570,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns true when the user is a joint landlord`() {
             val jointLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -590,7 +590,7 @@ class PropertyOwnershipServiceTests {
                 MockLandlordData.createPropertyOwnership(
                     landlords =
                         mutableSetOf(
-                            MockLandlordData.createLandlord(
+                            MockLandlordData.createIndividualLandlord(
                                 baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
                             ),
                         ),
@@ -1507,7 +1507,7 @@ class PropertyOwnershipServiceTests {
         fun `addLandlordToPropertyOwnership adds the landlord to the property ownership`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-            val newLandlord = MockLandlordData.createLandlord()
+            val newLandlord = MockLandlordData.createIndividualLandlord()
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
@@ -1525,8 +1525,8 @@ class PropertyOwnershipServiceTests {
     inner class RemoveLandlord {
         @Test
         fun `removeLandlord removes the landlord from the property ownership`() {
-            val landlord = MockLandlordData.createLandlord()
-            val otherLandlord = MockLandlordData.createLandlord(name = "Other")
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val otherLandlord = MockLandlordData.createIndividualLandlord(name = "Other")
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     landlords = mutableSetOf(landlord, otherLandlord),

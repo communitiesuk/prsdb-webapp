@@ -132,7 +132,7 @@ class DeregisterLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getConfirmation returns 500 if the landlord is still found in the database`() {
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
 
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
         whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)

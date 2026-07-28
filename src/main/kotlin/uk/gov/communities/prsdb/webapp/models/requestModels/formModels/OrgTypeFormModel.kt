@@ -24,4 +24,6 @@ class OrgTypeFormModel : FormModel {
         if (selected.isEmpty()) return false
         return !(selected.contains(OrgType.NONE.name) && selected.size > 1)
     }
+
+    fun getSelectedOrgTypes(): List<OrgType> = orgTypes.filterNotNull().filter { it.isNotBlank() }.map { OrgType.valueOf(it) }
 }

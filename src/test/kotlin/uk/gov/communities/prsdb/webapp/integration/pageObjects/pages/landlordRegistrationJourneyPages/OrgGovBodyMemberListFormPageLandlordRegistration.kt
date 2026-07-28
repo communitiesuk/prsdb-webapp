@@ -14,6 +14,7 @@ class OrgGovBodyMemberListFormPageLandlordRegistration(
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
     val summaryList = GovBodyMemberSummaryList(page)
+    val addAnotherButton = page.locator("a.govuk-button--secondary")
 
     class GovBodyMemberSummaryList(
         page: Page,
