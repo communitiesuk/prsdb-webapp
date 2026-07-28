@@ -248,6 +248,35 @@ class PropertyDetailsBeforePdjb939ViewModelTests {
     }
 
     @Test
+    fun `an occupied provide-later property is rendered as unoccupied with no tenancy details`() {
+        // Property 39 scenario: state created while the flag was on, so it is occupied but has no tenancy
+        // details. The flag-off view must render it as unoccupied rather than throwing.
+        val occupiedProvideLaterPropertyOwnership =
+            createPropertyOwnership(
+                currentNumTenants = 2,
+                isOccupied = true,
+                tenancyProvideLater = true,
+                furnishedStatus = null,
+                rentFrequency = null,
+                rentAmount = null,
+            )
+        val viewModel =
+            PropertyDetailsBeforePdjb939ViewModel(
+                occupiedProvideLaterPropertyOwnership,
+                messageSource = mockMessageSource,
+            )
+
+        val occupiedRow =
+            viewModel.beforePdjb939TenancyAndRentalInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied" }
+
+        assertEquals(false, viewModel.effectivelyOccupied)
+        assertEquals("propertyDetails.occupationStatus.unoccupied", viewModel.effectiveIsOccupiedKey)
+        assertEquals("commonText.no", occupiedRow.fieldValue)
+        assertEquals(1, viewModel.beforePdjb939TenancyAndRentalInformation.size)
+    }
+
+    @Test
     fun `Tenancy details are returned on the propertyRecord for an occupied property`() {
         val numberOfPeople = 3
         val numberOfHouseholds = 2

@@ -9,6 +9,20 @@ class PropertyDetailsBeforePdjb939ViewModel(
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
 ) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView, messageSource) {
+    // Property state may have been created while the flag was on, so an occupied property can be in a
+    // provide-later state with no tenancy details. This view cannot render those, so it treats such a
+    // property as unoccupied and hides the tenancy section.
+    private val isTenancyProvideLater = propertyOwnership.tenancyProvideLater == true
+
+    val effectivelyOccupied = isOccupied && !isTenancyProvideLater
+
+    val effectiveIsOccupiedKey: String =
+        if (effectivelyOccupied) {
+            "propertyDetails.occupationStatus.occupied"
+        } else {
+            "propertyDetails.occupationStatus.unoccupied"
+        }
+
     val beforePdjb939PropertyRecord: List<SummaryListRowViewModel> =
         listOfNotNull(
             registrationDateRow(),
@@ -25,8 +39,13 @@ class PropertyDetailsBeforePdjb939ViewModel(
 
     val beforePdjb939TenancyAndRentalInformation: List<SummaryListRowViewModel> =
         buildList {
-            add(occupiedRow("propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied"))
-            if (isOccupied) {
+            add(
+                occupiedRow(
+                    "propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.occupied",
+                    effectivelyOccupied,
+                ),
+            )
+            if (effectivelyOccupied) {
                 add(householdsRow())
                 add(tenantsRow())
                 add(bedroomsRow())

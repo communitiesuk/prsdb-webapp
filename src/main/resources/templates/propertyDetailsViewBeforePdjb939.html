@@ -60,7 +60,7 @@
                 <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
             </h1>
             <p class="govuk-body">
-                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
+                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.effectiveIsOccupiedKey}, tagColour = ${propertyDetails.effectivelyOccupied ? 'turquoise' : 'grey'})}"></div>
             </p>
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">

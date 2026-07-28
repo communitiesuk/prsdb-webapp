@@ -93,10 +93,13 @@ abstract class PropertyDetailsViewModelBase(
             withChangeLinks,
         )
 
-    protected fun occupiedRow(labelKey: String): SummaryListRowViewModel =
+    protected fun occupiedRow(
+        labelKey: String,
+        occupied: Boolean = isOccupied,
+    ): SummaryListRowViewModel =
         row(
             labelKey,
-            MessageKeyConverter.convert(isOccupied),
+            MessageKeyConverter.convert(occupied),
             changeLinkMessageKey,
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                 "/${OccupiedStep.ROUTE_SEGMENT}",
