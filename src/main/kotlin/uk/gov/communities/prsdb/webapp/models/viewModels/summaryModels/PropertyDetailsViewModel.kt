@@ -1,210 +1,102 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
-import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
-    private val propertyOwnership: PropertyOwnership,
-    private val withChangeLinks: Boolean = true,
-    private val hideNullUprn: Boolean = true,
-    private val isRestructureAndSkippingEnabled: Boolean = false,
-    private val messageSource: MessageSource,
-) {
-    val address: String = propertyOwnership.address.singleLineAddress
-    val addressParts: List<String> = propertyOwnership.address.toMultiLineAddress().split("\n")
+    propertyOwnership: PropertyOwnership,
+    isLandlordView: Boolean = true,
+    messageSource: MessageSource,
+) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView, messageSource) {
+    val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
 
-    private val changeLinkMessageKey = "forms.links.change"
+    val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
-    val isOccupied = propertyOwnership.isOccupied
+    val showTenancySection: Boolean = isOccupied
 
-    val isOccupiedKey: String = getIsTenantedKey(isOccupied)
+    val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
 
-    val propertyRecord: List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    "propertyDetails.propertyRecord.registrationDate",
-                    DateTimeHelper.getDateInUK(propertyOwnership.createdDate.toKotlinInstant()),
-                )
-                addRow(
-                    "propertyDetails.propertyRecord.registrationNumber",
-                    RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                )
-                addRow("propertyDetails.propertyRecord.address", address)
-                if (propertyOwnership.address.uprn != null) {
-                    addRow(
-                        "propertyDetails.propertyRecord.uprn",
-                        propertyOwnership.address.uprn
-                            .toString(),
-                    )
-                } else if (!hideNullUprn) {
-                    addRow("propertyDetails.propertyRecord.uprn", "propertyDetails.propertyRecord.uprn.unavailable")
+    val registrationDetails: List<SummaryListRowViewModel> =
+        listOf(registrationNumberRow(), registrationDateRow())
+
+    val propertyDetailsSection: List<SummaryListRowViewModel> =
+        listOf(addressRow(), localCouncilRow(), propertyTypeRow(), bedroomsRow())
+
+    val ownershipSection: List<SummaryListRowViewModel> =
+        listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
+
+    val occupiedSection: List<SummaryListRowViewModel> =
+        listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
+
+    val licensingSection: List<SummaryListRowViewModel> =
+        when {
+            !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
+            isLandlordView -> listOf(licensingProvideLaterRow())
+            else -> emptyList()
+        }
+
+    val licensingProvideLaterParagraph: String? =
+        if (isLicensingProvideLater && !isLandlordView) {
+            if (isOccupied) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
+            } else {
+                messageSource.getMessageForKey("propertyDetails.propertyRecord.licensing.councilNotProvided")
+            }
+        } else {
+            null
+        }
+
+    val tenancySection: List<SummaryListRowViewModel> =
+        when {
+            !showTenancySection -> emptyList()
+            isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
+            isTenancyProvideLater && !isLandlordView -> emptyList()
+            else ->
+                buildList {
+                    add(householdsRow())
+                    add(tenantsRow())
+                    add(rentFrequencyRow())
+                    add(furnishedStatusRow())
+                    add(rentIncludesBillsRow())
+                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow())
+                    add(rentAmountRow())
                 }
-                addRow(
-                    "propertyDetails.propertyRecord.localCouncil",
-                    propertyOwnership.address.localCouncil
-                        ?.name,
-                )
-                addRow(
-                    "propertyDetails.propertyRecord.propertyType",
-                    propertyOwnership.customPropertyType
-                        ?: MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
-                )
-                if (isRestructureAndSkippingEnabled) {
-                    addBedroomsRow()
-                }
-                addRow(
-                    "propertyDetails.propertyRecord.ownershipType",
-                    MessageKeyConverter.convert(propertyOwnership.ownershipType),
-                    changeLinkMessageKey,
-                    UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
-                        "/${OwnershipTypeStep.ROUTE_SEGMENT}",
-                    withChangeLinks,
-                )
-            }.toList()
+        }
 
-    val licensingInformation: List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    "propertyDetails.propertyRecord.licensingInformation.licensingType",
-                    propertyOwnership.license?.let {
-                        MessageKeyConverter.convert(it.licenseType)
-                    } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-                    changeLinkMessageKey,
-                    getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                        "/${LicensingTypeStep.ROUTE_SEGMENT}",
-                    withChangeLinks,
-                )
-                if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
-                    addRow(
-                        "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
-                        propertyOwnership.license!!.licenseNumber,
-                    )
-                }
-            }.toList()
+    val tenancyProvideLaterParagraph: String? =
+        when {
+            !showTenancySection || isLandlordView -> null
+            isTenancyProvideLater ->
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
+            else -> null
+        }
 
-    val tenancyAndRentalInformation: List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
-                    MessageKeyConverter.convert(isOccupied),
-                    changeLinkMessageKey,
-                    UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
-                        "/${OccupiedStep.ROUTE_SEGMENT}",
-                    withChangeLinks,
-                )
-                if (isOccupied) {
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
-                        propertyOwnership.currentNumHouseholds,
-                        changeLinkMessageKey,
-                        UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
-                            "/${HouseholdStep.ROUTE_SEGMENT}",
-                        withChangeLinks,
-                        withoutBottomBorder = true,
-                        withAriaLabelForAction =
-                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
-                    )
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
-                        propertyOwnership.currentNumTenants,
-                    )
-                    if (!isRestructureAndSkippingEnabled) {
-                        addBedroomsRow()
-                    }
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
-                        MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
-                        changeLinkMessageKey,
-                        UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
-                            "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
-                        withChangeLinks,
-                        withoutBottomBorder = propertyOwnership.rentIncludesBills,
-                        withAriaLabelForAction =
-                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.changeLinkAriaLabel",
-                    )
-                    if (propertyOwnership.rentIncludesBills) {
-                        addRow(
-                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
-                            BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource),
-                        )
-                    }
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
-                        // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
-                        MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
-                        changeLinkMessageKey,
-                        UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
-                            "/${FurnishedStatusStep.ROUTE_SEGMENT}",
-                        withChangeLinks,
-                    )
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-                        // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
-                        RentDataHelper.getRentFrequency(
-                            propertyOwnership.rentFrequency!!,
-                            propertyOwnership.customRentFrequency,
-                        ),
-                        changeLinkMessageKey,
-                        UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
-                            "/${RentFrequencyStep.ROUTE_SEGMENT}",
-                        withChangeLinks,
-                        withoutBottomBorder = true,
-                        withAriaLabelForAction =
-                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
-                    )
-                    addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
-                        // TODO PDJB-548 remove not-null assertions !! once occupancy is embedded in PropertyOwnership
-                        RentDataHelper.getRentAmount(
-                            propertyOwnership.rentAmount!!.toString(),
-                            propertyOwnership.rentFrequency!!,
-                            messageSource,
-                        ),
-                    )
-                }
-            }.toList()
-
-    private fun MutableList<SummaryListRowViewModel>.addBedroomsRow() {
-        addRow(
-            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-            propertyOwnership.numBedrooms,
+    private fun licensingProvideLaterRow(): SummaryListRowViewModel =
+        row(
+            "propertyDetails.propertyRecord.licensing.rowName",
+            if (isOccupied) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterOccupied")
+            } else {
+                "propertyDetails.propertyRecord.licensing.provideLaterUnoccupied"
+            },
             changeLinkMessageKey,
-            UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
-                "/${BedroomsStep.ROUTE_SEGMENT}",
+            getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                "/${LicensingTypeStep.ROUTE_SEGMENT}",
             withChangeLinks,
         )
-    }
 
-    private fun getIsTenantedKey(isOccupied: Boolean): String =
-        when (isOccupied) {
-            true -> "propertyDetails.occupationStatus.occupied"
-            false -> "propertyDetails.occupationStatus.unoccupied"
-        }
+    private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
+        row(
+            "propertyDetails.propertyRecord.tenancy.rowName",
+            getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied"),
+            changeLinkMessageKey,
+            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
+            withChangeLinks,
+        )
 }

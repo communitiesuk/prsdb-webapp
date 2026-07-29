@@ -6,31 +6,36 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 import kotlin.String
 
+/**
+ * Given you have a reference to a landlord, perform actions on it
+ */
 @PrsdbWebService
 class LandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
-    private val prsdbUserService: PrsdbUserService,
+    private val organisationLandlordRepository: OrganisationLandlordRepository,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
     private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
 ) {
     fun retrieveLandlordByRegNum(regNum: RegistrationNumberDataModel): Landlord? {
         if (regNum.type != RegistrationNumberType.LANDLORD) {
@@ -44,10 +49,9 @@ class LandlordService(
 
     fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
 
-    // TODO: PDJB-1180: Update to potentially save an org landlord to the database
     @Transactional
     fun createIndividualLandlord(
-        baseUserId: String,
+        baseUser: PrsdbUser,
         name: String,
         email: String,
         phoneNumber: String,
@@ -56,38 +60,85 @@ class LandlordService(
         isVerified: Boolean,
         hasAcceptedPrivacyNotice: Boolean,
         nonEnglandOrWalesAddress: String? = null,
-        dateOfBirth: LocalDate? = null,
-    ): Landlord {
-        val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
+        dateOfBirth: LocalDate,
+    ): IndividualLandlord {
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
-        val landlord =
-            individualLandlordRepository.save(
-                IndividualLandlord(
-                    baseUser,
-                    name,
-                    email,
-                    phoneNumber,
-                    address,
-                    registrationNumber,
-                    countryOfResidence,
-                    isVerified,
-                    hasAcceptedPrivacyNotice,
-                    nonEnglandOrWalesAddress,
-                    dateOfBirth,
-                ),
-            )
-
-        registrationConfirmationSender.sendEmail(
-            landlord.email,
-            LandlordRegistrationConfirmationEmail(
-                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
-                absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+        return individualLandlordRepository.save(
+            IndividualLandlord(
+                baseUser,
+                name,
+                email,
+                phoneNumber,
+                address,
+                registrationNumber,
+                countryOfResidence,
+                isVerified,
+                hasAcceptedPrivacyNotice,
+                nonEnglandOrWalesAddress,
+                dateOfBirth,
             ),
         )
+    }
 
-        return landlord
+    @Transactional
+    fun createOrganisationLandlord(
+        organisationName: String,
+        organisationAddress: AddressDataModel,
+        organisationEmail: String,
+        organisationPhoneNumber: String,
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+        companyNumber: String?,
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+        leadTrusteeName: String?,
+        leadTrusteeDateOfBirth: LocalDate?,
+        leadTrusteeEmail: String?,
+        leadTrusteePhoneNumber: String?,
+        leadTrusteeAddress: AddressDataModel?,
+        mainContactName: String,
+        mainContactEmail: String,
+        mainContactPhoneNumber: String,
+        registrantName: String,
+        registrantDateOfBirth: LocalDate,
+        registrantEmail: String,
+        registrantPhoneNumber: String,
+    ): OrganisationLandlord {
+        val orgAddress = addressService.findOrCreateAddress(organisationAddress)
+        val trusteeAddress = leadTrusteeAddress?.let { addressService.findOrCreateAddress(it) }
+        val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
+
+        val landlord =
+            OrganisationLandlord(
+                registrationNumber = registrationNumber,
+                name = organisationName,
+                address = orgAddress,
+                email = organisationEmail,
+                phoneNumber = organisationPhoneNumber,
+                registrantName = registrantName,
+                registrantDateOfBirth = registrantDateOfBirth,
+                registrantEmail = registrantEmail,
+                registrantPhoneNumber = registrantPhoneNumber,
+                isCompany = isCompany,
+                isCharity = isCharity,
+                isTrust = isTrust,
+                companyNumber = companyNumber,
+                charityRegisteredWith = charityRegisteredWith,
+                charityNumber = charityNumber,
+                leadTrusteeName = leadTrusteeName,
+                leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
+                leadTrusteeEmail = leadTrusteeEmail,
+                leadTrusteePhone = leadTrusteePhoneNumber,
+                leadTrusteeAddress = trusteeAddress,
+                mainContactName = mainContactName,
+                mainContactEmail = mainContactEmail,
+                mainContactPhone = mainContactPhoneNumber,
+            )
+
+        return organisationLandlordRepository.save(landlord)
     }
 
     @Transactional

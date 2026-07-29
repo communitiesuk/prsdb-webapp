@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
@@ -28,9 +29,14 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
+import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 @JourneyFrameworkComponent
-class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
+class OrgLandlordRegistrationCyaStepConfig(
+    private val landlordRegistrationService: LandlordRegistrationService,
+    private val securityContextService: SecurityContextService,
+) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) = "forms/orgLandlordRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
@@ -44,7 +50,55 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
         )
 
     override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
-        // TODO: PDJB-1180 - persist the organisation landlord on submit.
+        val org = state.orgLandlordRegistrationTask
+
+        val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
+        val isTrust = OrgType.TRUST in organisationTypes
+        val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+        val hasCompanyNumber = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
+
+        val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
+
+        val mainContact = org.orgMainContactStep.formModel
+
+        val governingBodyMembers =
+            (org.governingBodyMembersMap ?: emptyMap())
+                .values
+                .toList()
+
+        landlordRegistrationService.registerOrganisationLandlord(
+            baseUserId = SecurityContextHolder.getContext().authentication.name,
+            organisationTypes = organisationTypes,
+            organisationHasCompanyNumber = hasCompanyNumber,
+            orgIsRegisteredCharity = isRegisteredCharity,
+            organisationName = org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
+            organisationAddress = getOrgAddress(org.orgAddressStep.formModel),
+            organisationEmail = org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+            organisationPhoneNumber = org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
+            organisationCompanyNumber =
+                if (hasCompanyNumber) org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber) else null,
+            organisationCharityRegisteredWith = charityRegulator,
+            organisationCharityNumber = getCharityNumber(state, charityRegulator),
+            organisationLeadTrusteeName =
+                if (isTrust) org.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
+            organisationLeadTrusteeDateOfBirth = if (isTrust) org.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
+            organisationLeadTrusteeEmail =
+                if (isTrust) org.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress) else null,
+            organisationLeadTrusteePhoneNumber =
+                if (isTrust) org.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber) else null,
+            organisationLeadTrusteeAddress = if (isTrust) org.trusteeAddressTask.getAddress() else null,
+            organisationMainContactName = mainContact.notNullValue(OrgMainContactFormModel::name),
+            organisationMainContactEmail = mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
+            organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
+            organisationRegistrantName = state.identityTask.getName(),
+            organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
+            // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
+            organisationRegistrantEmail = "",
+            organisationRegistrantPhoneNumber = "",
+            organisationGoverningBodyMembers = governingBodyMembers,
+        )
+
+        securityContextService.refreshContext()
     }
 
     // Overrides AbstractCheckYourAnswersStepConfig, which deleted the journey
@@ -375,7 +429,7 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
     }
 
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
-    private fun orgAddressLines(address: ManualAddressFormModel) =
+    private fun getOrgAddress(address: ManualAddressFormModel) =
         AddressDataModel
             .fromManualAddressData(
                 addressLineOne = address.notNullValue(ManualAddressFormModel::addressLineOne),
@@ -383,8 +437,37 @@ class OrgLandlordRegistrationCyaStepConfig : AbstractCheckYourAnswersStepConfig<
                 townOrCity = address.notNullValue(ManualAddressFormModel::townOrCity),
                 county = address.county,
                 postcode = address.notNullValue(ManualAddressFormModel::postcode),
-            ).toMultiLineAddress()
+            )
+
+    private fun orgAddressLines(address: ManualAddressFormModel) =
+        getOrgAddress(address)
+            .toMultiLineAddress()
             .split("\n")
+
+    private fun getCharityNumber(
+        state: LandlordRegistrationState,
+        charityRegulator: CharityRegulator?,
+    ): String? {
+        val org = state.orgLandlordRegistrationTask
+        return when (charityRegulator) {
+            CharityRegulator.ENGLAND_AND_WALES ->
+                org.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(
+                    OrgCharityNumberEnglandAndWalesFormModel::charityNumber,
+                )
+
+            CharityRegulator.NORTHERN_IRELAND ->
+                org.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(
+                    OrgCharityNumberNorthernIrelandFormModel::charityNumber,
+                )
+
+            CharityRegulator.SCOTLAND ->
+                org.orgCharityNumberScotlandStep.formModel.notNullValue(
+                    OrgCharityNumberScotlandFormModel::charityNumber,
+                )
+
+            CharityRegulator.NONE, null -> null
+        }
+    }
 
     private fun orgTypeMessageKey(orgTypeName: String) =
         when (orgTypeName) {
