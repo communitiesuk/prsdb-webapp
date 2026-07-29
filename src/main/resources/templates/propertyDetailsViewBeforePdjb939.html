@@ -60,36 +60,23 @@
                 <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
             </h1>
             <p class="govuk-body">
-                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
+                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.effectiveIsOccupiedKey}, tagColour = ${propertyDetails.effectivelyOccupied ? 'turquoise' : 'grey'})}"></div>
             </p>
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
+                    <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.propertyDetails.heading})}"></li>
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('landlord-details', #{propertyDetails.landlordDetails.heading})}"></li>
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${complianceInfoTabId}, #{propertyDetails.complianceInformation.heading})}"></li>
                 </ul>
 
                 <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
-                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.heading}">propertyDetails.propertyRecord.heading</h2>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.registrationDetails)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.registrationDetails})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.propertyDetailsSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyDetailsSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.occupation.heading}">propertyDetails.propertyRecord.occupation.heading</h3>
-                        <dl th:if="${not #lists.isEmpty(propertyDetails.occupiedSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.occupiedSection})}"></dl>
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h3>
-                        <th:block th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}">
-                            <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
-                        </th:block>
-                        <p th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.licensingProvideLaterParagraph}"></p>
-                        <th:block th:if="${propertyDetails.showTenancySection}">
-                            <h3 class="govuk-heading-s" th:text="#{${propertyDetails.tenancyHeadingKey}}">propertyDetails.propertyRecord.tenancy.heading</h3>
-                            <th:block th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}">
-                                <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
-                            </th:block>
-                            <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
-                        </th:block>
+                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.propertyDetails.heading}">propertyDetails.propertyRecord.propertyDetails.heading</h2>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939PropertyRecord})}"></dl>
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h3>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939LicensingInformation})}"></dl>
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.heading</h3>
+                        <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.beforePdjb939.tenancyAndRentalInformation.hintText</p>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.beforePdjb939TenancyAndRentalInformation})}"></dl>
                     <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
                         <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
                             propertyDetails.deregisterPropertyLink.text
