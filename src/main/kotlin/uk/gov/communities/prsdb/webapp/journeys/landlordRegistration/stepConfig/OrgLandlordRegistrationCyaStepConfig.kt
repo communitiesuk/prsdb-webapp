@@ -136,18 +136,18 @@ class OrgLandlordRegistrationCyaStepConfig(
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.yourDetails.email",
-                    state.individualLandlordRegistrationTask.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                    state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
                     Destination.VisitableStep(
-                        state.individualLandlordRegistrationTask.emailStep,
-                        state.getCyaJourneyId(state.individualLandlordRegistrationTask.emailStep),
+                        state.emailStep,
+                        state.getCyaJourneyId(state.emailStep),
                     ),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber",
-                    state.individualLandlordRegistrationTask.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
+                    state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
                     Destination.VisitableStep(
-                        state.individualLandlordRegistrationTask.phoneNumberStep,
-                        state.getCyaJourneyId(state.individualLandlordRegistrationTask.phoneNumberStep),
+                        state.phoneNumberStep,
+                        state.getCyaJourneyId(state.phoneNumberStep),
                     ),
                 ),
             )
