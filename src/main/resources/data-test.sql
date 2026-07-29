@@ -456,7 +456,7 @@ VALUES (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
        (14, 2, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (15, 3, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (16, 4, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 

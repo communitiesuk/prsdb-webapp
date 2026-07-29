@@ -489,7 +489,7 @@ VALUES
        -- banner variants (TENANCY / LICENSING / BOTH) render instead of COMBINED.
        (39, 41, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
        (40, 42, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true),
-       (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true);
+       (41, 43, '01/01/25', '01/01/25', null, false, '2035-01-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01', null, 'c', null, null, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
