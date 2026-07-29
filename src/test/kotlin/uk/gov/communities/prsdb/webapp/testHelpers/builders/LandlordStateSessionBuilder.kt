@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -118,6 +119,27 @@ class LandlordStateSessionBuilder(
         withSubmittedValue(
             "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
             SelectAddressFormModel().apply { address = singleLineAddress },
+        )
+        return self()
+    }
+
+    fun withOrgManualAddressSelected(): LandlordStateSessionBuilder {
+        val routePrefix = OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT
+        val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                postcode = "EG1 2AB"
+                houseNameOrNumber = "1"
+            },
+        )
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
         )
         return self()
     }
@@ -329,6 +351,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgName() = beforeYourDetails().withYourDetails()
 
         fun beforeOrgAddress() = beforeOrgName().withOrgName()
+
+        fun beforeOrgManualAddress() = beforeOrgAddress().withOrgManualAddressSelected()
 
         fun beforeOrgEmail() = beforeOrgAddress().withOrgAddress()
 

@@ -112,6 +112,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
@@ -449,8 +450,14 @@ class Navigator(
 
     fun skipToOrgLandlordRegistrationOrgAddressPage(): OrgAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgAddress().build())
-        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/lookup-address")
+        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, OrgAddressFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationManualAddressPage(): OrgManualAddressFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgManualAddress().build())
+        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}")
+        return createValidPage(page, OrgManualAddressFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationMainContactPage(): OrgMainContactFormPageLandlordRegistration {

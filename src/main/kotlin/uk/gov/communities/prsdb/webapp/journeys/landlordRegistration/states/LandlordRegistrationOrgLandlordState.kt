@@ -27,13 +27,15 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val yourDetailsStep: YourDetailsStep
     val orgNameStep: OrgNameStep
-    val orgAddressTask: AddressTask
+    val orgAddressTask: OrgAddressTask
     val orgEmailStep: OrgEmailStep
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep
@@ -48,7 +50,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
-    val trusteeAddressTask: AddressTask
+    val trusteeAddressTask: TrusteeAddressTask
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
@@ -56,7 +58,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val govBodyMemberAddressTask: AddressTask
+    val govBodyMemberAddressTask: GovBodyMemberAddressTask
     val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
     val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
     val saveGovBodyMemberStep: SaveGovBodyMemberStep

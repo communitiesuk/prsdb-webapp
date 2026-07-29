@@ -125,6 +125,49 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgManualAddressStep {
+        @Test
+        fun `submitting without an address line 1 returns the missing address line 1 error`(page: Page) {
+            val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
+
+            manualAddressPage.submitAddress(townOrCity = "Exampleton", postcode = "EG1 2AB")
+
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
+                .containsText("Enter the first line of an address, typically the building and street")
+        }
+
+        @Test
+        fun `submitting without a town or city returns the missing town or city error`(page: Page) {
+            val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
+
+            manualAddressPage.submitAddress(addressLineOne = "1 Example Street", postcode = "EG1 2AB")
+
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+        }
+
+        @Test
+        fun `submitting without a postcode returns the missing postcode error`(page: Page) {
+            val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
+
+            manualAddressPage.submitAddress(addressLineOne = "1 Example Street", townOrCity = "Exampleton")
+
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        }
+
+        @Test
+        fun `submitting all required fields empty returns all three missing errors`(page: Page) {
+            val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
+
+            manualAddressPage.form.submit()
+
+            assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
+                .containsText("Enter the first line of an address, typically the building and street")
+            assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+            assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        }
+    }
+
+    @Nested
     inner class OrgMainContactStep {
         @Test
         fun `the main contact page renders the heading and the three field labels`(page: Page) {
