@@ -191,7 +191,7 @@ class PropertyRegistrationJourneyFactory(
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.gasSafetyTask, journey) {
-                        duplicableCheckAnswerTask(task.gasSafetyDetailsTask)
+                        duplicableCheckAnswerTask(task.gasSafetyDetailsTask, { journey })
                     }
                 }
 
@@ -200,7 +200,7 @@ class PropertyRegistrationJourneyFactory(
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.electricalSafetyTask, journey) {
-                        duplicableCheckAnswerTask(task.electricalSafetyDetailsTask)
+                        duplicableCheckAnswerTask(task.electricalSafetyDetailsTask, { journey })
                     }
                 }
 
@@ -213,7 +213,7 @@ class PropertyRegistrationJourneyFactory(
                 EpcExemptionStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.epcTask, journey) {
-                        duplicableCheckAnswerTask(task.epcDetailsTask)
+                        duplicableCheckAnswerTask(task.epcDetailsTask, { journey })
                     }
                 }
 
