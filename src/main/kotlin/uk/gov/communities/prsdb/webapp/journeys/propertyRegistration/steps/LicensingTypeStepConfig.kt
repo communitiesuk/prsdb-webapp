@@ -80,6 +80,7 @@ class LicensingTypeStepConfig(
                         LicensingType.HMO_MANDATORY_LICENCE -> LicensingTypeMode.HMO_MANDATORY_LICENCE
                         LicensingType.HMO_ADDITIONAL_LICENCE -> LicensingTypeMode.HMO_ADDITIONAL_LICENCE
                         LicensingType.NO_LICENSING -> LicensingTypeMode.NO_LICENSING
+                        LicensingType.PROVIDE_LATER -> LicensingTypeMode.PROVIDE_LATER
                     }
                 }
             }

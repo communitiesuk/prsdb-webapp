@@ -154,8 +154,8 @@ class PropertyRegistrationService(
         val address = addressService.findOrCreateAddress(addressModel)
 
         val license =
-            if (LicenseService.licenceShouldBeStored(licenseType, licenseProvideLater)) {
-                licenseService.createLicense(licenseType!!, licenceNumber)
+            if (licenseType != null && LicenseService.licenceShouldBeStored(licenseType)) {
+                licenseService.createLicense(licenseType, licenceNumber)
             } else {
                 null
             }

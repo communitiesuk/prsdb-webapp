@@ -92,7 +92,7 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `licenceShouldBeStored returns true for a licence type other than NO_LICENSING`() {
+    fun `licenceShouldBeStored returns true for a licence type other than NO_LICENSING or PROVIDE_LATER`() {
         assertTrue(LicenseService.licenceShouldBeStored(LicensingType.SELECTIVE_LICENCE))
     }
 
@@ -102,12 +102,7 @@ class LicenseServiceTests {
     }
 
     @Test
-    fun `licenceShouldBeStored returns false for a null licence type`() {
-        assertFalse(LicenseService.licenceShouldBeStored(null))
-    }
-
-    @Test
-    fun `licenceShouldBeStored returns false when the licensing details are being provided later`() {
-        assertFalse(LicenseService.licenceShouldBeStored(null, licenseProvideLater = true))
+    fun `licenceShouldBeStored returns false for PROVIDE_LATER`() {
+        assertFalse(LicenseService.licenceShouldBeStored(LicensingType.PROVIDE_LATER))
     }
 }

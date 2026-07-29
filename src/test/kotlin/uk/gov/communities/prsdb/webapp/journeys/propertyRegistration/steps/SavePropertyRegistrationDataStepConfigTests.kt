@@ -36,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
@@ -170,6 +169,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.licensingTypeStep.outcome).thenReturn(LicensingTypeMode.PROVIDE_LATER)
+        whenever(mockState.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -371,12 +371,11 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockPropertyTypeStep.formModel).thenReturn(propertyTypeFormModel)
 
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
-        val licensingTypeFormModel = LicensingTypeFormModel().apply { licensingType = LicensingType.SELECTIVE_LICENCE }
         whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
-        whenever(mockLicensingTypeStep.formModelOrNull).thenReturn(licensingTypeFormModel)
         whenever(mockLicensingTypeStep.outcome).thenReturn(LicensingTypeMode.SELECTIVE_LICENCE)
 
         whenever(mockState.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockState.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }

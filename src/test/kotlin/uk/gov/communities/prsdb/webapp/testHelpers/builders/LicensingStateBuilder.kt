@@ -34,6 +34,7 @@ interface LicensingStateBuilder<SelfType : LicensingStateBuilder<SelfType>> {
             LicensingType.HMO_MANDATORY_LICENCE -> withLicenceNumber("hmo-mandatory-licence", licenseNumber)
             LicensingType.HMO_ADDITIONAL_LICENCE -> withLicenceNumber("hmo-additional-licence", licenseNumber)
             LicensingType.NO_LICENSING -> {}
+            LicensingType.PROVIDE_LATER -> {}
         }
         return self()
     }

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -15,9 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 
 @JourneyFrameworkComponent
-class LicensingTask(
-    private val featureFlagManager: FeatureFlagManager,
-) : Task<LicensingState>() {
+class LicensingTask : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
             step(journey.licensingTypeStep) {

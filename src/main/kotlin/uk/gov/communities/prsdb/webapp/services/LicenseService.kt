@@ -25,7 +25,7 @@ class LicenseService(
         updateLicenceType: LicensingType?,
         updateLicenceNumber: String?,
     ): License? =
-        if (!licenceShouldBeStored(updateLicenceType)) {
+        if (!licenceShouldBeStored(updateLicenceType ?: LicensingType.NO_LICENSING)) {
             license?.let { licenseRepository.delete(license) }
             null
         } else if (license == null) {
@@ -37,12 +37,11 @@ class LicenseService(
             license
         }
 
-    // A licence is only stored when the landlord selects a licence type other than NO_LICENSING and has not opted to
-    // provide the licensing details later. NO_LICENSING and "provide this later" are both represented by a null licence.
+    // A licence is only stored when the landlord selects a licence type other than NO_LICENSING or PROVIDE_LATER.
+    // NO_LICENSING and PROVIDE_LATER are both represented by a null licence, but are distinguished by the
+    // licenseProvideLater flag on the property ownership.
     companion object {
-        fun licenceShouldBeStored(
-            licenceType: LicensingType?,
-            licenseProvideLater: Boolean = false,
-        ): Boolean = licenceType != null && licenceType != LicensingType.NO_LICENSING && !licenseProvideLater
+        fun licenceShouldBeStored(licenceType: LicensingType): Boolean =
+            licenceType != LicensingType.NO_LICENSING && licenceType != LicensingType.PROVIDE_LATER
     }
 }
