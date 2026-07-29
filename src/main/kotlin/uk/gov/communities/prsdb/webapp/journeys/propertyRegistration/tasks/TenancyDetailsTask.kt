@@ -62,7 +62,10 @@ class TenancyDetailsTask(
                 parents {
                     OrParents(
                         journey.rentFrequencyAndAmountTask.isComplete(),
-                        journey.householdsAndTenantsTask.provideTenancyDetailsLaterStep.isComplete(),
+                        AndParents(
+                            journey.householdsAndTenantsTask.isComplete(),
+                            journey.householdsAndTenantsTask.households.hasOutcome(HouseholdMode.PROVIDE_THIS_LATER),
+                        ),
                     )
                 }
             }

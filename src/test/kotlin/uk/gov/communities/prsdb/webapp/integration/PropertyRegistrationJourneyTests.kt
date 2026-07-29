@@ -1619,6 +1619,54 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `Changing from provide tenancy details later to actual households routes to rent includes bills page`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            householdsPage.submitNumberOfHouseholds(1)
+
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+
+            assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Changing from provide tenancy details later and completing tenancy details marks task as completed on task list`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            householdsPage.submitNumberOfHouseholds(1)
+
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+
+            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+            rentIncludesBillsPage.submitIsNotIncluded()
+
+            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
+            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
+
+            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
+            rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+            rentFrequencyPage.form.submit()
+
+            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
+            rentAmountPage.submitRentAmount("400")
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+        }
+
+        @Test
         fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
