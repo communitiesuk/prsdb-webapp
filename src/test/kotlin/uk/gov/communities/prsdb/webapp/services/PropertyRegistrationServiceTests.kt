@@ -205,6 +205,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -248,6 +249,7 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            tenancyProvideLater = false,
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumber.number,
@@ -298,6 +300,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -388,6 +391,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -489,6 +493,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -530,6 +535,7 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            tenancyProvideLater = false,
         )
     }
 
@@ -583,6 +589,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -663,6 +670,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -740,6 +748,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                tenancyProvideLater = false,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -807,6 +816,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -853,6 +863,7 @@ class PropertyRegistrationServiceTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             markedJointLandlord = eq(true),
+            tenancyProvideLater = anyOrNull(),
         )
     }
 }
