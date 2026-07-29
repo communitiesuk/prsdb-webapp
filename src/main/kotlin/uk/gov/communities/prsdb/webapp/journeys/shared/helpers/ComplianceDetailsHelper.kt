@@ -37,7 +37,7 @@ class ComplianceDetailsHelper(
         electricalSafetyState: ElectricalSafetyState,
     ): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(electricalSafetyState, uploadService) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(electricalSafetyState.electricalSafetyDetailsTask, uploadService) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(

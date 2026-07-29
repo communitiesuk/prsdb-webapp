@@ -29,16 +29,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UploadService
-
-internal interface TestableElectricalSafetyState :
-    ElectricalSafetyState,
-    CheckYourAnswersJourneyState
 
 internal interface TestableEpcState :
     EpcState,
@@ -130,18 +127,29 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetElectricalSafetyCyaContent {
         @Mock
-        internal lateinit var mockState: TestableElectricalSafetyState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockState: ElectricalSafetyState
+
+        @Mock
+        internal lateinit var mockElectricalDetailsTask: ElectricalSafetyDetailsTask
 
         private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalDetailsTask)
+        }
+
         @Test
         fun `provide later for occupied property returns 1 row and null inset text key`() {
-            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockElectricalDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockElectricalDetailsTask.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState, mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockCyaState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>
@@ -153,12 +161,12 @@ class ComplianceDetailsHelperTests {
 
         @Test
         fun `no cert for occupied property returns 1 row and occupiedNoCert inset text key`() {
-            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockElectricalDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockElectricalDetailsTask.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState, mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockCyaState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>

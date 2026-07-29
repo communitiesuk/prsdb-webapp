@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
@@ -145,16 +146,22 @@ class HasMissingComplianceStepConfigTests {
         }
 
         private fun setupElectricalCertMissing() {
+            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
+            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
+            whenever(mockDetailsTask.getElectricalCertificateIsOutdated()).thenReturn(null)
+
             val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockElectricalSafetyTask.getElectricalCertificateIsOutdated()).thenReturn(null)
+            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
             whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
         }
 
         private fun setupElectricalCertPresent() {
+            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
+            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
+            whenever(mockDetailsTask.getElectricalCertificateIsOutdated()).thenReturn(false)
+
             val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockElectricalSafetyTask.getElectricalCertificateIsOutdated()).thenReturn(false)
+            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
             whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
         }
 
@@ -190,10 +197,13 @@ class HasMissingComplianceStepConfigTests {
         }
 
         private fun setupElectricalCertProvideLater() {
-            val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
+            val mockDetailsTask: ElectricalSafetyDetailsTask = mock()
             val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+
+            val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
+            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockDetailsTask)
             whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
         }
 
@@ -291,35 +301,43 @@ class HasMissingComplianceStepConfigTests {
         @Mock
         lateinit var mockElectricalSafetyTask: ElectricalSafetyTask
 
+        @Mock
+        lateinit var mockElectricalSafetyDetailTask: ElectricalSafetyDetailsTask
+
+        @BeforeEach
+        fun setUp() {
+            whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailTask)
+        }
+
         @Test
         fun `returns false when user chose provide this later`() {
             val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockElectricalSafetyDetailTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
 
             assertFalse(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockElectricalSafetyTask))
         }
 
         @Test
         fun `returns true when cert is missing`() {
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockElectricalSafetyTask.getElectricalCertificateIsOutdated()).thenReturn(null)
+            whenever(mockElectricalSafetyDetailTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
+            whenever(mockElectricalSafetyDetailTask.getElectricalCertificateIsOutdated()).thenReturn(null)
 
             assertTrue(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockElectricalSafetyTask))
         }
 
         @Test
         fun `returns true when cert is outdated`() {
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockElectricalSafetyTask.getElectricalCertificateIsOutdated()).thenReturn(true)
+            whenever(mockElectricalSafetyDetailTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
+            whenever(mockElectricalSafetyDetailTask.getElectricalCertificateIsOutdated()).thenReturn(true)
 
             assertTrue(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockElectricalSafetyTask))
         }
 
         @Test
         fun `returns false when cert is valid`() {
-            whenever(mockElectricalSafetyTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
-            whenever(mockElectricalSafetyTask.getElectricalCertificateIsOutdated()).thenReturn(false)
+            whenever(mockElectricalSafetyDetailTask.hasElectricalCertStep).thenReturn(mock<HasElectricalCertStep>())
+            whenever(mockElectricalSafetyDetailTask.getElectricalCertificateIsOutdated()).thenReturn(false)
 
             assertFalse(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockElectricalSafetyTask))
         }

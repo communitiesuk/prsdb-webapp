@@ -7,17 +7,17 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
 @JourneyFrameworkComponent
 class HasElectricalCertStepConfig :
-    AbstractRequestableStepConfig<HasElectricalCertMode, HasElectricalCertFormModel, ElectricalSafetyState>() {
+    AbstractRequestableStepConfig<HasElectricalCertMode, HasElectricalCertFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = HasElectricalCertFormModel::class
 
-    override fun getStepSpecificContent(state: ElectricalSafetyState) =
+    override fun getStepSpecificContent(state: ElectricalSafetyDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.electricalSafetyTask.electricalCert.heading",
             "fieldSetHint" to "propertyCompliance.electricalSafetyTask.electricalCert.hint",
@@ -48,9 +48,9 @@ class HasElectricalCertStepConfig :
                 ),
         )
 
-    override fun chooseTemplate(state: ElectricalSafetyState) = "forms/hasElectricalCertForm"
+    override fun chooseTemplate(state: ElectricalSafetyDetailState) = "forms/hasElectricalCertForm"
 
-    override fun mode(state: ElectricalSafetyState) =
+    override fun mode(state: ElectricalSafetyDetailState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
                 if (state.allowProvideCertificateLaterRoute) {
@@ -77,7 +77,7 @@ class HasElectricalCertStepConfig :
 @JourneyFrameworkComponent
 final class HasElectricalCertStep(
     stepConfig: HasElectricalCertStepConfig,
-) : RequestableStep<HasElectricalCertMode, HasElectricalCertFormModel, ElectricalSafetyState>(stepConfig) {
+) : RequestableStep<HasElectricalCertMode, HasElectricalCertFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-electrical-safety"
     }

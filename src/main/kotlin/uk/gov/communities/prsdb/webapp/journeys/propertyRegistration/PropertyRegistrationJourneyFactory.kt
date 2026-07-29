@@ -215,7 +215,7 @@ class PropertyRegistrationJourneyFactory(
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.electricalSafetyTask, journey) {
-                        checkAnswerTask(task.electricalSafetyDetailsTask)
+                        duplicableCheckAnswerTask(task.electricalSafetyDetailsTask)
                     }
                 }
 

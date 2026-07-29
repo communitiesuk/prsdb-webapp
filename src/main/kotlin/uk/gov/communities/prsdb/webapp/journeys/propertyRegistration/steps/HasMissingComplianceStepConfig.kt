@@ -32,8 +32,8 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
         }
 
         fun isElectricalCertInvalid(state: ElectricalSafetyState): Boolean {
-            if (state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER) return false
-            val isOutdated = state.getElectricalCertificateIsOutdated()
+            if (state.electricalSafetyDetailsTask.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER) return false
+            val isOutdated = state.electricalSafetyDetailsTask.getElectricalCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 
