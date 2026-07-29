@@ -1601,8 +1601,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
+        // TODO: PDJB-942: Update CYA page to match Figma designs
         @Test
-        fun `CYA number of tenants row shows a change link after landlord has chosen to provide tenancy details later`(page: Page) {
+        fun `CYA number of households row shows a change link after landlord has chosen to provide tenancy details later`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 

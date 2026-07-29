@@ -61,6 +61,7 @@ class PropertyOwnershipService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean = false,
+        tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
@@ -85,6 +86,7 @@ class PropertyOwnershipService(
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 markedJointLandlord = markedJointLandlord,
+                tenancyProvideLater = tenancyProvideLater,
             ).apply {
                 if (isOccupied) lastOccupiedDate = LocalDate.now()
             },

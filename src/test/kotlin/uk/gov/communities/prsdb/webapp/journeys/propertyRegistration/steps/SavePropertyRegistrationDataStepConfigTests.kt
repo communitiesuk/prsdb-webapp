@@ -20,6 +20,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -176,6 +177,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = eq(epcExemptionReason),
             epcMeesExemptionReason = eq(meesExemptionReason),
             epcProvideLater = eq(false),
+            tenancyProvideLater = eq(false),
         )
     }
 
@@ -223,6 +225,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 epcExemptionReason = anyOrNull(),
                 epcMeesExemptionReason = anyOrNull(),
                 epcProvideLater = anyOrNull(),
+                tenancyProvideLater = any(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -280,6 +283,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(false),
         )
     }
 
@@ -288,13 +292,13 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration(isOccupied = true)
         setupStateForComplianceDataWithNullValues()
+        whenever(mockState.provideTenancyDetailsLater).thenReturn(false)
 
         val mockHouseholdsAndTenantsTask = mock<HouseholdsAndTenantsTask>()
         whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
 
         val mockHouseholdsStep = mock<HouseholdStep>()
         whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdsStep)
-        whenever(mockHouseholdsStep.outcome).thenReturn(HouseholdMode.COMPLETE)
         whenever(mockHouseholdsStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
 
         val mockTenantsStep = mock<TenantsStep>()
@@ -364,6 +368,62 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = anyOrNull(),
             epcMeesExemptionReason = anyOrNull(),
             epcProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(false),
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached sends zero tenancy fields when occupied user marks task as provide this later`() {
+        // Arrange
+        setupStateForPropertyRegistration(isOccupied = true)
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
+
+        val mockBedroomsStep = mock<BedroomsStep>()
+        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "2" })
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = any(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = eq(true),
+            numberOfHouseholds = eq(0),
+            numberOfPeople = eq(0),
+            baseUserId = any(),
+            numBedrooms = eq(2),
+            billsIncludedList = isNull(),
+            customBillsIncluded = isNull(),
+            furnishedStatus = isNull(),
+            rentFrequency = isNull(),
+            customRentFrequency = isNull(),
+            rentAmount = isNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = anyOrNull(),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(true),
         )
     }
 

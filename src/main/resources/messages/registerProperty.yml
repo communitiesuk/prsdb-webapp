@@ -21,7 +21,7 @@ provideTenancyDetailsLater:
     one: You can continue and submit your registration now, but you’ll need to return later and provide details about the current tenancy.
   whenToProvide:
     heading: When you’ll need to provide these tenancy details
-    insetText: To keep your property registered, you must provide its licensing details within 28 days.
+    insetText: To keep your property registered, you must provide its tenancy details within 28 days.
     paragraph: This is because you’ve told us this property’s occupied by tenants.
   reason: 'We’ll need to know:'
   weWillNeedToKnow:

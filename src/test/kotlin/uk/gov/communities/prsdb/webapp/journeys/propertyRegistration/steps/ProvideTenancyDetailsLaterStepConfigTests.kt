@@ -14,10 +14,10 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class ProvideTenancyDetailsLaterStepConfigTests {
     @Mock
-    private lateinit var mockState: HouseholdsAndTenantsState
+    lateinit var mockState: HouseholdsAndTenantsState
 
     @Test
-    fun `GetStepSpecificContent provides save and continue submitButtonText and chooseTemplate returns expected template`() {
+    fun `GetStepSpecificContent provides save and continue submitButtonText`() {
         // Arrange
         val stepConfig = setupStepConfig()
 
@@ -26,15 +26,21 @@ class ProvideTenancyDetailsLaterStepConfigTests {
 
         // Assert
         assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
+    }
+
+    @Test
+    fun `ChooseTemplate returns expected template`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+
+        // Act & Assert
         assertEquals("forms/provideTenancyDetailsLaterForm", stepConfig.chooseTemplate(mockState))
     }
 
     @Test
     fun `Mode returns COMPLETE when form model is saved`() {
         // Arrange
-        val stepConfig = ProvideTenancyDetailsLaterStepConfig()
-        stepConfig.routeSegment = ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT
-        stepConfig.validator = AlwaysTrueValidator()
+        val stepConfig = setupStepConfig()
 
         // Act
         whenever(mockState.getStepData(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)).thenReturn(emptyMap<String, Any>())
