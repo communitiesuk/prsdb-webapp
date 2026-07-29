@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
@@ -14,8 +16,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -25,8 +25,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 @WebMvcTest(PropertyDetailsController::class)
 class PropertyDetailsControllerTests(
@@ -122,6 +120,31 @@ class PropertyDetailsControllerTests(
             }
 
             verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
+        }
+
+        @ParameterizedTest(name = "when the provide later feature is {0}")
+        @ValueSource(booleans = [true, false])
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(isFeatureEnabled)
+
+            val expectedView =
+                if (isFeatureEnabled) {
+                    PropertyDetailsController.PROPERTY_DETAILS_VIEW
+                } else {
+                    PropertyDetailsController.PROPERTY_DETAILS_BEFORE_PDJB939_VIEW
+                }
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                view { name(expectedView) }
+            }
         }
 
         @Test
@@ -263,38 +286,6 @@ class PropertyDetailsControllerTests(
                 model { attribute("landlordCount", 2) }
             }
         }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails places bedrooms in property record with update action when restructure flag is enabled`() {
-            val propertyOwnership = createPropertyOwnership(numberOfBedrooms = 3)
-            val bedroomsHeading = "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
-
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
-                .thenReturn(propertyOwnership)
-            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-                .thenReturn(Pair(emptyList(), emptyList()))
-
-            val result =
-                mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
-                    .andExpect { status { isOk() } }
-                    .andReturn()
-            val viewModel = result.modelAndView!!.model["propertyDetails"] as PropertyDetailsViewModel
-            val propertyRecordHeadings = viewModel.propertyRecord.map { it.fieldHeading }
-            val bedroomsIndex = propertyRecordHeadings.indexOf(bedroomsHeading)
-
-            assertEquals(propertyRecordHeadings.indexOf("propertyDetails.propertyRecord.propertyType") + 1, bedroomsIndex)
-            assertEquals(
-                bedroomsIndex + 1,
-                propertyRecordHeadings.indexOf("propertyDetails.propertyRecord.ownershipType"),
-            )
-            assertFalse(viewModel.tenancyAndRentalInformation.any { it.fieldHeading == bedroomsHeading })
-            assertEquals(
-                UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) + "/${BedroomsStep.ROUTE_SEGMENT}",
-                viewModel.propertyRecord.single { it.fieldHeading == bedroomsHeading }.actions.single().url,
-            )
-        }
     }
 
     @Nested
@@ -354,35 +345,6 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
             }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getPropertyDetailsLocalCouncilView places bedrooms in property record without actions when restructure flag is enabled`() {
-            val propertyOwnership = createPropertyOwnership(numberOfBedrooms = 3)
-            val bedroomsHeading = "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
-
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
-                .thenReturn(propertyOwnership)
-            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-                .thenReturn(Pair(emptyList(), emptyList()))
-
-            val result =
-                mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true))
-                    .andExpect { status { isOk() } }
-                    .andReturn()
-            val viewModel = result.modelAndView!!.model["propertyDetails"] as PropertyDetailsViewModel
-            val propertyRecordHeadings = viewModel.propertyRecord.map { it.fieldHeading }
-            val bedroomsIndex = propertyRecordHeadings.indexOf(bedroomsHeading)
-
-            assertEquals(propertyRecordHeadings.indexOf("propertyDetails.propertyRecord.propertyType") + 1, bedroomsIndex)
-            assertEquals(
-                bedroomsIndex + 1,
-                propertyRecordHeadings.indexOf("propertyDetails.propertyRecord.ownershipType"),
-            )
-            assertFalse(viewModel.tenancyAndRentalInformation.any { it.fieldHeading == bedroomsHeading })
-            assertEquals(0, viewModel.propertyRecord.single { it.fieldHeading == bedroomsHeading }.actions.size)
         }
 
         @Test
