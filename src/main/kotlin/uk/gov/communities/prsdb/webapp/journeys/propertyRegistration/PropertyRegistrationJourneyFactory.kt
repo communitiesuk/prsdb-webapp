@@ -513,7 +513,12 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextDestination { _ -> getTenancyDetailsTaskDestination(state) }
+                    nextDestination { _ ->
+                        when {
+                            state.provideTenancyDetailsLater -> Destination(state.cyaStep)
+                            else -> Destination(state.taskListStep)
+                        }
+                    }
                     saveProgress()
                 }
             }
@@ -578,12 +583,6 @@ class PropertyRegistrationJourneyFactory(
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
-        }
-
-    private fun getTenancyDetailsTaskDestination(state: PropertyRegistrationJourneyState): Destination =
-        when {
-            state.provideTenancyDetailsLater -> Destination(state.cyaStep)
-            else -> Destination(state.taskListStep)
         }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeOrRestoreState(user)
