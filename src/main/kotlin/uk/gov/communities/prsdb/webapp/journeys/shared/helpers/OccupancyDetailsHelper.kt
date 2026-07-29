@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.BedroomsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FurnishedStatusState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
@@ -46,14 +45,8 @@ class OccupancyDetailsHelper {
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : BedroomsState, T : CheckYourAnswersJourneyState =
         getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-            getBedroomsRow(state, state) +
-            getRentBillsAndFurnishingsSummaryList(
-                state,
-                state,
-                state.rentIncludesBillsTask,
-                state.rentFrequencyAndAmountTask,
-                messageSource,
-            )
+            getBedroomsRow(state) +
+            getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
     fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
         state: CheckYourAnswersJourneyState,
@@ -149,33 +142,18 @@ class OccupancyDetailsHelper {
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
         getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-            getBedroomsRow(state, state) +
-            getRentBillsAndFurnishingsSummaryList(
-                state,
-                state,
-                state.rentIncludesBillsTask,
-                state.rentFrequencyAndAmountTask,
-                messageSource,
-            )
+            getBedroomsRow(state) +
+            getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
     private fun <T> getRestructuredOccupiedTenancyDetailsSummaryList(
         state: T,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
         getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-            getRentBillsAndFurnishingsSummaryList(
-                state,
-                state,
-                state.rentIncludesBillsTask,
-                state.rentFrequencyAndAmountTask,
-                messageSource,
-            )
+            getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
-    private fun getBedroomsRow(
-        state: CheckYourAnswersJourneyState,
-        bedroomsState: BedroomsState,
-    ): SummaryListRowViewModel {
-        val bedroomsStep = bedroomsState.bedrooms
+    private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : BedroomsState, T : CheckYourAnswersJourneyState {
+        val bedroomsStep = state.bedrooms
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
             bedroomsStep.formModel.numberOfBedrooms,
@@ -183,17 +161,14 @@ class OccupancyDetailsHelper {
         )
     }
 
-    private fun getRentBillsAndFurnishingsSummaryList(
-        state: CheckYourAnswersJourneyState,
-        furnishedStatusState: FurnishedStatusState,
-        rentIncludesBillsState: RentIncludesBillsState,
-        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
+    private fun <T> getRentBillsAndFurnishingsSummaryList(
+        state: T,
         messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> =
+    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val furnishedStatusStep = furnishedStatusState.furnishedStatus
-                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, rentIncludesBillsState, messageSource))
+                val furnishedStatusStep = state.furnishedStatus
+                addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
@@ -201,6 +176,6 @@ class OccupancyDetailsHelper {
                         Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),
                 )
-                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, rentFrequencyAndAmountState, messageSource))
+                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource))
             }
 }

@@ -11,10 +11,11 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -32,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -53,7 +55,6 @@ class UpdateOccupancyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.wasOccupied = propertyOwnership.isOccupied
-            state.initialNumberOfBedrooms = propertyOwnership.numBedrooms
             state.isStateInitialized = true
         }
 
@@ -62,18 +63,18 @@ class UpdateOccupancyJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        return if (isRestructured) {
-            // The restructured occupancy update is a single-page update (no check-your-answers page)
-            restructuredJourneyMap(state, propertyId)
+        val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        return if (isRedesigned) {
+            // The redesigned occupancy update is a single-page update (no check-your-answers page)
+            redesignedJourneyMap(state, propertyId)
         } else if (checkingAnswersFor == null) {
-            legacyMainJourneyMap(state, propertyId)
+            oldMainJourneyMap(state, propertyId)
         } else {
-            legacyCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            oldCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
 
-    private fun restructuredJourneyMap(
+    private fun redesignedJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -98,15 +99,18 @@ class UpdateOccupancyJourneyFactory(
             }
             step(journey.completeOccupancyUpdateStep) {
                 parents {
-                    journey.occupied.always()
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.YES),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                    )
                 }
                 nextUrl { propertyDetailsRoute }
             }
         }
     }
 
-    // TODO(PDJB-1340): delete this legacy (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun legacyMainJourneyMap(
+    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun oldMainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -131,8 +135,8 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    // TODO(PDJB-1340): delete this legacy (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun legacyCheckYourAnswersJourneyMap(
+    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun oldCheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,
@@ -193,7 +197,7 @@ class UpdateOccupancyJourneyFactory(
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
-    // TODO(PDJB-1340): delete this helper (only used by the legacy flag-off journeys above) when
+    // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
         configureStep(journey.occupied) {
@@ -257,11 +261,11 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // TODO(PDJB-1340): delete these legacy (flag-off) check-your-answers steps when
-    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the restructured update is a single page).
+    // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
-    // Completion step for the restructured single-page update
+    // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
@@ -280,8 +284,6 @@ class UpdateOccupancyJourney(
 
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
-    override var initialNumberOfBedrooms: Int? by delegateProvider.nullableDelegate("initialNumberOfBedrooms")
-
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
@@ -294,5 +296,4 @@ interface UpdateOccupancyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
-    val initialNumberOfBedrooms: Int?
 }

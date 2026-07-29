@@ -16,9 +16,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
-// TODO(PDJB-1340): delete this legacy (flag-off) check-your-answers step when
-// PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. The restructured occupancy update is a single-page
-// update (see UpdateOccupancyJourneyFactory.restructuredJourneyMap) and does not use this step.
+// TODO(PDJB-1340): delete this old (flag-off) check-your-answers step when
+// PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. The redesigned occupancy update is a single-page
+// update (see UpdateOccupancyJourneyFactory.redesignedJourneyMap) and does not use this step.
 @JourneyFrameworkComponent
 class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,

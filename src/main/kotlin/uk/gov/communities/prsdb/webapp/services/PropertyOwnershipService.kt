@@ -244,6 +244,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    // TODO(PDJB-1340): delete this method when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. It is only
+    // used by the old (flag-off) occupancy update check-your-answers step (UpdateOccupancyCyaConfig); the
+    // redesigned single-page update persists via updateIsOccupied instead.
     @Transactional
     fun updateOccupancy(
         id: Long,
