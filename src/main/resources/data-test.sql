@@ -1,3 +1,17 @@
+-- =============================================================================
+-- available_addresses(n): returns the first n existing active addresses not already
+-- used by an active property, ranked 1..n (rn). Like the rest of this seed, the
+-- cohorts below reference the AddressBase/NGD addresses already present rather than
+-- inserting their own; each claims distinct free addresses by joining this function
+-- on rn. The inner LIMIT n keeps callers from ranking the whole address table.
+-- Defined with a single-quoted SQL body (no dollar-quoting) because the spring.sql.init
+-- runner splits scripts on ';' and cannot parse dollar-quoted function blocks.
+-- =============================================================================
+CREATE OR REPLACE FUNCTION available_addresses(n integer)
+    RETURNS TABLE (address_id bigint, rn bigint)
+    LANGUAGE sql
+AS 'SELECT id, ROW_NUMBER() OVER (ORDER BY id) FROM (SELECT a.id FROM address a WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id) ORDER BY a.id LIMIT $1) limited';
+
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024-10-15 00:00:00+00'),        -- Team-PRSDB+laadmin@softwire.com
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', '2024-10-15 00:00:00+00'),        -- Team-PRSDB+lauser@softwire.com
@@ -183,77 +197,92 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
+-- PDJB-1048 / PDJB-1305 provide-later + compliance-banner property record QA (landlord 1):
+-- registration numbers for property_ownership 18-26
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (43, '2026-04-14 00:00:00+00', 210000000043, 0),
+       (44, '2026-04-14 00:00:00+00', 210000000044, 0),
+       (45, '2026-04-14 00:00:00+00', 210000000045, 0),
+       (46, '2026-04-14 00:00:00+00', 210000000046, 0),
+       (47, '2026-04-14 00:00:00+00', 210000000047, 0),
+       (48, '2026-04-14 00:00:00+00', 210000000048, 0),
+       (49, '2026-04-14 00:00:00+00', 210000000049, 0),
+       (50, '2026-04-14 00:00:00+00', 210000000050, 0),
+       (51, '2026-04-14 00:00:00+00', 210000000051, 0) ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true, false),
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
         'KENNETH DECERQUEIRA', '07777777777', 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU', '1965-07-08',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (4, 4, 1, '2025-02-20 11:50:45.745273+00', 'kiran.randhawakukar@softwire.com', null, true, '2025-03-06 14:01:33.486684+00',
         'Not Kiran', '01234567890', 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU', '1965-07-08', 'England or Wales',
-        false, true, false),
+        false, true),
        (5, 5, 1, '2025-02-24 09:29:53.079945+00', 'jasmin.conterio@softwire.com', null, true, '2025-02-27 17:19:52.061638+00',
         'Jasmin Conterio', '01223 123 456', 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '1989-02-02',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (7, 7, 1, '2025-02-27 13:56:15.745135+00', 'geetika.kejriwal@communities.gov.uk', null, true, '2025-02-27 14:34:33.323661+00',
         'LISA S C LOOSELEY', '+447123456789', 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI', '1973-03-14',
-        'England or Wales', true, true, false),
+        'England or Wales', true, true),
        (9, 9, 1, '2025-02-27 13:58:02.81462+00', 'catherine.graham2@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '+447123456789', 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', '1973-03-14', 'England or Wales', true, true, false),
+        '+447123456789', 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', '1973-03-14', 'England or Wales', true, true),
        (10, 10, 1, '2025-03-06 08:22:41.002251+00', 'Team-PRSDB+Unverified@softwire.com', null, true, '2025-03-11 13:47:42.800533+00',
         'Unverified Landlord', '07777777777', 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24', '1996-03-03',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (11, 11, 1, '2025-03-06 10:33:22.395944+00', 'team-prsdb+verified@softwire.com', null, true, null, 'KENNETH DECERQUEIRA',
-        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true),
        (12, 12, 1, '2025-04-01 11:08:11.224604+00', 'norris.orighoye@communities.gov.uk', null, true, null, 'Norris Orighoye',
-        '07777777777', 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk', '1984-11-11', 'England or Wales', false, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk', '1984-11-11', 'England or Wales', false, true),
        (13, 13, 1, '2025-04-02 12:49:10.39148+00', 'sharan.flora@communities.gov.uk', null, true, null, 'JULIE SYED HABIB EYLES-SPENCER',
-        '07777777777', 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU', '1967-03-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU', '1967-03-01', 'England or Wales', true, true),
        (14, 14, 1, '2025-04-02 12:51:57.966276+00', 'rowan.hill@softwire.com', null, true, null, 'Rowan Hill', '07777777777',
-        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', '1908-03-27', 'England or Wales', false, true, false),
+        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', '1908-03-27', 'England or Wales', false, true),
        (18, 18, 1, '2025-04-22 10:52:32.910331+00', 'sandra.lila@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY', '07777777777',
-        'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '1973-03-14', 'England or Wales', true, true, false),
+        'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', '1973-03-14', 'England or Wales', true, true),
        (19, 19, 1, '2025-10-09 12:44:47.460558+00', 'chris.lightfoot@communities.gov.uk', null, true, null, 'Hello Name', '07777777777',
-        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2001-01-01', 'England or Wales', false, true, false),
+        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', '2001-01-01', 'England or Wales', false, true),
        (20, 20, 1, '2025-10-17 14:16:57.295418+00', 'Ned.FrederickCalas-Hathaway@softwire.com', null, true, null, 'Ned Calas-Hathaway',
-        '07777777777', 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg', '1973-06-18', 'England or Wales', false, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg', '1973-06-18', 'England or Wales', false, true),
        (21, 25, 1, '2025-11-07 11:15:00+00', 'dani.swift@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY', '07427585544',
-        'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', '1973-03-14', 'England or Wales', true, true, false),
+        'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', '1973-03-14', 'England or Wales', true, true),
        (22, 26, 1, '2025-11-10 15:30:00+00', 'shannon.okyemba-tsambou@communities.gov.uk', null, true, null, 'KENNETH DECERQUEIRA',
-        '07432768528', 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', '1965-07-08', 'England or Wales', true, true, false),
+        '07432768528', 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', '1965-07-08', 'England or Wales', true, true),
        (23, 27, 1, '2025-11-10 16:10:00+00', 'rebecca.coll@communities.gov.uk', null, true, null, 'Rebecca Coll', '07764123456',
-        'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', '1989-03-08', 'England or Wales', false, true, false),
+        'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', '1989-03-08', 'England or Wales', false, true),
        (24, 28, 1, '2025-11-07 11:15:00+00', 'adam.jennings@softwire.com', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
-        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '1965-07-08', 'England or Wales', true, true, false),
+        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '1965-07-08', 'England or Wales', true, true),
        (26, 30, 1, '2025-11-07 11:15:00+00', 'Lewis.Jones@communities.gov.uk', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
-        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true, true, false),
+        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true, true),
        (27, 43, 1, '2026-07-01 10:33:22.395944+00', 'danielle.dias@madetech.com', null, true, null, 'Danielle Dias',
         '07777777777', 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '1990-01-01', 'England or Wales', true,
-        true, false),
+        true),
        (28, 44, 1, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
         '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
-        true, false),
+        true),
        (29, 45, 1, '2026-07-21 00:00:00+00', 'andrew.wilkins@communities.gov.uk', null, true, null, 'Andrew Wilkins',
-        '07777777777', 'urn:fdc:gov.uk:2022:wkm6PXI5bMeyS-iMYW9FoBp86EdijRr6usu6qTaA3Cg', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:wkm6PXI5bMeyS-iMYW9FoBp86EdijRr6usu6qTaA3Cg', '1990-01-01', 'England or Wales', true, true),
        (30, 46, 1, '2026-07-21 00:00:00+00', 'william.gledhill@communities.gov.uk', null, true, null, 'William Gledhill',
-        '07777777777', 'urn:fdc:gov.uk:2022:r4pLmSY3oYBWPaJVhw8U_wgdfXp3e7cuLSjctVWEJWo', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:r4pLmSY3oYBWPaJVhw8U_wgdfXp3e7cuLSjctVWEJWo', '1990-01-01', 'England or Wales', true, true),
        (31, 47, 1, '2026-07-21 00:00:00+00', 'sean.hennity@communities.gov.uk', null, true, null, 'Sean Hennity',
-        '07777777777', 'urn:fdc:gov.uk:2022:Flwl0DlDFArbsXtBSpBeVNLJ_OhhmnGl7s4Lo-qg3QI', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:Flwl0DlDFArbsXtBSpBeVNLJ_OhhmnGl7s4Lo-qg3QI', '1990-01-01', 'England or Wales', true, true),
        (32, 48, 1, '2026-07-21 00:00:00+00', 'denis.fazlji@communities.gov.uk', null, true, null, 'Denis Fazlji',
-        '07777777777', 'urn:fdc:gov.uk:2022:aOcUnYIpNfDHDfbexwINrPodEJLV5Fh451VDFOM5h_o', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:aOcUnYIpNfDHDfbexwINrPodEJLV5Fh451VDFOM5h_o', '1990-01-01', 'England or Wales', true, true),
        (33, 49, 1, '2026-07-21 00:00:00+00', 'andreea.popescu@communities.gov.uk', null, true, null, 'Andreea Popescu',
-        '07777777777', 'urn:fdc:gov.uk:2022:kMCObIbxtdFvloXjqQUnFISalxA4bct23eJJxe3QDmI', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:kMCObIbxtdFvloXjqQUnFISalxA4bct23eJJxe3QDmI', '1990-01-01', 'England or Wales', true, true),
        (34, 50, 1, '2026-07-21 00:00:00+00', 'yvonne.andrews@communities.gov.uk', null, true, null, 'Yvonne Andrews',
-        '07777777777', 'urn:fdc:gov.uk:2022:3vvs6mvUviJ6xMVqLKL2rS0BIrlszvGh4nRMdX3IFb8', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:3vvs6mvUviJ6xMVqLKL2rS0BIrlszvGh4nRMdX3IFb8', '1990-01-01', 'England or Wales', true, true),
        (35, 51, 1, '2026-07-21 00:00:00+00', 'mobin.patel@communities.gov.uk', null, true, null, 'Mobin Ibrahim Patel',
-        '07777777777', 'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '1990-01-01', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '1990-01-01', 'England or Wales', true, true),
        (36, 52, 1, '2026-07-21 00:00:00+00', 'sarah.warren@communities.gov.uk', null, true, null, 'Sarah Warren',
         '07777777777', 'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '1990-01-01', 'England or Wales', true,
-        true, false) ON CONFLICT DO NOTHING;
+        true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -301,6 +330,63 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 
 UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 
+-- =============================================================================
+-- PDJB-1048 provide-later property record QA properties (landlord 1), ids 18-25.
+-- For manual QA of the new-layout notification banners and "Provide this later"
+-- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Like the rest of
+-- this seed, addresses are NOT inserted: each property claims a distinct existing
+-- active AddressBase/NGD address not already used by an active property (the
+-- combined insert below picks them via the available_addresses(n) function). Occupied
+-- properties set last_occupied_date so the "within 28 days" deadline renders.
+-- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
+--   18  occupied, licensing + tenancy skipped, compliance all provide-later -> COMBINED banner
+--   19  occupied, everything provided, fully compliant          -> no banner (control)
+--   20  occupied, tenancy skipped (licence held), compliant     -> TENANCY banner
+--   21  occupied, licensing skipped (tenancy held), compliant   -> LICENSING banner
+--   22  occupied, licensing + tenancy skipped, fully compliant  -> BOTH banner
+--   23  unoccupied, licensing skipped                           -> licensing provide-later row (no banner)
+-- PDJB-1305 compliance-banner QA (occupied, licensing + tenancy fully provided so only the
+-- compliance banner shows):
+--   24  gas cert expired, electrical + EPC valid                -> single "certificate expired" banner
+--   25  gas cert + EPC expired, electrical valid                -> "multiple certificates expired" banner
+--   26  gas cert "provide later", electrical + EPC valid        -> "add compliance certificates" (missing) banner
+-- =============================================================================
+INSERT INTO license (id, license_type, license_number)
+VALUES (1, 1, 'LQA0000019'),
+       (2, 1, 'LQA0000020') ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
+
+-- Each QA property claims a distinct existing active address not already used by an active property.
+-- available_addresses(9) returns 9 free addresses ranked 1..9 so every row below picks a different one.
+WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
+                     furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
+                     license_provide_later, tenancy_provide_later) AS (
+         VALUES (1, 18, 43, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (2, 19, 44, 1, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (3, 20, 45, 2, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', false, true),
+                (4, 21, 46, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', true, false),
+                (5, 22, 47, null, 0, 0, null, null, null, true, current_date - INTERVAL '7 days', true, true),
+                (6, 23, 48, null, 0, 0, null, null, null, false, null, true, false),
+                (7, 24, 49, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (8, 25, 50, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false),
+                (9, 26, 51, null, 1, 2, 2, 1, 123.12, true, current_date - INTERVAL '7 days', false, false))
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
+                                address_id, created_date, last_modified_date, license_id, property_build_type, num_bedrooms,
+                                bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency,
+                                rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
+                                license_provide_later, tenancy_provide_later)
+SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
+       aa.address_id, current_date, current_date, np.license_id, 1, 1,
+       null, null, np.furnished_status, np.rent_frequency, null,
+       np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
+       np.license_provide_later, np.tenancy_provide_later
+FROM new_properties np
+         JOIN available_addresses(9) aa ON aa.rn = np.rn
+ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),
@@ -321,6 +407,18 @@ VALUES (1, 1, '2025-01-15'),
        (1, 17, '2025-01-15'),
        (10, 1, '2025-01-15'),
        (11, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+
+-- PDJB-1048 / PDJB-1305 QA (landlord 1): ownership links for property_ownership 18-26
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15'),
+       (1, 22, '2025-01-15'),
+       (1, 23, '2025-01-15'),
+       (1, 24, '2025-01-15'),
+       (1, 25, '2025-01-15'),
+       (1, 26, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
@@ -358,7 +456,45 @@ VALUES (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
        (14, 2, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (15, 3, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (16, 4, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (17, 5, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+-- PDJB-1048 / PDJB-1305 provide-later + compliance-banner QA (landlord 1) compliance records.
+-- 18-21: fully compliant records for property_ownership 19-22 (gas not required, valid electrical +
+-- EPC, all declarations) so they render the pure provide-later banner variant.
+-- 22: scenario A (PO 18) with all three certs "provide later" -> COMBINED, backed by data.
+-- 23: PO 24 gas cert expired, electrical + EPC valid          -> single "certificate expired" banner.
+-- 24: PO 25 gas cert + EPC expired, electrical valid          -> "multiple certificates expired" banner.
+-- 25: PO 26 gas cert "provide later", electrical + EPC valid  -> "add compliance certificates" (missing) banner.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
+                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
+VALUES (18, 19, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (19, 20, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (20, 21, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (21, 22, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (22, 18, current_date, current_date, null, true, null, null, null, null,
+        null, null, null, null, true, true, true, true, true, true),
+       (23, 24, current_date, current_date, current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false),
+       (24, 25, current_date, current_date, current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
+        false, 'c', null, null, true, true, true, false, false, false),
+       (25, 26, current_date, current_date, null, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 

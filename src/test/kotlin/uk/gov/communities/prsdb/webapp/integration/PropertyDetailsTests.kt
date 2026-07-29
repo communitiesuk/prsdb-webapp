@@ -2,14 +2,20 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
@@ -66,13 +72,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 DeregisterPropertyInfoPage::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        }
-
-        @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test
@@ -274,13 +273,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertPageIs(page, LocalCouncilDashboardPage::class)
         }
 
-        @Test
-        fun `the property details page displays the custom property type when set`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
-
-            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
-        }
-
         @Nested
         inner class LandlordDetails {
             @Test
@@ -434,6 +426,222 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val successBanner = page.locator(".govuk-notification-banner--success")
             assertThat(successBanner).isVisible()
             assertThat(successBanner).containsText("expired@example.com")
+        }
+    }
+
+    @Nested
+    inner class BeforePdjb939Layout {
+        // Flag-off (legacy) property record layout. Delete this class when PDJB-939 is permanently on.
+        @BeforeEach
+        fun disableFlag() {
+            featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        }
+
+        @Test
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+            assertThat(detailsPage.beforePdjb939SummaryList.propertyTypeRow).containsText("End terrace")
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsTab {
+        @Test
+        fun `landlord view groups the property record into sections`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+
+            assertThat(detailsPage.sectionHeading("Property details")).isVisible()
+            assertThat(detailsPage.sectionHeading("Ownership")).isVisible()
+            assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
+            assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
+
+            assertThat(detailsPage.sectionHeading("Licensing information")).not().isVisible()
+            assertThat(detailsPage.sectionHeading("Tenancy and rental information")).not().isVisible()
+        }
+
+        @Test
+        fun `landlord view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `local council view displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
+        @Test
+        fun `landlord view hides the tenancy section for an unoccupied property`(page: Page) {
+            // Property 12: unoccupied, no licence, tenancy details not applicable.
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(12)
+
+            assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
+            assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+            assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+        }
+
+        @Nested
+        inner class OccupiedWithLicensingAndTenancySkipped {
+            // Property 39: occupied (0 tenants, 0 households), no licence, no tenancy details.
+            // last_occupied_date is seeded to 7 days ago, so the provide-later deadline is
+            // (7 days ago + PROVIDE_LATER_DEADLINE_DAYS) days from today.
+            private val expectedDeadline =
+                LocalDate
+                    .now()
+                    .minusDays(7)
+                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+
+            @Test
+            fun `landlord view shows provide later rows with the deadline date for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (before $expectedDeadline)")
+            }
+
+            @Test
+            fun `local council view shows provide later paragraphs with the deadline date for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
+
+                assertThat(
+                    detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
+                ).hasCount(2)
+            }
+        }
+
+        @Nested
+        inner class UnoccupiedWithLicensingSkipped {
+            // Property 9: unoccupied (0 tenants), no licence.
+            @Test
+            fun `landlord view shows a provide later licensing row and hides the tenancy section`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(9)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value)
+                    .containsText("Provide this later (within 28 days of the property being occupied)")
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+            }
+
+            @Test
+            fun `local council view shows a not provided licensing paragraph and hides the tenancy section`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(9)
+
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(
+                    detailsPage.bodyParagraph("These details have not been provided yet"),
+                ).hasCount(1)
+            }
+        }
+
+        @Nested
+        inner class OccupiedWithAllFieldsCompleted {
+            // Property 40: occupied (2 tenants, 1 household), licence present, full tenancy details.
+            @Test
+            fun `landlord view shows the licensing type and the tenancy details`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
+
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
+            }
+
+            @Test
+            fun `local council view shows the licensing type and the tenancy details`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(40)
+
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
+                assertThat(
+                    detailsPage.bodyParagraph("These details have not been provided yet"),
+                ).hasCount(0)
+            }
+        }
+
+        @Nested
+        inner class UnoccupiedWithAllFieldsCompleted {
+            // Property 7: unoccupied (0 tenants), licence present.
+            @Test
+            fun `landlord view shows the licensing type and hides the tenancy section`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+            }
+
+            @Test
+            fun `local council view shows the licensing type and hides the tenancy section`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(
+                    detailsPage.bodyParagraph("These details have not been provided yet"),
+                ).hasCount(0)
+            }
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsLocalCouncilInvitations :
+        NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
+        @Test
+        fun `local council view shows pending invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).isVisible()
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Pending invitations (1)")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("pending@example.com")
+        }
+
+        @Test
+        fun `local council view shows expired invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).isVisible()
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired invitations (1)")
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("expired@example.com")
+        }
+
+        @Test
+        fun `local council view does not show action links on pending invitations`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.pendingInvitationsDetails.locator("summary").click()
+            assertThat(detailsPage.pendingInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
+        }
+
+        @Test
+        fun `local council view does not show action links on expired invitations`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.expiredInvitationsDetails.locator("summary").click()
+            assertThat(detailsPage.expiredInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
         }
     }
 }

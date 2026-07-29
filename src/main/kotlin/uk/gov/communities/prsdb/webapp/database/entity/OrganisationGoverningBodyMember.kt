@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "organisation_governing_body_member")
-class OrganisationGoverningBodyMember : ModifiableAuditableEntity() {
+class OrganisationGoverningBodyMember() : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -34,4 +34,18 @@ class OrganisationGoverningBodyMember : ModifiableAuditableEntity() {
     @ManyToOne(optional = false)
     @JoinColumn(name = "address_id", nullable = false)
     lateinit var address: Address
+
+    constructor(
+        organisationLandlord: OrganisationLandlord,
+        type: GoverningBodyMemberType,
+        name: String,
+        dateOfBirth: LocalDate,
+        address: Address,
+    ) : this() {
+        this.organisationLandlord = organisationLandlord
+        this.type = type
+        this.name = name
+        this.dateOfBirth = dateOfBirth
+        this.address = address
+    }
 }

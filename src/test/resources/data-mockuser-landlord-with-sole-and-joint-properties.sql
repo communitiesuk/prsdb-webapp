@@ -16,11 +16,11 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
-                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
-        'Alexander Smith', 'alex.surname@example.com', 'England or Wales', true, true, false),
+        'Alexander Smith', 'alex.surname@example.com', 'England or Wales', true, true),
        (2, '09/13/24', '09/13/24', 2, 1, '09/13/2000', true, 07222222222, 'urn:fdc:gov.uk:2022:ABCDE',
-        'Co Owner', 'co.owner@example.com', 'England or Wales', true, true, false);
+        'Co Owner', 'co.owner@example.com', 'England or Wales', true, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
