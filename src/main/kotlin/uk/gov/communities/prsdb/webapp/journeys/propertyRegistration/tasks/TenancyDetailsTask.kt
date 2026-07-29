@@ -23,6 +23,7 @@ class TenancyDetailsTask(
 ) : DuplicableTask<TenancyDetailsState>(journeyStateService),
     TenancyDetailsState {
     override val taskState get() = this
+
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             duplicableTask(journey.householdsAndTenantsTask) {
