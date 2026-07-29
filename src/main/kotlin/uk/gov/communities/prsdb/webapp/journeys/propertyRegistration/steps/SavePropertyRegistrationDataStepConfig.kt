@@ -36,7 +36,7 @@ class SavePropertyRegistrationDataStepConfig(
         try {
             registerProperty(state)
         } catch (_: EntityExistsException) {
-            state.addressTask.isAddressAlreadyRegistered = true
+            state.propertyDetailsTask.addressTask.isAddressAlreadyRegistered = true
             return
         }
     }
@@ -45,8 +45,8 @@ class SavePropertyRegistrationDataStepConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination =
-        if (state.addressTask.isAddressAlreadyRegistered == true) {
-            Destination(state.addressTask.alreadyRegisteredStep)
+        if (state.propertyDetailsTask.addressTask.isAddressAlreadyRegistered == true) {
+            Destination(state.propertyDetailsTask.addressTask.alreadyRegisteredStep)
         } else {
             state.deleteJourney()
             defaultDestination
@@ -56,24 +56,25 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
+        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
-            state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
+            jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
                 ?.values
                 ?.toList()
-        val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
-            addressModel = state.addressTask.getAddress(),
-            propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+            addressModel = state.propertyDetailsTask.addressTask.getAddress(),
+            propertyType = state.propertyDetailsTask.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
             customPropertyType =
-                if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
-                    state.propertyTypeStep.formModel.customPropertyType
+                if (state.propertyDetailsTask.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                    state.propertyDetailsTask.propertyTypeStep.formModel.customPropertyType
                 } else {
                     null
                 },
             licenseType = state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
-            ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            ownershipType = state.ownershipAndLandlordsTask.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
                 if (isOccupied) {
