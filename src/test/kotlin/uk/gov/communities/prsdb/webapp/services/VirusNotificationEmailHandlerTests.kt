@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
@@ -39,6 +39,8 @@ class VirusNotificationEmailHandlerTests {
 
     private val virusMonitoringEmail = "support@example.com"
 
+    private val monitoringTeamRecipientName = "Monitoring Team"
+
     @BeforeEach
     fun setup() {
         emailNotificationService = mock()
@@ -57,34 +59,13 @@ class VirusNotificationEmailHandlerTests {
             )
     }
 
-    companion object {
-        @JvmStatic
-        fun certificateTestParameters(): List<Array<Any>> =
-            listOf(
-                arrayOf(CertificateType.GasSafetyCert, "gas safety certificate"),
-                arrayOf(CertificateType.Eicr, "EICR"),
-                arrayOf(CertificateType.Eic, "EIC"),
-            )
-
-        @JvmStatic
-        fun incompletePropertyParameters(): List<Array<Any>> =
-            listOf(
-                arrayOf(CertificateType.GasSafetyCert, "gas safety certificate"),
-                arrayOf(CertificateType.Eicr, "EICR"),
-                arrayOf(CertificateType.Eic, "EIC"),
-            )
-    }
-
     @ParameterizedTest
-    @MethodSource("certificateTestParameters")
-    fun `handleCallback for monitoring email sends email to the monitoring team`(
-        testType: CertificateType,
-        expectedBody: String,
-    ) {
+    @EnumSource(CertificateType::class)
+    fun `handleCallback for monitoring email sends email to the monitoring team`(testType: CertificateType) {
         // Arrange
         val (ownershipId, expectedEmail) =
             arrangeOwnedPropertyUploadCallback(
-                expectedBody,
+                expectedCertType(testType),
                 listOf("test@example.com"),
             )
 
@@ -99,20 +80,17 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(listOf(virusMonitoringEmail), expectedEmail)
+        assertEmailSentToAddress(listOf(virusMonitoringEmail), expectedEmail.copy(recipientName = monitoringTeamRecipientName))
     }
 
     @ParameterizedTest
-    @MethodSource("certificateTestParameters")
-    fun `handleCallback for send owner email sends email to every landlord on the property`(
-        testType: CertificateType,
-        expectedBody: String,
-    ) {
+    @EnumSource(CertificateType::class)
+    fun `handleCallback for send owner email sends email to every landlord on the property`(testType: CertificateType) {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com", "landlord3@example.com")
         val (ownershipId, expectedEmail) =
             arrangeOwnedPropertyUploadCallback(
-                expectedBody,
+                expectedCertType(testType),
                 landlordEmails,
             )
 
@@ -162,11 +140,8 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @ParameterizedTest
-    @MethodSource("incompletePropertyParameters")
-    fun `handleCallback for incomplete property emails the registering landlord`(
-        certType: CertificateType,
-        expectedCertString: String,
-    ) {
+    @EnumSource(CertificateType::class)
+    fun `handleCallback for incomplete property emails the registering landlord`(certType: CertificateType) {
         val expectedEmail = arrangeIncompletePropertyCallback(certType)
         val data = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
         virusNotificationEmailHandler.handleCallback(
@@ -184,11 +159,8 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @ParameterizedTest
-    @MethodSource("incompletePropertyParameters")
-    fun `handleCallback for incomplete-property monitoring email sends to the monitoring team`(
-        certType: CertificateType,
-        expectedCertString: String,
-    ) {
+    @EnumSource(CertificateType::class)
+    fun `handleCallback for incomplete-property monitoring email sends to the monitoring team`(certType: CertificateType) {
         val expectedEmail = arrangeIncompletePropertyCallback(certType)
         val inner = EmailNotificationData.IncompletePropertyEmailNotification("journey-1", certType, 7L)
         val data = EmailNotificationData.VirusMonitoringEmailNotification(inner)
@@ -203,7 +175,7 @@ class VirusNotificationEmailHandlerTests {
         val addressCaptor = argumentCaptor<String>()
         verify(emailNotificationService).sendEmail(addressCaptor.capture(), emailCaptor.capture())
         assertEquals(virusMonitoringEmail, addressCaptor.firstValue)
-        assertEquals(expectedEmail, emailCaptor.firstValue)
+        assertEquals(expectedEmail.copy(recipientName = monitoringTeamRecipientName), emailCaptor.firstValue)
     }
 
     @Test
