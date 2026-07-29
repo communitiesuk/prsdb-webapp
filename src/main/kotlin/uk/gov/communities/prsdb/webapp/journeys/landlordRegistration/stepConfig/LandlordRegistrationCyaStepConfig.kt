@@ -176,8 +176,22 @@ class LandlordRegistrationCyaStepConfig(
 
     private fun getSummaryList(state: LandlordRegistrationState) =
         getIdentityRows(state) +
+            getLandlordTypeRows(state) +
             getEmailAndPhoneRows(state) +
             getAddressRows(state)
+
+    private fun getLandlordTypeRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
+        if (state.landlordTypeStep.outcome == LandlordTypeMode.INDIVIDUAL) {
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.checkAnswers.rowHeading.landlordType",
+                    "registerAsALandlord.checkAnswers.landlordTypeValue",
+                    Destination.VisitableStep(state.landlordTypeStep, state.getCyaJourneyId(state.landlordTypeStep)),
+                ),
+            )
+        } else {
+            emptyList()
+        }
 
     private fun getIdentityRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> {
         val isIdentityVerified = state.identityTask.getIsIdentityVerified()

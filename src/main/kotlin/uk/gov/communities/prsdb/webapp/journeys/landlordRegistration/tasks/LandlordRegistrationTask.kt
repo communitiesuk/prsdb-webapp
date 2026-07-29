@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -183,15 +184,14 @@ class LandlordRegistrationTask(
                         step(journey.landlordTypeStep) {
                             initialStep()
                             routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                            nextStep { mode ->
-                                when (mode) {
-                                    LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask.firstStep
-                                    LandlordTypeMode.ORGANISATION -> journey.finishCyaStep
-                                }
-                            }
+                            nextDestination { mode -> destinationForSelectedLandlordType(journey, mode) }
                         }
                         duplicableTask(journey.individualLandlordRegistrationTask) {
                             parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                            nextStep { journey.finishCyaStep }
+                        }
+                        duplicableTask(journey.orgLandlordRegistrationTask) {
+                            parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                             nextStep { journey.finishCyaStep }
                         }
                     }
@@ -248,5 +248,21 @@ class LandlordRegistrationTask(
                     nextDestination { Destination.Nowhere() }
                 }
             }
+
+        private fun destinationForSelectedLandlordType(
+            journey: LandlordRegistrationState,
+            landlordType: LandlordTypeMode,
+        ): Destination {
+            val selectedTask =
+                when (landlordType) {
+                    LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask
+                    LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask
+                }
+            return if (selectedTask.exitStep.outcome == SubjourneyComplete.COMPLETE) {
+                Destination(journey.finishCyaStep)
+            } else {
+                Destination(selectedTask.firstStep)
+            }
+        }
     }
 }
