@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
@@ -29,6 +31,7 @@ class OrgLandlordRegistrationTask(
     override val leadTrusteeTask: LeadTrusteeTask,
     override val charityTask: OrgCharityTask,
     override val companiesHouseTask: OrgCompaniesHouseTask,
+    override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
@@ -85,11 +88,29 @@ class OrgLandlordRegistrationTask(
             }
             duplicableTask(journey.companiesHouseTask) {
                 parents { journey.charityTask.isComplete() }
+                nextDestination {
+                    if (journey.companiesHouseTask.orgCompaniesHouseStep.outcome == YesOrNo.NO) {
+                        Destination(journey.orgGovBodyTask.firstStep)
+                    } else {
+                        Destination(journey.orgMainContactStep)
+                    }
+                }
+            }
+            duplicableTask(journey.orgGovBodyTask) {
+                parents { journey.companiesHouseTask.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.companiesHouseTask.isComplete() }
+                parents {
+                    OrParents(
+                        AndParents(
+                            journey.companiesHouseTask.isComplete(),
+                            journey.companiesHouseTask.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES),
+                        ),
+                        journey.orgGovBodyTask.isComplete(),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {

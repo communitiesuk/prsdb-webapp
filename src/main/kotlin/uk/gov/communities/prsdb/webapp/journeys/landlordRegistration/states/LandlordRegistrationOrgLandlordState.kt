@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val yourDetailsStep: YourDetailsStep
@@ -20,6 +21,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep
     val companiesHouseTask: OrgCompaniesHouseTask
+    val orgGovBodyTask: OrgGovBodyTask
     val charityTask: OrgCharityTask
     val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep

@@ -213,7 +213,7 @@ class LandlordRegistrationTask(
                     }
 
                     OrgTypeStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgTypeStep, OrgTypeStep.ROUTE_SEGMENT)
+                        // TODO PDJB-1237 : use org type update journey here
                     }
 
                     OrgCharityStep.ROUTE_SEGMENT,
@@ -228,7 +228,7 @@ class LandlordRegistrationTask(
                     OrgCompaniesHouseStep.ROUTE_SEGMENT,
                     OrgCompanyNumberStep.ROUTE_SEGMENT,
                     -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.companiesHouseTask, null)
+                        // TODO PDJB-1238 : use companies update journey here
                     }
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {
@@ -236,7 +236,7 @@ class LandlordRegistrationTask(
                     }
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask, null)
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask, null)
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {

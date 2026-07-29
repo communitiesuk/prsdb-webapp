@@ -73,7 +73,7 @@ class LandlordRegistrationCyaStepConfig(
             val mainContact = org.orgMainContactStep.formModel
 
             val governingBodyMembers =
-                (org.companiesHouseTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap())
+                (org.orgGovBodyTask.governingBodyMembersMap ?: emptyMap())
                     .values
                     .toList()
 
@@ -507,7 +507,7 @@ class LandlordRegistrationCyaStepConfig(
     }
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
-        val members = state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap()
+        val members = state.orgLandlordRegistrationTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap()
         return members
             .toList()
             .sortedBy { it.first }
@@ -541,9 +541,9 @@ class LandlordRegistrationCyaStepConfig(
                     actions =
                         SummaryCardActionViewModel.changeAction(
                             Destination.VisitableStep(
-                                state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
                                 state.getCyaJourneyId(
-                                    state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                    state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
                                 ),
                             ),
                         ),
