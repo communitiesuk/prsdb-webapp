@@ -43,9 +43,8 @@ class OccupancyDetailsHelper {
     fun <T> getCheckYourTenancyDetailsAnswersSummaryList(
         state: T,
         messageSource: MessageSource,
-    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : BedroomsState, T : CheckYourAnswersJourneyState =
+    ): List<SummaryListRowViewModel> where T : TenancyDetailsState, T : CheckYourAnswersJourneyState =
         getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, state.householdsAndTenantsTask) +
-            getBedroomsRow(state) +
             getRentBillsAndFurnishingsSummaryList(state, messageSource)
 
     fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(

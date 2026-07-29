@@ -327,7 +327,6 @@ class PropertyOwnershipService(
         id: Long,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        numBedrooms: Int,
         billsIncludedList: String?,
         customBillsIncluded: String?,
         furnishedStatus: FurnishedStatus,
@@ -340,7 +339,6 @@ class PropertyOwnershipService(
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnership.numBedrooms = numBedrooms
         propertyOwnership.billsIncludedList = billsIncludedList
         propertyOwnership.customBillsIncluded = customBillsIncluded
         propertyOwnership.furnishedStatus = furnishedStatus

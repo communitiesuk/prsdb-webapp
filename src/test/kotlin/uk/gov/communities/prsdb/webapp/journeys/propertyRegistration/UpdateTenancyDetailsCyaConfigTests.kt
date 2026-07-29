@@ -15,7 +15,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
@@ -29,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tena
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
@@ -64,9 +62,6 @@ class UpdateTenancyDetailsCyaConfigTests {
     private lateinit var mockTenantsStep: TenantsStep
 
     @Mock
-    private lateinit var mockBedroomsStep: BedroomsStep
-
-    @Mock
     private lateinit var mockFurnishedStatusStep: FurnishedStatusStep
 
     @Mock
@@ -82,9 +77,6 @@ class UpdateTenancyDetailsCyaConfigTests {
     private lateinit var mockNumberOfTenantsFormModel: NewNumberOfPeopleFormModel
 
     @Mock
-    private lateinit var mockNumberOfBedroomsFormModel: NumberOfBedroomsFormModel
-
-    @Mock
     private lateinit var mockFurnishedStatusFormModel: FurnishedStatusFormModel
 
     @Mock
@@ -98,7 +90,6 @@ class UpdateTenancyDetailsCyaConfigTests {
     private val propertyId = 123L
     private val numberOfHouseholds = 2
     private val numberOfTenants = 5
-    private val numberOfBedrooms = 3
     private val rentAmount = "500"
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
 
@@ -118,20 +109,17 @@ class UpdateTenancyDetailsCyaConfigTests {
         whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
         whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
         whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
         whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
         whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
         whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
         whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
-        whenever(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
         whenever(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
         whenever(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
         whenever(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
         whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
         whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
-        whenever(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn(numberOfBedrooms.toString())
         whenever(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(FurnishedStatus.FURNISHED)
         whenever(mockRentFrequencyFormModel.rentFrequency).thenReturn(RentFrequency.MONTHLY)
         whenever(mockRentAmountFormModel.rentAmount).thenReturn(rentAmount)
@@ -147,7 +135,6 @@ class UpdateTenancyDetailsCyaConfigTests {
             id = propertyId,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfTenants,
-            numBedrooms = numberOfBedrooms,
             billsIncludedList = null,
             customBillsIncluded = null,
             furnishedStatus = FurnishedStatus.FURNISHED,
@@ -170,7 +157,6 @@ class UpdateTenancyDetailsCyaConfigTests {
                 listOf(
                     "The number of households living in this property",
                     "The number of people living in this property",
-                    "The number of bedrooms in this property",
                     "Whether the rent includes bills",
                     "Whether the property is furnished",
                     "How often the rent is charged",
@@ -188,7 +174,6 @@ class UpdateTenancyDetailsCyaConfigTests {
                 id = propertyId,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfTenants,
-                numBedrooms = numberOfBedrooms,
                 billsIncludedList = null,
                 customBillsIncluded = null,
                 furnishedStatus = FurnishedStatus.FURNISHED,

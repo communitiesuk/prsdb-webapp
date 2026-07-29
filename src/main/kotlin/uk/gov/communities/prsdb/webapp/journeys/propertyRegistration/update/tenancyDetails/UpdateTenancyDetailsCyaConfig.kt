@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -47,10 +46,6 @@ class UpdateTenancyDetailsCyaConfig(
                     state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt(),
-                numBedrooms =
-                    state.bedrooms.formModel
-                        .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        .toInt(),
                 billsIncludedList = billsIncludedDataModel?.standardBillsIncludedListAsString,
                 customBillsIncluded = billsIncludedDataModel?.customBillsIncluded,
                 furnishedStatus = state.furnishedStatus.formModel.notNullValue(FurnishedStatusFormModel::furnishedStatus),
@@ -77,7 +72,6 @@ class UpdateTenancyDetailsCyaConfig(
             listOf(
                 "The number of households living in this property",
                 "The number of people living in this property",
-                "The number of bedrooms in this property",
                 "Whether the rent includes bills",
                 "Whether the property is furnished",
                 "How often the rent is charged",

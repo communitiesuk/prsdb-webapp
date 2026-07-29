@@ -14,9 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.BedroomsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -77,15 +75,10 @@ class UpdateTenancyDetailsJourneyFactory(
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
-                nextStep { journey.bedrooms }
-            }
-            step(journey.bedrooms) {
-                routeSegment(BedroomsStep.ROUTE_SEGMENT)
-                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
             }
             duplicableTask(journey.rentIncludesBillsTask) {
-                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
             }
             step(journey.furnishedStatus) {
@@ -122,10 +115,6 @@ class UpdateTenancyDetailsJourneyFactory(
             when (checkingAnswersFor) {
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
                     duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
-                }
-
-                BedroomsStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
@@ -174,11 +163,6 @@ class UpdateTenancyDetailsJourneyFactory(
                 "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
             }
         }
-        configureStep(journey.bedrooms) {
-            withAdditionalContentProperty {
-                "heading" to "forms.update.numberOfBedrooms.heading"
-            }
-        }
         configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
@@ -211,7 +195,6 @@ class UpdateTenancyDetailsJourneyFactory(
 class UpdateTenancyDetailsJourney(
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val bedrooms: BedroomsStep,
     // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val furnishedStatus: FurnishedStatusStep,
@@ -238,7 +221,6 @@ class UpdateTenancyDetailsJourney(
 
 interface UpdateTenancyDetailsJourneyState :
     TenancyDetailsState,
-    BedroomsState,
     CheckYourAnswersJourneyState {
     override val cyaStep: UpdateTenancyDetailsCyaStep
     val propertyId: Long
