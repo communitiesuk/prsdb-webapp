@@ -500,7 +500,7 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
        (45, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (46, 37, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (47, 38, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
