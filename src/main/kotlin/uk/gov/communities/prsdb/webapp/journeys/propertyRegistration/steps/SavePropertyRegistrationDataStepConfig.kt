@@ -103,8 +103,18 @@ class SavePropertyRegistrationDataStepConfig(
             billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
             furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,
-            rentFrequency = if (shouldRequireTenancyDetails) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
-            customRentFrequency = if (shouldRequireTenancyDetails) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
+            rentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
+                } else {
+                    null
+                },
+            customRentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
+                } else {
+                    null
+                },
             rentAmount =
                 if (shouldRequireTenancyDetails) {
                     state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
