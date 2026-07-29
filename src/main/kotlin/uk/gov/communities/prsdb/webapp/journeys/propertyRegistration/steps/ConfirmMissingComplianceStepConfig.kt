@@ -17,7 +17,7 @@ class ConfirmMissingComplianceStepConfig :
             "title" to "registerProperty.confirmMissingCompliance.heading",
             "isGasMissing" to HasMissingComplianceStepConfig.isGasCertInvalid(state.gasSafetyTask),
             "isElectricalMissing" to HasMissingComplianceStepConfig.isElectricalCertInvalid(state.electricalSafetyTask),
-            "isEpcMissing" to HasMissingComplianceStepConfig.isEpcInvalid(state),
+            "isEpcMissing" to HasMissingComplianceStepConfig.isEpcInvalid(state.epcTask),
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
-interface CombinedComplianceCheckState : EpcState {
-    override val isOccupied: Boolean
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+
+interface CombinedComplianceCheckState : JourneyState {
+    val isOccupied: Boolean
     val gasSafetyTask: GasSafetyState
     val electricalSafetyTask: ElectricalSafetyState
+    val epcTask: EpcState
 }

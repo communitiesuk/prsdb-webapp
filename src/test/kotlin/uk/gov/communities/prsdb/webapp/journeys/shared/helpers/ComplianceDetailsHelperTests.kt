@@ -180,7 +180,10 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetEpcCyaContent {
         @Mock
-        internal lateinit var mockState: TestableEpcState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockState: EpcState
 
         private val mockHasEpcStep: HasEpcStep = mock()
 
@@ -190,11 +193,11 @@ class ComplianceDetailsHelperTests {
         fun `skipped occupied returns all expected keys with null epcCardTitle and non-empty nonEpcRows`() {
             whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
             whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val content = helper.getEpcCyaContent(mockState)
+            val content = helper.getEpcCyaContent(mockCyaState, mockState)
 
             assertEquals(
                 setOf(

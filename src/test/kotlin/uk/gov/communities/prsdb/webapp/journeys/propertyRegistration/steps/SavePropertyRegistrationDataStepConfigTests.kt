@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
@@ -402,7 +403,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        val mockEpcTask: EpcTask = mock()
+        whenever(mockEpcTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
         whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
@@ -412,24 +414,24 @@ class SavePropertyRegistrationDataStepConfigTests {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
         }
 
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
+        whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(
             EpcInDateAtStartOfTenancyCheckFormModel().apply {
                 tenancyStartedBeforeExpiry = tenancyStartedBeforeEpcExpiry
             },
         )
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(
             EpcExemptionFormModel().apply {
                 exemptionReason = epcExemptionReason
             },
         )
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(
             MeesExemptionReasonFormModel().apply {
                 exemptionReason = meesExemptionReason
@@ -442,11 +444,13 @@ class SavePropertyRegistrationDataStepConfigTests {
         val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
         whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(electricalSafetyDetailsTask)
         whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
+        whenever(mockState.epcTask).thenReturn(mockEpcTask)
     }
 
     private fun setupStateForComplianceDataWithNullValues() {
         val gasSafetyDetailsTask: GasSafetyDetailsTask = mock()
         val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask = mock()
+        val mockEpcTask: EpcTask = mock()
 
         whenever(gasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
@@ -465,12 +469,12 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockHasElectricalCertStep.outcome).thenReturn(null)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockEpcTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
         whenever(gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+        whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockGasTask: GasSafetyTask = mock()
         whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(gasSafetyDetailsTask)
@@ -478,15 +482,16 @@ class SavePropertyRegistrationDataStepConfigTests {
         val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
         whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(electricalSafetyDetailsTask)
         whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
+        whenever(mockState.epcTask).thenReturn(mockEpcTask)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
     }
 }

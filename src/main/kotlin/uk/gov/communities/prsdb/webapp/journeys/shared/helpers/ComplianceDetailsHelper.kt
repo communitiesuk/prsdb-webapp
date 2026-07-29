@@ -46,10 +46,13 @@ class ComplianceDetailsHelper(
         )
     }
 
-    fun <T> getEpcCyaContent(state: T): Map<String, Any?> where T : EpcState, T : CheckYourAnswersJourneyState {
+    fun getEpcCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        epcState: EpcState,
+    ): Map<String, Any?> {
         val factory =
-            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, epcState) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),

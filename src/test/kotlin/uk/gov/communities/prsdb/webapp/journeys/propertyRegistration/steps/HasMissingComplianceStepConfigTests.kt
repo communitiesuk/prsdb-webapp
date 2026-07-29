@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -166,19 +167,23 @@ class HasMissingComplianceStepConfigTests {
         }
 
         private fun setupEpcMissing() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+            val mockEpcTask: EpcTask = mock()
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-            whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+            whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+            whenever(mockState.epcTask).thenReturn(mockEpcTask)
         }
 
         private fun setupEpcPresent() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            val mockEpcTask: EpcTask = mock()
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockState.epcTask).thenReturn(mockEpcTask)
         }
 
         private fun setupGasCertProvideLater() {
@@ -208,9 +213,11 @@ class HasMissingComplianceStepConfigTests {
         }
 
         private fun setupEpcProvideLater() {
+            val mockEpcTask: EpcTask = mock()
             val mockHasEpcStep = mock<HasEpcStep>()
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockState.epcTask).thenReturn(mockEpcTask)
         }
     }
 
@@ -345,138 +352,141 @@ class HasMissingComplianceStepConfigTests {
 
     @Nested
     inner class IsEpcMissingOrExpired {
+        @Mock
+        lateinit var mockEpcTask: EpcTask
+
         @Test
         fun `returns false when user chose provide later`() {
             val mockHasEpcStep = mock<HasEpcStep>()
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mockHasEpcStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns false when accepted epc present and not expired and good rating`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns true when accepted epc present but expired and tenancy did not start before expiry`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
             val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
             whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE)
-            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+            whenever(mockEpcTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns false when accepted epc present but expired and tenancy started before expiry`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
             val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
             whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
-            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+            whenever(mockEpcTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns true when accepted epc is expired with tenancy started before expiry but has low rating and no mees exemption`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
             val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
             whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
-            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+            whenever(mockEpcTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
             val mockMeesExemptionStep = mock<MeesExemptionStep>()
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+            whenever(mockEpcTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns true when accepted epc has low rating and no mees exemption`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
             val mockMeesExemptionStep = mock<MeesExemptionStep>()
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+            whenever(mockEpcTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns false when accepted epc has low rating but has mees exemption`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
             val mockMeesExemptionStep = mock<MeesExemptionStep>()
             val formModel =
                 MeesExemptionReasonFormModel().apply {
                     exemptionReason = MeesExemptionReason.ALL_IMPROVEMENTS_MADE
                 }
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
-            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+            whenever(mockEpcTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns true when no accepted epc and no exemption`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-            whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+            whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns false when no accepted epc but exemption present`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             val formModel =
                 EpcExemptionFormModel().apply {
                     exemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
                 }
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
-            whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+            whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
 
         @Test
         fun `returns true when no accepted epc and exemption reason is null`() {
-            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
-            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+            whenever(mockEpcTask.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            whenever(mockEpcTask.acceptedEpcIfStillAccepted).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             val formModel = EpcExemptionFormModel()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
-            whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+            whenever(mockEpcTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockEpcTask))
         }
     }
 }

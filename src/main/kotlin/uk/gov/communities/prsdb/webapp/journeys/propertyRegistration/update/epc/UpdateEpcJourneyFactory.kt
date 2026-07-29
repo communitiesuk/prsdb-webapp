@@ -37,7 +37,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -148,7 +147,6 @@ class UpdateEpcJourneyFactory(
 class UpdateEpcJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "updateEpc",
-    override val epcTask: EpcTask,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
@@ -208,6 +206,5 @@ interface UpdateEpcJourneyState :
     CheckYourAnswersJourneyState {
     val propertyId: Long
     val lastModifiedDate: String
-    val epcTask: EpcTask
     val completeEpcUpdateStep: CompleteEpcUpdateStep
 }

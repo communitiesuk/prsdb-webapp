@@ -11,7 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 @JourneyFrameworkComponent
 class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult {
-        val anyInvalid = isGasCertInvalid(state.gasSafetyTask) || isElectricalCertInvalid(state.electricalSafetyTask) || isEpcInvalid(state)
+        val anyInvalid =
+            isGasCertInvalid(state.gasSafetyTask) ||
+                isElectricalCertInvalid(state.electricalSafetyTask) ||
+                isEpcInvalid(state.epcTask)
         return if (state.isOccupied && anyInvalid) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {

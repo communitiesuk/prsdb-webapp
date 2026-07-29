@@ -58,7 +58,7 @@ class PropertyRegistrationCyaStepConfig(
 
         content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
         content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
-        content += complianceDetailsHelper.getEpcCyaContent(state)
+        content += complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
 
         return content
     }
