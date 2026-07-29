@@ -61,15 +61,19 @@ class LandlordRegistrationCyaStepConfig(
 
             val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
             val isTrust = OrgType.TRUST in organisationTypes
-            val isRegisteredCharity = org.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
-            val hasCompanyNumber = org.orgCompaniesHouseStep.formModel.notNullValue(OrgCompaniesHouseFormModel::companiesHouse)
+            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val hasCompanyNumber =
+                org.companiesHouseTask.orgCompaniesHouseStep.formModel.notNullValue(
+                    OrgCompaniesHouseFormModel::companiesHouse,
+                )
 
-            val charityRegulator = if (isRegisteredCharity) org.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
+            val charityRegulator =
+                if (isRegisteredCharity) org.charityTask.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
 
             val mainContact = org.orgMainContactStep.formModel
 
             val governingBodyMembers =
-                (org.governingBodyMembersMap ?: emptyMap())
+                (org.companiesHouseTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap())
                     .values
                     .toList()
 
@@ -83,17 +87,36 @@ class LandlordRegistrationCyaStepConfig(
                 organisationEmail = org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
                 organisationPhoneNumber = org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
                 organisationCompanyNumber =
-                    if (hasCompanyNumber) org.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber) else null,
+                    if (hasCompanyNumber) {
+                        org.companiesHouseTask.orgCompanyNumberStep.formModel.notNullValue(
+                            OrgCompanyNumberFormModel::companyNumber,
+                        )
+                    } else {
+                        null
+                    },
                 organisationCharityRegisteredWith = charityRegulator,
                 organisationCharityNumber = getCharityNumber(state, charityRegulator),
                 organisationLeadTrusteeName =
-                    if (isTrust) org.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
-                organisationLeadTrusteeDateOfBirth = if (isTrust) org.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
+                    if (isTrust) org.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
+                organisationLeadTrusteeDateOfBirth =
+                    if (isTrust) org.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
                 organisationLeadTrusteeEmail =
-                    if (isTrust) org.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress) else null,
+                    if (isTrust) {
+                        org.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(
+                            LeadTrusteeEmailFormModel::emailAddress,
+                        )
+                    } else {
+                        null
+                    },
                 organisationLeadTrusteePhoneNumber =
-                    if (isTrust) org.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber) else null,
-                organisationLeadTrusteeAddress = if (isTrust) org.trusteeAddressTask.getAddress() else null,
+                    if (isTrust) {
+                        org.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(
+                            LeadTrusteePhoneFormModel::phoneNumber,
+                        )
+                    } else {
+                        null
+                    },
+                organisationLeadTrusteeAddress = if (isTrust) org.leadTrusteeTask.trusteeAddressTask.getAddress() else null,
                 organisationMainContactName = mainContact.notNullValue(OrgMainContactFormModel::name),
                 organisationMainContactEmail = mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
                 organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
@@ -608,17 +631,17 @@ class LandlordRegistrationCyaStepConfig(
         val org = state.orgLandlordRegistrationTask
         return when (charityRegulator) {
             CharityRegulator.ENGLAND_AND_WALES ->
-                org.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(
+                org.charityTask.orgCharityNumberEnglandAndWalesStep.formModel.notNullValue(
                     OrgCharityNumberEnglandAndWalesFormModel::charityNumber,
                 )
 
             CharityRegulator.NORTHERN_IRELAND ->
-                org.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(
+                org.charityTask.orgCharityNumberNorthernIrelandStep.formModel.notNullValue(
                     OrgCharityNumberNorthernIrelandFormModel::charityNumber,
                 )
 
             CharityRegulator.SCOTLAND ->
-                org.orgCharityNumberScotlandStep.formModel.notNullValue(
+                org.charityTask.orgCharityNumberScotlandStep.formModel.notNullValue(
                     OrgCharityNumberScotlandFormModel::charityNumber,
                 )
 
