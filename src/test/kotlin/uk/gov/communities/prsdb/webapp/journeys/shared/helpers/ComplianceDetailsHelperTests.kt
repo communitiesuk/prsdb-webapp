@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -185,17 +186,25 @@ class ComplianceDetailsHelperTests {
         @Mock
         internal lateinit var mockState: EpcState
 
+        @Mock
+        internal lateinit var mockEpcDetailsTask: EpcDetailsTask
+
         private val mockHasEpcStep: HasEpcStep = mock()
 
         private val mockStartEpcStep: StartEpcStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        }
+
         @Test
         fun `skipped occupied returns all expected keys with null epcCardTitle and non-empty nonEpcRows`() {
-            whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
-            whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockEpcDetailsTask.startEpcStep).thenReturn(mockStartEpcStep)
+            whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
             whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockEpcDetailsTask.isOccupied).thenReturn(true)
 
             val content = helper.getEpcCyaContent(mockCyaState, mockState)
 

@@ -141,24 +141,24 @@ class SavePropertyRegistrationDataStepConfig(
                 state.electricalSafetyTask.electricalSafetyDetailsTask
                     .hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
-                state.epcTask.acceptedEpcIfStillAccepted?.let {
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.epcTask.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.epcTask.acceptedEpcIfStillAccepted?.energyRating,
+            epcExpiryDate = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
+            epcEnergyRating = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.energyRating,
             tenancyStartedBeforeEpcExpiry =
-                state.epcTask.epcInDateAtStartOfTenancyCheckStep
+                state.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
                     ?.tenancyStartedBeforeExpiry,
             epcExemptionReason =
-                state.epcTask.epcExemptionStep
+                state.epcTask.epcDetailsTask.epcExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
             epcMeesExemptionReason =
-                state.epcTask.meesExemptionStep
+                state.epcTask.epcDetailsTask.meesExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
-            epcProvideLater = state.epcTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            epcProvideLater = state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
         )
     }
 }

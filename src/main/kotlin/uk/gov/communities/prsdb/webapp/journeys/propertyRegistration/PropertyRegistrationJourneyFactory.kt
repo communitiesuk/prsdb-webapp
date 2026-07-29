@@ -213,7 +213,7 @@ class PropertyRegistrationJourneyFactory(
                 EpcExemptionStep.ROUTE_SEGMENT,
                 -> {
                     fromTask(journey.epcTask, journey) {
-                        checkAnswerTask(task.epcDetailsTask)
+                        duplicableCheckAnswerTask(task.epcDetailsTask)
                     }
                 }
 

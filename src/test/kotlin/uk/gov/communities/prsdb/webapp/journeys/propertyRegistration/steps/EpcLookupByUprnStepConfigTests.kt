@@ -10,7 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -21,7 +21,7 @@ class EpcLookupByUprnStepConfigTests {
     lateinit var mockEpcLookupService: EpcLookupService
 
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     val epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()
 

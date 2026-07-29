@@ -41,18 +41,18 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
         }
 
         fun isEpcInvalid(state: EpcState): Boolean {
-            if (state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
+            if (state.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
             val acceptedEpc =
-                state.acceptedEpcIfStillAccepted
-                    ?: return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
+                state.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?: return state.epcDetailsTask.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
             return (
                 (
                     acceptedEpc.isPastExpiryDate() &&
-                        (state.epcInDateAtStartOfTenancyCheckStep.outcome != EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
+                        (state.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep.outcome != EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
                 ) ||
                     (
                         !acceptedEpc.isEnergyRatingEOrBetter() &&
-                            (state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null)
+                            (state.epcDetailsTask.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null)
                     )
             )
         }

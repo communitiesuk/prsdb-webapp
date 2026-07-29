@@ -51,7 +51,7 @@ class ComplianceDetailsHelper(
         epcState: EpcState,
     ): Map<String, Any?> {
         val factory =
-            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, epcState) { step ->
+            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, epcState.epcDetailsTask) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(

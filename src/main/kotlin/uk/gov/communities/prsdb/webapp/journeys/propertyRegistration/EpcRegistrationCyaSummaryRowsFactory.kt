@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
@@ -15,12 +15,12 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    private val state: EpcState,
+    private val state: EpcDetailState,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: EpcScenario = determineScenario(state)
 
-    private fun determineScenario(state: EpcState): EpcScenario {
+    private fun determineScenario(state: EpcDetailState): EpcScenario {
         val isOccupied = state.isOccupied == true
         return when {
             state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER -> {
@@ -38,7 +38,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
     }
 
     private fun determineNoEpcScenario(
-        state: EpcState,
+        state: EpcDetailState,
         isOccupied: Boolean,
     ): EpcScenario =
         when {
@@ -48,7 +48,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
         }
 
     private fun determineEpcPresentScenario(
-        state: EpcState,
+        state: EpcDetailState,
         isOccupied: Boolean,
     ): EpcScenario {
         val isExpired = state.epcAgeCheckStep.outcome == EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS
@@ -60,7 +60,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
     }
 
     private fun determineNotExpiredEpcScenario(
-        state: EpcState,
+        state: EpcDetailState,
         isOccupied: Boolean,
     ): EpcScenario {
         if (state.epcEnergyRatingCheckStep.outcome != EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING) {
@@ -74,7 +74,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
     }
 
     private fun determineExpiredEpcScenario(
-        state: EpcState,
+        state: EpcDetailState,
         isOccupied: Boolean,
     ): EpcScenario {
         if (!isOccupied) return EpcScenario.EPC_EXPIRED_UNOCCUPIED
