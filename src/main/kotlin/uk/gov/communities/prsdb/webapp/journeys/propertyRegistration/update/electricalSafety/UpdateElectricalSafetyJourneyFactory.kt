@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -137,7 +136,6 @@ class UpdateElectricalSafetyJourneyFactory(
 class UpdateElectricalSafetyJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "electricalSafety",
-    override val electricalSafetyTask: ElectricalSafetyTask,
     override val hasElectricalCertStep: HasElectricalCertStep,
     override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
@@ -180,6 +178,5 @@ interface UpdateElectricalSafetyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val electricalSafetyTask: ElectricalSafetyTask
     val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep
 }

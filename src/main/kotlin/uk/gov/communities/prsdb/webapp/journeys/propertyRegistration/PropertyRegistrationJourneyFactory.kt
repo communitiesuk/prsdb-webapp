@@ -21,13 +21,11 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
@@ -35,9 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
@@ -51,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindY
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
@@ -73,9 +68,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -83,8 +76,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
@@ -222,7 +214,9 @@ class PropertyRegistrationJourneyFactory(
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.electricalSafetyDetailsTask)
+                    fromTask(journey.electricalSafetyTask, journey) {
+                        checkAnswerTask(task.electricalSafetyDetailsTask)
+                    }
                 }
 
                 StartEpcStep.ROUTE_SEGMENT,
@@ -331,7 +325,8 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                task(journey.electricalSafetyTask) {
+                duplicableTask(journey.electricalSafetyTask) {
+                    withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
@@ -422,7 +417,7 @@ class PropertyRegistrationJourneyFactory(
             // We don't have a section header for these pages, as their titles are the same as the respective page header
             listOf(
                 journey.gasSafetyTask.checkGasSafetyAnswersStep,
-                journey.checkElectricalSafetyAnswersStep,
+                journey.electricalSafetyTask.checkElectricalSafetyAnswersStep,
                 journey.checkEpcAnswersStep,
             ).forEach { checkAnswersStep ->
                 configureStep(checkAnswersStep) {
@@ -484,7 +479,8 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
-                task(journey.electricalSafetyTask) {
+                duplicableTask(journey.electricalSafetyTask) {
+                    withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
@@ -600,17 +596,6 @@ class PropertyRegistrationJourney(
     override val gasSafetyTask: GasSafetyTask,
     // Electrical safety task
     override val electricalSafetyTask: ElectricalSafetyTask,
-    override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
-    override val hasElectricalCertStep: HasElectricalCertStep,
-    override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
-    override val uploadElectricalCertStep: UploadElectricalCertStep,
-    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
-    override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
-    override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
-    override val electricalCertExpiredStep: ElectricalCertExpiredStep,
-    override val electricalCertMissingStep: ElectricalCertMissingStep,
-    override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
-    override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
     override val epcDetailsTask: EpcDetailsTask,
@@ -684,9 +669,6 @@ class PropertyRegistrationJourney(
     override val rentFrequencyAndAmountTask = tenancyDetailsTask.rentFrequencyAndAmountTask
     override val furnishedStatus = tenancyDetailsTask.furnishedStatus
 
-    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
-    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
-
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
@@ -726,6 +708,7 @@ interface PropertyRegistrationJourneyState :
     OccupationState,
     InviteJointLandlordsTaskDependencies,
     GasSafetyDependencies,
+    ElectricalSafetyDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
@@ -741,7 +724,7 @@ interface PropertyRegistrationJourneyState :
     val tenancyDetailsTask: TenancyDetailsTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val gasSafetyTask: GasSafetyTask
-    val electricalSafetyTask: ElectricalSafetyTask
+    override val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
     val hasMissingComplianceStep: HasMissingComplianceStep

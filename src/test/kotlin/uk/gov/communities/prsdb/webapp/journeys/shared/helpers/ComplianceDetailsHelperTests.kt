@@ -141,7 +141,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>
@@ -158,7 +158,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
             whenever(mockState.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>

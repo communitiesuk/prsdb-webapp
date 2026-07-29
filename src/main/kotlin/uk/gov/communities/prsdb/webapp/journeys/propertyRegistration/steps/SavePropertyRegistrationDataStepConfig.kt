@@ -129,10 +129,11 @@ class SavePropertyRegistrationDataStepConfig(
             gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater =
                 state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
-            electricalSafetyFileUploadIds = state.electricalUploadIds,
-            electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
-            electricalSafetyCertProvideLater = state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
+            electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalUploadIds,
+            electricalSafetyExpiryDate = state.electricalSafetyTask.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+            electricalCertType = state.electricalSafetyTask.mapElectricalCertificateTypeToGlobalCertificateType(),
+            electricalSafetyCertProvideLater =
+                state.electricalSafetyTask.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
                 state.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)

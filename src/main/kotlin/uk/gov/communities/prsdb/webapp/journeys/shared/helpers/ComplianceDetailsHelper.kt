@@ -32,10 +32,13 @@ class ComplianceDetailsHelper(
         )
     }
 
-    fun <T> getElectricalSafetyCyaContent(state: T): Map<String, Any?> where T : ElectricalSafetyState, T : CheckYourAnswersJourneyState {
+    fun getElectricalSafetyCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        electricalSafetyState: ElectricalSafetyState,
+    ): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(electricalSafetyState, uploadService) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "electricalRows" to factory.createRows(),
