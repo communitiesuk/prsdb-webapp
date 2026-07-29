@@ -31,3 +31,26 @@ registeredProperties:
     link: Register a property
 update:
   title: Update Landlord record
+org:
+  title: Organisation landlord record
+  heading: Organisation landlord record
+  organisationDetails: Organisation details
+  name: Organisation name
+  address: Organisation address
+  email: Organisation email
+  phone: Organisation phone number
+  organisationType: Organisation type
+  isCompany: Company
+  companyNumber: Companies House number
+  isCharity: Charity
+  isTrust: Trust
+  charityNumber: Charity number
+  mainContactHeading: Main contact
+  mainContactName: Name
+  mainContactEmail: Email
+  mainContactPhone: Phone number
+  leadTrusteeHeading: Lead trustee
+  leadTrusteeName: Name
+  leadTrusteeEmail: Email
+  leadTrusteePhone: Phone number
+  governingBodyHeading: Governing body members
