@@ -38,7 +38,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25'),
        ('ia-mock-user-12345', '10/14/24'),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
-       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'); -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'), -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:ORG01', '07/23/26');
 
 
 -- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
@@ -153,7 +154,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (77, '01/15/25', 1502423339, 0),
        (78, '01/15/25', 1502423340, 0),
        (79, '01/15/25', 1502423341, 0),
-       (80, '01/15/25', 1502423342, 0);
+       (80, '01/15/25', 1502423342, 0),
+       (81, '07/23/26', 1502423343, 1);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -263,6 +265,23 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
        (34, '07/01/26', '07/01/26', 71, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', 'Danielle Dias', 'danielle.dias@madetech.com', 'England or Wales', true, true),
        (35, '07/02/26', '07/02/26', 72, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', 'Ben Johnson', 'benjamin.johnson@madetech.com', 'England or Wales', true, true);
+
+-- TODO: PDJB-1295: Add some more
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, landlord_type,
+                      organisation_landlord_name, organisation_address_id, organisation_email,
+                      organisation_phone_number, organisation_registrant_name,
+                      organisation_registrant_date_of_birth, organisation_registrant_email,
+                      organisation_registrant_phone_number, organisation_is_company,
+                      organisation_is_charity, organisation_is_trust, organisation_company_number,
+                      organisation_main_contact_name, organisation_main_contact_email,
+                      organisation_main_contact_phone)
+VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
+        'local-org-landlord@example.com', '07111111111', 'Local Registrant', '01/01/1990',
+        'local-registrant@example.com', '07111111112', true, false, false, '12345678',
+        'Local Main Contact', 'local-main-contact@example.com', '07111111113');
+
+INSERT INTO organisation_landlord_user (organisation_landlord_id, subject_identifier, created_date)
+VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', '07/23/26');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
