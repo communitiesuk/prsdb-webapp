@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -44,6 +45,12 @@ class LandlordService(
     fun retrieveLandlordByBaseUserId(baseUserId: String): IndividualLandlord? = individualLandlordRepository.findByBaseUser_Id(baseUserId)
 
     fun retrieveLandlordById(id: Long): Landlord? = individualLandlordRepository.findById(id).orElse(null)
+
+    fun getCurrentLandlordId(): Long {
+        val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
+        return retrieveLandlordByBaseUserId(subjectIdentifier)?.id
+            ?: throw IllegalStateException("No landlord found for subject identifier: $subjectIdentifier")
+    }
 
     // TODO: PDJB-1180: Update to potentially save an org landlord to the database
     @Transactional

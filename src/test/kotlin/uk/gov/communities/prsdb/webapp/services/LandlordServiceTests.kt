@@ -26,6 +26,8 @@ import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -144,6 +146,33 @@ class LandlordServiceTests {
                 "unregisteredBaseUserId",
             ),
         )
+    }
+
+    @Test
+    fun `getCurrentLandlordId returns the ID of the landlord for the authenticated user`() {
+        val baseUserId = "baseUserId"
+        val expectedLandlord = mock(IndividualLandlord::class.java)
+        whenever(expectedLandlord.id).thenReturn(7L)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
+
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(baseUserId, null)
+        try {
+            assertEquals(7L, landlordService.getCurrentLandlordId())
+        } finally {
+            SecurityContextHolder.clearContext()
+        }
+    }
+
+    @Test
+    fun `getCurrentLandlordId throws when no landlord is found for the authenticated user`() {
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("unregisteredBaseUserId", null)
+        try {
+            assertThrows<IllegalStateException> {
+                landlordService.getCurrentLandlordId()
+            }
+        } finally {
+            SecurityContextHolder.clearContext()
+        }
     }
 
     @Test

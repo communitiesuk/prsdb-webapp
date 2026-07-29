@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -53,18 +52,22 @@ class UploadElectricalCertStepConfig(
     override fun mode(state: ElectricalSafetyState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     override fun afterStepDataIsAdded(state: ElectricalSafetyState) {
+        val certificateType: CertificateType =
+            state.getElectricalCertificateTypeAsCertificateType()
+                ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
+
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = getCurrentLandlordId()
+            val landlordId = landlordService.getCurrentLandlordId()
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
-                CertificateType.Eicr,
+                certificateType,
                 landlordId,
             )
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
-                CertificateType.Eicr,
+                certificateType,
                 landlordId,
             )
 
@@ -81,12 +84,6 @@ class UploadElectricalCertStepConfig(
 
             state.uploadElectricalCertStep.clearFormData()
         }
-    }
-
-    private fun getCurrentLandlordId(): Long {
-        val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
-        return landlordService.retrieveLandlordByBaseUserId(subjectIdentifier)?.id
-            ?: throw IllegalStateException("No individual landlord found for subject identifier: $subjectIdentifier")
     }
 }
 

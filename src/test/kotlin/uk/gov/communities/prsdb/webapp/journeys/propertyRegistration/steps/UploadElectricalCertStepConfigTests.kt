@@ -1,23 +1,17 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
@@ -47,16 +41,6 @@ class UploadElectricalCertStepConfigTests {
 
     @Mock
     lateinit var uploadElectricalCertStep: UploadElectricalCertStep
-
-    @BeforeEach
-    fun setupSecurityContext() {
-        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("subject-1", null)
-    }
-
-    @AfterEach
-    fun clearSecurityContext() {
-        SecurityContextHolder.clearContext()
-    }
 
     @Test
     fun `getStepSpecificContent returns EIC heading when EIC is selected`() {
@@ -116,9 +100,7 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
-        val landlord = mock<IndividualLandlord>()
-        whenever(landlord.id).thenReturn(7L)
-        whenever(landlordService.retrieveLandlordByBaseUserId("subject-1")).thenReturn(landlord)
+        whenever(landlordService.getCurrentLandlordId()).thenReturn(7L)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -142,9 +124,7 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(3)
-        val landlord = mock<IndividualLandlord>()
-        whenever(landlord.id).thenReturn(7L)
-        whenever(landlordService.retrieveLandlordByBaseUserId("subject-1")).thenReturn(landlord)
+        whenever(landlordService.getCurrentLandlordId()).thenReturn(7L)
 
         stepConfig.afterStepDataIsAdded(mockState)
 

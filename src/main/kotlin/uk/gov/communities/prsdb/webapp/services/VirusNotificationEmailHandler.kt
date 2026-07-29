@@ -37,17 +37,24 @@ class VirusNotificationEmailHandler(
 
     private fun sendAlertToOwners(
         notification: OwnerEmailNotification,
-        emailAddress: String? = null,
+        monitoringEmailAddress: String? = null,
     ) {
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        ownership.landlords.forEach { landlord ->
-            check(landlord is IndividualLandlord)
+        if (monitoringEmailAddress != null) {
             emailNotificationService.sendEmail(
-                emailAddress ?: landlord.email,
-                buildAlertEmail(ownership, notification.certificateType, landlord.name),
+                monitoringEmailAddress,
+                buildAlertEmail(ownership, notification.certificateType, "Monitoring Team"),
             )
+        } else {
+            // TODO: PDJB-1274: Update emails to account for org landlord
+            ownership.landlords.forEach { landlord ->
+                check(landlord is IndividualLandlord)
+                emailNotificationService.sendEmail(
+                    monitoringEmailAddress ?: landlord.email,
+                    buildAlertEmail(ownership, notification.certificateType, landlord.name),
+                )
+            }
         }
     }
 
