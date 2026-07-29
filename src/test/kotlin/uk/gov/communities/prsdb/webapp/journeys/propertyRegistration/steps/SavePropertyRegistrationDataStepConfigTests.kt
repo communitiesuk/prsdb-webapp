@@ -34,6 +34,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
@@ -76,6 +78,12 @@ class SavePropertyRegistrationDataStepConfigTests {
 
     @Mock
     private lateinit var mockAddressTask: PropertyRegistrationAddressTask
+
+    @Mock
+    private lateinit var mockPropertyDetailsTask: PropertyDetailsTask
+
+    @Mock
+    private lateinit var mockOwnershipAndLandlordsTask: OwnershipAndLandlordsTask
 
     private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
@@ -431,7 +439,8 @@ class SavePropertyRegistrationDataStepConfigTests {
     fun `resolveNextDestination deletes journey and returns default destination when address is not already registered`() {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
-        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(false)
 
         // Act
@@ -448,7 +457,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         val defaultDestination = Destination.ExternalUrl("redirect")
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
         whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn("test-journey-id")
-        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         whenever(mockAddressTask.isAddressAlreadyRegistered).thenReturn(true)
         whenever(mockAddressTask.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
@@ -472,14 +482,15 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
 
-        whenever(mockState.addressTask).thenReturn(mockAddressTask)
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         whenever(mockAddressTask.getAddress()).thenReturn(
             AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
         )
 
         val mockPropertyTypeStep = mock<PropertyTypeStep>()
         val propertyTypeFormModel = PropertyTypeFormModel().apply { propertyType = PropertyType.DETACHED_HOUSE }
-        whenever(mockState.propertyTypeStep).thenReturn(mockPropertyTypeStep)
+        whenever(mockPropertyDetailsTask.propertyTypeStep).thenReturn(mockPropertyTypeStep)
         whenever(mockPropertyTypeStep.formModel).thenReturn(propertyTypeFormModel)
 
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
@@ -493,11 +504,12 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
-        whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
 
         val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
-        whenever(mockState.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
 
         val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
         val hasJointLandlordsFormModel = HasJointLandlordsFormModel().apply { hasJointLandlords = false }

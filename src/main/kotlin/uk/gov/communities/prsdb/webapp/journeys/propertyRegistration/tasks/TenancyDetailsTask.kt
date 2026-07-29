@@ -1,38 +1,34 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.AndParents
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
-class TenancyDetailsTask : Task<TenancyDetailsState>() {
+class TenancyDetailsTask(
+    journeyStateService: JourneyStateService,
+    override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
+    override val furnishedStatus: FurnishedStatusStep,
+    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
+) : DuplicableTask<TenancyDetailsState>(journeyStateService),
+    TenancyDetailsState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             duplicableTask(journey.householdsAndTenantsTask) {
                 withDependencies { HouseHoldsAndTenantsDependencies(true) }
-                nextStep {
-                    when (state.householdsAndTenantsTask.households.outcome) {
-                        HouseholdMode.PROVIDE_THIS_LATER -> exitStep
-                        else -> journey.rentIncludesBillsTask.firstStep
-                    }
-                }
+                nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }
             duplicableTask(journey.rentIncludesBillsTask) {
-                parents {
-                    AndParents(
-                        journey.householdsAndTenantsTask.isComplete(),
-                        journey.householdsAndTenantsTask.households.doesNotHaveOutcome(HouseholdMode.PROVIDE_THIS_LATER),
-                    )
-                }
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
                 savable()
             }
@@ -49,12 +45,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
             }
             exitStep {
                 savable()
-                parents {
-                    OrParents(
-                        journey.rentFrequencyAndAmountTask.isComplete(),
-                        journey.householdsAndTenantsTask.provideTenancyDetailsLaterStep.isComplete(),
-                    )
-                }
+                parents { journey.rentFrequencyAndAmountTask.isComplete() }
             }
         }
 }

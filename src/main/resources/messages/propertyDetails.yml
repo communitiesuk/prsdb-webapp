@@ -1,7 +1,5 @@
 title: Property record
 heading: Property record
-propertyDetails:
-  heading: Property details
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied
@@ -136,20 +134,35 @@ deregisterPropertyLink:
 propertyRecord:
   registrationDate: Registration date
   registrationNumber: Property Registration Number
-  address: Property address
-  uprn: UPRN
-  'uprn.unavailable': Not available
   localCouncil: Local council
   propertyType: Property type
-  ownershipType: Ownership type
+  heading: Property and tenancy details
+  propertyDetails:
+    heading: Property details
+    address: Address
+  ownership:
+    heading: Ownership
+    ownershipType: How do you own this property?
+  occupation:
+    heading: Occupied by tenants
+    isOccupied: Is this property occupied by tenants?
+  licensing:
+    heading: Property licensing
+    rowName: Licensing
+    provideLaterOccupied: Provide this later (before {0})
+    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
+    councilNotProvided: These details have not been provided yet.
+  tenancy:
+    heading: Tenancy details
+    rowName: Tenancy
+    provideLaterOccupied: Provide this later (before {0})
+    councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type
     licensingNumber: Licensing number
   tenancyAndRentalInformation:
-    heading: Tenancy and rental information
-    hintText: Information about tenants and rent for this property
-    occupied: Occupied by tenants
     numberOfHouseholds:
       rowName: Number of households
       changeLinkAriaLabel: Change number of households and tenants
@@ -164,6 +177,15 @@ propertyRecord:
       rowName: When rent is paid
       changeLinkAriaLabel: Change rent frequency or rent amount
     rentAmount: Rent amount
+  beforePdjb939:
+    address: Property address
+    uprn: UPRN
+    'uprn.unavailable': Not available
+    ownershipType: Ownership type
+    tenancyAndRentalInformation:
+      heading: Tenancy and rental information
+      hintText: Information about tenants and rent for this property
+      occupied: Occupied by tenants
 update:
   title: Update property record
 resendInvitation:
