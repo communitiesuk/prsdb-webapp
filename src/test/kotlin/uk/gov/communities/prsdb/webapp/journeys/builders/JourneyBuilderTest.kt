@@ -898,6 +898,57 @@ class JourneyBuilderTest {
             assertFalse(sectionHeaderInfo.useNumbering)
         }
 
+        @Test
+        fun `a step inside a section added from fromTask has sectionHeaderInfo added to its content properties`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val embeddedState = mock<JourneyState>()
+            val embeddedStep = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                fromTask(embeddedState) {
+                    step(embeddedStep) {
+                        initialStep()
+                        nextUrl { "url1" }
+                        unreachableStepUrl { "unreachable" }
+                    }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val expectedSectionHeaderInfo = SectionHeaderViewModel("section.heading", 1, 1)
+            val sectionHeaderInfo = capturedSectionHeader(embeddedStep)
+            assertEquals(expectedSectionHeaderInfo, sectionHeaderInfo)
+        }
+
+        @Test
+        fun `withAdditionalContentProperty configured on a step inside a section is applied alongside the section header`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val step = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                step(step) {
+                    initialStep()
+                    nextUrl { "url1" }
+                    unreachableStepUrl { "unreachable" }
+                    withAdditionalContentProperty { "extra" to "value" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val capturedContent = capturedContentProperties(step)
+            val expectedSectionHeaderInfo = SectionHeaderViewModel("section.heading", 1, 1)
+            assertEquals(expectedSectionHeaderInfo, capturedContent["sectionHeaderInfo"])
+            assertEquals("value", capturedContent["extra"])
+        }
+
         private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
             object : Task<JourneyState>() {
                 override fun makeSubJourney(state: JourneyState) =
@@ -916,7 +967,7 @@ class JourneyBuilderTest {
             }
     }
 
-    private fun capturedSectionHeader(step: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): SectionHeaderViewModel {
+    private fun capturedContentProperties(step: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Map<String, Any> {
         val captor = argumentCaptor<() -> Map<String, Any>>()
         verify(step).initialize(
             anyOrNull(),
@@ -928,8 +979,11 @@ class JourneyBuilderTest {
             anyOrNull(),
             captor.capture(),
         )
-        return captor.firstValue()["sectionHeaderInfo"] as SectionHeaderViewModel
+        return captor.firstValue()
     }
+
+    private fun capturedSectionHeader(step: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): SectionHeaderViewModel =
+        capturedContentProperties(step)["sectionHeaderInfo"] as SectionHeaderViewModel
 
     @Nested
     inner class RoutableTaskTests {
