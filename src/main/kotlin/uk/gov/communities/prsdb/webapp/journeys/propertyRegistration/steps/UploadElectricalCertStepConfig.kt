@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ElectricalUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -23,7 +23,7 @@ class UploadElectricalCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
 ) : AbstractRequestableStepConfig<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyState>() {
     override val formModelClass = ElectricalUploadCertificateFormModel::class
 
@@ -57,7 +57,7 @@ class UploadElectricalCertStepConfig(
                 ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
 
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = landlordService.getCurrentLandlordId()
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -12,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -22,7 +21,7 @@ class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -41,7 +40,7 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = getCurrentLandlordId()
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
@@ -68,12 +67,6 @@ class UploadGasCertStepConfig(
 
             state.uploadGasCertStep.clearFormData()
         }
-    }
-
-    private fun getCurrentLandlordId(): Long {
-        val subjectIdentifier = SecurityContextHolder.getContext().authentication.name
-        return landlordService.retrieveLandlordByBaseUserId(subjectIdentifier)?.id
-            ?: throw IllegalStateException("No individual landlord found for subject identifier: $subjectIdentifier")
     }
 }
 

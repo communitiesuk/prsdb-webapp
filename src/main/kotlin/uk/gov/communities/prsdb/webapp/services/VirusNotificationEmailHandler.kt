@@ -44,15 +44,15 @@ class VirusNotificationEmailHandler(
         if (monitoringEmailAddress != null) {
             emailNotificationService.sendEmail(
                 monitoringEmailAddress,
-                buildAlertEmail(ownership, notification.certificateType, "Monitoring Team"),
+                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.singleLineAddress),
             )
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
                 check(landlord is IndividualLandlord)
                 emailNotificationService.sendEmail(
-                    monitoringEmailAddress ?: landlord.email,
-                    buildAlertEmail(ownership, notification.certificateType, landlord.name),
+                    landlord.email,
+                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.singleLineAddress),
                 )
             }
         }
@@ -60,7 +60,7 @@ class VirusNotificationEmailHandler(
 
     private fun sendAlertForIncompleteProperty(
         notification: IncompletePropertyEmailNotification,
-        emailAddress: String? = null,
+        monitoringEmailAddress: String? = null,
     ) {
         val landlord =
             individualLandlordRepository.findById(notification.landlordId).orElse(null)
@@ -70,15 +70,14 @@ class VirusNotificationEmailHandler(
                 ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
 
         // TODO: PDJB-1274: update to account for org landlords
-        val email =
-            VirusScanUnsuccessfulEmail(
-                certificateType = certificateDescriptionForBody(notification.certificateType),
-                recipientName = landlord.name,
-                propertyAddress = savedJourneyState.getPropertyRegistrationSingleLineAddress(),
-                registerRentalPropertyURL = absoluteUrlProvider.buildLandlordDashboardUri(),
-            )
-
-        emailNotificationService.sendEmail(emailAddress ?: landlord.email, email)
+        emailNotificationService.sendEmail(
+            monitoringEmailAddress ?: landlord.email,
+            buildAlertEmail(
+                notification.certificateType,
+                if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
+                savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+            ),
+        )
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
@@ -101,14 +100,14 @@ class VirusNotificationEmailHandler(
             ?: throw IllegalStateException("No active property ownership found for id: $id")
 
     private fun buildAlertEmail(
-        propertyOwnership: PropertyOwnership,
         certificateType: CertificateType,
         recipientName: String,
+        singleLineAddress: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
             certificateType = certificateDescriptionForBody(certificateType),
             recipientName = recipientName,
-            propertyAddress = propertyOwnership.address.singleLineAddress,
+            propertyAddress = singleLineAddress,
             registerRentalPropertyURL = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
 
@@ -118,4 +117,8 @@ class VirusNotificationEmailHandler(
             CertificateType.Eicr -> "EICR"
             CertificateType.Eic -> "EIC"
         }
+
+    companion object {
+        private const val MONITORING_TEAM_RECIPIENT_NAME = "Monitoring Team"
+    }
 }
