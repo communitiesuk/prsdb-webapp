@@ -277,15 +277,51 @@ class OrgLandlordRegistrationTask(
             duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.saveGovBodyMemberStep }
+                configureStep(journey.govBodyMemberAddressTask.lookupAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember =
+                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        if (editingMember != null) {
+                            mapOf(
+                                "prefillPostcode" to editingMember.addressSearchPostcode,
+                                "prefillHouseNameOrNumber" to editingMember.addressSearchHouseNameOrNumber,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember =
+                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        mapOf(
+                            "fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading",
+                            "prefillSelectedAddress" to editingMember?.selectedAddress,
+                        )
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.manualAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember =
+                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        if (editingMember?.manualAddressLineOne != null) {
+                            mapOf(
+                                "prefillAddressLineOne" to editingMember.manualAddressLineOne,
+                                "prefillAddressLineTwo" to editingMember.manualAddressLineTwo,
+                                "prefillTownOrCity" to editingMember.manualTownOrCity,
+                                "prefillCounty" to editingMember.manualCounty,
+                                "prefillPostcode" to editingMember.manualPostcode,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
             }
             step(journey.saveGovBodyMemberStep) {
                 parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
-                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
-                    withAdditionalContentProperties {
-                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
-                    }
-                }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)

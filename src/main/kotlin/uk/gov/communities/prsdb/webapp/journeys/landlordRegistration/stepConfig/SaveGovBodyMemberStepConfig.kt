@@ -30,6 +30,9 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
         val address = state.govBodyMemberAddressTask.getAddress()
+        val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
+        val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
+        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -46,6 +49,14 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 type = type,
                 dateOfBirth = dateOfBirth,
                 address = address,
+                addressSearchPostcode = lookupFormModel?.postcode,
+                addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
+                selectedAddress = selectFormModel?.address,
+                manualAddressLineOne = manualFormModel?.addressLineOne,
+                manualAddressLineTwo = manualFormModel?.addressLineTwo,
+                manualTownOrCity = manualFormModel?.townOrCity,
+                manualCounty = manualFormModel?.county,
+                manualPostcode = manualFormModel?.postcode,
             )
 
         currentMap[targetKey] = member
