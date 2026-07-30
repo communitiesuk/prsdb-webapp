@@ -36,7 +36,7 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
 
             val messages =
                 when {
-                    hasPropertyProvideLater && hasComplianceIssue -> listOf(combinedMessage(isLandlordView))
+                    hasPropertyProvideLater && hasComplianceIssue -> listOf(propertyAndComplianceCombinedMessage(isLandlordView))
                     hasPropertyProvideLater ->
                         listOf(provideLaterMessage(isLandlordView, isLicensingProvideLater, isTenancyProvideLater))
                     else -> complianceMessages
@@ -47,8 +47,8 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
 
         private fun viewSegment(isLandlordView: Boolean) = if (isLandlordView) "landlord" else "localCouncil"
 
-        private fun combinedMessage(isLandlordView: Boolean): NotificationMessage {
-            val prefix = "$PREFIX.${viewSegment(isLandlordView)}.combined"
+        private fun propertyAndComplianceCombinedMessage(isLandlordView: Boolean): NotificationMessage {
+            val prefix = "$PREFIX.${viewSegment(isLandlordView)}.propertyAndCompliance"
             return NotificationMessage(
                 links =
                     listOf(
@@ -74,15 +74,15 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
         ): NotificationMessage {
             val view = viewSegment(isLandlordView)
             return when {
-                isLicensingProvideLater && isTenancyProvideLater && isLandlordView -> landlordBothMessage()
-                isLicensingProvideLater && isTenancyProvideLater -> singleLinkMessage("$PREFIX.$view.both")
+                isLicensingProvideLater && isTenancyProvideLater && isLandlordView -> landlordLicensingAndTenancyMessage()
+                isLicensingProvideLater && isTenancyProvideLater -> singleLinkMessage("$PREFIX.$view.licensingAndTenancy")
                 isLicensingProvideLater -> singleLinkMessage("$PREFIX.$view.licensing")
                 else -> singleLinkMessage("$PREFIX.$view.tenancy")
             }
         }
 
-        private fun landlordBothMessage(): NotificationMessage {
-            val prefix = "$PREFIX.landlord.both"
+        private fun landlordLicensingAndTenancyMessage(): NotificationMessage {
+            val prefix = "$PREFIX.landlord.licensingAndTenancy"
             return NotificationMessage(
                 links =
                     listOf(

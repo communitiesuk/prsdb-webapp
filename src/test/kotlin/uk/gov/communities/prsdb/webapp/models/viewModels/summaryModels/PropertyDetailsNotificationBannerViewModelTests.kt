@@ -106,13 +106,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.licensingLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.middleText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.licensingLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.both.tenancyLinkText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.tenancyLinkText",
                                 afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
                             ),
                         ),
@@ -129,12 +129,12 @@ class PropertyDetailsNotificationBannerViewModelTests {
         assertEquals(
             listOf(
                 NotificationMessage(
-                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.both.mainText",
+                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.licensingAndTenancy.mainText",
                     links =
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.both.linkText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.licensingAndTenancy.linkText",
                                 afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
                             ),
                         ),
@@ -159,13 +159,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.propertyLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.middleText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.propertyLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.combined.complianceLinkText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.complianceLinkText",
                                 afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
                             ),
                         ),
@@ -191,13 +191,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.propertyLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.middleText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.propertyLinkText",
+                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.beforeLinkText",
+                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.combined.complianceLinkText",
+                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.complianceLinkText",
                                 afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
                             ),
                         ),
