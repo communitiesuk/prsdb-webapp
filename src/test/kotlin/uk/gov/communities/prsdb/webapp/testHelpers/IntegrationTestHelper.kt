@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.testHelpers
 
-import org.flywaydb.core.Flyway
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.util.ResourceUtils
 
@@ -14,11 +13,10 @@ class IntegrationTestHelper {
         private val PRESERVED_TABLES = setOf("flyway_schema_history", "local_council")
 
         fun resetAndSeedDatabase(
-            flyway: Flyway,
             scripts: List<String>,
             jdbcTemplate: JdbcTemplate,
         ) {
-            resetDatabase(flyway)
+            resetDatabase(jdbcTemplate)
             seedDatabase(scripts, jdbcTemplate)
         }
 
@@ -34,11 +32,6 @@ class IntegrationTestHelper {
 
             val quotedTables = tablesToTruncate.joinToString(", ") { "\"$it\"" }
             jdbcTemplate.execute("TRUNCATE TABLE $quotedTables RESTART IDENTITY CASCADE")
-        }
-
-        private fun resetDatabase(flyway: Flyway) {
-            flyway.clean()
-            flyway.migrate()
         }
 
         private fun seedDatabase(
