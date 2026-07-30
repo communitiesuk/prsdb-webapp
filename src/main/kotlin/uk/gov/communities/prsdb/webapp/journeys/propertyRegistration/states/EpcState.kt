@@ -31,6 +31,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 interface EpcState : JourneyState {
     val epcDetailsTask: EpcDetailsTask
 
+    val checkEpcAnswersStep: CheckEpcAnswersStep
+}
+
+interface EpcDetailState : JourneyState {
     val isOccupied: Boolean?
     val uprn: Long?
     var epcRetrievedByUprn: EpcDataModel?
@@ -73,7 +77,6 @@ interface EpcState : JourneyState {
     val epcExemptionStep: EpcExemptionStep
     val epcMissingStep: EpcMissingStep
     val provideEpcLaterStep: ProvideEpcLaterStep
-    val checkEpcAnswersStep: CheckEpcAnswersStep
 
     fun getNotNullAcceptedEpc() = acceptedEpc ?: throw PrsdbWebException("Attempting to access accepted EPC when it is null in state")
 }

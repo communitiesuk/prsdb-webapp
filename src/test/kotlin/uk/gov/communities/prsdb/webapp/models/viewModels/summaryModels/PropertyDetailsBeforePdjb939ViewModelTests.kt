@@ -112,6 +112,30 @@ class PropertyDetailsBeforePdjb939ViewModelTests {
     }
 
     @Test
+    fun `Bedrooms row shows the not added message key when no bedroom count was entered`() {
+        // Arrange
+        val propertyOwnership = createOccupiedPropertyOwnership()
+        propertyOwnership.numBedrooms = null
+
+        // Act
+        val viewModel =
+            PropertyDetailsBeforePdjb939ViewModel(
+                propertyOwnership,
+                messageSource = mockMessageSource,
+            )
+        val bedroomsRow =
+            viewModel.beforePdjb939TenancyAndRentalInformation.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+            }
+
+        // Assert
+        assertEquals(
+            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms.notAdded",
+            bedroomsRow.fieldValue,
+        )
+    }
+
+    @Test
     fun `Tenancy details are in the correct order when property is occupied and all conditional and custom fields are filled`() {
         // Arrange
         val propertyOwnership =

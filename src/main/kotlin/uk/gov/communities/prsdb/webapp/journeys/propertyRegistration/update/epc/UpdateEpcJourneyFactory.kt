@@ -13,34 +13,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -85,7 +62,8 @@ class UpdateEpcJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            task(journey.epcDetailsTask) {
+            duplicableTask(journey.epcDetailsTask) {
+                withDependencies { journey }
                 initialStep()
                 backUrl { propertyComplianceRoute }
                 nextStep { journey.updateCheckEpcAnswersStep }
@@ -130,7 +108,11 @@ class UpdateEpcJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(journey.epcDetailsTask)
+            duplicableCheckAnswerTask(
+                journey.epcDetailsTask,
+                { journey },
+            )
+
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
@@ -148,31 +130,9 @@ class UpdateEpcJourneyFactory(
 class UpdateEpcJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "updateEpc",
-    override val epcTask: EpcTask,
-    override val epcLookupByUprnStep: EpcLookupByUprnStep,
-    override val hasEpcStep: HasEpcStep,
-    override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
-    override val epcAgeCheckStep: EpcAgeCheckStep,
-    override val epcEnergyRatingCheckStep: EpcEnergyRatingCheckStep,
-    override val isPropertyOccupiedCheckStep: PropertyOccupiedCheckStep,
-    override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
-    override val findYourEpcStep: FindYourEpcStep,
-    override val checkSupersededEpcStep: EpcSuperseededStep,
-    override val epcNotFoundStep: EpcNotFoundStep,
-    override val epcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep,
-    override val hasMeesExemptionStep: HasMeesExemptionStep,
-    override val meesExemptionStep: MeesExemptionStep,
-    override val lowEnergyRatingStep: LowEnergyRatingStep,
-    override val epcExpiredStep: EpcExpiredStep,
-    override val isEpcRequiredStep: IsEpcRequiredStep,
-    override val epcExemptionStep: EpcExemptionStep,
-    override val epcMissingStep: EpcMissingStep,
-    override val provideEpcLaterStep: ProvideEpcLaterStep,
-    override val checkEpcAnswersStep: CheckEpcAnswersStep,
     val updateCheckEpcAnswersStep: UpdateCheckEpcAnswersStep,
     override val epcDetailsTask: EpcDetailsTask,
     override val completeEpcUpdateStep: CompleteEpcUpdateStep,
-    override val startEpcStep: StartEpcStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateEpcJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -181,16 +141,6 @@ class UpdateEpcJourney(
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
-
-    override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
-    override var epcRetrievedByUprnUpdatedSinceUserReview: Boolean?
-        by delegateProvider.nullableDelegate("epcRetrievedByUprnUpdatedSinceUserReview")
-    override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
-    override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
-        by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
-    override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider
-        .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
-    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
     override val allowProvideCertificateLaterRoute: Boolean = false
 
@@ -204,10 +154,11 @@ class UpdateEpcJourney(
 
 interface UpdateEpcJourneyState :
     JourneyState,
-    EpcState,
+    EpcDependencies,
     CheckYourAnswersJourneyState {
+    val epcDetailsTask: EpcDetailsTask
     val propertyId: Long
     val lastModifiedDate: String
-    val epcTask: EpcTask
+    override var isOccupied: Boolean
     val completeEpcUpdateStep: CompleteEpcUpdateStep
 }

@@ -20,24 +20,25 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -45,18 +46,12 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
@@ -194,9 +189,11 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceData()
-        whenever(mockState.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+        whenever(
+            mockState.electricalSafetyTask.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
+        ).thenReturn(null)
         whenever(
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
@@ -233,7 +230,6 @@ class SavePropertyRegistrationDataStepConfigTests {
                 epcExemptionReason = anyOrNull(),
                 epcMeesExemptionReason = anyOrNull(),
                 epcProvideLater = anyOrNull(),
-                tenancyProvideLater = any(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -291,147 +287,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached sends tenancy fields when occupied user provides tenancy details`() {
-        // Arrange
-        setupStateForPropertyRegistration(isOccupied = true)
-        setupStateForComplianceDataWithNullValues()
-        whenever(mockState.provideTenancyDetailsLater).thenReturn(false)
-
-        val mockHouseholdsAndTenantsTask = mock<HouseholdsAndTenantsTask>()
-        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
-
-        val mockHouseholdsStep = mock<HouseholdStep>()
-        whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdsStep)
-        whenever(mockHouseholdsStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
-
-        val mockTenantsStep = mock<TenantsStep>()
-        whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
-        whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "3" })
-
-        val mockBedroomsStep = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
-        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "4" })
-
-        val mockFurnishedStatusStep = mock<FurnishedStatusStep>()
-        whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
-        whenever(mockFurnishedStatusStep.formModel).thenReturn(
-            FurnishedStatusFormModel().apply { furnishedStatus = FurnishedStatus.FURNISHED },
-        )
-
-        val mockRentFrequencyAndAmountTask = mock<RentFrequencyAndAmountTask>()
-        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
-
-        val mockRentFrequencyStep = mock<RentFrequencyStep>()
-        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
-        whenever(mockRentFrequencyStep.formModel).thenReturn(
-            RentFrequencyFormModel().apply { rentFrequency = RentFrequency.MONTHLY },
-        )
-
-        val mockRentAmountStep = mock<RentAmountStep>()
-        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
-        whenever(mockRentAmountStep.formModel).thenReturn(RentAmountFormModel().apply { rentAmount = "1200" })
-        whenever(mockRentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()).thenReturn(null)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = eq(true),
-            numberOfHouseholds = eq(2),
-            numberOfPeople = eq(3),
-            baseUserId = any(),
-            numBedrooms = eq(4),
-            billsIncludedList = isNull(),
-            customBillsIncluded = isNull(),
-            furnishedStatus = eq(FurnishedStatus.FURNISHED),
-            rentFrequency = eq(RentFrequency.MONTHLY),
-            customRentFrequency = isNull(),
-            rentAmount = eq("1200.00".toBigDecimal()),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(false),
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached sends zero tenancy fields when occupied user marks task as provide this later`() {
-        // Arrange
-        setupStateForPropertyRegistration(isOccupied = true)
-        setupStateForComplianceDataWithNullValues()
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
-
-        val mockBedroomsStep = mock<BedroomsStep>()
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
-        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "2" })
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            isOccupied = eq(true),
-            numberOfHouseholds = eq(0),
-            numberOfPeople = eq(0),
-            baseUserId = any(),
-            numBedrooms = eq(2),
-            billsIncludedList = isNull(),
-            customBillsIncluded = isNull(),
-            furnishedStatus = isNull(),
-            rentFrequency = isNull(),
-            customRentFrequency = isNull(),
-            rentAmount = isNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            gasSafetyCertProvideLater = anyOrNull(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = anyOrNull(),
-            electricalSafetyCertProvideLater = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-            epcProvideLater = anyOrNull(),
-            tenancyProvideLater = eq(true),
         )
     }
 
@@ -470,11 +325,11 @@ class SavePropertyRegistrationDataStepConfigTests {
         assertNotEquals(defaultDestination, result)
     }
 
-    private fun setupStateForPropertyRegistration(isOccupied: Boolean = false) {
+    private fun setupStateForPropertyRegistration() {
         setMockUser("test-user")
 
         val mockOccupiedStep = mock<OccupiedStep>()
-        val occupancyFormModel = OccupancyFormModel().apply { occupied = isOccupied }
+        val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(occupancyFormModel)
 
@@ -530,91 +385,119 @@ class SavePropertyRegistrationDataStepConfigTests {
         epcExemptionReason: EpcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT,
         meesExemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
     ) {
-        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
-        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
+        val gasSafetyTask: GasSafetyDetailsTask = mock()
+        val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask = mock()
+
+        whenever(gasSafetyTask.gasUploadIds).thenReturn(gasUploadIds)
+        whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(electricalUploadIds)
+        whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
         val mockHasGasCertStep = mock<HasGasCertStep>()
-        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(gasSafetyTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
         whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
-        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        val mockEpcTask: EpcTask = mock()
+        val mockEpcDetailsTask: EpcDetailsTask = mock()
+        whenever(mockEpcTask.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
 
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+        whenever(gasSafetyTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
+        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
 
         if (acceptedEpc != null) {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
         }
 
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
+        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(
             EpcInDateAtStartOfTenancyCheckFormModel().apply {
                 tenancyStartedBeforeExpiry = tenancyStartedBeforeEpcExpiry
             },
         )
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(
             EpcExemptionFormModel().apply {
                 exemptionReason = epcExemptionReason
             },
         )
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(
             MeesExemptionReasonFormModel().apply {
                 exemptionReason = meesExemptionReason
             },
         )
+
+        val mockGasTask: GasSafetyTask = mock()
+        whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(gasSafetyTask)
+        whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
+        val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
+        whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(electricalSafetyDetailsTask)
+        whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
+        whenever(mockState.epcTask).thenReturn(mockEpcTask)
     }
 
     private fun setupStateForComplianceDataWithNullValues() {
-        whenever(mockState.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+        val gasSafetyDetailsTask: GasSafetyDetailsTask = mock()
+        val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask = mock()
+        val mockEpcTask: EpcTask = mock()
+        val mockEpcDetailsTask: EpcDetailsTask = mock()
+        whenever(mockEpcTask.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+
+        whenever(gasSafetyDetailsTask.gasUploadIds).thenReturn(emptyList())
+        whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+        whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(gasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
         val mockHasGasCertStep = mock<HasGasCertStep>()
-        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(gasSafetyDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
         whenever(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
-        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
         whenever(mockHasElectricalCertStep.outcome).thenReturn(null)
 
         val mockHasEpcStep = mock<HasEpcStep>()
-        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockHasEpcStep.outcome).thenReturn(null)
 
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
+        whenever(gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+        whenever(electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(null)
+
+        val mockGasTask: GasSafetyTask = mock()
+        whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(gasSafetyDetailsTask)
+        whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
+        val mockElectricalSafetyTask: ElectricalSafetyTask = mock()
+        whenever(mockElectricalSafetyTask.electricalSafetyDetailsTask).thenReturn(electricalSafetyDetailsTask)
+        whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
+        whenever(mockState.epcTask).thenReturn(mockEpcTask)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
         val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
         whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
     }
 }

@@ -16,7 +16,7 @@ class CheckGasSafetyAnswersStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
-        val factory = GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService)
+        val factory = GasSafetyRegistrationCyaSummaryRowsFactory(state.gasSafetyDetailsTask, uploadService)
         return mapOf(
             "gasSupplyRows" to factory.createGasSupplyRows(),
             "certRows" to factory.createCertRows(),

@@ -8,7 +8,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
@@ -29,16 +28,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
-class EpcStateTests {
+class EpcDetailsStateTests {
     @Test
     fun `acceptedEpcIfStillAccepted returns acceptedEpc when checkUprnMatchedEpcStep has outcome YES`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, uprnStepOutcome = YesOrNo.YES)
+        val state = buildTestEpcDetailsState(acceptedEpc = epc, uprnStepOutcome = YesOrNo.YES)
 
         assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
@@ -46,7 +44,7 @@ class EpcStateTests {
     @Test
     fun `acceptedEpcIfStillAccepted returns acceptedEpc when confirmEpcDetailsRetrievedByCertificateNumberStep has outcome YES`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, certStepOutcome = YesOrNo.YES)
+        val state = buildTestEpcDetailsState(acceptedEpc = epc, certStepOutcome = YesOrNo.YES)
 
         assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
@@ -54,7 +52,7 @@ class EpcStateTests {
     @Test
     fun `acceptedEpcIfStillAccepted returns acceptedEpc when checkSuperseededEpcStep has outcome COMPLETE`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, supersededStepOutcome = Complete.COMPLETE)
+        val state = buildTestEpcDetailsState(acceptedEpc = epc, supersededStepOutcome = Complete.COMPLETE)
 
         assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
@@ -62,25 +60,25 @@ class EpcStateTests {
     @Test
     fun `acceptedEpcIfStillAccepted returns null when no confirm step has a positive outcome`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc)
+        val state = buildTestEpcDetailsState(acceptedEpc = epc)
 
         assertNull(state.acceptedEpcIfStillAccepted)
     }
 
     @Test
     fun `acceptedEpcIfStillAccepted throws when acceptedEpc is null and a confirm step has positive outcome`() {
-        val state = buildTestEpcState(acceptedEpc = null, uprnStepOutcome = YesOrNo.YES)
+        val state = buildTestEpcDetailsState(acceptedEpc = null, uprnStepOutcome = YesOrNo.YES)
 
         assertThrows<PrsdbWebException> { state.acceptedEpcIfStillAccepted }
     }
 
-    private fun buildTestEpcState(
+    private fun buildTestEpcDetailsState(
         acceptedEpc: EpcDataModel? = null,
         uprnStepOutcome: YesOrNo? = null,
         certStepOutcome: YesOrNo? = null,
         supersededStepOutcome: Complete? = null,
-    ): EpcState =
-        object : AbstractJourneyState(journeyStateService = mock()), EpcState {
+    ): EpcDetailState =
+        object : AbstractJourneyState(journeyStateService = mock()), EpcDetailState {
             override val isOccupied: Boolean? = null
             override val uprn: Long? = null
             override val allowProvideCertificateLaterRoute: Boolean = true
@@ -127,7 +125,5 @@ class EpcStateTests {
             override val epcExemptionStep = mock<EpcExemptionStep>()
             override val epcMissingStep = mock<EpcMissingStep>()
             override val provideEpcLaterStep = mock<ProvideEpcLaterStep>()
-            override val checkEpcAnswersStep = mock<CheckEpcAnswersStep>()
-            override val epcDetailsTask = mock<EpcDetailsTask>()
         }
 }
