@@ -4,25 +4,25 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 
 @JourneyFrameworkComponent
 class FindYourEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcState>() {
+) : AbstractRequestableStepConfig<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcDetailState>() {
     override val formModelClass = FindEpcByCertificateNumberFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState) =
+    override fun getStepSpecificContent(state: EpcDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.findYourEpc.fieldSetHeading",
             "findEpcUrl" to FIND_EPC_URL,
         )
 
-    override fun chooseTemplate(state: EpcState) = "forms/findYourEpcForm"
+    override fun chooseTemplate(state: EpcDetailState) = "forms/findYourEpcForm"
 
-    override fun mode(state: EpcState): FindYourEpcMode? {
+    override fun mode(state: EpcDetailState): FindYourEpcMode? {
         val epc = state.epcRetrievedByCertificateNumber
         return when {
             epc == null -> FindYourEpcMode.NOT_FOUND
@@ -31,7 +31,7 @@ class FindYourEpcStepConfig(
         }
     }
 
-    override fun afterStepDataIsAdded(state: EpcState) {
+    override fun afterStepDataIsAdded(state: EpcDetailState) {
         val epcPreviouslyReviewedByUser = state.epcRetrievedByCertificateNumber
         val formModel = getFormModelFromState(state)
         state.epcRetrievedByCertificateNumber = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
@@ -48,7 +48,7 @@ class FindYourEpcStepConfig(
 @JourneyFrameworkComponent
 final class FindYourEpcStep(
     stepConfig: FindYourEpcStepConfig,
-) : RequestableStep<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcState>(stepConfig) {
+) : RequestableStep<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "find-your-epc"
     }

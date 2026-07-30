@@ -3,16 +3,16 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStepConfig")
 class EpcInDateAtStartOfTenancyCheckStepConfig :
-    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>() {
+    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcDetailState>() {
     override val formModelClass = EpcInDateAtStartOfTenancyCheckFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
+    override fun getStepSpecificContent(state: EpcDetailState): Map<String, Any?> {
         val expiryDate = state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate
         return mapOf(
             "expiryDate" to expiryDate,
@@ -34,9 +34,9 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
         )
     }
 
-    override fun chooseTemplate(state: EpcState) = "forms/epcInDateAtStartOfTenancyCheckForm"
+    override fun chooseTemplate(state: EpcDetailState) = "forms/epcInDateAtStartOfTenancyCheckForm"
 
-    override fun mode(state: EpcState) =
+    override fun mode(state: EpcDetailState) =
         getFormModelFromStateOrNull(state)?.let {
             when (it.tenancyStartedBeforeExpiry) {
                 true -> EpcInDateAtStartOfTenancyCheckMode.IN_DATE
@@ -49,7 +49,7 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
 @JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStep")
 final class EpcInDateAtStartOfTenancyCheckStep(
     stepConfig: EpcInDateAtStartOfTenancyCheckStepConfig,
-) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>(stepConfig) {
+) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "epc-in-date-at-start-of-tenancy-check"
     }

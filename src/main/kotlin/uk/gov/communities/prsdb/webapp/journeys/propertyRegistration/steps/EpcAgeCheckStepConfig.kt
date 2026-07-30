@@ -4,11 +4,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 
 @JourneyFrameworkComponent
-class EpcAgeCheckStepConfig : AbstractInternalStepConfig<EpcAgeCheckMode, EpcState>() {
-    override fun mode(state: EpcState): EpcAgeCheckMode? {
+class EpcAgeCheckStepConfig : AbstractInternalStepConfig<EpcAgeCheckMode, EpcDetailState>() {
+    override fun mode(state: EpcDetailState): EpcAgeCheckMode? {
         val epcDetails =
             state.acceptedEpc
                 ?: throw NotNullFormModelValueIsNullException("acceptedEpc must be present before evaluating EPC age")
@@ -19,7 +19,7 @@ class EpcAgeCheckStepConfig : AbstractInternalStepConfig<EpcAgeCheckMode, EpcSta
 @JourneyFrameworkComponent
 final class EpcAgeCheckStep(
     stepConfig: EpcAgeCheckStepConfig,
-) : JourneyStep.InternalStep<EpcAgeCheckMode, EpcState>(stepConfig)
+) : JourneyStep.InternalStep<EpcAgeCheckMode, EpcDetailState>(stepConfig)
 
 enum class EpcAgeCheckMode {
     EPC_10_YEARS_OR_NEWER,

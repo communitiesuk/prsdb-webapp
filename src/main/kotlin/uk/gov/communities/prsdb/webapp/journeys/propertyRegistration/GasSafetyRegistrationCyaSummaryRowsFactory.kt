@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class GasSafetyRegistrationCyaSummaryRowsFactory(
-    private val state: GasSafetyState,
+    private val state: GasSafetyDetailState,
     private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
@@ -111,7 +111,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             "checkGasSafety.provideThisLater.unoccupied"
         }
 
-    private fun determineScenario(state: GasSafetyState): GasSafetyScenario {
+    private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario {
         if (state.hasGasSupplyStep.outcome == YesOrNo.NO) return GasSafetyScenario.NO_GAS_SUPPLY
         return when (state.hasGasCertStep.outcome) {
             HasGasCertMode.PROVIDE_THIS_LATER -> {
