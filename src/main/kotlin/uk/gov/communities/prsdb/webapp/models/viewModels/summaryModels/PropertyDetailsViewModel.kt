@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
+import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -95,7 +95,7 @@ class PropertyDetailsViewModel(
             "propertyDetails.propertyRecord.tenancy.rowName",
             getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied"),
             changeLinkMessageKey,
-            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",
             withChangeLinks,
         )

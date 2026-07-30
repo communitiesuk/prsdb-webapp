@@ -1,16 +1,23 @@
 -- =============================================================================
--- available_addresses(n): returns the first n existing active addresses not already
--- used by an active property, ranked 1..n (rn). Like the rest of this seed, the
--- cohorts below reference the AddressBase/NGD addresses already present rather than
--- inserting their own; each claims distinct free addresses by joining this function
--- on rn. The inner LIMIT n keeps callers from ranking the whole address table.
--- Defined with a single-quoted SQL body (no dollar-quoting) because the spring.sql.init
--- runner splits scripts on ';' and cannot parse dollar-quoted function blocks.
+-- Addresses for the QA cohort below, at reserved ids far above the range the
+-- AddressBase/NGD loader allocates from. The cohort used to claim whichever existing
+-- addresses were not yet used by an active property, which meant an unbounded scan of
+-- the 35m-row address table on every boot and left each property in whichever council
+-- happened to own the address it claimed.
+--
+-- These rows are inert to the NGD loader, which is delta-based and keyed on uprn:
+--   * uprn IS NULL, so its ON CONFLICT (uprn) DO UPDATE never matches them, and its
+--     property_ownership refresh (WHERE a.uprn IN (...)) never overwrites them
+--   * is_active, so its "delete unused inactive addresses" pass never considers them
+--   * the address id sequence is deliberately NOT bumped past these ids, so the loader
+--     carries on allocating from where it left off
+-- A NULL uprn also keeps them out of the address lookup, which requires uprn IS NOT NULL.
 -- =============================================================================
-CREATE OR REPLACE FUNCTION available_addresses(n integer)
-    RETURNS TABLE (address_id bigint, rn bigint)
-    LANGUAGE sql
-AS 'SELECT id, ROW_NUMBER() OVER (ORDER BY id) FROM (SELECT a.id FROM address a WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id) ORDER BY a.id LIMIT $1) limited';
+INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
+SELECT 9000000000 + i, current_timestamp, null::bigint,
+       i || ' Provide Later Road, Testville, QA1 1AA', 'QA1 1AA', i || '', 2
+FROM generate_series(1, 9) AS s(i)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024-10-15 00:00:00+00'),        -- Team-PRSDB+laadmin@softwire.com
@@ -333,10 +340,8 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 18-25.
 -- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Like the rest of
--- this seed, addresses are NOT inserted: each property claims a distinct existing
--- active AddressBase/NGD address not already used by an active property (the
--- combined insert below picks them via the available_addresses(n) function). Occupied
+-- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
 --   18  occupied, licensing + tenancy skipped, compliance all provide-later -> COMBINED banner
@@ -357,8 +362,8 @@ VALUES (1, 1, 'LQA0000019'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
--- Each QA property claims a distinct existing active address not already used by an active property.
--- available_addresses(9) returns 9 free addresses ranked 1..9 so every row below picks a different one.
+-- rn doubles as the reserved QA address selector (9000000000 + rn), so every row below
+-- gets a distinct address.
 WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
                      furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
                      license_provide_later, tenancy_provide_later) AS (
@@ -377,12 +382,11 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
                                 license_provide_later, tenancy_provide_later)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
-       aa.address_id, current_date, current_date, np.license_id, 1, 1,
+       9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
        np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
        np.license_provide_later, np.tenancy_provide_later
 FROM new_properties np
-         JOIN available_addresses(9) aa ON aa.rn = np.rn
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
