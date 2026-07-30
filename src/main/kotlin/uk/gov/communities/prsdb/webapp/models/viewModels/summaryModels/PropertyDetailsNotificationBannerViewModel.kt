@@ -3,19 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_FRAGMENT
 
-/**
- * Unified notification banner for the property record page. It merges the "provide later" registration
- * messages from the property and tenancy details tab (behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
- * with the compliance messages from the compliance information tab into a single banner model.
- *
- * When a property has an outstanding "provide later" detail AND an outstanding compliance issue, a single
- * combined sentence is shown instead of the individual messages. Otherwise the relevant provide-later or
- * compliance messages are shown. Banners are only shown for occupied properties in the provide-later cases.
- *
- * Each [NotificationMessage] renders as a single heading made up of an optional leading text followed by a
- * sequence of links, each with its own surrounding text. Spacing (other than the single space between the
- * leading text and the first link) is baked into the message keys.
- */
 class PropertyDetailsNotificationBannerViewModel private constructor(
     val messages: List<NotificationMessage>,
 ) {

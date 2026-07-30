@@ -12,8 +12,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 
 @PrsdbWebService
 class NotificationBannerViewModelService {
-    // Assembles the unified property-record banner (flag on), merging compliance messages with the
-    // provide-later registration state. A null propertyCompliance means no certificates exist yet.
     fun getPropertyDetailsNotificationBanner(
         propertyCompliance: PropertyCompliance?,
         isLandlordView: Boolean,
@@ -38,10 +36,13 @@ class NotificationBannerViewModelService {
         propertyCompliance: PropertyCompliance?,
         isLandlordView: Boolean,
     ): PropertyDetailsBeforePdjb939NotificationBannerViewModel {
-        // The flag-off banner is compliance-only and only shown to landlords.
         val complianceMessages =
             propertyCompliance?.let {
-                if (isLandlordView) getComplianceNotificationMessageKeys(it, isLandlordView, beforePdjb939 = true) else emptyList()
+                if (isLandlordView) {
+                    getComplianceNotificationMessageKeys(it, isLandlordView, beforePdjb939 = true)
+                } else {
+                    emptyList()
+                }
             }
 
         return PropertyDetailsBeforePdjb939NotificationBannerViewModel.fromState(isLandlordView, complianceMessages)
@@ -105,7 +106,6 @@ class NotificationBannerViewModelService {
         )
     }
 
-    // The flag-on banner uses view-specific "missing" copy; the flag-off (beforePdjb939) banner uses a single variant.
     private fun missingMainTextKey(
         isLandlordView: Boolean,
         beforePdjb939: Boolean,

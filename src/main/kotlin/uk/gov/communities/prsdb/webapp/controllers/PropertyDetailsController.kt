@@ -203,8 +203,6 @@ class PropertyDetailsController(
         return viewName
     }
 
-    // Builds the property-record notification banner, selecting the flag-on (unified) or flag-off
-    // (compliance-only, beforePdjb939) variant. propertyCompliance is null when no certificates exist yet.
     private fun buildNotificationBanner(
         provideLaterEnabled: Boolean,
         isLandlordView: Boolean,
@@ -224,7 +222,6 @@ class PropertyDetailsController(
             notificationBannerViewModelService.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView)
         }
 
-    // Parse the provide-later feature flag exactly once and select the matching view model + template.
     private fun getPropertyDetailsViewModelAndView(
         propertyOwnership: PropertyOwnership,
         provideLaterEnabled: Boolean,
