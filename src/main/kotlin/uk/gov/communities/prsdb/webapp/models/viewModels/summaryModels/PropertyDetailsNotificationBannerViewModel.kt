@@ -38,7 +38,7 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
                 when {
                     hasPropertyProvideLater && hasComplianceIssue -> listOf(propertyAndComplianceCombinedMessage(isLandlordView))
                     hasPropertyProvideLater ->
-                        listOf(provideLaterMessage(isLandlordView, isLicensingProvideLater, isTenancyProvideLater))
+                        listOf(providePropertyDetailsLaterMessage(isLandlordView, isLicensingProvideLater, isTenancyProvideLater))
                     else -> complianceMessages
                 }
 
@@ -67,7 +67,7 @@ class PropertyDetailsNotificationBannerViewModel private constructor(
             )
         }
 
-        private fun provideLaterMessage(
+        private fun providePropertyDetailsLaterMessage(
             isLandlordView: Boolean,
             isLicensingProvideLater: Boolean,
             isTenancyProvideLater: Boolean,
