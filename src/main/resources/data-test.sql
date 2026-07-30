@@ -502,44 +502,6 @@ VALUES (18, 19, current_date, current_date, null, false, '2035-01-01', null,
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
--- PDJB-1048 / PDJB-1305 provide-later + compliance-banner QA (landlord 1) compliance records.
--- 18-21: fully compliant records for property_ownership 19-22 (gas not required, valid electrical +
--- EPC, all declarations) so they render the pure provide-later banner variant.
--- 22: scenario A (PO 18) with all three certs "provide later" -> COMBINED, backed by data.
--- 23: PO 24 gas cert expired, electrical + EPC valid          -> single "certificate expired" banner.
--- 24: PO 25 gas cert + EPC expired, electrical valid          -> "multiple certificates expired" banner.
--- 25: PO 26 gas cert "provide later", electrical + EPC valid  -> "add compliance certificates" (missing) banner.
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
-                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
-                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
-                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
-VALUES (18, 19, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (19, 20, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (20, 21, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (21, 22, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (22, 18, current_date, current_date, null, true, null, null, null, null,
-        null, null, null, null, true, true, true, true, true, true),
-       (23, 24, current_date, current_date, current_date - 730, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, false, false, false),
-       (24, 25, current_date, current_date, current_date - 730, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
-        false, 'c', null, null, true, true, true, false, false, false),
-       (25, 26, current_date, current_date, null, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
-
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null,
         'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk

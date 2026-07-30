@@ -557,43 +557,6 @@ VALUES (49, 50, current_date, current_date, null, false, '2035-01-01', null,
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
--- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
--- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
-                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
-                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
-                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
-                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
-VALUES (49, 50, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (50, 51, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (51, 52, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       (52, 53, current_date, current_date, null, false, '2035-01-01', null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
-        null, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: scenario A (PO 49) compliance record with all three certs "provide later".
-       (53, 49, current_date, current_date, null, true, null, null, null, null,
-        null, null, null, null, true, true, true, true, true, true),
-       -- PDJB-1305: PO 55 gas cert expired (issued 730 days ago), electrical + EPC valid.
-       (54, 55, current_date, current_date, current_date - 730, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: PO 56 gas cert + EPC expired, electrical valid.
-       (55, 56, current_date, current_date, current_date - 730, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
-        false, 'c', null, null, true, true, true, false, false, false),
-       -- PDJB-1305: PO 57 gas cert "provide later", electrical + EPC valid -> "add compliance certificates" banner.
-       (56, 57, current_date, current_date, null, true, current_date + 730, null,
-        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
-
 INSERT INTO passcode (passcode, created_date, last_modified_date, subject_identifier)
 VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
        ('PRSD23', current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
