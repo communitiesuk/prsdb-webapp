@@ -12,6 +12,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
@@ -194,44 +195,43 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(
             mockState.electricalSafetyTask.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
         ).thenReturn(null)
-        whenever(
-            mockPropertyRegistrationService.registerProperty(
-                addressModel = any(),
-                propertyType = any(),
-                licenseType = any(),
-                licenceNumber = any(),
-                ownershipType = any(),
-                isOccupied = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                baseUserId = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                jointLandlordEmails = anyOrNull(),
-                markedJointLandlord = any(),
-                hasGasSupply = anyOrNull(),
-                gasSafetyCertIssueDate = anyOrNull(),
-                gasSafetyFileUploadIds = any(),
-                gasSafetyCertProvideLater = anyOrNull(),
-                electricalSafetyFileUploadIds = any(),
-                electricalSafetyExpiryDate = anyOrNull(),
-                electricalCertType = anyOrNull(),
-                electricalSafetyCertProvideLater = anyOrNull(),
-                epcCertificateUrl = anyOrNull(),
-                epcExpiryDate = anyOrNull(),
-                epcEnergyRating = anyOrNull(),
-                tenancyStartedBeforeEpcExpiry = anyOrNull(),
-                epcExemptionReason = anyOrNull(),
-                epcMeesExemptionReason = anyOrNull(),
-                epcProvideLater = anyOrNull(),
-            ),
-        ).thenThrow(EntityExistsException("Address already registered"))
+        doThrow(EntityExistsException("Address already registered")).whenever(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = any(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            baseUserId = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = anyOrNull(),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = anyOrNull(),
+            tenancyProvideLater = any(),
+        )
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -243,8 +243,6 @@ class SavePropertyRegistrationDataStepConfigTests {
     @Test
     fun `afterStepIsReached passes nulls and empties when all compliance steps return no data`() {
         // Arrange
-        val registrationNumberValue = 12345L
-
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
 
@@ -287,6 +285,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(false),
         )
     }
 
