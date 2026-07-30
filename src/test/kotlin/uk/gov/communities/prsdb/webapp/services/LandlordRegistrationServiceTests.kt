@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationLandlordRegistrationConfirmationEmail
 import java.net.URI
 import java.time.LocalDate
 
@@ -47,6 +48,9 @@ class LandlordRegistrationServiceTests {
     private lateinit var mockRegistrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
     @Mock
+    private lateinit var mockOrgRegistrationConfirmationSender: EmailNotificationService<OrganisationLandlordRegistrationConfirmationEmail>
+
+    @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var landlordRegistrationService: LandlordRegistrationService
@@ -65,6 +69,7 @@ class LandlordRegistrationServiceTests {
                 mockOrganisationLandlordUserService,
                 mockOrganisationGoverningBodyMemberService,
                 mockRegistrationConfirmationSender,
+                mockOrgRegistrationConfirmationSender,
                 mockAbsoluteUrlProvider,
             )
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser("user-123")).thenReturn(baseUser)
@@ -261,6 +266,36 @@ class LandlordRegistrationServiceTests {
 
     @Nested
     inner class OrganisationLandlordRegistration {
+        private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
+        private val orgDashboardUri = URI("http://example.com/landlord-dashboard")
+
+        private val organisationLandlord =
+            OrganisationLandlord(
+                registrationNumber = orgRegistrationNumber,
+                name = "Test Org",
+                address = Address(AddressDataModel(singleLineAddress = "1 Org St")),
+                email = "org@test.com",
+                phoneNumber = "020 1234 5678",
+                registrantName = "Alice",
+                registrantDateOfBirth = LocalDate.of(1990, 1, 1),
+                registrantEmail = "alice@test.com",
+                registrantPhoneNumber = "072",
+                isCompany = false,
+                isCharity = false,
+                isTrust = false,
+                companyNumber = null,
+                charityRegisteredWith = null,
+                charityNumber = null,
+                leadTrusteeName = null,
+                leadTrusteeDateOfBirth = null,
+                leadTrusteeEmail = null,
+                leadTrusteePhone = null,
+                leadTrusteeAddress = null,
+                mainContactName = "Bob",
+                mainContactEmail = "bob@test.com",
+                mainContactPhone = "071",
+            )
+
         @BeforeEach
         fun stubOrganisationLandlord() {
             whenever(
@@ -288,7 +323,8 @@ class LandlordRegistrationServiceTests {
                     any(),
                     any(),
                 ),
-            ).thenReturn(OrganisationLandlord())
+            ).thenReturn(organisationLandlord)
+            whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
         }
 
         @Test
@@ -451,6 +487,23 @@ class LandlordRegistrationServiceTests {
             registerOrganisationLandlord()
 
             verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(any(), eq(baseUser))
+        }
+
+        @Test
+        fun `registerOrganisationLandlord sends a registration confirmation email to the organisation email`() {
+            registerOrganisationLandlord()
+
+            verify(mockOrgRegistrationConfirmationSender).sendEmail(
+                eq("org@test.com"),
+                eq(
+                    OrganisationLandlordRegistrationConfirmationEmail(
+                        registrantName = "Alice",
+                        organisationName = "Test Org",
+                        lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
+                        prsdURL = orgDashboardUri.toString(),
+                    ),
+                ),
+            )
         }
     }
 }

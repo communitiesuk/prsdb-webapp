@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -61,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisatio
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationLandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -76,8 +78,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     @Autowired
     private lateinit var landlordService: LandlordService
 
+    @Autowired
+    private lateinit var organisationLandlordUserRepository: OrganisationLandlordUserRepository
+
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var orgConfirmationEmailSender: EmailNotificationService<OrganisationLandlordRegistrationConfirmationEmail>
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -327,7 +335,26 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Company")
         assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
 
-        // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+        checkAnswersPage.confirmAndSubmit()
+
+        val createdOrgLandlord =
+            assertNotNull(organisationLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull())
+                .organisationLandlord
+        val createdOrgLandlordRegNum = RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
+
+        verify(orgConfirmationEmailSender).sendEmail(
+            "test.address@provider.com",
+            OrganisationLandlordRegistrationConfirmationEmail(
+                registrantName = "name",
+                organisationName = "Test Organisation Name",
+                lrn = createdOrgLandlordRegNum.toString(),
+                prsdURL = absoluteLandlordUrl,
+            ),
+        )
+
+        // TODO: PDJB-1180: assert the confirmation page renders here. It currently errors for org landlords because
+        //  RegisterLandlordController.getConfirmation looks the landlord up via retrieveLandlordByBaseUserId, which
+        //  only finds IndividualLandlords.
     }
 
     @Test
