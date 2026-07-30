@@ -13,15 +13,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 @PrsdbWebService
 class NotificationBannerViewModelService {
     fun getPropertyDetailsNotificationBanner(
-        propertyCompliance: PropertyCompliance?,
+        propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
         isOccupied: Boolean,
         isLicensingProvideLater: Boolean,
         isTenancyProvideLater: Boolean,
     ): PropertyDetailsNotificationBannerViewModel {
-        val complianceMessages =
-            propertyCompliance?.let { getComplianceNotificationMessageKeys(it, isLandlordView) }
-                ?: listOf(NotificationMessage(mainText = noComplianceMessageKey(isLandlordView)))
+        val complianceMessages = getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView)
 
         return PropertyDetailsNotificationBannerViewModel.fromState(
             isLandlordView = isLandlordView,
@@ -114,13 +112,6 @@ class NotificationBannerViewModelService {
             beforePdjb939 -> "$NOTIFICATION_KEY_PREFIX.missing.beforePdjb939.mainText"
             isLandlordView -> "$NOTIFICATION_KEY_PREFIX.missing.landlord.mainText"
             else -> "$NOTIFICATION_KEY_PREFIX.missing.localCouncil.mainText"
-        }
-
-    private fun noComplianceMessageKey(isLandlordView: Boolean): String =
-        if (isLandlordView) {
-            "propertyDetails.complianceInformation.noCompliance.landlordView.mainText"
-        } else {
-            "propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText"
         }
 
     companion object {

@@ -331,40 +331,6 @@ class NotificationBannerViewModelServiceTests {
     @Nested
     inner class PropertyDetailsBanner {
         @Test
-        fun `landlord view falls back to the no-compliance message when no certificates exist`() {
-            val banner =
-                service.getPropertyDetailsNotificationBanner(
-                    propertyCompliance = null,
-                    isLandlordView = true,
-                    isOccupied = false,
-                    isLicensingProvideLater = false,
-                    isTenancyProvideLater = false,
-                )
-
-            assertEquals(
-                listOf(NotificationMessage(mainText = "propertyDetails.complianceInformation.noCompliance.landlordView.mainText")),
-                banner.messages,
-            )
-        }
-
-        @Test
-        fun `local council view falls back to the no-compliance message when no certificates exist`() {
-            val banner =
-                service.getPropertyDetailsNotificationBanner(
-                    propertyCompliance = null,
-                    isLandlordView = false,
-                    isOccupied = false,
-                    isLicensingProvideLater = false,
-                    isTenancyProvideLater = false,
-                )
-
-            assertEquals(
-                listOf(NotificationMessage(mainText = "propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText")),
-                banner.messages,
-            )
-        }
-
-        @Test
         fun `surfaces compliance messages when certificates are present and there is no provide-later detail`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
 

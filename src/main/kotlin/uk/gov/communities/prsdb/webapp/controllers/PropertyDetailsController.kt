@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
@@ -59,20 +60,20 @@ class PropertyDetailsController(
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
 
-        val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
         val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
         val (propertyDetails, viewName) = getPropertyDetailsViewModelAndView(propertyOwnership, provideLaterEnabled, isLandlordView = true)
 
         val propertyComplianceDetails =
-            propertyCompliance?.let {
-                propertyComplianceViewModelFactory.create(
-                    propertyCompliance = propertyCompliance,
-                    landlordView = true,
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-            }
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance = propertyCompliance,
+                landlordView = true,
+                propertyOwnershipId = propertyOwnershipId,
+            )
 
         val modelAndView = ModelAndView(viewName)
         modelAndView.addObject("propertyDetails", propertyDetails)
@@ -150,7 +151,9 @@ class PropertyDetailsController(
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
-        val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+        val propertyCompliance =
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
+                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
         val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
@@ -181,13 +184,11 @@ class PropertyDetailsController(
         model.addAttribute("expiredInvitations", expiredInvitations)
 
         val propertyComplianceDetails =
-            propertyCompliance?.let {
-                propertyComplianceViewModelFactory.create(
-                    propertyCompliance = propertyCompliance,
-                    landlordView = false,
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-            }
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance = propertyCompliance,
+                landlordView = false,
+                propertyOwnershipId = propertyOwnershipId,
+            )
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
@@ -207,7 +208,7 @@ class PropertyDetailsController(
         provideLaterEnabled: Boolean,
         isLandlordView: Boolean,
         propertyDetails: PropertyDetailsViewModelBase,
-        propertyCompliance: PropertyCompliance?,
+        propertyCompliance: PropertyCompliance,
     ): Any =
         if (provideLaterEnabled) {
             val provideLaterDetails = propertyDetails as PropertyDetailsViewModel

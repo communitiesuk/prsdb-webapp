@@ -517,6 +517,7 @@ SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(i
 --   43  PO 44: gas cert expired, electrical + EPC valid      -> single "certificate expired" banner.
 --   44  PO 45: gas cert + EPC expired, electrical valid      -> "multiple certificates expired" banner.
 --   45  PO 46: gas cert "provide later", electrical + EPC valid -> "add compliance certificates" (missing) banner.
+--   46  PO 40 (11 Complete Fields Road): all certs valid & in date, no provide-later -> no banner.
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
                                  tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
@@ -532,7 +533,10 @@ VALUES (42, 39, '01/01/25', '01/01/25', null, true, null, null, null, null,
         false, 'c', null, null, true, true, true, false, false, false),
        (45, 46, '01/01/25', '01/01/25', null, true, current_date + 730, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
-        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
+        null, 'c', null, null, true, true, true, true, false, false),
+       (46, 40, '01/01/25', '01/01/25', current_date - 30, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
