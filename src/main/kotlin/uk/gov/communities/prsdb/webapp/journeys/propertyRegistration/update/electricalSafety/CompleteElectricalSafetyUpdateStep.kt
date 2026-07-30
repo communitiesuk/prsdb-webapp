@@ -24,9 +24,11 @@ class CompleteElectricalSafetyUpdateStepConfig(
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
-                electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-                electricalSafetyCertUploadIds = state.electricalUploadIds,
+                electricalCertType = state.electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType(),
+                electricalSafetyExpiryDate =
+                    state.electricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()
+                        ?.toJavaLocalDate(),
+                electricalSafetyCertUploadIds = state.electricalSafetyDetailsTask.electricalUploadIds,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

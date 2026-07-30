@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -19,7 +19,7 @@ class ConfirmEpcRetrievedByUprnStepConfig(
 ) : AbstractConfirmEpcDetailsStepConfig<ConfirmEpcDetailsFromUprnFormModel>() {
     override val formModelClass = ConfirmEpcDetailsFromUprnFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState) =
+    override fun getStepSpecificContent(state: EpcDetailState) =
         getRelevantEpc(state)?.let { epcDetails ->
             mapOf(
                 "summaryCardTitle" to "propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryCard.title",
@@ -59,9 +59,9 @@ class ConfirmEpcRetrievedByUprnStepConfig(
             "Attempting to access relevantEpc for ConfirmEpcRetrievedByUprnStepConfig but it was null.",
         )
 
-    override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsByUprnForm"
+    override fun chooseTemplate(state: EpcDetailState): String = "forms/confirmEpcDetailsByUprnForm"
 
-    override fun afterStepIsReached(state: EpcState) {
+    override fun afterStepIsReached(state: EpcDetailState) {
         if (state.epcRetrievedByUprnUpdatedSinceUserReview == true) {
             state.clearStepData(stepDataKey)
             state.epcRetrievedByUprnUpdatedSinceUserReview = false
@@ -72,7 +72,7 @@ class ConfirmEpcRetrievedByUprnStepConfig(
 @JourneyFrameworkComponent
 final class ConfirmEpcRetrievedByUprnStep(
     stepConfig: ConfirmEpcRetrievedByUprnStepConfig,
-) : JourneyStep.RequestableStep<YesOrNo, ConfirmEpcDetailsFromUprnFormModel, EpcState>(stepConfig) {
+) : JourneyStep.RequestableStep<YesOrNo, ConfirmEpcDetailsFromUprnFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-epc-details"
     }

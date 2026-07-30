@@ -16,6 +16,7 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
         mapOf(
             "fieldSetHeading" to "forms.occupancy.fieldSetHeading",
             "fieldSetHint" to "forms.occupancy.fieldSetHint",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

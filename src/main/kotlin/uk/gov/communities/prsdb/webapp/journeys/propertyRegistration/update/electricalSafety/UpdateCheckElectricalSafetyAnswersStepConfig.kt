@@ -17,7 +17,7 @@ class UpdateCheckElectricalSafetyAnswersStepConfig(
 
     override fun getStepSpecificContent(state: UpdateElectricalSafetyJourneyState): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state.electricalSafetyDetailsTask, uploadService) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(

@@ -24,8 +24,8 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -41,40 +41,32 @@ class UpdateGasSafetyController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
 ) {
-    @GetMapping("{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
-    @PostMapping("{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        return postProcessedJourneyData(stepName, formData, principal, propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
-    @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
         @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
         @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
@@ -85,6 +77,7 @@ class UpdateGasSafetyController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
+        val stepName = stepPath.trimStart('/')
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
                 CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
@@ -93,24 +86,21 @@ class UpdateGasSafetyController(
                 request,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal, propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
-    private fun postProcessedJourneyData(
-        stepName: String,
-        formData: FormData,
-        principal: Principal,
+    private fun dispatchJourneyStep(
+        stepPath: String,
         propertyOwnershipId: Long,
+        principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
-        try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            dispatch = dispatch,
+        )
 
     private fun throwErrorIfUserIsNotAuthorized(
         baseUserId: String,

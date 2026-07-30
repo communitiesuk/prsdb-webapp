@@ -13,13 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class HasGasCertStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: GasSafetyState
+    lateinit var mockJourneyState: GasSafetyDetailState
 
     val routeSegment = HasGasCertStep.ROUTE_SEGMENT
 

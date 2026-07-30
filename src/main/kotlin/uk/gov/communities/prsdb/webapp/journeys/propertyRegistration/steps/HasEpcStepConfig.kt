@@ -8,15 +8,15 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, EpcState>() {
+class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, EpcDetailState>() {
     override val formModelClass = HasEpcFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState) =
+    override fun getStepSpecificContent(state: EpcDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.hasEpc.fieldSetHeading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
@@ -29,9 +29,9 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
             "epcGuideUrl" to EPC_GUIDE_URL,
         )
 
-    override fun chooseTemplate(state: EpcState) = "forms/hasEpcForm"
+    override fun chooseTemplate(state: EpcDetailState) = "forms/hasEpcForm"
 
-    override fun mode(state: EpcState) =
+    override fun mode(state: EpcDetailState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
                 if (state.allowProvideCertificateLaterRoute) {
@@ -69,7 +69,7 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
 @JourneyFrameworkComponent
 final class HasEpcStep(
     stepConfig: HasEpcStepConfig,
-) : RequestableStep<HasEpcMode, HasEpcFormModel, EpcState>(stepConfig) {
+) : RequestableStep<HasEpcMode, HasEpcFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-epc"
     }

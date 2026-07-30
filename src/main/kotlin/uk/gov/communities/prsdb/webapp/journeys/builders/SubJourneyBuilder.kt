@@ -120,6 +120,17 @@ abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneySta
         registerTransparentBuilder(builder)
     }
 
+    fun <TEmbeddedState, TDependencies : Any> fromTask(
+        task: TEmbeddedState,
+        dependencies: TDependencies,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
+    ) where TEmbeddedState : JourneyState, TEmbeddedState : DuplicableTaskWithDependencies<*, TDependencies> {
+        val builder = EmbedBuilder(task, privateJourney)
+        task.bindDependencies(dependencies)
+        builder.init()
+        registerTransparentBuilder(builder)
+    }
+
     // Splices a sub-builder's elements into this journey so that its steps are built inline while remaining
     // reachable, by declared identity, to this builder's configuration (via additionalElements). Used by both
     // embed and section so outer configuration is applied transparently to the sub-builder's owned elements.

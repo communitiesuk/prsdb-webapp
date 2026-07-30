@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationBasePath
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyFactory
@@ -98,7 +97,7 @@ class DeregisterPropertyControllerTests(
             .get(getPropertyDeregistrationPath(1))
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(CheckCanDeregisterStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getPropertyDeregistrationPath(1)}?journeyId=$journeyId")
             }
     }
 
@@ -119,7 +118,7 @@ class DeregisterPropertyControllerTests(
             .get(getPropertyDeregistrationPath(1))
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(CheckCanDeregisterStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl("${getPropertyDeregistrationPath(1)}?journeyId=$journeyId")
             }
     }
 

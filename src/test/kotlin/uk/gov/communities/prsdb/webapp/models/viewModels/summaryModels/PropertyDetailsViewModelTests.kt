@@ -1,22 +1,29 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.time.LocalDate
+import java.util.Locale
 
 class PropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
+
+    private val yamlMessageSource = YamlMessageSource("classpath:messages")
 
     @Test
     fun `property details section is in the correct order`() {
@@ -53,6 +60,85 @@ class PropertyDetailsViewModelTests {
                 .fieldValue
 
         assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), addressValue)
+    }
+
+    @Test
+    fun `bedrooms row shows the not added message key when no bedroom count was entered`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+
+        assertEquals(
+            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms.notAdded",
+            bedroomsRow(viewModel).fieldValue,
+        )
+    }
+
+    @Test
+    fun `bedrooms row shows the bedroom count when a bedroom count was entered`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(numberOfBedrooms = 3)
+
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+
+        assertEquals(3, bedroomsRow(viewModel).fieldValue)
+    }
+
+    @Test
+    fun `bedrooms row keeps its update action for a landlord when no bedroom count was entered`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership(id = 123)
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) + "/${BedroomsStep.ROUTE_SEGMENT}",
+            bedroomsRow(viewModel)
+                .actions
+                .single()
+                .url,
+        )
+    }
+
+    @Test
+    fun `bedrooms row shows the not added message key with no update action for a council`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms.notAdded",
+            bedroomsRow(viewModel).fieldValue,
+        )
+        assertTrue(bedroomsRow(viewModel).actions.isEmpty()) {
+            "The local council view must not show a change link for the bedrooms row"
+        }
+    }
+
+    @Test
+    fun `bedrooms not added message key resolves to a message`() {
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        val viewModel =
+            PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+
+        val messageKey = bedroomsRow(viewModel).fieldValue as String
+
+        val resolvedMessage = yamlMessageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+
+        assertNotEquals(messageKey, resolvedMessage) {
+            "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
+        }
     }
 
     @Test
@@ -342,4 +428,9 @@ class PropertyDetailsViewModelTests {
             rowValue("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount"),
         )
     }
+
+    private fun bedroomsRow(viewModel: PropertyDetailsViewModel): SummaryListRowViewModel =
+        viewModel.propertyDetailsSection.single {
+            it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
+        }
 }

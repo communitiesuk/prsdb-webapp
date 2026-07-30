@@ -20,7 +20,7 @@ class CompleteEpcUpdateStepConfig(
     override fun mode(state: UpdateEpcJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateEpcJourneyState) {
-        val acceptedEpc = state.acceptedEpcIfStillAccepted
+        val acceptedEpc = state.epcDetailsTask.acceptedEpcIfStillAccepted
 
         try {
             propertyComplianceService.updateEpc(
@@ -30,9 +30,9 @@ class CompleteEpcUpdateStepConfig(
                 epcExpiryDate = acceptedEpc?.expiryDate?.toJavaLocalDate(),
                 epcEnergyRating = acceptedEpc?.energyRating,
                 tenancyStartedBeforeEpcExpiry =
-                    state.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
-                epcExemptionReason = state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                epcMeesExemptionReason = state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
+                    state.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
+                epcExemptionReason = state.epcDetailsTask.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
+                epcMeesExemptionReason = state.epcDetailsTask.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.CompleteEpcUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -41,6 +42,9 @@ class CompleteEpcUpdateStepConfigTests {
 
     @Mock
     private lateinit var mockState: UpdateEpcJourneyState
+
+    @Mock
+    private lateinit var mockEpcDetailsTask: EpcDetailsTask
 
     @Mock
     private lateinit var mockEpcExemptionStep: EpcExemptionStep
@@ -181,10 +185,11 @@ class CompleteEpcUpdateStepConfigTests {
 
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
+        whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        whenever(mockEpcDetailsTask.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
+        whenever(mockEpcDetailsTask.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcDetailsTask.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockEpcDetailsTask.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
         whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(epcExemptionFormModel)
         whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(meesExemptionFormModel)
         whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(tenancyFormModel)

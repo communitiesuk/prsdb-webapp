@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class UploadElectricalCertStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyState
+    lateinit var mockState: ElectricalSafetyDetailState
 
     @Mock
     lateinit var virusScanCallbackService: VirusScanCallbackService

@@ -4,11 +4,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 
 @JourneyFrameworkComponent
-class EpcEnergyRatingCheckStepConfig : AbstractInternalStepConfig<EpcEnergyRatingCheckMode, EpcState>() {
-    override fun mode(state: EpcState): EpcEnergyRatingCheckMode? {
+class EpcEnergyRatingCheckStepConfig : AbstractInternalStepConfig<EpcEnergyRatingCheckMode, EpcDetailState>() {
+    override fun mode(state: EpcDetailState): EpcEnergyRatingCheckMode? {
         val epcDetails =
             state.acceptedEpc
                 ?: throw NotNullFormModelValueIsNullException("acceptedEpc must be present before evaluating EPC energy rating")
@@ -23,7 +23,7 @@ class EpcEnergyRatingCheckStepConfig : AbstractInternalStepConfig<EpcEnergyRatin
 @JourneyFrameworkComponent
 final class EpcEnergyRatingCheckStep(
     stepConfig: EpcEnergyRatingCheckStepConfig,
-) : JourneyStep.InternalStep<EpcEnergyRatingCheckMode, EpcState>(stepConfig)
+) : JourneyStep.InternalStep<EpcEnergyRatingCheckMode, EpcDetailState>(stepConfig)
 
 enum class EpcEnergyRatingCheckMode {
     EPC_MEETS_ENERGY_REQUIREMENTS,
