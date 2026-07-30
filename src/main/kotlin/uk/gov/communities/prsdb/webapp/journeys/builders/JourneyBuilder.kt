@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -17,19 +16,13 @@ interface JourneyBuilderDsl<TState : JourneyState> {
         init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
     )
 
-    fun task(
-        uninitialisedTask: Task<TState>,
-        routeSegment: String? = null,
-        init: TaskInitialiser<TState, Nothing>.() -> Unit,
-    )
-
-    // Adds a self-stated task: one that owns its own steps and acts as its own state. It is bound to the journey's
-    // state (for data storage) and an optional `routeSegment`, letting the same task be added more than once
-    // (each instance isolated by its route) without the journey state gaining per-instance fields. When
-    // `routeSegment` is null the task's steps keep bare URLs and data keys. A task declaring a TDependencies contract
-    // binds the enclosing state via withDependencies { }; dependency-free tasks (TDependencies = Nothing) do not.
-    fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
-        uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+    // Adds a task to this journey. The task owns its own steps and JourneyState, bound to the journey's state
+    // (for storage) and an optional routeSegment so the same task can be added more than once (each instance
+    // isolated by its route). A null routeSegment keeps bare URLs and data keys. A task declaring a TDependencies
+    // contract binds the enclosing state via withDependencies { }; dependency-free tasks (TDependencies = Nothing)
+    // do not.
+    fun <TTaskState : JourneyState, TDependencies : Any> task(
+        uninitialisedTask: Task<TTaskState, TDependencies>,
         routeSegment: String? = null,
         init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
     )

@@ -7,11 +7,47 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
+// The single task base. A task owns its own JourneyState and namespaces its stored data behind a route prefix,
+// so the same task can be added to a journey more than once, each instance isolated by its route. A null route
+// keeps bare keys.
+//
+// Subclasses supply the task's steps, its task-specific state, and makeSubJourney; this base owns the route
+// binding and key-registry wiring (the actual scoping is done by the inherited delegateProvider).
+//
+// If a task needs typed access to the enclosing journey/sibling state, it declares a TDependencies contract; the
+// mount site binds the live state via withDependencies { }. Tasks with no such need use TaskWithoutDependencies
+// (TDependencies = Nothing, requiresDependencies = false).
+abstract class Task<TState : JourneyState, TDependencies : Any>(
+    journeyStateService: JourneyStateService,
+) : AbstractJourneyState(journeyStateService) {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit
     private var exitStepOverride: SubjourneyExitStep? = null
+
+    abstract val taskState: TState
+
+    // Whether this task must have its dependencies bound at the mount site. True by default;
+    // TaskWithoutDependencies overrides it to false so a bare task(...) { } call needs no
+    // withDependencies { }.
+    open val requiresDependencies: Boolean = true
+
+    // Nullable backing field rather than lateinit so that TaskWithoutDependencies (TDependencies = Nothing) is legal
+    private var boundDependencies: TDependencies? = null
+
+    val areDependenciesBound: Boolean get() = boundDependencies != null
+
+    // The typed, live reference to the enclosing dependencies, bound at build time by the mount site. Reads
+    // reflect later mutations to the enclosing state because it holds the state instance itself.
+    val dependencies: TDependencies
+        get() = boundDependencies ?: throw UninitializedPropertyAccessException("dependencies have not been bound")
+
+    fun bindDependencies(value: TDependencies) {
+        if (areDependenciesBound) {
+            throw JourneyInitialisationException("dependencies have already been bound")
+        }
+        boundDependencies = value
+    }
 
     fun getTaskSubJourneyBuilder(
         state: TState,
@@ -45,21 +81,11 @@ abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
         this.exitStepOverride = step
     }
 
-    abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
+    protected abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
 
-    // A duplicable task (one that owns its own steps and acts as its own state) sources its
-    // JourneyState behaviour from its own journeyStateService; the only value it needs at
-    // build time is its route prefix, used to namespace its stored data keys. The TaskInitialiser
-    // calls this from build(). The default no-op keeps journey-stated tasks unaffected.
-    // End state: once every task is duplicable, this stops being open/no-op and the route becomes
-    // a plain field the TaskInitialiser always populates.
-    open fun bindRoute(routePrefix: String?) {}
-
-    // A task that owns delegate keys (a duplicable task) attaches its own provider to the journey-build-wide
-    // DelegateKeyRegistry here, so its route-scoped keys are checked for collisions against the journey state and
-    // every other task. The TaskInitialiser calls this from build(), AFTER bindRoute so keys resolve to their final
-    // route-scoped form. The default no-op keeps journey-stated tasks (which own no keys) unaffected.
-    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {}
+    // Route-only late binding - the sole value the TaskInitialiser supplies at build time.
+    // Key-registry binding is inherited from AbstractJourneyState via `DelegateKeysOwner by delegateProvider`.
+    fun bindRoute(routePrefix: String?) = delegateProvider.bindRoutePrefix(routePrefix)
 
     fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
 

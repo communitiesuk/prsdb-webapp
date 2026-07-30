@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LeadTrusteeState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
@@ -19,7 +19,7 @@ class LeadTrusteeTask(
     override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
     override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
     override val trusteeAddressTask: TrusteeAddressTask,
-) : DuplicableTask<LeadTrusteeState>(journeyStateService),
+) : TaskWithoutDependencies<LeadTrusteeState>(journeyStateService),
     LeadTrusteeState {
     override val taskState get() = this
 
@@ -44,7 +44,7 @@ class LeadTrusteeTask(
                 parents { journey.leadTrusteeEmailStep.isComplete() }
                 nextStep { journey.trusteeAddressTask.firstStep }
             }
-            duplicableTask(journey.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT) {
+            task(journey.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT) {
                 parents { journey.leadTrusteePhoneStep.isComplete() }
                 nextStep { exitStep }
             }

@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -16,14 +16,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 /*
- * This is a legacy task which does not hold its own state.
+ * This is a legacy task - it's "taskState" does not return itself but the journey it belongs to. This is because it's used
+ * for a shared implementation of the legacy journey.
  * TODO PDJB-1340 - Remove this class
  */
 @JourneyFrameworkComponent
 class OccupationTask(
     private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
-) : DuplicableTaskWithDependencies<OccupationState, OccupationState>(journeyStateService) {
+) : Task<OccupationState, OccupationState>(journeyStateService) {
     override val taskState get() = dependencies
 
     fun inJourney(state: OccupationState): OccupationTask {
@@ -46,9 +47,9 @@ class OccupationTask(
                 }
                 savable()
             }
-            duplicableTask(journey.householdsAndTenantsTask) {
+            task(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                withDependencies { taskState.householdsAndTenantsDependencies }
+                withDependencies { dependencies.householdsAndTenantsDependencies }
                 nextStep {
                     if (isRestructureAndSkippingEnabled) {
                         journey.rentIncludesBillsTask.firstStep
@@ -66,7 +67,7 @@ class OccupationTask(
                     savable()
                 }
             }
-            duplicableTask(journey.rentIncludesBillsTask) {
+            task(journey.rentIncludesBillsTask) {
                 parents {
                     if (isRestructureAndSkippingEnabled) {
                         journey.householdsAndTenantsTask.isComplete()
@@ -82,7 +83,7 @@ class OccupationTask(
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            duplicableTask(journey.rentFrequencyAndAmountTask) {
+            task(journey.rentFrequencyAndAmountTask) {
                 parents {
                     journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }
