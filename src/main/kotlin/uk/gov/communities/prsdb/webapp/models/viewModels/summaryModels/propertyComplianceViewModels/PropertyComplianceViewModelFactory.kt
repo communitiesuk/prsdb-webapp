@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -16,13 +17,11 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val epcViewModelFactory: EpcViewModelFactory,
-    private val notificationBannerViewModelFactory: NotificationBannerViewModelService,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
         propertyOwnershipId: Long,
-        provideLaterEnabled: Boolean = false,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             if (landlordView) {
@@ -93,25 +92,7 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val complianceNotificationMessages =
-            if (provideLaterEnabled) {
-                notificationBannerViewModelFactory.getComplianceNotificationMessageKeys(propertyCompliance, landlordView)
-            } else {
-                emptyList()
-            }
-
-        val beforePdjb939ComplianceNotificationMessages =
-            if (!provideLaterEnabled && landlordView) {
-                notificationBannerViewModelFactory.getComplianceNotificationMessageKeys(
-                    propertyCompliance,
-                    landlordView,
-                    beforePdjb939 = true,
-                )
-            } else {
-                emptyList()
-            }
-
-        val isAllValid = notificationBannerViewModelFactory.getIsAllValid(propertyCompliance)
+        val isAllValid = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
@@ -119,8 +100,6 @@ class PropertyComplianceViewModelFactory(
             epcSummaryCard = epcSummaryCard,
             epcSupplementarySections = epcSupplementarySections,
             epcExpiredInsetViewModel = epcExpiredInsetViewModel,
-            complianceNotificationMessages = complianceNotificationMessages,
-            beforePdjb939ComplianceNotificationMessages = beforePdjb939ComplianceNotificationMessages,
             isAllValid = isAllValid,
         )
     }

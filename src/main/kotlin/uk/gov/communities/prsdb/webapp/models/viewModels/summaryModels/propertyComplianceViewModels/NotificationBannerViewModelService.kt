@@ -5,11 +5,48 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939NotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 
 @PrsdbWebService
 class NotificationBannerViewModelService {
+    // Assembles the unified property-record banner (flag on), merging compliance messages with the
+    // provide-later registration state. A null propertyCompliance means no certificates exist yet.
+    fun getPropertyDetailsNotificationBanner(
+        propertyCompliance: PropertyCompliance?,
+        isLandlordView: Boolean,
+        isOccupied: Boolean,
+        isLicensingProvideLater: Boolean,
+        isTenancyProvideLater: Boolean,
+    ): PropertyDetailsNotificationBannerViewModel {
+        val complianceMessages =
+            propertyCompliance?.let { getComplianceNotificationMessageKeys(it, isLandlordView) }
+                ?: listOf(NotificationMessage(mainText = noComplianceMessageKey(isLandlordView)))
+
+        return PropertyDetailsNotificationBannerViewModel.fromState(
+            isLandlordView = isLandlordView,
+            isOccupied = isOccupied,
+            isLicensingProvideLater = isLicensingProvideLater,
+            isTenancyProvideLater = isTenancyProvideLater,
+            complianceMessages = complianceMessages,
+        )
+    }
+
+    fun getBeforePdjb939NotificationBanner(
+        propertyCompliance: PropertyCompliance?,
+        isLandlordView: Boolean,
+    ): PropertyDetailsBeforePdjb939NotificationBannerViewModel {
+        // The flag-off banner is compliance-only and only shown to landlords.
+        val complianceMessages =
+            propertyCompliance?.let {
+                if (isLandlordView) getComplianceNotificationMessageKeys(it, isLandlordView, beforePdjb939 = true) else emptyList()
+            }
+
+        return PropertyDetailsBeforePdjb939NotificationBannerViewModel.fromState(isLandlordView, complianceMessages)
+    }
+
     fun getComplianceNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
@@ -79,8 +116,12 @@ class NotificationBannerViewModelService {
             else -> "$NOTIFICATION_KEY_PREFIX.missing.localCouncil.mainText"
         }
 
-    fun getIsAllValid(propertyCompliance: PropertyCompliance): Boolean =
-        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
+    private fun noComplianceMessageKey(isLandlordView: Boolean): String =
+        if (isLandlordView) {
+            "propertyDetails.complianceInformation.noCompliance.landlordView.mainText"
+        } else {
+            "propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText"
+        }
 
     companion object {
         private const val NOTIFICATION_KEY_PREFIX = "propertyDetails.complianceInformation.notificationBanner"

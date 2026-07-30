@@ -22,15 +22,14 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939NotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -46,6 +45,7 @@ class PropertyDetailsController(
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
+    private val notificationBannerViewModelService: NotificationBannerViewModelService,
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -71,7 +71,6 @@ class PropertyDetailsController(
                     propertyCompliance = propertyCompliance,
                     landlordView = true,
                     propertyOwnershipId = propertyOwnershipId,
-                    provideLaterEnabled = provideLaterEnabled,
                 )
             }
 
@@ -79,20 +78,10 @@ class PropertyDetailsController(
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        if (provideLaterEnabled) {
-            addProvideLaterBannerAttributes(
-                { name, value -> modelAndView.addObject(name, value) },
-                isLandlordView = true,
-                propertyDetails as PropertyDetailsViewModel,
-                propertyComplianceDetails,
-            )
-        } else {
-            addBeforePdjb939BannerAttributes(
-                { name, value -> modelAndView.addObject(name, value) },
-                isLandlordView = true,
-                propertyComplianceDetails,
-            )
-        }
+        modelAndView.addObject(
+            "notificationBanner",
+            buildNotificationBanner(provideLaterEnabled, isLandlordView = true, propertyDetails, propertyCompliance),
+        )
 
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
@@ -197,27 +186,16 @@ class PropertyDetailsController(
                     propertyCompliance = propertyCompliance,
                     landlordView = false,
                     propertyOwnershipId = propertyOwnershipId,
-                    provideLaterEnabled = provideLaterEnabled,
                 )
             }
 
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        if (provideLaterEnabled) {
-            addProvideLaterBannerAttributes(
-                { name, value -> model.addAttribute(name, value) },
-                isLandlordView = false,
-                propertyDetails as PropertyDetailsViewModel,
-                propertyComplianceDetails,
-            )
-        } else {
-            addBeforePdjb939BannerAttributes(
-                { name, value -> model.addAttribute(name, value) },
-                isLandlordView = false,
-                propertyComplianceDetails,
-            )
-        }
+        model.addAttribute(
+            "notificationBanner",
+            buildNotificationBanner(provideLaterEnabled, isLandlordView = false, propertyDetails, propertyCompliance),
+        )
         model.addAttribute("isLandlordView", false)
 
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
@@ -225,47 +203,25 @@ class PropertyDetailsController(
         return viewName
     }
 
-    private fun addProvideLaterBannerAttributes(
-        addAttribute: (String, Any?) -> Unit,
+    // Builds the property-record notification banner, selecting the flag-on (unified) or flag-off
+    // (compliance-only, beforePdjb939) variant. propertyCompliance is null when no certificates exist yet.
+    private fun buildNotificationBanner(
+        provideLaterEnabled: Boolean,
         isLandlordView: Boolean,
-        propertyDetails: PropertyDetailsViewModel,
-        propertyComplianceDetails: PropertyComplianceViewModel?,
-    ) {
-        val complianceMessages =
-            propertyComplianceDetails?.complianceNotificationMessages
-                ?: listOf(PropertyDetailsNotificationBannerViewModel.NotificationMessage(mainText = noComplianceMessageKey(isLandlordView)))
-
-        val notificationBanner =
-            PropertyDetailsNotificationBannerViewModel.fromState(
+        propertyDetails: PropertyDetailsViewModelBase,
+        propertyCompliance: PropertyCompliance?,
+    ): Any =
+        if (provideLaterEnabled) {
+            val provideLaterDetails = propertyDetails as PropertyDetailsViewModel
+            notificationBannerViewModelService.getPropertyDetailsNotificationBanner(
+                propertyCompliance = propertyCompliance,
                 isLandlordView = isLandlordView,
-                isOccupied = propertyDetails.isOccupied,
-                isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
-                isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
-                complianceMessages = complianceMessages,
+                isOccupied = provideLaterDetails.isOccupied,
+                isLicensingProvideLater = provideLaterDetails.isLicensingProvideLater,
+                isTenancyProvideLater = provideLaterDetails.isTenancyProvideLater,
             )
-
-        addAttribute("notificationBanner", notificationBanner)
-    }
-
-    private fun addBeforePdjb939BannerAttributes(
-        addAttribute: (String, Any?) -> Unit,
-        isLandlordView: Boolean,
-        propertyComplianceDetails: PropertyComplianceViewModel?,
-    ) {
-        val notificationBanner =
-            PropertyDetailsBeforePdjb939NotificationBannerViewModel.fromState(
-                isLandlordView = isLandlordView,
-                complianceMessages = propertyComplianceDetails?.beforePdjb939ComplianceNotificationMessages,
-            )
-
-        addAttribute("notificationBanner", notificationBanner)
-    }
-
-    private fun noComplianceMessageKey(isLandlordView: Boolean): String =
-        if (isLandlordView) {
-            "propertyDetails.complianceInformation.noCompliance.landlordView.mainText"
         } else {
-            "propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText"
+            notificationBannerViewModelService.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView)
         }
 
     // Parse the provide-later feature flag exactly once and select the matching view model + template.
