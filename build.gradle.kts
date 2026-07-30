@@ -1,5 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.concurrent.ConcurrentLinkedQueue
 
 plugins {
     kotlin("jvm") version "1.9.25"
@@ -163,12 +164,46 @@ tasks.withType<KotlinCompile> {
 // integration tests is a JUnit @Nested inner class, and PropertyRegistrationSinglePageTests alone is a
 // single scheduling unit worth ~5 minutes. Use -PtestForks=1 to fall back to serial execution.
 val testForks = (project.findProperty("testForks") as String?)?.toInt() ?: 3
+val slowTestCount = (project.findProperty("slowTestCount") as String?)?.toInt() ?: 15
 
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
     maxParallelForks = testForks
+
+    val taskLogger = logger
+    val testDurations = ConcurrentLinkedQueue<Pair<String, Long>>()
+
+    addTestListener(
+        object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) = Unit
+
+            override fun beforeTest(testDescriptor: TestDescriptor) = Unit
+
+            override fun afterTest(
+                testDescriptor: TestDescriptor,
+                result: TestResult,
+            ) {
+                val name = "${testDescriptor.className}.${testDescriptor.name}"
+                testDurations.add(name to (result.endTime - result.startTime))
+            }
+
+            override fun afterSuite(
+                suite: TestDescriptor,
+                result: TestResult,
+            ) {
+                if (suite.parent != null) return
+                val slowest = testDurations.sortedByDescending { it.second }.take(slowTestCount)
+                if (slowest.isEmpty()) return
+                taskLogger.lifecycle("")
+                taskLogger.lifecycle("Slowest ${slowest.size} tests:")
+                slowest.forEach { (name, durationMs) ->
+                    taskLogger.lifecycle(String.format("  %8.2fs  %s", durationMs / 1000.0, name))
+                }
+            }
+        },
+    )
 }
 
 tasks.register<JavaExec>("playwright") {
