@@ -19,41 +19,41 @@ class OrganisationLandlord() : Landlord() {
         get() = LandlordType.ORGANISATION
 
     @Column(name = "organisation_landlord_name")
-    var name: String? = null
+    lateinit var name: String
 
     @ManyToOne
     @JoinColumn(name = "organisation_address_id")
-    var address: Address? = null
+    lateinit var address: Address
 
     @Column(name = "organisation_email")
-    var email: String? = null
+    lateinit var email: String
 
     @Column(name = "organisation_phone_number")
-    var phoneNumber: String? = null
+    lateinit var phoneNumber: String
 
     @Column(name = "organisation_registrant_name")
-    var registrantName: String? = null
+    lateinit var registrantName: String
 
     @Column(name = "organisation_registrant_date_of_birth")
-    var registrantDateOfBirth: LocalDate? = null
+    lateinit var registrantDateOfBirth: LocalDate
 
     @Column(name = "organisation_registrant_email")
-    var registrantEmail: String? = null
+    lateinit var registrantEmail: String
 
     @Column(name = "organisation_registrant_phone_number")
-    var registrantPhoneNumber: String? = null
+    lateinit var registrantPhoneNumber: String
 
     // Note that this has no relation to the companyNumber nullable col
     @Column(name = "organisation_is_company")
-    var isCompany: Boolean? = null
+    var isCompany: Boolean = false
 
     // Note that this has no relation to the charityRegisteredWith & charityNumber nullable col
     @Column(name = "organisation_is_charity")
-    var isCharity: Boolean? = null
+    var isCharity: Boolean = false
 
     // Note that this determines whether the organisation needs a lead trustee
     @Column(name = "organisation_is_trust")
-    var isTrust: Boolean? = null
+    var isTrust: Boolean = false
 
     @Column(name = "organisation_company_number")
     var companyNumber: String? = null
@@ -81,13 +81,13 @@ class OrganisationLandlord() : Landlord() {
     var leadTrusteeAddress: Address? = null
 
     @Column(name = "organisation_main_contact_name")
-    var mainContactName: String? = null
+    lateinit var mainContactName: String
 
     @Column(name = "organisation_main_contact_email")
-    var mainContactEmail: String? = null
+    lateinit var mainContactEmail: String
 
     @Column(name = "organisation_main_contact_phone")
-    var mainContactPhone: String? = null
+    lateinit var mainContactPhone: String
 
     constructor(
         registrationNumber: RegistrationNumber,
