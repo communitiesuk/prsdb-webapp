@@ -160,17 +160,12 @@ tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
 }
 
-// Three forks is the useful maximum: Gradle schedules by top-level class, every nested grouping in the
-// integration tests is a JUnit @Nested inner class, and PropertyRegistrationSinglePageTests alone is a
-// single scheduling unit worth ~5 minutes. Use -PtestForks=1 to fall back to serial execution.
-val testForks = (project.findProperty("testForks") as String?)?.toInt() ?: 3
 val slowTestCount = (project.findProperty("slowTestCount") as String?)?.toInt() ?: 15
 
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
-    maxParallelForks = testForks
 
     val taskLogger = logger
     val testDurations = ConcurrentLinkedQueue<Pair<String, Long>>()

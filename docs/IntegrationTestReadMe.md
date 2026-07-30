@@ -24,17 +24,15 @@ These are the only two tables with rows after a bare migrate. If you add a migra
 its table to `PRESERVED_TABLES` in `IntegrationTestHelper`, or the data will be wiped before every test. You can check
 which tables hold reference data by migrating an empty database and looking for non-empty tables.
 
-## Parallel Execution
+## Test Timing
 
-Tests run across three forked JVMs. Each fork is completely isolated: its own Spring contexts, its own Postgres and
-Redis containers, its own database and its own browser. No test needs to be aware of this.
+Every run ends with a table of the slowest tests, so that suite speed stays visible as scenarios are added. Change
+its length with `-PslowTestCount=N`.
 
-Three is the useful maximum because Gradle schedules by top-level class, every nested grouping is a JUnit
-`@Nested inner class`, and `PropertyRegistrationSinglePageTests` alone is a single scheduling unit worth about five
-minutes.
-
-Override the fork count with `-PtestForks=N`. Use `-PtestForks=1` for fully serial execution when debugging. Every run
-ends with a table of the slowest tests; change its length with `-PslowTestCount=N`.
+Running the suite across parallel Gradle forks was measured and rejected. Each fork needs its own Spring contexts,
+Postgres and Redis containers, application instance and browser, and Playwright tests are latency-sensitive, so the
+contention inflates per-test time faster than the parallelism recovers it: summed test time rose 32% at two forks and
+84% at three, making wall clock no better than serial while introducing timeout and Docker-discovery flakes.
 
 ## Page Objects (and Components)
 
