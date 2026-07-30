@@ -368,6 +368,7 @@ same PR process below)
 The normal process is simply to raise a PR merging `main` into `test`, name the PR "Release main to test #n" for the nth release to `test`.
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
+Use the same release number between the webapp repo and infra repo.
 
 Go and find the release tracking Jira ticket:
 
