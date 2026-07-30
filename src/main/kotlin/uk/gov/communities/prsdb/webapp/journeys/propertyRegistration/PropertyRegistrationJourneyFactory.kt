@@ -190,18 +190,14 @@ class PropertyRegistrationJourneyFactory(
                 GasCertIssueDateStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    fromTask(journey.gasSafetyTask, journey) {
-                        duplicableCheckAnswerTask(task.gasSafetyDetailsTask, { journey })
-                    }
+                    duplicableCheckAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    fromTask(journey.electricalSafetyTask, journey) {
-                        duplicableCheckAnswerTask(task.electricalSafetyDetailsTask, { journey })
-                    }
+                    duplicableCheckAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
                 }
 
                 StartEpcStep.ROUTE_SEGMENT,
@@ -212,9 +208,7 @@ class PropertyRegistrationJourneyFactory(
                 IsEpcRequiredStep.ROUTE_SEGMENT,
                 EpcExemptionStep.ROUTE_SEGMENT,
                 -> {
-                    fromTask(journey.epcTask, journey) {
-                        duplicableCheckAnswerTask(task.epcDetailsTask, { journey })
-                    }
+                    duplicableCheckAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                 }
 
                 else -> {
