@@ -12,7 +12,7 @@ Check the file and try uploading it again.
 
 If the file fails the virus scan again, upload a different version of the file.
 
-[Sign in to your account](((register rental property url)))
+[Sign in to your account](((dashboard url)))
 
 ---
 

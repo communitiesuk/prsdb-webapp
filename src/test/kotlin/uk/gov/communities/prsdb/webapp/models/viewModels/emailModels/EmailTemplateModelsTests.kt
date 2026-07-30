@@ -79,7 +79,7 @@ class EmailTemplateModelsTests {
                         certificateType = "gas safety certificate",
                         recipientName = "Jane Smith",
                         propertyAddress = "1 Street Name, Town, Country, AB1 2CD",
-                        registerRentalPropertyURL = URI("dashboardUrl"),
+                        landlordDashboardUrl = URI("dashboardUrl"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
                 ),

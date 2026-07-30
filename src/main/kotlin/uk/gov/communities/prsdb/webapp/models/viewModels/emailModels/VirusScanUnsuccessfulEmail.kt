@@ -6,12 +6,12 @@ data class VirusScanUnsuccessfulEmail(
     val certificateType: String,
     val recipientName: String,
     val propertyAddress: String,
-    val registerRentalPropertyURL: URI,
+    val landlordDashboardUrl: URI,
 ) : EmailTemplateModel {
     private val certificateTypeKey = "certificate type"
     private val recipientNameKey = "recipient name"
     private val propertyAddressKey = "property address"
-    private val registerRentalPropertyUrlKey = "register rental property url"
+    private val landlordDashboardUrlKey = "dashboard url"
 
     override val template = EmailTemplate.VIRUS_SCAN_UNSUCCESSFUL
 
@@ -20,6 +20,6 @@ data class VirusScanUnsuccessfulEmail(
             certificateTypeKey to certificateType,
             recipientNameKey to recipientName,
             propertyAddressKey to propertyAddress,
-            registerRentalPropertyUrlKey to registerRentalPropertyURL.toASCIIString(),
+            landlordDashboardUrlKey to landlordDashboardUrl.toASCIIString(),
         )
 }

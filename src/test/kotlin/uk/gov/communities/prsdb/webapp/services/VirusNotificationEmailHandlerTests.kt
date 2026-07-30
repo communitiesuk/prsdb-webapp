@@ -135,7 +135,7 @@ class VirusNotificationEmailHandlerTests {
             certificateType = expectedCertType(certType),
             recipientName = "Jane Smith",
             propertyAddress = "1 Main St, Anytown",
-            registerRentalPropertyURL = dashboardUri,
+            landlordDashboardUrl = dashboardUri,
         )
     }
 
@@ -212,7 +212,7 @@ class VirusNotificationEmailHandlerTests {
                 certificateType = bodyCertificateType,
                 recipientName = "name",
                 propertyAddress = "123 Main St, Anytown",
-                registerRentalPropertyURL = dashboardUri,
+                landlordDashboardUrl = dashboardUri,
             ),
         )
     }

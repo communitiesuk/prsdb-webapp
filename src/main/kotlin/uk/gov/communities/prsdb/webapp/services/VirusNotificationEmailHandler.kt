@@ -108,7 +108,7 @@ class VirusNotificationEmailHandler(
             certificateType = certificateDescriptionForBody(certificateType),
             recipientName = recipientName,
             propertyAddress = singleLineAddress,
-            registerRentalPropertyURL = absoluteUrlProvider.buildLandlordDashboardUri(),
+            landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
