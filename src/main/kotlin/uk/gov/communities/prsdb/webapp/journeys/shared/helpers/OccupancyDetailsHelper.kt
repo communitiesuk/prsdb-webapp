@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Hous
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
