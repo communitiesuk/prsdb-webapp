@@ -213,7 +213,10 @@ class LandlordRegistrationTask(
                     }
 
                     OrgTypeStep.ROUTE_SEGMENT -> {
-                        // TODO PDJB-1237 : use org type update journey here
+                        // TODO PDJB-1237 : replace this placeholder with the org type update journey
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, OrgTypeStep.ROUTE_SEGMENT) {
+                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1237: Organisation type update journey" }
+                        }
                     }
 
                     OrgCharityStep.ROUTE_SEGMENT,
@@ -228,7 +231,10 @@ class LandlordRegistrationTask(
                     OrgCompaniesHouseStep.ROUTE_SEGMENT,
                     OrgCompanyNumberStep.ROUTE_SEGMENT,
                     -> {
-                        // TODO PDJB-1238 : use companies update journey here
+                        // TODO PDJB-1238 : replace this placeholder with the companies house update journey
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, checkingAnswersFor) {
+                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1238: Companies House update journey" }
+                        }
                     }
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {

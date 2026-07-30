@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
@@ -33,6 +34,8 @@ class OrgLandlordRegistrationTask(
     override val companiesHouseTask: OrgCompaniesHouseTask,
     override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
+    // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
+    override val updateDetailsTodoStep: UpdateDetailsTodoStep,
 ) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
