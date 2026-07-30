@@ -490,11 +490,11 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord sends a registration confirmation email to the organisation email`() {
+        fun `registerOrganisationLandlord sends a registration confirmation email to the registrant email`() {
             registerOrganisationLandlord()
 
             verify(mockOrgRegistrationConfirmationSender).sendEmail(
-                eq("org@test.com"),
+                eq("alice@test.com"),
                 eq(
                     OrganisationLandlordRegistrationConfirmationEmail(
                         registrantName = "Alice",

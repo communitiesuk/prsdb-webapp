@@ -138,9 +138,8 @@ class LandlordRegistrationService(
     }
 
     private fun sendOrganisationRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
-        // TODO: PDJB-1282: send this to the registrant's email address once that step exists
         orgRegistrationConfirmationSender.sendEmail(
-            landlord.email!!,
+            landlord.registrantEmail!!,
             OrganisationLandlordRegistrationConfirmationEmail(
                 registrantName = landlord.registrantName!!,
                 organisationName = landlord.name!!,

@@ -343,7 +343,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val createdOrgLandlordRegNum = RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
 
         verify(orgConfirmationEmailSender).sendEmail(
-            "test.address@provider.com",
+            "registrant@example.com",
             OrganisationLandlordRegistrationConfirmationEmail(
                 registrantName = "name",
                 organisationName = "Test Organisation Name",
