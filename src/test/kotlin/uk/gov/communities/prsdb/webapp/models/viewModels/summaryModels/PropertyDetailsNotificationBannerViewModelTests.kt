@@ -7,6 +7,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PropertyDetailsNotificationBannerViewModelTests {
+    companion object {
+        private const val PREFIX = "propertyDetails.propertyRecord.notificationBanner"
+    }
+
     private val complianceMessage =
         NotificationMessage(
             mainText = "compliance.mainText",
@@ -58,13 +62,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
         assertEquals(
             listOf(
                 NotificationMessage(
-                    mainText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensing.mainText",
+                    mainText = "$PREFIX.landlord.licensing.mainText",
                     links =
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensing.linkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.landlord.licensing.linkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
@@ -80,13 +84,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
         assertEquals(
             listOf(
                 NotificationMessage(
-                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.tenancy.mainText",
+                    mainText = "$PREFIX.localCouncil.tenancy.mainText",
                     links =
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.tenancy.linkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.localCouncil.tenancy.linkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
@@ -106,14 +110,14 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.licensingLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.middleText",
+                                linkText = "$PREFIX.landlord.licensingAndTenancy.licensingLinkText",
+                                beforeLinkText = "$PREFIX.landlord.licensingAndTenancy.beforeLinkText",
+                                afterLinkText = "$PREFIX.landlord.licensingAndTenancy.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.licensingAndTenancy.tenancyLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.landlord.licensingAndTenancy.tenancyLinkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
@@ -129,13 +133,13 @@ class PropertyDetailsNotificationBannerViewModelTests {
         assertEquals(
             listOf(
                 NotificationMessage(
-                    mainText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.licensingAndTenancy.mainText",
+                    mainText = "$PREFIX.localCouncil.licensingAndTenancy.mainText",
                     links =
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.licensingAndTenancy.linkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.localCouncil.licensingAndTenancy.linkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
@@ -159,14 +163,14 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.propertyLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.middleText",
+                                linkText = "$PREFIX.landlord.propertyAndCompliance.propertyLinkText",
+                                beforeLinkText = "$PREFIX.landlord.propertyAndCompliance.beforeLinkText",
+                                afterLinkText = "$PREFIX.landlord.propertyAndCompliance.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.landlord.propertyAndCompliance.complianceLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.landlord.propertyAndCompliance.complianceLinkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
@@ -191,14 +195,14 @@ class PropertyDetailsNotificationBannerViewModelTests {
                         listOf(
                             NotificationBannerLink(
                                 linkUrl = "#property-details",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.propertyLinkText",
-                                beforeLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.beforeLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.middleText",
+                                linkText = "$PREFIX.localCouncil.propertyAndCompliance.propertyLinkText",
+                                beforeLinkText = "$PREFIX.localCouncil.propertyAndCompliance.beforeLinkText",
+                                afterLinkText = "$PREFIX.localCouncil.propertyAndCompliance.middleText",
                             ),
                             NotificationBannerLink(
                                 linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.propertyRecord.notificationBanner.localCouncil.propertyAndCompliance.complianceLinkText",
-                                afterLinkText = "propertyDetails.propertyRecord.notificationBanner.afterLinkText",
+                                linkText = "$PREFIX.localCouncil.propertyAndCompliance.complianceLinkText",
+                                afterLinkText = "$PREFIX.afterLinkText",
                             ),
                         ),
                 ),
