@@ -18,6 +18,14 @@ class OrganisationLandlord() : Landlord() {
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION
 
+    @get:Transient
+    override val displayName: String
+        get() = name
+
+    @get:Transient
+    override val contactEmailAddress: String
+        get() = email
+
     @Column(name = "organisation_landlord_name")
     lateinit var name: String
 

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -13,11 +14,7 @@ class PropertyDetailsLandlordViewModelBuilder {
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
-                // TODO: PDJB-1276: Update landlord tab landlord view for org landlords
-                .map { landlord ->
-                    check(landlord is IndividualLandlord)
-                    landlord
-                }.sortedWith(compareByDescending<IndividualLandlord> { it.id == currentLandlord.id }.thenBy { it.name })
+                .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.displayName })
                 .map { landlord ->
                     val isCurrentUser = landlord.id == currentLandlord.id
                     if (isCurrentUser) {
@@ -27,22 +24,28 @@ class PropertyDetailsLandlordViewModelBuilder {
                                 LeavePropertyController.getLeavePropertyPath(propertyOwnershipId),
                             )
 
+                        val titleKey =
+                            if (landlord.landlordType == LandlordType.ORGANISATION) {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle"
+                            } else {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
+                            }
+
                         SummaryCardViewModel(
-                            title =
-                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle",
-                            cardNumber = landlord.name,
+                            title = titleKey,
+                            cardNumber = landlord.displayName,
                             summaryList = buildLandlordCardRows(landlord),
                             actions = if (landlords.size > 1) listOf(removeMeAction) else null,
                         )
                     } else {
                         SummaryCardViewModel(
-                            title = landlord.name,
+                            title = landlord.displayName,
                             summaryList = buildLandlordCardRows(landlord),
                         )
                     }
                 }
 
-        private fun buildLandlordCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",
@@ -50,7 +53,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.email,
+                    fieldValue = landlord.contactEmailAddress,
                 ),
             )
 
