@@ -57,12 +57,12 @@ class LandlordRegistrationTask(
 
     override fun makeSubJourney(state: LandlordRegistrationState) =
         if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-            makeOrgLandlordSubJourney(state)
+            makeRestructuredLandlordSubJourney(state)
         } else {
-            makeIndividualLandlordSubJourney(state)
+            makeLegacyLandlordSubJourney(state)
         }
 
-    private fun makeIndividualLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
+    private fun makeLegacyLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
@@ -96,7 +96,7 @@ class LandlordRegistrationTask(
             }
         }
 
-    private fun makeOrgLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
+    private fun makeRestructuredLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)

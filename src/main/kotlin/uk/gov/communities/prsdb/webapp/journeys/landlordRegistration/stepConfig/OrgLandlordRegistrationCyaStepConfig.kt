@@ -92,9 +92,8 @@ class OrgLandlordRegistrationCyaStepConfig(
             organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
             organisationRegistrantName = state.identityTask.getName(),
             organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
-            // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
-            organisationRegistrantEmail = "",
-            organisationRegistrantPhoneNumber = "",
+            organisationRegistrantEmail = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+            organisationRegistrantPhoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
             organisationGoverningBodyMembers = governingBodyMembers,
         )
 
