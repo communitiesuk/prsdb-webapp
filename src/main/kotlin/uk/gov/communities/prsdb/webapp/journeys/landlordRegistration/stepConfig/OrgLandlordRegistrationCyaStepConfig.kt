@@ -25,9 +25,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompan
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -92,9 +92,8 @@ class OrgLandlordRegistrationCyaStepConfig(
             organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
             organisationRegistrantName = state.identityTask.getName(),
             organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
-            // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
-            organisationRegistrantEmail = "",
-            organisationRegistrantPhoneNumber = "",
+            organisationRegistrantEmail = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+            organisationRegistrantPhoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
             organisationGoverningBodyMembers = governingBodyMembers,
         )
 
@@ -110,9 +109,6 @@ class OrgLandlordRegistrationCyaStepConfig(
     ): Destination = defaultDestination
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
-        // TODO: PDJB-1282 - review this identity-verification branch; whether organisation landlords can be
-        // identity-verified at all (and so whether the name/date-of-birth Change links should ever be suppressed)
-        // may change.
         val verified = state.identityTask.getIsIdentityVerified()
         val rows =
             listOf(
@@ -137,9 +133,22 @@ class OrgLandlordRegistrationCyaStepConfig(
                         )
                     },
                 ),
-                // TODO: PDJB-1282 - replace these dummy email and phone rows with the user's real contact details once collected.
-                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.email", "Indiana.jones@marshallCollege.com"),
-                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber", "020 7123 4567"),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.yourDetails.email",
+                    state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                    Destination.VisitableStep(
+                        state.emailStep,
+                        state.getCyaJourneyId(state.emailStep),
+                    ),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber",
+                    state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
+                    Destination.VisitableStep(
+                        state.phoneNumberStep,
+                        state.getCyaJourneyId(state.phoneNumberStep),
+                    ),
+                ),
             )
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.yourDetails.cardTitle",
@@ -418,16 +427,6 @@ class OrgLandlordRegistrationCyaStepConfig(
         )
     }
 
-    // TODO: PDJB-1282 - dummy row with a non-functional Change link; replace once the underlying step exists.
-    private fun dummyRow(
-        headingKey: String,
-        value: Any?,
-    ) = SummaryListRowViewModel(
-        fieldHeading = headingKey,
-        fieldValue = value,
-        actions = listOf(SummaryListRowActionsViewModel("forms.links.change", PLACEHOLDER_CHANGE_URL)),
-    )
-
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun getOrgAddress(address: ManualAddressFormModel) =
         AddressDataModel
@@ -486,8 +485,7 @@ class OrgLandlordRegistrationCyaStepConfig(
         }
 
     companion object {
-        // TODO: PDJB-1282 - non-functional Change link placeholder for the your-details email/phone rows
-        // until those steps exist.
+        // TODO: PDJB-1168 - non-functional Change link placeholder for governing body member rows until edit flow exists.
         private const val PLACEHOLDER_CHANGE_URL = "#"
     }
 }

@@ -34,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
@@ -99,11 +98,6 @@ class LandlordStateSessionBuilder(
     fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
         val landlordTypeFormModel = LandlordTypeFormModel().apply { this.landlordType = landlordType }
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
-        return self()
-    }
-
-    fun withYourDetails(): LandlordStateSessionBuilder {
-        withSubmittedValue(YourDetailsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -343,17 +337,15 @@ class LandlordStateSessionBuilder(
 
         fun beforeDob() = beforeName().withName()
 
-        fun beforeLandlordType() = beforeDob().withDateOfBirth()
+        fun beforeEmail() = beforeDob().withDateOfBirth()
 
-        fun beforeEmail() = beforeLandlordType()
+        fun beforeLandlordType() = beforePhoneNumber().withPhoneNumber()
 
         fun beforePhoneNumber() = beforeEmail().withEmail()
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
-        fun beforeYourDetails() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
-
-        fun beforeOrgName() = beforeYourDetails().withYourDetails()
+        fun beforeOrgName() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
         fun beforeOrgAddress() = beforeOrgName().withOrgName()
 
