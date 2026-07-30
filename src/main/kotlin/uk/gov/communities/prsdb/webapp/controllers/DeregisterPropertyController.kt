@@ -19,8 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
@@ -36,56 +35,39 @@ class DeregisterPropertyController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
 ) {
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
-
-        return try {
-            val journeyMap = getJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
-
-        return try {
-            val journeyMap = getJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 
-    private fun initializeAndRedirect(
+    private fun dispatchJourneyStep(
+        stepPath: String,
         propertyOwnershipId: Long,
-        stepName: String,
-    ): ModelAndView {
-        val journeyId = propertyDeregistrationJourneyFactory.initializeJourneyState(propertyOwnershipId)
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-        return ModelAndView("redirect:$redirectUrl")
-    }
-
-    private fun getJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> =
-        propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { propertyDeregistrationJourneyFactory.initializeJourneyState(propertyOwnershipId) },
+            dispatch = dispatch,
+            startNewJourneyOn = { it is PropertyOwnershipMismatchException },
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(

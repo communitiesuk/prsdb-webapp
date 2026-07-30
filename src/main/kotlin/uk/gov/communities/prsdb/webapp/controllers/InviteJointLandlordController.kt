@@ -19,8 +19,8 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.StartInviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -37,43 +37,40 @@ class InviteJointLandlordController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val landlordService: LandlordService,
 ) {
-    @GetMapping("{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
-    @PostMapping("{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
+
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        propertyOwnershipId: Long,
+        principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            dispatch = dispatch,
+        )
 
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
     @GetMapping("$RESEND_PATH_SEGMENT/{invitationId}")
