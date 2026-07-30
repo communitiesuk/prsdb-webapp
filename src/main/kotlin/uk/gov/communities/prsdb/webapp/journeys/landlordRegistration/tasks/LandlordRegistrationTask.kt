@@ -37,7 +37,7 @@ class LandlordRegistrationTask(
     override val identityTask: IdentityTask,
     override val emailStep: EmailStep,
     override val phoneNumberStep: PhoneNumberStep,
-    override val individualLandlordRegistrationTask: IndividualLandlordRegistrationTask,
+    override val individualLandlordLocationTask: IndividualLandlordLocationTask,
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
@@ -80,15 +80,15 @@ class LandlordRegistrationTask(
             step(journey.phoneNumberStep) {
                 routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
                 parents { journey.emailStep.isComplete() }
-                nextStep { journey.individualLandlordRegistrationTask.firstStep }
+                nextStep { journey.individualLandlordLocationTask.firstStep }
             }
-            duplicableTask(journey.individualLandlordRegistrationTask) {
+            duplicableTask(journey.individualLandlordLocationTask) {
                 parents { journey.phoneNumberStep.isComplete() }
                 nextStep { journey.cyaStep }
             }
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.individualLandlordRegistrationTask.isComplete() }
+                parents { journey.individualLandlordLocationTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
@@ -121,9 +121,9 @@ class LandlordRegistrationTask(
                 parents { journey.phoneNumberStep.isComplete() }
                 nextStep {
                     when (journey.landlordTypeStep.outcome) {
-                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask.firstStep
+                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask.firstStep
                         LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.firstStep
-                        null -> journey.individualLandlordRegistrationTask.firstStep
+                        null -> journey.individualLandlordLocationTask.firstStep
                     }
                 }
             }
@@ -131,13 +131,13 @@ class LandlordRegistrationTask(
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { journey.orgCyaStep }
             }
-            duplicableTask(journey.individualLandlordRegistrationTask) {
+            duplicableTask(journey.individualLandlordLocationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { journey.cyaStep }
             }
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.individualLandlordRegistrationTask.isComplete() }
+                parents { journey.individualLandlordLocationTask.isComplete() }
                 nextStep { exitStep }
             }
             step(journey.orgCyaStep) {
@@ -180,13 +180,13 @@ class LandlordRegistrationTask(
 
                     CountryOfResidenceStep.ROUTE_SEGMENT -> {
                         checkAnswerStep(
-                            journey.individualLandlordRegistrationTask.countryOfResidenceStep,
+                            journey.individualLandlordLocationTask.countryOfResidenceStep,
                             CountryOfResidenceStep.ROUTE_SEGMENT,
                         )
                     }
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.individualLandlordRegistrationTask.addressTask, null)
+                        duplicableCheckAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
                     }
                 }
                 step(journey.finishCyaStep) {

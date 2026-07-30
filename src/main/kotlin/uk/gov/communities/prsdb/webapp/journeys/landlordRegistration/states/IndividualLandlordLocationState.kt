@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
-interface IndividualLandlordRegistrationState : JourneyState {
+interface IndividualLandlordLocationState : JourneyState {
     val countryOfResidenceStep: CountryOfResidenceStep
     val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep
     val addressTask: AddressTask

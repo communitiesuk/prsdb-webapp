@@ -41,7 +41,7 @@ class IndividualLandlordRegistrationCyaStepConfig(
                 state.phoneNumberStep.formModel.notNullValue(
                     PhoneNumberFormModel::phoneNumber,
                 ),
-            address = state.individualLandlordRegistrationTask.addressTask.getAddress(),
+            address = state.individualLandlordLocationTask.addressTask.getAddress(),
             countryOfResidence = ENGLAND_OR_WALES,
             isVerified = state.identityTask.getIsIdentityVerified(),
             hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
@@ -118,22 +118,22 @@ class IndividualLandlordRegistrationCyaStepConfig(
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
-                state.individualLandlordRegistrationTask.countryOfResidenceStep.formModel.notNullValue(
+                state.individualLandlordLocationTask.countryOfResidenceStep.formModel.notNullValue(
                     CountryOfResidenceFormModel::livesInEnglandOrWales,
                 ),
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.countryOfResidenceStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.countryOfResidenceStep),
+                    state.individualLandlordLocationTask.countryOfResidenceStep,
+                    state.getCyaJourneyId(state.individualLandlordLocationTask.countryOfResidenceStep),
                 ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
-                state.individualLandlordRegistrationTask.addressTask
+                state.individualLandlordLocationTask.addressTask
                     .getAddress()
                     .singleLineAddress,
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.addressTask.lookupAddressStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.addressTask.lookupAddressStep),
+                    state.individualLandlordLocationTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.individualLandlordLocationTask.addressTask.lookupAddressStep),
                 ),
             ),
         )
