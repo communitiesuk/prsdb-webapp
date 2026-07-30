@@ -37,7 +37,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
@@ -48,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBod
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
-    override val yourDetailsStep: YourDetailsStep,
     override val orgNameStep: OrgNameStep,
     override val orgAddressStep: OrgAddressStep,
     override val orgEmailStep: OrgEmailStep,
@@ -90,13 +88,8 @@ class OrgLandlordRegistrationTask(
 
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
-            step(journey.yourDetailsStep) {
-                routeSegment(YourDetailsStep.ROUTE_SEGMENT)
-                nextStep { journey.orgNameStep }
-            }
             step(journey.orgNameStep) {
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
-                parents { journey.yourDetailsStep.isComplete() }
                 nextStep { journey.orgAddressStep }
             }
             step(journey.orgAddressStep) {
