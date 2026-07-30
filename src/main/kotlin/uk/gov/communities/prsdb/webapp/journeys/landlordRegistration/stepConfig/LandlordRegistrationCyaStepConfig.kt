@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -40,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordRegistrationCyaStepConfig(
     private val landlordRegistrationService: LandlordRegistrationService,
     private val securityContextService: SecurityContextService,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) =
         if (isOrgLandlord(state)) {
@@ -161,7 +164,9 @@ class LandlordRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    private fun isOrgLandlord(state: LandlordRegistrationState) = state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
+    private fun isOrgLandlord(state: LandlordRegistrationState) =
+        featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
+            state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
 
     // Individual landlord content
 
@@ -181,7 +186,9 @@ class LandlordRegistrationCyaStepConfig(
             getAddressRows(state)
 
     private fun getLandlordTypeRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
-        if (state.landlordTypeStep.outcome == LandlordTypeMode.INDIVIDUAL) {
+        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
+            state.landlordTypeStep.outcome == LandlordTypeMode.INDIVIDUAL
+        ) {
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.checkAnswers.rowHeading.landlordType",
