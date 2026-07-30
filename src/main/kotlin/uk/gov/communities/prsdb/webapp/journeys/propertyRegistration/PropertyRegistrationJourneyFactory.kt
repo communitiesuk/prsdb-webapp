@@ -71,7 +71,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithProvideLaterAllowed
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
@@ -80,7 +79,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Check
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
@@ -149,7 +147,7 @@ class PropertyRegistrationJourneyFactory(
                     if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                         checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                     } else {
-                        checkAnswerTask(journey.occupationTask)
+                        duplicableCheckAnswerTask(journey.occupationTask.inJourney(journey))
                     }
                 }
 
@@ -291,7 +289,7 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
 
-                task(journey.occupationTask) {
+                duplicableTask(journey.occupationTask.inJourney(journey)) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.ownershipAndLandlordsTask.jointLandlordsTask.firstStep }
                     saveProgress()
@@ -577,7 +575,7 @@ class PropertyRegistrationJourney(
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels, bedrooms override) when the old journey is removed.
-    override val occupationTask: OccupationTaskWithProvideLaterAllowed,
+    override val occupationTask: OccupationTask,
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
@@ -602,6 +600,7 @@ class PropertyRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
 

@@ -3,8 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -14,25 +15,21 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
+/*
+ * This is a legacy task which does not hold its own state.
+ * TODO PDJB-1340 - Remove this class
+ */
 @JourneyFrameworkComponent
-class OccupationTaskWithProvideLaterAllowed(
-    featureFlagManager: FeatureFlagManager,
-) : OccupationTask(featureFlagManager) {
-    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
-}
-
-@JourneyFrameworkComponent
-class OccupationTaskWithOccupationRequired(
-    featureFlagManager: FeatureFlagManager,
-) : OccupationTask(featureFlagManager) {
-    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
-}
-
-abstract class OccupationTask(
+class OccupationTask(
     private val featureFlagManager: FeatureFlagManager,
-) : Task<OccupationState>() {
-    // TODO PDJB-896: Remerge the three versions of occupation task when this class uses DuplicableTaskWithDependencies
-    abstract val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
+    journeyStateService: JourneyStateService,
+) : DuplicableTaskWithDependencies<OccupationState, OccupationState>(journeyStateService) {
+    override val taskState get() = dependencies
+
+    fun inJourney(state: OccupationState): OccupationTask {
+        bindDependencies(state)
+        return this
+    }
 
     override fun makeSubJourney(state: OccupationState) =
         subJourney(state) {
@@ -51,7 +48,7 @@ abstract class OccupationTask(
             }
             duplicableTask(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                withDependencies { householdsAndTenantsDependencies }
+                withDependencies { taskState.householdsAndTenantsDependencies }
                 nextStep {
                     if (isRestructureAndSkippingEnabled) {
                         journey.rentIncludesBillsTask.firstStep
