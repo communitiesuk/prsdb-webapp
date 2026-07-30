@@ -11,7 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 @JourneyFrameworkComponent
 class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult {
-        val anyInvalid = isGasCertInvalid(state) || isElectricalCertInvalid(state) || isEpcInvalid(state)
+        val anyInvalid =
+            isGasCertInvalid(state.gasSafetyTask) ||
+                isElectricalCertInvalid(state.electricalSafetyTask) ||
+                isEpcInvalid(state.epcTask)
         return if (state.isOccupied && anyInvalid) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
@@ -21,31 +24,35 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
-            if (state.hasGasSupplyStep.formModelIfReachableOrNull?.hasGasSupply != true) return false
-            if (state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
-            val isOutdated = state.getGasSafetyCertificateIsOutdated()
+            if (state.gasSafetyDetailsTask.hasGasSupplyStep.formModelIfReachableOrNull
+                    ?.hasGasSupply != true
+            ) {
+                return false
+            }
+            if (state.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
+            val isOutdated = state.gasSafetyDetailsTask.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 
         fun isElectricalCertInvalid(state: ElectricalSafetyState): Boolean {
-            if (state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER) return false
-            val isOutdated = state.getElectricalCertificateIsOutdated()
+            if (state.electricalSafetyDetailsTask.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER) return false
+            val isOutdated = state.electricalSafetyDetailsTask.getElectricalCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 
         fun isEpcInvalid(state: EpcState): Boolean {
-            if (state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
+            if (state.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
             val acceptedEpc =
-                state.acceptedEpcIfStillAccepted
-                    ?: return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
+                state.epcDetailsTask.acceptedEpcIfStillAccepted
+                    ?: return state.epcDetailsTask.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
             return (
                 (
                     acceptedEpc.isPastExpiryDate() &&
-                        (state.epcInDateAtStartOfTenancyCheckStep.outcome != EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
+                        (state.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep.outcome != EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
                 ) ||
                     (
                         !acceptedEpc.isEnergyRatingEOrBetter() &&
-                            (state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null)
+                            (state.epcDetailsTask.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null)
                     )
             )
         }

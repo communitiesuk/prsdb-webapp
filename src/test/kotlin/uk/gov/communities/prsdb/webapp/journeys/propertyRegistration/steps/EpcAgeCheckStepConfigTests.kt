@@ -9,14 +9,14 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class EpcAgeCheckStepConfigTests {
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     @Test
     fun `mode throws exception when acceptedEpc is null`() {

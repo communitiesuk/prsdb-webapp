@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -18,7 +18,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
     override val formModelClass = ConfirmEpcDetailsFromCertificateNumberFormModel::class
 
     // TODO PDJB-746 - update content as required
-    override fun getStepSpecificContent(state: EpcState) =
+    override fun getStepSpecificContent(state: EpcDetailState) =
         getRelevantEpc(state)?.let { epcDetails ->
             mapOf(
                 "summaryCardTitle" to "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.title",
@@ -69,9 +69,9 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
             "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig but it was null.",
         )
 
-    override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsRetrievedByCertificateNumberForm"
+    override fun chooseTemplate(state: EpcDetailState): String = "forms/confirmEpcDetailsRetrievedByCertificateNumberForm"
 
-    override fun afterStepIsReached(state: EpcState) {
+    override fun afterStepIsReached(state: EpcDetailState) {
         if (state.epcRetrievedByCertificateNumberUpdatedSinceUserReview == true) {
             state.clearStepData(stepDataKey)
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = false
@@ -82,7 +82,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
 @JourneyFrameworkComponent
 final class ConfirmEpcDetailsRetrievedByCertificateNumberStep(
     stepConfig: ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig,
-) : JourneyStep.RequestableStep<YesOrNo, ConfirmEpcDetailsFromCertificateNumberFormModel, EpcState>(stepConfig) {
+) : JourneyStep.RequestableStep<YesOrNo, ConfirmEpcDetailsFromCertificateNumberFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "confirm-epc-details"
     }

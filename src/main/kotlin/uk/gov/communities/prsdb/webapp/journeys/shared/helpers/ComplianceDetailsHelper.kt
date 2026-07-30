@@ -17,10 +17,13 @@ class ComplianceDetailsHelper(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val uploadService: UploadService,
 ) {
-    fun <T> getGasSafetyCyaContent(state: T): Map<String, Any?> where T : GasSafetyState, T : CheckYourAnswersJourneyState {
+    fun getGasSafetyCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        gasSafetyState: GasSafetyState,
+    ): Map<String, Any?> {
         val factory =
-            GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            GasSafetyRegistrationCyaSummaryRowsFactory(gasSafetyState.gasSafetyDetailsTask, uploadService) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "gasSupplyRows" to factory.createGasSupplyRows(),
@@ -29,10 +32,13 @@ class ComplianceDetailsHelper(
         )
     }
 
-    fun <T> getElectricalSafetyCyaContent(state: T): Map<String, Any?> where T : ElectricalSafetyState, T : CheckYourAnswersJourneyState {
+    fun getElectricalSafetyCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        electricalSafetyState: ElectricalSafetyState,
+    ): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(electricalSafetyState.electricalSafetyDetailsTask, uploadService) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "electricalRows" to factory.createRows(),
@@ -40,10 +46,13 @@ class ComplianceDetailsHelper(
         )
     }
 
-    fun <T> getEpcCyaContent(state: T): Map<String, Any?> where T : EpcState, T : CheckYourAnswersJourneyState {
+    fun getEpcCyaContent(
+        cyaState: CheckYourAnswersJourneyState,
+        epcState: EpcState,
+    ): Map<String, Any?> {
         val factory =
-            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state) { step ->
-                Destination.VisitableStep(step, state.getCyaJourneyId(step))
+            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, epcState.epcDetailsTask) { step ->
+                Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),

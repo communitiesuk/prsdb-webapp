@@ -35,7 +35,8 @@ import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -131,35 +132,26 @@ class RegisterPropertyController(
         return "registerPropertyConfirmation"
     }
 
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         principal: Principal,
-    ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView {
         val annotatedFormData = CertificateUploadHelper.annotateFormDataForMetadataOnlyFileUpload(formData)
 
-        return postProcessedJourneyData(stepName, annotatedFormData, principal)
+        return dispatchJourneyStep(stepPath, principal) { postStepModelAndView(annotatedFormData) }
     }
 
-    @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
         @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
@@ -167,6 +159,7 @@ class RegisterPropertyController(
         principal: Principal,
         request: HttpServletRequest,
     ): ModelAndView {
+        val stepName = stepPath.trimStart('/')
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
                 CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
@@ -175,23 +168,20 @@ class RegisterPropertyController(
                 request,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal)
+        return dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
     }
 
-    private fun postProcessedJourneyData(
-        stepName: String,
-        formData: FormData,
+    private fun dispatchJourneyStep(
+        stepPath: String,
         principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { propertyRegistrationJourneyFactory.createJourneySteps() },
+            initialiseJourney = { propertyRegistrationJourneyFactory.initializeJourneyState(principal) },
+            dispatch = dispatch,
+        )
 
     companion object {
         const val PROPERTY_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_PROPERTY_JOURNEY_URL"
