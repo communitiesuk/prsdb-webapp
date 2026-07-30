@@ -5,21 +5,19 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 
 @PrsdbWebService
 class UserRolesService(
-    val individualLandlordRepository: IndividualLandlordRepository,
     val localCouncilUserRepository: LocalCouncilUserRepository,
     val systemOperatorRepository: SystemOperatorRepository,
+    val userToLandlordService: UserToLandlordService,
 ) {
     fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 
-        val matchingLandlordUser = individualLandlordRepository.findByBaseUser_Id(subjectId)
-        if (matchingLandlordUser != null) {
+        if (userToLandlordService.getLandlordForBaseUserIdOrNull(subjectId) != null) {
             roles.add(ROLE_LANDLORD)
         }
 

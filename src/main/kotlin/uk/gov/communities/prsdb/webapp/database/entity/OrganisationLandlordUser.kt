@@ -11,24 +11,25 @@ import jakarta.persistence.UniqueConstraint
 
 @Entity
 @Table(
-    name = "landlord_access_link",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["landlord_id", "subject_identifier"])],
+    name = "organisation_landlord_user",
+    uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_landlord_id", "subject_identifier"])],
 )
-class LandlordAccessLink() : AuditableEntity() {
+class OrganisationLandlordUser() : AuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "landlord_id", nullable = false)
-    lateinit var landlord: Landlord
+    @JoinColumn(name = "organisation_landlord_id", nullable = false)
+    lateinit var organisationLandlord: OrganisationLandlord
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false)
     lateinit var baseUser: PrsdbUser
 
-    constructor(landlord: Landlord, baseUser: PrsdbUser) : this() {
-        this.landlord = landlord
+    constructor(organisationLandlord: OrganisationLandlord, baseUser: PrsdbUser) : this() {
+
+        this.organisationLandlord = organisationLandlord
         this.baseUser = baseUser
     }
 }

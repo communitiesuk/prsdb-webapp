@@ -42,9 +42,9 @@ ON CONFLICT (subject_identifier) DO NOTHING;
 -- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
 -- exact across the Europe/London DST boundary on 2030-03-31.
 --
--- Unlike data-integration.sql, this local seed inserts its own addresses (ids 10xx for
--- landlords, 12xx for properties): the local database has no AddressBase/NGD addresses to
--- reference, so the cohort cannot claim existing free addresses and must supply them.
+-- Like data-integration.sql, this seed inserts its own addresses (ids 10xx for landlords,
+-- 12xx for properties) rather than referencing AddressBase/NGD data, which the local
+-- database does not have.
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
 SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'
@@ -71,10 +71,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1000 + i, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
-       'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true, false
+       'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
 FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -141,12 +141,12 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        NULL, 1400 + i, 1400 + i, DATE '1985-06-15', true, '07222222222',
        'metrics-realistic-user-' || i, 'Realistic Test Landlord ' || i, 'metrics.realistic.' || i || '@example.com',
-       'England or Wales', (i % 5 < 3), true, false
+       'England or Wales', (i % 5 < 3), true
 FROM generate_series(1, 120) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -223,12 +223,12 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
-VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', NULL, 2001, 2001, DATE '1980-01-01', true, '07300002001', 'metrics-joint-user-1', 'Joint Metrics Landlord 1', 'metrics.joint.1@example.com', 'England or Wales', true, true, false),
-       (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', NULL, 2002, 2002, DATE '1980-01-02', true, '07300002002', 'metrics-joint-user-2', 'Joint Metrics Landlord 2', 'metrics.joint.2@example.com', 'England or Wales', true, true, false),
-       (2003, TIMESTAMPTZ '2031-02-01 09:00:00+00', NULL, 2003, 2003, DATE '1980-01-03', true, '07300002003', 'metrics-joint-user-3', 'Joint Metrics Landlord 3', 'metrics.joint.3@example.com', 'England or Wales', true, true, false),
-       (2004, TIMESTAMPTZ '2031-02-04 09:00:00+00', NULL, 2004, 2004, DATE '1980-01-04', true, '07300002004', 'metrics-joint-user-4', 'Joint Metrics Landlord 4', 'metrics.joint.4@example.com', 'England or Wales', true, true, false),
-       (2005, TIMESTAMPTZ '2031-02-05 09:00:00+00', NULL, 2005, 2005, DATE '1980-01-05', true, '07300002005', 'metrics-joint-user-5', 'Joint Metrics Landlord 5', 'metrics.joint.5@example.com', 'England or Wales', true, true, false)
+                      individual_has_accepted_privacy_notice)
+VALUES (2001, TIMESTAMPTZ '2029-12-01 09:00:00+00', NULL, 2001, 2001, DATE '1980-01-01', true, '07300002001', 'metrics-joint-user-1', 'Joint Metrics Landlord 1', 'metrics.joint.1@example.com', 'England or Wales', true, true),
+       (2002, TIMESTAMPTZ '2031-01-01 09:00:00+00', NULL, 2002, 2002, DATE '1980-01-02', true, '07300002002', 'metrics-joint-user-2', 'Joint Metrics Landlord 2', 'metrics.joint.2@example.com', 'England or Wales', true, true),
+       (2003, TIMESTAMPTZ '2031-02-01 09:00:00+00', NULL, 2003, 2003, DATE '1980-01-03', true, '07300002003', 'metrics-joint-user-3', 'Joint Metrics Landlord 3', 'metrics.joint.3@example.com', 'England or Wales', true, true),
+       (2004, TIMESTAMPTZ '2031-02-04 09:00:00+00', NULL, 2004, 2004, DATE '1980-01-04', true, '07300002004', 'metrics-joint-user-4', 'Joint Metrics Landlord 4', 'metrics.joint.4@example.com', 'England or Wales', true, true),
+       (2005, TIMESTAMPTZ '2031-02-05 09:00:00+00', NULL, 2005, 2005, DATE '1980-01-05', true, '07300002005', 'metrics-joint-user-5', 'Joint Metrics Landlord 5', 'metrics.joint.5@example.com', 'England or Wales', true, true)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,

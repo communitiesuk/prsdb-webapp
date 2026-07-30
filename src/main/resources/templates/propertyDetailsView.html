@@ -83,11 +83,11 @@
                     </p>
                 </div>
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
-                    <div th:replace="~{landlordDetails :: landlordDetailsTabContent}"></div>
+                    <div th:replace="~{fragments/landlordDetails :: landlordDetailsTabContent}"></div>
                 </div>
 
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
-                    <div th:replace="~{compliance :: complianceTabContent}"></div>
+                    <div th:replace="~{fragments/compliance :: complianceTabContent}"></div>
                 </div>
             </div>
         </div>

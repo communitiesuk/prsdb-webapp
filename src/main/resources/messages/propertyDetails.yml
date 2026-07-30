@@ -201,6 +201,7 @@ propertyRecord:
         middleText: ' and valid '
         complianceLinkText: compliance certificates
   licensingInformation:
+    heading: Licensing information
     licensingType: Licensing type
     licensingNumber: Licensing number
   tenancyAndRentalInformation:
@@ -223,8 +224,6 @@ propertyRecord:
     uprn: UPRN
     'uprn.unavailable': Not available
     ownershipType: Ownership type
-    licensingInformation:
-      heading: Licensing information
     tenancyAndRentalInformation:
       heading: Tenancy and rental information
       hintText: Information about tenants and rent for this property

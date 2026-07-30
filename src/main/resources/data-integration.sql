@@ -1,16 +1,35 @@
 -- =============================================================================
--- available_addresses(n): returns the first n existing active addresses not already
--- used by an active property, ranked 1..n (rn). Like the rest of this seed, the
--- cohorts below reference the AddressBase/NGD addresses already present rather than
--- inserting their own; each claims distinct free addresses by joining this function
--- on rn. The inner LIMIT n keeps callers from ranking the whole address table.
--- Defined with a single-quoted SQL body (no dollar-quoting) because the spring.sql.init
--- runner splits scripts on ';' and cannot parse dollar-quoted function blocks.
+-- Addresses for the QA and metrics cohorts below, at reserved ids far above the range
+-- the AddressBase/NGD loader allocates from. The cohorts used to claim whichever
+-- existing addresses were not yet used by an active property, which meant an unbounded
+-- scan of the 35m-row address table on every boot and left each property in whichever
+-- council happened to own the address it claimed.
+--
+--   9000000001-9000000009  provide-later property record QA cohort (properties 49-57)
+--   9000001001-9000001101  metrics test cohort 1 (properties 1201-1301)
+--   9000002001-9000002100  metrics test cohort 2 (properties 1601-1700)
+--
+-- These rows are inert to the NGD loader, which is delta-based and keyed on uprn:
+--   * uprn IS NULL, so its ON CONFLICT (uprn) DO UPDATE never matches them, and its
+--     property_ownership refresh (WHERE a.uprn IN (...)) never overwrites them
+--   * is_active, so its "delete unused inactive addresses" pass never considers them
+--   * the address id sequence is deliberately NOT bumped past these ids, so the loader
+--     carries on allocating from where it left off
+-- A NULL uprn also keeps them out of the address lookup, which requires uprn IS NOT NULL.
 -- =============================================================================
-CREATE OR REPLACE FUNCTION available_addresses(n integer)
-    RETURNS TABLE (address_id bigint, rn bigint)
-    LANGUAGE sql
-AS 'SELECT id, ROW_NUMBER() OVER (ORDER BY id) FROM (SELECT a.id FROM address a WHERE a.is_active AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id) ORDER BY a.id LIMIT $1) limited';
+INSERT INTO address (id, created_date, uprn, single_line_address, postcode, building_number, local_council_id)
+SELECT 9000000000 + i, current_timestamp, null::bigint,
+       i || ' Provide Later Road, Testville, QA1 1AA', 'QA1 1AA', i || '', 2
+FROM generate_series(1, 9) AS s(i)
+UNION ALL
+SELECT 9000001000 + i, current_timestamp, null::bigint,
+       i || ' Metrics Property Street, MT2 2BB', 'MT2 2BB', i || '', 2
+FROM generate_series(1, 101) AS s(i)
+UNION ALL
+SELECT 9000002000 + i, current_timestamp, null::bigint,
+       i || ' Realistic Metrics Street, MT3 3CC', 'MT3 3CC', i || '', 2
+FROM generate_series(1, 100) AS s(i)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024-10-15 00:00:00+00'),
@@ -159,34 +178,34 @@ SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(i
 
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true, false),
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
-        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', false, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', false, true),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
         'KENNETH DECERQUEIRA', '07777777777', 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU', '1965-07-08',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (4, 4, 1, '2025-02-20 11:50:45.745273+00', 'kiran.randhawakukar@softwire.com', null, true, '2025-03-06 14:01:33.486684+00',
         'Not Kiran', '01234567890', 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU', '1965-07-08', 'England or Wales',
-        false, true, false),
+        false, true),
        (5, 5, 1, '2025-02-24 09:29:53.079945+00', 'jasmin.conterio@softwire.com', null, true, '2025-02-27 17:19:52.061638+00',
         'Jasmin Conterio', '01223 123 456', 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '1989-02-02',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (6, 6, 1, '2025-03-06 08:22:41.002251+00', 'Team-PRSDB+Unverified@softwire.com', null, true, '2025-03-11 13:47:42.800533+00',
         'Unverified Landlord', '07777777777', 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24', '1996-03-03',
-        'England or Wales', false, true, false),
+        'England or Wales', false, true),
        (7, 7, 1, '2025-03-06 10:33:22.395944+00', 'team-prsdb+verified@softwire.com', null, true, null, 'KENNETH DECERQUEIRA',
-        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true, false),
+        '07777777777', 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM', '1965-07-08', 'England or Wales', true, true),
        (8, 8, 1, '2025-02-27 13:58:02.81462+00', 'isobel.ibironke@softwire.com', null, true, null, 'Isobel Ibironke', '07123456789',
         'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', '1995-08-4', 'England or Wales', false,
-        true, false),
+        true),
        (9, 57, 9073642, '2026-07-01 10:33:22.395944+00', 'danielle.dias@madetech.com', null, true, null, 'Danielle Dias',
         '07777777777', 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '1990-01-01', 'England or Wales', true,
-        true, false),
+        true),
        (10, 58, 9073642, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
         '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
-        true, false) ON CONFLICT DO NOTHING;
+        true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -298,10 +317,8 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 49-56.
 -- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Like the rest of
--- this seed, addresses are NOT inserted: each property claims a distinct existing
--- active AddressBase/NGD address not already used by an active property (the
--- combined insert below picks them via the available_addresses(n) function). Occupied
+-- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.
 --   49  occupied, licensing + tenancy skipped, compliance all provide-later -> COMBINED banner
@@ -322,8 +339,8 @@ VALUES (1, 1, 'LQA0000050'),
 
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
--- Each QA property claims a distinct existing active address not already used by an active property.
--- available_addresses(9) returns 9 free addresses ranked 1..9 so every row below picks a different one.
+-- rn doubles as the reserved QA address selector (9000000000 + rn), so every row below
+-- gets a distinct address.
 WITH new_properties (rn, id, registration_number_id, license_id, current_num_households, current_num_tenants,
                      furnished_status, rent_frequency, rent_amount, is_occupied, last_occupied_date,
                      license_provide_later, tenancy_provide_later) AS (
@@ -342,12 +359,11 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date,
                                 license_provide_later, tenancy_provide_later)
 SELECT np.id, true, 1, np.current_num_households, np.current_num_tenants, np.registration_number_id,
-       aa.address_id, current_date, current_date, np.license_id, 1, 1,
+       9000000000 + np.rn, current_date, current_date, np.license_id, 1, 1,
        null, null, np.furnished_status, np.rent_frequency, null,
        np.rent_amount, null, false, np.is_occupied, np.last_occupied_date,
        np.license_provide_later, np.tenancy_provide_later
 FROM new_properties np
-         JOIN available_addresses(9) aa ON aa.rn = np.rn
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
@@ -500,7 +516,44 @@ VALUES (1, 5, '01/01/25', '01/01/25', null, true, null, null, null, null, null, 
        (45, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (46, 37, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (47, 38, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (48, 39, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true) ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
+-- PDJB-1048 provide-later property record QA (landlord 1): fully compliant records for property_ownership 50-53
+-- (gas not required, valid electrical + EPC, all declarations) so they render the pure provide-later banner variant.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration,
+                                 gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
+VALUES (49, 50, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (50, 51, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (51, 52, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       (52, 53, current_date, current_date, null, false, '2035-01-01', null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2035-01-01',
+        null, 'c', null, null, true, true, true, false, false, false),
+       -- PDJB-1305: scenario A (PO 49) compliance record with all three certs "provide later".
+       (53, 49, current_date, current_date, null, true, null, null, null, null,
+        null, null, null, null, true, true, true, true, true, true),
+       -- PDJB-1305: PO 55 gas cert expired (issued 730 days ago), electrical + EPC valid.
+       (54, 55, current_date, current_date, current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, false, false, false),
+       -- PDJB-1305: PO 56 gas cert + EPC expired, electrical valid.
+       (55, 56, current_date, current_date, current_date - 730, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date - 365,
+        false, 'c', null, null, true, true, true, false, false, false),
+       -- PDJB-1305: PO 57 gas cert "provide later", electrical + EPC valid -> "add compliance certificates" banner.
+       (56, 57, current_date, current_date, null, true, current_date + 730, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', current_date + 730,
+        null, 'c', null, null, true, true, true, true, false, false) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
@@ -567,11 +620,9 @@ VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6
 -- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
 -- exact across the Europe/London DST boundary on 2030-03-31.
 --
--- No addresses are inserted: like the rest of this seed, the cohort references the
--- AddressBase/NGD addresses already present in the environment. Landlords all share an
--- existing address (address_id 1, as the other seeded landlords do), and each property
--- takes a distinct existing active address not already used by an active property
--- (property_ownership.address_id is unique among active rows).
+-- Landlords all share an existing address (address_id 1, as the other seeded landlords
+-- do), and each property takes a distinct reserved metrics address seeded at the top of
+-- this file (9000001001 onwards).
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
 SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'
@@ -588,7 +639,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
        'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
@@ -598,11 +649,10 @@ ON CONFLICT DO NOTHING;
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord, is_occupied)
-SELECT 1200 + i, true, 1, 1, 2, 1200 + i, fa.address_id,
+SELECT 1200 + i, true, 1, 1, 2, 1200 + i, 9000001000 + i,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false, true
 FROM generate_series(1, 101) AS s(i)
-JOIN available_addresses(101) fa ON fa.rn = i
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
@@ -624,9 +674,9 @@ ON CONFLICT DO NOTHING;
 -- p90/p95 hours and minutes show too. Fixed sequential ids continuing above the existing
 -- seed (landlords 14xx, properties 16xx) plus ON CONFLICT DO NOTHING keep it idempotent
 -- under mode: always; the setval calls after all metrics inserts bump the sequences past
--- them (matching the rest of this file). Addresses are referenced, not inserted (as in
--- cohort 1): landlords share address_id 1 and each property takes a distinct existing
--- active address not already used by an active property.
+-- them (matching the rest of this file). Addresses come from the reserved block seeded at
+-- the top of this file (as in cohort 1): landlords share address_id 1 and each property
+-- takes a distinct reserved metrics address (9000002001 onwards).
 --
 -- Query the 2028 reporting period (From 1/1/2028 To 31/12/2028) to see only this cohort:
 -- expect 120 registrations, 72 verified, 100 properties, 100 landlords with a property,
@@ -649,7 +699,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
-                      individual_has_accepted_privacy_notice, individual_has_responded_to_feedback)
+                      individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        NULL, 1400 + i, 1, DATE '1985-06-15', true, '07222222222',
@@ -679,9 +729,8 @@ WITH p AS (
                  END)::int) AS created
     FROM generate_series(1, 100) AS s(i)
 )
-SELECT 1600 + i, true, 1, 1, 2, 1600 + i, fa.address_id, created, created, NULL, 1, 2, false, true
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 9000002000 + i, created, created, NULL, 1, 2, false, true
 FROM p
-JOIN available_addresses(100) fa ON fa.rn = p.i
 ON CONFLICT DO NOTHING;
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)

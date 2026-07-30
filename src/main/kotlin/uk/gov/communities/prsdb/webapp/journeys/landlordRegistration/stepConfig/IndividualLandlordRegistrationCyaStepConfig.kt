@@ -13,12 +13,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 @JourneyFrameworkComponent
 class IndividualLandlordRegistrationCyaStepConfig(
-    private val landlordService: LandlordService,
+    private val landlordRegistrationService: LandlordRegistrationService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
@@ -31,7 +31,7 @@ class IndividualLandlordRegistrationCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
-        landlordService.createIndividualLandlord(
+        landlordRegistrationService.registerIndividualLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             name = state.identityTask.getName(),
             email =
@@ -41,7 +41,7 @@ class IndividualLandlordRegistrationCyaStepConfig(
                 state.individualLandlordRegistrationTask.phoneNumberStep.formModel.notNullValue(
                     PhoneNumberFormModel::phoneNumber,
                 ),
-            addressDataModel = state.individualLandlordRegistrationTask.addressTask.getAddress(),
+            address = state.individualLandlordRegistrationTask.addressTask.getAddress(),
             countryOfResidence = ENGLAND_OR_WALES,
             isVerified = state.identityTask.getIsIdentityVerified(),
             hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
