@@ -16,13 +16,16 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
@@ -31,6 +34,8 @@ class LandlordDetailsController(
     private val landlordService: LandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val userToLandlordService: UserToLandlordService,
+    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -38,9 +43,11 @@ class LandlordDetailsController(
         model: Model,
         principal: Principal,
     ): String {
-        val landlord =
-            landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+
+        if (landlord.landlordType == LandlordType.ORGANISATION) {
+            return getOrgLandlordDetails(landlord as OrganisationLandlord, model)
+        }
 
         val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
 
@@ -65,6 +72,21 @@ class LandlordDetailsController(
         model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
 
         return "landlordDetailsView"
+    }
+
+    // TODO: PDJB-1276: Update skeleton page
+    private fun getOrgLandlordDetails(
+        orgLandlord: OrganisationLandlord,
+        model: Model,
+    ): String {
+        val governingBodyMembers =
+            organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
+
+        model.addAttribute("orgLandlord", orgLandlord)
+        model.addAttribute("governingBodyMembers", governingBodyMembers)
+        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+
+        return "orgLandlordDetailsView"
     }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
