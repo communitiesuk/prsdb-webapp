@@ -207,6 +207,41 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
         '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
         true) ON CONFLICT DO NOTHING;
 
+INSERT INTO prsdb_user (id, created_date)
+VALUES ('urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (900, '2026-07-30 00:00:00+00', 210000000900, 1) ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+
+INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
+                      organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+                      organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+                      organisation_is_company, organisation_is_charity, organisation_is_trust,
+                      organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+                      organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+                      organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+                      organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
+VALUES (11, 900, 1, '2026-07-30 00:00:00+00',
+        'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
+        'Test Registrant', '1980-01-01', 'registrant@example.com', '07777777778',
+        true, true, true,
+        '12345678', 0, '1234567',
+        'Lead Trustee Name', '1975-06-15', 'lead.trustee@example.com',
+        '07777777779', 1,
+        'Main Contact Name', 'main.contact@example.com', '07777777780') ON CONFLICT DO NOTHING;
+
+INSERT INTO organisation_landlord_user (id, organisation_landlord_id, subject_identifier, created_date)
+VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('organisation_landlord_user', 'id'), (SELECT MAX(id) FROM organisation_landlord_user));
+
+INSERT INTO organisation_governing_body_member (id, organisation_landlord_id, type, name, date_of_birth, address_id, created_date)
+VALUES (1, 11, 1, 'Governing Body Trustee', '1985-03-20', 1, '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('organisation_governing_body_member', 'id'), (SELECT MAX(id) FROM organisation_governing_body_member));
+
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
