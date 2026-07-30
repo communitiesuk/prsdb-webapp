@@ -13,7 +13,6 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyFactory
@@ -95,10 +94,7 @@ class CancelJointLandlordInvitationControllerTests(
         whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
 
         val expectedRedirectUrl =
-            "$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${JourneyStateService.urlWithJourneyState(
-                AreYouSureStep.ROUTE_SEGMENT,
-                journeyId,
-            )}"
+            "$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${AreYouSureStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
         mvc
             .get("$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${AreYouSureStep.ROUTE_SEGMENT}")
