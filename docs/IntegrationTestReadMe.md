@@ -13,6 +13,29 @@ We set seed data by passing SQL script names into integration test class constru
 Tests that require different seed data to the rest of the class must be put in nested classes that inherit from 
 `NestedIntegrationTestWithMutableData` or `NestedIntegrationTestWithImmutableData` depending on the outer class.
 
+Resetting the database means truncating every table in the `public` schema with `RESTART IDENTITY CASCADE`, then
+running the seed scripts. Two tables are deliberately preserved:
+
+* `flyway_schema_history` - Flyway's own bookkeeping. Dropping it would make every migration re-run.
+* `local_council` - reference data inserted by `V1_0_0__la_and_address_tables.sql` (as `local_authority`, renamed by
+  `V1_6_0`). No seed script writes to it.
+
+These are the only two tables with rows after a bare migrate. If you add a migration that inserts reference data, add
+its table to `PRESERVED_TABLES` in `IntegrationTestHelper`, or the data will be wiped before every test. You can check
+which tables hold reference data by migrating an empty database and looking for non-empty tables.
+
+## Parallel Execution
+
+Tests run across three forked JVMs. Each fork is completely isolated: its own Spring contexts, its own Postgres and
+Redis containers, its own database and its own browser. No test needs to be aware of this.
+
+Three is the useful maximum because Gradle schedules by top-level class, every nested grouping is a JUnit
+`@Nested inner class`, and `PropertyRegistrationSinglePageTests` alone is a single scheduling unit worth about five
+minutes.
+
+Override the fork count with `-PtestForks=N`. Use `-PtestForks=1` for fully serial execution when debugging. Every run
+ends with a table of the slowest tests; change its length with `-PslowTestCount=N`.
+
 ## Page Objects (and Components)
 
 We encapsulate logic for interacting with our pages into page objects (as described by [Martin Fowler](https://martinfowler.com/bliki/PageObject.html) and
