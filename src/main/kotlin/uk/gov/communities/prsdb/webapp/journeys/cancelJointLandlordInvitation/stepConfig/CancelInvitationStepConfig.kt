@@ -51,9 +51,9 @@ class CancelInvitationStepConfig(
         // Email the canceller
         // TODO: PDJB-1274: Update emails to account for org landlord
         cancellerEmailSender.sendEmail(
-            cancellerLandlord.contactEmail,
+            cancellerLandlord.email,
             JointLandlordInvitationCancellationCancellerEmail(
-                recipientName = cancellerLandlord.contactName,
+                recipientName = cancellerLandlord.name,
                 invitedEmail = state.invitedEmail,
                 propertyAddress = propertyAddress,
                 propertyRecordUrl = propertyRecordUrl,
@@ -66,9 +66,9 @@ class CancelInvitationStepConfig(
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach {
                 otherLandlordEmailSender.sendEmail(
-                    it.contactEmail,
+                    it.email,
                     JointLandlordInvitationCancellationOtherLandlordEmail(
-                        recipientName = it.contactName,
+                        recipientName = it.name,
                         invitedEmail = state.invitedEmail,
                         propertyAddress = propertyAddress,
                         propertyRecordUrl = propertyRecordUrl,

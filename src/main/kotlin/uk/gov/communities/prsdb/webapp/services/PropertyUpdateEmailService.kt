@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
@@ -24,7 +23,6 @@ class PropertyUpdateEmailService(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(actingLandlord is IndividualLandlord)
         confirmationEmailService.sendEmail(
             actingLandlord.email,
             PropertyUpdateConfirmation(
@@ -40,7 +38,6 @@ class PropertyUpdateEmailService(
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
             // TODO: PDJB-1274: Update emails to account for org landlord
             otherLandlords.forEach { landlord ->
-                check(landlord is IndividualLandlord)
                 notificationEmailService.sendEmail(
                     landlord.email,
                     JointLandlordPropertyUpdateNotificationEmail(
