@@ -433,10 +433,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class OrgCompaniesHouseStep {
+    inner class OrgIsRegisteredCompanyStep {
         @Test
         fun `the companies house page renders the heading and yes no radio options`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             assertThat(companiesHousePage.form.fieldsetHeading)
                 .containsText("Is your organisation registered with Companies House?")
@@ -446,7 +446,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns a validation error`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             companiesHousePage.form.submit()
 
@@ -533,29 +533,29 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class OrgCharityStep {
+    inner class OrgIsRegisteredCharityStep {
         @Test
         fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+            val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
-            assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
-            assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
-            assertThat(orgCharityPage.page.locator("#charity-hint"))
+            assertThat(orgIsRegisteredCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgIsRegisteredCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
+            assertThat(orgIsRegisteredCharityPage.page.locator("#charity-hint"))
                 .containsText(
                     "This includes Charity of Commission of England and Wales, " +
                         "Charity Commission of Northern Ireland and Scottish Charity Regulator",
                 )
-            assertThat(orgCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
-            assertThat(orgCharityPage.page.locator("label[for='charity-no']")).containsText("No")
+            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
+            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-no']")).containsText("No")
         }
 
         @Test
         fun `submitting with no option selected returns an error`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+            val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
-            orgCharityPage.form.submit()
+            orgIsRegisteredCharityPage.form.submit()
 
-            assertThat(orgCharityPage.form.getErrorMessage())
+            assertThat(orgIsRegisteredCharityPage.form.getErrorMessage())
                 .containsText("Select yes if your organisation is a registered charity")
         }
     }
@@ -920,7 +920,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
                         .beforeOrgCheckAnswers()
-                        .withOrgCharity(true)
+                        .withOrgIsRegisteredCharity(true)
                         .withCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
                         .withOrgCharityNumberEnglandAndWales("1234567"),
                 )
@@ -937,7 +937,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
                         .beforeOrgCheckAnswers()
-                        .withOrgCharity(true)
+                        .withOrgIsRegisteredCharity(true)
                         .withCharityRegisteredWith(CharityRegulator.NONE),
                 )
 
@@ -952,7 +952,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
                         .beforeOrgCheckAnswers()
-                        .withOrgCompaniesHouse(true)
+                        .withOrgIsRegisteredCompany(true)
                         .withOrgCompanyNumber("12345678"),
                 )
 

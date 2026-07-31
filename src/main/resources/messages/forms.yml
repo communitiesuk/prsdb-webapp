@@ -42,10 +42,6 @@ orgCompanyNumber:
     missing: "Enter a company number, like 12345678 or 00123456"
     length: "Company number must be 8 characters, like 12345678 or 00123456"
     invalidCharacters: Company number must only include numbers and letters A to Z
-orgCompaniesHouse:
-  fieldSetHeading: Is your organisation registered with Companies House?
-  error:
-    missing: Select yes if your organisation is registered with Companies House
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.
@@ -54,12 +50,6 @@ phoneNumber:
   error:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
-orgCharity:
-  fieldSetHeading: Is your organisation a registered charity?
-  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
-  radios:
-    error:
-      missing: Select yes if your organisation is a registered charity
 orgCharityNumber:
   fieldSetHeading: What is your organisation’s charity number?
   fieldSetHint: Enter the number as shown on the charities register
