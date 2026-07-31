@@ -61,7 +61,7 @@ class LandlordRegistrationCyaStepConfig(
         if (isOrgLandlord(state)) {
             val org = state.orgLandlordRegistrationTask
 
-            val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
+            val organisationTypes = org.orgTypeTask.orgTypeStep.formModel.getSelectedOrgTypes()
             val isTrust = OrgType.TRUST in organisationTypes
             val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
             val hasCompanyNumber =
@@ -75,7 +75,7 @@ class LandlordRegistrationCyaStepConfig(
             val mainContact = org.orgMainContactStep.formModel
 
             val governingBodyMembers =
-                (org.orgGovBodyTask.governingBodyMembersMap ?: emptyMap())
+                (org.companiesHouseTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap())
                     .values
                     .toList()
 
@@ -99,12 +99,18 @@ class LandlordRegistrationCyaStepConfig(
                 organisationCharityRegisteredWith = charityRegulator,
                 organisationCharityNumber = getCharityNumber(state, charityRegulator),
                 organisationLeadTrusteeName =
-                    if (isTrust) org.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name) else null,
+                    if (isTrust) {
+                        org.orgTypeTask.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(
+                            LeadTrusteeNameFormModel::name,
+                        )
+                    } else {
+                        null
+                    },
                 organisationLeadTrusteeDateOfBirth =
-                    if (isTrust) org.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
+                    if (isTrust) org.orgTypeTask.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull() else null,
                 organisationLeadTrusteeEmail =
                     if (isTrust) {
-                        org.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(
+                        org.orgTypeTask.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(
                             LeadTrusteeEmailFormModel::emailAddress,
                         )
                     } else {
@@ -112,13 +118,13 @@ class LandlordRegistrationCyaStepConfig(
                     },
                 organisationLeadTrusteePhoneNumber =
                     if (isTrust) {
-                        org.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(
+                        org.orgTypeTask.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(
                             LeadTrusteePhoneFormModel::phoneNumber,
                         )
                     } else {
                         null
                     },
-                organisationLeadTrusteeAddress = if (isTrust) org.leadTrusteeTask.trusteeAddressTask.getAddress() else null,
+                organisationLeadTrusteeAddress = if (isTrust) org.orgTypeTask.leadTrusteeTask.trusteeAddressTask.getAddress() else null,
                 organisationMainContactName = mainContact.notNullValue(OrgMainContactFormModel::name),
                 organisationMainContactEmail = mainContact.notNullValue(OrgMainContactFormModel::emailAddress),
                 organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
@@ -373,11 +379,11 @@ class LandlordRegistrationCyaStepConfig(
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationType",
-                    org.orgTypeStep.formModel.orgTypes
+                    org.orgTypeTask.orgTypeStep.formModel.orgTypes
                         .filterNotNull()
                         .filter { it.isNotBlank() }
                         .map { orgTypeMessageKey(it) },
-                    Destination.VisitableStep(org.orgTypeStep, state.getCyaJourneyId(org.orgTypeStep)),
+                    Destination.VisitableStep(org.orgTypeTask.orgTypeStep, state.getCyaJourneyId(org.orgTypeTask.orgTypeStep)),
                 ),
             )
 
@@ -491,34 +497,34 @@ class LandlordRegistrationCyaStepConfig(
 
     private fun getLeadTrusteeCard(state: LandlordRegistrationState): SummaryCardViewModel? {
         val org = state.orgLandlordRegistrationTask
-        if (OrgType.TRUST !in org.orgTypeStep.formModel.getSelectedOrgTypes()) {
+        if (OrgType.TRUST !in org.orgTypeTask.orgTypeStep.formModel.getSelectedOrgTypes()) {
             return null
         }
         val rows =
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.name",
-                    org.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name),
+                    org.orgTypeTask.leadTrusteeTask.leadTrusteeNameStep.formModel.notNullValue(LeadTrusteeNameFormModel::name),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth",
-                    org.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull(),
+                    org.orgTypeTask.leadTrusteeTask.leadTrusteeDobStep.formModel.toLocalDateOrNull(),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.email",
-                    org.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress),
+                    org.orgTypeTask.leadTrusteeTask.leadTrusteeEmailStep.formModel.notNullValue(LeadTrusteeEmailFormModel::emailAddress),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.phoneNumber",
-                    org.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
+                    org.orgTypeTask.leadTrusteeTask.leadTrusteePhoneStep.formModel.notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
                     Destination.Nowhere(),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.governingBody.address",
-                    org.leadTrusteeTask.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
+                    org.orgTypeTask.leadTrusteeTask.trusteeAddressTask.getAddress().toMultiLineAddress().split("\n"),
                     Destination.Nowhere(),
                 ),
             )
@@ -528,15 +534,17 @@ class LandlordRegistrationCyaStepConfig(
             actions =
                 SummaryCardActionViewModel.changeAction(
                     Destination.VisitableStep(
-                        org.leadTrusteeTask.leadTrusteeNameStep,
-                        state.getCyaJourneyId(org.leadTrusteeTask.leadTrusteeNameStep),
+                        org.orgTypeTask.leadTrusteeTask.leadTrusteeNameStep,
+                        state.getCyaJourneyId(org.orgTypeTask.leadTrusteeTask.leadTrusteeNameStep),
                     ),
                 ),
         )
     }
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
-        val members = state.orgLandlordRegistrationTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap()
+        val members =
+            state.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap
+                ?: emptyMap()
         return members
             .toList()
             .sortedBy { it.first }
@@ -570,9 +578,11 @@ class LandlordRegistrationCyaStepConfig(
                     actions =
                         SummaryCardActionViewModel.changeAction(
                             Destination.VisitableStep(
-                                state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                state.orgLandlordRegistrationTask
+                                    .companiesHouseTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
                                 state.getCyaJourneyId(
-                                    state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                    state.orgLandlordRegistrationTask
+                                        .companiesHouseTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
                                 ),
                             ),
                         ),

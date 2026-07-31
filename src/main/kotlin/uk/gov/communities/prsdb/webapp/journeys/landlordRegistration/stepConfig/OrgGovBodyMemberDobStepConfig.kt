@@ -4,16 +4,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 
 @JourneyFrameworkComponent
 class OrgGovBodyMemberDobStepConfig :
-    AbstractRequestableStepConfig<Complete, OrgGovBodyMemberDobFormModel, OrgGovBodyState>() {
+    AbstractRequestableStepConfig<Complete, OrgGovBodyMemberDobFormModel, OrgGovBodyMembersState>() {
     override val formModelClass = OrgGovBodyMemberDobFormModel::class
 
-    override fun getStepSpecificContent(state: OrgGovBodyState) =
+    override fun getStepSpecificContent(state: OrgGovBodyMembersState) =
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.orgGovBodyMemberDob.fieldSetHeading",
             "fieldSetHint" to "registerAsALandlord.orgGovBodyMemberDob.fieldSetHint",
@@ -21,7 +21,7 @@ class OrgGovBodyMemberDobStepConfig :
         )
 
     override fun resolvePageContent(
-        state: OrgGovBodyState,
+        state: OrgGovBodyMembersState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? OrgGovBodyMemberDobFormModel
@@ -35,18 +35,18 @@ class OrgGovBodyMemberDobStepConfig :
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 
-    override fun chooseTemplate(state: OrgGovBodyState) = "forms/dateForm"
+    override fun chooseTemplate(state: OrgGovBodyMembersState) = "forms/dateForm"
 
-    override fun mode(state: OrgGovBodyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: OrgGovBodyMembersState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    private fun getEditingMemberOrNull(state: OrgGovBodyState) =
+    private fun getEditingMemberOrNull(state: OrgGovBodyMembersState) =
         state.editingGovBodyMemberId?.let { state.governingBodyMembersMap?.get(it) }
 }
 
 @JourneyFrameworkComponent
 final class OrgGovBodyMemberDobStep(
     stepConfig: OrgGovBodyMemberDobStepConfig,
-) : RequestableStep<Complete, OrgGovBodyMemberDobFormModel, OrgGovBodyState>(stepConfig) {
+) : RequestableStep<Complete, OrgGovBodyMemberDobFormModel, OrgGovBodyMembersState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-governing-body-member-dob"
     }
