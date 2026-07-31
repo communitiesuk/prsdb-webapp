@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - chore/PDJB-NONE-test-virus-scan
 
 jobs:
   build-and-deploy-integration:
