@@ -1617,9 +1617,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             changeLink.clickAndWait()
             assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
         }
-
+        
+        // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
+        // from tenancy-details
         @Test
-        fun `Changing from provide tenancy details later to actual households routes to rent includes bills page`(page: Page) {
+        fun `Changing from provide tenancy details later to actual households routes to task list`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -1631,11 +1633,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
 
-            assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
+        // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
+        // from tenancy-details
         @Test
-        fun `Changing from provide tenancy details later and completing tenancy details marks task as completed on task list`(page: Page) {
+        fun `Changing from provide tenancy details later to actual households marks tenancy details task as in progress on task list`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -1647,23 +1651,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
 
-            val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
-            rentIncludesBillsPage.submitIsNotIncluded()
-
-            val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
-            furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
-
-            val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
-            rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
-            rentFrequencyPage.form.submit()
-
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.submitRentAmount("400")
-
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+            assertEquals("In progress", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
         }
 
         @Test
