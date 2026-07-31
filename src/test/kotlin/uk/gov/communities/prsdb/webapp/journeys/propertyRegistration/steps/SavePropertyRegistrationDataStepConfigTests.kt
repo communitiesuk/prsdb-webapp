@@ -290,6 +290,56 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached passes null tenancy fields and true tenancyProvideLater when tenancy is provide this later`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
+        setupStateForComplianceDataWithNullValues()
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = any(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = eq(0),
+            numberOfPeople = eq(0),
+            baseUserId = any(),
+            numBedrooms = isNull(),
+            billsIncludedList = isNull(),
+            customBillsIncluded = isNull(),
+            furnishedStatus = isNull(),
+            rentFrequency = isNull(),
+            customRentFrequency = isNull(),
+            rentAmount = isNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = isNull(),
+            gasSafetyFileUploadIds = eq(emptyList()),
+            gasSafetyCertProvideLater = anyOrNull(),
+            electricalSafetyFileUploadIds = eq(emptyList()),
+            electricalSafetyExpiryDate = isNull(),
+            electricalCertType = isNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = isNull(),
+            epcExpiryDate = isNull(),
+            epcEnergyRating = isNull(),
+            tenancyStartedBeforeEpcExpiry = isNull(),
+            epcExemptionReason = isNull(),
+            epcMeesExemptionReason = isNull(),
+            epcProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(true),
+        )
+    }
+
+    @Test
     fun `resolveNextDestination deletes journey and returns default destination when address is not already registered`() {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
