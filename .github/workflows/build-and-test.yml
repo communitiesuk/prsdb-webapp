@@ -51,7 +51,7 @@ jobs:
         env:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
           EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
-        run: ./gradlew clean check --no-daemon
+        run: ./gradlew clean check --no-daemon -PtestForks=2
 
       # TEMPORARY, experiment branch only: gives each CI run per-class timings rather than a single
       # noisy wall-clock number, so changes under ~10% can be judged against CI's ~2 min variance.

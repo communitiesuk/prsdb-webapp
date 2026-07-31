@@ -160,12 +160,14 @@ tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
 }
 
+val testForks = (project.findProperty("testForks") as String?)?.toInt() ?: 1
 val slowTestCount = (project.findProperty("slowTestCount") as String?)?.toInt() ?: 15
 
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
+    maxParallelForks = testForks
 
     val taskLogger = logger
     val testDurations = ConcurrentLinkedQueue<Pair<String, Long>>()
