@@ -38,11 +38,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
@@ -51,6 +49,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCharityFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
@@ -302,8 +302,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitYes()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitYes()
 
         val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
@@ -311,8 +311,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
 
-        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        orgCompaniesHousePage.submitYes()
+        val orgIsRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+        orgIsRegisteredCompanyPage.submitYes()
 
         val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
         orgCompanyNumberPage.submitCompanyNumber("12345678")
@@ -423,7 +423,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
-        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -460,7 +460,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.registeredCharityRow.clickNamedActionLinkAndWait("Change")
 
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        val orgCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitYes()
 
         val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
@@ -608,15 +608,15 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     //  LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgTypeStep.ROUTE_SEGMENT branch is currently empty).
 
     // TODO PDJB-1238: add tests for the Companies House and company number change links once the companies update
-    //  journey is wired into LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgCompaniesHouseStep /
+    //  journey is wired into LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgIsRegisteredCompanyStep /
     //  OrgCompanyNumberStep branch is currently empty).
 
     @Test
     fun `Selecting no on companies house skips the company number question and goes to the governing body journey`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
-        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
+        val companiesHousePage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         companiesHousePage.submitNo()
 
         val govBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
@@ -667,11 +667,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Selecting no on charity skips the charity questions and goes to the companies house page`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        navigator.skipToOrgLandlordRegistrationCharityPage()
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitNo()
+        navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitNo()
 
-        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -684,7 +684,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val charityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         charityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.NONE)
 
-        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
     }
 
     @Test

@@ -7,14 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCompaniesHouseState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class OrgCompaniesHouseTask(
     journeyStateService: JourneyStateService,
-    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCompaniesHouseStep: OrgIsRegisteredCompanyStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
     override val orgGovBodyTask: OrgGovBodyTask,
 ) : DuplicableTask<OrgCompaniesHouseState>(journeyStateService),
@@ -24,7 +24,7 @@ class OrgCompaniesHouseTask(
     override fun makeSubJourney(state: OrgCompaniesHouseState) =
         subJourney(state) {
             step(journey.orgCompaniesHouseStep) {
-                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
+                routeSegment(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.orgCompanyNumberStep

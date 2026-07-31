@@ -5,10 +5,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 
 interface OrgCharityState : JourneyState {
-    val orgCharityStep: OrgCharityStep
+    val orgCharityStep: OrgIsRegisteredCharityStep
     val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep
     val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep
     val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep

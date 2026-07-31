@@ -20,12 +20,12 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrust
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCompanyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
@@ -63,10 +63,10 @@ class LandlordRegistrationCyaStepConfig(
 
             val organisationTypes = org.orgTypeTask.orgTypeStep.formModel.getSelectedOrgTypes()
             val isTrust = OrgType.TRUST in organisationTypes
-            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
             val hasCompanyNumber =
                 org.companiesHouseTask.orgCompaniesHouseStep.formModel.notNullValue(
-                    OrgCompaniesHouseFormModel::companiesHouse,
+                    OrgIsRegisteredCompanyFormModel::companiesHouse,
                 )
 
             val charityRegulator =
@@ -387,7 +387,7 @@ class LandlordRegistrationCyaStepConfig(
                 ),
             )
 
-            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgCharityFormModel::charity)
+            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
@@ -423,7 +423,7 @@ class LandlordRegistrationCyaStepConfig(
 
             val registeredWithCompaniesHouse =
                 org.companiesHouseTask.orgCompaniesHouseStep.formModel.notNullValue(
-                    OrgCompaniesHouseFormModel::companiesHouse,
+                    OrgIsRegisteredCompanyFormModel::companiesHouse,
                 )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(

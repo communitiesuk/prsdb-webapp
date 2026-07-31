@@ -12,13 +12,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class OrgCharityTask(
     journeyStateService: JourneyStateService,
-    override val orgCharityStep: OrgCharityStep,
+    override val orgCharityStep: OrgIsRegisteredCharityStep,
     override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
     override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
     override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
@@ -30,7 +30,7 @@ class OrgCharityTask(
     override fun makeSubJourney(state: OrgCharityState) =
         subJourney(state) {
             step(journey.orgCharityStep) {
-                routeSegment(OrgCharityStep.ROUTE_SEGMENT)
+                routeSegment(OrgIsRegisteredCharityStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.orgCharityRegisteredWithStep

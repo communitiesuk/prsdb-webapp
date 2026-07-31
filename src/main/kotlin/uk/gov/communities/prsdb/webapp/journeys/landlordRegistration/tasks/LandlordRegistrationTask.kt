@@ -28,11 +28,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -242,7 +242,7 @@ class LandlordRegistrationTask(
                         }
                     }
 
-                    OrgCharityStep.ROUTE_SEGMENT,
+                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
                     OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
                     OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
                     OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
@@ -251,7 +251,7 @@ class LandlordRegistrationTask(
                         duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.charityTask, null)
                     }
 
-                    OrgCompaniesHouseStep.ROUTE_SEGMENT,
+                    OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
                     OrgCompanyNumberStep.ROUTE_SEGMENT,
                     -> {
                         // TODO PDJB-1238 : replace this placeholder with the companies house update journey
