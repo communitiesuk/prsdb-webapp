@@ -53,7 +53,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.contactEmailAddress,
+                    fieldValue = landlord.displayEmail,
                 ),
             )
 

@@ -24,7 +24,7 @@ class IndividualLandlord() : Landlord() {
         get() = name
 
     @get:Transient
-    override val contactEmailAddress: String
+    override val displayEmail: String
         get() = email
 
     @OneToOne

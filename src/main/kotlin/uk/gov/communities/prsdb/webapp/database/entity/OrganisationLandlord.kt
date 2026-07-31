@@ -23,7 +23,7 @@ class OrganisationLandlord() : Landlord() {
         get() = name
 
     @get:Transient
-    override val contactEmailAddress: String
+    override val displayEmail: String
         get() = email
 
     @Column(name = "organisation_landlord_name")
