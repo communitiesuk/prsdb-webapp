@@ -162,12 +162,35 @@ tasks.withType<KotlinCompile> {
 
 val testForks = (project.findProperty("testForks") as String?)?.toInt() ?: 1
 val slowTestCount = (project.findProperty("slowTestCount") as String?)?.toInt() ?: 15
+val shardIndex = (project.findProperty("shardIndex") as String?)?.toInt()
+val shardCount = (project.findProperty("shardCount") as String?)?.toInt()
+
+require(shardCount == null || (shardIndex != null && shardIndex in 0 until shardCount)) {
+    "shardIndex must be set and within 0..<shardCount when shardCount is given"
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
     maxParallelForks = testForks
+
+    // Splits test classes across CI jobs. Nested classes must execute with their enclosing class, so the
+    // shard is chosen from the top-level class name and every nested class follows it.
+    if (shardIndex != null && shardCount != null) {
+        exclude { element ->
+            if (element.isDirectory) {
+                false
+            } else {
+                val path = element.path
+                if (!path.endsWith(".class")) {
+                    false
+                } else {
+                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                }
+            }
+        }
+    }
 
     val taskLogger = logger
     val testDurations = ConcurrentLinkedQueue<Pair<String, Long>>()
