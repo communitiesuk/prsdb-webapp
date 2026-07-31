@@ -56,7 +56,7 @@ class MyValidator : PropertyConstraintValidator() {
 ### Message Keys
 - Define in YAML files in `messages/`
 - Use pattern: `{section}.{subsection}.error.{errorType}`
-- Example: `registerAsALandlord.phoneNumber.error.invalidFormat: Enter a phone number including the country code for international numbers`
+- Example: `forms.companyRegistrationNumber.error.missing: Enter a company number, like 12345678 or 00123456`
 
 ### Custom Error Messages
 ```kotlin
