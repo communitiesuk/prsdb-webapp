@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationLandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import java.net.URI
 import java.time.LocalDate
 
@@ -48,7 +48,8 @@ class LandlordRegistrationServiceTests {
     private lateinit var mockRegistrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
     @Mock
-    private lateinit var mockOrgRegistrationConfirmationSender: EmailNotificationService<OrganisationLandlordRegistrationConfirmationEmail>
+    private lateinit var mockOrgRegistrationConfirmationSender:
+        EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -496,7 +497,7 @@ class LandlordRegistrationServiceTests {
             verify(mockOrgRegistrationConfirmationSender).sendEmail(
                 eq("alice@test.com"),
                 eq(
-                    OrganisationLandlordRegistrationConfirmationEmail(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
                         registrantName = "Alice",
                         organisationName = "Test Org",
                         lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),

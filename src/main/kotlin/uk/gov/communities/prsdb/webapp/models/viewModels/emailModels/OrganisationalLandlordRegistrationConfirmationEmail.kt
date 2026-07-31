@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-data class OrganisationLandlordRegistrationConfirmationEmail(
+data class OrganisationalLandlordRegistrationConfirmationEmail(
     val registrantName: String,
     val organisationName: String,
     val lrn: String,
@@ -11,7 +11,7 @@ data class OrganisationLandlordRegistrationConfirmationEmail(
     private val lrnKey = "LRN"
     private val prsdURLKey = "PRSD URL"
 
-    override val template = EmailTemplate.ORGANISATION_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
+    override val template = EmailTemplate.ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

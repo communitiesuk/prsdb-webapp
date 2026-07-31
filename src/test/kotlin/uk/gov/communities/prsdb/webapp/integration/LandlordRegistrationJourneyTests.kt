@@ -62,7 +62,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisatio
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationLandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -85,7 +85,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
     @MockitoBean
-    private lateinit var orgConfirmationEmailSender: EmailNotificationService<OrganisationLandlordRegistrationConfirmationEmail>
+    private lateinit var orgConfirmationEmailSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -344,7 +344,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(orgConfirmationEmailSender).sendEmail(
             "registrant@example.com",
-            OrganisationLandlordRegistrationConfirmationEmail(
+            OrganisationalLandlordRegistrationConfirmationEmail(
                 registrantName = "name",
                 organisationName = "Test Organisation Name",
                 lrn = createdOrgLandlordRegNum.toString(),
@@ -352,7 +352,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             ),
         )
 
-        // TODO: PDJB-1180: assert the confirmation page renders here. It currently errors for org landlords because
+        // TODO: PDJB-1392: assert the confirmation page renders here. It currently errors for org landlords because
         //  RegisterLandlordController.getConfirmation looks the landlord up via retrieveLandlordByBaseUserId, which
         //  only finds IndividualLandlords.
     }

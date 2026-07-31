@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationLandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -20,7 +20,7 @@ class LandlordRegistrationService(
     private val organisationLandlordUserService: OrganisationLandlordUserService,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
     private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
-    private val orgRegistrationConfirmationSender: EmailNotificationService<OrganisationLandlordRegistrationConfirmationEmail>,
+    private val organisationalRegistrationConfirmationSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
@@ -122,7 +122,7 @@ class LandlordRegistrationService(
             organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, organisationGoverningBodyMembers)
         }
 
-        sendOrganisationRegistrationConfirmationEmail(landlord)
+        sendOrganisationalRegistrationConfirmationEmail(landlord)
 
         return landlord
     }
@@ -137,10 +137,11 @@ class LandlordRegistrationService(
         )
     }
 
-    private fun sendOrganisationRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
-        orgRegistrationConfirmationSender.sendEmail(
+    private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
+        // TODO: PDJB-1274: reassess which address and name to send to once there is a general way to email a landlord
+        organisationalRegistrationConfirmationSender.sendEmail(
             landlord.registrantEmail!!,
-            OrganisationLandlordRegistrationConfirmationEmail(
+            OrganisationalLandlordRegistrationConfirmationEmail(
                 registrantName = landlord.registrantName!!,
                 organisationName = landlord.name!!,
                 lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),

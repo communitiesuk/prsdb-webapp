@@ -35,13 +35,13 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    OrganisationLandlordRegistrationConfirmationEmail(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
                         registrantName = "Jill Jones",
                         organisationName = "Test Organisation Name",
                         lrn = "L-CCCC-CCCC",
                         prsdURL = "prsdUrl",
                     ),
-                    "/emails/OrganisationLandlordRegistrationConfirmation.md",
+                    "/emails/OrganisationalLandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
