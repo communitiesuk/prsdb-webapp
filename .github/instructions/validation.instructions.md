@@ -55,7 +55,7 @@ class MyValidator : PropertyConstraintValidator() {
 
 ### Message Keys
 - Define in YAML files in `messages/`
-- Use pattern: `{section}.{subsection}.error.{errorType}`
+- Use pattern: `forms.{section}.error.{errorType}`
 - Example: `forms.companyRegistrationNumber.error.missing: Enter a company number, like 12345678 or 00123456`
 
 ### Custom Error Messages
@@ -74,15 +74,15 @@ override fun isValid(value: String?, context: ConstraintValidatorContext): Boole
 ## Page-Level Validation
 ```kotlin
 class ExamplePage : Page() {
-    
+
     override fun validate(journeyData: JourneyData): List<ValidationError> {
         val errors = mutableListOf<ValidationError>()
-        
+
         // Cross-field validation
         if (startDate > endDate) {
             errors.add(ValidationError("endDate", "validation.dateRange.invalid"))
         }
-        
+
         return errors
     }
 }
@@ -92,12 +92,12 @@ class ExamplePage : Page() {
 ```kotlin
 class ExampleValidatorTests {
     private val validator = ExampleValidator()
-    
+
     @Test
     fun `valid input passes`() {
         assertThat(validator.isValid("valid", mockContext)).isTrue()
     }
-    
+
     @Test
     fun `invalid input fails`() {
         assertThat(validator.isValid("invalid", mockContext)).isFalse()
