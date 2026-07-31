@@ -39,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
@@ -479,12 +479,12 @@ class LandlordServiceTests {
                 phoneNumber = originalPhoneNumber,
                 dateOfBirth = originalDateOfBirth,
             )
-        val updateModel = LandlordUpdateModel(null, null, null, null, null)
+        val updateModel = IndividualLandlordUpdateModel(null, null, null, null, null)
 
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
 
         // Act
-        landlordService.updateLandlordForUser(updateModel) {}
+        landlordService.updateIndividualLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(originalName, landlordEntity.name)
@@ -506,7 +506,7 @@ class LandlordServiceTests {
             )
         val newAddress = createAddress("new address")
         val updateModel =
-            LandlordUpdateModel(
+            IndividualLandlordUpdateModel(
                 "newEmail",
                 "newName",
                 "new phone number",
@@ -519,7 +519,7 @@ class LandlordServiceTests {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        landlordService.updateLandlordForUser(updateModel) {}
+        landlordService.updateIndividualLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(updateModel.name, landlordEntity.name)
@@ -550,7 +550,7 @@ class LandlordServiceTests {
     @ParameterizedTest
     @MethodSource("getUpdateAndExpectedEmailPairs")
     fun `when a landlord is updated, a corresponding email is sent to each relevant email`(
-        updateModel: LandlordUpdateModel,
+        updateModel: IndividualLandlordUpdateModel,
         expectedDetail: String,
     ) {
         // Arrange
@@ -572,7 +572,7 @@ class LandlordServiceTests {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
         // Act
-        landlordService.updateLandlordForUser(updateModel) {}
+        landlordService.updateIndividualLandlordForUser(updateModel) {}
 
         // Assert
         val expectedEmailModel =
@@ -608,12 +608,12 @@ class LandlordServiceTests {
                 address = createAddress("original address"),
                 dateOfBirth = LocalDate.of(1991, 1, 1),
             )
-        val updateModel = LandlordUpdateModel(newCasingEmailAddress, null, null, null, null)
+        val updateModel = IndividualLandlordUpdateModel(newCasingEmailAddress, null, null, null, null)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordEntity)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        val updatedLandlord = landlordService.updateLandlordForUser(updateModel) {}
+        val updatedLandlord = landlordService.updateIndividualLandlordForUser(updateModel) {}
 
         // Assert
         assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
@@ -637,7 +637,7 @@ class LandlordServiceTests {
             )
         val newAddress = createAddress("new address")
         val updateModel =
-            LandlordUpdateModel(
+            IndividualLandlordUpdateModel(
                 "newEmail",
                 "newName",
                 "new phone number",
@@ -647,7 +647,7 @@ class LandlordServiceTests {
 
         // Act
         try {
-            landlordService.updateLandlordForUser(updateModel) { throw Exception("Invalid update") }
+            landlordService.updateIndividualLandlordForUser(updateModel) { throw Exception("Invalid update") }
         } catch (_: Exception) {
             // Expected exception, do nothing
         }
@@ -660,8 +660,8 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateLandlordForUser is annotated with @Transactional`() {
-        assertTrue(landlordService::updateLandlordForUser.hasAnnotation<Transactional>())
+    fun `updateIndividualLandlordForUser is annotated with @Transactional`() {
+        assertTrue(landlordService::updateIndividualLandlordForUser.hasAnnotation<Transactional>())
     }
 
     companion object {
@@ -669,7 +669,7 @@ class LandlordServiceTests {
         fun getUpdateAndExpectedEmailPairs() =
             listOf(
                 Arguments.of(
-                    LandlordUpdateModel(
+                    IndividualLandlordUpdateModel(
                         "newEmail",
                         null,
                         null,
@@ -679,7 +679,7 @@ class LandlordServiceTests {
                     "email address",
                 ),
                 Arguments.of(
-                    LandlordUpdateModel(
+                    IndividualLandlordUpdateModel(
                         null,
                         "newName",
                         null,
@@ -689,7 +689,7 @@ class LandlordServiceTests {
                     "name",
                 ),
                 Arguments.of(
-                    LandlordUpdateModel(
+                    IndividualLandlordUpdateModel(
                         null,
                         null,
                         "new phone number",
@@ -699,7 +699,7 @@ class LandlordServiceTests {
                     "telephone number",
                 ),
                 Arguments.of(
-                    LandlordUpdateModel(
+                    IndividualLandlordUpdateModel(
                         null,
                         null,
                         null,
@@ -709,7 +709,7 @@ class LandlordServiceTests {
                     "contact address",
                 ),
                 Arguments.of(
-                    LandlordUpdateModel(
+                    IndividualLandlordUpdateModel(
                         null,
                         null,
                         null,

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
@@ -16,8 +15,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -304,13 +301,5 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         setupValidTokenWithInvitation(invitation)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(acceptingLandlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("https://example.com/property"))
-    }
-
-    private fun setMockPrincipal(name: String) {
-        val authentication = mock<Authentication>()
-        whenever(authentication.name).thenReturn(name)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
     }
 }

@@ -52,7 +52,6 @@ class CancelInvitationStepConfigTests {
     @Mock
     lateinit var mockState: CancelJointLandlordInvitationJourneyState
 
-    private val baseUserId = "test-user-id"
     private val invitedEmail = "invitee@example.com"
     private val cancellerEmail = "canceller@example.com"
     private val cancellerName = "Canceller Name"
