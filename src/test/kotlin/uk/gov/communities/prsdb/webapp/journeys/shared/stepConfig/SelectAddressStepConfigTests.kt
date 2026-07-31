@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -87,6 +89,51 @@ class SelectAddressStepConfigTests {
 
         // Assert
         assertEquals(SelectAddressMode.ADDRESS_SELECTED, result)
+    }
+
+    @Test
+    fun `resolvePageContent pre-fills selected address when prefillSelectedAddress is provided`() {
+        val stepConfig = setupStepConfig()
+        val formModel = SelectAddressFormModel()
+        val content =
+            mapOf(
+                FORM_MODEL_ATTR_NAME to formModel,
+                "prefillSelectedAddress" to "1 PRSDB Square, EG1 2AA",
+            )
+
+        val result = stepConfig.resolvePageContent(mockAddressState, content)
+
+        val resultFormModel = result[FORM_MODEL_ATTR_NAME] as SelectAddressFormModel
+        assertEquals("1 PRSDB Square, EG1 2AA", resultFormModel.address)
+    }
+
+    @Test
+    fun `resolvePageContent does not overwrite existing address selection`() {
+        val stepConfig = setupStepConfig()
+        val formModel = SelectAddressFormModel()
+        formModel.address = "2 PRSDB Square, EG1 2AA"
+        val content =
+            mapOf(
+                FORM_MODEL_ATTR_NAME to formModel,
+                "prefillSelectedAddress" to "1 PRSDB Square, EG1 2AA",
+            )
+
+        val result = stepConfig.resolvePageContent(mockAddressState, content)
+
+        val resultFormModel = result[FORM_MODEL_ATTR_NAME] as SelectAddressFormModel
+        assertEquals("2 PRSDB Square, EG1 2AA", resultFormModel.address)
+    }
+
+    @Test
+    fun `resolvePageContent returns default content when no prefillSelectedAddress is provided`() {
+        val stepConfig = setupStepConfig()
+        val formModel = SelectAddressFormModel()
+        val content = mapOf(FORM_MODEL_ATTR_NAME to formModel)
+
+        val result = stepConfig.resolvePageContent(mockAddressState, content)
+
+        val resultFormModel = result[FORM_MODEL_ATTR_NAME] as SelectAddressFormModel
+        assertNull(resultFormModel.address)
     }
 
     private fun setupStepConfig(): SelectAddressStepConfig {
