@@ -6,11 +6,11 @@ import uk.gov.communities.prsdb.webapp.validation.NotNullConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class OrgCompaniesHouseFormModel : FormModel {
+class OrgIsRegisteredCompanyFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.orgCompaniesHouse.error.missing",
+                messageKey = "registerAsALandlord.orgIsRegisteredCompany.error.missing",
                 validatorType = NotNullConstraintValidator::class,
             ),
         ],
