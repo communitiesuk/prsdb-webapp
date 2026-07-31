@@ -33,7 +33,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumb
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
@@ -125,9 +124,8 @@ class LandlordRegistrationCyaStepConfig(
                 organisationMainContactPhoneNumber = mainContact.notNullValue(OrgMainContactFormModel::phoneNumber),
                 organisationRegistrantName = state.identityTask.getName(),
                 organisationRegistrantDateOfBirth = state.identityTask.getDateOfBirth(),
-                // TODO: PDJB-1282 - replace with real registrant email and phone once those steps exist
-                organisationRegistrantEmail = "",
-                organisationRegistrantPhoneNumber = "",
+                organisationRegistrantEmail = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                organisationRegistrantPhoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
                 organisationGoverningBodyMembers = governingBodyMembers,
             )
 
@@ -139,13 +137,13 @@ class LandlordRegistrationCyaStepConfig(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             name = state.identityTask.getName(),
             email =
-                state.individualLandlordRegistrationTask.emailStep.formModel
+                state.emailStep.formModel
                     .notNullValue(EmailFormModel::emailAddress),
             phoneNumber =
-                state.individualLandlordRegistrationTask.phoneNumberStep.formModel.notNullValue(
+                state.phoneNumberStep.formModel.notNullValue(
                     PhoneNumberFormModel::phoneNumber,
                 ),
-            address = state.individualLandlordRegistrationTask.addressTask.getAddress(),
+            address = state.individualLandlordLocationTask.addressTask.getAddress(),
             countryOfResidence = ENGLAND_OR_WALES,
             isVerified = state.identityTask.getIsIdentityVerified(),
             hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
@@ -231,20 +229,20 @@ class LandlordRegistrationCyaStepConfig(
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
-                state.individualLandlordRegistrationTask.emailStep.formModel
+                state.emailStep.formModel
                     .notNullValue(EmailFormModel::emailAddress),
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.emailStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.emailStep),
+                    state.emailStep,
+                    state.getCyaJourneyId(state.emailStep),
                 ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
-                state.individualLandlordRegistrationTask.phoneNumberStep.formModel
+                state.phoneNumberStep.formModel
                     .notNullValue(PhoneNumberFormModel::phoneNumber),
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.phoneNumberStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.phoneNumberStep),
+                    state.phoneNumberStep,
+                    state.getCyaJourneyId(state.phoneNumberStep),
                 ),
             ),
         )
@@ -253,22 +251,22 @@ class LandlordRegistrationCyaStepConfig(
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
-                state.individualLandlordRegistrationTask.countryOfResidenceStep.formModel.notNullValue(
+                state.individualLandlordLocationTask.countryOfResidenceStep.formModel.notNullValue(
                     CountryOfResidenceFormModel::livesInEnglandOrWales,
                 ),
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.countryOfResidenceStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.countryOfResidenceStep),
+                    state.individualLandlordLocationTask.countryOfResidenceStep,
+                    state.getCyaJourneyId(state.individualLandlordLocationTask.countryOfResidenceStep),
                 ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
-                state.individualLandlordRegistrationTask.addressTask
+                state.individualLandlordLocationTask.addressTask
                     .getAddress()
                     .singleLineAddress,
                 Destination.VisitableStep(
-                    state.individualLandlordRegistrationTask.addressTask.lookupAddressStep,
-                    state.getCyaJourneyId(state.individualLandlordRegistrationTask.addressTask.lookupAddressStep),
+                    state.individualLandlordLocationTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.individualLandlordLocationTask.addressTask.lookupAddressStep),
                 ),
             ),
         )
@@ -286,9 +284,6 @@ class LandlordRegistrationCyaStepConfig(
         )
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
-        // TODO: PDJB-1282 - review this identity-verification branch; whether organisation landlords can be
-        // identity-verified at all (and so whether the name/date-of-birth Change links should ever be suppressed)
-        // may change.
         val verified = state.identityTask.getIsIdentityVerified()
         val rows =
             listOf(
@@ -313,9 +308,22 @@ class LandlordRegistrationCyaStepConfig(
                         )
                     },
                 ),
-                // TODO: PDJB-1282 - replace these dummy email and phone rows with the user's real contact details once collected.
-                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.email", "Indiana.jones@marshallCollege.com"),
-                dummyRow("registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber", "020 7123 4567"),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.yourDetails.email",
+                    state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
+                    Destination.VisitableStep(
+                        state.emailStep,
+                        state.getCyaJourneyId(state.emailStep),
+                    ),
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "registerAsALandlord.orgCheckAnswers.yourDetails.phoneNumber",
+                    state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
+                    Destination.VisitableStep(
+                        state.phoneNumberStep,
+                        state.getCyaJourneyId(state.phoneNumberStep),
+                    ),
+                ),
             )
         return SummaryCardViewModel(
             title = "registerAsALandlord.orgCheckAnswers.yourDetails.cardTitle",
@@ -619,16 +627,6 @@ class LandlordRegistrationCyaStepConfig(
         )
     }
 
-    // TODO: PDJB-1282 - dummy row with a non-functional Change link; replace once the underlying step exists.
-    private fun dummyRow(
-        headingKey: String,
-        value: Any?,
-    ) = SummaryListRowViewModel(
-        fieldHeading = headingKey,
-        fieldValue = value,
-        actions = listOf(SummaryListRowActionsViewModel("forms.links.change", PLACEHOLDER_CHANGE_URL)),
-    )
-
     // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
     private fun getOrgAddress(address: ManualAddressFormModel) =
         AddressDataModel
@@ -685,12 +683,6 @@ class LandlordRegistrationCyaStepConfig(
             CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
             CharityRegulator.NONE -> "commonText.other"
         }
-
-    companion object {
-        // TODO: PDJB-1282 - non-functional Change link placeholder for the your-details email/phone rows
-        // until those steps exist.
-        private const val PLACEHOLDER_CHANGE_URL = "#"
-    }
 }
 
 @JourneyFrameworkComponent

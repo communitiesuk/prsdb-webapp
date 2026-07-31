@@ -11,7 +11,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 @ExtendWith(MockitoExtension::class)
 class AbstractConfirmEpcDetailsStepConfigTests {
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     private val routeSegment = "test-route-segment"
 
@@ -30,9 +30,9 @@ class AbstractConfirmEpcDetailsStepConfigTests {
             object : AbstractConfirmEpcDetailsStepConfig<ConfirmEpcDetailsFromUprnFormModel>() {
                 override val formModelClass = ConfirmEpcDetailsFromUprnFormModel::class
 
-                override fun getStepSpecificContent(state: EpcState) = emptyMap<String, Any?>()
+                override fun getStepSpecificContent(state: EpcDetailState) = emptyMap<String, Any?>()
 
-                override fun chooseTemplate(state: EpcState) = ""
+                override fun chooseTemplate(state: EpcDetailState) = ""
             }
         stepConfig.usingEpc { usingEpc }
         stepConfig.routeSegment = routeSegment

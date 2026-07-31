@@ -5,40 +5,26 @@ import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IndividualLandlordRegistrationState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IndividualLandlordLocationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 
 @JourneyFrameworkComponent
-class IndividualLandlordRegistrationTask(
+class IndividualLandlordLocationTask(
     journeyStateService: JourneyStateService,
-    override val emailStep: EmailStep,
-    override val phoneNumberStep: PhoneNumberStep,
     override val countryOfResidenceStep: CountryOfResidenceStep,
     override val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep,
     override val addressTask: LandlordAddressTask,
-) : DuplicableTask<IndividualLandlordRegistrationState>(journeyStateService),
-    IndividualLandlordRegistrationState {
+) : DuplicableTask<IndividualLandlordLocationState>(journeyStateService),
+    IndividualLandlordLocationState {
     override val taskState get() = this
 
-    override fun makeSubJourney(state: IndividualLandlordRegistrationState) =
+    override fun makeSubJourney(state: IndividualLandlordLocationState) =
         subJourney(state) {
-            step(journey.emailStep) {
-                routeSegment(EmailStep.ROUTE_SEGMENT)
-                nextStep { journey.phoneNumberStep }
-            }
-            step(journey.phoneNumberStep) {
-                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                parents { journey.emailStep.isComplete() }
-                nextStep { journey.countryOfResidenceStep }
-            }
             step(journey.countryOfResidenceStep) {
                 routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
-                parents { journey.phoneNumberStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
                         CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep

@@ -17,13 +17,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
-    override val yourDetailsStep: YourDetailsStep,
     override val orgNameStep: OrgNameStep,
     override val orgAddressStep: OrgAddressStep,
     override val orgEmailStep: OrgEmailStep,
@@ -42,13 +40,8 @@ class OrgLandlordRegistrationTask(
 
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
-            step(journey.yourDetailsStep) {
-                routeSegment(YourDetailsStep.ROUTE_SEGMENT)
-                nextStep { journey.orgNameStep }
-            }
             step(journey.orgNameStep) {
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
-                parents { journey.yourDetailsStep.isComplete() }
                 nextStep { journey.orgAddressStep }
             }
             step(journey.orgAddressStep) {

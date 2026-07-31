@@ -11,7 +11,9 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.Test
 
@@ -24,6 +26,12 @@ class LandlordDetailsControllerTests(
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     @Nested
     inner class GetUserLandlordDetailsTests {
@@ -46,7 +54,7 @@ class LandlordDetailsControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `getUserLandlordDetails returns 200 for a valid request from a landlord`() {
             val landlord = MockLandlordData.createIndividualLandlord()
-            whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
                     "user",

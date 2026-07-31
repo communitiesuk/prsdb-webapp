@@ -1,16 +1,19 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -19,9 +22,32 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 
-@JourneyFrameworkComponent
-class ElectricalSafetyDetailsTask : Task<ElectricalSafetyState>() {
-    override fun makeSubJourney(state: ElectricalSafetyState) =
+@JourneyFrameworkComponent("propertyRegistrationElectricalSafetyDetailsTask")
+class ElectricalSafetyDetailsTask(
+    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
+    override val hasElectricalCertStep: HasElectricalCertStep,
+    override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
+    override val uploadElectricalCertStep: UploadElectricalCertStep,
+    override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
+    override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
+    override val electricalCertExpiredStep: ElectricalCertExpiredStep,
+    override val electricalCertMissingStep: ElectricalCertMissingStep,
+    override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
+    journeyStateService: JourneyStateService,
+) : DuplicableTaskWithDependencies<ElectricalSafetyDetailState, ElectricalSafetyDependencies>(journeyStateService),
+    ElectricalSafetyDetailState {
+    override val taskState: ElectricalSafetyDetailState
+        get() = this
+
+    override val isOccupied: Boolean
+        get() = dependencies.isOccupied
+    override val allowProvideCertificateLaterRoute: Boolean
+        get() = dependencies.allowProvideCertificateLaterRoute
+
+    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
+    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
+
+    override fun makeSubJourney(state: ElectricalSafetyDetailState) =
         subJourney(state) {
             step(journey.hasElectricalCertStep) {
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)

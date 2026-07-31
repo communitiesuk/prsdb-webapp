@@ -59,7 +59,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.YourDetailsPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -221,14 +220,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
         confirmIdentityPage.confirm()
 
-        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
-        landlordTypePage.submitIndividual()
-
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
         emailPage.submitEmail("test@example.com")
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         phoneNumPage.submitPhoneNumber("07123456789")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitUk()
@@ -274,12 +273,14 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
         confirmIdentityPage.confirm()
 
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("registrant@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitOrganisation()
-
-        // TODO: PDJB-1282 - Submit real your details data once the step is implemented
-        val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
-        yourDetailsPage.form.submit()
 
         val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
         orgNamePage.submitName("Test Organisation Name")
@@ -321,12 +322,78 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
         assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
+        assertThat(checkAnswersPage.yourDetailsCard).containsText("registrant@example.com")
+        assertThat(checkAnswersPage.yourDetailsCard).containsText("07123456789")
         assertThat(checkAnswersPage.landlordDetails.landlordTypeRow).containsText("Organisation")
         assertThat(checkAnswersPage.landlordDetails.organisationNameRow).containsText("Test Organisation Name")
         assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Company")
         assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
 
         // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+    }
+
+    @Test
+    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for individual flow`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for organisation flow`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val identityNotVerifiedPage = assertPageIs(page, IdentityNotVerifiedFormPageLandlordRegistration::class)
+        identityNotVerifiedPage.clickContinue()
+
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("registrant@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitOrganisation()
+
+        assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -518,7 +585,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitIndividual()
 
-        assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -534,7 +601,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitOrganisation()
 
-        assertPageIs(page, YourDetailsPageLandlordRegistration::class)
+        assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
     }
 
     // TODO PDJB-1237: add a test for the organisation type change link once the org type update journey is wired into

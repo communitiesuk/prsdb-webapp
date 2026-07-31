@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
@@ -14,10 +14,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class EpcSuperseededStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
+    override fun getStepSpecificContent(state: EpcDetailState): Map<String, Any?> {
         val supersededEpc = state.epcRetrievedByCertificateNumber
         val latestEpc = state.updatedEpcRetrievedByCertificateNumber
         val messageKeyPrefix = "propertyCompliance.epcTask.epcSuperseded"
@@ -74,11 +74,11 @@ class EpcSuperseededStepConfig(
         )
     }
 
-    override fun chooseTemplate(state: EpcState) = "forms/confirmUpdatedEpcForm"
+    override fun chooseTemplate(state: EpcDetailState) = "forms/confirmUpdatedEpcForm"
 
-    override fun mode(state: EpcState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: EpcDetailState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    override fun afterStepDataIsAdded(state: EpcState) {
+    override fun afterStepDataIsAdded(state: EpcDetailState) {
         state.acceptedEpc = state.updatedEpcRetrievedByCertificateNumber
     }
 }
@@ -86,7 +86,7 @@ class EpcSuperseededStepConfig(
 @JourneyFrameworkComponent
 final class EpcSuperseededStep(
     stepConfig: EpcSuperseededStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, EpcDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "epc-superseded"
     }
