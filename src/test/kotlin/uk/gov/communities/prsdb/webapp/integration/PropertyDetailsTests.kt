@@ -660,3 +660,30 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
     }
 }
+
+@WithOrgLandlordUser
+class PropertyDetailsOrgLandlordTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Test
+    fun `property solely owned by org landlord shows your organisation in card title`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(47)
+        detailsPage.tabs.goToLandlordDetails()
+
+        assertEquals(1, detailsPage.landlordSummaryCards.size)
+        val orgCard = detailsPage.landlordSummaryCards[0]
+        assertEquals("Local Organisation Landlord (your organisation)", orgCard.title.getText())
+    }
+
+    @Test
+    fun `joint property shows your organisation for org landlord and not for other landlord`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
+        detailsPage.tabs.goToLandlordDetails()
+
+        assertEquals(2, detailsPage.landlordSummaryCards.size)
+
+        val orgCard = detailsPage.landlordSummaryCards[0]
+        assertEquals("Local Organisation Landlord (your organisation)", orgCard.title.getText())
+
+        val otherCard = detailsPage.landlordSummaryCards[1]
+        assertEquals("Alexander Smith", otherCard.title.getText())
+    }
+}
