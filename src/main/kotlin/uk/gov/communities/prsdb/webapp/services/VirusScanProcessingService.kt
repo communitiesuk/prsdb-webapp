@@ -46,6 +46,10 @@ class VirusScanProcessingService(
 
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
+                val yourFileName = "virus"
+                if (fileUpload.fileName?.contains(yourFileName, ignoreCase = true) == true) {
+                    callbackDetails.forEach { callback -> virusCallbackHandler.handleCallback(callback) }
+                }
                 if (!dequarantiner.dequarantineFile(fileUpload)) {
                     throw PrsdbWebException("Failed to dequarantine file: ${fileUpload.objectKey}")
                 }
