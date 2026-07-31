@@ -116,7 +116,12 @@ class LandlordRegistrationService(
                 registrantPhoneNumber = organisationRegistrantPhoneNumber,
             )
 
-        organisationLandlordUserService.createOrganisationLandlordUser(landlord, baseUser)
+        organisationLandlordUserService.createOrganisationLandlordUser(
+            landlord,
+            baseUser,
+            organisationRegistrantName,
+            organisationRegistrantEmail,
+        )
 
         if (!organisationHasCompanyNumber) {
             organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, organisationGoverningBodyMembers)
