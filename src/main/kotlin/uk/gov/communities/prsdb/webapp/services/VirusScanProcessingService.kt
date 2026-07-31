@@ -46,7 +46,8 @@ class VirusScanProcessingService(
 
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
-                val yourFileName = "virus"
+                // as this is uses .contains you can drop the .png file extension
+                val yourFileName = "cert"
                 if (fileUpload.fileName?.contains(yourFileName, ignoreCase = true) == true) {
                     callbackDetails.forEach { callback -> virusCallbackHandler.handleCallback(callback) }
                 }
