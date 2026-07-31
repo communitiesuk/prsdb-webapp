@@ -53,5 +53,15 @@ jobs:
           EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
         run: ./gradlew clean check --no-daemon
 
+      # TEMPORARY, experiment branch only: gives each CI run per-class timings rather than a single
+      # noisy wall-clock number, so changes under ~10% can be judged against CI's ~2 min variance.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_attempt }}
+          path: build/test-results/test/*.xml
+          retention-days: 5
+
       - name: Run ktlintFormat
         run: ./gradlew ktlintFormat --no-daemon

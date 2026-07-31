@@ -132,6 +132,7 @@ abstract class IntegrationTest {
 
     @BeforeEach
     fun setUp(page: Page) {
+        blockExternalAnalytics(page)
         navigator = Navigator(page, port)
     }
 
@@ -158,7 +159,16 @@ abstract class IntegrationTest {
 
     fun createPageAndNavigator(browserContext: BrowserContext): Pair<Page, Navigator> {
         val page = browserContext.newPage()
+        blockExternalAnalytics(page)
         val navigator = Navigator(page, port)
         return Pair(page, navigator)
+    }
+
+    // The layout renders <script async src="https://plausible.io/js/pa-...js"> from a hardcoded constant, so
+    // every page load reaches out to the internet. That script delays the window load event, which
+    // ClickAndWaitable.clickAndWait waits for, putting an external round trip on the critical path of every
+    // interaction. Each test gets a fresh BrowserContext, so the browser cache never helps.
+    private fun blockExternalAnalytics(page: Page) {
+        page.route("**plausible.io**") { it.abort() }
     }
 }
