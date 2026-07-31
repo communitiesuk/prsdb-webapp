@@ -13,11 +13,9 @@ class PhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, PhoneNumbe
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.phoneNumber.fieldSetHeading",
-            "fieldSetHint" to "forms.phoneNumber.fieldSetHint",
-            "label" to "forms.phoneNumber.label",
+            "fieldSetHeading" to "registerAsALandlord.phoneNumber.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
-            "hint" to "forms.phoneNumber.hint",
+            "hint" to "registerAsALandlord.phoneNumber.hint",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/phoneNumberForm"

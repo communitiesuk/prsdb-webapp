@@ -42,14 +42,6 @@ orgCompanyNumber:
     missing: "Enter a company number, like 12345678 or 00123456"
     length: "Company number must be 8 characters, like 12345678 or 00123456"
     invalidCharacters: Company number must only include numbers and letters A to Z
-phoneNumber:
-  fieldSetHeading: What is your phone number?
-  fieldSetHint: We’ll use this to contact you about your record.
-  label: Enter your phone number
-  hint: For international numbers include the country code
-  error:
-    missing: Enter a phone number
-    invalidFormat: Enter a phone number including the country code for international numbers
 orgCharityNumber:
   fieldSetHeading: What is your organisation’s charity number?
   fieldSetHint: Enter the number as shown on the charities register
