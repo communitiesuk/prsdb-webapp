@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -153,8 +154,14 @@ class LandlordRegistrationTask(
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.individualLandlordLocationTask.isComplete(),
-                        journey.orgLandlordRegistrationTask.isComplete(),
+                        AndParents(
+                            journey.individualLandlordLocationTask.isComplete(),
+                            journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
+                        ),
+                        AndParents(
+                            journey.orgLandlordRegistrationTask.isComplete(),
+                            journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION),
+                        ),
                     )
                 }
                 nextStep { exitStep }
