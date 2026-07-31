@@ -228,6 +228,21 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertEquals("Tobias Evans", thirdCard.title.getText())
                 assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
             }
+
+            @Test
+            fun `joint property with org landlord shows org landlord card with LRN and email`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(2, detailsPage.landlordSummaryCards.size)
+                val currentUserCard = detailsPage.landlordSummaryCards[0]
+                assertEquals("Alexander Smith (you)", currentUserCard.title.getText())
+
+                val orgCard = detailsPage.landlordSummaryCards[1]
+                assertEquals("Local Organisation Landlord", orgCard.title.getText())
+                assertThat(orgCard.summaryList.emailAddressRow.value).containsText("local-org-landlord@example.com")
+                assertThat(orgCard.summaryList.registrationNumberRow.value).not().isEmpty()
+            }
         }
     }
 
