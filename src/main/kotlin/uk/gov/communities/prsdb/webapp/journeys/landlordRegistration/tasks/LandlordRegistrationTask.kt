@@ -251,20 +251,48 @@ class LandlordRegistrationTask(
 
                     OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
                     OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
-                    OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
-                    OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
-                    OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
                     -> {
                         duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.charityTask, null)
                     }
 
+                    OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberEnglandAndWalesStep,
+                            OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberNorthernIrelandStep,
+                            OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberScotlandStep,
+                            OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
+                        )
+                    }
+
                     OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
-                    OrgCompanyNumberStep.ROUTE_SEGMENT,
                     -> {
                         // TODO PDJB-1238 : replace this placeholder with the companies house update journey
                         checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, checkingAnswersFor) {
                             withAdditionalContentProperty { "todoComment" to "TODO PDJB-1238: Companies House update journey" }
                         }
+                    }
+
+                    OrgCompanyNumberStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep,
+                            OrgCompanyNumberStep.ROUTE_SEGMENT,
+                        )
                     }
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {
