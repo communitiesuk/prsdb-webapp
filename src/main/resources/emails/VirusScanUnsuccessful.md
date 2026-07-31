@@ -1,16 +1,19 @@
-# Your ((heading certificate type)) failed our virus scan
-## The ((body certificate type)) did not upload for this property:
-^ ((single line address))
+Hello ((recipient name)),
 
-This property's registration number is:
+There was a problem uploading the ((certificate type)) for this property.
 
-((registration number))
+# Property
 
-You should check the file and try uploading it again.
+((property address))
 
-If the file fails the virus scan again, you should upload a different version of the file.
+# What to do next
 
-[Return to the database to try again](((property url)))
+Check the file and try uploading it again.
+
+If the file fails the virus scan again, upload a different version of the file.
+
+[Sign in to your account](((dashboard url)))
 
 ---
+
 This is an automated email - do not reply.
