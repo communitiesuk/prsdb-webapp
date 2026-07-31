@@ -168,4 +168,9 @@ orgGovBodyMemberDob:
   fieldSetHint: 'For example, 27 03 1968'
   error:
     invalidAge: The minimum age is 16
-
+phoneNumber:
+  fieldSetHeading: What is your phone number?
+  hint: For international numbers include the country code
+  error:
+    missing: Enter a phone number
+    invalidFormat: Enter a phone number including the country code for international numbers
