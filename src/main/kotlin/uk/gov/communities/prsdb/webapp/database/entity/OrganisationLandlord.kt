@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -91,6 +93,18 @@ class OrganisationLandlord() : Landlord() {
 
     @Column(name = "organisation_main_contact_phone")
     lateinit var mainContactPhone: String
+
+    @OneToMany(mappedBy = "organisationLandlord", fetch = FetchType.EAGER)
+    private val organisationLandlordUsers: MutableSet<OrganisationLandlordUser> = mutableSetOf()
+
+    // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
+    @get:Transient
+    override val email: String
+        get() = organisationLandlordUsers.single().email
+
+    internal fun addOrganisationLandlordUser(organisationLandlordUser: OrganisationLandlordUser) {
+        organisationLandlordUsers.add(organisationLandlordUser)
+    }
 
     constructor(
         registrationNumber: RegistrationNumber,
