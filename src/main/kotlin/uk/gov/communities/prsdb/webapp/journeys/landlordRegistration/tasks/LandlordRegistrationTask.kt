@@ -268,14 +268,11 @@ class LandlordRegistrationTask(
                     }
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.orgTypeTask.leadTrusteeTask, null)
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
                     }
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(
-                            journey.orgLandlordRegistrationTask.companiesHouseTask.orgGovBodyTask.orgGovBodyMembersTask,
-                            null,
-                        )
+                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask, null)
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {

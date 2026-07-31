@@ -16,7 +16,6 @@ class OrgCompaniesHouseTask(
     journeyStateService: JourneyStateService,
     override val orgCompaniesHouseStep: OrgIsRegisteredCompanyStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
-    override val orgGovBodyTask: OrgGovBodyTask,
 ) : DuplicableTask<OrgCompaniesHouseState>(journeyStateService),
     OrgCompaniesHouseState {
     override val taskState get() = this
@@ -28,7 +27,7 @@ class OrgCompaniesHouseTask(
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.orgCompanyNumberStep
-                        YesOrNo.NO -> journey.orgGovBodyTask.firstStep
+                        YesOrNo.NO -> exitStep
                     }
                 }
             }
@@ -37,15 +36,11 @@ class OrgCompaniesHouseTask(
                 parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
                 nextStep { exitStep }
             }
-            duplicableTask(journey.orgGovBodyTask) {
-                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
-                nextStep { exitStep }
-            }
             exitStep {
                 parents {
                     OrParents(
+                        journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO),
                         journey.orgCompanyNumberStep.isComplete(),
-                        journey.orgGovBodyTask.isComplete(),
                     )
                 }
             }
