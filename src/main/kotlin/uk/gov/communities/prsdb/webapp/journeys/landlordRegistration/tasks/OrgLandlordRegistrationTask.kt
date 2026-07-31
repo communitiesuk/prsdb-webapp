@@ -85,7 +85,7 @@ class OrgLandlordRegistrationTask(
             duplicableTask(journey.companiesHouseTask) {
                 parents { journey.charityTask.isComplete() }
                 nextDestination {
-                    if (journey.companiesHouseTask.orgCompaniesHouseStep.outcome == YesOrNo.NO) {
+                    if (journey.companiesHouseTask.orgIsRegisteredCompanyStep.outcome == YesOrNo.NO) {
                         Destination(journey.orgGovBodyTask.firstStep)
                     } else {
                         Destination(journey.orgMainContactStep)
@@ -93,7 +93,7 @@ class OrgLandlordRegistrationTask(
                 }
             }
             duplicableTask(journey.orgGovBodyTask) {
-                parents { journey.companiesHouseTask.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO) }
+                parents { journey.companiesHouseTask.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO) }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
@@ -102,7 +102,7 @@ class OrgLandlordRegistrationTask(
                     OrParents(
                         AndParents(
                             journey.companiesHouseTask.isComplete(),
-                            journey.companiesHouseTask.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES),
+                            journey.companiesHouseTask.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.YES),
                         ),
                         journey.orgGovBodyTask.isComplete(),
                     )

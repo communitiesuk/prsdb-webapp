@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 @JourneyFrameworkComponent
 class OrgCompaniesHouseTask(
     journeyStateService: JourneyStateService,
-    override val orgCompaniesHouseStep: OrgIsRegisteredCompanyStep,
+    override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
 ) : DuplicableTask<OrgCompaniesHouseState>(journeyStateService),
     OrgCompaniesHouseState {
@@ -22,7 +22,7 @@ class OrgCompaniesHouseTask(
 
     override fun makeSubJourney(state: OrgCompaniesHouseState) =
         subJourney(state) {
-            step(journey.orgCompaniesHouseStep) {
+            step(journey.orgIsRegisteredCompanyStep) {
                 routeSegment(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
@@ -33,13 +33,13 @@ class OrgCompaniesHouseTask(
             }
             step(journey.orgCompanyNumberStep) {
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
+                parents { journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.YES) }
                 nextStep { exitStep }
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO),
+                        journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO),
                         journey.orgCompanyNumberStep.isComplete(),
                     )
                 }

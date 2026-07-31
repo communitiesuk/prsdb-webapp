@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 
 interface OrgCharityState : JourneyState {
-    val orgCharityStep: OrgIsRegisteredCharityStep
+    val orgIsRegisteredCharityStep: OrgIsRegisteredCharityStep
     val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep
     val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep
     val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep

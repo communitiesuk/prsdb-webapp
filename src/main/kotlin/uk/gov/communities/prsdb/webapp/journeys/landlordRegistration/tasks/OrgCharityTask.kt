@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 @JourneyFrameworkComponent
 class OrgCharityTask(
     journeyStateService: JourneyStateService,
-    override val orgCharityStep: OrgIsRegisteredCharityStep,
+    override val orgIsRegisteredCharityStep: OrgIsRegisteredCharityStep,
     override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
     override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
     override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
@@ -29,7 +29,7 @@ class OrgCharityTask(
 
     override fun makeSubJourney(state: OrgCharityState) =
         subJourney(state) {
-            step(journey.orgCharityStep) {
+            step(journey.orgIsRegisteredCharityStep) {
                 routeSegment(OrgIsRegisteredCharityStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
@@ -40,7 +40,7 @@ class OrgCharityTask(
             }
             step(journey.orgCharityRegisteredWithStep) {
                 routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
+                parents { journey.orgIsRegisteredCharityStep.hasOutcome(YesOrNo.YES) }
                 nextStep { mode ->
                     when (mode) {
                         CharityRegulator.ENGLAND_AND_WALES -> journey.orgCharityNumberEnglandAndWalesStep
@@ -68,7 +68,7 @@ class OrgCharityTask(
             exitStep {
                 parents {
                     OrParents(
-                        journey.orgCharityStep.hasOutcome(YesOrNo.NO),
+                        journey.orgIsRegisteredCharityStep.hasOutcome(YesOrNo.NO),
                         journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NONE),
                         journey.orgCharityNumberEnglandAndWalesStep.isComplete(),
                         journey.orgCharityNumberNorthernIrelandStep.isComplete(),

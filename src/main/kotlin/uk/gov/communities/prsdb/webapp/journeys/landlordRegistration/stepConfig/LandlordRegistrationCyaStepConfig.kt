@@ -63,9 +63,12 @@ class LandlordRegistrationCyaStepConfig(
 
             val organisationTypes = org.orgTypeStep.formModel.getSelectedOrgTypes()
             val isTrust = OrgType.TRUST in organisationTypes
-            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
+            val isRegisteredCharity =
+                org.charityTask.orgIsRegisteredCharityStep.formModel.notNullValue(
+                    OrgIsRegisteredCharityFormModel::charity,
+                )
             val hasCompanyNumber =
-                org.companiesHouseTask.orgCompaniesHouseStep.formModel.notNullValue(
+                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
                     OrgIsRegisteredCompanyFormModel::companiesHouse,
                 )
 
@@ -381,12 +384,18 @@ class LandlordRegistrationCyaStepConfig(
                 ),
             )
 
-            val isRegisteredCharity = org.charityTask.orgCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
+            val isRegisteredCharity =
+                org.charityTask.orgIsRegisteredCharityStep.formModel.notNullValue(
+                    OrgIsRegisteredCharityFormModel::charity,
+                )
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredCharity",
                     isRegisteredCharity,
-                    Destination.VisitableStep(org.charityTask.orgCharityStep, state.getCyaJourneyId(org.charityTask.orgCharityStep)),
+                    Destination.VisitableStep(
+                        org.charityTask.orgIsRegisteredCharityStep,
+                        state.getCyaJourneyId(org.charityTask.orgIsRegisteredCharityStep),
+                    ),
                 ),
             )
 
@@ -416,7 +425,7 @@ class LandlordRegistrationCyaStepConfig(
             }
 
             val registeredWithCompaniesHouse =
-                org.companiesHouseTask.orgCompaniesHouseStep.formModel.notNullValue(
+                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
                     OrgIsRegisteredCompanyFormModel::companiesHouse,
                 )
             add(
@@ -424,8 +433,8 @@ class LandlordRegistrationCyaStepConfig(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
                     registeredWithCompaniesHouse,
                     Destination.VisitableStep(
-                        org.companiesHouseTask.orgCompaniesHouseStep,
-                        state.getCyaJourneyId(org.companiesHouseTask.orgCompaniesHouseStep),
+                        org.companiesHouseTask.orgIsRegisteredCompanyStep,
+                        state.getCyaJourneyId(org.companiesHouseTask.orgIsRegisteredCompanyStep),
                     ),
                 ),
             )

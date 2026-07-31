@@ -5,6 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 
 interface OrgCompaniesHouseState : JourneyState {
-    val orgCompaniesHouseStep: OrgIsRegisteredCompanyStep
+    val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
     val orgCompanyNumberStep: OrgCompanyNumberStep
 }
