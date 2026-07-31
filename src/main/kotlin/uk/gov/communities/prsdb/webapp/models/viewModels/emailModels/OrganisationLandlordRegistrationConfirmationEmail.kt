@@ -6,13 +6,18 @@ data class OrganisationLandlordRegistrationConfirmationEmail(
     val lrn: String,
     val prsdURL: String,
 ) : EmailTemplateModel {
+    private val registrantNameKey = "registrant name"
+    private val organisationNameKey = "organisation name"
+    private val lrnKey = "LRN"
+    private val prsdURLKey = "PRSD URL"
+
     override val template = EmailTemplate.ORGANISATION_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL
 
-    override fun toHashMap() =
+    override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            "registrant name" to registrantName,
-            "organisation name" to organisationName,
-            "LRN" to lrn,
-            "PRSD URL" to prsdURL,
+            registrantNameKey to registrantName,
+            organisationNameKey to organisationName,
+            lrnKey to lrn,
+            prsdURLKey to prsdURL,
         )
 }
