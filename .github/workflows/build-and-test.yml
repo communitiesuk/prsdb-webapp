@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3, 4, 5]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -55,7 +55,7 @@ jobs:
         env:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
           EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
-        run: ./gradlew clean test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
+        run: ./gradlew clean test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=6
 
   lint:
     name: Lint
