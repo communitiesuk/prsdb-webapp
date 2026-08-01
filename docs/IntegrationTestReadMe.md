@@ -13,6 +13,18 @@ We set seed data by passing SQL script names into integration test class constru
 Tests that require different seed data to the rest of the class must be put in nested classes that inherit from 
 `NestedIntegrationTestWithMutableData` or `NestedIntegrationTestWithImmutableData` depending on the outer class.
 
+Resetting the database means truncating every table in the `public` schema with `RESTART IDENTITY CASCADE`, then
+running the seed scripts. Migrations run once per JVM at Spring context startup rather than being re-applied for every
+reset. Two tables are deliberately preserved:
+
+* `flyway_schema_history` - Flyway's own bookkeeping. Dropping it would make every migration re-run.
+* `local_council` - reference data inserted by `V1_0_0__la_and_address_tables.sql` (as `local_authority`, renamed by
+  `V1_6_0`). No seed script writes to it.
+
+These are the only two tables with rows after a bare migrate. If you add a migration that inserts reference data, add
+its table to `PRESERVED_TABLES` in `IntegrationTestHelper`, or the data will be wiped before every test. You can check
+which tables hold reference data by migrating an empty database and looking for non-empty tables.
+
 ## Page Objects (and Components)
 
 We encapsulate logic for interacting with our pages into page objects (as described by [Martin Fowler](https://martinfowler.com/bliki/PageObject.html) and

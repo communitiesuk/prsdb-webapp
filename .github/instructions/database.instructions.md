@@ -101,6 +101,13 @@ CREATE TABLE example_table (
 CREATE INDEX idx_example_name ON example_table(name);
 ```
 
+### Reference Data in Migrations
+
+Integration tests reset the database by truncating every table except `flyway_schema_history` and `local_council`.
+If a migration inserts reference data that tests rely on, add that table to `PRESERVED_TABLES` in
+`src/test/kotlin/uk/gov/communities/prsdb/webapp/testHelpers/IntegrationTestHelper.kt`. Otherwise the data will be
+deleted before every test that resets the database.
+
 ## Search with Trigrams
 - Use `pg_trgm` extension for fuzzy text search
 - See existing search implementations for patterns
