@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -12,9 +13,10 @@ abstract class IntegrationTestWithImmutableData(
 
     @BeforeAll
     fun setUpBeforeAll(
+        @Autowired flyway: Flyway,
         @Autowired jdbcTemplate: JdbcTemplate,
     ) {
-        IntegrationTestHelper.resetAndSeedDatabase(seedDataScripts, jdbcTemplate)
+        IntegrationTestHelper.resetAndSeedDatabase(flyway, seedDataScripts, jdbcTemplate)
     }
 
     abstract class NestedIntegrationTestWithImmutableData(
@@ -24,9 +26,10 @@ abstract class IntegrationTestWithImmutableData(
 
         @BeforeAll
         fun setUpBeforeAll(
+            @Autowired flyway: Flyway,
             @Autowired jdbcTemplate: JdbcTemplate,
         ) {
-            IntegrationTestHelper.resetAndSeedDatabase(seedDataScripts, jdbcTemplate)
+            IntegrationTestHelper.resetAndSeedDatabase(flyway, seedDataScripts, jdbcTemplate)
         }
     }
 }

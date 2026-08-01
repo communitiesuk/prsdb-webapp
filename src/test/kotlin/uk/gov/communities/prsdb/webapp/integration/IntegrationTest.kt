@@ -34,7 +34,10 @@ import uk.gov.service.notify.NotificationClient
 import kotlin.reflect.full.isSubclassOf
 
 @Import(TestcontainersConfiguration::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = ["spring.flyway.clean-disabled=false"],
+)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @UsePlaywright
 @ActiveProfiles(profiles = ["local", "local-no-auth"])
