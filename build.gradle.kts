@@ -141,6 +141,13 @@ val frontendAssetsSpec: CopySpec =
 tasks.register<Exec>("buildFrontendAssets") {
     group = "build"
     description = "Build frontend JavaScript and CSS assets using npm"
+    // Declared so Gradle can skip this when nothing has changed, and so the build cache can restore
+    // dist/ on a fresh CI runner rather than re-running rollup in every shard.
+    inputs.dir("src/main/js").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir("src/main/resources/css").withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.files("rollup.config.mjs", "package.json", "package-lock.json").withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir("dist")
+    outputs.cacheIf { true }
     if (OperatingSystem.current().isWindows) {
         commandLine("cmd", "/c", "npm", "run", "build")
     } else {
