@@ -159,10 +159,35 @@ tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
 }
 
+// CI runs the test suite as several parallel jobs, each taking a slice of the test classes. Nested
+// classes must execute with their enclosing class, so the slice is chosen from the top-level class name
+// and every nested class follows it.
+val shardIndex = (project.findProperty("shardIndex") as String?)?.toInt()
+val shardCount = (project.findProperty("shardCount") as String?)?.toInt()
+
+require(shardCount == null || (shardIndex != null && shardIndex in 0 until shardCount)) {
+    "shardIndex must be set and within 0..<shardCount when shardCount is given"
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
+
+    if (shardIndex != null && shardCount != null) {
+        exclude { element ->
+            if (element.isDirectory) {
+                false
+            } else {
+                val path = element.path
+                if (!path.endsWith(".class")) {
+                    false
+                } else {
+                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                }
+            }
+        }
+    }
 }
 
 tasks.register<JavaExec>("playwright") {
