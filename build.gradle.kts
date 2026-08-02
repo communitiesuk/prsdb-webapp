@@ -169,6 +169,32 @@ require(shardCount == null || (shardIndex != null && shardIndex in 0 until shard
     "shardIndex must be set and within 0..<shardCount when shardCount is given"
 }
 
+// Distributing classes by hashing their name ignores how much work each one represents, which lets a
+// single shard collect several of the slowest classes. Instead, pack the largest source files into the
+// emptiest shard first. File size is only a rough proxy for runtime, but greedy packing needs no more
+// than an approximate ordering, and it needs no recorded timings to maintain.
+val shardAssignments: Map<String, Int> by lazy {
+    val count = shardCount ?: return@lazy emptyMap()
+    val testRoot = file("src/test/kotlin")
+    val load = LongArray(count)
+    val assignments = mutableMapOf<String, Int>()
+    testRoot
+        .walkTopDown()
+        .filter { it.isFile && it.extension == "kt" }
+        .sortedWith(compareByDescending<File> { it.length() }.thenBy { it.path })
+        .forEach { source ->
+            val className =
+                source
+                    .relativeTo(testRoot)
+                    .invariantSeparatorsPath
+                    .removeSuffix(".kt")
+            val target = load.indices.minByOrNull { load[it] }!!
+            load[target] += source.length()
+            assignments[className] = target
+        }
+    assignments
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
@@ -183,7 +209,12 @@ tasks.withType<Test> {
                 if (!path.endsWith(".class")) {
                     false
                 } else {
-                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                    // Nested classes compile to Outer$Inner.class and must follow their enclosing class.
+                    val topLevel = path.removeSuffix(".class").substringBefore('$')
+                    // Classes whose name does not match their file, so are absent from the packing, fall
+                    // back to hashing. Still deterministic, so they land in exactly one shard.
+                    val target = shardAssignments[topLevel] ?: Math.floorMod(topLevel.hashCode(), shardCount)
+                    target != shardIndex
                 }
             }
         }
