@@ -95,7 +95,7 @@ class PropertyOwnershipService(
     fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val landlord = userToLandlordService.getLandlordForBaseUserIdOrNull(baseUserId)
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
         val isLandlord = landlord != null && propertyOwnership.landlords.any { it.id == landlord.id }
@@ -120,8 +120,7 @@ class PropertyOwnershipService(
     fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean = isCurrentUserLandlord(propertyOwnershipId)
 
     fun isCurrentUserLandlord(propertyOwnershipId: Long): Boolean {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val landlord = userToLandlordService.getLandlordForBaseUserIdOrNull(baseUserId) ?: return false
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull() ?: return false
         return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }
     }
 

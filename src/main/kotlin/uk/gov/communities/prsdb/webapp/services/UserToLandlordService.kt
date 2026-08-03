@@ -22,6 +22,12 @@ class UserToLandlordService(
         return getLandlordForBaseUserId(baseUserId)
     }
 
+    fun getCurrentLandlordForUserOrNull(): Landlord? {
+        // TODO: PDJB-1477: Improve this method with caching
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        return getLandlordForBaseUserIdOrNull(baseUserId)
+    }
+
     /**
      * Calls getCurrentLandlordForUser and discards result.
      * Use for checking that the user has a landlord and expect a PrsdbWebException if they do not.
