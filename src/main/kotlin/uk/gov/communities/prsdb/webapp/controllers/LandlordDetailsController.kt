@@ -78,8 +78,25 @@ class LandlordDetailsController(
         val governingBodyMembers =
             organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
 
+        model.addAttribute("name", orgLandlord.name)
         model.addAttribute("orgLandlord", orgLandlord)
         model.addAttribute("governingBodyMembers", governingBodyMembers)
+
+        val registeredPropertiesList =
+            propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                orgLandlord,
+                currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+            )
+        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
+        model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
+        model.addAttribute(
+            "registerPropertyUrl",
+            RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
+        )
+
+        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return "orgLandlordDetailsView"

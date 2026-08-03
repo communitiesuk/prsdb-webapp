@@ -67,6 +67,37 @@ class LandlordDetailsControllerTests(
                 model { attribute("name", landlord.name) }
             }
         }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getUserLandlordDetails returns the org details view with shell attributes for an organisation landlord`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)).thenReturn(emptyList())
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    orgLandlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("orgLandlordDetailsView") }
+                model {
+                    attribute("name", orgLandlord.name!!)
+                    attribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+                    attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+                    attributeExists(
+                        "orgLandlord",
+                        "governingBodyMembers",
+                        "registeredPropertiesList",
+                        "registerPropertyUrl",
+                        "backUrl",
+                    )
+                }
+            }
+        }
     }
 
     @Nested
