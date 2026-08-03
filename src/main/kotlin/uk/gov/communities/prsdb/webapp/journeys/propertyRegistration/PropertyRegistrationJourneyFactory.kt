@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -10,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
@@ -71,7 +71,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithProvideLaterAllowed
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
@@ -81,10 +80,9 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbWebService
@@ -116,7 +114,7 @@ class PropertyRegistrationJourneyFactory(
 
             when (checkingAnswersFor) {
                 LookupAddressStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.propertyDetailsTask.addressTask)
+                    checkAnswerTask(journey.propertyDetailsTask.addressTask)
                 }
 
                 LocalCouncilStep.ROUTE_SEGMENT -> {
@@ -142,19 +140,21 @@ class PropertyRegistrationJourneyFactory(
                 HmoMandatoryLicenceStep.ROUTE_SEGMENT,
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.licensingTask)
+                    checkAnswerTask(journey.licensingTask)
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                         checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                     } else {
-                        checkAnswerTask(journey.occupationTask)
+                        checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    // TODO PDJB-942: If changing from provide-this-later to actual households for tenancy details, route through
+                    //  the rent section so the user can fill in missing rent details before returning to CYA
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
@@ -162,7 +162,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
@@ -176,13 +176,13 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.ownershipAndLandlordsTask.jointLandlordsTask, { journey })
+                    checkAnswerTask(journey.ownershipAndLandlordsTask.jointLandlordsTask, { journey })
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
@@ -190,14 +190,14 @@ class PropertyRegistrationJourneyFactory(
                 GasCertIssueDateStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
                 }
 
                 StartEpcStep.ROUTE_SEGMENT,
@@ -208,7 +208,7 @@ class PropertyRegistrationJourneyFactory(
                 IsEpcRequiredStep.ROUTE_SEGMENT,
                 EpcExemptionStep.ROUTE_SEGMENT,
                 -> {
-                    duplicableCheckAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                 }
 
                 else -> {
@@ -256,10 +256,10 @@ class PropertyRegistrationJourneyFactory(
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                     withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
                 } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.old.heading")
+                    withHeadingMessageKey("registerProperty.taskList.register.heading")
                 }
                 fromTask(journey.propertyDetailsTask) {
-                    duplicableTask(task.addressTask) {
+                    task(task.addressTask) {
                         parents { journey.taskListStep.always() }
                         nextStep { task.addToLandlordIncompletePropertiesStep }
                     }
@@ -283,37 +283,37 @@ class PropertyRegistrationJourneyFactory(
                         saveProgress()
                     }
                 }
-                duplicableTask(journey.licensingTask) {
+                task(journey.licensingTask) {
                     parents { journey.ownershipAndLandlordsTask.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
                 }
 
-                task(journey.occupationTask) {
+                task(journey.occupationTask.inJourney(journey)) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.ownershipAndLandlordsTask.jointLandlordsTask.firstStep }
                     saveProgress()
                 }
-                duplicableTask(journey.ownershipAndLandlordsTask.jointLandlordsTask) {
+                task(journey.ownershipAndLandlordsTask.jointLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.occupationTask.isComplete() }
                     nextStep { journey.gasSafetyTask.firstStep }
                     saveProgress()
                 }
-                duplicableTask(journey.gasSafetyTask) {
+                task(journey.gasSafetyTask) {
                     withDependencies { journey }
                     parents { journey.ownershipAndLandlordsTask.jointLandlordsTask.isComplete() }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                duplicableTask(journey.electricalSafetyTask) {
+                task(journey.electricalSafetyTask) {
                     withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
-                duplicableTask(journey.epcTask) {
+                task(journey.epcTask) {
                     withDependencies { journey }
                     parents { journey.electricalSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
@@ -413,7 +413,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.propertyDetails", shouldUseNumbering = false)
-                duplicableTask(journey.propertyDetailsTask) {
+                task(journey.propertyDetailsTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.ownershipAndLandlordsTask.firstStep }
                     saveProgress()
@@ -421,7 +421,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
-                duplicableTask(journey.ownershipAndLandlordsTask) {
+                task(journey.ownershipAndLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.propertyDetailsTask.isComplete() }
                     nextStep { journey.occupied }
@@ -439,7 +439,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
-                duplicableTask(journey.licensingTask) {
+                task(journey.licensingTask) {
                     parents {
                         OrParents(
                             journey.occupied.hasOutcome(YesOrNo.YES),
@@ -452,7 +452,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
-                duplicableTask(journey.gasSafetyTask) {
+                task(journey.gasSafetyTask) {
                     withDependencies { journey }
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.taskListStep }
@@ -461,7 +461,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
-                duplicableTask(journey.electricalSafetyTask) {
+                task(journey.electricalSafetyTask) {
                     withDependencies { journey }
                     parents { journey.gasSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
@@ -471,7 +471,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)
-                duplicableTask(journey.epcTask) {
+                task(journey.epcTask) {
                     withDependencies { journey }
                     parents { journey.electricalSafetyTask.isComplete() }
                     backStep { journey.taskListStep }
@@ -481,7 +481,7 @@ class PropertyRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.tenancyDetails", shouldUseNumbering = false)
-                duplicableTask(journey.tenancyDetailsTask) {
+                task(journey.tenancyDetailsTask) {
                     parents {
                         AndParents(
                             journey.epcTask.isComplete(),
@@ -489,7 +489,12 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextStep { journey.taskListStep }
+                    nextDestination { _ ->
+                        when {
+                            journey.provideTenancyDetailsLater -> Destination(journey.cyaStep)
+                            else -> Destination(journey.taskListStep)
+                        }
+                    }
                     saveProgress()
                 }
             }
@@ -570,7 +575,7 @@ class PropertyRegistrationJourney(
     // ===== Journey-structure tasks (the two alternative flows diverge here) =====
     // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
     // legacySectionViewModels, bedrooms override) when the old journey is removed.
-    override val occupationTask: OccupationTaskWithProvideLaterAllowed,
+    override val occupationTask: OccupationTask,
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
@@ -590,11 +595,12 @@ class PropertyRegistrationJourney(
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
 
@@ -645,10 +651,11 @@ class PropertyRegistrationJourney(
 
     override val loggedInLandlordEmail: String?
         // TODO: PDJB-1274: Update emails to account for org landlord
-        get() =
-            landlordService
-                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
-                ?.email
+        get() {
+            val landlord = userToLandlordService.getCurrentLandlordForUser()
+            check(landlord is IndividualLandlord)
+            return landlord.email
+        }
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"

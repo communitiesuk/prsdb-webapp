@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -15,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -28,7 +26,7 @@ class PropertyRegistrationService(
     private val addressService: AddressService,
     private val licenseService: LicenseService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val individualLandlordRepository: IndividualLandlordRepository,
+    private val userToLandlordService: UserToLandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
@@ -46,7 +44,6 @@ class PropertyRegistrationService(
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        baseUserId: String,
         numBedrooms: Int?,
         billsIncludedList: String?,
         customBillsIncluded: String?,
@@ -72,11 +69,9 @@ class PropertyRegistrationService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
+        tenancyProvideLater: Boolean? = null,
     ) {
-        val landlord =
-            individualLandlordRepository.findByBaseUser_Id(baseUserId)
-                ?: throw EntityNotFoundException("User not registered as a landlord")
-        // TODO: PDJB-1274: Update emails to account for org landlord
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         val propertyOwnership =
             createPropertyOwnershipAndRelatedEntities(
@@ -97,6 +92,7 @@ class PropertyRegistrationService(
                 rentAmount,
                 customPropertyType,
                 markedJointLandlord,
+                tenancyProvideLater,
                 mutableSetOf(landlord),
             )
 
@@ -142,6 +138,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean,
+        tenancyProvideLater: Boolean?,
         landlords: MutableSet<Landlord>,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -173,17 +170,20 @@ class PropertyRegistrationService(
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,
+            tenancyProvideLater = tenancyProvideLater,
             address = address,
             license = license,
         )
     }
 
     private fun sendConfirmationEmails(
-        landlord: IndividualLandlord,
+        landlord: Landlord,
         propertyOwnership: PropertyOwnership,
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
     ) {
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        check(landlord is IndividualLandlord)
         confirmationEmailSender.sendEmail(
             landlord.email,
             PropertyRegistrationConfirmationEmail(

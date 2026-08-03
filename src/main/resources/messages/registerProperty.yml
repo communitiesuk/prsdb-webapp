@@ -16,7 +16,19 @@ ifOccupied:
     one: how many people live in the property
     two: the rent you charge
 provideTenancyDetailsLater:
-  heading: 'TODO: PDJB-942 - Provide tenancy details later'
+  heading: Provide tenancy details later
+  paragraph:
+    one: You can continue and submit your registration now, but you’ll need to return later and provide details about the current tenancy.
+  whenToProvide:
+    heading: When you’ll need to provide these tenancy details
+    insetText: To keep your property registered, you must provide its tenancy details within 28 days.
+    paragraph: This is because you’ve told us this property’s occupied by tenants.
+  reason: 'We’ll need to know:'
+  weWillNeedToKnow:
+    bullet:
+      one: how many people are living in the property
+      two: if you’ve provided furniture
+      three: how much the rent is
 afterRegistered:
   heading: After you’ve registered
   paragraph:
@@ -42,8 +54,7 @@ taskList:
   heading: Register a rental property
   subtitle: Your answers are saved as you go. You can return and finish this later.
   register:
-    old:
-      heading: Add property details
+    heading: Add property details
     restructureAndSkipping:
       heading: Tenancy details
     addAddress: Property address

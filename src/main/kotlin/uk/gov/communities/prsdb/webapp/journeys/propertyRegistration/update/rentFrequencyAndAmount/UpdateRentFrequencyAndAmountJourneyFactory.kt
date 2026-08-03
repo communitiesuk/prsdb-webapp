@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -53,7 +53,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            duplicableTask(journey.rentFrequencyAndAmountTask) {
+            task(journey.rentFrequencyAndAmountTask) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -91,7 +91,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
-            duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
+            checkAnswerTask(journey.rentFrequencyAndAmountTask)
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }

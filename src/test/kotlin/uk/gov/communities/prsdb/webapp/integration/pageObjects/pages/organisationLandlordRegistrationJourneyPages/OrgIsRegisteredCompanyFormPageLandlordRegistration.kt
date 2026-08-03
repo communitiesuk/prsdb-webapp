@@ -5,14 +5,14 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 
-class OrgCompaniesHouseFormPageLandlordRegistration(
+class OrgIsRegisteredCompanyFormPageLandlordRegistration(
     page: Page,
-) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgCompaniesHouseStep.ROUTE_SEGMENT}") {
-    val form = OrgCompaniesHouseForm(page)
+) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}") {
+    val form = OrgIsRegisteredCompanyForm(page)
 
-    class OrgCompaniesHouseForm(
+    class OrgIsRegisteredCompanyForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val yesLabel: Locator get() = locator.locator("label[for='companiesHouse-yes']")

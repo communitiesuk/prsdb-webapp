@@ -51,15 +51,22 @@ The summary list contains 19 rows, in display order:
 
 ## Transaction counts
 
-Completed transactions — registrations, deregistrations, updates, switch-to-individual, and accepting a
-joint landlord invitation — are counted from a dedicated Plausible `Transaction` custom event. The event
+Completed transactions — registrations, deregistrations, updates, switch-to-individual, accepting a
+joint landlord invitation, and leaving a property as a joint landlord — are counted from a dedicated
+Plausible `Transaction` custom event. The event
 is fired by a button press on each journey's final commit step: the commit button is rendered from a
 fragment tagged `data-plausible-event="Transaction"` (`transactionSubmitButton` / `transactionWarningButton`).
 For reporting periods before the configured cutover date (`plausible.transaction-event-start-date`) the
 legacy Flow event is used instead. See [AnalyticsReadMe](AnalyticsReadMe.md) and `PlausibleMetricsService`
 for details.
 
-### Known coverage gap: landlord deregistration with no registered properties
+### Known coverage gaps
+
+Three journeys are intentionally not counted. In each case there is no place to fire the event
+exactly once per completion, and the project's standing preference is to **under-count rather than
+over-count**.
+
+#### Landlord deregistration with no registered properties
 
 A landlord who has **no registered properties** deregisters via the `are-you-sure` page, which goes
 straight to the internal deregistration step and skips the `reason` page that carries the `Transaction`
@@ -71,6 +78,32 @@ deregistration step itself has no button to tag.
 minimal (a landlord with no properties leaving the service) and there is no clean solution that avoids
 over-counting. Landlord deregistrations where the landlord *does* have properties, and all property
 deregistrations, are counted as normal.
+
+#### Cancelling a joint landlord invitation
+
+The `cancelJointLandlordInvitation` journey's only button is on its `are-you-sure` page, and the
+following `cancelInvitationStep` is internal with no button.
+
+**Decision:** cancelled invitations are intentionally **not counted**, for the same reason as above —
+there is no place to fire the event that does not also fire it when the user answers "no".
+
+#### Landlord address updates
+
+The landlord address update journey commits on either `select-address` (a looked-up address was
+chosen) or `manual-address` (reached by choosing "Add address manually" on the select-address page,
+or when the lookup found no addresses). Tagging a step's button is a render-time decision, taken
+before the user's radio selection is known, so tagging both steps would fire `Transaction` twice for
+a single update whenever the user reaches `manual-address` *via* `select-address`.
+
+**Decision:** address updates are intentionally **not counted**. Tagging only `manual-address` would
+count an arbitrary subset (missing the common "pick an address from the list" route), and suppressing
+the event with JavaScript keyed on the selected radio would introduce a new tagging mechanism for a
+single path. Under-counting was preferred to double-counting. The other four landlord detail updates
+(name, email, phone number and date of birth) are counted as normal.
+
+Note that `forms/selectAddressForm.html` and `forms/manualAddressForm.html` are shared with the
+landlord registration, property registration, governing body member address and trustee address
+journeys, so any future fix must tag the update journey without affecting those.
 
 ## Cost and cost per transaction
 

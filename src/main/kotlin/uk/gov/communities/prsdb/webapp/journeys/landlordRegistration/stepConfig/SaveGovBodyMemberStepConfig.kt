@@ -6,15 +6,15 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 @JourneyFrameworkComponent
-class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, LandlordRegistrationOrgLandlordState>() {
-    override fun mode(state: LandlordRegistrationOrgLandlordState): Complete = Complete.COMPLETE
+class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovBodyState>() {
+    override fun mode(state: OrgGovBodyState): Complete = Complete.COMPLETE
 
-    override fun afterStepIsReached(state: LandlordRegistrationOrgLandlordState) {
+    override fun afterStepIsReached(state: OrgGovBodyState) {
         val name =
             state.orgGovBodyMemberNameStep.formModelOrNull?.name
                 ?: throw PrsdbWebException("Governing body member name step data is missing")
@@ -76,4 +76,4 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
 @JourneyFrameworkComponent
 final class SaveGovBodyMemberStep(
     stepConfig: SaveGovBodyMemberStepConfig,
-) : JourneyStep.InternalStep<Complete, LandlordRegistrationOrgLandlordState>(stepConfig)
+) : JourneyStep.InternalStep<Complete, OrgGovBodyState>(stepConfig)

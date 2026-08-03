@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -14,12 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
 
-// The single initialiser for tasks, whether journey-stated (task { }) or self-stated/duplicable (duplicableTask { }).
-// TDependencies is the type of the enclosing state a self-stated task reads through DuplicableTaskWithDependencies;
-// journey-stated tasks and dependency-free duplicable tasks use Nothing, making withDependencies { } uncallable for
-// them. Dependency binding + validation only applies when the task is a DuplicableTaskWithDependencies.
-class TaskInitialiser<TStateInit : JourneyState, TDependencies>(
-    private val task: Task<TStateInit>,
+class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
+    private val task: Task<TStateInit, TDependencies>,
     private val state: TStateInit,
     private val elementConfiguration: ElementConfiguration<SubjourneyComplete> =
         ElementConfiguration("Task ${task::class.simpleName}}"),
@@ -46,8 +41,8 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies>(
         return this
     }
 
-    // Provides the live enclosing state a self-stated task reads through DuplicableTaskWithDependencies.dependencies.
-    // For journey-stated or dependency-free tasks TDependencies is Nothing, so this cannot be called.
+    // Provides the live enclosing state a task reads through Task.dependencies.
+    // For dependency-free tasks TDependencies is Nothing, so this cannot be called.
     private var dependenciesProvider: (() -> TDependencies)? = null
 
     fun withDependencies(provider: () -> TDependencies) {
@@ -60,24 +55,19 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies>(
     override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
         // Bind the enclosing state (if this task declares a dependency contract) before its sub-journey builds.
         // dependencies is only read at runtime, so ordering relative to bindRoute/bindKeyRegistry is immaterial.
-        if (task is DuplicableTaskWithDependencies<*, *>) {
-            @Suppress("UNCHECKED_CAST")
-            val dependencyTask = task as DuplicableTaskWithDependencies<TStateInit, TDependencies>
-            dependenciesProvider?.let { dependencyTask.bindDependencies(it()) }
-            if (dependencyTask.requiresDependencies && !dependencyTask.areDependenciesBound) {
-                throw JourneyInitialisationException(
-                    "Task ${dependencyTask::class.simpleName} requires dependencies but withDependencies { } was not called",
-                )
-            }
+        dependenciesProvider?.let { task.bindDependencies(it()) }
+        if (task.requiresDependencies && !task.areDependenciesBound) {
+            throw JourneyInitialisationException(
+                "Task ${task::class.simpleName} requires dependencies but withDependencies { } was not called",
+            )
         }
 
-        // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime.
-        // No-op for journey-stated tasks; self-stated tasks use it to namespace their stored data keys.
+        // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime,
+        // so it namespaces its stored data keys.
         task.bindRoute(taskRoute)
 
         // Attach the task to the shared registry AFTER bindRoute, so its keys register in their final route-scoped
-        // form and collide against the journey state's keys and every other task's keys. No-op for journey-stated
-        // tasks, which own no keys.
+        // form and collide against the journey state's keys and every other task's keys.
         task.bindKeyRegistry(registry)
 
         val nonNullDestinationProvider =

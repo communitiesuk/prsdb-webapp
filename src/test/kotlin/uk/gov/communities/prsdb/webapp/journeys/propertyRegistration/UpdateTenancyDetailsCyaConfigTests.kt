@@ -2,12 +2,15 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -16,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
@@ -31,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumber
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import java.math.BigDecimal
@@ -103,26 +108,41 @@ class UpdateTenancyDetailsCyaConfigTests {
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.afterStepIsReached(mockState)
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
-        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
-        whenever(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
-        whenever(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
-        whenever(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
-        whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
-        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
-        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
-        whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
-        whenever(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
-        whenever(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
-        whenever(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
-        whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
-        whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
-        whenever(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(FurnishedStatus.FURNISHED)
-        whenever(mockRentFrequencyFormModel.rentFrequency).thenReturn(RentFrequency.MONTHLY)
-        whenever(mockRentAmountFormModel.rentAmount).thenReturn(rentAmount)
+        lenient().`when`(mockState.propertyId).thenReturn(propertyId)
+        lenient().`when`(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        lenient().`when`(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        lenient().`when`(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+        lenient().`when`(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
+        lenient().`when`(mockHouseholdsAndTenantsTask.tenants).thenReturn(mockTenantsStep)
+        lenient().`when`(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
+        lenient().`when`(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
+        lenient().`when`(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
+        lenient().`when`(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        lenient().`when`(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
+        lenient().`when`(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
+        lenient().`when`(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
+        lenient().`when`(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
+        lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
+        lenient().`when`(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
+        lenient().`when`(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
+        lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(FurnishedStatus.FURNISHED)
+        lenient().`when`(mockRentFrequencyFormModel.rentFrequency).thenReturn(RentFrequency.MONTHLY)
+        lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn(rentAmount)
+    }
+
+    @Test
+    fun `getStepSpecificContent does not include rent bills and furnishings rows when tenancy is provide this later`() {
+        // Arrange
+        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.PROVIDE_THIS_LATER)
+        whenever(mockState.provideTenancyDetailsLater).thenReturn(true)
+        whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockState)
+        val rows = content["summaryListData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertEquals(1, rows.size)
     }
 
     @Test
