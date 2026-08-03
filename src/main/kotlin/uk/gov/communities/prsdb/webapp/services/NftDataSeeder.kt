@@ -202,8 +202,7 @@ class NftDataSeeder(
                                     propertyOwnershipId,
                                     landlord,
                                     licenseProvideLater = if (!hasLicence) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
-                                    // TODO PDJB-1048: May need to check another property like licenseProvideLater does (e.g. if isOccupied otherwise null)
-                                    tenancyProvideLater = NftDataFaker.generateBoolean(probabilityTrue = 0.4),
+                                    tenancyProvideLater = if (isOccupied) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
                                 )
 
                             val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
@@ -402,11 +401,14 @@ class NftDataSeeder(
             licenceStmt.addBatch()
         }
 
-        val numHouseholdsAndTenants = if (isOccupied) NftDataFaker.generateNumHouseholdsAndTenants() else Pair(0, 0)
+        // A "provide tenancy details later" property has no tenancy details yet, mirroring the real app where the details
+        // are cleared/absent until the landlord provides them. Only generate details when occupied and not provide-later.
+        val hasTenancyDetails = isOccupied && tenancyProvideLater != true
+        val numHouseholdsAndTenants = if (hasTenancyDetails) NftDataFaker.generateNumHouseholdsAndTenants() else Pair(0, 0)
         val numBedrooms = if (isOccupied) NftDataFaker.generateNumBedrooms() else null
-        val standardAndCustomBillsIncluded = if (isOccupied) NftDataFaker.generateStandardAndCustomBillsIncluded() else null
-        val furnishedStatus = if (isOccupied) NftDataFaker.generateFurnishedStatus() else null
-        val rentDetails = if (isOccupied) NftDataFaker.generateRentDetails() else null
+        val standardAndCustomBillsIncluded = if (hasTenancyDetails) NftDataFaker.generateStandardAndCustomBillsIncluded() else null
+        val furnishedStatus = if (hasTenancyDetails) NftDataFaker.generateFurnishedStatus() else null
+        val rentDetails = if (hasTenancyDetails) NftDataFaker.generateRentDetails() else null
 
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
