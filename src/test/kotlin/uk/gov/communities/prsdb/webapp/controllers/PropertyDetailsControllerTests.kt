@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -52,7 +51,6 @@ class PropertyDetailsControllerTests(
     @BeforeEach
     fun setUpFeatureFlag() {
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-        whenever(userToLandlordService.getLandlordForBaseUserId(any())).thenReturn(createIndividualLandlord())
     }
 
     @Nested
