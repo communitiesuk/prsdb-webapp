@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
@@ -29,7 +29,7 @@ class PropertyRegistrationAddressTask(
     override val manualAddressStep: ManualAddressStep,
     override val alreadyRegisteredStep: AlreadyRegisteredStep,
     override val localCouncilStep: LocalCouncilStep,
-) : DuplicableTask<PropertyRegistrationAddressState>(journeyStateService),
+) : TaskWithoutDependencies<PropertyRegistrationAddressState>(journeyStateService),
     PropertyRegistrationAddressState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")

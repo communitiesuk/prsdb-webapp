@@ -5,6 +5,7 @@ import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
@@ -15,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -40,6 +40,7 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -61,6 +62,7 @@ class PropertyOwnershipService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean = false,
+        tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
@@ -85,31 +87,30 @@ class PropertyOwnershipService(
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 markedJointLandlord = markedJointLandlord,
+                tenancyProvideLater = tenancyProvideLater,
             ).apply {
                 if (isOccupied) lastOccupiedDate = LocalDate.now()
             },
         )
     }
 
-    fun getPropertyOwnershipIfAuthorizedUser(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): PropertyOwnership {
+    fun getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
+        val baseUserId = SecurityContextHolder.getContext().authentication.name
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
 
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        val isLandlord = propertyOwnership.landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
+        if (isLocalCouncil) return propertyOwnership
 
-        if (!isLocalCouncil && !isLandlord) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "The current user is not authorised to view property ownership $propertyOwnershipId",
-            )
-        }
+        val isLandlord = landlord != null && propertyOwnership.landlords.any { it.id == landlord.id }
 
-        return propertyOwnership
+        if (isLandlord) return propertyOwnership
+
+        throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "The current user is not authorised to view property ownership $propertyOwnershipId",
+        )
     }
 
     fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
@@ -119,23 +120,28 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
-    fun getIsAuthorizedToEditRecord(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): Boolean = getIsLandlord(propertyOwnershipId, baseUserId)
+    fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean = isCurrentUserLandlord(propertyOwnershipId)
 
-    fun getIsLandlord(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-    ): Boolean =
-        getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
+    fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
+        if (!getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
+            val baseUserId = SecurityContextHolder.getContext().authentication.name
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
+            )
+        }
+    }
+
+    fun isCurrentUserLandlord(propertyOwnershipId: Long): Boolean {
+        val landlord = userToLandlordService.getCurrentLandlordForUserOrNull() ?: return false
+        return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }
+    }
 
     fun getRegisteredPropertiesForLandlordUser(
-        baseUserId: String,
+        landlord: Landlord,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLandlordViewModel> =
-        retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
+        retrieveAllActivePropertiesForLandlord(landlord).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
@@ -440,8 +446,8 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+    fun retrieveAllActivePropertiesForLandlord(landlord: Landlord): List<PropertyOwnership> =
+        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
 
     fun deletePropertyOwnership(propertyOwnershipId: Long) {
         propertyOwnershipRepository.deleteById(propertyOwnershipId)
@@ -464,16 +470,15 @@ class PropertyOwnershipService(
         }
     }
 
-    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
-        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
+    fun getNumberOfIncompleteCompliancesForLandlord(landlord: Landlord): Int {
+        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(landlord)
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
     }
 
-    fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
-        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+    fun doesLandlordHaveRegisteredProperties(landlord: Landlord): Boolean =
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
 
-    fun getPropertyCountForLandlord(baseUserId: String): Long =
-        propertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)
+    fun getPropertyCountForLandlord(landlord: Landlord): Long = propertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

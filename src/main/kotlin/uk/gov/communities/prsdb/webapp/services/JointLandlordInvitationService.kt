@@ -31,6 +31,7 @@ class JointLandlordInvitationService(
     private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
         invitationRepository
@@ -212,22 +213,13 @@ class JointLandlordInvitationService(
     }
 
     @Transactional
-    fun hideExpiredInvitation(
-        invitationId: Long,
-        baseUserId: String,
-    ) {
+    fun hideExpiredInvitation(invitationId: Long) {
         val invitation =
             invitationRepository.findById(invitationId).orElseThrow {
                 ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
             }
 
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        if (
-            invitation.registeredOwnership.landlords.none { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == baseUserId
-            }
-        ) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(invitation.registeredOwnership.id)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
         }
 
@@ -244,22 +236,12 @@ class JointLandlordInvitationService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Joint landlord invitation not found")
         }
 
-    fun getPendingInvitationIfAuthorizedLandlord(
-        invitationId: Long,
-        baseUserId: String,
-    ): JointLandlordInvitation {
+    fun getPendingInvitationIfAuthorizedLandlord(invitationId: Long): JointLandlordInvitation {
         val invitation = getInvitationById(invitationId)
         if (invitation.status != JointLandlordInvitationStatus.PENDING) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is not pending")
         }
-        val propertyOwnership = invitation.registeredOwnership
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        if (
-            propertyOwnership.landlords.none { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == baseUserId
-            }
-        ) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(invitation.registeredOwnership.id)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to cancel this invitation")
         }
         return invitation

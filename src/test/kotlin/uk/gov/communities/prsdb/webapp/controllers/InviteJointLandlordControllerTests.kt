@@ -2,22 +2,25 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(InviteJointLandlordController::class)
@@ -31,7 +34,7 @@ class InviteJointLandlordControllerTests(
     private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -75,8 +78,8 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc.get(confirmationRoute).andExpect {
             status { isNotFound() }
@@ -86,9 +89,6 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 200 for an authorised landlord user`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
-            .thenReturn(true)
-
         mvc.get(confirmationRoute).andExpect {
             status { isOk() }
             model { attributeExists("propertyDetailsUrl") }
@@ -117,8 +117,8 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc
             .get(resendRoute)
@@ -133,11 +133,9 @@ class InviteJointLandlordControllerTests(
         val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val mockLandlord = MockLandlordData.createIndividualLandlord()
 
-        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
-            .thenReturn(true)
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(mockPropertyOwnership)
-        whenever(landlordService.retrieveLandlordByBaseUserId(LANDLORD_USER))
+        whenever(userToLandlordService.getCurrentLandlordForUser())
             .thenReturn(mockLandlord)
         whenever(jointLandlordInvitationService.resendInvitation(eq(123L), any<PropertyOwnership>(), any<Landlord>()))
             .thenReturn("joint@example.com")
