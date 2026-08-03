@@ -4,17 +4,25 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
+        private fun landlordEmail(landlord: Landlord): String =
+            when (landlord) {
+                is IndividualLandlord -> landlord.email
+                is OrganisationLandlord -> landlord.wholeOrgEmail
+                else -> throw IllegalArgumentException("Unknown landlord type")
+            }
+
         fun buildSummaryCards(
             landlords: Set<Landlord>,
             currentLandlord: Landlord,
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
-                .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.displayName })
+                .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.name })
                 .map { landlord ->
                     val isCurrentUser = landlord.id == currentLandlord.id
                     if (isCurrentUser) {
@@ -33,13 +41,13 @@ class PropertyDetailsLandlordViewModelBuilder {
 
                         SummaryCardViewModel(
                             title = titleKey,
-                            cardNumber = landlord.displayName,
+                            cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
                             actions = if (landlords.size > 1) listOf(removeMeAction) else null,
                         )
                     } else {
                         SummaryCardViewModel(
-                            title = landlord.displayName,
+                            title = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
                         )
                     }
@@ -53,7 +61,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.displayEmail,
+                    fieldValue = landlordEmail(landlord),
                 ),
             )
 

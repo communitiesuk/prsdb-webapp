@@ -23,10 +23,7 @@ abstract class Landlord : ModifiableAuditableEntity() {
     abstract val landlordType: LandlordType
 
     @get:Transient
-    abstract val displayName: String
-
-    @get:Transient
-    abstract val displayEmail: String
+    abstract val name: String
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

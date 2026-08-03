@@ -19,21 +19,13 @@ class IndividualLandlord() : Landlord() {
     override val landlordType: LandlordType
         get() = LandlordType.INDIVIDUAL
 
-    @get:Transient
-    override val displayName: String
-        get() = name
-
-    @get:Transient
-    override val displayEmail: String
-        get() = email
-
     @OneToOne
     @JoinColumn(name = "individual_subject_identifier", unique = true)
     lateinit var baseUser: PrsdbUser
         private set
 
     @Column(name = "individual_name")
-    lateinit var name: String
+    override lateinit var name: String
 
     @Column(name = "individual_email")
     lateinit var email: String

@@ -18,23 +18,18 @@ class OrganisationLandlord() : Landlord() {
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION
 
-    @get:Transient
-    override val displayName: String
-        get() = name
-
-    @get:Transient
-    override val displayEmail: String
-        get() = email
-
     @Column(name = "organisation_landlord_name")
-    lateinit var name: String
+    override lateinit var name: String
 
     @ManyToOne
     @JoinColumn(name = "organisation_address_id")
     lateinit var address: Address
 
+    /**
+     * This should not be used for sending emails, just for displaying the contact info for an organisation.
+     */
     @Column(name = "organisation_email")
-    lateinit var email: String
+    lateinit var wholeOrgEmail: String
 
     @Column(name = "organisation_phone_number")
     lateinit var phoneNumber: String
@@ -125,7 +120,7 @@ class OrganisationLandlord() : Landlord() {
         this.registrationNumber = registrationNumber
         this.name = name
         this.address = address
-        this.email = email
+        this.wholeOrgEmail = email
         this.phoneNumber = phoneNumber
         this.registrantName = registrantName
         this.registrantDateOfBirth = registrantDateOfBirth
