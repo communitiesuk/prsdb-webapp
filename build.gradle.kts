@@ -37,6 +37,11 @@ extra["commons-lang3.version"] = "3.18.0"
 extra["logback.version"] = "1.5.35"
 // CVE-2026-54515 / GHSA-5jmj-h7xm-6q6v: jackson-databind case-insensitive @JsonIgnoreProperties bypass (fixed in 2.21.5).
 extra["jackson-bom.version"] = "2.21.5"
+// Multiple netty-codec / netty-codec-http / netty-codec-http2 advisories fixed in 4.1.136.Final
+// (CVE-2026-55831, -55833, -56745, -56746, -59898, -59899, -59900, -59901, -59921).
+extra["netty.version"] = "4.1.136.Final"
+// CVE-2026-54291 / GHSA-j92g-9f8w-j867: PostgreSQL JDBC silent channel-binding auth downgrade (fixed in 42.7.12).
+extra["postgresql.version"] = "42.7.12"
 
 dependencies {
     // Spring Boot Web
@@ -154,10 +159,35 @@ tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
 }
 
+// CI runs the test suite as several parallel jobs, each taking a slice of the test classes. Nested
+// classes must execute with their enclosing class, so the slice is chosen from the top-level class name
+// and every nested class follows it.
+val shardIndex = (project.findProperty("shardIndex") as String?)?.toInt()
+val shardCount = (project.findProperty("shardCount") as String?)?.toInt()
+
+require(shardCount == null || (shardIndex != null && shardIndex in 0 until shardCount)) {
+    "shardIndex must be set and within 0..<shardCount when shardCount is given"
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
+
+    if (shardIndex != null && shardCount != null) {
+        exclude { element ->
+            if (element.isDirectory) {
+                false
+            } else {
+                val path = element.path
+                if (!path.endsWith(".class")) {
+                    false
+                } else {
+                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                }
+            }
+        }
+    }
 }
 
 tasks.register<JavaExec>("playwright") {
@@ -251,7 +281,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.11")
+        classpath("org.postgresql:postgresql:42.7.12")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
     }
     configurations.classpath {
@@ -259,6 +289,10 @@ buildscript {
             // spring-boot-buildpack-platform pulls a vulnerable commons-lang3 transitively onto the
             // build classpath; GitHub's dependency submission reports it even though it is build-time only.
             force("org.apache.commons:commons-lang3:3.18.0")
+            // The Flyway and Spring Boot plugins pull jackson 2.21.4 onto the build classpath. The
+            // extra["jackson-bom.version"] override above only applies to the project's dependency
+            // management, not here, so GHSA-5gvw-p9qm-jgwh / GHSA-mhm7-754m-9p8w are reported against it.
+            force("com.fasterxml.jackson:jackson-bom:2.21.5")
         }
     }
 }

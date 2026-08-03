@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -15,10 +15,10 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class CheckElectricalCertUploadsStepConfig(
     private val memberIdService: CollectionKeyParameterService,
     private val uploadService: UploadService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: ElectricalSafetyState) =
+    override fun getStepSpecificContent(state: ElectricalSafetyDetailState) =
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getUploadCount(state),
@@ -33,7 +33,7 @@ class CheckElectricalCertUploadsStepConfig(
                     .toUrlStringOrNull(),
         )
 
-    private fun getUploadRows(state: ElectricalSafetyState): List<UploadRow> =
+    private fun getUploadRows(state: ElectricalSafetyDetailState): List<UploadRow> =
         state.electricalUploadMap
             .toList()
             .sortedBy { it.first }
@@ -50,17 +50,17 @@ class CheckElectricalCertUploadsStepConfig(
                 )
             }
 
-    override fun chooseTemplate(state: ElectricalSafetyState): String = "forms/addAnotherFormWithFileUploadTable"
+    override fun chooseTemplate(state: ElectricalSafetyDetailState): String = "forms/addAnotherFormWithFileUploadTable"
 
-    override fun mode(state: ElectricalSafetyState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
+    override fun mode(state: ElectricalSafetyDetailState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
-    private fun getUploadCount(state: ElectricalSafetyState): Int = getUploadRows(state).size
+    private fun getUploadCount(state: ElectricalSafetyDetailState): Int = getUploadRows(state).size
 }
 
 @JourneyFrameworkComponent
 final class CheckElectricalCertUploadsStep(
     stepConfig: CheckElectricalCertUploadsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, ElectricalSafetyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-electrical-safety-certificate-uploads"
     }

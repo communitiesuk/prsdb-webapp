@@ -1,66 +1,30 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.HasAnyGovBodyMembersStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
-    val yourDetailsStep: YourDetailsStep
     val orgNameStep: OrgNameStep
     val orgAddressStep: OrgAddressStep
     val orgEmailStep: OrgEmailStep
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep
-    val orgCompaniesHouseStep: OrgCompaniesHouseStep
-    val orgCompanyNumberStep: OrgCompanyNumberStep
-    val orgCharityStep: OrgCharityStep
-    val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep
-    val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep
-    val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep
-    val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep
-    val leadTrusteeNameStep: LeadTrusteeNameStep
-    val leadTrusteeEmailStep: LeadTrusteeEmailStep
-    val leadTrusteePhoneStep: LeadTrusteePhoneStep
-    val leadTrusteeDobStep: LeadTrusteeDobStep
-    val trusteeAddressTask: AddressTask
+    val companiesHouseTask: OrgCompaniesHouseTask
+    val orgGovBodyTask: OrgGovBodyTask
+    val charityTask: OrgCharityTask
+    val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep
-    val orgLandlordCyaStep: OrgLandlordCyaStep
-    val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
-    val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
-    val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
-    val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
-    val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val govBodyMemberAddressTask: AddressTask
-    val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
-    val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
-    val saveGovBodyMemberStep: SaveGovBodyMemberStep
-    var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
-    var nextGoverningBodyMemberId: Int?
+
+    // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
+    val updateDetailsTodoStep: UpdateDetailsTodoStep
 }

@@ -60,10 +60,6 @@ class IndividualLandlord() : Landlord() {
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
 
-    // TODO: PDJB-1294: Remove this
-    @Column(name = "individual_has_responded_to_feedback")
-    var hasRespondedToFeedback: Boolean = false
-
     @OneToMany(
         mappedBy = "landlord",
         orphanRemoval = true,
@@ -101,7 +97,4 @@ class IndividualLandlord() : Landlord() {
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
-
-    val shouldSeeFeedback: Boolean
-        get() = !hasRespondedToFeedback
 }

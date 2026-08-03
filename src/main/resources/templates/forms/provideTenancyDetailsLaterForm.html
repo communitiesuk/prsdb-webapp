@@ -1,0 +1,9 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="form-content">
+        <h1 class="govuk-heading-l" th:text="#{registerProperty.provideTenancyDetailsLater.heading}">forms.provideTenancyDetailsLater.heading</h1>
+    </th:block>
+</html>

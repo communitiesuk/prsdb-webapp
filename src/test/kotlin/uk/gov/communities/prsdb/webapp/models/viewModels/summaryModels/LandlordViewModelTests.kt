@@ -25,7 +25,7 @@ class LandlordViewModelTests {
     @Test
     fun `Name matches the landlord name`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord()
+        val testLandlord = MockLandlordData.createIndividualLandlord()
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -37,7 +37,7 @@ class LandlordViewModelTests {
     @Test
     fun `England or Wales resident landlord personal details are in the correct order`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord(nonEnglandOrWalesAddress = null)
+        val testLandlord = MockLandlordData.createIndividualLandlord(nonEnglandOrWalesAddress = null)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -64,7 +64,7 @@ class LandlordViewModelTests {
     fun `Non England or Wales landlord personal details are in the correct order`() {
         // Arrange
         val testLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
                 countryOfResidence = "USA",
             )
@@ -100,7 +100,7 @@ class LandlordViewModelTests {
     ) {
         // Arrange
         val testLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 createdDate = OffsetDateTime.ofInstant(instant.toJavaInstant(), ZoneId.of(timeZoneID)).toInstant(),
             )
 
@@ -122,7 +122,7 @@ class LandlordViewModelTests {
         val registrationNumber =
             RegistrationNumberDataModel.parseTypeOrNull("LGYTKPJRR", RegistrationNumberType.LANDLORD)!!
         val testLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
             )
 
@@ -141,7 +141,7 @@ class LandlordViewModelTests {
     fun `Landlord personal details shows the correct name`() {
         // Arrange
         val landlordName = "a test name"
-        val testLandlord = MockLandlordData.createLandlord(name = landlordName)
+        val testLandlord = MockLandlordData.createIndividualLandlord(name = landlordName)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -159,7 +159,7 @@ class LandlordViewModelTests {
     fun `Landlord personal details shows the correct date of birth`() {
         // Arrange
         val landlordDateOfBirth = LocalDate.ofEpochDay(10000)
-        val testLandlord = MockLandlordData.createLandlord(dateOfBirth = landlordDateOfBirth)
+        val testLandlord = MockLandlordData.createIndividualLandlord(dateOfBirth = landlordDateOfBirth)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -177,7 +177,7 @@ class LandlordViewModelTests {
     fun `Landlord personal details shows the correct email address`() {
         // Arrange
         val landlordEmail = "an email address"
-        val testLandlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val testLandlord = MockLandlordData.createIndividualLandlord(email = landlordEmail)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -194,7 +194,7 @@ class LandlordViewModelTests {
     fun `Landlord personal details shows the correct telephone number`() {
         // Arrange
         val landlordPhoneNumber = "a phone number"
-        val testLandlord = MockLandlordData.createLandlord(phoneNumber = landlordPhoneNumber)
+        val testLandlord = MockLandlordData.createIndividualLandlord(phoneNumber = landlordPhoneNumber)
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -211,7 +211,7 @@ class LandlordViewModelTests {
     fun `England or Wales  landlord personal details shows the correct contact address`() {
         // Arrange
         val oneLineAddress = "A test address"
-        val testLandlord = MockLandlordData.createLandlord(address = Address(AddressDataModel(oneLineAddress)))
+        val testLandlord = MockLandlordData.createIndividualLandlord(address = Address(AddressDataModel(oneLineAddress)))
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -229,7 +229,7 @@ class LandlordViewModelTests {
         // Arrange
         val countryOfResidence = "Barbados"
         val testLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 countryOfResidence = countryOfResidence,
             )
 
@@ -250,7 +250,7 @@ class LandlordViewModelTests {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord =
-            MockLandlordData.createLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
+            MockLandlordData.createIndividualLandlord(nonEnglandOrWalesAddress = oneLineAddress, countryOfResidence = "USA")
 
         // Act
         val viewModel = LandlordViewModel(testLandlord)
@@ -268,7 +268,7 @@ class LandlordViewModelTests {
         // Arrange
         val oneLineAddress = "A test address"
         val testLandlord =
-            MockLandlordData.createLandlord(
+            MockLandlordData.createIndividualLandlord(
                 address = Address(AddressDataModel(oneLineAddress)),
                 nonEnglandOrWalesAddress = "1600 Pennsylvania Avenue, Washington DC, United States of America",
                 countryOfResidence = "USA",
@@ -289,7 +289,7 @@ class LandlordViewModelTests {
     @ValueSource(booleans = [true, false])
     fun `LandlordViewModel populates change links in rows when landlord`(isVerified: Boolean) {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord(isVerified = isVerified)
+        val testLandlord = MockLandlordData.createIndividualLandlord(isVerified = isVerified)
         val changeableByAllLandlordsPersonalDetailKeys =
             listOf(
                 "landlordDetails.personalDetails.emailAddress",
@@ -333,7 +333,7 @@ class LandlordViewModelTests {
     @Test
     fun `LandlordViewModel returns all rows without change links`() {
         // Arrange
-        val testLandlord = MockLandlordData.createLandlord()
+        val testLandlord = MockLandlordData.createIndividualLandlord()
 
         // Act
         val viewModel = LandlordViewModel(testLandlord, withChangeLinks = false)

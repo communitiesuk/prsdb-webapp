@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.constants.SWITCH_TO_INDIVIDUAL_JOURNEY_UR
 import uk.gov.communities.prsdb.webapp.controllers.SwitchToIndividualController.Companion.SWITCH_TO_INDIVIDUAL_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -35,44 +35,39 @@ class SwitchToIndividualController(
     private val switchToIndividualJourneyFactory: SwitchToIndividualJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfUnauthorized(propertyOwnershipId, principal)
-
-        return try {
-            val journeyMap = switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
         @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfUnauthorized(propertyOwnershipId, principal)
-
-        return try {
-            val journeyMap = switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
+
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        propertyOwnershipId: Long,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { switchToIndividualJourneyFactory.initializeJourneyState(propertyOwnershipId) },
+            dispatch = dispatch,
+            startNewJourneyOn = { it is PropertyOwnershipMismatchException },
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getSuccess(
@@ -93,15 +88,6 @@ class SwitchToIndividualController(
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
 
         return "switchToIndividualSuccess"
-    }
-
-    private fun initializeAndRedirect(
-        propertyOwnershipId: Long,
-        stepName: String,
-    ): ModelAndView {
-        val journeyId = switchToIndividualJourneyFactory.initializeJourneyState(propertyOwnershipId)
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-        return ModelAndView("redirect:$redirectUrl")
     }
 
     private fun throwExceptionIfUnauthorized(

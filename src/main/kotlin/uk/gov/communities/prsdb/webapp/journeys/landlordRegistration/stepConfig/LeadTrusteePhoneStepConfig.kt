@@ -15,7 +15,7 @@ class LeadTrusteePhoneStepConfig : AbstractRequestableStepConfig<Complete, LeadT
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.leadTrusteePhone.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
-            "hint" to "forms.phoneNumber.hint",
+            "hint" to "registerAsALandlord.phoneNumber.hint",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/phoneNumberForm"

@@ -28,10 +28,12 @@ interface BuildableElement {
     )
 }
 
-abstract class AbstractJourneyBuilder<TState : JourneyState>(
-    val journey: TState,
+abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneyState : JourneyState>(
+    private val privateJourney: TInternalState,
 ) : BuildableElement,
-    JourneyBuilderDsl<TState> {
+    JourneyBuilderDsl<TInternalState> {
+    abstract val journey: TJourneyState
+
     private val journeyElements: MutableList<BuildableElement> = mutableListOf()
 
     private var defaultUnreachableStepDestination: (() -> Destination)? = null
@@ -51,10 +53,13 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         return build(registry)
     }
 
+    private val additionalElements: MutableList<BuildableElement> = mutableListOf()
+    protected val ownedElements get() = journeyElements + additionalElements
+
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
         additionalConfiguration.add(
             ConditionalElementConfiguration(
-                { journeyElements.any { this === it } },
+                { ownedElements.any { this === it } },
                 configuration,
             ),
         )
@@ -69,11 +74,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         }
     }
 
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TInternalState>> step(
+        uninitialisedStep: JourneyStep<TMode, *, TInternalState>,
+        init: StepInitialiser<TStep, TInternalState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TInternalState, TMode>(uninitialisedStep, privateJourney)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {
@@ -84,11 +89,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     override fun task(
-        uninitialisedTask: Task<TState>,
+        uninitialisedTask: Task<TInternalState>,
         routeSegment: String?,
-        init: TaskInitialiser<TState, Nothing>.() -> Unit,
+        init: TaskInitialiser<TInternalState, Nothing>.() -> Unit,
     ) {
-        val taskInitialiser = TaskInitialiser<TState, Nothing>(uninitialisedTask, journey)
+        val taskInitialiser = TaskInitialiser<TInternalState, Nothing>(uninitialisedTask, privateJourney)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
@@ -104,6 +109,37 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
+    }
+
+    fun <TEmbeddedState : JourneyState> fromTask(
+        task: TEmbeddedState,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
+    ) {
+        val builder = EmbedBuilder(task, privateJourney)
+        builder.init()
+        registerTransparentBuilder(builder)
+    }
+
+    fun <TEmbeddedState, TDependencies : Any> fromTask(
+        task: TEmbeddedState,
+        dependencies: TDependencies,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
+    ) where TEmbeddedState : JourneyState, TEmbeddedState : DuplicableTaskWithDependencies<*, TDependencies> {
+        val builder = EmbedBuilder(task, privateJourney)
+        task.bindDependencies(dependencies)
+        builder.init()
+        registerTransparentBuilder(builder)
+    }
+
+    // Splices a sub-builder's elements into this journey so that its steps are built inline while remaining
+    // reachable, by declared identity, to this builder's configuration (via additionalElements). Used by both
+    // embed and section so outer configuration is applied transparently to the sub-builder's owned elements.
+    protected fun registerTransparentBuilder(builder: AbstractJourneyBuilder<*, *>) {
+        if (journeyElements.isEmpty()) {
+            builder.configureFirst { additionalFirstElementConfiguration.forEach { it() } }
+        }
+        journeyElements.add(builder)
+        additionalElements.addAll(builder.ownedElements)
     }
 
     override fun conditionallyConfigure(
@@ -155,9 +191,9 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 }
 
 open class SubJourneyBuilder<TState : JourneyState>(
-    journey: TState,
+    override val journey: TState,
     exitStepOverride: SubjourneyExitStep? = null,
-) : AbstractJourneyBuilder<TState>(journey) {
+) : AbstractJourneyBuilder<TState, TState>(journey) {
     var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> =
         mutableListOf()
         private set

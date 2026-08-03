@@ -17,6 +17,26 @@ data class AddressDataModel(
     val townName: String? = null,
     val postcode: String? = null,
 ) {
+    fun toMultiLineAddress(): String =
+        if (hasAddressComponents()) {
+            buildMultiLineAddressFromComponents()
+        } else {
+            singleLineAddress.replace(", ", "\n")
+        }
+
+    private fun hasAddressComponents(): Boolean = streetName != null || buildingName != null || buildingNumber != null
+
+    private fun buildMultiLineAddressFromComponents(): String =
+        listOfNotNull(
+            organisation,
+            subBuilding,
+            listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
+            buildingName,
+            locality,
+            townName,
+            postcode,
+        ).joinToString("\n")
+
     companion object {
         fun fromManualAddressData(
             addressLineOne: String,

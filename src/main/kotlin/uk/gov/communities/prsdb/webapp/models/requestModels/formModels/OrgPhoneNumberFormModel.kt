@@ -15,7 +15,7 @@ class OrgPhoneNumberFormModel : FormModel {
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.phoneNumber.error.invalidFormat",
+                messageKey = "registerAsALandlord.phoneNumber.error.invalidFormat",
                 validatorType = PhoneNumberConstraintValidator::class,
             ),
         ],

@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -32,9 +31,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -42,9 +41,8 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
-import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.UploadService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import java.time.LocalDate
 import kotlin.test.Test
@@ -100,6 +98,9 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
 
+    @MockitoBean
+    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
+
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
@@ -108,29 +109,21 @@ class LandlordDashboardUrlTests(
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
         val prsdbUserService = mock<PrsdbUserService>()
-        val addressService = mock<AddressService>()
-        val registrationNumberService = mock<RegistrationNumberService>()
-        val repository = mock<IndividualLandlordRepository>()
-        val landlordService =
-            LandlordService(
-                repository,
+        val landlordService = mock<LandlordService>()
+        val landlordRegistrationService =
+            LandlordRegistrationService(
+                landlordService,
                 prsdbUserService,
-                addressService,
-                registrationNumberService,
+                mock(),
                 mock(),
                 mockEmailNotificationService,
                 absoluteUrlProvider,
-                mockEmailNotificationService,
             )
 
         whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
             .thenReturn(PrsdbUser("baseUserId"))
-        whenever(addressService.findOrCreateAddress(any()))
-            .thenReturn(mock())
-        whenever(registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))
-            .thenReturn(mock())
-        whenever(repository.save(any()))
-            .thenReturn(createLandlord())
+        whenever(landlordService.createIndividualLandlord(any(), any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull()))
+            .thenReturn(createIndividualLandlord())
 
         val confirmationCaptor = argumentCaptor<LandlordRegistrationConfirmationEmail>()
         Mockito
@@ -139,17 +132,17 @@ class LandlordDashboardUrlTests(
             .sendEmail(any(), confirmationCaptor.capture())
 
         // Act
-        landlordService.createLandlord(
+        landlordRegistrationService.registerIndividualLandlord(
             "userId",
             "Test Name",
             "email",
             "phone",
             mock(),
-            "Test Country",
+            dateOfBirth = LocalDate.of(1990, 1, 1),
+            countryOfResidence = "Test Country",
             isVerified = true,
             hasAcceptedPrivacyNotice = true,
             nonEnglandOrWalesAddress = null,
-            dateOfBirth = LocalDate.of(1990, 1, 1),
         )
 
         // Assert
@@ -163,7 +156,7 @@ class LandlordDashboardUrlTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
         // Arrange
-        val landlord = createLandlord()
+        val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockIndividualLandlordRepository = mock<IndividualLandlordRepository>()
         val propertyRegistrationService =

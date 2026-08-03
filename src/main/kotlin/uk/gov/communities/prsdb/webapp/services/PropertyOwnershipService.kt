@@ -130,7 +130,8 @@ class PropertyOwnershipService(
         propertyOwnershipId: Long,
         baseUserId: String,
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
+    ): Boolean =
+        getPropertyOwnership(propertyOwnershipId).landlords.any { (it as IndividualLandlord).baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,
@@ -147,12 +148,14 @@ class PropertyOwnershipService(
         landlordId: Long,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLocalCouncilViewModel> =
-        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
-            RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
-                propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
-            )
-        }
+        propertyOwnershipRepository
+            .findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId)
+            .map { propertyOwnership ->
+                RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
+                    propertyOwnership,
+                    currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
+                )
+            }
 
     fun retrievePropertyOwnership(registrationNumber: Long): PropertyOwnership? =
         propertyOwnershipRepository
@@ -243,6 +246,9 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    // TODO(PDJB-1340): delete this method when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. It is only
+    // used by the old (flag-off) occupancy update check-your-answers step (UpdateOccupancyCyaConfig); the
+    // redesigned single-page update persists via updateIsOccupied instead.
     @Transactional
     fun updateOccupancy(
         id: Long,
@@ -277,6 +283,72 @@ class PropertyOwnershipService(
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
         }
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateIsOccupied(
+        id: Long,
+        isOccupied: Boolean,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val wasOccupied = propertyOwnership.isOccupied
+        propertyOwnership.isOccupied = isOccupied
+        if (!wasOccupied && propertyOwnership.isOccupied) {
+            // Becoming occupied defaults to "provide tenancy details later": flag the property so the record shows
+            // the deadline prompt (lastOccupiedDate + 28 days) until the landlord provides the details.
+            propertyOwnership.lastOccupiedDate = LocalDate.now()
+            propertyOwnership.tenancyProvideLater = true
+        }
+        if (wasOccupied && !propertyOwnership.isOccupied) {
+            // Becoming unoccupied: tenancy details no longer apply, so clear them rather than holding onto stale data.
+            clearTenancyDetails(propertyOwnership)
+            propertyOwnership.tenancyProvideLater = null
+        }
+        if (!propertyOwnership.isOccupied) {
+            propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
+        }
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    private fun clearTenancyDetails(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.currentNumHouseholds = 0
+        propertyOwnership.currentNumTenants = 0
+        propertyOwnership.billsIncludedList = null
+        propertyOwnership.customBillsIncluded = null
+        propertyOwnership.furnishedStatus = null
+        propertyOwnership.rentFrequency = null
+        propertyOwnership.customRentFrequency = null
+        propertyOwnership.rentAmount = null
+    }
+
+    @Transactional
+    fun updateTenancyDetails(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus,
+        rentFrequency: RentFrequency,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        // The tenancy details are now provided, so the property record no longer needs to prompt for them.
+        propertyOwnership.tenancyProvideLater = false
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

@@ -28,6 +28,7 @@ class UpdateLicensingCyaConfig(
             "summaryListData" to
                 licensingDetailsHelper.getCheckYourAnswersSummaryList(
                     state,
+                    state.licensingTask,
                 ),
             "summaryName" to
                 if (isRemovingLicensing(state)) {
@@ -41,8 +42,8 @@ class UpdateLicensingCyaConfig(
         try {
             propertyOwnershipService.updateLicensing(
                 state.propertyId,
-                state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-                state.getLicenceNumberOrNull(),
+                state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+                state.licensingTask.getLicenceNumberOrNull(),
                 Instant.parse(state.lastModifiedDate).toJavaInstant(),
             )
         } catch (ex: UpdateConflictException) {
@@ -57,7 +58,7 @@ class UpdateLicensingCyaConfig(
     }
 
     private fun isRemovingLicensing(state: UpdateLicensingJourneyState): Boolean {
-        val newLicensingType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType)
+        val newLicensingType = state.licensingTask.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType)
         return state.hasOriginalLicense && newLicensingType == LicensingType.NO_LICENSING
     }
 }

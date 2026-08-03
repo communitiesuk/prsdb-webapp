@@ -16,32 +16,33 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 class LicensingDetailsHelper(
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    fun <T> getCheckYourAnswersSummaryList(
-        state: T,
-    ): List<SummaryListRowViewModel> where T : LicensingState, T : CheckYourAnswersJourneyState {
+    fun getCheckYourAnswersSummaryList(
+        state: CheckYourAnswersJourneyState,
+        licensingState: LicensingState,
+    ): List<SummaryListRowViewModel> {
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
-            state.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER
+            licensingState.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER
         ) {
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater",
-                    Destination.VisitableStep(state.licensingTypeStep, state.getCyaJourneyId(state.licensingTypeStep)),
+                    Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
                 ),
             )
         }
 
-        return state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
+        return licensingState.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
             listOfNotNull(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     licensingType,
-                    Destination.VisitableStep(state.licensingTypeStep, state.getCyaJourneyId(state.licensingTypeStep)),
+                    Destination.VisitableStep(licensingState.licensingTypeStep, state.getCyaJourneyId(licensingState.licensingTypeStep)),
                 ),
                 when (licensingType) {
-                    LicensingType.HMO_MANDATORY_LICENCE -> (state.getLicenceNumber() to state.hmoMandatoryLicenceStep)
-                    LicensingType.HMO_ADDITIONAL_LICENCE -> (state.getLicenceNumber() to state.hmoAdditionalLicenceStep)
-                    LicensingType.SELECTIVE_LICENCE -> (state.getLicenceNumber() to state.selectiveLicenceStep)
+                    LicensingType.HMO_MANDATORY_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoMandatoryLicenceStep)
+                    LicensingType.HMO_ADDITIONAL_LICENCE -> (licensingState.getLicenceNumber() to licensingState.hmoAdditionalLicenceStep)
+                    LicensingType.SELECTIVE_LICENCE -> (licensingState.getLicenceNumber() to licensingState.selectiveLicenceStep)
                     else -> null
                 }?.let { (licenceNumber, step) ->
                     SummaryListRowViewModel.forCheckYourAnswersPage(
