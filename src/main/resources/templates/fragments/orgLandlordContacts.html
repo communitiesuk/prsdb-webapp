@@ -1,0 +1,23 @@
+<div th:fragment="orgLandlordContacts(contacts)" th:remove="tag">
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">Main contact</h2>
+    <div th:replace="~{fragments/summaryCard :: summaryCard(${contacts.mainContactCard.title}, ${contacts.mainContactCard.cardNumber}, ${contacts.mainContactCard.actions}, ${contacts.mainContactCard.summaryList})}"></div>
+
+    <th:block th:if="${contacts.leadTrusteeCard != null}">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">Lead trustee</h2>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${contacts.leadTrusteeCard.title}, ${contacts.leadTrusteeCard.cardNumber}, ${contacts.leadTrusteeCard.actions}, ${contacts.leadTrusteeCard.summaryList})}"></div>
+    </th:block>
+
+    <th:block th:if="${contacts.showGoverningBody}">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">Governing body</h2>
+        <p class="govuk-body">
+            <a class="govuk-link" th:href="@{${contacts.governingBodyMembersLinkUrl}}"
+               th:text="#{landlordDetails.org.governingBody.membersLink}">Add, change or remove members of your governing body</a>
+        </p>
+        <th:block th:each="card : ${contacts.governingBodyMemberCards}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+        </th:block>
+    </th:block>
+
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.registrationContactHeading}">Registration contact</h2>
+    <div th:replace="~{fragments/summaryCard :: summaryCard(${contacts.registrationContactCard.title}, ${contacts.registrationContactCard.cardNumber}, ${contacts.registrationContactCard.actions}, ${contacts.registrationContactCard.summaryList})}"></div>
+</div>

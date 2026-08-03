@@ -98,7 +98,7 @@ class LandlordDetailsControllerTests(
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
                     attributeExists(
                         "orgLandlord",
-                        "governingBodyMembers",
+                        "orgLandlordContacts",
                         "registeredPropertiesList",
                         "registerPropertyUrl",
                         "backUrl",

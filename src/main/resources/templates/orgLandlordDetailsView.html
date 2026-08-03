@@ -78,49 +78,7 @@
             </div>
 
             <div id="organisation-contacts-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-contacts', ~{::#organisation-contacts-panel/content()})}">
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">landlordDetails.org.mainContactHeading</h2>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.mainContactName}">landlordDetails.org.mainContactName</strong><br/>
-                    <span th:text="${orgLandlord.mainContactName}">orgLandlord.mainContactName</span><br/>
-                    <strong th:text="#{landlordDetails.org.mainContactEmail}">landlordDetails.org.mainContactEmail</strong><br/>
-                    <span th:text="${orgLandlord.mainContactEmail}">orgLandlord.mainContactEmail</span><br/>
-                    <strong th:text="#{landlordDetails.org.mainContactPhone}">landlordDetails.org.mainContactPhone</strong><br/>
-                    <span th:text="${orgLandlord.mainContactPhone}">orgLandlord.mainContactPhone</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1244: Add update journey -->
-                </p>
-
-                <th:block th:if="${orgLandlord.leadTrusteeName != null}">
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">landlordDetails.org.leadTrusteeHeading</h2>
-
-                    <p class="govuk-body">
-                        <strong th:text="#{landlordDetails.org.leadTrusteeName}">landlordDetails.org.leadTrusteeName</strong><br/>
-                        <span th:text="${orgLandlord.leadTrusteeName}">orgLandlord.leadTrusteeName</span><br/>
-                        <th:block th:if="${orgLandlord.leadTrusteeEmail != null}">
-                            <strong th:text="#{landlordDetails.org.leadTrusteeEmail}">landlordDetails.org.leadTrusteeEmail</strong><br/>
-                            <span th:text="${orgLandlord.leadTrusteeEmail}">orgLandlord.leadTrusteeEmail</span><br/>
-                        </th:block>
-                        <th:block th:if="${orgLandlord.leadTrusteePhone != null}">
-                            <strong th:text="#{landlordDetails.org.leadTrusteePhone}">landlordDetails.org.leadTrusteePhone</strong><br/>
-                            <span th:text="${orgLandlord.leadTrusteePhone}">orgLandlord.leadTrusteePhone</span><br/>
-                        </th:block>
-                        <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1469: Add update journey -->
-                    </p>
-                </th:block>
-
-                <th:block th:unless="${#lists.isEmpty(governingBodyMembers)}">
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBodyHeading}">landlordDetails.org.governingBodyHeading</h2>
-
-                    <th:block th:each="member : ${governingBodyMembers}">
-                        <p class="govuk-body">
-                            <strong th:text="${member.name}">member.name</strong><br/>
-                            <span th:text="${member.type}">member.type</span><br/>
-                            <span th:text="${member.dateOfBirth}">member.dateOfBirth</span><br/>
-                            <span th:text="${member.address.singleLineAddress}">member.address.singleLineAddress</span>
-                        </p>
-                    </th:block>
-                    <a class="govuk-link" href="#" th:text="#{landlordDetails.org.governingBodyChange}">landlordDetails.org.governingBodyChange</a> <!-- TODO: PDJB-1471: Add update journey -->
-                </th:block>
+                <div th:replace="~{fragments/orgLandlordContacts :: orgLandlordContacts(${orgLandlordContacts})}"></div>
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">

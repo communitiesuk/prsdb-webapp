@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LandlordDetailsBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 
@@ -19,6 +20,17 @@ class OrgLandlordDetailsPage(
     private val organisationNameChangeLink = Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
+
+    val mainContactCard = SummaryCard(page, "Main contact")
+    val leadTrusteeCard = SummaryCard(page, "Lead trustee")
+    val registrationContactCard = SummaryCard(page, "Registration contact")
+    val governingBodyMembersLink = Link.byText(page, "Add, change or remove members of your governing body")
+
+    fun governingBodyMemberCardCount(): Int =
+        page
+            .locator("h2.govuk-summary-card__title")
+            .allInnerTexts()
+            .count { Regex("^\\d+\\.").containsMatchIn(it.trim()) }
 
     class OrgLandlordDetailsTabs(
         page: Page,
