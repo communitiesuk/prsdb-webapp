@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
-import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
@@ -37,10 +36,9 @@ class LeavePropertyController(
     fun getJourneyStep(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-        principal: Principal,
     ): ModelAndView {
-        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
-        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
     @PostMapping("/{*stepPath}")
@@ -48,21 +46,19 @@ class LeavePropertyController(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         @RequestParam formData: FormData,
-        principal: Principal,
     ): ModelAndView {
-        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
-        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 
     private fun dispatchJourneyStep(
         stepPath: String,
         propertyOwnershipId: Long,
-        principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { leavePropertyJourneyFactory.createJourneySteps(propertyOwnershipId, principal.name) },
+            createRoutingMap = { leavePropertyJourneyFactory.createJourneySteps(propertyOwnershipId) },
             initialiseJourney = { leavePropertyJourneyFactory.initializeJourneyState(propertyOwnershipId) },
             dispatch = dispatch,
             startNewJourneyOn = { it is PropertyOwnershipMismatchException },

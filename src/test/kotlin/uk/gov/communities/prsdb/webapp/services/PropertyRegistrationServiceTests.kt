@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityExistsException
-import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -26,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -41,7 +39,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
     @Mock
-    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
+    private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -75,7 +73,7 @@ class PropertyRegistrationServiceTests {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
         val landlord = MockLandlordData.createIndividualLandlord()
 
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id("baseUserId")).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(registeredAddress.uprn!!),
         ).thenReturn(true)
@@ -83,60 +81,26 @@ class PropertyRegistrationServiceTests {
         val errorThrown =
             assertThrows<EntityExistsException> {
                 propertyRegistrationService.registerProperty(
-                    registeredAddress,
-                    PropertyType.DETACHED_HOUSE,
-                    LicensingType.NO_LICENSING,
-                    "license number",
-                    OwnershipType.FREEHOLD,
-                    true,
-                    1,
-                    1,
-                    "baseUserId",
-                    1,
-                    null,
-                    null,
-                    null,
-                    RentFrequency.MONTHLY,
-                    null,
-                    123.toBigDecimal(),
-                    null,
+                    addressModel = registeredAddress,
+                    propertyType = PropertyType.DETACHED_HOUSE,
+                    licenseType = LicensingType.NO_LICENSING,
+                    licenceNumber = "license number",
+                    ownershipType = OwnershipType.FREEHOLD,
+                    isOccupied = true,
+                    numberOfHouseholds = 1,
+                    numberOfPeople = 1,
+                    numBedrooms = null,
+                    billsIncludedList = null,
+                    customBillsIncluded = null,
+                    furnishedStatus = null,
+                    rentFrequency = RentFrequency.MONTHLY,
+                    customRentFrequency = null,
+                    rentAmount = 123.toBigDecimal(),
+                    customPropertyType = null,
                 )
             }
 
         assertEquals("Address already registered", errorThrown.message)
-    }
-
-    @Test
-    fun `registerProperty throws an error if the logged in user is not a landlord`() {
-        val nonLandlordUserId = "baseUserId"
-        val address = AddressDataModel("1 Example Road")
-
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(nonLandlordUserId)).thenReturn(null)
-
-        val errorThrown =
-            assertThrows<EntityNotFoundException> {
-                propertyRegistrationService.registerProperty(
-                    address,
-                    PropertyType.DETACHED_HOUSE,
-                    LicensingType.NO_LICENSING,
-                    "license number",
-                    OwnershipType.FREEHOLD,
-                    true,
-                    1,
-                    1,
-                    nonLandlordUserId,
-                    1,
-                    null,
-                    null,
-                    null,
-                    RentFrequency.MONTHLY,
-                    null,
-                    123.toBigDecimal(),
-                    null,
-                )
-            }
-
-        assertEquals("User not registered as a landlord", errorThrown.message)
     }
 
     @Test
@@ -185,7 +149,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockLicenseService.createLicense(licenceType, licenceNumber)).thenReturn(licence)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -212,23 +176,22 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            propertyType,
-            licenceType,
-            licenceNumber,
-            ownershipType,
-            isOccupied,
-            numberOfHouseholds,
-            numberOfPeople,
-            landlord.baseUser.id,
-            numberOfBedrooms,
-            billsIncludedList,
-            customBillsIncluded,
-            furnishedStatus,
-            rentFrequency,
-            customRentFrequency,
-            rentAmount,
-            customPropertyType,
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = licenceType,
+            licenceNumber = licenceNumber,
+            ownershipType = ownershipType,
+            isOccupied = isOccupied,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
+            customPropertyType = customPropertyType,
         )
 
         // Assert
@@ -279,7 +242,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
@@ -307,23 +270,22 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            PropertyType.DETACHED_HOUSE,
-            LicensingType.NO_LICENSING,
-            "",
-            OwnershipType.FREEHOLD,
-            true,
-            1,
-            1,
-            landlord.baseUser.id,
-            1,
-            null,
-            null,
-            null,
-            RentFrequency.MONTHLY,
-            null,
-            123.toBigDecimal(),
-            null,
+            addressModel = addressDataModel,
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.NO_LICENSING,
+            licenceNumber = "",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
+            numberOfHouseholds = 1,
+            numberOfPeople = 1,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = RentFrequency.MONTHLY,
+            customRentFrequency = null,
+            rentAmount = 123.toBigDecimal(),
+            customPropertyType = null,
             hasGasSupply = true,
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
             gasSafetyFileUploadIds = listOf(10L, 20L),
@@ -369,7 +331,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -400,23 +362,22 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            AddressDataModel.fromAddress(expectedPropertyOwnership.address),
-            PropertyType.DETACHED_HOUSE,
-            LicensingType.SELECTIVE_LICENCE,
-            "Licence",
-            OwnershipType.FREEHOLD,
-            true,
-            2,
-            3,
-            "USER_ID",
-            1,
-            null,
-            null,
-            null,
-            RentFrequency.MONTHLY,
-            null,
-            123.toBigDecimal(),
-            null,
+            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.SELECTIVE_LICENCE,
+            licenceNumber = "Licence",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
+            numberOfHouseholds = 2,
+            numberOfPeople = 1,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = RentFrequency.MONTHLY,
+            customRentFrequency = null,
+            rentAmount = 123.toBigDecimal(),
+            customPropertyType = null,
         )
 
         // Assert
@@ -474,7 +435,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
@@ -499,23 +460,22 @@ class PropertyRegistrationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            propertyType,
-            licenceType,
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = licenceType,
             licenceNumber = "",
-            ownershipType,
-            true,
-            numberOfHouseholds,
-            numberOfPeople,
-            landlord.baseUser.id,
-            numberOfBedrooms,
-            billsIncludedList,
-            customBillsIncluded,
-            furnishedStatus,
-            rentFrequency,
-            customRentFrequency,
-            rentAmount,
-            customPropertyType,
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
+            customPropertyType = customPropertyType,
         )
 
         verify(mockPropertyOwnershipService).createPropertyOwnership(
@@ -568,7 +528,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockLicenseService.createLicense(licenceType, licenceNumber)).thenReturn(license)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
@@ -596,24 +556,23 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            propertyType,
-            licenceType,
-            licenceNumber,
-            ownershipType,
-            true,
-            numberOfHouseholds,
-            numberOfPeople,
-            landlord.baseUser.id,
-            null,
-            null,
-            null,
-            null,
-            RentFrequency.MONTHLY,
-            null,
-            123.toBigDecimal(),
-            null,
-            jointLandlordEmails,
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = licenceType,
+            licenceNumber = licenceNumber,
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = RentFrequency.MONTHLY,
+            customRentFrequency = null,
+            rentAmount = 123.toBigDecimal(),
+            customPropertyType = null,
+            jointLandlordEmails = jointLandlordEmails,
         )
 
         // Assert
@@ -650,7 +609,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
@@ -677,24 +636,23 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            propertyType,
-            licenceType,
-            "",
-            ownershipType,
-            true,
-            numberOfHouseholds,
-            numberOfPeople,
-            landlord.baseUser.id,
-            null,
-            null,
-            null,
-            null,
-            RentFrequency.MONTHLY,
-            null,
-            123.toBigDecimal(),
-            null,
-            null,
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = licenceType,
+            licenceNumber = "",
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = RentFrequency.MONTHLY,
+            customRentFrequency = null,
+            rentAmount = 123.toBigDecimal(),
+            customPropertyType = null,
+            jointLandlordEmails = null,
         )
 
         // Assert
@@ -728,7 +686,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = ownershipType,
@@ -755,24 +713,23 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            propertyType,
-            licenceType,
-            "",
-            ownershipType,
-            true,
-            numberOfHouseholds,
-            numberOfPeople,
-            landlord.baseUser.id,
-            null,
-            null,
-            null,
-            null,
-            RentFrequency.MONTHLY,
-            null,
-            123.toBigDecimal(),
-            null,
-            jointLandlordEmails,
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = licenceType,
+            licenceNumber = "",
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = RentFrequency.MONTHLY,
+            customRentFrequency = null,
+            rentAmount = 123.toBigDecimal(),
+            customPropertyType = null,
+            jointLandlordEmails = jointLandlordEmails,
         )
 
         // Assert
@@ -795,7 +752,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
@@ -823,23 +780,22 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            PropertyType.DETACHED_HOUSE,
-            LicensingType.NO_LICENSING,
-            "",
-            OwnershipType.FREEHOLD,
-            false,
-            0,
-            0,
-            landlord.baseUser.id,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            addressModel = addressDataModel,
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.NO_LICENSING,
+            licenceNumber = "",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            customPropertyType = null,
             markedJointLandlord = true,
         )
 
@@ -883,7 +839,7 @@ class PropertyRegistrationServiceTests {
             )
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
@@ -911,23 +867,22 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressDataModel,
-            PropertyType.DETACHED_HOUSE,
-            LicensingType.NO_LICENSING,
-            "",
-            OwnershipType.FREEHOLD,
-            false,
-            0,
-            0,
-            landlord.baseUser.id,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            addressModel = addressDataModel,
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.NO_LICENSING,
+            licenceNumber = "",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = false,
+            numberOfHouseholds = 0,
+            numberOfPeople = 0,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            customPropertyType = null,
             tenancyProvideLater = true,
         )
 

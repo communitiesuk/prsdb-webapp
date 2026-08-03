@@ -1,23 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig
 
-import org.springframework.http.HttpStatus
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent("leavePropertyConfirmStepConfig")
 class ConfirmStepConfig(
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val leavePropertyService: LeavePropertyService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LeavePropertyJourneyState>() {
@@ -35,20 +32,11 @@ class ConfirmStepConfig(
 
     override fun afterStepDataIsAdded(state: LeavePropertyJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
-        val landlord = getLandlordOrThrow(state.baseUserId)
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
         leavePropertyService.addLeftPropertyOwnershipToSession(propertyOwnership)
     }
-
-    private fun getLandlordOrThrow(baseUserId: String): Landlord =
-        (
-            landlordService.retrieveLandlordByBaseUserId(baseUserId)
-                ?: throw ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Landlord not found for user $baseUserId",
-                )
-        )
 
     override fun resolveNextDestination(
         state: LeavePropertyJourneyState,

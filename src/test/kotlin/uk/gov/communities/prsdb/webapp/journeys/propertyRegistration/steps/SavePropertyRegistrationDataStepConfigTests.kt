@@ -63,7 +63,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmoun
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -163,7 +162,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            baseUserId = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
             customBillsIncluded = anyOrNull(),
@@ -212,7 +210,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            baseUserId = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
             customBillsIncluded = anyOrNull(),
@@ -267,7 +264,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            baseUserId = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
             customBillsIncluded = anyOrNull(),
@@ -318,7 +314,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = eq(true),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            baseUserId = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
             customBillsIncluded = anyOrNull(),
@@ -369,7 +364,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = eq(0),
             numberOfPeople = eq(0),
-            baseUserId = any(),
             numBedrooms = isNull(),
             billsIncludedList = isNull(),
             customBillsIncluded = isNull(),
@@ -435,8 +429,6 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     private fun setupStateForPropertyRegistration() {
-        setMockUser("test-user")
-
         val mockOccupiedStep = mock<OccupiedStep>()
         val occupancyFormModel = OccupancyFormModel().apply { occupied = false }
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
