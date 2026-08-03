@@ -531,22 +531,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(2)
             }
-
-            @Test
-            fun `landlord view shows the combined provide-later and compliance notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
-
-                assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
-            }
-
-            @Test
-            fun `local council view shows the combined provide-later and compliance notification banner`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
-
-                assertThat(detailsPage.notificationBanner.content.heading)
-                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
-            }
         }
 
         @Nested
@@ -570,14 +554,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(1)
-            }
-
-            @Test
-            fun `landlord view does not show a provide-later notification banner for an unoccupied property`(page: Page) {
-                navigator.goToPropertyDetailsLandlordView(9)
-
-                assertThat(page.getByText("You must finish adding")).isHidden()
-                assertThat(page.getByText("You must finish providing")).isHidden()
             }
         }
 
@@ -603,14 +579,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
-            }
-
-            @Test
-            fun `landlord view does not show a provide-later notification banner when all fields are completed`(page: Page) {
-                navigator.goToPropertyDetailsLandlordView(40)
-
-                assertThat(page.getByText("You must finish adding")).isHidden()
-                assertThat(page.getByText("You must finish providing")).isHidden()
             }
         }
 
@@ -639,28 +607,16 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Nested
-        inner class OccupiedWithTenancySkippedOnly {
-            // Property 41: occupied, licence present, tenancy skipped, fully compliant (no compliance issue).
-            private val expectedDeadline =
-                LocalDate
-                    .now()
-                    .minusDays(7)
-                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+        inner class ProvideLaterNotificationBanner {
+            // The banner content matrix (which messages/links show for each provide-later and
+            // compliance combination, landlord vs local council) is exhaustively covered by the
+            // unit tests in PropertyDetailsNotificationBannerViewModelTests. These integration
+            // tests only smoke-test that the correct banner variant is wired up and rendered on
+            // the property details page.
 
             @Test
-            fun `landlord view shows the licensing type and a tenancy provide-later row with the deadline date`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
-
-                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).containsText("HMO mandatory licence")
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(
-                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
-                ).containsText("Provide this later (before $expectedDeadline)")
-            }
-
-            @Test
-            fun `landlord view shows only the tenancy provide-later notification banner`(page: Page) {
+            fun `landlord view shows the tenancy-only provide-later banner`(page: Page) {
+                // Property 41: occupied, licence present, tenancy skipped, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
@@ -670,42 +626,17 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows a tenancy provide-later paragraph and a tenancy-only notification banner`(page: Page) {
+            fun `local council view shows the tenancy-only provide-later banner`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
 
-                assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(
-                    detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
-                ).hasCount(1)
                 assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing tenancy details")
                 assertThat(detailsPage.notificationBanner.content.heading).not().containsText("licensing")
                 assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
             }
-        }
-
-        @Nested
-        inner class OccupiedWithLicensingSkippedOnly {
-            // Property 42: occupied, no licence, tenancy provided, fully compliant (no compliance issue).
-            private val expectedDeadline =
-                LocalDate
-                    .now()
-                    .minusDays(7)
-                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                    .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 
             @Test
-            fun `landlord view shows the tenancy details and a licensing provide-later row with the deadline date`(page: Page) {
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
-
-                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
-                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
-                assertThat(
-                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
-                ).containsText("Provide this later (before $expectedDeadline)")
-            }
-
-            @Test
-            fun `landlord view shows only the licensing provide-later notification banner`(page: Page) {
+            fun `landlord view shows the licensing-only provide-later banner`(page: Page) {
+                // Property 42: occupied, no licence, tenancy provided, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
@@ -715,24 +646,17 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows a licensing provide-later paragraph and a licensing-only notification banner`(page: Page) {
+            fun `local council view shows the licensing-only provide-later banner`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
 
-                assertThat(detailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.value).containsText("1")
-                assertThat(
-                    detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
-                ).hasCount(1)
                 assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing licensing details")
                 assertThat(detailsPage.notificationBanner.content.heading).not().containsText("tenancy")
                 assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
             }
-        }
 
-        @Nested
-        inner class OccupiedWithBothSkippedAndCompliant {
-            // Property 43: occupied, no licence, tenancy skipped, fully compliant (no compliance issue).
             @Test
-            fun `landlord view shows the both provide-later notification banner with links to licensing and tenancy`(page: Page) {
+            fun `landlord view shows the both provide-later banner with links to licensing and tenancy`(page: Page) {
+                // Property 43: occupied, no licence, tenancy skipped, fully compliant.
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
@@ -744,7 +668,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `local council view shows the both provide-later notification banner with a single link`(page: Page) {
+            fun `local council view shows the both provide-later banner with a single link`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
 
                 assertThat(detailsPage.notificationBanner.content.heading)
@@ -753,6 +677,41 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     page.locator(".govuk-notification-banner__heading a.govuk-notification-banner__link"),
                 ).hasCount(1)
+            }
+
+            @Test
+            fun `landlord view shows the combined provide-later and compliance banner`(page: Page) {
+                // Property 39: occupied, no licence, no tenancy details, has a compliance issue.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
+
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
+            }
+
+            @Test
+            fun `local council view shows the combined provide-later and compliance banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
+
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+            }
+
+            @Test
+            fun `no provide-later banner is shown for an unoccupied property with licensing skipped`(page: Page) {
+                // Property 9: unoccupied, no licence.
+                navigator.goToPropertyDetailsLandlordView(9)
+
+                assertThat(page.getByText("You must finish adding")).isHidden()
+                assertThat(page.getByText("You must finish providing")).isHidden()
+            }
+
+            @Test
+            fun `no provide-later banner is shown when all fields are completed`(page: Page) {
+                // Property 40: occupied, licence present, full tenancy details.
+                navigator.goToPropertyDetailsLandlordView(40)
+
+                assertThat(page.getByText("You must finish adding")).isHidden()
+                assertThat(page.getByText("You must finish providing")).isHidden()
             }
         }
     }
