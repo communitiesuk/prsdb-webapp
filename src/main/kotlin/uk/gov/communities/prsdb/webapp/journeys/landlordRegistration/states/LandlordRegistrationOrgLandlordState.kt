@@ -66,4 +66,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
     var nextGoverningBodyMemberId: Int?
     var editingGovBodyMemberId: Int?
+
+    val editingGovBodyMember: GoverningBodyMemberDataModel?
+        get() = editingGovBodyMemberId?.let { governingBodyMembersMap?.get(it) }
 }

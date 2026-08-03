@@ -279,8 +279,7 @@ class OrgLandlordRegistrationTask(
                 nextStep { journey.saveGovBodyMemberStep }
                 configureStep(journey.govBodyMemberAddressTask.lookupAddressStep) {
                     withAdditionalContentProperties {
-                        val editingMember =
-                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        val editingMember = journey.editingGovBodyMember
                         if (editingMember != null) {
                             mapOf(
                                 "prefillPostcode" to editingMember.addressSearchPostcode,
@@ -293,8 +292,7 @@ class OrgLandlordRegistrationTask(
                 }
                 configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
                     withAdditionalContentProperties {
-                        val editingMember =
-                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        val editingMember = journey.editingGovBodyMember
                         mapOf(
                             "fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading",
                             "prefillSelectedAddress" to editingMember?.selectedAddress,
@@ -303,8 +301,7 @@ class OrgLandlordRegistrationTask(
                 }
                 configureStep(journey.govBodyMemberAddressTask.manualAddressStep) {
                     withAdditionalContentProperties {
-                        val editingMember =
-                            journey.editingGovBodyMemberId?.let { journey.governingBodyMembersMap?.get(it) }
+                        val editingMember = journey.editingGovBodyMember
                         if (editingMember?.manualAddressLineOne != null) {
                             mapOf(
                                 "prefillAddressLineOne" to editingMember.manualAddressLineOne,

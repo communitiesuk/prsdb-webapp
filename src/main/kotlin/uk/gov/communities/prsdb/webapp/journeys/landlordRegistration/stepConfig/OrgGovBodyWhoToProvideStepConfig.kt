@@ -47,7 +47,7 @@ class OrgGovBodyWhoToProvideStepConfig :
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? OrgGovBodyWhoToProvideFormModel
         if (formModel?.whoToProvide != null) return defaultContent
 
-        val editingMember = getEditingMemberOrNull(state) ?: return defaultContent
+        val editingMember = state.editingGovBodyMember ?: return defaultContent
         val prepopulatedFormModel = formModel ?: OrgGovBodyWhoToProvideFormModel()
         prepopulatedFormModel.whoToProvide = editingMember.type
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
@@ -59,9 +59,6 @@ class OrgGovBodyWhoToProvideStepConfig :
         getFormModelFromStateOrNull(
             state,
         )?.whoToProvide?.let { Complete.COMPLETE }
-
-    private fun getEditingMemberOrNull(state: LandlordRegistrationOrgLandlordState) =
-        state.editingGovBodyMemberId?.let { state.governingBodyMembersMap?.get(it) }
 }
 
 @JourneyFrameworkComponent
