@@ -17,6 +17,7 @@ class UserToLandlordService(
     private val organisationLandlordUserRepository: OrganisationLandlordUserRepository,
 ) {
     fun getCurrentLandlordForUser(): Landlord {
+        // TODO: PDJB-1477: Improve this method with caching
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         return getLandlordForBaseUserId(baseUserId)
     }
