@@ -22,8 +22,10 @@ reset. Two tables are deliberately preserved:
   `V1_6_0`). No seed script writes to it.
 
 These are the only two tables with rows after a bare migrate. If you add a migration that inserts reference data, add
-its table to `PRESERVED_TABLES` in `IntegrationTestHelper`, or the data will be wiped before every test. You can check
-which tables hold reference data by migrating an empty database and looking for non-empty tables.
+its table to `PRESERVED_TABLES` in `IntegrationTestHelper` and to the list above, or the data will be wiped before
+every test. The same applies to a migration that renames a preserved table. `IntegrationTestHelperTests` asserts that
+every preserved table exists and holds rows, so a stale entry is caught rather than quietly wiping the table. You can
+check which tables hold reference data by migrating an empty database and looking for non-empty tables.
 
 ## Page Objects (and Components)
 

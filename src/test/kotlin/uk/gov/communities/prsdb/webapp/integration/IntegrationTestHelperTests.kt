@@ -45,6 +45,17 @@ class IntegrationTestHelperTests : IntegrationTestWithMutableData("data-local.sq
     }
 
     @Test
+    fun `every preserved table exists and holds reference data`() {
+        val publicTables =
+            jdbcTemplate.queryForList("SELECT tablename FROM pg_tables WHERE schemaname = 'public'", String::class.java)
+
+        for (table in IntegrationTestHelper.PRESERVED_TABLES) {
+            assertTrue(table in publicTables, "$table is preserved but does not exist - has a migration renamed it?")
+            assertTrue(countRowsIn(table) > 0, "$table is preserved but holds no data")
+        }
+    }
+
+    @Test
     fun `resetDatabase restarts identity sequences`() {
         IntegrationTestHelper.resetDatabase(jdbcTemplate)
 

@@ -10,7 +10,7 @@ class IntegrationTestHelper {
         // data inserted by V1_0_0__la_and_address_tables.sql (as local_authority, renamed by V1_6_0) and is
         // never written to by a seed script. These are the only two tables with rows after a bare migrate.
         // Any future migration that inserts reference data must add its table to this set.
-        private val PRESERVED_TABLES = setOf("flyway_schema_history", "local_council")
+        val PRESERVED_TABLES = setOf("flyway_schema_history", "local_council")
 
         fun resetAndSeedDatabase(
             scripts: List<String>,
