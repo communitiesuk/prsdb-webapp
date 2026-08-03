@@ -5,9 +5,12 @@
     <main class="govuk-main-wrapper" id="main-content">
         <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
 
-        <div id="delete-record-button" th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${name}, ~{::#delete-record-button/content()})}">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.org.removeRecord})}"></a>
-        </div>
+        <h1 class="govuk-heading-l" th:text="${name}">Organisation name</h1>
+
+        <p class="govuk-body">
+            <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
+               th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>
+        </p>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">

@@ -8,10 +8,10 @@ import kotlin.test.assertEquals
 
 class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-mockuser-organisation-landlord.sql") {
     @Test
-    fun `the org landlord details page loads with the organisation details tab selected and a delete organisation button`(page: Page) {
+    fun `the org landlord details page loads with the organisation details tab selected and a delete organisation link`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
 
-        assertThat(detailsPage.deleteOrganisationButton).isVisible()
+        assertThat(detailsPage.deleteOrganisationLink).isVisible()
         assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
     }
 
