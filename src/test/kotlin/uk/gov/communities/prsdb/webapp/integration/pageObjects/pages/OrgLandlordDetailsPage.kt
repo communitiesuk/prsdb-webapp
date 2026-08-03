@@ -19,6 +19,8 @@ class OrgLandlordDetailsPage(
     class OrgLandlordDetailsTabs(
         page: Page,
     ) : Tabs(page) {
+        fun goToOrganisationDetails() = goToTab("Organisation details")
+
         fun goToOrganisationContacts() = goToTab("Organisation contacts")
 
         fun goToRegisteredProperties() = goToTab("Registered properties")

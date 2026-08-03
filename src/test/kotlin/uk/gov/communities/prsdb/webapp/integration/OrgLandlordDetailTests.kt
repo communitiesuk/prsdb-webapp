@@ -24,4 +24,20 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-mockuser-o
         detailsPage.tabs.goToRegisteredProperties()
         assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
     }
+
+    @Test
+    fun `clicking each tab activates the corresponding panel`(page: Page) {
+        val detailsPage = navigator.goToOrgLandlordDetails()
+
+        assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
+
+        detailsPage.tabs.goToOrganisationContacts()
+        assertEquals("organisation-contacts", detailsPage.tabs.activeTabPanelId)
+
+        detailsPage.tabs.goToRegisteredProperties()
+        assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPage.tabs.activeTabPanelId)
+
+        detailsPage.tabs.goToOrganisationDetails()
+        assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
+    }
 }
