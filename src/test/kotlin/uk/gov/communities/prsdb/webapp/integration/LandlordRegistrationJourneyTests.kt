@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -37,11 +38,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
@@ -50,6 +49,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCharityFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
@@ -64,6 +65,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
 import java.time.LocalDate
@@ -300,8 +302,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitYes()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitYes()
 
         val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
@@ -309,8 +311,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
 
-        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        orgCompaniesHousePage.submitYes()
+        val orgIsRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+        orgIsRegisteredCompanyPage.submitYes()
 
         val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
         orgCompanyNumberPage.submitCompanyNumber("12345678")
@@ -421,15 +423,200 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
-        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
     }
+
+    @Test
+    fun `The organisation name change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationNameRow.clickNamedActionLinkAndWait("Change")
+
+        val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+        orgNamePage.submitName("Updated Organisation Name")
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationNameRow).containsText("Updated Organisation Name")
+    }
+
+    @Test
+    fun `The landlord type change link returns to the org check answers page when the organisation type is kept`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.landlordTypeRow.clickNamedActionLinkAndWait("Change")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitOrganisation()
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The registered charity change link re-walks the charity questions and returns to the org check answers page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.registeredCharityRow.clickNamedActionLinkAndWait("Change")
+
+        val orgCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgCharityPage.submitYes()
+
+        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+
+        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        orgCharityNumberPage.submitCharityNumber("1234567")
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.charityNumberRow).containsText("1234567")
+    }
+
+    @Test
+    fun `The lead trustee card change link re-walks the trustee section and returns to the org check answers page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.leadTrusteeCard.getAction("Change").link.clickAndWait()
+
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
+        leadTrusteeNamePage.submitName("Updated Lead Trustee Name")
+
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
+
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        leadTrusteeEmailPage.submitEmail("trustee@test.com")
+
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
+        leadTrusteePhonePage.submitPhoneNumber("07123456789")
+
+        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val leadTrusteeSelectAddressPage =
+            assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
+        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The organisation address change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationAddressRow.clickNamedActionLinkAndWait("Change")
+
+        val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
+        orgAddressPage.submitAddress(
+            addressLineOne = "2 Updated Street",
+            townOrCity = "Updatedton",
+            postcode = "UP1 2DD",
+        )
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationAddressRow).containsText("2 Updated Street")
+    }
+
+    @Test
+    fun `The organisation email change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationEmailRow.clickNamedActionLinkAndWait("Change")
+
+        val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
+        orgEmailPage.submitEmail("updated.email@example.com")
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationEmailRow).containsText("updated.email@example.com")
+    }
+
+    @Test
+    fun `The organisation phone number change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationPhoneRow.clickNamedActionLinkAndWait("Change")
+
+        val orgPhoneNumberPage = assertPageIs(page, OrgPhoneNumberFormPageLandlordRegistration::class)
+        orgPhoneNumberPage.submitPhoneNumber("07999999999")
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationPhoneRow).containsText("07999999999")
+    }
+
+    @Test
+    fun `The governing body member card change link re-walks the member list and returns to the org check answers page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.governingBodyMemberCard.getAction("Change").link.clickAndWait()
+
+        val memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        memberListPage.form.submit()
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The main contact change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.mainContactCard.getAction("Change").link.clickAndWait()
+
+        val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
+        orgMainContactPage.submit("Updated Contact Name", "updated.contact@example.com", "07888888888")
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.mainContactCard).containsText("Updated Contact Name")
+    }
+
+    @Test
+    fun `The landlord type change link routes into the individual journey when switching to individual`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.landlordTypeRow.clickNamedActionLinkAndWait("Change")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The landlord type change link routes into the organisation journey when switching to organisation`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage =
+            navigator.skipToLandlordRegistrationCheckAnswersPage(
+                LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
+            )
+        checkAnswersPage.summaryList.landlordTypeRow.clickNamedActionLinkAndWait("Change")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitOrganisation()
+
+        assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+    }
+
+    // TODO PDJB-1237: add a test for the organisation type change link once the org type update journey is wired into
+    //  LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgTypeStep.ROUTE_SEGMENT branch is currently empty).
+
+    // TODO PDJB-1238: add tests for the Companies House and company number change links once the companies update
+    //  journey is wired into LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgIsRegisteredCompanyStep /
+    //  OrgCompanyNumberStep branch is currently empty).
 
     @Test
     fun `Selecting no on companies house skips the company number question and goes to the governing body journey`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
-        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
+        val companiesHousePage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         companiesHousePage.submitNo()
 
         val govBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
@@ -480,11 +667,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Selecting no on charity skips the charity questions and goes to the companies house page`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        navigator.skipToOrgLandlordRegistrationCharityPage()
-        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
-        orgCharityPage.submitNo()
+        navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
+        val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
+        orgIsRegisteredCharityPage.submitNo()
 
-        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -497,7 +684,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val charityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         charityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.NONE)
 
-        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
     }
 
     @Test
