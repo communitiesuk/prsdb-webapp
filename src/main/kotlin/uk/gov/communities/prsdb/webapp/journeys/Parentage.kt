@@ -83,4 +83,6 @@ fun Task<*>.isComplete() =
 
 fun JourneyStep<Complete, *, *>.isComplete() = this.hasOutcome(Complete.COMPLETE)
 
+fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.isComplete(): Parentage = SingleParent(this) { outcome != null }
+
 fun JourneyStep<*, *, *>.always(): Parentage = SingleParent(this) { true }

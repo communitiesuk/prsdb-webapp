@@ -220,10 +220,7 @@ class LandlordRegistrationTask(
                         }
                         step(journey.landlordTypeChangeRedirectStep) {
                             parents {
-                                OrParents(
-                                    journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
-                                    journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION),
-                                )
+                                journey.landlordTypeStep.isComplete()
                             }
                             nextDestination { destination ->
                                 when (destination) {
