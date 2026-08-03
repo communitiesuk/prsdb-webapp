@@ -20,6 +20,12 @@ class PropertyDetailsPageLocalCouncilView(
     ) {
     val notificationBanner = NotificationBanner(page)
 
+    val pendingInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
+
+    val expiredInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
+
     val landlordSummaryCards: List<LandlordSummaryCard>
         get() {
             val count = page.locator("#landlord-details .govuk-summary-card").count()

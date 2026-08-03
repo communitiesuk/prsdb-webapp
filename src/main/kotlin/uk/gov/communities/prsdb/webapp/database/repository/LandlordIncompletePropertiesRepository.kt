@@ -19,7 +19,7 @@ interface LandlordIncompletePropertiesRepository : JpaRepository<LandlordIncompl
     @Suppress("ktlint:standard:function-naming")
     fun countBySavedJourneyState_CreatedDateBefore(cutoffDate: Instant): Long
 
-    // TODO: PDJB-1275: Update assumption one base user per landlord
+    // TODO: PDJB-1394: Support org landlords in incomplete properties
     // Once this is complete we should be able to remove the query
     @Query(
         "SELECT lip FROM LandlordIncompleteProperties lip " +

@@ -19,13 +19,11 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.LEAVE_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
-import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
@@ -34,44 +32,37 @@ class LeavePropertyController(
     private val leavePropertyJourneyFactory: LeavePropertyJourneyFactory,
     private val leavePropertyService: LeavePropertyService,
 ) {
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-        principal: Principal,
     ): ModelAndView {
-        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
-
-        return try {
-            val journeyMap = getJourneySteps(propertyOwnershipId, principal.name)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         @RequestParam formData: FormData,
-        principal: Principal,
     ): ModelAndView {
-        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
-
-        return try {
-            val journeyMap = getJourneySteps(propertyOwnershipId, principal.name)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        } catch (_: PropertyOwnershipMismatchException) {
-            initializeAndRedirect(propertyOwnershipId, stepName)
-        }
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
+
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        propertyOwnershipId: Long,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { leavePropertyJourneyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { leavePropertyJourneyFactory.initializeJourneyState(propertyOwnershipId) },
+            dispatch = dispatch,
+            startNewJourneyOn = { it is PropertyOwnershipMismatchException },
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -93,20 +84,6 @@ class LeavePropertyController(
         )
 
         return "leavePropertyConfirmation"
-    }
-
-    private fun getJourneySteps(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): Map<String, StepLifecycleOrchestrator> = leavePropertyJourneyFactory.createJourneySteps(propertyOwnershipId, baseUserId)
-
-    private fun initializeAndRedirect(
-        propertyOwnershipId: Long,
-        stepName: String,
-    ): ModelAndView {
-        val journeyId = leavePropertyJourneyFactory.initializeJourneyState(propertyOwnershipId)
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-        return ModelAndView("redirect:$redirectUrl")
     }
 
     companion object {

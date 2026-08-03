@@ -13,7 +13,6 @@ import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.CancelJointLandlordInvitationJourneyFactory
@@ -58,7 +57,7 @@ class CancelJointLandlordInvitationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
-            journeyFactory.createJourneySteps(testInvitationId, "user"),
+            journeyFactory.createJourneySteps(testInvitationId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -75,7 +74,7 @@ class CancelJointLandlordInvitationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            journeyFactory.createJourneySteps(testInvitationId, "user"),
+            journeyFactory.createJourneySteps(testInvitationId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
@@ -90,15 +89,12 @@ class CancelJointLandlordInvitationControllerTests(
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
-        whenever(journeyFactory.createJourneySteps(testInvitationId, "user"))
+        whenever(journeyFactory.createJourneySteps(testInvitationId))
             .thenThrow(NoSuchJourneyException())
         whenever(journeyFactory.initializeJourneyState()).thenReturn(journeyId)
 
         val expectedRedirectUrl =
-            "$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${JourneyStateService.urlWithJourneyState(
-                AreYouSureStep.ROUTE_SEGMENT,
-                journeyId,
-            )}"
+            "$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${AreYouSureStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
         mvc
             .get("$CANCEL_JOINT_LANDLORD_INVITATION_ROUTE/$testInvitationId/${AreYouSureStep.ROUTE_SEGMENT}")

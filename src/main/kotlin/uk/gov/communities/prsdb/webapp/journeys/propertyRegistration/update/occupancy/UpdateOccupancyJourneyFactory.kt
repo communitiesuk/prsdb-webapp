@@ -4,14 +4,18 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -29,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -40,6 +45,7 @@ import java.security.Principal
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -49,7 +55,6 @@ class UpdateOccupancyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.wasOccupied = propertyOwnership.isOccupied
-            state.initialNumberOfBedrooms = propertyOwnership.numBedrooms
             state.isStateInitialized = true
         }
 
@@ -58,14 +63,54 @@ class UpdateOccupancyJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
-        return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+        val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        return if (isRedesigned) {
+            // The redesigned occupancy update is a single-page update (no check-your-answers page)
+            redesignedJourneyMap(state, propertyId)
+        } else if (checkingAnswersFor == null) {
+            oldMainJourneyMap(state, propertyId)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            oldCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
 
-    private fun mainJourneyMap(
+    private fun redesignedJourneyMap(
+        state: UpdateOccupancyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            step(journey.occupied) {
+                routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                initialStep()
+                backUrl { propertyDetailsRoute }
+                nextStep { journey.completeOccupancyUpdateStep }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "submitButton" to "transactionSubmitButton",
+                        "showWarning" to true,
+                    )
+                }
+            }
+            step(journey.completeOccupancyUpdateStep) {
+                parents {
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.YES),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                    )
+                }
+                nextUrl { propertyDetailsRoute }
+            }
+        }
+    }
+
+    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun oldMainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -90,7 +135,8 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun checkYourAnswersJourneyMap(
+    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    private fun oldCheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,
@@ -151,6 +197,8 @@ class UpdateOccupancyJourneyFactory(
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
+    // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
         configureStep(journey.occupied) {
             withAdditionalContentProperty {
@@ -213,9 +261,12 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // Check your answers step
+    // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
     override val cyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Completion step for the redesigned single-page update
+    override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -233,8 +284,6 @@ class UpdateOccupancyJourney(
 
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
-    override var initialNumberOfBedrooms: Int? by delegateProvider.nullableDelegate("initialNumberOfBedrooms")
-
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
@@ -243,8 +292,8 @@ interface UpdateOccupancyJourneyState :
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
+    val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
-    val initialNumberOfBedrooms: Int?
 }

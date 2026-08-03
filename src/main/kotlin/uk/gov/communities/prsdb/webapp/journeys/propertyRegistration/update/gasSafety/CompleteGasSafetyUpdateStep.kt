@@ -26,10 +26,10 @@ class CompleteGasSafetyUpdateStepConfig(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
                 hasGasSupply =
-                    state.hasGasSupplyStep.formModel.hasGasSupply
+                    state.gasSafetyDetailsTask.hasGasSupplyStep.formModel.hasGasSupply
                         ?: throw NotNullFormModelValueIsNullException("hasGasSupply is null"),
-                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-                gasSafetyCertUploadIds = state.gasUploadIds,
+                gasSafetyCertIssueDate = state.gasSafetyDetailsTask.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
+                gasSafetyCertUploadIds = state.gasSafetyDetailsTask.gasUploadIds,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()

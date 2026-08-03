@@ -6,11 +6,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -20,10 +21,11 @@ class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
+    private val userToLandlordService: UserToLandlordService,
+) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyDetailState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
+    override fun getStepSpecificContent(state: GasSafetyDetailState): Map<String, Any?> {
         fileUploadCookieService.addFileUploadCookieToResponse()
 
         return mapOf(
@@ -32,21 +34,24 @@ class UploadGasCertStepConfig(
         )
     }
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/registrationCertificateForm"
+    override fun chooseTemplate(state: GasSafetyDetailState): String = "forms/registrationCertificateForm"
 
-    override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
+    override fun mode(state: GasSafetyDetailState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
-    override fun afterStepDataIsAdded(state: GasSafetyState) {
+    override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
+                landlordId,
             )
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
+                landlordId,
             )
 
             val formModel = getFormModelFromState(state)
@@ -68,7 +73,7 @@ class UploadGasCertStepConfig(
 @JourneyFrameworkComponent
 final class UploadGasCertStep(
     stepConfig: UploadGasCertStepConfig,
-) : RequestableStep<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<Complete, GasSafetyUploadCertificateFormModel, GasSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"
     }

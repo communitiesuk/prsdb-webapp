@@ -17,9 +17,24 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 
 interface ElectricalSafetyState : JourneyState {
-    val allowProvideCertificateLaterRoute: Boolean
-
     val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
+
+    val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep
+}
+
+interface ElectricalSafetyDetailState : JourneyState {
+    val hasElectricalCertStep: HasElectricalCertStep
+    val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
+    val uploadElectricalCertStep: UploadElectricalCertStep
+    val hasUploadedElectricalCert: HasAnyInCollectionStep
+    val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep
+    val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep
+    val electricalCertExpiredStep: ElectricalCertExpiredStep
+    val electricalCertMissingStep: ElectricalCertMissingStep
+    val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
+
+    val isOccupied: Boolean
+    val allowProvideCertificateLaterRoute: Boolean
 
     fun getElectricalCertificateExpiryDateIfReachable() =
         electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->
@@ -34,6 +49,13 @@ interface ElectricalSafetyState : JourneyState {
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
         hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
 
+    fun getElectricalCertificateTypeAsCertificateType(): CertificateType? =
+        when (getElectricalCertificateType()) {
+            HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic
+            HasElectricalSafetyCertificate.HAS_EICR -> CertificateType.Eicr
+            else -> null
+        }
+
     fun mapElectricalCertificateTypeToGlobalCertificateType(): CertificateType? =
         when (getElectricalCertificateType()) {
             HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic
@@ -41,28 +63,15 @@ interface ElectricalSafetyState : JourneyState {
             else -> null
         }
 
-    val electricalUploadIds: List<Long> get() =
-        if (uploadElectricalCertStep.isStepReachable) {
-            electricalUploadMap.values.map { it.fileUploadId }
-        } else {
-            emptyList()
-        }
-
-    val isOccupied: Boolean
-
+    val electricalUploadIds: List<Long>
+        get() =
+            if (uploadElectricalCertStep.isStepReachable) {
+                electricalUploadMap.values.map { it.fileUploadId }
+            } else {
+                emptyList()
+            }
     var electricalUploadMap: Map<Int, CertificateUpload>
     var highestAssignedElectricalMemberId: Int?
 
     fun getNextElectricalUploadMemberId(): Int = highestAssignedElectricalMemberId?.let { it + 1 } ?: 1
-
-    val hasElectricalCertStep: HasElectricalCertStep
-    val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
-    val uploadElectricalCertStep: UploadElectricalCertStep
-    val hasUploadedElectricalCert: HasAnyInCollectionStep
-    val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep
-    val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep
-    val electricalCertExpiredStep: ElectricalCertExpiredStep
-    val electricalCertMissingStep: ElectricalCertMissingStep
-    val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
-    val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep
 }

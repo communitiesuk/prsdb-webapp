@@ -1973,7 +1973,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Nested
         inner class ProvideTenancyDetailsLaterStep {
-            // TODO PDJB-942: Add test for unoccupied when branching logic is added
             @Test
             fun `The page renders the occupied variant for an occupied property`() {
                 val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
