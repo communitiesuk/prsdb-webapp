@@ -63,8 +63,8 @@ class PropertyDetailsViewModel(
                     add(rentFrequencyRow())
                     add(furnishedStatusRow())
                     add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow())
-                    add(rentAmountRow())
+                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+                    add(rentAmountRow(includeChangeLink = false))
                 }
         }
 
