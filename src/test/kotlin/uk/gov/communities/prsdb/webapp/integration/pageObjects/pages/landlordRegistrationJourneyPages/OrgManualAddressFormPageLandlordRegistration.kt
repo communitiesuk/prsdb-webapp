@@ -10,5 +10,6 @@ class OrgManualAddressFormPageLandlordRegistration(
     page: Page,
 ) : ManualAddressFormPage(
         page,
+        @Suppress("ktlint:standard:max-line-length")
         "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}",
     )
