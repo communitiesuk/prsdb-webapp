@@ -740,10 +740,6 @@ FROM generate_series(1, 100) AS s(i)
 JOIN property_ownership po ON po.id = 1600 + i
 ON CONFLICT DO NOTHING;
 
--- PDJB-1276: Add org landlord (11) as joint landlord on property 1
-INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (11, 1, '2026-07-31') ON CONFLICT DO NOTHING;
-
 -- Bump the sequences past the metrics seed ids so any later records get higher ids
 -- (matching the setval pattern used after the other seed inserts above).
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
