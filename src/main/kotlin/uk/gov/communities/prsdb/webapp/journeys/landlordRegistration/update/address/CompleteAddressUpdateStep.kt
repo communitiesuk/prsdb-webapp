@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.address
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -15,10 +14,7 @@ class CompleteAddressUpdateStepConfig(
     override fun mode(state: UpdateAddressJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateAddressJourneyState) {
-        landlordService.updateLandlordAddress(
-            SecurityContextHolder.getContext().authentication.name,
-            state.addressTask.getAddress(),
-        )
+        landlordService.updateLandlordAddress(state.addressTask.getAddress())
     }
 
     override fun resolveNextDestination(

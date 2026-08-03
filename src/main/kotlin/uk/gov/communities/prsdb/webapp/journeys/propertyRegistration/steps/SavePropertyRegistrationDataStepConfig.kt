@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
@@ -126,7 +125,6 @@ class SavePropertyRegistrationDataStepConfig(
                 } else {
                     null
                 },
-            baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
             markedJointLandlord = markedJointLandlord,
             hasGasSupply = state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,

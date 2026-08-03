@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.phoneNumber
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -17,10 +16,8 @@ class CompletePhoneNumberUpdateStepConfig(
     override fun mode(state: UpdatePhoneNumberJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdatePhoneNumberJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
         val newPhoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber)
-
-        landlordService.updateLandlordPhoneNumber(baseUserId, newPhoneNumber)
+        landlordService.updateLandlordPhoneNumber(newPhoneNumber)
     }
 
     override fun resolveNextDestination(

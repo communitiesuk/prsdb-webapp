@@ -1,9 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -64,7 +63,7 @@ class DeregisterPropertyControllerTests(
         // Arrange
         val propertyOwnershipId = 1.toLong()
 
-        whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
         whenever(
             propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
         ).thenReturn(mapOf(CheckCanDeregisterStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -87,7 +86,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         val journeyId = "test-journey-id"
 
-        whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
         whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -108,7 +107,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         val journeyId = "test-journey-id"
 
-        whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(propertyOwnershipService.isCurrentUserLandlord(eq(propertyOwnershipId))).thenReturn(true)
         whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)

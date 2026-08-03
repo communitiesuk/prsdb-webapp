@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companio
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -59,6 +60,7 @@ class RegisterPropertyController(
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -119,7 +121,8 @@ class RegisterPropertyController(
             model.addAttribute("completeByDate", formattedDate)
         }
 
-        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(principal.name)
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(landlord)
         if (propertyCount == 0L) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
