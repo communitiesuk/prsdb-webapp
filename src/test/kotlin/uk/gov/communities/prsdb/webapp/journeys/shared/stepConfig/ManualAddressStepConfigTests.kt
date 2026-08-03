@@ -23,11 +23,11 @@ class ManualAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillAddressLineOne" to "123 Main Street",
-                "prefillAddressLineTwo" to "Flat 4",
-                "prefillTownOrCity" to "London",
-                "prefillCounty" to "Greater London",
-                "prefillPostcode" to "EG1 2AA",
+                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to "123 Main Street",
+                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to "Flat 4",
+                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to "London",
+                ManualAddressStepConfig.PREFILL_COUNTY to "Greater London",
+                ManualAddressStepConfig.PREFILL_POSTCODE to "EG1 2AA",
             )
 
         val result = stepConfig.resolvePageContent(mockState, content)
@@ -48,7 +48,7 @@ class ManualAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillAddressLineOne" to "123 Main Street",
+                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to "123 Main Street",
             )
 
         val result = stepConfig.resolvePageContent(mockState, content)

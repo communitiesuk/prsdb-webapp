@@ -98,7 +98,7 @@ class SelectAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillSelectedAddress" to "1 PRSDB Square, EG1 2AA",
+                SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to "1 PRSDB Square, EG1 2AA",
             )
 
         val result = stepConfig.resolvePageContent(mockAddressState, content)
@@ -115,7 +115,7 @@ class SelectAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillSelectedAddress" to "1 PRSDB Square, EG1 2AA",
+                SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to "1 PRSDB Square, EG1 2AA",
             )
 
         val result = stepConfig.resolvePageContent(mockAddressState, content)

@@ -27,8 +27,8 @@ class LookupAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillPostcode" to "EG1 2AA",
-                "prefillHouseNameOrNumber" to "1",
+                LookupAddressStepConfig.PREFILL_POSTCODE to "EG1 2AA",
+                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to "1",
             )
 
         val result = stepConfig.resolvePageContent(mockState, content)
@@ -46,8 +46,8 @@ class LookupAddressStepConfigTests {
         val content =
             mapOf(
                 FORM_MODEL_ATTR_NAME to formModel,
-                "prefillPostcode" to "EG1 2AA",
-                "prefillHouseNameOrNumber" to "1",
+                LookupAddressStepConfig.PREFILL_POSTCODE to "EG1 2AA",
+                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to "1",
             )
 
         val result = stepConfig.resolvePageContent(mockState, content)
