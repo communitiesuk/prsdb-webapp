@@ -98,16 +98,17 @@ class PropertyOwnershipService(
         val landlord = userToLandlordService.getCurrentLandlordForUserOrNull()
 
         val isLocalCouncil = localCouncilDataService.getIsLocalCouncilUser(baseUserId)
+
+        if (isLocalCouncil) return propertyOwnership
+
         val isLandlord = landlord != null && propertyOwnership.landlords.any { it.id == landlord.id }
 
-        if (!isLocalCouncil && !isLandlord) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "The current user is not authorised to view property ownership $propertyOwnershipId",
-            )
-        }
+        if (isLandlord) return propertyOwnership
 
-        return propertyOwnership
+        throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "The current user is not authorised to view property ownership $propertyOwnershipId",
+        )
     }
 
     fun getPropertyOwnership(propertyOwnershipId: Long): PropertyOwnership =
