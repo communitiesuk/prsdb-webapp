@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 
-class OrgCompaniesHouseFormPageLandlordRegistration(
+class OrgIsRegisteredCompanyFormPageLandlordRegistration(
     page: Page,
-) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgCompaniesHouseStep.ROUTE_SEGMENT}") {
-    val form = OrgCompaniesHouseForm(page)
+) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}") {
+    val form = OrgIsRegisteredCompanyForm(page)
 
     fun submitYes() {
         form.companiesHouseRadios.selectValue("true")
@@ -22,7 +22,7 @@ class OrgCompaniesHouseFormPageLandlordRegistration(
         form.submit()
     }
 
-    class OrgCompaniesHouseForm(
+    class OrgIsRegisteredCompanyForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val companiesHouseRadios = Radios(locator)

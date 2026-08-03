@@ -64,10 +64,10 @@
   },
 
   {
-    "test_id": "7bed4d38-1551-4049-8c06-2b42594b5a73",
-    "prod_id": "2e73e6b5-6bdc-42af-ad94-021108c6f166",
+    "test_id": "688a6c9e-b137-4082-9037-cb850f1aeae7",
+    "prod_id": "0e58af06-f5f2-4f89-b802-4e2e42369e75",
     "enumName": "VIRUS_SCAN_UNSUCCESSFUL",
-    "subject": "((subject certificate type)) for a property failed our virus scan",
+    "subject": "Your ((certificate type)) failed our virus scan",
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   },
   {

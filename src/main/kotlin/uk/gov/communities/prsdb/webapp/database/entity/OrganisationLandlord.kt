@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import java.time.LocalDate
 
 @Entity
@@ -42,12 +43,15 @@ class OrganisationLandlord() : Landlord() {
     @Column(name = "organisation_registrant_phone_number")
     var registrantPhoneNumber: String? = null
 
+    // Note that this has no relation to the companyNumber nullable col
     @Column(name = "organisation_is_company")
     var isCompany: Boolean? = null
 
+    // Note that this has no relation to the charityRegisteredWith & charityNumber nullable col
     @Column(name = "organisation_is_charity")
     var isCharity: Boolean? = null
 
+    // Note that this determines whether the organisation needs a lead trustee
     @Column(name = "organisation_is_trust")
     var isTrust: Boolean? = null
 
@@ -134,4 +138,30 @@ class OrganisationLandlord() : Landlord() {
         this.mainContactEmail = mainContactEmail
         this.mainContactPhone = mainContactPhone
     }
+
+    @get:Transient
+    val isRegisteredCompany: Boolean
+        get() = companyNumber != null
+
+    @get:Transient
+    val isRegisteredCharity: Boolean
+        get() = charityNumber != null
+
+    @get:Transient
+    val hasLeadTrustee: Boolean
+        get() = isTrust == true
+
+    @get:Transient
+    val hasGoverningBody: Boolean
+        get() = !isRegisteredCompany
+
+    @get:Transient
+    val organisationTypes: List<OrgType>
+        get() =
+            buildList {
+                if (isCompany == true) add(OrgType.COMPANY)
+                if (isCharity == true) add(OrgType.CHARITY)
+                if (isTrust == true) add(OrgType.TRUST)
+                if (isEmpty()) add(OrgType.NONE)
+            }
 }

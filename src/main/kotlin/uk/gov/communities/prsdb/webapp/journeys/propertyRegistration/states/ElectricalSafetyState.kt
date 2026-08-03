@@ -49,6 +49,13 @@ interface ElectricalSafetyDetailState : JourneyState {
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
         hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
 
+    fun getElectricalCertificateTypeAsCertificateType(): CertificateType? =
+        when (getElectricalCertificateType()) {
+            HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic
+            HasElectricalSafetyCertificate.HAS_EICR -> CertificateType.Eicr
+            else -> null
+        }
+
     fun mapElectricalCertificateTypeToGlobalCertificateType(): CertificateType? =
         when (getElectricalCertificateType()) {
             HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic

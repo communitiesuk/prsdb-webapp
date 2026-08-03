@@ -159,10 +159,35 @@ tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
 }
 
+// CI runs the test suite as several parallel jobs, each taking a slice of the test classes. Nested
+// classes must execute with their enclosing class, so the slice is chosen from the top-level class name
+// and every nested class follows it.
+val shardIndex = (project.findProperty("shardIndex") as String?)?.toInt()
+val shardCount = (project.findProperty("shardCount") as String?)?.toInt()
+
+require(shardCount == null || (shardIndex != null && shardIndex in 0 until shardCount)) {
+    "shardIndex must be set and within 0..<shardCount when shardCount is given"
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
+
+    if (shardIndex != null && shardCount != null) {
+        exclude { element ->
+            if (element.isDirectory) {
+                false
+            } else {
+                val path = element.path
+                if (!path.endsWith(".class")) {
+                    false
+                } else {
+                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                }
+            }
+        }
+    }
 }
 
 tasks.register<JavaExec>("playwright") {
@@ -264,6 +289,10 @@ buildscript {
             // spring-boot-buildpack-platform pulls a vulnerable commons-lang3 transitively onto the
             // build classpath; GitHub's dependency submission reports it even though it is build-time only.
             force("org.apache.commons:commons-lang3:3.18.0")
+            // The Flyway and Spring Boot plugins pull jackson 2.21.4 onto the build classpath. The
+            // extra["jackson-bom.version"] override above only applies to the project's dependency
+            // management, not here, so GHSA-5gvw-p9qm-jgwh / GHSA-mhm7-754m-9p8w are reported against it.
+            force("com.fasterxml.jackson:jackson-bom:2.21.5")
         }
     }
 }

@@ -20,45 +20,41 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.security.Principal
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
-    private val landlordService: LandlordService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-        principal: Principal,
-    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
         stepPath: String,
-        principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { landlordDeregistrationJourneyFactory.createJourneySteps(principal.name) },
+            createRoutingMap = { landlordDeregistrationJourneyFactory.createJourneySteps() },
             initialiseJourney = { landlordDeregistrationJourneyFactory.initializeJourneyState() },
             dispatch = dispatch,
         )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(principal: Principal): String {
+    fun getConfirmation(): String {
         if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -66,10 +62,10 @@ class DeregisterLandlordController(
             )
         }
 
-        if (landlordService.retrieveLandlordByBaseUserId(principal.name) != null) {
+        if (userToLandlordService.doesCurrentUserHaveLandlord()) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Landlord with one-login id ${principal.name} was found in the database",
+                "Landlord deregistration did not complete successfully",
             )
         }
 

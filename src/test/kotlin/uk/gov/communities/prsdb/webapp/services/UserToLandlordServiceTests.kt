@@ -9,14 +9,15 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -71,7 +72,7 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
-        assertThrows<PrsdbWebException> {
+        assertThrows<ResponseStatusException> {
             service.getLandlordForBaseUserId(baseUserId)
         }
     }
@@ -107,9 +108,9 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
-        val exception = assertThrows<PrsdbWebException> { service.getCurrentLandlordForUser() }
+        val exception = assertThrows<ResponseStatusException> { service.getCurrentLandlordForUser() }
 
-        assertEquals("No landlord was found for user with baseUserId $baseUserId", exception.message)
+        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
     }
 
     private fun setMockPrincipal(name: String) {

@@ -13,7 +13,7 @@ class ProvideTenancyDetailsLaterStepConfig : AbstractRequestableStepConfig<Compl
 
     override fun getStepSpecificContent(state: HouseholdsAndTenantsState) =
         mapOf(
-            "submitButtonText" to "forms.buttons.continue",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: HouseholdsAndTenantsState) = "forms/provideTenancyDetailsLaterForm"

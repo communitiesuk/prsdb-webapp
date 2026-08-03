@@ -57,7 +57,7 @@ class LandlordDetailsControllerTests(
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                    "user",
+                    landlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 ),
             ).thenReturn(emptyList())

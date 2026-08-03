@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -10,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
@@ -84,7 +84,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbWebService
@@ -154,6 +154,8 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                    // TODO PDJB-942: If changing from provide-this-later to actual households for tenancy details, route through
+                    //  the rent section so the user can fill in missing rent details before returning to CYA
                     duplicableCheckAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
@@ -256,7 +258,7 @@ class PropertyRegistrationJourneyFactory(
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                     withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
                 } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.old.heading")
+                    withHeadingMessageKey("registerProperty.taskList.register.heading")
                 }
                 fromTask(journey.propertyDetailsTask) {
                     duplicableTask(task.addressTask) {
@@ -489,7 +491,12 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextStep { journey.taskListStep }
+                    nextDestination { _ ->
+                        when {
+                            journey.provideTenancyDetailsLater -> Destination(journey.cyaStep)
+                            else -> Destination(journey.taskListStep)
+                        }
+                    }
                     saveProgress()
                 }
             }
@@ -590,7 +597,7 @@ class PropertyRegistrationJourney(
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
@@ -645,10 +652,11 @@ class PropertyRegistrationJourney(
 
     override val loggedInLandlordEmail: String?
         // TODO: PDJB-1274: Update emails to account for org landlord
-        get() =
-            landlordService
-                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
-                ?.email
+        get() {
+            val landlord = userToLandlordService.getCurrentLandlordForUser()
+            check(landlord is IndividualLandlord)
+            return landlord.email
+        }
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
