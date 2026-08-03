@@ -25,7 +25,7 @@
             <div th:replace="~{fragments/warningText :: warningText(#{leaveProperty.confirm.warning})}"></div>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
-                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(#{leaveProperty.confirm.confirmButton})}"></button>
+                    <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{leaveProperty.confirm.confirmButton})}"></button>
                     <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{leaveProperty.confirm.cancelLink}">
                         leaveProperty.confirm.cancelLink
                     </a>

@@ -23,6 +23,7 @@ testTheService:
     three: Parts of the service may change during the private beta period.
 checkAnswers:
   summaryName: Your details
+  landlordTypeValue: Individual
   rowHeading:
     name: Name
     dateOfBirth: Date of birth
@@ -31,6 +32,7 @@ checkAnswers:
     englandOrWalesResident: Resident in England or Wales
     contactAddress: Contact address
     localCouncil: Local Council
+    landlordType: Landlord type
 orgCheckAnswers:
   heading: Check your answers
   yourDetails:

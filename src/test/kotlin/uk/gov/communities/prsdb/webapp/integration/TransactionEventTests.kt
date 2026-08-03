@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -154,6 +155,23 @@ class AcceptJointLandlordInvitationTransactionEventTests :
         acceptOrRejectPage.acceptInvitation()
 
         assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
+    }
+}
+
+class LeavePropertyTransactionEventTests :
+    IntegrationTestWithImmutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
+    private val jointPropertyOwnershipId = 2L
+
+    @Test
+    fun `the leave property commit button is tagged for the Plausible Transaction event`(page: Page) {
+        navigator.goToLeavePropertyConfirmPage(jointPropertyOwnershipId)
+
+        assertPageIs(
+            page,
+            ConfirmPageLeaveProperty::class,
+            mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()),
+        )
         assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
     }
 }

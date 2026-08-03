@@ -208,7 +208,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -340,6 +339,12 @@ class Navigator(
         return createValidPage(page, OrgCompanyNumberFormPageLandlordRegistration::class)
     }
 
+    fun skipToLandlordRegistrationOrgCheckAnswersPage(): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCheckAnswers().build())
+        navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
     fun goToLandlordRegistrationPrivacyNoticePage(): PrivacyNoticePageLandlordRegistration {
         navigate("$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
         return createValidPage(page, PrivacyNoticePageLandlordRegistration::class)
@@ -433,8 +438,10 @@ class Navigator(
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationCheckAnswersPage(): CheckAnswersPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeCheckAnswers().build())
+    fun skipToLandlordRegistrationCheckAnswersPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeCheckAnswers(),
+    ): CheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
         navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
@@ -461,7 +468,7 @@ class Navigator(
         stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeOrgCheckAnswers(),
     ): OrgCheckAnswersPageLandlordRegistration {
         setJourneyStateInSession(stateBuilder.build())
-        navigateToLandlordRegistrationJourneyStep(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
+        navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
     }
 
