@@ -11,9 +11,11 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -35,6 +37,7 @@ class LandlordDetailsController(
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -75,6 +78,10 @@ class LandlordDetailsController(
         orgLandlord: OrganisationLandlord,
         model: Model,
     ): String {
+        if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+        }
+
         val governingBodyMembers =
             organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
 
