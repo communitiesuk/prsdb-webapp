@@ -212,7 +212,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             isOccupied = any(),
             numberOfHouseholds = any(),
             numberOfPeople = any(),
-            baseUserId = any(),
             numBedrooms = anyOrNull(),
             billsIncludedList = anyOrNull(),
             customBillsIncluded = anyOrNull(),
