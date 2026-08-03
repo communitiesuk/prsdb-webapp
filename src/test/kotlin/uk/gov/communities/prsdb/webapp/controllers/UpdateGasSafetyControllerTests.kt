@@ -6,11 +6,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -18,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.post
 import org.springframework.util.ResourceUtils
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -110,8 +113,8 @@ class UpdateGasSafetyControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 404 for a landlord user not authorised to edit the property`() {
-            whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-                .thenReturn(false)
+            doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+                .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
             mvc
                 .post(validFileUploadUrl) {
@@ -127,9 +130,6 @@ class UpdateGasSafetyControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 400 for a valid user without a cookie`() {
-            whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-                .thenReturn(true)
-
             mvc
                 .post(validFileUploadUrl) {
                     contentType = MediaType.parseMediaType(httpEntity.contentType)
@@ -143,8 +143,6 @@ class UpdateGasSafetyControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep delegates to the certificate upload helper and redirects`() {
-            whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-                .thenReturn(true)
             whenever(certificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
                 .thenReturn(mapOf<String, Any>())
             whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))

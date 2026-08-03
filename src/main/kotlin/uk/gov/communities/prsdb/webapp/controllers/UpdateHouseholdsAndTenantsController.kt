@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -8,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -34,7 +32,7 @@ class UpdateHouseholdsAndTenantsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable stepPath: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
@@ -46,7 +44,7 @@ class UpdateHouseholdsAndTenantsController(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
@@ -62,15 +60,6 @@ class UpdateHouseholdsAndTenantsController(
             initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
             dispatch = dispatch,
         )
-
-    private fun throwErrorIfUserIsNotAuthorized(propertyOwnershipId: Long) {
-        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Current user is not authorized to update property ownership $propertyOwnershipId",
-            )
-        }
-    }
 
     companion object {
         const val UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE =

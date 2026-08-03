@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -37,7 +37,7 @@ class UpdateTenancyDetailsController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return try {
             val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.getStepModelAndView()
@@ -58,7 +58,7 @@ class UpdateTenancyDetailsController(
         @PathVariable("stepName") stepName: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return try {
             val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.postStepModelAndView(formData)
@@ -67,15 +67,6 @@ class UpdateTenancyDetailsController(
             val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
-        }
-    }
-
-    private fun throwErrorIfUserIsNotAuthorized(propertyOwnershipId: Long) {
-        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Current user is not authorized to update property ownership $propertyOwnershipId",
-            )
         }
     }
 

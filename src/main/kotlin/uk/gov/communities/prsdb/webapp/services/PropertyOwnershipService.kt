@@ -120,6 +120,16 @@ class PropertyOwnershipService(
 
     fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean = isCurrentUserLandlord(propertyOwnershipId)
 
+    fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
+        if (!getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
+            val baseUserId = SecurityContextHolder.getContext().authentication.name
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
+            )
+        }
+    }
+
     fun isCurrentUserLandlord(propertyOwnershipId: Long): Boolean {
         val landlord = userToLandlordService.getCurrentLandlordForUserOrNull() ?: return false
         return getPropertyOwnership(propertyOwnershipId).landlords.any { it.id == landlord.id }

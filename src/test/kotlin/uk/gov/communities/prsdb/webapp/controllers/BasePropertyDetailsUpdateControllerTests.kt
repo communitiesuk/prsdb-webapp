@@ -2,14 +2,17 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -43,8 +46,8 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc.get(updateStepRoute).andExpect {
             status { isNotFound() }
@@ -54,8 +57,6 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getUpdateStep returns 200 for a landlord user`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(true)
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.getStepModelAndView())
             .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
@@ -93,8 +94,8 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `postUpdateStep returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc
             .post(updateStepRoute) {
@@ -111,8 +112,6 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     fun `postUpdateStep redirects for a valid landlord request`() {
         val redirectUrl = "/landlord/property-details/$propertyOwnershipId"
 
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(true)
         stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
             .thenReturn(ModelAndView("redirect:$redirectUrl"))

@@ -2,14 +2,17 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -75,8 +78,8 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc.get(confirmationRoute).andExpect {
             status { isNotFound() }
@@ -86,9 +89,6 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `getConfirmation returns 200 for an authorised landlord user`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(true)
-
         mvc.get(confirmationRoute).andExpect {
             status { isOk() }
             model { attributeExists("propertyDetailsUrl") }
@@ -117,8 +117,8 @@ class InviteJointLandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
     fun `resendInvitation returns 404 for a landlord user not authorised to edit the property`() {
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(false)
+        doThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
+            .whenever(propertyOwnershipService).throwIfCurrentUserNotAuthorizedToEdit(eq(propertyOwnershipId))
 
         mvc
             .get(resendRoute)
@@ -133,8 +133,6 @@ class InviteJointLandlordControllerTests(
         val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val mockLandlord = MockLandlordData.createIndividualLandlord()
 
-        whenever(propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(eq(propertyOwnershipId)))
-            .thenReturn(true)
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(mockPropertyOwnership)
         whenever(userToLandlordService.getCurrentLandlordForUser())
