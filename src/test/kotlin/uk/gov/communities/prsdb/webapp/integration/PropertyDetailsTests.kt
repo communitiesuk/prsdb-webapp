@@ -608,12 +608,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Nested
         inner class ProvideLaterNotificationBanner {
-            // The banner content matrix (which messages/links show for each provide-later and
-            // compliance combination, landlord vs local council) is exhaustively covered by the
-            // unit tests in PropertyDetailsNotificationBannerViewModelTests. These integration
-            // tests only smoke-test that the correct banner variant is wired up and rendered on
-            // the property details page.
-
             @Test
             fun `landlord view shows the tenancy-only provide-later banner`(page: Page) {
                 // Property 41: occupied, licence present, tenancy skipped, fully compliant.
