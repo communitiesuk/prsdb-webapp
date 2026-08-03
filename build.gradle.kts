@@ -175,6 +175,12 @@ tasks.withType<Test> {
     maxHeapSize = "2g"
 
     if (shardIndex != null && shardCount != null) {
+        // Shards run concurrently when sharding locally, so each needs its own output directories.
+        val shardName = "$name-shard$shardIndex"
+        binaryResultsDirectory.set(layout.buildDirectory.dir("test-results/$shardName/binary"))
+        reports.junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/$shardName"))
+        reports.html.outputLocation.set(layout.buildDirectory.dir("reports/tests/$shardName"))
+
         exclude { element ->
             if (element.isDirectory) {
                 false

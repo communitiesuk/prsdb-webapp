@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Parallel test suite" type="CompoundRunConfigurationType">
+    <toRun name="Test shard 0 of 4" type="GradleRunConfiguration" />
+    <toRun name="Test shard 1 of 4" type="GradleRunConfiguration" />
+    <toRun name="Test shard 2 of 4" type="GradleRunConfiguration" />
+    <toRun name="Test shard 3 of 4" type="GradleRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
