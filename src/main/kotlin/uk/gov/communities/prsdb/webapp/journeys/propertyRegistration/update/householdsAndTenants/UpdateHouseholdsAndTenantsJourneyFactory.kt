@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -53,7 +53,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            duplicableTask(journey.householdsAndTenantsTask) {
+            task(journey.householdsAndTenantsTask) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -93,7 +93,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
+            checkAnswerTask(journey.householdsAndTenantsTask)
             step(journey.finishCyaStep) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextDestination { Destination.Nowhere() }

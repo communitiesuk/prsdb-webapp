@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IndividualLandlordLocationState
@@ -17,7 +17,7 @@ class IndividualLandlordLocationTask(
     override val countryOfResidenceStep: CountryOfResidenceStep,
     override val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep,
     override val addressTask: LandlordAddressTask,
-) : DuplicableTask<IndividualLandlordLocationState>(journeyStateService),
+) : TaskWithoutDependencies<IndividualLandlordLocationState>(journeyStateService),
     IndividualLandlordLocationState {
     override val taskState get() = this
 
@@ -37,7 +37,7 @@ class IndividualLandlordLocationTask(
                 parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.NON_ENGLAND_OR_WALES) }
                 noNextDestination()
             }
-            duplicableTask(journey.addressTask) {
+            task(journey.addressTask) {
                 parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
                 nextStep { exitStep }
             }

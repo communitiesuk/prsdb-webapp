@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -37,7 +37,7 @@ class GasSafetyDetailsTask(
     override val gasCertMissingStep: GasCertMissingStep,
     override val provideGasCertLaterStep: ProvideGasCertLaterStep,
     journeyStateService: JourneyStateService,
-) : DuplicableTaskWithDependencies<GasSafetyDetailState, GasSafetyDependencies>(journeyStateService),
+) : Task<GasSafetyDetailState, GasSafetyDependencies>(journeyStateService),
     GasSafetyDetailState {
     override val taskState: GasSafetyDetailState
         get() = this

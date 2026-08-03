@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
@@ -36,7 +36,7 @@ class OrgGovBodyTask(
     override val saveGovBodyMemberStep: SaveGovBodyMemberStep,
     override val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep,
     override val removeGovBodyMemberStep: RemoveGovBodyMemberStep,
-) : DuplicableTask<OrgGovBodyState>(journeyStateService),
+) : TaskWithoutDependencies<OrgGovBodyState>(journeyStateService),
     OrgGovBodyState {
     override val taskState get() = this
 
@@ -108,7 +108,7 @@ class OrgGovBodyTask(
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
                 nextStep { journey.govBodyMemberAddressTask.firstStep }
             }
-            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
+            task(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.saveGovBodyMemberStep }
             }

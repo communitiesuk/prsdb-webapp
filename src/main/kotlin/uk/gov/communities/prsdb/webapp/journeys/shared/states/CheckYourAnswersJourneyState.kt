@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -80,8 +79,9 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(
-            task: Task<T>,
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, *>,
             route: String? = null,
         ) {
             task(task) {
@@ -93,25 +93,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTaskWithDependencies<TTaskState, *>,
-            route: String? = null,
-        ) {
-            duplicableTask(task) {
-                route?.let { routeSegment(it) }
-                initialStep()
-                backDestination { journey.returnToCyaPageDestination }
-                nextStep { journey.finishCyaStep }
-            }
-        }
-
-        @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, TDependencies>,
             dependencies: () -> TDependencies,
             route: String? = null,
         ) {
-            duplicableTask(task) {
+            task(task) {
                 route?.let { routeSegment(it) }
                 withDependencies(dependencies)
                 initialStep()
