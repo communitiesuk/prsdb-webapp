@@ -62,7 +62,12 @@ class DeregisterLandlordController(
             )
         }
 
-        userToLandlordService.throwIfCurrentUserDoesNotHaveALandlord()
+        if (userToLandlordService.doesCurrentUserHaveLandlord()) {
+            throw ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Landlord deregistration did not complete successfully",
+            )
+        }
 
         val landlordHadRegisteredProperties = landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()
 

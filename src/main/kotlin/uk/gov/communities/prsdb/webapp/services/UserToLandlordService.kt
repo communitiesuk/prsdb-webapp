@@ -30,6 +30,8 @@ class UserToLandlordService(
         return getLandlordForBaseUserIdOrNull(baseUserId)
     }
 
+    fun doesCurrentUserHaveLandlord(): Boolean = getCurrentLandlordForUserOrNull() != null
+
     /**
      * Calls getCurrentLandlordForUser and discards result.
      * Use for checking that the user has a landlord and expect a ResponseStatusException(BAD_REQUEST) if they do not.

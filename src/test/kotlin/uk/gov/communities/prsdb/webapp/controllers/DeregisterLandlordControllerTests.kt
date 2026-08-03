@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -106,6 +105,7 @@ class DeregisterLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the landlord was deregistered in the session`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
+        whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(false)
         whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
@@ -113,8 +113,6 @@ class DeregisterLandlordControllerTests(
             .andExpect {
                 status { isOk() }
             }
-
-        verify(userToLandlordService).throwIfCurrentUserDoesNotHaveALandlord()
     }
 
     @Test
@@ -126,6 +124,19 @@ class DeregisterLandlordControllerTests(
             .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 500 if the landlord is still found in the database`() {
+        whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
+        whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(true)
+
+        mvc
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { is5xxServerError() }
             }
     }
 }
