@@ -706,12 +706,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `no provide-later banner is shown when all fields are completed`(page: Page) {
-                // Property 40: occupied, licence present, full tenancy details.
-                navigator.goToPropertyDetailsLandlordView(40)
+            fun `no notification banner is shown when all fields are completed and the property is compliant`(page: Page) {
+                // Property 40: occupied, licence present, full tenancy details, fully compliant.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
-                assertThat(page.getByText("You must finish adding")).isHidden()
-                assertThat(page.getByText("You must finish providing")).isHidden()
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
         }
     }

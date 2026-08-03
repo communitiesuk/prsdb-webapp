@@ -57,7 +57,7 @@ class PropertyDetailsControllerTests(
     private lateinit var featureFlagManager: FeatureFlagManager
 
     @BeforeEach
-    fun setUpFeatureFlag() {
+    fun setUp() {
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
