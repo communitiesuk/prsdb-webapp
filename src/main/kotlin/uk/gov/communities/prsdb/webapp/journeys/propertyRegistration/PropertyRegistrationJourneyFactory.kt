@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -665,7 +664,6 @@ class PropertyRegistrationJourney(
 
 interface PropertyRegistrationJourneyState :
     OccupationState,
-    TenancyDetailsState,
     InviteJointLandlordsTaskDependencies,
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
