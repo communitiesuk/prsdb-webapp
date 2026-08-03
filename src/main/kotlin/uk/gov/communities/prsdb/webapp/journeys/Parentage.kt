@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-
 interface Parentage {
     fun allowsChild(): Boolean
 
@@ -80,8 +78,6 @@ fun Task<*, *>.isComplete() =
     SingleParent(exitStep) {
         exitStep.outcome == SubjourneyComplete.COMPLETE
     }
-
-fun JourneyStep<Complete, *, *>.isComplete() = this.hasOutcome(Complete.COMPLETE)
 
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.isComplete(): Parentage = SingleParent(this) { outcome != null }
 
