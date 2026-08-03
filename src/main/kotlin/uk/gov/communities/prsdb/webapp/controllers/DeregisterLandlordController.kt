@@ -20,12 +20,14 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
     private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/{*stepPath}")
@@ -59,6 +61,8 @@ class DeregisterLandlordController(
                 "Landlord deregistration has not been performed in this session",
             )
         }
+
+        userToLandlordService.throwIfCurrentUserDoesNotHaveALandlord()
 
         val landlordHadRegisteredProperties = landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()
 

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(DeregisterLandlordController::class)
 class DeregisterLandlordControllerTests(
@@ -26,6 +28,9 @@ class DeregisterLandlordControllerTests(
 
     @MockitoBean
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
+
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -108,6 +113,8 @@ class DeregisterLandlordControllerTests(
             .andExpect {
                 status { isOk() }
             }
+
+        verify(userToLandlordService).throwIfCurrentUserDoesNotHaveALandlord()
     }
 
     @Test

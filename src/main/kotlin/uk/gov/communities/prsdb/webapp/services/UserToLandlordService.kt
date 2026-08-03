@@ -22,6 +22,14 @@ class UserToLandlordService(
     }
 
     /**
+     * Calls getCurrentLandlordForUser and discards result.
+     * Use for checking that the user has a landlord and expect a PrsdbWebException if they do not.
+     */
+    fun throwIfCurrentUserDoesNotHaveALandlord() {
+        getCurrentLandlordForUser()
+    }
+
+    /**
      * Be careful about using this, at some point we may need to allow for one user to be in control of multiple landlords
      * Where possible use getCurrentLandlordForUser()
      */
