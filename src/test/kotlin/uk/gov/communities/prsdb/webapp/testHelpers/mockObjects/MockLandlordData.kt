@@ -251,6 +251,7 @@ class MockLandlordData {
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
             lastOccupiedDate: LocalDate? = LocalDate.of(2025, 1, 1),
+            createdDate: Instant = Instant.now(),
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
         ): PropertyOwnership {
@@ -274,6 +275,7 @@ class MockLandlordData {
                     rentFrequency = rentFrequency,
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
+                    createdDate = createdDate,
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
                 )

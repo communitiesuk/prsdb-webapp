@@ -51,6 +51,14 @@ abstract class PropertyDetailsViewModelBase(
 
     val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
+    private val registrationDate = propertyOwnership.createdDate.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
+
+    // A property counts as "occupied when registered" when its lastOccupiedDate matches its registration date.
+    // Properties that became occupied after registration have a later lastOccupiedDate and so are shown a
+    // provide-later message without a deadline date.
+    protected val wasOccupiedAtRegistration: Boolean =
+        isOccupied && propertyOwnership.lastOccupiedDate == registrationDate
+
     protected fun registrationNumberRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.registrationNumber",
@@ -259,11 +267,8 @@ abstract class PropertyDetailsViewModelBase(
             }.single()
 
     protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
-        // Matches the compliance tab (ComplianceViewModelFactoryBase): an occupied property in a provide-later
-        // state is expected to always have a lastOccupiedDate.
-        val deadline =
-            propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
+        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
+        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
         return messageSource.getMessageForKey(deadlineMessageKey, arrayOf<Any>(deadline.format(PROVIDE_LATER_DATE_FORMATTER)))
     }
 

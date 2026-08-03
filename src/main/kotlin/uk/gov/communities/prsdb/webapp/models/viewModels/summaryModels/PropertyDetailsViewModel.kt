@@ -42,7 +42,7 @@ class PropertyDetailsViewModel(
 
     val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
-            if (isOccupied) {
+            if (isOccupied && wasOccupiedAtRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
                 messageSource.getMessageForKey("propertyDetails.propertyRecord.licensing.councilNotProvided")
@@ -71,15 +71,17 @@ class PropertyDetailsViewModel(
     val tenancyProvideLaterParagraph: String? =
         when {
             !showTenancySection || isLandlordView -> null
-            isTenancyProvideLater ->
+            isTenancyProvideLater && wasOccupiedAtRegistration ->
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
+            isTenancyProvideLater ->
+                messageSource.getMessageForKey("propertyDetails.propertyRecord.tenancy.councilNotProvided")
             else -> null
         }
 
     private fun licensingProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.licensing.rowName",
-            if (isOccupied) {
+            if (isOccupied && wasOccupiedAtRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterOccupied")
             } else {
                 "propertyDetails.propertyRecord.licensing.provideLaterUnoccupied"
@@ -93,7 +95,11 @@ class PropertyDetailsViewModel(
     private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancy.rowName",
-            getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied"),
+            if (wasOccupiedAtRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied")
+            } else {
+                "propertyDetails.propertyRecord.tenancy.provideLaterUnoccupied"
+            },
             changeLinkMessageKey,
             UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",

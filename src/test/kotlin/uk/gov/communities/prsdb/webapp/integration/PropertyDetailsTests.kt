@@ -496,8 +496,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class OccupiedWithLicensingAndTenancySkipped {
             // Property 39: occupied (0 tenants, 0 households), no licence, no tenancy details.
-            // last_occupied_date is seeded to 7 days ago, so the provide-later deadline is
-            // (7 days ago + PROVIDE_LATER_DEADLINE_DAYS) days from today.
+            // created_date and last_occupied_date are both seeded to 7 days ago (occupied at registration),
+            // so the provide-later deadline is (7 days ago + PROVIDE_LATER_DEADLINE_DAYS) days from today.
             private val expectedDeadline =
                 LocalDate
                     .now()
@@ -525,6 +525,35 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
+                ).hasCount(2)
+            }
+        }
+
+        @Nested
+        inner class OccupiedAfterRegistrationWithLicensingAndTenancySkipped {
+            // Property 43: occupied with licensing and tenancy skipped, but created_date (05/02/25) is earlier
+            // than last_occupied_date (7 days ago), i.e. it became occupied after registration. Such properties
+            // show a provide-later prompt with no deadline date.
+            @Test
+            fun `landlord view shows no-deadline provide later rows for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
+                ).containsText("Provide this later (within 28 days of the property being occupied)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (within 28 days of the property being occupied)")
+            }
+
+            @Test
+            fun `local council view shows not provided paragraphs for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
+
+                assertThat(
+                    detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(2)
             }
         }
