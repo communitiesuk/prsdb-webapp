@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -32,7 +33,8 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
         val address = state.govBodyMemberAddressTask.getAddress()
         val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
         val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
-        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull
+        val wentManual = selectFormModel?.address == MANUAL_ADDRESS_CHOSEN
+        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
