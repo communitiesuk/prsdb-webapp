@@ -661,7 +661,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 }
 
-@WithOrgLandlordUser
+@WithOrgLandlordProfile
 class PropertyDetailsOrgLandlordTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `property solely owned by org landlord shows your organisation in card title`(page: Page) {
