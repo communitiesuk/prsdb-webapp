@@ -75,6 +75,25 @@ class JourneyStepDispatcherTests {
                 result.viewName,
             )
         }
+
+        @Test
+        fun `throws 404 without initialising a journey when the path is empty`() {
+            var initialiseCalled = false
+            val result =
+                assertThrows<ResponseStatusException> {
+                    JourneyStepDispatcher.handleInitialisableRequest(
+                        rawStepPath = "/",
+                        createRoutingMap = { throw NoSuchJourneyException("none") },
+                        initialiseJourney = {
+                            initialiseCalled = true
+                            "journey-id"
+                        },
+                        dispatch = { ModelAndView("view") },
+                    )
+                }
+            assertEquals(404, result.statusCode.value())
+            assertEquals(false, initialiseCalled)
+        }
     }
 
     @Nested
@@ -126,6 +145,25 @@ class JourneyStepDispatcherTests {
                 )
 
             assertEquals(expected, result)
+        }
+
+        @Test
+        fun `throws 404 without invoking the fallback redirect when the path is empty`() {
+            var redirectCalled = false
+            val result =
+                assertThrows<ResponseStatusException> {
+                    JourneyStepDispatcher.handleUninitialisableRequest(
+                        rawStepPath = "/",
+                        createRoutingMap = { throw NoSuchJourneyException("none") },
+                        dispatch = { ModelAndView("view") },
+                        getRedirect = {
+                            redirectCalled = true
+                            ModelAndView("redirect:/base")
+                        },
+                    )
+                }
+            assertEquals(404, result.statusCode.value())
+            assertEquals(false, redirectCalled)
         }
     }
 }

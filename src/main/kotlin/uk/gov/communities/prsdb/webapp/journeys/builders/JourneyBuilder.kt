@@ -37,8 +37,8 @@ interface JourneyBuilderDsl<TState : JourneyState> {
 
 open class JourneyBuilder<TState : JourneyState>(
     // The state is referred to here as the "journey" so that in the DSL steps can be referenced as `journey.stepName`
-    journey: TState,
-) : AbstractJourneyBuilder<TState>(journey) {
+    override val journey: TState,
+) : AbstractJourneyBuilder<TState, TState>(journey) {
     private val sections: MutableList<String> = mutableListOf()
 
     fun buildRoutingMap(): Map<String, StepLifecycleOrchestrator> =
@@ -64,70 +64,59 @@ open class JourneyBuilder<TState : JourneyState>(
             }
         }
 
-    fun section(init: SectionBuilder<TState>.() -> Unit) {
-        val sectionBuilder = SectionBuilder<TState>(this)
+    open fun section(init: SectionBuilder<TState>.() -> Unit) {
+        val sectionBuilder = SectionBuilder(journey, this)
         sectionBuilder.init()
         sectionBuilder.validateHeadingSet()
+        sectionBuilder.applySectionHeader()
+        registerTransparentBuilder(sectionBuilder)
     }
 
+    private fun getSectionHeaderViewModel(
+        headingMessageKey: String,
+        useNumbering: Boolean,
+    ): SectionHeaderViewModel {
+        val sectionIndex = sections.indexOf(headingMessageKey) + 1
+        val totalSections = sections.size
+        return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections, useNumbering)
+    }
+
+    // A section groups steps and tasks under a shared numbered heading. It owns its elements (like an embedded
+    // sub-journey) and splices them transparently into the parent journey, so the parent's configuration still
+    // applies to them and additional element types (e.g. embed) become available inside a section. The section
+    // header is applied to every owned element via a single lazy content provider, so numbering reflects the
+    // final total once all sections have been declared.
     class SectionBuilder<TState : JourneyState>(
-        private val journeyBuilder: JourneyBuilder<TState>,
-    ) : JourneyBuilderDsl<TState> {
+        journey: TState,
+        private val parent: JourneyBuilder<TState>,
+    ) : JourneyBuilder<TState>(journey) {
         private lateinit var headingMessageKey: String
         private var useNumbering: Boolean = true
+
+        // Sections are flat, top-level groupings on the journey's task list; nesting them would register the inner
+        // heading against the wrong `sections` list (breaking numbering) and mask the inner header with the outer's.
+        override fun section(init: SectionBuilder<TState>.() -> Unit): Unit =
+            throw JourneyInitialisationException("Sections cannot be nested")
 
         fun withHeadingMessageKey(
             key: String,
             shouldUseNumbering: Boolean = true,
         ) {
-            journeyBuilder.sections.add(key)
+            parent.sections.add(key)
             headingMessageKey = key
             useNumbering = shouldUseNumbering
         }
 
-        override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-            uninitialisedStep: JourneyStep<TMode, *, TState>,
-            init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
-        ) = journeyBuilder.step<TMode, TStep>(uninitialisedStep) {
-            init()
-            withAdditionalContentProperty {
-                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+        internal fun applySectionHeader() {
+            configure {
+                withAdditionalContentProperty {
+                    "sectionHeaderInfo" to parent.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+                }
             }
-        }
-
-        override fun task(
-            uninitialisedTask: Task<TState>,
-            routeSegment: String?,
-            init: TaskInitialiser<TState, Nothing>.() -> Unit,
-        ) = journeyBuilder.task(uninitialisedTask, routeSegment) {
-            init()
-            withAdditionalContentProperty {
-                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
-            }
-        }
-
-        override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
-            uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
-            routeSegment: String?,
-            init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
-        ) = journeyBuilder.duplicableTask(uninitialisedTask, routeSegment) {
-            init()
-            withAdditionalContentProperty {
-                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
-            }
-        }
-
-        private fun JourneyBuilder<*>.getSectionHeaderViewModel(
-            headingMessageKey: String,
-            useNumbering: Boolean,
-        ): SectionHeaderViewModel {
-            val sectionIndex = sections.indexOf(headingMessageKey) + 1
-            val totalSections = sections.size
-            return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections, useNumbering)
         }
 
         fun validateHeadingSet() {
-            if (!::headingMessageKey.isInitialized || !journeyBuilder.sections.contains(headingMessageKey)) {
+            if (!::headingMessageKey.isInitialized || !parent.sections.contains(headingMessageKey)) {
                 throw JourneyInitialisationException("Section heading message key must be set using withHeadingMessageKey")
             }
         }

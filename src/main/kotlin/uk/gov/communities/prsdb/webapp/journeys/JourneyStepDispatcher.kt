@@ -25,6 +25,9 @@ object JourneyStepDispatcher {
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         request.setAttribute(JourneyStateService.JOURNEY_BASE_PATH_ATTRIBUTE, deriveJourneyBasePath(request.requestURI, rawStepPath))
         val stepPath = rawStepPath.trimStart('/')
+        if (stepPath.isEmpty()) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        }
         return try {
             val routingMap = createRoutingMap()
             routingMap[stepPath]?.dispatch()
@@ -48,6 +51,9 @@ object JourneyStepDispatcher {
         val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
         request.setAttribute(JourneyStateService.JOURNEY_BASE_PATH_ATTRIBUTE, deriveJourneyBasePath(request.requestURI, rawStepPath))
         val stepPath = rawStepPath.trimStart('/')
+        if (stepPath.isEmpty()) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        }
         return try {
             val routingMap = createRoutingMap()
             routingMap[stepPath]?.dispatch()

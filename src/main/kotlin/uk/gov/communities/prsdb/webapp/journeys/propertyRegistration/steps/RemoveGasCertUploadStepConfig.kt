@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveFileFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -17,38 +17,38 @@ import kotlin.collections.remove
 class RemoveGasCertUploadStepConfig(
     private val collectionKeyParameterService: CollectionKeyParameterService,
     private val uploadService: UploadService,
-) : AbstractRequestableStepConfig<AnyMembers, RemoveFileFormModel, GasSafetyState>() {
+) : AbstractRequestableStepConfig<AnyMembers, RemoveFileFormModel, GasSafetyDetailState>() {
     override val formModelClass = RemoveFileFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState) =
+    override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
             "fieldSetHeading" to "uploads.removeUploads.fieldSetHeading",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             "optionalFieldSetHeadingParam" to getFileToRemove(state)?.fileName,
         )
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/areYouSureForm"
+    override fun chooseTemplate(state: GasSafetyDetailState): String = "forms/areYouSureForm"
 
-    override fun mode(state: GasSafetyState) =
+    override fun mode(state: GasSafetyDetailState) =
         if (state.gasUploadMap.isNotEmpty()) {
             AnyMembers.SOME_MEMBERS
         } else {
             AnyMembers.NO_MEMBERS
         }
 
-    private fun getFileToRemove(state: GasSafetyState): CertificateUpload? {
+    private fun getFileToRemove(state: GasSafetyDetailState): CertificateUpload? {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
         return state.gasUploadMap[keyToRemove]
     }
 
-    override fun beforeAttemptingToReachStep(state: GasSafetyState): Boolean {
+    override fun beforeAttemptingToReachStep(state: GasSafetyDetailState): Boolean {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
         val currentMap = state.gasUploadMap
 
         return keyToRemove != null && keyToRemove in currentMap.keys
     }
 
-    override fun afterStepDataIsAdded(state: GasSafetyState) {
+    override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         if (getFormModelFromStateOrNull(state)?.wantsToProceed == false) {
             return
         }
@@ -64,7 +64,7 @@ class RemoveGasCertUploadStepConfig(
 @JourneyFrameworkComponent
 final class RemoveGasCertUploadStep(
     stepConfig: RemoveGasCertUploadStepConfig,
-) : RequestableStep<AnyMembers, RemoveFileFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<AnyMembers, RemoveFileFormModel, GasSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-gas-safety-certificate-upload"
     }

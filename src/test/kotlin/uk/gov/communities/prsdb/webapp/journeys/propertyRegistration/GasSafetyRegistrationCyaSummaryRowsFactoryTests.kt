@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 @ExtendWith(MockitoExtension::class)
 class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
     @Mock
-    lateinit var mockState: GasSafetyState
+    lateinit var mockState: GasSafetyDetailState
 
     private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
     private val mockHasGasCertStep: HasGasCertStep = mock()

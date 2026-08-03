@@ -97,11 +97,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberNorthernIrelandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberScotlandFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
@@ -111,6 +111,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMustProvideInfoFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgIsRegisteredCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
@@ -126,8 +127,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
@@ -174,6 +175,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
@@ -196,8 +198,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
@@ -206,6 +206,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -244,6 +246,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -331,16 +334,16 @@ class Navigator(
         return createValidPage(page, OrgTypeFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationOrganisationCompaniesHousePage(): OrgCompaniesHouseFormPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCompaniesHouse().build())
-        navigateToLandlordRegistrationJourneyStep(OrgCompaniesHouseStep.ROUTE_SEGMENT)
-        return createValidPage(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-    }
-
     fun skipToLandlordRegistrationOrgCompanyNumberPage(): OrgCompanyNumberFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCompanyNumber().build())
         navigateToLandlordRegistrationJourneyStep(OrgCompanyNumberStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+    }
+
+    fun skipToLandlordRegistrationOrgCheckAnswersPage(): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCheckAnswers().build())
+        navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
     }
 
     fun goToLandlordRegistrationPrivacyNoticePage(): PrivacyNoticePageLandlordRegistration {
@@ -436,8 +439,10 @@ class Navigator(
         return createValidPage(page, ManualAddressFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationCheckAnswersPage(): CheckAnswersPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeCheckAnswers().build())
+    fun skipToLandlordRegistrationCheckAnswersPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeCheckAnswers(),
+    ): CheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
         navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPageLandlordRegistration::class)
     }
@@ -466,6 +471,14 @@ class Navigator(
         return createValidPage(page, OrgMainContactFormPageLandlordRegistration::class)
     }
 
+    fun skipToOrgLandlordRegistrationCheckAnswersPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeOrgCheckAnswers(),
+    ): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
+        navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
     fun skipToOrgLandlordRegistrationMustProvideInfoPage(): OrgGovBodyMustProvideInfoFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgGovBodyMustProvideInfo().build())
         navigateToLandlordRegistrationJourneyStep(OrgGovBodyMustProvideInfoStep.ROUTE_SEGMENT)
@@ -492,10 +505,16 @@ class Navigator(
         return createValidPage(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationCharityPage(): OrgCharityFormPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCharity().build())
-        navigateToLandlordRegistrationJourneyStep(OrgCharityStep.ROUTE_SEGMENT)
-        return createValidPage(page, OrgCharityFormPageLandlordRegistration::class)
+    fun skipToOrgLandlordRegistrationIsRegisteredCompanyPage(): OrgIsRegisteredCompanyFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgIsRegisteredCompany().build())
+        navigateToLandlordRegistrationJourneyStep(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationIsRegisteredCharityPage(): OrgIsRegisteredCharityFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgIsRegisteredCharity().build())
+        navigateToLandlordRegistrationJourneyStep(OrgIsRegisteredCharityStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationCharityRegisteredWithPage(): OrgCharityRegisteredWithFormPageLandlordRegistration {
@@ -790,6 +809,14 @@ class Navigator(
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+    }
+
+    fun skipToTenancyDetailsProvideTenancyDetailsLaterPage(): ProvideTenancyDetailsLaterFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforeTenancyDetails().withProvideTenancyDetailsLater().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT)
+        return createValidPage(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationPeoplePage(): NumberOfPeopleFormPagePropertyRegistration {

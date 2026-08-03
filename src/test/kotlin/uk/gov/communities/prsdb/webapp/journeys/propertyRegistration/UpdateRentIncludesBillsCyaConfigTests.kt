@@ -12,6 +12,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -26,6 +27,9 @@ class UpdateRentIncludesBillsCyaConfigTests {
 
     @Mock
     private lateinit var mockState: UpdateRentIncludesBillsJourneyState
+
+    @Mock
+    private lateinit var mockRentIncludesBillsTask: RentIncludesBillsTask
 
     @Mock
     private lateinit var stepConfig: UpdateRentIncludesBillsCyaConfig
@@ -53,7 +57,8 @@ class UpdateRentIncludesBillsCyaConfigTests {
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.getBillsIncludedOrNull()).thenReturn(billsIncludedDataModel)
+        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(billsIncludedDataModel)
     }
 
     @Test

@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -8,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bills
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -15,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
@@ -25,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentInclu
 
 interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
+    val additionalDataMap: MutableMap<String, String>
 
     fun withSubmittedValue(
         key: String,
@@ -51,6 +57,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
                 occupied = false
             }
         withSubmittedValue("occupancy", occupancyFormModel)
+        additionalDataMap["cachedOccupied"] = Json.encodeToString(serializer(), false)
         return self()
     }
 
@@ -60,6 +67,7 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
                 this.occupied = occupied
             }
         withSubmittedValue(OccupiedStep.ROUTE_SEGMENT, occupancyFormModel)
+        additionalDataMap["cachedOccupied"] = Json.encodeToString(serializer(), occupied)
         return self()
     }
 
@@ -155,6 +163,16 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
         withRentFrequency(rentFrequency)
         withRentAmount(rentAmount)
         @Suppress("UNCHECKED_CAST")
+        return self()
+    }
+
+    fun withProvideTenancyDetailsLater(): SelfType {
+        val numberOfHouseholdsFormModel =
+            NumberOfHouseholdsFormModel().apply {
+                action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+            }
+        withSubmittedValue(HouseholdStep.ROUTE_SEGMENT, numberOfHouseholdsFormModel)
+        withSubmittedValue(ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }

@@ -7,7 +7,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -18,7 +18,7 @@ class EpcSuperseededStepConfigTests {
     lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     val routeSegment = EpcSuperseededStep.ROUTE_SEGMENT
 

@@ -56,4 +56,3 @@ VALUES
        (1, 1, current_date, true, current_date + 365, 0),
        (2, 2, current_date, true, current_date + 365, 0),
        (3, 3, current_date, true, current_date + 365, 0);
-

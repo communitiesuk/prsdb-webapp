@@ -30,7 +30,7 @@ class LicensingDetailsHelperTests {
         val state = createMockLicensingState(LicensingType.NO_LICENSING, null)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
 
         // Assert
         summaryList.single().let { row ->
@@ -50,7 +50,7 @@ class LicensingDetailsHelperTests {
         val state = createMockLicensingState(LicensingType.HMO_MANDATORY_LICENCE, licenceNumber)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
 
         // Assert
         assertEquals(2, summaryList.size)

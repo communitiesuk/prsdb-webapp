@@ -42,9 +42,9 @@ ON CONFLICT (subject_identifier) DO NOTHING;
 -- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
 -- exact across the Europe/London DST boundary on 2030-03-31.
 --
--- Unlike data-integration.sql, this local seed inserts its own addresses (ids 10xx for
--- landlords, 12xx for properties): the local database has no AddressBase/NGD addresses to
--- reference, so the cohort cannot claim existing free addresses and must supply them.
+-- Like data-integration.sql, this seed inserts its own addresses (ids 10xx for landlords,
+-- 12xx for properties) rather than referencing AddressBase/NGD data, which the local
+-- database does not have.
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
 SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'

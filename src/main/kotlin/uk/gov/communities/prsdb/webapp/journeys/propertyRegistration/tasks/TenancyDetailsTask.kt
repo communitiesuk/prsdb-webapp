@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
@@ -9,14 +10,24 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
-class TenancyDetailsTask : Task<TenancyDetailsState>() {
+class TenancyDetailsTask(
+    journeyStateService: JourneyStateService,
+    override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
+    override val furnishedStatus: FurnishedStatusStep,
+    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
+) : DuplicableTask<TenancyDetailsState>(journeyStateService),
+    TenancyDetailsState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
-            task(journey.householdsAndTenantsTask) {
+            duplicableTask(journey.householdsAndTenantsTask) {
+                withDependencies { HouseHoldsAndTenantsDependencies(true) }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }
-            task(journey.rentIncludesBillsTask) {
+            duplicableTask(journey.rentIncludesBillsTask) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
                 savable()
@@ -27,7 +38,7 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            task(journey.rentFrequencyAndAmountTask) {
+            duplicableTask(journey.rentFrequencyAndAmountTask) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()

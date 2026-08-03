@@ -241,11 +241,11 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createLandlord(email = emailAddress1),
+                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress1),
                         savedJourneyState = savedJourneyState1,
                     ),
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createLandlord(email = emailAddress2),
+                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress2),
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),
@@ -264,7 +264,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createLandlord(email = emailAddress1),
+                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress1),
                         savedJourneyState = savedJourneyState1,
                     ),
                 ),
@@ -274,7 +274,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createLandlord(email = emailAddress2),
+                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress2),
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),

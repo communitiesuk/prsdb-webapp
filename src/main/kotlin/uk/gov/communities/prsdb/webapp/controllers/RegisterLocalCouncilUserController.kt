@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.InvalidInvitationException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
@@ -60,60 +60,42 @@ class RegisterLocalCouncilUserController(
         }
     }
 
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
     ): ModelAndView {
         val token =
             getValidTokenFromSessionOrNull()
                 ?: return redirectToInvalidLink()
-
-        return try {
-            try {
-                val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(token)
-                journeyMap[stepName]?.getStepModelAndView()
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
-                val redirectUrl =
-                    JourneyStateService.urlWithJourneyState(
-                        stepName,
-                        journeyId,
-                    )
-                ModelAndView("redirect:$redirectUrl")
-            }
-        } catch (_: InvalidInvitationException) {
-            redirectToInvalidLink()
-        }
+        return dispatchJourneyStep(stepPath, token) { getStepModelAndView() }
     }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
         val token =
             getValidTokenFromSessionOrNull()
                 ?: return redirectToInvalidLink()
+        return dispatchJourneyStep(stepPath, token) { postStepModelAndView(formData) }
+    }
 
-        return try {
-            try {
-                val journeyMap = localCouncilUserRegistrationJourneyFactory.createJourneySteps(token)
-                journeyMap[stepName]?.postStepModelAndView(formData)
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token)
-                val redirectUrl =
-                    JourneyStateService.urlWithJourneyState(
-                        stepName,
-                        journeyId,
-                    )
-                ModelAndView("redirect:$redirectUrl")
-            }
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        token: String,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        try {
+            JourneyStepDispatcher.handleInitialisableRequest(
+                rawStepPath = stepPath,
+                createRoutingMap = { localCouncilUserRegistrationJourneyFactory.createJourneySteps(token) },
+                initialiseJourney = { localCouncilUserRegistrationJourneyFactory.initializeJourneyState(token) },
+                dispatch = dispatch,
+            )
         } catch (_: InvalidInvitationException) {
             redirectToInvalidLink()
         }
-    }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(model: Model): String {

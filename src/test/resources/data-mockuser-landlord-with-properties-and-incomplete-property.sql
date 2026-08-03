@@ -59,4 +59,3 @@ VALUES
        (1, 1, current_date, true, 0),
        (2, 2, current_date, true, 0),
        (3, 3, current_date, true, 0);
-

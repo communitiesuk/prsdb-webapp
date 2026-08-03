@@ -11,11 +11,11 @@ class PhoneNumberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.phoneNumber.error.missing",
+                messageKey = "registerAsALandlord.phoneNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.phoneNumber.error.invalidFormat",
+                messageKey = "registerAsALandlord.phoneNumber.error.invalidFormat",
                 validatorType = PhoneNumberConstraintValidator::class,
             ),
         ],

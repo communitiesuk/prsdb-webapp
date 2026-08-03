@@ -15,22 +15,25 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
@@ -48,13 +51,19 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrust
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyMemberDobFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCompanyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -92,13 +101,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withYourDetails(): LandlordStateSessionBuilder {
-        withSubmittedValue(YourDetailsStep.ROUTE_SEGMENT, NoInputFormModel())
-        return self()
-    }
-
-    fun withOrgName(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgName(name: String = "Test Organisation Name"): LandlordStateSessionBuilder {
+        val formModel = OrgNameFormModel().apply { orgName = name }
+        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -150,8 +155,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgPhoneNumber(phoneNumber: String = "07123456789"): LandlordStateSessionBuilder {
+        val formModel = OrgPhoneNumberFormModel().apply { this.phoneNumber = phoneNumber }
+        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -161,21 +167,45 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
-        val formModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
-        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, formModel)
+    fun withOrgIsRegisteredCompany(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgIsRegisteredCompanyFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
+        withSubmittedValue(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
-    fun withOrgCharity(registeredCharity: Boolean): LandlordStateSessionBuilder {
-        val formModel = OrgCharityFormModel().apply { this.charity = registeredCharity }
-        withSubmittedValue(OrgCharityStep.ROUTE_SEGMENT, formModel)
+    fun withOrgIsRegisteredCharity(registeredCharity: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgIsRegisteredCharityFormModel().apply { this.charity = registeredCharity }
+        withSubmittedValue(OrgIsRegisteredCharityStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
     fun withCharityRegisteredWith(regulator: CharityRegulator): LandlordStateSessionBuilder {
         val formModel = CharityRegisteredWithFormModel().apply { this.charityRegisteredWith = regulator }
         withSubmittedValue(OrgCharityRegisteredWithStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberEnglandAndWales(charityNumber: String = "1234567"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberEnglandAndWalesFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberNorthernIreland(charityNumber: String = "123456"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberNorthernIrelandFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharityNumberScotland(charityNumber: String = "SC001234"): LandlordStateSessionBuilder {
+        val formModel = OrgCharityNumberScotlandFormModel().apply { this.charityNumber = charityNumber }
+        withSubmittedValue(OrgCharityNumberScotlandStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCompanyNumber(companyNumber: String = "12345678"): LandlordStateSessionBuilder {
+        val formModel = OrgCompanyNumberFormModel().apply { this.companyNumber = companyNumber }
+        withSubmittedValue(OrgCompanyNumberStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -338,17 +368,15 @@ class LandlordStateSessionBuilder(
 
         fun beforeDob() = beforeName().withName()
 
-        fun beforeLandlordType() = beforeDob().withDateOfBirth()
+        fun beforeEmail() = beforeDob().withDateOfBirth()
 
-        fun beforeEmail() = beforeLandlordType()
+        fun beforeLandlordType() = beforePhoneNumber().withPhoneNumber()
 
         fun beforePhoneNumber() = beforeEmail().withEmail()
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
-        fun beforeYourDetails() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
-
-        fun beforeOrgName() = beforeYourDetails().withYourDetails()
+        fun beforeOrgName() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
         fun beforeOrgAddress() = beforeOrgName().withOrgName()
 
@@ -370,9 +398,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeLeadTrusteeAddress() = beforeLeadTrusteePhone().withLeadTrusteePhone()
 
-        fun beforeOrgCharity() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
+        fun beforeOrgIsRegisteredCharity() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
 
-        fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
+        fun beforeOrgCharityRegisteredWith() = beforeOrgIsRegisteredCharity().withOrgIsRegisteredCharity(registeredCharity = true)
 
         fun beforeOrgCharityNumberEnglandAndWales() =
             beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
@@ -382,11 +410,11 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCharityNumberScotland() = beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.SCOTLAND)
 
-        fun beforeOrgCompaniesHouse() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
+        fun beforeOrgIsRegisteredCompany() = beforeOrgIsRegisteredCharity().withOrgIsRegisteredCharity(registeredCharity = false)
 
-        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
+        fun beforeOrgCompanyNumber() = beforeOrgIsRegisteredCompany().withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
 
-        fun beforeOrgGovBodyDetails() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+        fun beforeOrgGovBodyDetails() = beforeOrgIsRegisteredCompany().withOrgIsRegisteredCompany(registeredWithCompaniesHouse = false)
 
         fun beforeOrgGovBodyMustProvideInfo() = beforeOrgGovBodyDetails().withOrgGovBodyDetails(OrgGovBodyDetailsMode.NO_DETAILS)
 
@@ -408,6 +436,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgMainContact() =
             beforeOrgGovBodyMemberList()
                 .withOrgGovBodyMemberList()
+
+        fun beforeOrgCheckAnswers() = beforeOrgMainContact().withOrgMainContact()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 

@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.builders.EmbedBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -94,7 +94,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
         @Suppress("ktlint:standard:max-line-length")
         fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTask<TTaskState>,
+            task: DuplicableTaskWithDependencies<TTaskState, *>,
             route: String? = null,
         ) {
             duplicableTask(task) {
@@ -122,6 +122,18 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
         fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
             step: JourneyStep<TMode, *, T>,
+            route: String,
+        ) {
+            step(step) {
+                initialStep()
+                nextStep { journey.finishCyaStep }
+                routeSegment(route)
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TEmbeddedState : JourneyState, TOuterState : CheckYourAnswersJourneyState, TMode : Enum<TMode>> EmbedBuilder<TEmbeddedState, TOuterState>.checkAnswerStep(
+            step: JourneyStep<TMode, *, TEmbeddedState>,
             route: String,
         ) {
             step(step) {

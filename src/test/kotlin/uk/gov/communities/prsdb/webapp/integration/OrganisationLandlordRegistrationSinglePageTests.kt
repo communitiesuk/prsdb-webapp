@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -23,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -441,10 +444,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class OrgCompaniesHouseStep {
+    inner class OrgIsRegisteredCompanyStep {
         @Test
         fun `the companies house page renders the heading and yes no radio options`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             assertThat(companiesHousePage.form.fieldsetHeading)
                 .containsText("Is your organisation registered with Companies House?")
@@ -454,7 +457,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns a validation error`(page: Page) {
-            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+            val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             companiesHousePage.form.submit()
 
@@ -541,29 +544,29 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
-    inner class OrgCharityStep {
+    inner class OrgIsRegisteredCharityStep {
         @Test
         fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+            val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
-            assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
-            assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
-            assertThat(orgCharityPage.page.locator("#charity-hint"))
+            assertThat(orgIsRegisteredCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgIsRegisteredCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
+            assertThat(orgIsRegisteredCharityPage.page.locator("#charity-hint"))
                 .containsText(
                     "This includes Charity of Commission of England and Wales, " +
                         "Charity Commission of Northern Ireland and Scottish Charity Regulator",
                 )
-            assertThat(orgCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
-            assertThat(orgCharityPage.page.locator("label[for='charity-no']")).containsText("No")
+            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
+            assertThat(orgIsRegisteredCharityPage.page.locator("label[for='charity-no']")).containsText("No")
         }
 
         @Test
         fun `submitting with no option selected returns an error`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+            val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
-            orgCharityPage.form.submit()
+            orgIsRegisteredCharityPage.form.submit()
 
-            assertThat(orgCharityPage.form.getErrorMessage())
+            assertThat(orgIsRegisteredCharityPage.form.getErrorMessage())
                 .containsText("Select yes if your organisation is a registered charity")
         }
     }
@@ -862,5 +865,110 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 dateOfBirth = kotlinx.datetime.LocalDate(1970, 1, 1),
                 address = AddressDataModel(singleLineAddress = "Test Address"),
             )
+    }
+
+    @Nested
+    inner class CheckAnswersStep {
+        @Test
+        fun `the check answers page renders every card for a trust organisation`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.sectionHeader).containsText("Register as a landlord")
+            assertThat(checkAnswersPage.yourDetailsCard.title).hasText("Your details")
+            assertThat(checkAnswersPage.yourDetailsCard).containsText("email@test.com")
+            assertThat(checkAnswersPage.yourDetailsCard).containsText("01234567890")
+            assertThat(checkAnswersPage.leadTrusteeCard.title).hasText("Lead trustee")
+            assertThat(checkAnswersPage.governingBodyMemberCard.title).hasText("1. Director")
+            assertThat(checkAnswersPage.mainContactCard.title).hasText("Main contact")
+        }
+
+        @Test
+        fun `the landlord details card shows the organisation's answers`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.landlordDetails.landlordTypeRow.value).containsText("Organisation")
+            assertThat(checkAnswersPage.landlordDetails.organisationNameRow.value).containsText("Test Organisation Name")
+            assertThat(checkAnswersPage.landlordDetails.organisationEmailRow.value).containsText("org@test.com")
+            assertThat(checkAnswersPage.landlordDetails.organisationPhoneRow.value).containsText("07123456789")
+            assertThat(checkAnswersPage.landlordDetails.organisationTypeRow.value).containsText("Trust")
+            assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("No")
+            assertThat(checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.value).containsText("No")
+        }
+
+        @Test
+        fun `the main contact card shows the submitted main contact details`(page: Page) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.mainContactCard).containsText("Jane Doe")
+            assertThat(checkAnswersPage.mainContactCard).containsText("jane@example.com")
+        }
+
+        @Test
+        fun `the lead trustee card is not shown for a non-trust organisation`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                    LandlordStateSessionBuilder.beforeOrgCheckAnswers().withOrgType(listOf(OrgType.COMPANY)),
+                )
+
+            assertThat(checkAnswersPage.landlordDetails.organisationTypeRow.value).containsText("Company")
+            assertThat(checkAnswersPage.leadTrusteeCard).hasCount(0)
+        }
+
+        @Test
+        fun `the charity and companies house detail rows are hidden for a non-charity organisation not registered with companies house`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
+
+            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).hasCount(0)
+            assertThat(checkAnswersPage.landlordDetails.charityNumberRow.value).hasCount(0)
+            assertThat(checkAnswersPage.landlordDetails.companiesHouseNumberRow.value).hasCount(0)
+        }
+
+        @Test
+        fun `the charity commission and number rows are shown for a charity registered with a regulator`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                    LandlordStateSessionBuilder
+                        .beforeOrgCheckAnswers()
+                        .withOrgIsRegisteredCharity(true)
+                        .withCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+                        .withOrgCharityNumberEnglandAndWales("1234567"),
+                )
+
+            assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value)
+                .containsText("Charities Commission of England and Wales")
+            assertThat(checkAnswersPage.landlordDetails.charityNumberRow.value).containsText("1234567")
+        }
+
+        @Test
+        fun `the charity commission row is shown but the number row is hidden for a charity not registered with a regulator`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                    LandlordStateSessionBuilder
+                        .beforeOrgCheckAnswers()
+                        .withOrgIsRegisteredCharity(true)
+                        .withCharityRegisteredWith(CharityRegulator.NONE),
+                )
+
+            assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).containsText("Other")
+            assertThat(checkAnswersPage.landlordDetails.charityNumberRow.value).hasCount(0)
+        }
+
+        @Test
+        fun `the companies house number row is shown when registered with companies house`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                    LandlordStateSessionBuilder
+                        .beforeOrgCheckAnswers()
+                        .withOrgIsRegisteredCompany(true)
+                        .withOrgCompanyNumber("12345678"),
+                )
+
+            assertThat(checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.landlordDetails.companiesHouseNumberRow.value).containsText("12345678")
+        }
     }
 }

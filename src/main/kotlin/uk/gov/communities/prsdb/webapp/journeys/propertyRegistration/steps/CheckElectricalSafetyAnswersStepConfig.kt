@@ -16,7 +16,7 @@ class CheckElectricalSafetyAnswersStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyState): Map<String, Any?> {
-        val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService)
+        val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(state.electricalSafetyDetailsTask, uploadService)
         return mapOf(
             "rows" to factory.createRows(),
             "insetTextKey" to factory.getInsetTextKey(),

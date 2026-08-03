@@ -68,6 +68,7 @@ server:
     path: /error
 
 local:
+  one-login-user-id: urn:fdc:gov.uk:2022:UVWXY
   emails:
     transientExceptionAddress: transient@example.com
     persistentExceptionAddress: persistent@example.com
@@ -114,6 +115,16 @@ features:
     - name: "pdjb-1053-dashboard-nav-link"
       enabled: true
       expiry-date: "2026-12-31"
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local-org-landlord
+
+local:
+  one-login-user-id: urn:fdc:gov.uk:2022:ORG01
 
 ---
 

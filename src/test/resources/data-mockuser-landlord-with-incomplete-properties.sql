@@ -21,4 +21,3 @@ VALUES (1, current_date-1, current_date-1, '1', '{"journeyData":{"lookup-address
 INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
 VALUES (1, 1),
        (1, 2);
-
