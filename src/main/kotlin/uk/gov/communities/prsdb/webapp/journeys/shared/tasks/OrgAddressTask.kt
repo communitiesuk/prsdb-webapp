@@ -23,19 +23,19 @@ class OrgAddressTask(
     ) {
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.lookupAddress.organisationLandlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.lookupAddress.organisationLandlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "addressForms.lookupAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "addressForms.lookupAddress.organisationLandlordRegistration.fieldSetHint",
         )
 
     override val selectAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.selectAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHeading" to "addressForms.selectAddress.organisationLandlordRegistration.fieldSetHeading",
         )
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "addressForms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "addressForms.manualAddress.organisationLandlordRegistration.fieldSetHint",
         )
 
     companion object {

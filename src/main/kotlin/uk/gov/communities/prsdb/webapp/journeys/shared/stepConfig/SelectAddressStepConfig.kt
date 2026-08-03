@@ -35,11 +35,11 @@ class SelectAddressStepConfig(
             } +
                 listOf(
                     RadiosDividerViewModel("forms.radios.dividerText"),
-                    RadiosButtonViewModel(MANUAL_ADDRESS_CHOSEN, labelMsgKey = "forms.selectAddress.addAddressManually"),
+                    RadiosButtonViewModel(MANUAL_ADDRESS_CHOSEN, labelMsgKey = "addressForms.selectAddress.addAddressManually"),
                 )
 
         return mapOf(
-            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+            "fieldSetHeading" to "addressForms.selectAddress.fieldSetHeading",
             "submitButtonText" to "forms.buttons.useThisAddress",
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
@@ -69,7 +69,7 @@ class SelectAddressStepConfig(
             if (selectedAddress != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedAddress) == null) {
                 bindingResult.rejectValueWithMessageKey(
                     SelectAddressFormModel::address.name,
-                    "forms.selectAddress.error.invalidSelection",
+                    "addressForms.selectAddress.error.invalidSelection",
                 )
             }
         }

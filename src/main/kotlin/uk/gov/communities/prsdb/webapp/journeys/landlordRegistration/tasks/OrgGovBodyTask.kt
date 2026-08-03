@@ -117,7 +117,7 @@ class OrgGovBodyTask(
                 nextStep { journey.orgGovBodyMemberListStep }
                 configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
                     withAdditionalContentProperties {
-                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
+                        mapOf("fieldSetHeading" to "addressForms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
                     }
                 }
             }

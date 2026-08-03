@@ -52,8 +52,8 @@ class PropertyRegistrationAddressTask(
                 }
                 withAdditionalContentProperties {
                     mapOf(
-                        "fieldSetHeading" to "forms.lookupAddress.propertyRegistration.fieldSetHeading",
-                        "fieldSetHint" to "forms.lookupAddress.propertyRegistration.fieldSetHint",
+                        "fieldSetHeading" to "addressForms.lookupAddress.propertyRegistration.fieldSetHeading",
+                        "fieldSetHint" to "addressForms.lookupAddress.propertyRegistration.fieldSetHint",
                     )
                 }
             }
@@ -85,7 +85,7 @@ class PropertyRegistrationAddressTask(
                     )
                 }
                 nextStep { journey.localCouncilStep }
-                withAdditionalContentProperty { "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading" }
+                withAdditionalContentProperty { "fieldSetHeading" to "addressForms.manualAddress.propertyRegistration.fieldSetHeading" }
             }
             step(journey.alreadyRegisteredStep) {
                 routeSegment(AlreadyRegisteredStep.ROUTE_SEGMENT)

@@ -10,7 +10,7 @@ class ManualAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.manualAddress.addressLineOne.error.missing",
+                messageKey = "addressForms.manualAddress.addressLineOne.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
@@ -22,7 +22,7 @@ class ManualAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.manualAddress.townOrCity.error.missing",
+                messageKey = "addressForms.manualAddress.townOrCity.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
@@ -34,7 +34,7 @@ class ManualAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.manualAddress.postcode.error.missing",
+                messageKey = "addressForms.manualAddress.postcode.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
