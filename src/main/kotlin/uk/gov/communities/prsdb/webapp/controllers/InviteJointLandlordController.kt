@@ -75,7 +75,6 @@ class InviteJointLandlordController(
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
     @GetMapping("$RESEND_PATH_SEGMENT/{invitationId}")
     fun resendInvitation(
-        principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
@@ -91,7 +90,6 @@ class InviteJointLandlordController(
     @GetMapping(CONFIRMATION_PATH_SEGMENT)
     fun getConfirmation(
         model: Model,
-        principal: Principal,
         @PathVariable propertyOwnershipId: Long,
     ): String {
         throwErrorIfUserIsNotAuthorized(propertyOwnershipId)

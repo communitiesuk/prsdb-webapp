@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
-import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
@@ -81,7 +80,6 @@ class LandlordController(
     @GetMapping("/$COMPLIANCE_ACTIONS_PATH_SEGMENT")
     fun getComplianceActions(
         model: Model,
-        principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
