@@ -77,7 +77,7 @@ class InviteJointLandlordJourneyFactory(
                 initialStep()
                 nextStep { journey.inviteJointLandlordsTask.firstStep }
             }
-            duplicableTask(journey.inviteJointLandlordsTask) {
+            task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.startInviteJointLandlordStep.isComplete() }
                 backUrl { propertyDetailsLandlordTab }
@@ -126,7 +126,7 @@ class InviteJointLandlordJourneyFactory(
                     }
                 }
             }
-            duplicableTask(journey.inviteJointLandlordsTask) {
+            task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 backUrl { propertyDetailsLandlordTab }
