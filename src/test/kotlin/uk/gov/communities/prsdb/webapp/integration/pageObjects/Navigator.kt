@@ -271,7 +271,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder.Companion.beforeTenancyDetails
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -792,7 +791,7 @@ class Navigator(
     fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         val taskListPage =
             goToRestructuredPropertyRegistrationTaskList(
-                beforeTenancyDetails(),
+                PropertyStateSessionBuilder.beforeTenancyDetails(),
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
         return createValidPage(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
