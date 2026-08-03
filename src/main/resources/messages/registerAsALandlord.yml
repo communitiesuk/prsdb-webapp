@@ -23,6 +23,7 @@ testTheService:
     three: Parts of the service may change during the private beta period.
 checkAnswers:
   summaryName: Your details
+  landlordTypeValue: Individual
   rowHeading:
     name: Name
     dateOfBirth: Date of birth
@@ -31,6 +32,7 @@ checkAnswers:
     englandOrWalesResident: Resident in England or Wales
     contactAddress: Contact address
     localCouncil: Local Council
+    landlordType: Landlord type
 orgCheckAnswers:
   heading: Check your answers
   yourDetails:
@@ -168,4 +170,19 @@ orgGovBodyMemberDob:
   fieldSetHint: 'For example, 27 03 1968'
   error:
     invalidAge: The minimum age is 16
-
+orgIsRegisteredCharity:
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
+orgIsRegisteredCompany:
+  fieldSetHeading: Is your organisation registered with Companies House?
+  error:
+    missing: Select yes if your organisation is registered with Companies House
+phoneNumber:
+  fieldSetHeading: What is your phone number?
+  hint: For international numbers include the country code
+  error:
+    missing: Enter a phone number
+    invalidFormat: Enter a phone number including the country code for international numbers

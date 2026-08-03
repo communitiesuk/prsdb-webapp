@@ -249,6 +249,11 @@ logging in.
 
 If anyone knows a better way to do this please add it here!
 
+### Testing Org Landlords
+
+If you need to instead log in as an org landlord to see their dashboard & other views locally, run the `local-org-landlord`
+run config or enable the `local-org-landlord` profile. You may need to log out & log in again after enabling this.
+
 ### Connecting to AWS
 
 When the service runs in AWS it has the profile of the ECS service it is running on.
@@ -363,17 +368,19 @@ same PR process below)
 The normal process is simply to raise a PR merging `main` into `test`, name the PR "Release main to test #n" for the nth release to `test`.
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
+Use the same release number between the webapp repo and infra repo.
 
-Go and find the release tracking Jira ticket (likely titled "Perform a release") and:
+Go and find the release tracking Jira ticket:
 
-- Make sure that you've followed the pre-release steps
+- Open this [filter](https://mhclgdigital.atlassian.net/issues/?filter=23406).
+- The tickets are sorted by created date so the release ticket you're looking for should be near the top.
+- If you can't find a release Jira ticket for the type of release you want to do (test/nft or prod), make one by cloning PDJB-1300
+
+Read the release ticket carefully! The template contains steps you should make sure to complete before, during and after the release.
+
+- Fill in the initial release details if needed (release number, type, date)
 - Add your PR to the list in ticket
-- Note in the PR description what steps you'll take post release
-
-If you can't find a release Jira ticket for this release, make one:
-
-- Clone PDJB-1061
-- Fill in necessary details
+- Make sure you're happy with all the ticket steps before returning to the PR.
 
 Note: You will probably see the message "This branch is out-of-date with the base branch" on your PR. This does not need to be resolved and
 can be ignored.
@@ -453,12 +460,9 @@ We need to ensure that any new behaviour on prod is auditably approved before co
 
 This is the standard release where we release new code to production.
 
-The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
+In the release PR, check the status of all tickets that will be released.
 
-- If it is feature flagged, ignore
-- If it is not feature flagged, ensure it has been approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
-
-If there is any ticket that'll be released that is not 'Done' and it not behind a feature flag, **stop** and check in with your tech lead.
+if there is any ticket that'll be released that is not 'Done' and is not behind a feature flag, **stop** and check in with your tech lead.
 
 Before merging, take a note of the last merged PR to `production`. You may need this later if you need to rollback.
 

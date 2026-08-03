@@ -1,13 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.http.HttpStatus
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -23,15 +21,15 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
 @PrsdbController
 @RequestMapping(LANDLORD_REGISTRATION_ROUTE)
 class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
@@ -64,13 +62,8 @@ class RegisterLandlordController(
     ): ModelAndView = dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(
-        model: Model,
-        principal: Principal,
-    ): String {
-        val landlord =
-            landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "User ${principal.name} is not registered as a landlord")
+    fun getConfirmation(model: Model): String {
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         model.addAttribute(
             "registrationNumber",

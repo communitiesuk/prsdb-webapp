@@ -63,6 +63,7 @@ class IncompletePropertyForLandlordService(
         principalName: String,
     ): Boolean = repository.existsByJourneyIdAndUser_Id(incompletePropertyId, principalName)
 
+    // TODO: PDJB-1394: This may need to be updated to support OL
     fun addIncompletePropertyToLandlord(state: SavedJourneyState) {
         individualLandlordRepository.findByBaseUser_Id(state.user.id)?.let { landlord ->
             val newEntry =

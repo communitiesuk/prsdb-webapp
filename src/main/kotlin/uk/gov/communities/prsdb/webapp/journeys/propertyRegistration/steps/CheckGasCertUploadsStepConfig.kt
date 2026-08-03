@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -15,10 +15,10 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class CheckGasCertUploadsStepConfig(
     private val memberIdService: CollectionKeyParameterService,
     private val uploadService: UploadService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState) =
+    override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getUploadCount(state),
@@ -33,7 +33,7 @@ class CheckGasCertUploadsStepConfig(
                     .toUrlStringOrNull(),
         )
 
-    private fun getUploadRows(state: GasSafetyState): List<UploadRow> =
+    private fun getUploadRows(state: GasSafetyDetailState): List<UploadRow> =
         state.gasUploadMap
             .toList()
             .sortedBy { it.first }
@@ -50,17 +50,17 @@ class CheckGasCertUploadsStepConfig(
                 )
             }
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/addAnotherFormWithFileUploadTable"
+    override fun chooseTemplate(state: GasSafetyDetailState): String = "forms/addAnotherFormWithFileUploadTable"
 
-    override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
+    override fun mode(state: GasSafetyDetailState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
-    private fun getUploadCount(state: GasSafetyState): Int = getUploadRows(state).size
+    private fun getUploadCount(state: GasSafetyDetailState): Int = getUploadRows(state).size
 }
 
 @JourneyFrameworkComponent
 final class CheckGasCertUploadsStep(
     stepConfig: CheckGasCertUploadsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, GasSafetyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, GasSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-gas-safety-certificate-uploads"
     }

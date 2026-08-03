@@ -21,8 +21,22 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 interface GasSafetyState : JourneyState {
     val gasSafetyDetailsTask: GasSafetyDetailsTask
 
-    val isOccupied: Boolean
+    val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep
+}
 
+interface GasSafetyDetailState : JourneyState {
+    val hasGasSupplyStep: HasGasSupplyStep
+    val hasGasCertStep: HasGasCertStep
+    val gasCertIssueDateStep: GasCertIssueDateStep
+    val uploadGasCertStep: UploadGasCertStep
+    val checkGasCertUploadsStep: CheckGasCertUploadsStep
+    val removeGasCertUploadStep: RemoveGasCertUploadStep
+    val gasCertExpiredStep: GasCertExpiredStep
+    val gasCertMissingStep: GasCertMissingStep
+    val provideGasCertLaterStep: ProvideGasCertLaterStep
+    val hasUploadedCert: HasAnyInCollectionStep
+
+    val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
 
     fun getGasSafetyCertificateIssueDateIfReachable() =
@@ -35,27 +49,15 @@ interface GasSafetyState : JourneyState {
             DateTimeHelper().getCurrentDateInUK() > issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         }
 
-    val gasUploadIds: List<Long> get() =
-        if (uploadGasCertStep.isStepReachable) {
-            gasUploadMap.values.map { it.fileUploadId }
-        } else {
-            emptyList()
-        }
-
+    val gasUploadIds: List<Long>
+        get() =
+            if (uploadGasCertStep.isStepReachable) {
+                gasUploadMap.values.map { it.fileUploadId }
+            } else {
+                emptyList()
+            }
     var gasUploadMap: Map<Int, CertificateUpload>
     var highestAssignedGasMemberId: Int?
 
     fun getNextGasUploadMemberId(): Int = highestAssignedGasMemberId?.let { it + 1 } ?: 1
-
-    val hasGasSupplyStep: HasGasSupplyStep
-    val hasGasCertStep: HasGasCertStep
-    val gasCertIssueDateStep: GasCertIssueDateStep
-    val uploadGasCertStep: UploadGasCertStep
-    val checkGasCertUploadsStep: CheckGasCertUploadsStep
-    val removeGasCertUploadStep: RemoveGasCertUploadStep
-    val gasCertExpiredStep: GasCertExpiredStep
-    val gasCertMissingStep: GasCertMissingStep
-    val provideGasCertLaterStep: ProvideGasCertLaterStep
-    val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep
-    val hasUploadedCert: HasAnyInCollectionStep
 }

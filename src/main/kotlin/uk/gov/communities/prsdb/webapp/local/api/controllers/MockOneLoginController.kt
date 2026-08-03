@@ -34,6 +34,7 @@ import java.util.UUID
 @RequestMapping("/local/one-login")
 class MockOneLoginController(
     @Value("\${server.port}") private val serverPort: String,
+    @Value("\${local.one-login-user-id}") private val userId: String,
 ) {
     companion object {
         val keyId = UUID.randomUUID().toString()
@@ -73,8 +74,6 @@ class MockOneLoginController(
 
     @Value("\${local.id-verification-user-info-file:${VERIFIED_USER_FILE}}")
     lateinit var postVerificationUserInfoFile: String
-
-    private val userId = "urn:fdc:gov.uk:2022:UVWXY"
 
     // These values are from One-Login's publicly available docs (https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/authenticate-your-user/)
     private val userEmail = "test@example.com"

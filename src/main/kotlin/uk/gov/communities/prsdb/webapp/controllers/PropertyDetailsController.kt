@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,16 +21,18 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping
@@ -42,7 +43,7 @@ class PropertyDetailsController(
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -50,20 +51,11 @@ class PropertyDetailsController(
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
-        val propertyDetails =
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                withChangeLinks = true,
-                hideNullUprn = true,
-                isRestructureAndSkippingEnabled =
-                    featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-                messageSource = messageSource,
-            )
+        val (propertyDetails, viewName) = getPropertyDetailsViewModelAndView(propertyOwnership, isLandlordView = true)
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
@@ -74,15 +66,16 @@ class PropertyDetailsController(
                 )
             }
 
-        val modelAndView = ModelAndView("propertyDetailsView")
+        val modelAndView = ModelAndView(viewName)
         modelAndView.addObject("propertyDetails", propertyDetails)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
 
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                 propertyOwnership.landlords,
-                baseUserId,
+                landlord,
                 propertyOwnership.id,
             )
         modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
@@ -128,8 +121,7 @@ class PropertyDetailsController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        jointLandlordInvitationService.hideExpiredInvitation(invitationId, baseUserId)
+        jointLandlordInvitationService.hideExpiredInvitation(invitationId)
         redirectAttributes.addFlashAttribute("inviteRemoved", true)
         return "redirect:${getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
     }
@@ -139,24 +131,15 @@ class PropertyDetailsController(
     fun getPropertyDetailsLocalCouncilView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
-        principal: Principal,
     ): String {
         val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
+            propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
-        val propertyDetails =
-            PropertyDetailsViewModel(
-                propertyOwnership = propertyOwnership,
-                withChangeLinks = false,
-                hideNullUprn = false,
-                isRestructureAndSkippingEnabled =
-                    featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
-                messageSource = messageSource,
-            )
+        val (propertyDetails, viewName) = getPropertyDetailsViewModelAndView(propertyOwnership, isLandlordView = false)
 
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
@@ -169,6 +152,18 @@ class PropertyDetailsController(
             )
         model.addAttribute("landlordSummaryCards", landlordSummaryCards)
         model.addAttribute("landlordCount", propertyOwnership.landlords.size)
+
+        val (pendingInvitations, expiredInvitations) =
+            jointLandlordInvitationService
+                .getPendingAndExpiredInvitations(propertyOwnership)
+                .let { (pending, expired) ->
+                    Pair(
+                        pending.map { InvitationViewModelBuilder.buildPendingViewModel(it) },
+                        expired.map { InvitationViewModelBuilder.buildExpiredViewModel(it) },
+                    )
+                }
+        model.addAttribute("pendingInvitations", pendingInvitations)
+        model.addAttribute("expiredInvitations", expiredInvitations)
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
@@ -186,12 +181,35 @@ class PropertyDetailsController(
 
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
-        return "propertyDetailsView"
+        return viewName
     }
 
-    companion object {
-        const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+    // Parse the provide-later feature flag exactly once and select the matching view model + template.
+    // TODO PDJB-939: remove the flag-off branch (and PropertyDetailsBeforePdjb939ViewModel /
+    // propertyDetailsViewBeforePdjb939.html) when the flag is permanently on.
+    private fun getPropertyDetailsViewModelAndView(
+        propertyOwnership: PropertyOwnership,
+        isLandlordView: Boolean,
+    ): Pair<PropertyDetailsViewModelBase, String> =
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            Pair(
+                PropertyDetailsViewModel(propertyOwnership, isLandlordView, messageSource),
+                PROPERTY_DETAILS_VIEW,
+            )
+        } else {
+            Pair(
+                PropertyDetailsBeforePdjb939ViewModel(propertyOwnership, isLandlordView, messageSource),
+                PROPERTY_DETAILS_BEFORE_PDJB939_VIEW,
+            )
+        }
 
+    companion object {
+        const val PROPERTY_DETAILS_VIEW = "propertyDetailsView"
+
+        // TODO PDJB-939: remove when the provide-later flag is permanently on.
+        const val PROPERTY_DETAILS_BEFORE_PDJB939_VIEW = "propertyDetailsViewBeforePdjb939"
+
+        const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
         const val REMOVE_EXPIRED_INVITE_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$REMOVE_EXPIRED_INVITE_PATH_SEGMENT/{invitationId}"
 
         const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"

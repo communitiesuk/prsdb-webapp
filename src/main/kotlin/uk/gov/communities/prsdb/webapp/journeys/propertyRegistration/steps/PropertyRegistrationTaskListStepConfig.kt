@@ -59,18 +59,19 @@ class PropertyRegistrationTaskListStepConfig(
     }
 
     private fun legacySectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> {
+        val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
         val registerTaskItems =
             listOf(
-                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
-                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyTypeStep),
-                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", state.ownershipTypeStep),
+                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.propertyDetailsTask.addressTask),
+                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyDetailsTask.propertyTypeStep),
+                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", ownershipTypeStep),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addTenancyInfo", state.occupationTask),
             ) +
                 listOf(
                     TaskListItemViewModel.fromTask(
                         "registerProperty.taskList.register.inviteJointLandlords",
-                        state.jointLandlordsTask,
+                        state.ownershipAndLandlordsTask.jointLandlordsTask,
                     ),
                 ) +
                 listOf(
@@ -92,7 +93,7 @@ class PropertyRegistrationTaskListStepConfig(
             if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                 "registerProperty.taskList.register.restructureAndSkipping.heading"
             } else {
-                "registerProperty.taskList.register.old.heading"
+                "registerProperty.taskList.register.heading"
             }
 
         return listOf(
