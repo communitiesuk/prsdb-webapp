@@ -42,7 +42,7 @@ class PropertyDetailsViewModel(
 
     val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
-            if (isOccupied && wasOccupiedAtRegistration) {
+            if (isOccupied && hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
                 messageSource.getMessageForKey("propertyDetails.propertyRecord.licensing.councilNotProvided")
@@ -53,10 +53,19 @@ class PropertyDetailsViewModel(
 
     val tenancySection: List<SummaryListRowViewModel> =
         when {
-            !showTenancySection -> emptyList()
-            isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
-            isTenancyProvideLater && !isLandlordView -> emptyList()
-            else ->
+            !showTenancySection -> {
+                emptyList()
+            }
+
+            isTenancyProvideLater && isLandlordView -> {
+                listOf(tenancyProvideLaterRow())
+            }
+
+            isTenancyProvideLater && !isLandlordView -> {
+                emptyList()
+            }
+
+            else -> {
                 buildList {
                     add(householdsRow())
                     add(tenantsRow())
@@ -66,22 +75,32 @@ class PropertyDetailsViewModel(
                     if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
                     add(rentAmountRow(includeChangeLink = false))
                 }
+            }
         }
 
     val tenancyProvideLaterParagraph: String? =
         when {
-            !showTenancySection || isLandlordView -> null
-            isTenancyProvideLater && wasOccupiedAtRegistration ->
+            !showTenancySection || isLandlordView -> {
+                null
+            }
+
+            isTenancyProvideLater && hasBeenOccupiedSinceRegistration -> {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
-            isTenancyProvideLater ->
+            }
+
+            isTenancyProvideLater -> {
                 messageSource.getMessageForKey("propertyDetails.propertyRecord.tenancy.councilNotProvided")
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         }
 
     private fun licensingProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.licensing.rowName",
-            if (isOccupied && wasOccupiedAtRegistration) {
+            if (isOccupied && hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterOccupied")
             } else {
                 "propertyDetails.propertyRecord.licensing.provideLaterUnoccupied"
@@ -95,7 +114,7 @@ class PropertyDetailsViewModel(
     private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancy.rowName",
-            if (wasOccupiedAtRegistration) {
+            if (hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied")
             } else {
                 "propertyDetails.propertyRecord.tenancy.provideLaterUnoccupied"

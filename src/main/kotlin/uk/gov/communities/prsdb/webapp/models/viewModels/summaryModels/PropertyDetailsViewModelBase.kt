@@ -53,11 +53,8 @@ abstract class PropertyDetailsViewModelBase(
 
     private val registrationDate = propertyOwnership.createdDate.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
 
-    // A property counts as "occupied when registered" when its lastOccupiedDate matches its registration date.
-    // Properties that became occupied after registration have a later lastOccupiedDate and so are shown a
-    // provide-later message without a deadline date.
-    protected val wasOccupiedAtRegistration: Boolean =
-        isOccupied && propertyOwnership.lastOccupiedDate == registrationDate
+    protected val hasBeenOccupiedSinceRegistration: Boolean =
+        propertyOwnership.lastOccupiedDate?.isEqual(registrationDate) == true
 
     protected fun registrationNumberRow(): SummaryListRowViewModel =
         row(
