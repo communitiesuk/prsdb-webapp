@@ -494,8 +494,8 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextDestination { _ ->
                         when {
-                            state.provideTenancyDetailsLater -> Destination(state.cyaStep)
-                            else -> Destination(state.taskListStep)
+                            journey.provideTenancyDetailsLater -> Destination(journey.cyaStep)
+                            else -> Destination(journey.taskListStep)
                         }
                     }
                     saveProgress()
