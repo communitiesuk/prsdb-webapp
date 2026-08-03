@@ -355,8 +355,7 @@ class LandlordRegistrationCyaStepConfig(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationAddress",
                     org.orgAddressTask
                         .getAddress()
-                        .toMultiLineAddress()
-                        .split("\n"),
+                        .singleLineAddress,
                     Destination.VisitableStep(
                         org.orgAddressTask.lookupAddressStep,
                         state.getCyaJourneyId(org.orgAddressTask.lookupAddressStep),
