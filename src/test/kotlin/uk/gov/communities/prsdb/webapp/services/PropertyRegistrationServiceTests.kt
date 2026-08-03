@@ -205,7 +205,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-                tenancyProvideLater = false,
+                tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -249,7 +249,7 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            tenancyProvideLater = false,
+            tenancyProvideLater = null,
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumber.number,
@@ -493,7 +493,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-                tenancyProvideLater = false,
+                tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -535,7 +535,7 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            tenancyProvideLater = false,
+            tenancyProvideLater = null,
         )
     }
 
@@ -589,7 +589,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
-                tenancyProvideLater = false,
+                tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -670,7 +670,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
-                tenancyProvideLater = false,
+                tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -748,7 +748,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
-                tenancyProvideLater = false,
+                tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
