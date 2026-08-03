@@ -50,6 +50,9 @@ class PropertyComplianceJourneyFactory(
 }
 ```
 
+### Transaction Metric Tagging
+A journey's final commit step must render its submit button via `transactionSubmitButton` (or `transactionWarningButton` for destructive actions) so the completion is counted in the transaction metric — either hardcoded in a commit-only template, or opted into with `"submitButton" to "transactionSubmitButton"` in `withAdditionalContentProperties` where the template is shared with non-commit steps. Tag exactly one button per completed journey; where that is not possible, record the gap in [MetricsReadMe](../../docs/MetricsReadMe.md) rather than risk double-counting.
+
 ### Page Class Conventions
 Page class hierarchy:
 ```
