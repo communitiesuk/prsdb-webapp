@@ -788,7 +788,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             .getActionLink("Remove")
             .clickAndWait()
 
-        assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
     }
 
     @Test
@@ -808,9 +808,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
         BackLink.default(page).clickAndWait()
-
-        val detailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
-        detailsPage.submitHasDetails()
 
         val returnedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
         returnedListPage.addAnotherButton.click()
