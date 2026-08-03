@@ -65,7 +65,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
@@ -77,7 +77,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @Autowired
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
@@ -124,7 +124,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 
@@ -187,7 +187,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 
@@ -242,7 +242,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 

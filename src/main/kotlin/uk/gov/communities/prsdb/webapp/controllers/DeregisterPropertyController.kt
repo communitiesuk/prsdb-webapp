@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyD
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
@@ -39,9 +38,8 @@ class DeregisterPropertyController(
     fun getJourneyStep(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
-        principal: Principal,
     ): ModelAndView {
-        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
@@ -50,9 +48,8 @@ class DeregisterPropertyController(
         @PathVariable stepPath: String,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         @RequestParam formData: FormData,
-        principal: Principal,
     ): ModelAndView {
-        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+        throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 
@@ -81,11 +78,8 @@ class DeregisterPropertyController(
         return "deregisterPropertyConfirmation"
     }
 
-    private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(
-        propertyOwnershipId: Long,
-        principal: Principal,
-    ) {
-        if (!isCurrentUserAuthorizedToDeregisterProperty(propertyOwnershipId, principal)) {
+    private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId: Long) {
+        if (!isCurrentUserAuthorizedToDeregisterProperty(propertyOwnershipId)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "The current user is not authorised to delete property ownership $propertyOwnershipId",
@@ -93,12 +87,8 @@ class DeregisterPropertyController(
         }
     }
 
-    private fun isCurrentUserAuthorizedToDeregisterProperty(
-        propertyOwnershipId: Long,
-        principal: Principal,
-    ): Boolean =
-        propertyOwnershipService
-            .getIsLandlord(propertyOwnershipId, principal.name)
+    private fun isCurrentUserAuthorizedToDeregisterProperty(propertyOwnershipId: Long): Boolean =
+        propertyOwnershipService.isCurrentUserLandlord(propertyOwnershipId)
 
     private fun checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId: Long) {
         if (propertyOwnershipId !in propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()) {

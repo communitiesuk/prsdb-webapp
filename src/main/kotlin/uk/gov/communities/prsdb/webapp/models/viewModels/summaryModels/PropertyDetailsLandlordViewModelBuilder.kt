@@ -9,7 +9,7 @@ class PropertyDetailsLandlordViewModelBuilder {
     companion object {
         fun buildSummaryCards(
             landlords: Set<Landlord>,
-            currentUserId: String,
+            currentLandlord: Landlord,
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
@@ -17,9 +17,9 @@ class PropertyDetailsLandlordViewModelBuilder {
                 .map { landlord ->
                     check(landlord is IndividualLandlord)
                     landlord
-                }.sortedWith(compareByDescending<IndividualLandlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
+                }.sortedWith(compareByDescending<IndividualLandlord> { it.id == currentLandlord.id }.thenBy { it.name })
                 .map { landlord ->
-                    val isCurrentUser = landlord.baseUser.id == currentUserId
+                    val isCurrentUser = landlord.id == currentLandlord.id
                     if (isCurrentUser) {
                         val removeMeAction =
                             SummaryCardActionViewModel(
