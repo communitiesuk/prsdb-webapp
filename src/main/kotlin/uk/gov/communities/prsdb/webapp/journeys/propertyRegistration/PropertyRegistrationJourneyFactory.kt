@@ -155,6 +155,8 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                    // TODO PDJB-942: If changing from provide-this-later to actual households for tenancy details, route through
+                    //  the rent section so the user can fill in missing rent details before returning to CYA
                     duplicableCheckAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
@@ -257,7 +259,7 @@ class PropertyRegistrationJourneyFactory(
                 if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                     withHeadingMessageKey("registerProperty.taskList.register.restructureAndSkipping.heading", false)
                 } else {
-                    withHeadingMessageKey("registerProperty.taskList.register.old.heading")
+                    withHeadingMessageKey("registerProperty.taskList.register.heading")
                 }
                 fromTask(journey.propertyDetailsTask) {
                     duplicableTask(task.addressTask) {
@@ -492,7 +494,12 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextStep { journey.taskListStep }
+                    nextDestination { _ ->
+                        when {
+                            journey.provideTenancyDetailsLater -> Destination(journey.cyaStep)
+                            else -> Destination(journey.taskListStep)
+                        }
+                    }
                     saveProgress()
                 }
             }

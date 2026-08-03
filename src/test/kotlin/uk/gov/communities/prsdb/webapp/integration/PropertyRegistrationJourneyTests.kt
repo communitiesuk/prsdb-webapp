@@ -1560,7 +1560,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        // TODO PDJB-942: Add test for unoccupied when branching logic is added
         @Test
         fun `User can choose to provide tenancy details later if their property is occupied`(page: Page) {
             navigator.skipToTenancyDetailsHouseholdsPage()
@@ -1573,6 +1572,90 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Provide Tenancy Details Later - render page
             assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
             assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
+            assertThat(provideTenancyDetailsLaterPage.saveAndContinueButton).containsText("Save and continue")
+        }
+
+        @Test
+        fun `Occupied journey reaches check answers after landlord has chosen to provide this later`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            assertThat(provideTenancyDetailsLaterPage.sectionHeader).containsText("Tenancy details")
+            assertThat(provideTenancyDetailsLaterPage.heading).containsText("Provide tenancy details later")
+            provideTenancyDetailsLaterPage.form.submit()
+
+            // Check Your Answers - render page
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.heading).containsText("Check your answers")
+            assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("Provide this later")
+        }
+
+        @Test
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+
+            assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+
+            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertTrue(checkAndSubmitTask.hasLink)
+        }
+
+        // TODO: PDJB-942: Update CYA page to match Figma designs
+        @Test
+        fun `CYA number of households row shows a change link after landlord has chosen to provide tenancy details later`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            val changeLink =
+                checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+                    .getActionLink("Change")
+            assertThat(changeLink).isVisible()
+
+            changeLink.clickAndWait()
+            assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        }
+
+        // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
+        // from tenancy-details
+        @Test
+        fun `Changing from provide tenancy details later to actual households routes to task list`(page: Page) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            householdsPage.submitNumberOfHouseholds(1)
+
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
+        }
+
+        // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
+        // from tenancy-details
+        @Test
+        fun `Changing from provide tenancy details later to actual households marks tenancy details task as in progress on task list`(
+            page: Page,
+        ) {
+            val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
+            provideTenancyDetailsLaterPage.form.submit()
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            householdsPage.submitNumberOfHouseholds(1)
+
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            peoplePage.submitNumOfPeople(2)
+
+            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+            assertEquals("In progress", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
         }
 
         @Test

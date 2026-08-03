@@ -73,6 +73,7 @@ class PropertyRegistrationService(
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
         licenseProvideLater: Boolean = false,
+        tenancyProvideLater: Boolean? = null,
     ) {
         val landlord =
             individualLandlordRepository.findByBaseUser_Id(baseUserId)
@@ -98,6 +99,7 @@ class PropertyRegistrationService(
                 rentAmount,
                 customPropertyType,
                 markedJointLandlord,
+                tenancyProvideLater,
                 mutableSetOf(landlord),
                 licenseProvideLater = licenseProvideLater,
             )
@@ -144,6 +146,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean,
+        tenancyProvideLater: Boolean?,
         landlords: MutableSet<Landlord>,
         licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
@@ -176,6 +179,7 @@ class PropertyRegistrationService(
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,
+            tenancyProvideLater = tenancyProvideLater,
             address = address,
             license = license,
             licenseProvideLater = licenseProvideLater,
