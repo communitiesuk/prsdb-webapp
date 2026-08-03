@@ -1617,7 +1617,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             changeLink.clickAndWait()
             assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
         }
-        
+
         // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
         // from tenancy-details
         @Test
@@ -1639,7 +1639,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // TODO PDJB-942: Add tests for the change link routing through rent when changing from provide-this-later to actual households
         // from tenancy-details
         @Test
-        fun `Changing from provide tenancy details later to actual households marks tenancy details task as in progress on task list`(page: Page) {
+        fun `Changing from provide tenancy details later to actual households marks tenancy details task as in progress on task list`(
+            page: Page,
+        ) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
