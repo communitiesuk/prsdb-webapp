@@ -29,15 +29,23 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
         state: AddressState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
-        val prefillAddressLineOne = defaultContent["prefillAddressLineOne"] as? String ?: return defaultContent
+        val prefillAddressLineOne = defaultContent[PREFILL_ADDRESS_LINE_ONE] as? String ?: return defaultContent
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? ManualAddressFormModel ?: return defaultContent
         if (!formModel.addressLineOne.isNullOrBlank()) return defaultContent
         formModel.addressLineOne = prefillAddressLineOne
-        formModel.addressLineTwo = defaultContent["prefillAddressLineTwo"] as? String
-        formModel.townOrCity = defaultContent["prefillTownOrCity"] as? String
-        formModel.county = defaultContent["prefillCounty"] as? String
-        formModel.postcode = defaultContent["prefillPostcode"] as? String
+        formModel.addressLineTwo = defaultContent[PREFILL_ADDRESS_LINE_TWO] as? String
+        formModel.townOrCity = defaultContent[PREFILL_TOWN_OR_CITY] as? String
+        formModel.county = defaultContent[PREFILL_COUNTY] as? String
+        formModel.postcode = defaultContent[PREFILL_POSTCODE] as? String
         return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_ADDRESS_LINE_ONE = "manualPrefillAddressLineOne"
+        const val PREFILL_ADDRESS_LINE_TWO = "manualPrefillAddressLineTwo"
+        const val PREFILL_TOWN_OR_CITY = "manualPrefillTownOrCity"
+        const val PREFILL_COUNTY = "manualPrefillCounty"
+        const val PREFILL_POSTCODE = "manualPrefillPostcode"
     }
 
     override fun mode(state: AddressState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }

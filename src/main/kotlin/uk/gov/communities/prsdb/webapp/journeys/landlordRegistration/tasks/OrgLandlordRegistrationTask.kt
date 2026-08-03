@@ -38,6 +38,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
@@ -282,8 +285,8 @@ class OrgLandlordRegistrationTask(
                         val editingMember = journey.editingGovBodyMember
                         if (editingMember != null) {
                             mapOf(
-                                "prefillPostcode" to editingMember.addressSearchPostcode,
-                                "prefillHouseNameOrNumber" to editingMember.addressSearchHouseNameOrNumber,
+                                LookupAddressStepConfig.PREFILL_POSTCODE to editingMember.addressSearchPostcode,
+                                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to editingMember.addressSearchHouseNameOrNumber,
                             )
                         } else {
                             emptyMap()
@@ -295,7 +298,7 @@ class OrgLandlordRegistrationTask(
                         val editingMember = journey.editingGovBodyMember
                         mapOf(
                             "fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading",
-                            "prefillSelectedAddress" to editingMember?.selectedAddress,
+                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to editingMember?.selectedAddress,
                         )
                     }
                 }
@@ -304,11 +307,11 @@ class OrgLandlordRegistrationTask(
                         val editingMember = journey.editingGovBodyMember
                         if (editingMember?.manualAddressLineOne != null) {
                             mapOf(
-                                "prefillAddressLineOne" to editingMember.manualAddressLineOne,
-                                "prefillAddressLineTwo" to editingMember.manualAddressLineTwo,
-                                "prefillTownOrCity" to editingMember.manualTownOrCity,
-                                "prefillCounty" to editingMember.manualCounty,
-                                "prefillPostcode" to editingMember.manualPostcode,
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingMember.manualAddressLineOne,
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingMember.manualAddressLineTwo,
+                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingMember.manualTownOrCity,
+                                ManualAddressStepConfig.PREFILL_COUNTY to editingMember.manualCounty,
+                                ManualAddressStepConfig.PREFILL_POSTCODE to editingMember.manualPostcode,
                             )
                         } else {
                             emptyMap()

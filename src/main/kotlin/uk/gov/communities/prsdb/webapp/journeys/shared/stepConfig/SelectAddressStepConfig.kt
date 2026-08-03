@@ -56,11 +56,15 @@ class SelectAddressStepConfig(
         state: AddressState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
-        val prefillSelectedAddress = defaultContent["prefillSelectedAddress"] as? String ?: return defaultContent
+        val prefillSelectedAddress = defaultContent[PREFILL_SELECTED_ADDRESS] as? String ?: return defaultContent
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? SelectAddressFormModel ?: return defaultContent
         if (!formModel.address.isNullOrBlank()) return defaultContent
         formModel.address = prefillSelectedAddress
         return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_SELECTED_ADDRESS = "selectPrefillSelectedAddress"
     }
 
     override fun mode(state: AddressState) =

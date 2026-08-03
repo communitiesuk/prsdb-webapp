@@ -30,12 +30,17 @@ class LookupAddressStepConfig(
         state: AddressSearchState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
-        val prefillPostcode = defaultContent["prefillPostcode"] as? String ?: return defaultContent
+        val prefillPostcode = defaultContent[PREFILL_POSTCODE] as? String ?: return defaultContent
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? LookupAddressFormModel ?: return defaultContent
         if (!formModel.postcode.isNullOrBlank()) return defaultContent
         formModel.postcode = prefillPostcode
-        formModel.houseNameOrNumber = defaultContent["prefillHouseNameOrNumber"] as? String
+        formModel.houseNameOrNumber = defaultContent[PREFILL_HOUSE_NAME_OR_NUMBER] as? String
         return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_POSTCODE = "lookupPrefillPostcode"
+        const val PREFILL_HOUSE_NAME_OR_NUMBER = "lookupPrefillHouseNameOrNumber"
     }
 
     override fun mode(state: AddressSearchState) =
