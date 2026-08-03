@@ -31,6 +31,8 @@ class DeregisterStepConfig(
     override fun afterStepIsReached(state: LandlordDeregistrationJourneyState) {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlord = userToLandlordService.getCurrentLandlordForUser()
+        // TODO: PDJB-1435: Update landlord deregistration for org landlords
+        check(landlord is IndividualLandlord)
 
         val soleLandlordProperties = landlord.landlordships.toList()
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
@@ -40,7 +42,6 @@ class DeregisterStepConfig(
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
 
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
         val landlordEmailAddress = landlord.email
 
         if (landlordHadActiveSoloProperties) {
