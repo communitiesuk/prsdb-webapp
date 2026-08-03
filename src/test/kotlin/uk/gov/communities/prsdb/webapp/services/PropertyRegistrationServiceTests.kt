@@ -981,6 +981,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -1027,6 +1028,7 @@ class PropertyRegistrationServiceTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             markedJointLandlord = any(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
         )
     }
