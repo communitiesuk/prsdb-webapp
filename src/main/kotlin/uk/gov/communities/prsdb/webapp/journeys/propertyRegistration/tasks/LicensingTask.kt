@@ -28,21 +28,25 @@ class LicensingTask : Task<LicensingState>() {
                         LicensingTypeMode.PROVIDE_LATER -> journey.provideLicensingLaterStep
                     }
                 }
+                savable()
             }
             step(journey.selectiveLicenceStep) {
                 routeSegment(SelectiveLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.SELECTIVE_LICENCE) }
                 nextStep { exitStep }
+                savable()
             }
             step(journey.hmoMandatoryLicenceStep) {
                 routeSegment(HmoMandatoryLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_MANDATORY_LICENCE) }
                 nextStep { exitStep }
+                savable()
             }
             step(journey.hmoAdditionalLicenceStep) {
                 routeSegment(HmoAdditionalLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_ADDITIONAL_LICENCE) }
                 nextStep { exitStep }
+                savable()
             }
             step(journey.provideLicensingLaterStep) {
                 routeSegment(ProvideLicensingLaterStep.ROUTE_SEGMENT)
