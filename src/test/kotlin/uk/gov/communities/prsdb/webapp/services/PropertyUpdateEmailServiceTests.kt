@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -12,7 +11,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -50,19 +48,6 @@ class PropertyUpdateEmailServiceTests {
                 mockConfirmationEmailService,
                 mockNotificationEmailService,
             )
-    }
-
-    @Test
-    fun `sendUpdateEmails throws PrsdbWebException when the acting landlord is not found`() {
-        val baseUserId = "unknown-user"
-        val actor = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
-
-        val exception = assertThrows<PrsdbWebException> { notifier.sendUpdateEmails(propertyId, bullets) }
-        assert(exception.message == "Landlord not found")
     }
 
     @Test

@@ -1,22 +1,21 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
@@ -107,12 +106,16 @@ class RegisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation returns 500 for user not registered as landlord`() {
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
+    fun `getConfirmation returns 400 for user not registered as landlord`() {
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "Landlord not found"),
+        )
 
-        assertThrows<ServletException> {
-            mvc.get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
-        }
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isBadRequest() }
+            }
     }
 
     @Test
