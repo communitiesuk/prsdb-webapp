@@ -284,8 +284,8 @@ VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
         'local-registrant@example.com', '07111111112', true, false, false, '12345678',
         'Local Main Contact', 'local-main-contact@example.com', '07111111113');
 
-INSERT INTO organisation_landlord_user (organisation_landlord_id, subject_identifier, created_date)
-VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', '07/23/26');
+INSERT INTO organisation_landlord_user (organisation_landlord_id, subject_identifier, name, email, created_date)
+VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', '07/23/26');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -385,7 +385,7 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type, marked_joint_landlord, is_occupied, last_occupied_date, license_provide_later, tenancy_provide_later)
-VALUES (39, true, 1, 0, 0, 79, 47, '05/02/25', '05/02/25', null, 1,
+VALUES (39, true, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1,
         1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true),
        (40, true, 1, 1, 2, 80, 48, '05/02/25', '05/02/25', 9, 1,
         1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', null, null),

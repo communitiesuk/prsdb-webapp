@@ -153,15 +153,17 @@ propertyRecord:
   licensing:
     heading: Property licensing
     rowName: Licensing
-    provideLaterOccupied: Provide this later (before {0})
-    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    provideLaterWithDeadline: Provide this later (before {0})
+    provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
     councilNotProvided: These details have not been provided yet.
   tenancy:
     heading: Tenancy details
     rowName: Tenancy
-    provideLaterOccupied: Provide this later (before {0})
+    provideLaterWithDeadline: Provide this later (before {0})
+    provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
+    councilNotProvided: These details have not been provided yet.
   notificationBanner:
     afterLinkText: .
     landlord:

@@ -203,7 +203,16 @@ class LandlordRegistrationServiceTests {
         fun stubIndividualLandlord() {
             whenever(
                 mockLandlordService.createIndividualLandlord(
-                    any(), any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
                 ),
             ).thenReturn(individualLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
@@ -487,7 +496,12 @@ class LandlordRegistrationServiceTests {
         fun `registerOrganisationLandlord creates an OrganisationLandlordUser`() {
             registerOrganisationLandlord()
 
-            verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(any(), eq(baseUser))
+            verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(
+                any(),
+                eq(baseUser),
+                eq("Alice"),
+                eq("alice@test.com"),
+            )
         }
 
         @Test

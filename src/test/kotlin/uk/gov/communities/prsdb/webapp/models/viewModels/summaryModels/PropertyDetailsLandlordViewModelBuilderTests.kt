@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -22,7 +23,8 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         @Test
         fun `with single landlord returns one card with LRN and email`() {
             // Arrange, Act
-            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(loggedInLandlord), loggedInLandlord, 1L)
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(loggedInLandlord), loggedInLandlord, 1L)
 
             // Assert
             val lrnValue = cards[0].summaryList[0].fieldValue
@@ -65,19 +67,24 @@ class PropertyDetailsLandlordViewModelBuilderTests {
 
         @Test
         fun `with org landlord as current landlord uses org card title`() {
+            val orgDisplayEmail = "info@acme.com"
+            val soleUserContactEmail = "owner@acme.com"
             val orgLandlord =
                 MockLandlordData.createOrgLandlord(
                     name = "ACME Properties Ltd",
-                    email = "info@acme.com",
+                    email = orgDisplayEmail,
+                    registrantEmail = soleUserContactEmail,
                     registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 5678L),
                 )
 
             val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(orgLandlord), orgLandlord, 1L)
+            val displayedEmail = cards[0].summaryList[1].fieldValue
 
             assertEquals(1, cards.size)
             assertEquals("propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle", cards[0].title)
             assertEquals("ACME Properties Ltd", cards[0].cardNumber)
-            assertEquals("info@acme.com", cards[0].summaryList[1].fieldValue)
+            assertEquals(orgDisplayEmail, displayedEmail)
+            assertNotEquals(soleUserContactEmail, displayedEmail)
         }
 
         @Test
@@ -159,7 +166,10 @@ class PropertyDetailsLandlordViewModelBuilderTests {
 
             val card = cards.single()
             assertEquals(1, card.actions!!.size)
-            assertEquals("propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord", card.actions!![0].text)
+            assertEquals(
+                "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                card.actions!![0].text,
+            )
             assertEquals("/local-council/landlord-details/${landlord.id}", card.actions!![0].url)
             assertEquals(true, card.actions!![0].opensInNewTab)
         }

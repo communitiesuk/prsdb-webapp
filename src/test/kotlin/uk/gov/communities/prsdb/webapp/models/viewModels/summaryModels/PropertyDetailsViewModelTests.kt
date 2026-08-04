@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
@@ -24,6 +24,11 @@ class PropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
     private val yamlMessageSource = YamlMessageSource("classpath:messages")
+
+    // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date.
+    private val occupiedAtRegistrationDate = LocalDate.of(2025, 1, 1)
+    private val occupiedAtRegistrationInstant =
+        occupiedAtRegistrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
 
     @Test
     fun `property details section is in the correct order`() {
@@ -189,11 +194,12 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `shows a licensing deadline paragraph for a council when licensing is skipped on an occupied property`() {
+    fun `shows a licensing deadline paragraph for a council when an occupied-at-registration property skips licensing`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = null,
-                lastOccupiedDate = LocalDate.of(2025, 1, 1),
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
                 licenseProvideLater = true,
             )
 
@@ -212,21 +218,48 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `throws when building a council licensing paragraph for an occupied property with no occupied date`() {
+    fun `shows a not-provided licensing paragraph for a council when a property became occupied after registration`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 license = null,
-                lastOccupiedDate = null,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
                 licenseProvideLater = true,
             )
 
-        assertThrows<IllegalStateException> {
+        val viewModel =
             PropertyDetailsViewModel(
                 propertyOwnership,
                 isLandlordView = false,
                 messageSource = mockMessageSource,
             )
-        }
+
+        assertTrue(viewModel.licensingSection.isEmpty())
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.licensing.councilNotProvided",
+            viewModel.licensingProvideLaterParagraph,
+        )
+    }
+
+    @Test
+    fun `shows a no-deadline licensing provide-later row for a landlord when a property became occupied after registration`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                license = null,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
+                licenseProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        val licensingRow = viewModel.licensingSection.single()
+        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterNoDeadline", licensingRow.fieldValue)
     }
 
     @Test
@@ -259,7 +292,7 @@ class PropertyDetailsViewModelTests {
 
         val licensingRow = viewModel.licensingSection.single()
         assertEquals("propertyDetails.propertyRecord.licensing.rowName", licensingRow.fieldHeading)
-        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
+        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterNoDeadline", licensingRow.fieldValue)
         assertNull(viewModel.licensingProvideLaterParagraph)
     }
 
@@ -333,6 +366,100 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `shows a deadline tenancy provide-later row for a landlord for an occupied-at-registration property`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                currentNumHouseholds = 0,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline",
+            viewModel.tenancySection.single().fieldValue,
+        )
+    }
+
+    @Test
+    fun `shows a no-deadline tenancy provide-later row for a landlord when a property became occupied after registration`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                currentNumHouseholds = 0,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertEquals(
+            "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline",
+            viewModel.tenancySection.single().fieldValue,
+        )
+    }
+
+    @Test
+    fun `shows a tenancy deadline paragraph for a council when an occupied-at-registration property skips tenancy`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                currentNumHouseholds = 0,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.tenancySection.isEmpty())
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.tenancy.councilOccupied",
+            viewModel.tenancyProvideLaterParagraph,
+        )
+    }
+
+    @Test
+    fun `shows a not-provided tenancy paragraph for a council when a property became occupied after registration`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                currentNumHouseholds = 0,
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
+                tenancyProvideLater = true,
+            )
+
+        val viewModel =
+            PropertyDetailsViewModel(
+                propertyOwnership,
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+            )
+
+        assertTrue(viewModel.tenancySection.isEmpty())
+        assertEquals(
+            "Message for propertyDetails.propertyRecord.tenancy.councilNotProvided",
+            viewModel.tenancyProvideLaterParagraph,
+        )
+    }
+
+    @Test
     fun `hides the tenancy section for a landlord when the property is unoccupied`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
@@ -375,9 +502,9 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             )
 
@@ -400,13 +527,18 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             ),
             viewModel.tenancySection.map { it.fieldHeading },
+        )
+
+        assertEquals(
+            listOf(true, false, true, false, false, true, false),
+            viewModel.tenancySection.map { it.withoutBottomBorder },
         )
 
         fun rowValue(heading: String) = viewModel.tenancySection.single { it.fieldHeading == heading }.fieldValue

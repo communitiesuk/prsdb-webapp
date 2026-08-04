@@ -57,7 +57,7 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
             listOf(
-                OrganisationLandlordUser(landlord, baseUser),
+                OrganisationLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
             ),
         )
 

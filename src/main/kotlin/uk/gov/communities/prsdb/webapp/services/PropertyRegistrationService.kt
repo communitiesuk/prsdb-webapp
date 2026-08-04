@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -187,11 +186,10 @@ class PropertyRegistrationService(
         jointLandlordEmails: List<String>?,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
         confirmationEmailSender.sendEmail(
             landlord.email,
             PropertyRegistrationConfirmationEmail(
-                RegistrationNumberDataModel.Companion
+                RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
                 addressModel.singleLineAddress,

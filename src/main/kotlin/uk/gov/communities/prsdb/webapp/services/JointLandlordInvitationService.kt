@@ -63,7 +63,6 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(invitingLandlord is IndividualLandlord)
         val senderName = invitingLandlord.name
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
@@ -71,12 +70,7 @@ class JointLandlordInvitationService(
         // when an email is submitted, so without this a concurrent journey could invite the same email twice.
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
         // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
-        val registeredLandlords =
-            propertyOwnership.landlords.map { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord
-            }
-        val existingLandlordEmails = registeredLandlords.map { it.email }
+        val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
                 !alreadyInvitedEmails.containsEmail(candidateEmail) &&
@@ -89,7 +83,7 @@ class JointLandlordInvitationService(
 
             // Save the invitation before sending the email so the link in the email always resolves to a real token.
             // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
-            val invitation = JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name)
+            val invitation = JointLandlordInvitation(token, email, propertyOwnership, senderName)
             invitationRepository.save(invitation)
 
             try {
@@ -119,7 +113,7 @@ class JointLandlordInvitationService(
                 ),
             )
 
-            val existingJointLandlords = registeredLandlords.filter { it.id != invitingLandlord.id }
+            val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
             existingJointLandlords.forEach { landlord ->
                 notifyExistingEmailSender.sendEmail(
                     landlord.email,
