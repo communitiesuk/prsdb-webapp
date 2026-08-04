@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
@@ -201,6 +202,24 @@ class LandlordService(
                 dateOfBirth = dateOfBirth,
             ),
         ) {}
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordForUser(orgLandlordUpdate: OrganisationLandlordUpdateModel): Landlord {
+        val landlordEntity = userToLandlordService.getCurrentLandlordForUser()
+        check(landlordEntity is OrganisationLandlord)
+
+        //TODO PDJB-1311: Add rest of fields as part of epic
+        orgLandlordUpdate.name?.let { landlordEntity.name = it }
+
+        return landlordEntity
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordName(orgName: String) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(name = orgName),
+        )
     }
 
     fun searchForLandlords(
