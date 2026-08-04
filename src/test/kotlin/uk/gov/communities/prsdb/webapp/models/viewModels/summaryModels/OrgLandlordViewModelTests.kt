@@ -12,8 +12,8 @@ class OrgLandlordViewModelTests {
         val viewModel = OrgLandlordViewModel(testLandlord)
 
         assertEquals(testLandlord.name, viewModel.name)
-        assertEquals(testLandlord.address?.singleLineAddress, viewModel.singleLineAddress)
-        assertEquals(testLandlord.email, viewModel.email)
+        assertEquals(testLandlord.address.singleLineAddress, viewModel.singleLineAddress)
+        assertEquals(testLandlord.wholeOrgEmail, viewModel.email)
         assertEquals(testLandlord.phoneNumber, viewModel.phoneNumber)
         assertEquals(testLandlord.isCompany, viewModel.isCompany)
         assertEquals(testLandlord.isCharity, viewModel.isCharity)

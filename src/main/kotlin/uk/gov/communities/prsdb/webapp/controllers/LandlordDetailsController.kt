@@ -62,7 +62,7 @@ class LandlordDetailsController(
         return "landlordDetailsView"
     }
 
-    // TODO: PDJB-1251: Update skeleton page
+    // TODO: PDJB-1276: Replace this skeleton page with proper summary list content
     private fun getOrgLandlordDetails(
         orgLandlord: OrganisationLandlord,
         model: Model,
