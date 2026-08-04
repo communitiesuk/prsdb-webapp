@@ -39,7 +39,7 @@ class LandlordRegistrationServiceTests {
     private lateinit var mockPrsdbUserService: PrsdbUserService
 
     @Mock
-    private lateinit var mockOrganisationLandlordUserService: OrganisationLandlordUserService
+    private lateinit var mockOrganisationUserService: OrganisationUserService
 
     @Mock
     private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
@@ -67,7 +67,7 @@ class LandlordRegistrationServiceTests {
             LandlordRegistrationService(
                 mockLandlordService,
                 mockPrsdbUserService,
-                mockOrganisationLandlordUserService,
+                mockOrganisationUserService,
                 mockOrganisationGoverningBodyMemberService,
                 mockRegistrationConfirmationSender,
                 mockOrgRegistrationConfirmationSender,
@@ -493,10 +493,10 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord creates an OrganisationLandlordUser`() {
+        fun `registerOrganisationLandlord creates an OrganisationUser`() {
             registerOrganisationLandlord()
 
-            verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(
+            verify(mockOrganisationUserService).createOrganisationUser(
                 any(),
                 eq(baseUser),
                 eq("Alice"),

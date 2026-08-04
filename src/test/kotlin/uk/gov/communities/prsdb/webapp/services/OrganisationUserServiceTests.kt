@@ -10,41 +10,41 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
-class OrganisationLandlordUserServiceTests {
+class OrganisationUserServiceTests {
     @Mock
-    private lateinit var mockOrganisationLandlordUserRepository: OrganisationLandlordUserRepository
+    private lateinit var mockOrganisationUserRepository: OrganisationUserRepository
 
     @InjectMocks
-    private lateinit var organisationLandlordUserService: OrganisationLandlordUserService
+    private lateinit var organisationUserService: OrganisationUserService
 
     @Mock
     private lateinit var mockOrganisationLandlord: OrganisationLandlord
 
     @Test
-    fun `createOrganisationLandlordUser saves and returns an OrganisationLandlordUser linking landlord to user`() {
+    fun `createOrganisationUser saves and returns an OrganisationUser linking landlord to user`() {
         val baseUser = PrsdbUser("user-123")
         val name = "Alice Registrant"
         val email = "alice@example.com"
 
-        whenever(mockOrganisationLandlordUserRepository.save(any<OrganisationLandlordUser>()))
+        whenever(mockOrganisationUserRepository.save(any<OrganisationUser>()))
             .thenAnswer { it.arguments[0] }
 
         val result =
-            organisationLandlordUserService.createOrganisationLandlordUser(
+            organisationUserService.createOrganisationUser(
                 mockOrganisationLandlord,
                 baseUser,
                 name,
                 email,
             )
 
-        val captor = captor<OrganisationLandlordUser>()
-        verify(mockOrganisationLandlordUserRepository).save(captor.capture())
+        val captor = captor<OrganisationUser>()
+        verify(mockOrganisationUserRepository).save(captor.capture())
 
         val saved = captor.value
         assertEquals(mockOrganisationLandlord, saved.organisationLandlord)
