@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.fileupload2.core.FileItemInputIterator
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
@@ -24,8 +22,8 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -41,40 +39,32 @@ class UpdateGasSafetyController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
 ) {
-    @GetMapping("{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { getStepModelAndView() }
     }
 
-    @PostMapping("{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
-        return postProcessedJourneyData(stepName, formData, principal, propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
-    @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
         @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
         @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
@@ -83,8 +73,9 @@ class UpdateGasSafetyController(
         principal: Principal,
         request: HttpServletRequest,
     ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
+        val stepName = stepPath.trimStart('/')
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
                 CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
@@ -93,36 +84,21 @@ class UpdateGasSafetyController(
                 request,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal, propertyOwnershipId)
+        return dispatchJourneyStep(stepPath, propertyOwnershipId, principal) { postStepModelAndView(formData) }
     }
 
-    private fun postProcessedJourneyData(
-        stepName: String,
-        formData: FormData,
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        propertyOwnershipId: Long,
         principal: Principal,
-        propertyOwnershipId: Long,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
-        try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
-
-    private fun throwErrorIfUserIsNotAuthorized(
-        baseUserId: String,
-        propertyOwnershipId: Long,
-    ) {
-        if (!propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorized to update property ownership $propertyOwnershipId",
-            )
-        }
-    }
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            dispatch = dispatch,
+        )
 
     companion object {
         const val UPDATE_GAS_SAFETY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-gas-safety"

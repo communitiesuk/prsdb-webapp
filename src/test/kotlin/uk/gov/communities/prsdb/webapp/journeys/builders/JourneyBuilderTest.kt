@@ -22,7 +22,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -30,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.objectToTypedStringKeyedMap
@@ -428,7 +427,7 @@ class JourneyBuilderTest {
     fun `task method creates and inits a taskInitialiser, all of whom's steps are built when the journey is built`() {
         // Arrange 1
         val jb = JourneyBuilder(mock())
-        val uninitialisedTask = mock<Task<JourneyState>>()
+        val uninitialisedTask = mock<TaskWithoutDependencies<JourneyState>>()
 
         val builtSteps =
             listOf(
@@ -469,7 +468,7 @@ class JourneyBuilderTest {
     fun `buildRoutingMap includes a routed task's landing step keyed by its task route`() {
         // Arrange
         val jb = JourneyBuilder(mock())
-        val uninitialisedTask = mock<Task<JourneyState>>()
+        val uninitialisedTask = mock<TaskWithoutDependencies<JourneyState>>()
 
         val landingStep = mock<TaskRouteRedirectStep>()
         whenever(landingStep.routeSegment).thenReturn("task-route")
@@ -736,8 +735,12 @@ class JourneyBuilderTest {
             }
         }
 
-        private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
-            object : Task<JourneyState>() {
+        private fun testTaskWithSteps(
+            vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>,
+        ): TaskWithoutDependencies<JourneyState> =
+            object : TaskWithoutDependencies<JourneyState>(mock()) {
+                override val taskState: JourneyState get() = this
+
                 override fun makeSubJourney(state: JourneyState) =
                     subJourney(state) {
                         steps.forEachIndexed { index, step ->
@@ -949,8 +952,12 @@ class JourneyBuilderTest {
             assertEquals("value", capturedContent["extra"])
         }
 
-        private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
-            object : Task<JourneyState>() {
+        private fun testTaskWithSteps(
+            vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>,
+        ): TaskWithoutDependencies<JourneyState> =
+            object : TaskWithoutDependencies<JourneyState>(mock()) {
+                override val taskState: JourneyState get() = this
+
                 override fun makeSubJourney(state: JourneyState) =
                     subJourney(state) {
                         steps.forEachIndexed { index, step ->
@@ -1003,7 +1010,7 @@ class JourneyBuilderTest {
                 val jb = JourneyBuilder(mock<JourneyState>())
 
                 // Act
-                jb.duplicableTask(task, "lead-trustee-address") {
+                jb.task(task, "lead-trustee-address") {
                     parents { NoParents() }
                     nextDestination { Destination.NavigationalStep(mock()) }
                 }
@@ -1036,7 +1043,7 @@ class JourneyBuilderTest {
                 val jb = JourneyBuilder(mock<JourneyState>())
 
                 // Act
-                jb.duplicableTask(task, routeSegment = null) {
+                jb.task(task, routeSegment = null) {
                     parents { NoParents() }
                     nextDestination { Destination.NavigationalStep(mock()) }
                 }
@@ -1055,7 +1062,7 @@ class JourneyBuilderTest {
 }
 
 // A task that is both a Task and JourneyState, so it can be added via routableTask as its own state.
-abstract class TestSelfStatedTask : DuplicableTask<JourneyState>(mock()) {
+abstract class TestSelfStatedTask : TaskWithoutDependencies<JourneyState>(mock()) {
     override val taskState: JourneyState
         get() = this
 }

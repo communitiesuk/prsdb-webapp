@@ -5,17 +5,17 @@ import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyWhoToProvideFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
 class OrgGovBodyWhoToProvideStepConfig :
-    AbstractRequestableStepConfig<Complete, OrgGovBodyWhoToProvideFormModel, LandlordRegistrationOrgLandlordState>() {
+    AbstractRequestableStepConfig<Complete, OrgGovBodyWhoToProvideFormModel, OrgGovBodyState>() {
     override val formModelClass = OrgGovBodyWhoToProvideFormModel::class
 
-    override fun getStepSpecificContent(state: LandlordRegistrationOrgLandlordState) =
+    override fun getStepSpecificContent(state: OrgGovBodyState) =
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.orgGovBodyWhoToProvide.fieldSetHeading",
             "fieldName" to "whoToProvide",
@@ -41,33 +41,30 @@ class OrgGovBodyWhoToProvideStepConfig :
         )
 
     override fun resolvePageContent(
-        state: LandlordRegistrationOrgLandlordState,
+        state: OrgGovBodyState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? OrgGovBodyWhoToProvideFormModel
         if (formModel?.whoToProvide != null) return defaultContent
 
-        val editingMember = getEditingMemberOrNull(state) ?: return defaultContent
+        val editingMember = state.editingGovBodyMember ?: return defaultContent
         val prepopulatedFormModel = formModel ?: OrgGovBodyWhoToProvideFormModel()
         prepopulatedFormModel.whoToProvide = editingMember.type
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 
-    override fun chooseTemplate(state: LandlordRegistrationOrgLandlordState) = "forms/orgGovBodyWhoToProvideForm"
+    override fun chooseTemplate(state: OrgGovBodyState) = "forms/orgGovBodyWhoToProvideForm"
 
-    override fun mode(state: LandlordRegistrationOrgLandlordState) =
+    override fun mode(state: OrgGovBodyState) =
         getFormModelFromStateOrNull(
             state,
         )?.whoToProvide?.let { Complete.COMPLETE }
-
-    private fun getEditingMemberOrNull(state: LandlordRegistrationOrgLandlordState) =
-        state.editingGovBodyMemberId?.let { state.governingBodyMembersMap?.get(it) }
 }
 
 @JourneyFrameworkComponent
 final class OrgGovBodyWhoToProvideStep(
     stepConfig: OrgGovBodyWhoToProvideStepConfig,
-) : RequestableStep<Complete, OrgGovBodyWhoToProvideFormModel, LandlordRegistrationOrgLandlordState>(stepConfig) {
+) : RequestableStep<Complete, OrgGovBodyWhoToProvideFormModel, OrgGovBodyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-governing-body-who-to-provide"
     }

@@ -1,25 +1,30 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
+        private fun landlordEmail(landlord: Landlord): String =
+            when (landlord) {
+                is IndividualLandlord -> landlord.email
+                is OrganisationLandlord -> landlord.wholeOrgEmail
+                else -> throw IllegalArgumentException("Unknown landlord type")
+            }
+
         fun buildSummaryCards(
             landlords: Set<Landlord>,
-            currentUserId: String,
+            currentLandlord: Landlord,
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
-                // TODO: PDJB-1276: Update landlord tab landlord view for org landlords
+                .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.name })
                 .map { landlord ->
-                    check(landlord is IndividualLandlord)
-                    landlord
-                }.sortedWith(compareByDescending<IndividualLandlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
-                .map { landlord ->
-                    val isCurrentUser = landlord.baseUser.id == currentUserId
+                    val isCurrentUser = landlord.id == currentLandlord.id
                     if (isCurrentUser) {
                         val removeMeAction =
                             SummaryCardActionViewModel(
@@ -27,9 +32,15 @@ class PropertyDetailsLandlordViewModelBuilder {
                                 LeavePropertyController.getLeavePropertyPath(propertyOwnershipId),
                             )
 
+                        val titleKey =
+                            if (landlord.landlordType == LandlordType.ORGANISATION) {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle"
+                            } else {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
+                            }
+
                         SummaryCardViewModel(
-                            title =
-                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle",
+                            title = titleKey,
                             cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
                             actions = if (landlords.size > 1) listOf(removeMeAction) else null,
@@ -42,7 +53,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                     }
                 }
 
-        private fun buildLandlordCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",
@@ -50,7 +61,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.email,
+                    fieldValue = landlordEmail(landlord),
                 ),
             )
 

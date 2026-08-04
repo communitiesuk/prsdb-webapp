@@ -4,15 +4,15 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 
 @JourneyFrameworkComponent
 class ElectricalCertExpiryDateStepConfig :
-    AbstractRequestableStepConfig<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyState>() {
+    AbstractRequestableStepConfig<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = AnyDateFormModel::class
 
-    override fun getStepSpecificContent(state: ElectricalSafetyState): Map<String, Any?> {
+    override fun getStepSpecificContent(state: ElectricalSafetyDetailState): Map<String, Any?> {
         val certType = state.hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
         val headingKey =
             if (certType == HasElectricalSafetyCertificate.HAS_EIC) {
@@ -26,9 +26,9 @@ class ElectricalCertExpiryDateStepConfig :
         )
     }
 
-    override fun chooseTemplate(state: ElectricalSafetyState): String = "forms/dateForm"
+    override fun chooseTemplate(state: ElectricalSafetyDetailState): String = "forms/dateForm"
 
-    override fun mode(state: ElectricalSafetyState) =
+    override fun mode(state: ElectricalSafetyDetailState) =
         state.getElectricalCertificateIsOutdated()?.let {
             when (it) {
                 true -> ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED
@@ -40,7 +40,7 @@ class ElectricalCertExpiryDateStepConfig :
 @JourneyFrameworkComponent
 final class ElectricalCertExpiryDateStep(
     stepConfig: ElectricalCertExpiryDateStepConfig,
-) : RequestableStep<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyState>(stepConfig) {
+) : RequestableStep<ElectricalCertExpiryDateMode, AnyDateFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "electrical-safety-certificate-expiry-date"
     }

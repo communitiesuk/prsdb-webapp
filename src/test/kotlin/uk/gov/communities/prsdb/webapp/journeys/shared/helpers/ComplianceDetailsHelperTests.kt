@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,19 +29,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UploadService
-
-internal interface TestableGasSafetyState :
-    GasSafetyState,
-    CheckYourAnswersJourneyState
-
-internal interface TestableElectricalSafetyState :
-    ElectricalSafetyState,
-    CheckYourAnswersJourneyState
 
 internal interface TestableEpcState :
     EpcState,
@@ -58,18 +54,29 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetGasSafetyCyaContent {
         @Mock
-        internal lateinit var mockState: TestableGasSafetyState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockGasState: GasSafetyState
+
+        @Mock
+        internal lateinit var mockGasDetailsTask: GasSafetyDetailsTask
 
         private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
         private val mockHasGasCertStep: HasGasCertStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockGasState.gasSafetyDetailsTask).thenReturn(mockGasDetailsTask)
+        }
+
         @Test
         fun `no gas supply returns gasSupplyRows with 1 row, empty certRows, and noGasSupply inset text key`() {
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.NO)
 
-            val content = helper.getGasSafetyCyaContent(mockState)
+            val content = helper.getGasSafetyCyaContent(mockCyaState, mockGasState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>
@@ -88,22 +95,22 @@ class ComplianceDetailsHelperTests {
             val mockGasCertIssueDateStep: GasCertIssueDateStep = mock()
             val mockCheckGasCertUploadsStep: CheckGasCertUploadsStep = mock()
 
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
-            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
-            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
-            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockState.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+            whenever(mockGasDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
+            whenever(mockGasDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
+            whenever(mockGasDetailsTask.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
+            whenever(mockGasDetailsTask.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
+            whenever(mockGasDetailsTask.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
             val mockFileUpload: FileUpload = mock()
             whenever(mockFileUpload.status).thenReturn(FileUploadStatus.SCANNED)
             whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
             whenever(mockUploadService.getDownloadUrlOrNull(any(), any())).thenReturn("/download/cert.pdf")
 
-            val content = helper.getGasSafetyCyaContent(mockState)
+            val content = helper.getGasSafetyCyaContent(mockCyaState, mockGasState)
 
             @Suppress("UNCHECKED_CAST")
             val gasSupplyRows = content["gasSupplyRows"] as List<SummaryListRowViewModel>
@@ -121,18 +128,29 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetElectricalSafetyCyaContent {
         @Mock
-        internal lateinit var mockState: TestableElectricalSafetyState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockState: ElectricalSafetyState
+
+        @Mock
+        internal lateinit var mockElectricalDetailsTask: ElectricalSafetyDetailsTask
 
         private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalDetailsTask)
+        }
+
         @Test
         fun `provide later for occupied property returns 1 row and null inset text key`() {
-            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockElectricalDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockElectricalDetailsTask.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockCyaState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>
@@ -144,12 +162,12 @@ class ComplianceDetailsHelperTests {
 
         @Test
         fun `no cert for occupied property returns 1 row and occupiedNoCert inset text key`() {
-            whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockElectricalDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockElectricalDetailsTask.isOccupied).thenReturn(true)
 
-            val content = helper.getElectricalSafetyCyaContent(mockState)
+            val content = helper.getElectricalSafetyCyaContent(mockCyaState, mockState)
 
             @Suppress("UNCHECKED_CAST")
             val rows = content["electricalRows"] as List<SummaryListRowViewModel>
@@ -163,21 +181,32 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetEpcCyaContent {
         @Mock
-        internal lateinit var mockState: TestableEpcState
+        internal lateinit var mockCyaState: CheckYourAnswersJourneyState
+
+        @Mock
+        internal lateinit var mockState: EpcState
+
+        @Mock
+        internal lateinit var mockEpcDetailsTask: EpcDetailsTask
 
         private val mockHasEpcStep: HasEpcStep = mock()
 
         private val mockStartEpcStep: StartEpcStep = mock()
 
+        @BeforeEach
+        fun setUp() {
+            whenever(mockState.epcDetailsTask).thenReturn(mockEpcDetailsTask)
+        }
+
         @Test
         fun `skipped occupied returns all expected keys with null epcCardTitle and non-empty nonEpcRows`() {
-            whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
-            whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
-            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockEpcDetailsTask.startEpcStep).thenReturn(mockStartEpcStep)
+            whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockEpcDetailsTask.isOccupied).thenReturn(true)
 
-            val content = helper.getEpcCyaContent(mockState)
+            val content = helper.getEpcCyaContent(mockCyaState, mockState)
 
             assertEquals(
                 setOf(

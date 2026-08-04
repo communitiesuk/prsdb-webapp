@@ -1,14 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MatchedEpcFormModel
 
 abstract class AbstractConfirmEpcDetailsStepConfig<FormModel : MatchedEpcFormModel> :
-    AbstractRequestableStepConfig<YesOrNo, FormModel, EpcState>() {
-    override fun mode(state: EpcState) =
+    AbstractRequestableStepConfig<YesOrNo, FormModel, EpcDetailState>() {
+    override fun mode(state: EpcDetailState) =
         when (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect) {
             null -> null
             false -> YesOrNo.NO
@@ -17,14 +17,14 @@ abstract class AbstractConfirmEpcDetailsStepConfig<FormModel : MatchedEpcFormMod
 
     override fun isSubClassInitialised(): Boolean = ::getRelevantEpc.isInitialized
 
-    lateinit var getRelevantEpc: (EpcState) -> EpcDataModel?
+    lateinit var getRelevantEpc: (EpcDetailState) -> EpcDataModel?
 
-    fun usingEpc(getRelevantEpc: EpcState.() -> EpcDataModel?): AbstractConfirmEpcDetailsStepConfig<FormModel> {
+    fun usingEpc(getRelevantEpc: EpcDetailState.() -> EpcDataModel?): AbstractConfirmEpcDetailsStepConfig<FormModel> {
         this.getRelevantEpc = getRelevantEpc
         return this
     }
 
-    override fun afterStepDataIsAdded(state: EpcState) {
+    override fun afterStepDataIsAdded(state: EpcDetailState) {
         if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == true) {
             state.acceptedEpc = getRelevantEpc(state)
         } else if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == false && state.acceptedEpc == getRelevantEpc(state)) {

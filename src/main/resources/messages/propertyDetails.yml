@@ -8,6 +8,7 @@ landlordDetails:
   registeredLandlords:
     heading: 'Registered landlords ({0})'
     currentUserCardTitle: '{0} (you)'
+    currentOrgCardTitle: '{0} (your organisation)'
     viewLandlordRecord: View landlord record (opens in new tab)
     removeMe: Remove me
   registeredLandlord:
@@ -205,6 +206,7 @@ propertyRecord:
       changeLinkAriaLabel: Change number of households and tenants
     numberOfPeople: Number of tenants
     numberOfBedrooms: Number of bedrooms
+    'numberOfBedrooms.notAdded': Not added
     rentIncludesBills:
       rowName: Rent includes bills
       changeLinkAriaLabel: Change whether rent includes bills or which bills are included

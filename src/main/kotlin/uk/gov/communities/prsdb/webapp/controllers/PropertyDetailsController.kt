@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -33,12 +32,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping
@@ -50,7 +48,7 @@ class PropertyDetailsController(
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
     private val messageSource: MessageSource,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -58,8 +56,7 @@ class PropertyDetailsController(
     fun getPropertyDetails(
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, baseUserId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -85,10 +82,11 @@ class PropertyDetailsController(
             buildNotificationBanner(provideLaterEnabled, isLandlordView = true, propertyDetails, propertyCompliance),
         )
 
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
         val landlordSummaryCards =
             PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                 propertyOwnership.landlords,
-                baseUserId,
+                landlord,
                 propertyOwnership.id,
             )
         modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
@@ -134,8 +132,7 @@ class PropertyDetailsController(
         @PathVariable invitationId: Long,
         redirectAttributes: RedirectAttributes,
     ): String {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        jointLandlordInvitationService.hideExpiredInvitation(invitationId, baseUserId)
+        jointLandlordInvitationService.hideExpiredInvitation(invitationId)
         redirectAttributes.addFlashAttribute("inviteRemoved", true)
         return "redirect:${getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
     }
@@ -145,10 +142,9 @@ class PropertyDetailsController(
     fun getPropertyDetailsLocalCouncilView(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
-        principal: Principal,
     ): String {
         val propertyOwnership =
-            propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
+            propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 

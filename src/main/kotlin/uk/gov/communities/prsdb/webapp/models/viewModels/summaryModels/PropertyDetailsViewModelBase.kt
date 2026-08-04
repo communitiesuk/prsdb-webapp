@@ -109,7 +109,8 @@ abstract class PropertyDetailsViewModelBase(
     protected fun bedroomsRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-            propertyOwnership.numBedrooms,
+            propertyOwnership.numBedrooms
+                ?: "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms.notAdded",
             changeLinkMessageKey,
             UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
                 "/${BedroomsStep.ROUTE_SEGMENT}",

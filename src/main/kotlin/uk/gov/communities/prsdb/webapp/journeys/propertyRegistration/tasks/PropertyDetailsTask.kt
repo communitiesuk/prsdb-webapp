@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddToLandlordIncompletePropertiesStep
@@ -16,13 +16,13 @@ class PropertyDetailsTask(
     override val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep,
     override val propertyTypeStep: PropertyTypeStep,
     override val bedrooms: BedroomsStep,
-) : DuplicableTask<PropertyDetailsState>(journeyStateService),
+) : TaskWithoutDependencies<PropertyDetailsState>(journeyStateService),
     PropertyDetailsState {
     override val taskState get() = this
 
     override fun makeSubJourney(state: PropertyDetailsState) =
         subJourney(state) {
-            duplicableTask(journey.addressTask) {
+            task(journey.addressTask) {
                 nextStep { journey.addToLandlordIncompletePropertiesStep }
                 savable()
             }

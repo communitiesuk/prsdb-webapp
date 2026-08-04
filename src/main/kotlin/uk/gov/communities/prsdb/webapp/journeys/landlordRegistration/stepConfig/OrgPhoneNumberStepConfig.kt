@@ -15,7 +15,7 @@ class OrgPhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, OrgPhon
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.orgPhoneNumber.fieldSetHeading",
             "submitButtonText" to "forms.buttons.continue",
-            "hint" to "forms.phoneNumber.hint",
+            "hint" to "registerAsALandlord.phoneNumber.hint",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/phoneNumberForm"

@@ -1,19 +1,20 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 @JourneyFrameworkComponent
-class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, LandlordRegistrationOrgLandlordState>() {
-    override fun mode(state: LandlordRegistrationOrgLandlordState): Complete = Complete.COMPLETE
+class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovBodyState>() {
+    override fun mode(state: OrgGovBodyState): Complete = Complete.COMPLETE
 
-    override fun afterStepIsReached(state: LandlordRegistrationOrgLandlordState) {
+    override fun afterStepIsReached(state: OrgGovBodyState) {
         val name =
             state.orgGovBodyMemberNameStep.formModelOrNull?.name
                 ?: throw PrsdbWebException("Governing body member name step data is missing")
@@ -30,6 +31,10 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
         val address = state.govBodyMemberAddressTask.getAddress()
+        val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
+        val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
+        val wentManual = selectFormModel?.address == MANUAL_ADDRESS_CHOSEN
+        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -46,6 +51,14 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
                 type = type,
                 dateOfBirth = dateOfBirth,
                 address = address,
+                addressSearchPostcode = lookupFormModel?.postcode,
+                addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
+                selectedAddress = selectFormModel?.address,
+                manualAddressLineOne = manualFormModel?.addressLineOne,
+                manualAddressLineTwo = manualFormModel?.addressLineTwo,
+                manualTownOrCity = manualFormModel?.townOrCity,
+                manualCounty = manualFormModel?.county,
+                manualPostcode = manualFormModel?.postcode,
             )
 
         currentMap[targetKey] = member
@@ -63,4 +76,4 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, Landlor
 @JourneyFrameworkComponent
 final class SaveGovBodyMemberStep(
     stepConfig: SaveGovBodyMemberStepConfig,
-) : JourneyStep.InternalStep<Complete, LandlordRegistrationOrgLandlordState>(stepConfig)
+) : JourneyStep.InternalStep<Complete, OrgGovBodyState>(stepConfig)

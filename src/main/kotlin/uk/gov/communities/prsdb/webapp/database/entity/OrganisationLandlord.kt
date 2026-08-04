@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import java.time.LocalDate
 
 @Entity
@@ -18,38 +19,44 @@ class OrganisationLandlord() : Landlord() {
         get() = LandlordType.ORGANISATION
 
     @Column(name = "organisation_landlord_name")
-    var name: String? = null
+    override lateinit var name: String
 
     @ManyToOne
     @JoinColumn(name = "organisation_address_id")
-    var address: Address? = null
+    lateinit var address: Address
 
+    /**
+     * This should not be used for sending emails, just for displaying the contact info for an organisation.
+     */
     @Column(name = "organisation_email")
-    var email: String? = null
+    lateinit var wholeOrgEmail: String
 
     @Column(name = "organisation_phone_number")
-    var phoneNumber: String? = null
+    lateinit var phoneNumber: String
 
     @Column(name = "organisation_registrant_name")
-    var registrantName: String? = null
+    lateinit var registrantName: String
 
     @Column(name = "organisation_registrant_date_of_birth")
-    var registrantDateOfBirth: LocalDate? = null
+    lateinit var registrantDateOfBirth: LocalDate
 
     @Column(name = "organisation_registrant_email")
-    var registrantEmail: String? = null
+    lateinit var registrantEmail: String
 
     @Column(name = "organisation_registrant_phone_number")
-    var registrantPhoneNumber: String? = null
+    lateinit var registrantPhoneNumber: String
 
+    // Note that this has no relation to the companyNumber nullable col
     @Column(name = "organisation_is_company")
-    var isCompany: Boolean? = null
+    var isCompany: Boolean = false
 
+    // Note that this has no relation to the charityRegisteredWith & charityNumber nullable col
     @Column(name = "organisation_is_charity")
-    var isCharity: Boolean? = null
+    var isCharity: Boolean = false
 
+    // Note that this determines whether the organisation needs a lead trustee
     @Column(name = "organisation_is_trust")
-    var isTrust: Boolean? = null
+    var isTrust: Boolean = false
 
     @Column(name = "organisation_company_number")
     var companyNumber: String? = null
@@ -77,13 +84,13 @@ class OrganisationLandlord() : Landlord() {
     var leadTrusteeAddress: Address? = null
 
     @Column(name = "organisation_main_contact_name")
-    var mainContactName: String? = null
+    lateinit var mainContactName: String
 
     @Column(name = "organisation_main_contact_email")
-    var mainContactEmail: String? = null
+    lateinit var mainContactEmail: String
 
     @Column(name = "organisation_main_contact_phone")
-    var mainContactPhone: String? = null
+    lateinit var mainContactPhone: String
 
     constructor(
         registrationNumber: RegistrationNumber,
@@ -113,7 +120,7 @@ class OrganisationLandlord() : Landlord() {
         this.registrationNumber = registrationNumber
         this.name = name
         this.address = address
-        this.email = email
+        this.wholeOrgEmail = email
         this.phoneNumber = phoneNumber
         this.registrantName = registrantName
         this.registrantDateOfBirth = registrantDateOfBirth
@@ -134,4 +141,30 @@ class OrganisationLandlord() : Landlord() {
         this.mainContactEmail = mainContactEmail
         this.mainContactPhone = mainContactPhone
     }
+
+    @get:Transient
+    val isRegisteredCompany: Boolean
+        get() = companyNumber != null
+
+    @get:Transient
+    val isRegisteredCharity: Boolean
+        get() = charityNumber != null
+
+    @get:Transient
+    val hasLeadTrustee: Boolean
+        get() = isTrust == true
+
+    @get:Transient
+    val hasGoverningBody: Boolean
+        get() = !isRegisteredCompany
+
+    @get:Transient
+    val organisationTypes: List<OrgType>
+        get() =
+            buildList {
+                if (isCompany == true) add(OrgType.COMPANY)
+                if (isCharity == true) add(OrgType.CHARITY)
+                if (isTrust == true) add(OrgType.TRUST)
+                if (isEmpty()) add(OrgType.NONE)
+            }
 }

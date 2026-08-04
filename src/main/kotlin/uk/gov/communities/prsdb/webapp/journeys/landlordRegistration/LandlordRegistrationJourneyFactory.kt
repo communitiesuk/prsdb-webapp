@@ -39,7 +39,7 @@ class LandlordRegistrationJourneyFactory(
             }
             section {
                 withHeadingMessageKey("registerAsALandlord.caption", shouldUseNumbering = false)
-                duplicableTask(journey.landlordRegistrationTask) {
+                task(journey.landlordRegistrationTask) {
                     initialStep()
                     nextStep { journey.deleteJourneyStep }
                 }

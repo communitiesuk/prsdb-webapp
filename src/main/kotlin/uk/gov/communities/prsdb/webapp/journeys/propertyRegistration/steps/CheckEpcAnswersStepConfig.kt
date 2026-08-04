@@ -16,7 +16,7 @@ class CheckEpcAnswersStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
-        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state)
+        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state.epcDetailsTask)
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),
             "epcCardActions" to factory.createEpcCardActions(),
