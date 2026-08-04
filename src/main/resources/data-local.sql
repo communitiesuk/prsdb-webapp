@@ -284,7 +284,7 @@ VALUES (36, '07/23/26', '07/23/26', 81, 1, 'Local Organisation Landlord', 5,
         'local-registrant@example.com', '07111111112', true, false, false, '12345678',
         'Local Main Contact', 'local-main-contact@example.com', '07111111113');
 
-INSERT INTO organisation_landlord_user (organisation_landlord_id, subject_identifier, name, email, created_date)
+INSERT INTO organisation_user (organisation_landlord_id, subject_identifier, name, email, created_date)
 VALUES (36, 'urn:fdc:gov.uk:2022:ORG01', 'Local Registrant', 'local-registrant@example.com', '07/23/26');
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));

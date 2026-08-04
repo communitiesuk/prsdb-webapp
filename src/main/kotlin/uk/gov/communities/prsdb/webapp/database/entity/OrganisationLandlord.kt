@@ -98,15 +98,15 @@ class OrganisationLandlord() : Landlord() {
     // We assume one org user per landlord for now so this eager fetch will be cheap.
     // TODO: PDJB-1274: This eager fetch will no longer be needed once we support multiple users in an org. Remove it
     @OneToMany(mappedBy = "organisationLandlord", fetch = FetchType.EAGER)
-    private val organisationLandlordUsers: MutableSet<OrganisationLandlordUser> = mutableSetOf()
+    private val organisationUsers: MutableSet<OrganisationUser> = mutableSetOf()
 
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
     @get:Transient
     override val email: String
-        get() = organisationLandlordUsers.single().email
+        get() = organisationUsers.single().email
 
-    internal fun addOrganisationLandlordUser(organisationLandlordUser: OrganisationLandlordUser) {
-        organisationLandlordUsers.add(organisationLandlordUser)
+    internal fun addOrganisationUser(organisationUser: OrganisationUser) {
+        organisationUsers.add(organisationUser)
     }
 
     constructor(
