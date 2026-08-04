@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
@@ -46,30 +47,17 @@ class LandlordDetailsController(
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         if (landlord is OrganisationLandlord) {
+            if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+            }
             return getOrgLandlordDetails(landlord, model)
         }
 
         val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = true)
 
-        model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
 
-        val registeredPropertiesList =
-            propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                landlord,
-                currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
-            )
-
-        model.addAttribute("registeredPropertiesList", registeredPropertiesList)
-        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
-        model.addAttribute(
-            "registerPropertyUrl",
-            RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
-        )
-        model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-        model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
-
-        model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+        addUserLandlordDetailsSharedAttributes(landlord, model)
 
         return "landlordDetailsView"
     }
@@ -79,20 +67,24 @@ class LandlordDetailsController(
         orgLandlord: OrganisationLandlord,
         model: Model,
     ): String {
-        if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
-        }
-
         val governingBodyMembers =
             organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
 
-        model.addAttribute("name", orgLandlord.name)
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
         model.addAttribute("governingBodyMembers", governingBodyMembers)
 
+        addUserLandlordDetailsSharedAttributes(orgLandlord, model)
+
+        return "orgLandlordDetailsView"
+    }
+
+    private fun addUserLandlordDetailsSharedAttributes(
+        landlord: Landlord,
+        model: Model,
+    ) {
         val registeredPropertiesList =
             propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                orgLandlord,
+                landlord,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
             )
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
@@ -103,11 +95,8 @@ class LandlordDetailsController(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
         )
-
         model.addAttribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
-
-        return "orgLandlordDetailsView"
     }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
@@ -124,7 +113,6 @@ class LandlordDetailsController(
 
         val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = false)
 
-        model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("landlord", landlordViewModel)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)

@@ -34,8 +34,9 @@ update:
 org:
   title: Organisation landlord record
   removeRecord: Delete organisation
-  organisationDetails: Organisation details
-  organisationContacts: Organisation contacts
+  tabs:
+    organisationDetails: Organisation details
+    organisationContacts: Organisation contacts
   name: Organisation name
   address: Organisation address
   email: Organisation email

@@ -3,9 +3,9 @@
 <html id="page" th:replace="~{fragments/layout :: layout(#{landlordDetails.org.title},~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content">
-        <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
+        <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 
-        <h1 class="govuk-heading-l" th:text="${name}">Organisation name</h1>
+        <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">Organisation name</h1>
 
         <p class="govuk-body">
             <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
@@ -14,13 +14,13 @@
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('organisation-details', #{landlordDetails.org.organisationDetails})}"></li>
-                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('organisation-contacts', #{landlordDetails.org.organisationContacts})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('organisation-details', #{landlordDetails.org.tabs.organisationDetails})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('organisation-contacts', #{landlordDetails.org.tabs.organisationContacts})}"></li>
                 <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
             </ul>
 
             <div id="organisation-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-details', ~{::#organisation-details-panel/content()})}">
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.organisationDetails}">landlordDetails.org.organisationDetails</h2>
+                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.tabs.organisationDetails}">landlordDetails.org.tabs.organisationDetails</h2>
 
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.name}">landlordDetails.org.name</strong><br/>
@@ -124,23 +124,7 @@
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
-                <th:block th:unless="${#lists.isEmpty(registeredPropertiesList)}">
-                    <table th:replace="~{fragments/tables/table :: table(${ { 'landlordDetails.registeredProperties.table.addressHeading', 'landlordDetails.registeredProperties.table.prnHeading' } }, ~{::tbody}, null)}">
-                        <tbody class="govuk-table__body">
-                            <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
-                                <td class="govuk-table__cell govuk-!-width-one-half">
-                                    <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">${property.address}</a>
-                                </td>
-                                <td class="govuk-table__cell govuk-!-width-one-half" th:text="${property.registrationNumber}"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </th:block>
-
-                <p th:if="${#lists.isEmpty(registeredPropertiesList)}" class="govuk-body" data-testid="no-registered-properties-msg">
-                    <span th:remove="tag" th:text="#{landlordDetails.registeredProperties.none.beforeLink}">landlordDetails.registeredProperties.none.beforeLink</span>
-                    <a class="govuk-link" th:href="@{${registerPropertyUrl}}" th:text="#{landlordDetails.registeredProperties.none.link}">landlordDetails.registeredProperties.none.link</a>
-                </p>
+                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
             </div>
         </div>
     </main>

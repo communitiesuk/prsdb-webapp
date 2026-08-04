@@ -2,11 +2,11 @@
 <html id="page" th:replace="~{fragments/layout :: layout(#{landlordDetails.title}, ~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper" id="main-content">
-        <h2 class="govuk-heading-m" th:text="#{landlordDetails.heading}">landlordDetails.heading</h2>
+        <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 
-        <h1 class="govuk-heading-l" th:text="${name}">name</h1>
+        <h1 class="govuk-heading-l" th:text="${landlord.name}">name</h1>
 
-        <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${name}, ${lastModifiedDate})}"></div>
+        <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${landlord.name}, ${lastModifiedDate})}"></div>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">

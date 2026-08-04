@@ -69,7 +69,7 @@ class LandlordDetailsControllerTests(
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
-                model { attribute("name", landlord.name) }
+                model { attributeExists("landlord") }
             }
         }
 
@@ -91,7 +91,6 @@ class LandlordDetailsControllerTests(
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
                 model {
-                    attribute("name", orgLandlord.name!!)
                     attribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
                     attributeExists(
@@ -153,7 +152,7 @@ class LandlordDetailsControllerTests(
         fun `getLandlordDetails returns 200 for a valid request from an LC user`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
-                model { attribute("name", landlord.name) }
+                model { attributeExists("landlord") }
             }
         }
 
@@ -162,7 +161,7 @@ class LandlordDetailsControllerTests(
         fun `getLandlordDetails returns 200 for a valid request from an LC admin`() {
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(landlord.id)).andExpect {
                 status { isOk() }
-                model { attribute("name", landlord.name) }
+                model { attributeExists("landlord") }
             }
         }
     }
