@@ -131,7 +131,6 @@ class OrgGovBodyTask(
                     withAdditionalContentProperties {
                         val editingMember = journey.editingGovBodyMember
                         mapOf(
-                            "fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading",
                             SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to editingMember?.selectedAddress,
                         )
                     }

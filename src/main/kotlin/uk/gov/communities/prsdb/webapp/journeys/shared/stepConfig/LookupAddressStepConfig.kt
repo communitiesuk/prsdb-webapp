@@ -17,10 +17,10 @@ class LookupAddressStepConfig(
 
     override fun getStepSpecificContent(state: AddressSearchState) =
         mapOf(
-            "postcodeLabel" to "forms.lookupAddress.postcode.label",
-            "postcodeHint" to "forms.lookupAddress.postcode.hint",
-            "houseNameOrNumberLabel" to "forms.lookupAddress.houseNameOrNumber.label",
-            "houseNameOrNumberHint" to "forms.lookupAddress.houseNameOrNumber.hint",
+            "postcodeLabel" to "addressForms.lookupAddress.postcode.label",
+            "postcodeHint" to "addressForms.lookupAddress.postcode.hint",
+            "houseNameOrNumberLabel" to "addressForms.lookupAddress.houseNameOrNumber.label",
+            "houseNameOrNumberHint" to "addressForms.lookupAddress.houseNameOrNumber.hint",
             "submitButtonText" to "forms.buttons.continue",
         )
 

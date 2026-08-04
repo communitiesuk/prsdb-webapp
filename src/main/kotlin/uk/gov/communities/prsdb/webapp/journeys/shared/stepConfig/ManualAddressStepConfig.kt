@@ -14,12 +14,12 @@ class ManualAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAd
 
     override fun getStepSpecificContent(state: AddressState) =
         mapOf(
-            "fieldSetHint" to "forms.manualAddress.fieldSetHint",
-            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
-            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
-            "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
-            "countyLabel" to "forms.manualAddress.county.label",
-            "postcodeLabel" to "forms.manualAddress.postcode.label",
+            "fieldSetHint" to "addressForms.manualAddress.fieldSetHint",
+            "addressLineOneLabel" to "addressForms.manualAddress.addressLineOne.label",
+            "addressLineTwoLabel" to "addressForms.manualAddress.addressLineTwo.label",
+            "townOrCityLabel" to "addressForms.manualAddress.townOrCity.label",
+            "countyLabel" to "addressForms.manualAddress.county.label",
+            "postcodeLabel" to "addressForms.manualAddress.postcode.label",
             "submitButtonText" to "forms.buttons.continue",
         )
 

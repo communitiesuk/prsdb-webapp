@@ -56,6 +56,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
@@ -295,11 +296,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgNamePage.submitName("Test Organisation Name")
 
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
-        orgAddressPage.submitAddress(
-            addressLineOne = "1 Example Street",
-            townOrCity = "Exampleton",
-            postcode = "EG1 2AB",
-        )
+        orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val orgSelectAddressPage = assertPageIs(page, OrgSelectAddressFormPageLandlordRegistration::class)
+        orgSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
         orgEmailPage.submitEmail("test.address@provider.com")
@@ -545,14 +545,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         checkAnswersPage.landlordDetails.organisationAddressRow.clickNamedActionLinkAndWait("Change")
 
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
-        orgAddressPage.submitAddress(
-            addressLineOne = "2 Updated Street",
-            townOrCity = "Updatedton",
-            postcode = "UP1 2DD",
-        )
+        orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val orgSelectAddressPage = assertPageIs(page, OrgSelectAddressFormPageLandlordRegistration::class)
+        orgSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
-        assertThat(updatedCheckAnswersPage.landlordDetails.organisationAddressRow).containsText("2 Updated Street")
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationAddressRow).containsText("1 PRSDB Square")
     }
 
     @Test

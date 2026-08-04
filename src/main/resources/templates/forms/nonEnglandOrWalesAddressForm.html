@@ -5,13 +5,13 @@
     <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
         <main class="govuk-main-wrapper" id="main-content">
             <header>
-                <h1 class="govuk-heading-l" th:text="#{forms.nonEnglandOrWalesAddress.heading}">forms.nonEnglandOrWalesAddress.heading</h1>
+                <h1 class="govuk-heading-l" th:text="#{addressForms.nonEnglandOrWalesAddress.heading}">addressForms.nonEnglandOrWalesAddress.heading</h1>
             </header>
-            <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.one}">forms.nonEnglandOrWalesAddress.paragraph.one</p>
+            <p class="govuk-body" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.one}">addressForms.nonEnglandOrWalesAddress.paragraph.one</p>
             <p class="govuk-body">
-                <span th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">If you made a mistake, </span>
-                <a class="govuk-link" th:href="${backUrl}" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.linkText}">go back</a>
-                <span th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">.</span>
+                <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">If you made a mistake, </span>
+                <a class="govuk-link" th:href="${backUrl}" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.linkText}">go back</a>
+                <span th:remove="tag" th:text="#{addressForms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">.</span>
             </p>
         </main>
     </th:block>

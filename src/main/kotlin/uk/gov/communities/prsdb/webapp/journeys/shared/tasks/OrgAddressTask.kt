@@ -7,12 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-// AddressTask specialised with the field-set content for a landlord's own address (used by the registration,
-// change-answers and update flows). Structure and route-scoped state come from AddressTask; this only supplies
-// the landlord content. Genuinely flow-specific extras (e.g. the update flow's submit button/warning) are still
-// layered on at the DSL call site.
 @JourneyFrameworkComponent
-class LandlordAddressTask(
+class OrgAddressTask(
     journeyStateService: JourneyStateService,
     lookupAddressStep: LookupAddressStep,
     selectAddressStep: SelectAddressStep,
@@ -27,15 +23,22 @@ class LandlordAddressTask(
     ) {
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "addressForms.lookupAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "addressForms.lookupAddress.landlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "addressForms.lookupAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "addressForms.lookupAddress.organisationLandlordRegistration.fieldSetHint",
         )
 
-    override val selectAddressContentProperties: Map<String, Any?> = emptyMap()
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "addressForms.selectAddress.organisationLandlordRegistration.fieldSetHeading",
+        )
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "addressForms.manualAddress.landlordRegistration.fieldSetHeading",
-            "fieldSetHint" to "addressForms.manualAddress.landlordRegistration.fieldSetHint",
+            "fieldSetHeading" to "addressForms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "addressForms.manualAddress.organisationLandlordRegistration.fieldSetHint",
         )
+
+    companion object {
+        const val ROUTE_SEGMENT = "organisation-address"
+    }
 }
