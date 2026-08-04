@@ -35,7 +35,8 @@ class JointLandlordOtherLandlordLeftEmailServiceTests {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val previousLandlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val remainingLandlordOne = MockLandlordData.createIndividualLandlord(name = "Bob", email = "bob@example.com")
-        val remainingLandlordTwo = MockLandlordData.createIndividualLandlord(name = "Carol", email = "carol@example.com")
+        val remainingLandlordTwo =
+            MockLandlordData.createIndividualLandlord(name = "Carol", email = "carol@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = 7,

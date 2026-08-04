@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -27,9 +28,22 @@ class OrganisationLandlordUser() : AuditableEntity() {
     @JoinColumn(name = "subject_identifier", nullable = false)
     lateinit var baseUser: PrsdbUser
 
-    constructor(organisationLandlord: OrganisationLandlord, baseUser: PrsdbUser) : this() {
+    @Column(nullable = false)
+    lateinit var name: String
 
+    @Column(nullable = false)
+    lateinit var email: String
+
+    constructor(
+        organisationLandlord: OrganisationLandlord,
+        baseUser: PrsdbUser,
+        name: String,
+        email: String,
+    ) : this() {
         this.organisationLandlord = organisationLandlord
         this.baseUser = baseUser
+        this.name = name
+        this.email = email
+        organisationLandlord.addOrganisationLandlordUser(this)
     }
 }

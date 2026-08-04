@@ -69,7 +69,7 @@ class PropertyUpdateEmailServiceTests {
         notifier.sendUpdateEmails(propertyId, bullets)
 
         verify(mockConfirmationEmailService).sendEmail(
-            eq("actor@example.com"),
+            eq(actor.email),
             argThat<PropertyUpdateConfirmation> { this.updatedBullets == bullets },
         )
     }
@@ -93,12 +93,13 @@ class PropertyUpdateEmailServiceTests {
         notifier.sendUpdateEmails(propertyId, bullets)
 
         verify(mockNotificationEmailService).sendEmail(
-            eq("other@example.com"),
+            eq(other.email),
             argThat<JointLandlordPropertyUpdateNotificationEmail> {
-                this.recipientName == "Lois" && this.updatedBullets == bullets && this.propertyRecordUrl == "http://property"
+                this.recipientName == other.name && this.updatedBullets == bullets &&
+                    this.propertyRecordUrl == "http://property"
             },
         )
-        verify(mockNotificationEmailService, never()).sendEmail(eq("actor@example.com"), any())
+        verify(mockNotificationEmailService, never()).sendEmail(eq(actor.email), any())
     }
 
     @Test

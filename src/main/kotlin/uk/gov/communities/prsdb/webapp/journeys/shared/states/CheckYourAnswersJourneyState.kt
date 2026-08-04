@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.EmbedBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
+import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.urlPath
 
@@ -104,6 +105,20 @@ interface CheckYourAnswersJourneyState : JourneyState {
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
+            }
+        }
+
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, *>,
+            route: String? = null,
+            configure: TaskInitialiser<TTaskState, *>.() -> Unit,
+        ) {
+            task(task) {
+                route?.let { routeSegment(it) }
+                initialStep()
+                backDestination { journey.returnToCyaPageDestination }
+                nextStep { journey.finishCyaStep }
+                this.configure()
             }
         }
 
