@@ -33,6 +33,6 @@ VALUES (1, 1, 'urn:fdc:gov.uk:2022:UVWXY', current_date);
 SELECT setval(pg_get_serial_sequence('organisation_landlord_user', 'id'), (SELECT MAX(id) FROM organisation_landlord_user));
 
 INSERT INTO organisation_governing_body_member (id, created_date, organisation_landlord_id, type, name, date_of_birth, address_id)
-VALUES (1, current_date, 1, 0, 'Anita Locke', '1974-03-18', 3),
+VALUES (1, current_date, 1, 0, 'David Director', '1974-03-18', 3),
        (2, current_date, 1, 2, 'Omar Hassan', '2001-03-08', 4);
 SELECT setval(pg_get_serial_sequence('organisation_governing_body_member', 'id'), (SELECT MAX(id) FROM organisation_governing_body_member));
