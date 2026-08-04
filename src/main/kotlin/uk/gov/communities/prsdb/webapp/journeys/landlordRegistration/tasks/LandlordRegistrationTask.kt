@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
@@ -21,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeDestination
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -56,6 +57,7 @@ class LandlordRegistrationTask(
     override val individualLandlordLocationTask: IndividualLandlordLocationTask,
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
+    override val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -214,7 +216,21 @@ class LandlordRegistrationTask(
                         step(journey.landlordTypeStep) {
                             initialStep()
                             routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                            nextDestination { mode -> destinationForSelectedLandlordType(journey, mode) }
+                            nextStep { journey.landlordTypeChangeRedirectStep }
+                        }
+                        step(journey.landlordTypeChangeRedirectStep) {
+                            parents {
+                                journey.landlordTypeStep.isComplete()
+                            }
+                            nextDestination { destination ->
+                                when (destination) {
+                                    LandlordTypeChangeDestination.CHECK_ANSWERS -> Destination(journey.finishCyaStep)
+                                    LandlordTypeChangeDestination.INDIVIDUAL_TASK ->
+                                        Destination(journey.individualLandlordLocationTask.firstStep)
+                                    LandlordTypeChangeDestination.ORGANISATION_TASK ->
+                                        Destination(journey.orgLandlordRegistrationTask.firstStep)
+                                }
+                            }
                         }
                         task(journey.individualLandlordLocationTask) {
                             parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
@@ -231,6 +247,7 @@ class LandlordRegistrationTask(
                     }
 
                     OrgAddressStep.ROUTE_SEGMENT -> {
+                        // TODO PDJB-1133: update this to be a manual address change link
                         checkAnswerStep(journey.orgLandlordRegistrationTask.orgAddressStep, OrgAddressStep.ROUTE_SEGMENT)
                     }
 
@@ -300,7 +317,14 @@ class LandlordRegistrationTask(
                     }
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
-                        checkAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask, null)
+                        task(journey.orgLandlordRegistrationTask.orgGovBodyTask) {
+                            initialStep()
+                            backDestination { journey.returnToCyaPageDestination }
+                            nextStep { journey.finishCyaStep }
+                            configureStep(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep) {
+                                backDestination { journey.returnToCyaPageDestination }
+                            }
+                        }
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {
@@ -312,21 +336,5 @@ class LandlordRegistrationTask(
                     nextDestination { Destination.Nowhere() }
                 }
             }
-
-        private fun destinationForSelectedLandlordType(
-            journey: LandlordRegistrationState,
-            landlordType: LandlordTypeMode,
-        ): Destination {
-            val selectedTask =
-                when (landlordType) {
-                    LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask
-                    LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask
-                }
-            return if (selectedTask.exitStep.outcome == SubjourneyComplete.COMPLETE) {
-                Destination(journey.finishCyaStep)
-            } else {
-                Destination(selectedTask.firstStep)
-            }
-        }
     }
 }
