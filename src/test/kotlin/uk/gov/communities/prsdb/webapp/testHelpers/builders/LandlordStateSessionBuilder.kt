@@ -108,7 +108,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgAddress(): LandlordStateSessionBuilder {
-        val routePrefix = OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",
@@ -129,7 +129,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgManualAddressSelected(): LandlordStateSessionBuilder {
-        val routePrefix = OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",

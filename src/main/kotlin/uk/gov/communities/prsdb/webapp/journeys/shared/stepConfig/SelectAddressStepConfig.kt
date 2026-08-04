@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -50,6 +51,21 @@ class SelectAddressStepConfig(
     }
 
     override fun chooseTemplate(state: AddressState) = "forms/selectAddressForm"
+
+    override fun resolvePageContent(
+        state: AddressState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val prefillSelectedAddress = defaultContent[PREFILL_SELECTED_ADDRESS] as? String ?: return defaultContent
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? SelectAddressFormModel ?: return defaultContent
+        if (!formModel.address.isNullOrBlank()) return defaultContent
+        formModel.address = prefillSelectedAddress
+        return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_SELECTED_ADDRESS = "selectPrefillSelectedAddress"
+    }
 
     override fun mode(state: AddressState) =
         getFormModelFromStateOrNull(state)?.address?.let { selectedAddress ->

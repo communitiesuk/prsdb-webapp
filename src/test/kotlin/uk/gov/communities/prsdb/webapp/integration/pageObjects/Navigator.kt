@@ -455,13 +455,13 @@ class Navigator(
 
     fun skipToOrgLandlordRegistrationOrgAddressPage(): OrgAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgAddress().build())
-        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}")
+        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, OrgAddressFormPageLandlordRegistration::class)
     }
 
     fun skipToOrgLandlordRegistrationManualAddressPage(): OrgManualAddressFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgManualAddress().build())
-        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}")
+        navigateToLandlordRegistrationJourneyStep("${OrgAddressTask.ROUTE_SEGMENT}/${ManualAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, OrgManualAddressFormPageLandlordRegistration::class)
     }
 

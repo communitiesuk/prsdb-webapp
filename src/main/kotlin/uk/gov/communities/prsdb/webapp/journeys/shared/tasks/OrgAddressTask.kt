@@ -39,6 +39,6 @@ class OrgAddressTask(
         )
 
     companion object {
-        const val ORGANISATION_ADDRESS_ROUTE_SEGMENT = "organisation-address"
+        const val ROUTE_SEGMENT = "organisation-address"
     }
 }

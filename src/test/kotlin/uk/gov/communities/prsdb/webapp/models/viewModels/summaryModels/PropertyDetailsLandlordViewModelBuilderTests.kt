@@ -11,10 +11,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 class PropertyDetailsLandlordViewModelBuilderTests {
     @Nested
     inner class LandlordViewTests {
-        val currentUserId = "current-user"
         val loggedInLandlord =
             MockLandlordData.createIndividualLandlord(
-                baseUser = MockLandlordData.createPrsdbUser(currentUserId),
+                baseUser = MockLandlordData.createPrsdbUser("current-user"),
                 name = "John Smith",
                 email = "john@example.com",
                 registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1234L),
@@ -38,7 +37,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         }
 
         @Test
-        fun `with multiple landlords returns a card per landlord starting with the logged in landlord with a (you) suffix `() {
+        fun `with multiple landlords returns a card per landlord starting with the logged in landlord with a (you) suffix`() {
             // Arrange
             val landlordList =
                 setOf(
@@ -48,7 +47,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
                     ),
                     loggedInLandlord,
                     MockLandlordData.createIndividualLandlord(
-                        baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                        baseUser = MockLandlordData.createPrsdbUser("other-user-2"),
                         name = "Zack Anderson",
                     ),
                 )
@@ -62,6 +61,41 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             assertEquals("John Smith", cards[0].cardNumber)
             assertEquals("Alice Band", cards[1].title)
             assertEquals("Zack Anderson", cards[2].title)
+        }
+
+        @Test
+        fun `with org landlord as current landlord uses org card title`() {
+            val orgLandlord =
+                MockLandlordData.createOrgLandlord(
+                    name = "ACME Properties Ltd",
+                    email = "info@acme.com",
+                    registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 5678L),
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(orgLandlord), orgLandlord, 1L)
+
+            assertEquals(1, cards.size)
+            assertEquals("propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle", cards[0].title)
+            assertEquals("ACME Properties Ltd", cards[0].cardNumber)
+            assertEquals("info@acme.com", cards[0].summaryList[1].fieldValue)
+        }
+
+        @Test
+        fun `with mixed individual and org landlords sorts correctly`() {
+            val orgLandlord =
+                MockLandlordData.createOrgLandlord(
+                    name = "ACME Properties Ltd",
+                    email = "info@acme.com",
+                )
+
+            val landlordList = setOf(loggedInLandlord, orgLandlord)
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(landlordList, orgLandlord, 1L)
+
+            assertEquals(2, cards.size)
+            assertEquals("propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle", cards[0].title)
+            assertEquals("ACME Properties Ltd", cards[0].cardNumber)
+            assertEquals("John Smith", cards[1].title)
         }
     }
 

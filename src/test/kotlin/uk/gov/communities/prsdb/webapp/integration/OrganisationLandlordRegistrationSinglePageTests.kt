@@ -87,7 +87,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the organisation address lookup page renders the heading`(page: Page) {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
-            assertThat(orgAddressPage.form.fieldsetHeading).containsText("What is your organisation\u2019s address?")
+            assertThat(orgAddressPage.form.fieldsetHeading).containsText("What is your organisation’s address?")
         }
 
         @Test

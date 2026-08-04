@@ -11,6 +11,6 @@ class OrgManualAddressFormPageLandlordRegistration(
 ) : ManualAddressFormPage(
         page,
         RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE +
-            "/${OrgAddressTask.ORGANISATION_ADDRESS_ROUTE_SEGMENT}" +
+            "/${OrgAddressTask.ROUTE_SEGMENT}" +
             "/${ManualAddressStep.ROUTE_SEGMENT}",
     )

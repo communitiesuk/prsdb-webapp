@@ -129,28 +129,25 @@ class LandlordRegistrationCyaStepConfig(
                 organisationRegistrantPhoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
                 organisationGoverningBodyMembers = governingBodyMembers,
             )
-
-            securityContextService.refreshContext()
-            return
+        } else {
+            landlordRegistrationService.registerIndividualLandlord(
+                baseUserId = SecurityContextHolder.getContext().authentication.name,
+                name = state.identityTask.getName(),
+                email =
+                    state.emailStep.formModel
+                        .notNullValue(EmailFormModel::emailAddress),
+                phoneNumber =
+                    state.phoneNumberStep.formModel.notNullValue(
+                        PhoneNumberFormModel::phoneNumber,
+                    ),
+                address = state.individualLandlordLocationTask.addressTask.getAddress(),
+                countryOfResidence = ENGLAND_OR_WALES,
+                isVerified = state.identityTask.getIsIdentityVerified(),
+                hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
+                nonEnglandOrWalesAddress = null,
+                dateOfBirth = state.identityTask.getDateOfBirth(),
+            )
         }
-
-        landlordRegistrationService.registerIndividualLandlord(
-            baseUserId = SecurityContextHolder.getContext().authentication.name,
-            name = state.identityTask.getName(),
-            email =
-                state.emailStep.formModel
-                    .notNullValue(EmailFormModel::emailAddress),
-            phoneNumber =
-                state.phoneNumberStep.formModel.notNullValue(
-                    PhoneNumberFormModel::phoneNumber,
-                ),
-            address = state.individualLandlordLocationTask.addressTask.getAddress(),
-            countryOfResidence = ENGLAND_OR_WALES,
-            isVerified = state.identityTask.getIsIdentityVerified(),
-            hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
-            nonEnglandOrWalesAddress = null,
-            dateOfBirth = state.identityTask.getDateOfBirth(),
-        )
 
         securityContextService.refreshContext()
     }

@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -56,7 +56,7 @@ class UpdateRentIncludesBillsJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            duplicableTask(journey.rentIncludesBillsTask) {
+            task(journey.rentIncludesBillsTask) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -95,7 +95,7 @@ class UpdateRentIncludesBillsJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {

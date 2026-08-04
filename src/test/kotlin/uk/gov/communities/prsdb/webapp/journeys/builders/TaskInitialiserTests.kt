@@ -21,8 +21,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -32,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.urlPath
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -593,7 +592,7 @@ class TaskInitialiserTests {
     @Test
     fun `building a dependency task without calling withDependencies throws`() {
         // Arrange
-        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        val dependencyTask = mock<Task<JourneyState, Any>>()
         whenever(dependencyTask.requiresDependencies).thenReturn(true)
         whenever(dependencyTask.areDependenciesBound).thenReturn(false)
         val builder = TaskInitialiser<JourneyState, Any>(dependencyTask, mock())
@@ -607,7 +606,7 @@ class TaskInitialiserTests {
     @Test
     fun `building a dependency task binds the provided dependencies before building the sub-journey`() {
         // Arrange
-        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        val dependencyTask = mock<Task<JourneyState, Any>>()
         whenever(dependencyTask.requiresDependencies).thenReturn(true)
         whenever(dependencyTask.areDependenciesBound).thenReturn(true)
         val internalBuilder = mock<SubJourneyBuilder<JourneyState>>()
@@ -629,7 +628,7 @@ class TaskInitialiserTests {
     @Test
     fun `withDependencies cannot be set twice`() {
         // Arrange
-        val dependencyTask = mock<DuplicableTaskWithDependencies<JourneyState, Any>>()
+        val dependencyTask = mock<Task<JourneyState, Any>>()
         val builder = TaskInitialiser<JourneyState, Any>(dependencyTask, mock())
         builder.withDependencies { Any() }
 
@@ -649,8 +648,8 @@ class TaskInitialiserTests {
         override fun mode(state: JourneyState): TestEnum = TestEnum.ENUM_VALUE
     }
 
-    private fun mockTask(): Task<JourneyState> =
-        mock<Task<JourneyState>>().apply {
+    private fun mockTask(): TaskWithoutDependencies<JourneyState> =
+        mock<TaskWithoutDependencies<JourneyState>>().apply {
             whenever(
                 getTaskSubJourneyBuilder(
                     anyOrNull(),
@@ -667,7 +666,7 @@ class TaskInitialiserTests {
         @Test
         fun `a route-less task key colliding with a journey state key throws when the journey builds`() {
             val builder = JourneyBuilder(stateRegisteringKey("shared-key"))
-            builder.duplicableTask(KeyedSelfStatedTask("shared-key"), routeSegment = null) {
+            builder.task(KeyedSelfStatedTask("shared-key"), routeSegment = null) {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -678,11 +677,11 @@ class TaskInitialiserTests {
         @Test
         fun `two tasks under the same route registering the same key collide when the journey builds`() {
             val builder = JourneyBuilder(mock<JourneyState>())
-            builder.duplicableTask(KeyedSelfStatedTask("cached"), "same-route") {
+            builder.task(KeyedSelfStatedTask("cached"), "same-route") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
-            builder.duplicableTask(KeyedSelfStatedTask("cached"), "same-route") {
+            builder.task(KeyedSelfStatedTask("cached"), "same-route") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -693,11 +692,11 @@ class TaskInitialiserTests {
         @Test
         fun `two tasks under distinct routes registering the same key build without collision`() {
             val builder = JourneyBuilder(mock<JourneyState>())
-            builder.duplicableTask(KeyedSelfStatedTask("cached"), "route-one") {
+            builder.task(KeyedSelfStatedTask("cached"), "route-one") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
-            builder.duplicableTask(KeyedSelfStatedTask("cached"), "route-two") {
+            builder.task(KeyedSelfStatedTask("cached"), "route-two") {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
@@ -728,13 +727,15 @@ class TaskInitialiserTests {
         // A journey-stated (route-less) task whose sub-journey nests a self-stated task under innerRoute, so the
         // registry threading through the nested build can be exercised.
         private fun taskContaining(
-            inner: DuplicableTask<JourneyState>,
+            inner: TaskWithoutDependencies<JourneyState>,
             innerRoute: String,
-        ): Task<JourneyState> =
-            object : Task<JourneyState>() {
+        ): TaskWithoutDependencies<JourneyState> =
+            object : TaskWithoutDependencies<JourneyState>(mock()) {
+                override val taskState: JourneyState get() = this
+
                 override fun makeSubJourney(state: JourneyState) =
                     subJourney(state) {
-                        duplicableTask(inner, innerRoute) {
+                        task(inner, innerRoute) {
                             parents { NoParents() }
                             nextDestination { Destination.ExternalUrl("inner-done") }
                         }
@@ -746,7 +747,7 @@ class TaskInitialiserTests {
         // A minimal self-stated task that registers a single route-scoped delegate key and builds one real step.
         private inner class KeyedSelfStatedTask(
             key: String,
-        ) : DuplicableTask<JourneyState>(mock()) {
+        ) : TaskWithoutDependencies<JourneyState>(mock()) {
             @Suppress("unused")
             val cachedValue: String? by delegateProvider.nullableDelegate(key)
 
