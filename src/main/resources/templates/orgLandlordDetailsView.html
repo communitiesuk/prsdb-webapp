@@ -78,7 +78,27 @@
             </div>
 
             <div id="organisation-contacts-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-contacts', ~{::#organisation-contacts-panel/content()})}">
-                <div th:replace="~{fragments/orgLandlordContacts :: orgLandlordContacts(${orgLandlordContacts})}"></div>
+                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">Main contact</h2>
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.mainContactCard.title}, ${orgLandlordContacts.mainContactCard.cardNumber}, ${orgLandlordContacts.mainContactCard.actions}, ${orgLandlordContacts.mainContactCard.summaryList})}"></div>
+
+                <th:block th:if="${orgLandlordContacts.leadTrusteeCard != null}">
+                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">Lead trustee</h2>
+                    <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.leadTrusteeCard.title}, ${orgLandlordContacts.leadTrusteeCard.cardNumber}, ${orgLandlordContacts.leadTrusteeCard.actions}, ${orgLandlordContacts.leadTrusteeCard.summaryList})}"></div>
+                </th:block>
+
+                <th:block th:if="${orgLandlordContacts.showGoverningBody}">
+                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">Governing body</h2>
+                    <p class="govuk-body">
+                        <a class="govuk-link" th:href="@{${orgLandlordContacts.governingBodyMembersLinkUrl}}"
+                           th:text="#{landlordDetails.org.governingBody.membersLink}">Add, change or remove members of your governing body</a>
+                    </p>
+                    <th:block th:each="card : ${orgLandlordContacts.governingBodyMemberCards}">
+                        <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+                    </th:block>
+                </th:block>
+
+                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.registrationContactHeading}">Registration contact</h2>
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.registrationContactCard.title}, ${orgLandlordContacts.registrationContactCard.cardNumber}, ${orgLandlordContacts.registrationContactCard.actions}, ${orgLandlordContacts.registrationContactCard.summaryList})}"></div>
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
