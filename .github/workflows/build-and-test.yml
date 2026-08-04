@@ -5,8 +5,12 @@ on:
 
 jobs:
   test:
-    name: Build and test
+    name: Test shard
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,11 +51,55 @@ jobs:
           openssl genrsa -out src/main/resources/private_key.pem 2048
           openssl rsa -in src/main/resources/private_key.pem -pubout -out src/main/resources/public_key.pem
 
-      - name: Run gradle `check` to run linting and tests
+      - name: Run tests for shard ${{ matrix.shard }}
         env:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
           EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
-        run: ./gradlew clean check --no-daemon
+        run: ./gradlew clean test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Run ktlintCheck
+        run: ./gradlew ktlintCheck --no-daemon
 
       - name: Run ktlintFormat
         run: ./gradlew ktlintFormat --no-daemon
+
+  # Named to match the existing required status check, so branch protection needs no change and the shard
+  # count can be tuned without touching it. The individual shards report as "Test shard (0)" etc.
+  all-tests:
+    name: Build and test
+    needs: [test, lint]
+    # Without always() this job is skipped when a shard fails, and a skipped required check does not block
+    # merging, so the result of the jobs it depends on has to be asserted explicitly.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check shard and lint results
+        run: |
+          echo "test=${{ needs.test.result }} lint=${{ needs.lint.result }}"
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
+            exit 1
+          fi

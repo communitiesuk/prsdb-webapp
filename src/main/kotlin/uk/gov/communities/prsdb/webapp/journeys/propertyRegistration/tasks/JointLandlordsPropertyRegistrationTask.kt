@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
@@ -22,7 +22,7 @@ class JointLandlordsPropertyRegistrationTask(
     private val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordsTask: InviteJointLandlordsTask,
-) : DuplicableTaskWithDependencies<InviteJointLandlordPropertyRegistrationState, InviteJointLandlordsTaskDependencies>(
+) : Task<InviteJointLandlordPropertyRegistrationState, InviteJointLandlordsTaskDependencies>(
         journeyStateService,
     ),
     InviteJointLandlordPropertyRegistrationState {
@@ -61,7 +61,7 @@ class JointLandlordsPropertyRegistrationTask(
                 }
                 savable()
             }
-            duplicableTask(journey.inviteJointLandlordsTask) {
+            task(journey.inviteJointLandlordsTask) {
                 withDependencies { this@JointLandlordsPropertyRegistrationTask.dependencies }
                 parents {
                     OrParents(

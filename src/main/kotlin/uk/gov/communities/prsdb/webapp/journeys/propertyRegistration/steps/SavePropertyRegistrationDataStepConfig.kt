@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
@@ -55,6 +54,7 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
@@ -83,7 +83,7 @@ class SavePropertyRegistrationDataStepConfig(
                     .notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
@@ -91,7 +91,7 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numberOfPeople =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
@@ -99,26 +99,35 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numBedrooms =
-                if (isOccupied || isRestructured) {
+                if (isRestructured || shouldRequireTenancyDetails) {
                     state.bedrooms.formModel
                         .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         .toInt()
                 } else {
                     null
                 },
-            billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-            customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-            furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-            rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
-            customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
+            billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
+            customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
+            furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,
+            rentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
+                } else {
+                    null
+                },
+            customRentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
+                } else {
+                    null
+                },
             rentAmount =
-                if (isOccupied) {
+                if (shouldRequireTenancyDetails) {
                     state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
                     null
                 },
-            baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
             markedJointLandlord = markedJointLandlord,
             hasGasSupply = state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,
@@ -159,6 +168,7 @@ class SavePropertyRegistrationDataStepConfig(
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
             epcProvideLater = state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            tenancyProvideLater = state.provideTenancyDetailsLater,
         )
     }
 }

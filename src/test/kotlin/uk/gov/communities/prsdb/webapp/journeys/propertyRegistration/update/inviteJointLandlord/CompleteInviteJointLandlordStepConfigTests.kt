@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
@@ -34,7 +34,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockLandlordService: LandlordService
+    private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
     private lateinit var mockState: InviteJointLandlordJourneyState
@@ -57,11 +57,10 @@ class CompleteInviteJointLandlordStepConfigTests {
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
-                mockLandlordService,
+                mockUserToLandlordService,
             )
         val baseUserId = "unknown-user"
-        setMockPrincipal(baseUserId)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenThrow(PrsdbWebException("Landlord not found"))
         whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
 
@@ -75,21 +74,21 @@ class CompleteInviteJointLandlordStepConfigTests {
     fun `afterStepIsReached marks property as joint landlord and sends invitation emails when invites are present`() {
         // Arrange
         val baseUserId = "test-user"
-        val mockLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val mockLandlord =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
         val stepConfig =
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
-                mockLandlordService,
+                mockUserToLandlordService,
             )
         whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(invitedEmails)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLandlord)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -109,7 +108,7 @@ class CompleteInviteJointLandlordStepConfigTests {
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
-                mockLandlordService,
+                mockUserToLandlordService,
             )
         whenever(mockState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(emptyList())
@@ -130,7 +129,7 @@ class CompleteInviteJointLandlordStepConfigTests {
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
-                mockLandlordService,
+                mockUserToLandlordService,
             )
         val defaultDestination = Destination.ExternalUrl("/redirect")
 
@@ -146,7 +145,7 @@ class CompleteInviteJointLandlordStepConfigTests {
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,
                 mockPropertyOwnershipService,
-                mockLandlordService,
+                mockUserToLandlordService,
             )
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))

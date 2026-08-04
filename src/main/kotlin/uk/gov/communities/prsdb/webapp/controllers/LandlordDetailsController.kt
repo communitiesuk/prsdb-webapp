@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
-import java.security.Principal
 
 @PrsdbController
 @RequestMapping
@@ -39,10 +38,7 @@ class LandlordDetailsController(
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-    fun getUserLandlordDetails(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         if (landlord.landlordType == LandlordType.ORGANISATION) {
@@ -56,7 +52,7 @@ class LandlordDetailsController(
 
         val registeredPropertiesList =
             propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                principal.name,
+                landlord,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
             )
 
@@ -74,7 +70,7 @@ class LandlordDetailsController(
         return "landlordDetailsView"
     }
 
-    // TODO: PDJB-1276: Update skeleton page
+    // TODO: PDJB-1251: Update skeleton page
     private fun getOrgLandlordDetails(
         orgLandlord: OrganisationLandlord,
         model: Model,

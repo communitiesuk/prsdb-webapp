@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
-import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -42,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmation
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import java.time.LocalDate
@@ -99,7 +99,7 @@ class LandlordDashboardUrlTests(
     private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
-    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
+    private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -117,6 +117,7 @@ class LandlordDashboardUrlTests(
                 mock(),
                 mock(),
                 mockEmailNotificationService,
+                mock(),
                 absoluteUrlProvider,
             )
 
@@ -158,24 +159,25 @@ class LandlordDashboardUrlTests(
         // Arrange
         val landlord = createIndividualLandlord()
         val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
-        val mockIndividualLandlordRepository = mock<IndividualLandlordRepository>()
+        val mockUserToLandlordService = mock<UserToLandlordService>()
         val propertyRegistrationService =
             PropertyRegistrationService(
-                propertyOwnershipRepository = mock(),
-                individualLandlordRepository = mockIndividualLandlordRepository,
                 addressService = mock(),
                 licenseService = mock(),
                 propertyOwnershipService = mockPropertyOwnershipService,
+                userToLandlordService = mockUserToLandlordService,
                 absoluteUrlProvider = absoluteUrlProvider,
                 confirmationEmailSender = mockEmailNotificationService,
+                propertyOwnershipRepository = mock(),
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
                 propertyComplianceService = mock(),
             )
 
-        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -214,7 +216,6 @@ class LandlordDashboardUrlTests(
             isOccupied = propertyOwnership.isOccupied,
             numberOfHouseholds = propertyOwnership.currentNumHouseholds,
             numberOfPeople = propertyOwnership.currentNumTenants,
-            baseUserId = landlord.baseUser.id,
             numBedrooms = propertyOwnership.numBedrooms,
             billsIncludedList = propertyOwnership.billsIncludedList,
             customBillsIncluded = propertyOwnership.customBillsIncluded,

@@ -15,26 +15,18 @@ class AddressAvailabilityServiceTests {
     lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
     @Test
-    fun `isAddressOwnedByUser returns true when user owns the address`() {
-        // Arrange
+    fun `isAddressOwned returns true when address is registered`() {
         val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
-        whenever(
-            mockPropertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn("user-1", 123L),
-        ).thenReturn(true)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(123L)).thenReturn(true)
 
-        // Act & Assert
-        assertTrue(service.isAddressOwnedByUser(123L, "user-1"))
+        assertTrue(service.isAddressOwned(123L))
     }
 
     @Test
-    fun `isAddressOwnedByUser returns false when user does not own the address`() {
-        // Arrange
+    fun `isAddressOwned returns false when address is not registered`() {
         val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
-        whenever(
-            mockPropertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn("user-1", 123L),
-        ).thenReturn(false)
+        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(123L)).thenReturn(false)
 
-        // Act & Assert
-        assertFalse(service.isAddressOwnedByUser(123L, "user-1"))
+        assertFalse(service.isAddressOwned(123L))
     }
 }

@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
@@ -14,7 +14,7 @@ class RentFrequencyAndAmountTask(
     journeyStateService: JourneyStateService,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
-) : DuplicableTask<RentFrequencyAndAmountState>(journeyStateService),
+) : TaskWithoutDependencies<RentFrequencyAndAmountState>(journeyStateService),
     RentFrequencyAndAmountState {
     override val taskState get() = this
 

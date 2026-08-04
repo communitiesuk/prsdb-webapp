@@ -5,11 +5,12 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -18,15 +19,31 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IndividualLandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeDestination
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
@@ -40,13 +57,13 @@ class LandlordRegistrationTask(
     override val individualLandlordLocationTask: IndividualLandlordLocationTask,
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
+    override val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
-    override val cyaStep: IndividualLandlordRegistrationCyaStep,
-    override val orgCyaStep: OrgLandlordRegistrationCyaStep,
+    override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
-) : DuplicableTask<LandlordRegistrationState>(journeyStateService),
+) : TaskWithoutDependencies<LandlordRegistrationState>(journeyStateService),
     LandlordRegistrationState {
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
@@ -68,7 +85,7 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            duplicableTask(journey.identityTask) {
+            task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.emailStep }
             }
@@ -82,7 +99,7 @@ class LandlordRegistrationTask(
                 parents { journey.emailStep.isComplete() }
                 nextStep { journey.individualLandlordLocationTask.firstStep }
             }
-            duplicableTask(journey.individualLandlordLocationTask) {
+            task(journey.individualLandlordLocationTask) {
                 parents { journey.phoneNumberStep.isComplete() }
                 nextStep { journey.cyaStep }
             }
@@ -102,7 +119,7 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            duplicableTask(journey.identityTask) {
+            task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.emailStep }
             }
@@ -127,26 +144,32 @@ class LandlordRegistrationTask(
                     }
                 }
             }
-            duplicableTask(journey.orgLandlordRegistrationTask) {
+            task(journey.orgLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
-                nextStep { journey.orgCyaStep }
+                nextStep { journey.cyaStep }
             }
-            duplicableTask(journey.individualLandlordLocationTask) {
+            task(journey.individualLandlordLocationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { journey.cyaStep }
             }
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.individualLandlordLocationTask.isComplete() }
-                nextStep { exitStep }
-            }
-            step(journey.orgCyaStep) {
-                routeSegment(OrgLandlordRegistrationCyaStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordRegistrationTask.isComplete() }
+                parents {
+                    OrParents(
+                        AndParents(
+                            journey.individualLandlordLocationTask.isComplete(),
+                            journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
+                        ),
+                        AndParents(
+                            journey.orgLandlordRegistrationTask.isComplete(),
+                            journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION),
+                        ),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { OrParents(journey.cyaStep.isComplete(), journey.orgCyaStep.isComplete()) }
+                parents { journey.cyaStep.isComplete() }
             }
         }
 
@@ -186,7 +209,126 @@ class LandlordRegistrationTask(
                     }
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
+                        checkAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
+                    }
+
+                    LandlordTypeStep.ROUTE_SEGMENT -> {
+                        step(journey.landlordTypeStep) {
+                            initialStep()
+                            routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
+                            nextStep { journey.landlordTypeChangeRedirectStep }
+                        }
+                        step(journey.landlordTypeChangeRedirectStep) {
+                            parents {
+                                journey.landlordTypeStep.isComplete()
+                            }
+                            nextDestination { destination ->
+                                when (destination) {
+                                    LandlordTypeChangeDestination.CHECK_ANSWERS -> Destination(journey.finishCyaStep)
+                                    LandlordTypeChangeDestination.INDIVIDUAL_TASK ->
+                                        Destination(journey.individualLandlordLocationTask.firstStep)
+                                    LandlordTypeChangeDestination.ORGANISATION_TASK ->
+                                        Destination(journey.orgLandlordRegistrationTask.firstStep)
+                                }
+                            }
+                        }
+                        task(journey.individualLandlordLocationTask) {
+                            parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                            nextStep { journey.finishCyaStep }
+                        }
+                        task(journey.orgLandlordRegistrationTask) {
+                            parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
+                            nextStep { journey.finishCyaStep }
+                        }
+                    }
+
+                    OrgNameStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgNameStep, OrgNameStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgAddressStep.ROUTE_SEGMENT -> {
+                        // TODO PDJB-1133: update this to be a manual address change link
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgAddressStep, OrgAddressStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgEmailStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgEmailStep, OrgEmailStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgPhoneNumberStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgPhoneNumberStep, OrgPhoneNumberStep.ROUTE_SEGMENT)
+                    }
+
+                    OrgTypeStep.ROUTE_SEGMENT -> {
+                        // TODO PDJB-1237 : replace this placeholder with the org type update journey
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, OrgTypeStep.ROUTE_SEGMENT) {
+                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1237: Organisation type update journey" }
+                        }
+                    }
+
+                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
+                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.charityTask)
+                    }
+
+                    OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberEnglandAndWalesStep,
+                            OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberNorthernIrelandStep,
+                            OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.charityTask.orgCharityNumberScotlandStep,
+                            OrgCharityNumberScotlandStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
+                    -> {
+                        // TODO PDJB-1238 : replace this placeholder with the companies house update journey
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, checkingAnswersFor) {
+                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1238: Companies House update journey" }
+                        }
+                    }
+
+                    OrgCompanyNumberStep.ROUTE_SEGMENT,
+                    -> {
+                        checkAnswerStep(
+                            journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep,
+                            OrgCompanyNumberStep.ROUTE_SEGMENT,
+                        )
+                    }
+
+                    LeadTrusteeNameStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
+                    }
+
+                    OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
+                        task(journey.orgLandlordRegistrationTask.orgGovBodyTask) {
+                            initialStep()
+                            backDestination { journey.returnToCyaPageDestination }
+                            nextStep { journey.finishCyaStep }
+                            configureStep(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep) {
+                                backDestination { journey.returnToCyaPageDestination }
+                            }
+                        }
+                    }
+
+                    OrgMainContactStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgMainContactStep, OrgMainContactStep.ROUTE_SEGMENT)
                     }
                 }
                 step(journey.finishCyaStep) {

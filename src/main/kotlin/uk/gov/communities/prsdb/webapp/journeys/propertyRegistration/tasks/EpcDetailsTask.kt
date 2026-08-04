@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -63,7 +63,7 @@ class EpcDetailsTask(
     override val epcExemptionStep: EpcExemptionStep,
     override val epcMissingStep: EpcMissingStep,
     override val provideEpcLaterStep: ProvideEpcLaterStep,
-) : DuplicableTaskWithDependencies<EpcDetailState, EpcDependencies>(journeyStateService),
+) : Task<EpcDetailState, EpcDependencies>(journeyStateService),
     EpcDetailState {
     override val taskState: EpcDetailState
         get() = this
