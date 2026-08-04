@@ -18,11 +18,12 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
@@ -44,11 +45,11 @@ class LandlordDetailsController(
     fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
-        if (landlord.landlordType == LandlordType.ORGANISATION) {
-            return getOrgLandlordDetails(landlord as OrganisationLandlord, model)
+        if (landlord is OrganisationLandlord) {
+            return getOrgLandlordDetails(landlord, model)
         }
 
-        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
+        val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = true)
 
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
@@ -86,7 +87,7 @@ class LandlordDetailsController(
             organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
 
         model.addAttribute("name", orgLandlord.name)
-        model.addAttribute("orgLandlord", orgLandlord)
+        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
         model.addAttribute("governingBodyMembers", governingBodyMembers)
 
         val registeredPropertiesList =
@@ -121,7 +122,7 @@ class LandlordDetailsController(
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
-        val landlordViewModel = LandlordViewModel(baseLandlord = landlord, withChangeLinks = false)
+        val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = false)
 
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
