@@ -355,9 +355,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             ),
         )
 
-        // TODO: PDJB-1392: assert the confirmation page renders here. It currently errors for org landlords because
-        //  RegisterLandlordController.getConfirmation looks the landlord up via retrieveLandlordByBaseUserId, which
-        //  only finds IndividualLandlords.
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        assertThat(confirmationPage.surveyLink).isVisible()
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+
+        // TODO: PDJB-1278: Check that clicking the go to dashboard button goes to the dashboard
     }
 
     @Test
@@ -506,7 +510,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
-        checkAnswersPage.leadTrusteeCard.getAction("Change").link.clickAndWait()
+        checkAnswersPage.leadTrusteeCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
         leadTrusteeNamePage.submitName("Updated Lead Trustee Name")
@@ -581,7 +588,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
-        checkAnswersPage.governingBodyMemberCard.getAction("Change").link.clickAndWait()
+        checkAnswersPage.governingBodyMemberCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
         memberListPage.form.submit()
@@ -594,7 +604,10 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
-        checkAnswersPage.mainContactCard.getAction("Change").link.clickAndWait()
+        checkAnswersPage.mainContactCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
         orgMainContactPage.submit("Updated Contact Name", "updated.contact@example.com", "07888888888")
