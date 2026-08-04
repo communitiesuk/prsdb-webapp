@@ -154,8 +154,6 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    // TODO PDJB-942: If changing from provide-this-later to actual households for tenancy details, route through
-                    //  the rent section so the user can fill in missing rent details before returning to CYA
                     duplicableCheckAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
