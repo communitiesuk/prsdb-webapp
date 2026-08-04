@@ -68,6 +68,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
@@ -139,7 +140,7 @@ class PropertyRegistrationJourneyFactory(
                 HmoMandatoryLicenceStep.ROUTE_SEGMENT,
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.licensingTask)
+                    checkAnswerTask(journey.licensingTask, { journey })
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
@@ -283,6 +284,7 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
                 task(journey.licensingTask) {
+                    withDependencies { journey }
                     parents { journey.ownershipAndLandlordsTask.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
@@ -439,6 +441,7 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
                 task(journey.licensingTask) {
+                    withDependencies { journey }
                     parents {
                         OrParents(
                             journey.occupied.hasOutcome(YesOrNo.YES),
@@ -641,6 +644,7 @@ class PropertyRegistrationJourney(
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
+    override val allowProvideLicensingLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -663,6 +667,7 @@ interface PropertyRegistrationJourneyState :
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
     EpcDependencies,
+    LicensingDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep

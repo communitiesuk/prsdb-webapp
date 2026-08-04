@@ -557,6 +557,7 @@ checkPropertyAnswers:
     ownership: Ownership type
     licensingType: Licensing type
     noLicensing: None
+    licensingProvideLater: Provide this later
   tenancyDetails:
     heading: Tenancy and rental information
     occupied: Occupied by tenants

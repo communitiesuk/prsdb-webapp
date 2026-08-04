@@ -846,6 +846,38 @@ class PropertyOwnershipServiceTests {
     }
 
     @Test
+    fun `updateLicensing clears the licenseProvideLater flag`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                license = null,
+                licenseProvideLater = true,
+            )
+        val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+        val newLicenceNumber = "newLicenceNumber"
+        val updatedLicence = License(newLicensingType, newLicenceNumber)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, newLicensingType, newLicenceNumber),
+        ).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.updateLicensing(
+            propertyOwnership.id,
+            newLicensingType,
+            newLicenceNumber,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        assertEquals(false, propertyOwnership.licenseProvideLater)
+    }
+
+    @Test
     fun `updateLicensing throws UpdateConflictException if modified dates conflict`() {
         // Arrange
         val propertyOwnership =

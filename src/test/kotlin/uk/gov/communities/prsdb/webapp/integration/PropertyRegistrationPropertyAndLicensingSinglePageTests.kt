@@ -12,6 +12,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideLicensingLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
 class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
@@ -51,7 +54,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         @Test
         fun `Submitting with no licensingType selected returns an error`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationOccupiedLicensingTypePage()
-            licensingTypePage.form.submit()
+            licensingTypePage.form.submitPrimaryButton()
             assertThat(licensingTypePage.form.getErrorMessage()).containsText("Select the type of licensing for the property")
         }
 
@@ -73,6 +76,54 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
                 .containsText("Tell us if your property needs a license")
+        }
+
+        @Test
+        fun `Submitting provide this later on licensing routes to occupied provide licensing later page`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOwnershipType()
+                        .withBedrooms()
+                        .withOwnershipType()
+                        .withHasNoJointLandlords()
+                        .withOccupancyStatus(true),
+                )
+            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")
+            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            assertThat(licensingTypePage.provideThisLaterButton).isVisible()
+
+            licensingTypePage.submitProvideThisLater()
+            val provideLicensingLaterPage = assertPageIs(page, ProvideLicensingLaterFormPagePropertyRegistration::class)
+
+            BaseComponent
+                .assertThat(provideLicensingLaterPage.heading)
+                .containsText("Provide details about property licensing later")
+            BaseComponent.assertThat(provideLicensingLaterPage.insetText).isVisible()
+        }
+
+        @Test
+        fun `Submitting provide this later on licensing routes to unoccupied provide licensing later page`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOwnershipType()
+                        .withBedrooms()
+                        .withOwnershipType()
+                        .withHasNoJointLandlords()
+                        .withOccupancyStatus(false),
+                )
+            taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")
+            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            assertThat(licensingTypePage.provideThisLaterButton).isVisible()
+
+            licensingTypePage.submitProvideThisLater()
+            val provideLicensingLaterPage = assertPageIs(page, ProvideLicensingLaterFormPagePropertyRegistration::class)
+
+            BaseComponent
+                .assertThat(provideLicensingLaterPage.heading)
+                .containsText("Provide details about property licensing later")
+            BaseComponent.assertThat(provideLicensingLaterPage.insetText).isHidden()
         }
     }
 

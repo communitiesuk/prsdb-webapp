@@ -4,6 +4,11 @@
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showSecondarySubmitButton" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -11,6 +16,14 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'licensingType', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
         <input th:replace="~{fragments/forms/radios :: radios(null,'licensingType',null, ${radioOptions})}">
     </fieldset>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <th:block th:if="${showSecondarySubmitButton}">
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+            <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
+        </div>
+    </th:block>
+    <th:block th:unless="${showSecondarySubmitButton}">
+        <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+    </th:block>
 </th:block>
 </html>
