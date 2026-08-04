@@ -69,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddre
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MetricsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
@@ -1177,6 +1178,11 @@ class Navigator(
     fun goToLandlordDetails(): LandlordDetailsPage {
         navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         return createValidPage(page, LandlordDetailsPage::class)
+    }
+
+    fun goToOrgLandlordDetails(): OrgLandlordDetailsPage {
+        navigate(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
+        return createValidPage(page, OrgLandlordDetailsPage::class)
     }
 
     fun goToLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewLandlordDetailsPage {
