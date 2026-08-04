@@ -1624,7 +1624,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Selecting provide this later from tenancy details change link on CYA returns to CYA`(page: Page) {
+        fun `Changing tenancy details from CYA and selecting provide this later returns to CYA`(page: Page) {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
