@@ -5,15 +5,19 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.LocatorAssertions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.LocalDate
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCheckAnswersPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.EmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
@@ -156,6 +160,51 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             // Check changes have occurred
             val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
             assertThat(landlordDetailsPage.personalDetailsSummaryList.addressRow.value).containsText(newSingleLineAddress)
+        }
+    }
+
+    @Nested
+    inner class OrganisationNameUpdates : NestedIntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
+        @BeforeEach
+        fun setup() {
+            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+        }
+
+        @Test
+        fun `An organisation landlord can update organisation name from org check answers and return to check answers`(page: Page) {
+            // Check answers page
+            val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+            checkAnswersPage.landlordDetails.organisationNameRow.clickNamedActionLinkAndWait("Change")
+
+            // Update org name page
+            val updateOrgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+            updateOrgNamePage.submitName("Updated Organisation Name")
+
+            // Check updated value on check answers page
+            val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+            assertThat(updatedCheckAnswersPage.landlordDetails.organisationNameRow.value).containsText("Updated Organisation Name")
+        }
+
+        @Test
+        fun `Organisation name change link opens the organisation name update page`(page: Page) {
+            // Check answers page
+            val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+            checkAnswersPage.landlordDetails.organisationNameRow.clickNamedActionLinkAndWait("Change")
+
+            // Update org name page
+            assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+        }
+
+        @Test
+        fun `Submitting an empty organisation name on update shows a validation error`(page: Page) {
+            // Check answers page
+            val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+            checkAnswersPage.landlordDetails.organisationNameRow.clickNamedActionLinkAndWait("Change")
+
+            // Update org name page
+            val updateOrgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+            updateOrgNamePage.submitName("")
+            assertThat(updateOrgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
         }
     }
 

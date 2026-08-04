@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -22,6 +23,12 @@ class UserToLandlordService(
         // TODO: PDJB-1477: Improve this method with caching
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         return getLandlordForBaseUserId(baseUserId)
+    }
+
+    fun getCurrentOrganisationLandlordForUser(): OrganisationLandlord {
+        val landlord = getCurrentLandlordForUser()
+        check(landlord is OrganisationLandlord)
+        return landlord
     }
 
     fun getCurrentLandlordForUserOrNull(): Landlord? {

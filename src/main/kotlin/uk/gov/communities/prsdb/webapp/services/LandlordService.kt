@@ -206,10 +206,8 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationLandlordForUser(orgLandlordUpdate: OrganisationLandlordUpdateModel): Landlord {
-        val landlordEntity = userToLandlordService.getCurrentLandlordForUser()
-        check(landlordEntity is OrganisationLandlord)
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
-        //TODO PDJB-1311: Add rest of fields as part of epic
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
 
         return landlordEntity

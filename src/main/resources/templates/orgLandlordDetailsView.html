@@ -10,7 +10,7 @@
             <strong th:text="#{landlordDetails.org.name}">landlordDetails.org.name</strong><br/>
             <span th:text="${orgLandlord.name}">Organisation name</span><br/>
             <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-name/organisation-name'}">Change</a>
-        </p>
+        </p> <!-- TODO: PDJB-1474: Update links instead of using hrefs -->
 
         <p class="govuk-body">
             <strong th:text="#{landlordDetails.org.address}">landlordDetails.org.address</strong><br/>

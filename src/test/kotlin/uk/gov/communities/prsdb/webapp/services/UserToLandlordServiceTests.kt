@@ -113,6 +113,35 @@ class UserToLandlordServiceTests {
         assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
     }
 
+    @Test
+    fun `getCurrentOrganisationLandlordForUser returns organisation landlord for authenticated user`() {
+        val baseUserId = "organisation-user"
+        val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
+        val landlord = OrganisationLandlord()
+        setMockPrincipal(baseUserId)
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
+        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
+            listOf(
+                OrganisationLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
+            ),
+        )
+
+        val result = service.getCurrentOrganisationLandlordForUser()
+
+        assertEquals(landlord, result)
+    }
+
+    @Test
+    fun `getCurrentOrganisationLandlordForUser throws when authenticated user has an individual landlord`() {
+        val baseUserId = "individual-user"
+        setMockPrincipal(baseUserId)
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(MockLandlordData.createIndividualLandlord())
+
+        assertThrows<IllegalStateException> {
+            service.getCurrentOrganisationLandlordForUser()
+        }
+    }
+
     private fun setMockPrincipal(name: String) {
         val authentication = mock<Authentication>()
         whenever(authentication.name).thenReturn(name)
