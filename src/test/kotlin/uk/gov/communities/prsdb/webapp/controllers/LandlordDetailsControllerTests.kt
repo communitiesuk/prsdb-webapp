@@ -75,6 +75,44 @@ class LandlordDetailsControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
+        fun `getUserLandlordDetails returns the redesigned view when the org landlord flag is enabled`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("individualLandlordDetailsViewAugust2026Redesign") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getUserLandlordDetails returns the old view when the org landlord flag is disabled`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(false)
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    landlord,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+
+            mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
+                status { isOk() }
+                view { name("individualLandlordDetailsViewOld") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
         fun `getUserLandlordDetails returns the org details view with shell attributes for an organisation landlord`() {
             val orgLandlord = MockLandlordData.createOrgLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
