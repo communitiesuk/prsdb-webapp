@@ -4,7 +4,7 @@
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-PshardIndex=1 -PshardCount=4" />
+      <option name="scriptParameters" value="-PshardIndex=1 -PshardCount=4 -x buildFrontendAssets -x copyBuiltAssets" />
       <option name="taskDescriptions">
         <list />
       </option>
