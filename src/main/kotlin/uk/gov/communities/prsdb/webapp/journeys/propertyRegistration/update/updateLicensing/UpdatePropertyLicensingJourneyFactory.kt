@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -56,7 +56,7 @@ class UpdateLicensingJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            duplicableCheckAnswerTask(journey.licensingTask, { journey })
+            checkAnswerTask(journey.licensingTask, { journey })
             configureStep(journey.licensingTask.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
@@ -72,7 +72,7 @@ class UpdateLicensingJourneyFactory(
         journey(state) {
             val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(journey.propertyId)
             unreachableStepUrl { propertyDetailsRoute }
-            duplicableTask(journey.licensingTask) {
+            task(journey.licensingTask) {
                 withDependencies { journey }
                 initialStep()
                 backUrl { propertyDetailsRoute }

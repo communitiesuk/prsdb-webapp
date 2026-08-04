@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IdentityState
@@ -24,7 +24,7 @@ class IdentityTask(
     override val identityNotVerifiedStep: IdentityNotVerifiedStep,
     override val nameStep: NameStep,
     override val dateOfBirthStep: DateOfBirthStep,
-) : DuplicableTask<IdentityState>(journeyStateService),
+) : TaskWithoutDependencies<IdentityState>(journeyStateService),
     IdentityState {
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
 

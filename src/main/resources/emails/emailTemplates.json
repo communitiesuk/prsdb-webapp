@@ -267,5 +267,12 @@
     "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
     "subject": "You’re no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
+  },
+  {
+    "test_id": "a977fa79-3068-4a12-909c-8f5b3c90a41b",
+    "prod_id": "7c8f98da-6c20-4224-93c8-7ad654539c85",
+    "enumName": "ORGANISATIONAL_LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
+    "subject": "Confirmation of landlord registration",
+    "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"
   }
 ]

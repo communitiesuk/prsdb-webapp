@@ -15,30 +15,16 @@
                 </div>
             </th:block>
             <div id="notification-banner"
-                 th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0} ? ~{fragments/banners/notificationBanner ::
+                 th:replace="${notificationBanner != null and !notificationBanner.isEmpty()} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
-                <th:block th:each="message: ${complianceDetails.notificationMessages}">
-                    <h2 class="govuk-notification-banner__heading">
-                        <span th:utext="#{${message.mainText}}" th:remove="tag"></span>
-                        <th:block th:if="${message.linkMessage != null}">
-                            <span th:if="${message.linkMessage.beforeLinkText != null}" th:text="#{${message.linkMessage.beforeLinkText}}" th:remove="tag"></span>
-                            <a class="govuk-notification-banner__link" th:href="${message.linkMessage.linkUrl}" th:text="#{${message.linkMessage.linkText}}"></a><th:block
-                                th:if="${message.linkMessage.afterLinkText != null}"><span
-                                th:if="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span>
-                            <span th:unless="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span></th:block>
-                        </th:block>
-                    </h2>
+                <th:block th:each="message : ${notificationBanner}">
+                    <h2 class="govuk-notification-banner__heading"><span
+                        th:if="${message.mainText != null}" th:remove="tag"><span th:utext="#{${message.mainText}}" th:remove="tag"></span> </span><th:block
+                        th:each="link : ${message.links}"><span
+                        th:if="${link.beforeLinkText != null}" th:text="#{${link.beforeLinkText}}" th:remove="tag"></span><a
+                        class="govuk-notification-banner__link" th:href="${link.linkUrl}" th:text="#{${link.linkText}}"></a><span
+                        th:if="${link.afterLinkText != null}" th:text="#{${link.afterLinkText}}" th:remove="tag"></span></th:block></h2>
                 </th:block>
-            </div>
-            <div id="notification-banner-no-compliance"
-                 th:replace="${complianceDetails == null} ? ~{fragments/banners/notificationBanner ::
-                notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner-no-compliance/content()})} : ~{}">
-                <p th:if="${isLandlordView}" class="govuk-body"
-                   th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">
-                    propertyDetails.complianceInformation.noCompliance.landlordView.mainText
-                </p>
-                <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
-                    propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
             <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
                 <div id="resend-invitation-success-banner"

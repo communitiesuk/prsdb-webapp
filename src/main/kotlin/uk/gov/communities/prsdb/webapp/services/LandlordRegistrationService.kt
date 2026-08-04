@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import java.time.LocalDate
 
 @PrsdbWebService
@@ -20,6 +20,7 @@ class LandlordRegistrationService(
     private val organisationLandlordUserService: OrganisationLandlordUserService,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
     private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
+    private val organisationalRegistrationConfirmationSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
@@ -121,19 +122,30 @@ class LandlordRegistrationService(
             organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, organisationGoverningBodyMembers)
         }
 
-        // TODO: PDJB-1260: Send registration confirmation email for org landlords
+        sendOrganisationalRegistrationConfirmationEmail(landlord)
 
         return landlord
     }
 
-    private fun sendRegistrationConfirmationEmail(landlord: Landlord) {
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
+    private fun sendRegistrationConfirmationEmail(landlord: IndividualLandlord) {
         registrationConfirmationSender.sendEmail(
             landlord.email,
             LandlordRegistrationConfirmationEmail(
                 RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+            ),
+        )
+    }
+
+    private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
+        // TODO: PDJB-1274: reassess which address and name to send to once there is a general way to email a landlord
+        organisationalRegistrationConfirmationSender.sendEmail(
+            landlord.registrantEmail!!,
+            OrganisationalLandlordRegistrationConfirmationEmail(
+                registrantName = landlord.registrantName!!,
+                organisationName = landlord.name!!,
+                lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
+                prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
         )
     }

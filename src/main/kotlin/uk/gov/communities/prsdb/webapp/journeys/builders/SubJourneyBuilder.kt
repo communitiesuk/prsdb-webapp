@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -88,24 +87,13 @@ abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneySta
         journeyElements.add(stepInitialiser)
     }
 
-    override fun task(
-        uninitialisedTask: Task<TInternalState>,
-        routeSegment: String?,
-        init: TaskInitialiser<TInternalState, Nothing>.() -> Unit,
-    ) {
-        val taskInitialiser = TaskInitialiser<TInternalState, Nothing>(uninitialisedTask, privateJourney)
-        routeSegment?.let { taskInitialiser.routeSegment(it) }
-        taskInitialiser.init()
-        journeyElements.add(taskInitialiser)
-    }
-
-    override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
-        uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+    override fun <TTaskState : JourneyState, TDependencies : Any> task(
+        uninitialisedTask: Task<TTaskState, TDependencies>,
         routeSegment: String?,
         init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
     ) {
         // The task provides its own state, so build its sub-journey against that.
-        val taskInitialiser = TaskInitialiser<TTaskState, TDependencies>(uninitialisedTask, uninitialisedTask.taskState)
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
@@ -124,7 +112,7 @@ abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneySta
         task: TEmbeddedState,
         dependencies: TDependencies,
         init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
-    ) where TEmbeddedState : JourneyState, TEmbeddedState : DuplicableTaskWithDependencies<*, TDependencies> {
+    ) where TEmbeddedState : JourneyState, TEmbeddedState : Task<*, TDependencies> {
         val builder = EmbedBuilder(task, privateJourney)
         task.bindDependencies(dependencies)
         builder.init()
