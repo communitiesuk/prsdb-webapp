@@ -38,7 +38,7 @@ class PropertyRegistrationService(
     fun registerProperty(
         addressModel: AddressDataModel,
         propertyType: PropertyType,
-        licenseType: LicensingType?,
+        licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
         isOccupied: Boolean,
@@ -125,7 +125,7 @@ class PropertyRegistrationService(
     private fun createPropertyOwnershipAndRelatedEntities(
         addressModel: AddressDataModel,
         propertyType: PropertyType,
-        licenseType: LicensingType?,
+        licenseType: LicensingType,
         licenceNumber: String,
         ownershipType: OwnershipType,
         isOccupied: Boolean,
@@ -151,7 +151,7 @@ class PropertyRegistrationService(
         val address = addressService.findOrCreateAddress(addressModel)
 
         val license =
-            if (licenseType != null && LicenseService.licenceShouldBeStored(licenseType)) {
+            if (LicenseService.licenceShouldBeStored(licenseType)) {
                 licenseService.createLicense(licenseType, licenceNumber)
             } else {
                 null

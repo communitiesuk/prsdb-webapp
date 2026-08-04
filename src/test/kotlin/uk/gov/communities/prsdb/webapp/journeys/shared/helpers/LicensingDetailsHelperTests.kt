@@ -4,25 +4,19 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import kotlin.test.assertEquals
 
 class LicensingDetailsHelperTests {
-    private val featureFlagManager = mock<FeatureFlagManager>()
-
-    private val licensingDetailsHelper = LicensingDetailsHelper(featureFlagManager)
+    private val licensingDetailsHelper = LicensingDetailsHelper()
 
     private val childJourneyId = "childJourneyId"
 
@@ -77,9 +71,8 @@ class LicensingDetailsHelperTests {
     }
 
     @Test
-    fun `When licensing was skipped and FF is on, getCheckYourAnswersSummaryList returns a single provide-this-later row`() {
+    fun `When licensing is to be provided later, getCheckYourAnswersSummaryList returns a single provide-this-later row`() {
         // Arrange
-        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         val state = createMockLicensingStateWithSkip()
 
         // Act
@@ -88,7 +81,7 @@ class LicensingDetailsHelperTests {
         // Assert
         summaryList.single().let { row ->
             assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
-            assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingProvideLater", row.fieldValue)
+            assertEquals(LicensingType.PROVIDE_LATER, row.fieldValue)
             assertEquals(
                 listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
                 row.actions,
@@ -109,15 +102,11 @@ class LicensingDetailsHelperTests {
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {
-                whenever(this.formModel).thenReturn(
-                    LicensingTypeFormModel().apply {
-                        licensingType = licenseType
-                    },
-                )
                 whenever(this.routeSegment).thenReturn("licensing-type")
                 whenever(this.isStepReachable).thenReturn(true)
             }
         whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)
+        whenever(stateMock.getLicensingType()).thenReturn(licenseType)
         whenever(stateMock.getLicenceNumber()).thenReturn(licenceNumber)
         whenever(stateMock.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
 
@@ -157,11 +146,11 @@ class LicensingDetailsHelperTests {
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {
-                whenever(this.outcome).thenReturn(LicensingTypeMode.PROVIDE_LATER)
                 whenever(this.routeSegment).thenReturn("licensing-type")
                 whenever(this.isStepReachable).thenReturn(true)
             }
         whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)
+        whenever(stateMock.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
         whenever(stateMock.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
 
         return stateMock

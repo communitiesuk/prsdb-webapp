@@ -237,6 +237,7 @@ class PropertyOwnershipService(
                 licenceNumber,
             )
         propertyOwnership.license = updatedLicence
+        propertyOwnership.licenseProvideLater = false
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

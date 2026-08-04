@@ -22,16 +22,16 @@ class LicenseService(
 
     fun updateLicence(
         license: License?,
-        updateLicenceType: LicensingType?,
+        updateLicenceType: LicensingType,
         updateLicenceNumber: String?,
     ): License? =
-        if (!licenceShouldBeStored(updateLicenceType ?: LicensingType.NO_LICENSING)) {
+        if (!licenceShouldBeStored(updateLicenceType)) {
             license?.let { licenseRepository.delete(license) }
             null
         } else if (license == null) {
-            createLicense(updateLicenceType!!, updateLicenceNumber!!)
+            createLicense(updateLicenceType, updateLicenceNumber!!)
         } else {
-            updateLicenceType?.let { license.licenseType = it }
+            license.licenseType = updateLicenceType
             updateLicenceNumber?.let { license.licenseNumber = it }
             licenseRepository.save(license)
             license

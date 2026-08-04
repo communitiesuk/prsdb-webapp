@@ -574,7 +574,7 @@ class PropertyRegistrationServiceTests {
         propertyRegistrationService.registerProperty(
             addressModel = addressDataModel,
             propertyType = propertyType,
-            licenseType = null,
+            licenseType = LicensingType.PROVIDE_LATER,
             licenceNumber = "",
             ownershipType = ownershipType,
             isOccupied = true,
