@@ -405,9 +405,15 @@ class PropertyStateSessionBuilder(
             people: Int = 4,
             bedrooms: Int = 3,
             rentAmount: String = "400",
+            billsIncluded: Boolean = true,
         ) = beforePropertyRegistrationOccupancy()
-            .withTenants(households = households, people = people, bedrooms = bedrooms, rentAmount = rentAmount)
-            .withHasNoJointLandlords()
+            .withTenants(
+                households = households,
+                people = people,
+                bedrooms = bedrooms,
+                rentAmount = rentAmount,
+                includesBills = billsIncluded,
+            ).withHasNoJointLandlords()
             .withGasSafetyTaskCompletedWithNoGasSupply()
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()
