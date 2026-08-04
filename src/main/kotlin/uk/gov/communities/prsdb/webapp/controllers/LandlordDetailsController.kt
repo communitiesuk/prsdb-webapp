@@ -62,13 +62,18 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
+        val isOrgLandlordRegistrationEnabled = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
 
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
 
-        return "landlordDetailsView"
+        return if (isOrgLandlordRegistrationEnabled) {
+            "individualLandlordDetailsViewAugust2026Redesign"
+        } else {
+            "individualLandlordDetailsViewOld"
+        }
     }
 
     // TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton page with proper summary list content
