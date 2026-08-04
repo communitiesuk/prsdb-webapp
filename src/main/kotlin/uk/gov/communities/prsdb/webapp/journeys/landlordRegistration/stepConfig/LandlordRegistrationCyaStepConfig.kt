@@ -13,13 +13,11 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
@@ -88,7 +86,7 @@ class LandlordRegistrationCyaStepConfig(
                 organisationHasCompanyNumber = hasCompanyNumber,
                 orgIsRegisteredCharity = isRegisteredCharity,
                 organisationName = org.orgNameStep.formModel.notNullValue(OrgNameFormModel::orgName),
-                organisationAddress = getOrgAddress(org.orgAddressStep.formModel),
+                organisationAddress = org.orgAddressTask.getAddress(),
                 organisationEmail = org.orgEmailStep.formModel.notNullValue(EmailFormModel::emailAddress),
                 organisationPhoneNumber = org.orgPhoneNumberStep.formModel.notNullValue(OrgPhoneNumberFormModel::phoneNumber),
                 organisationCompanyNumber =
@@ -352,8 +350,13 @@ class LandlordRegistrationCyaStepConfig(
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationAddress",
-                    orgAddressLines(org.orgAddressStep.formModel),
-                    Destination.VisitableStep(org.orgAddressStep, state.getCyaJourneyId(org.orgAddressStep)),
+                    org.orgAddressTask
+                        .getAddress()
+                        .singleLineAddress,
+                    Destination.VisitableStep(
+                        org.orgAddressTask.lookupAddressStep,
+                        state.getCyaJourneyId(org.orgAddressTask.lookupAddressStep),
+                    ),
                 ),
             )
             add(
@@ -632,22 +635,6 @@ class LandlordRegistrationCyaStepConfig(
                 ),
         )
     }
-
-    // TODO: PDJB-1133 - this only handles the manually-entered organisation address; handle looked-up (auto) address data once org address lookup exists.
-    private fun getOrgAddress(address: ManualAddressFormModel) =
-        AddressDataModel
-            .fromManualAddressData(
-                addressLineOne = address.notNullValue(ManualAddressFormModel::addressLineOne),
-                addressLineTwo = address.addressLineTwo,
-                townOrCity = address.notNullValue(ManualAddressFormModel::townOrCity),
-                county = address.county,
-                postcode = address.notNullValue(ManualAddressFormModel::postcode),
-            )
-
-    private fun orgAddressLines(address: ManualAddressFormModel) =
-        getOrgAddress(address)
-            .toMultiLineAddress()
-            .split("\n")
 
     private fun getCharityNumber(
         state: LandlordRegistrationState,

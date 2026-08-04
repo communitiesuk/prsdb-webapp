@@ -5,6 +5,6 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 
 @IsValidPrioritised
 class SelectAddressFormModel : FormModel {
-    @NotNull(message = "forms.selectAddress.error.missing")
+    @NotNull(message = "addressForms.selectAddress.error.missing")
     var address: String? = null
 }
