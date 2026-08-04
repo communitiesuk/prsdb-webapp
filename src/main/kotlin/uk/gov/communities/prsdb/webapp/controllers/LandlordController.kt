@@ -17,22 +17,21 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
 @RequestMapping(LANDLORD_BASE_URL, "/")
 class LandlordController(
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
@@ -42,16 +41,12 @@ class LandlordController(
 
     // TODO: PDJB-1278: Update landlord dashboard for org landlords
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
-    fun landlordDashboard(
-        model: Model,
-        principal: Principal,
-    ): String {
-        val landlord =
-            landlordService.retrieveLandlordByBaseUserId(principal.name)
-                ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+    fun landlordDashboard(model: Model): String {
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+        check(landlord is IndividualLandlord)
         val numberOfComplianceActions =
-            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+            propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -85,12 +80,12 @@ class LandlordController(
     @GetMapping("/$COMPLIANCE_ACTIONS_PATH_SEGMENT")
     fun getComplianceActions(
         model: Model,
-        principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
         val pagedNonCompliantProperties =
-            propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name, page - 1)
+            propertyComplianceService.getNonCompliantPropertiesForLandlord(landlord, page - 1)
 
         if (pagedNonCompliantProperties.totalPages != 0 && pagedNonCompliantProperties.totalPages < page) {
             return "redirect:$COMPLIANCE_ACTIONS_URL"

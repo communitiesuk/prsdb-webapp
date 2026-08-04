@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberListFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberLookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
@@ -64,7 +65,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataMod
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
 import java.net.URI
@@ -76,7 +77,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @Autowired
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
@@ -123,7 +124,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 
@@ -186,7 +187,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 
@@ -241,7 +242,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
 
-        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlord = assertNotNull(userToLandlordService.getLandlordForBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 
@@ -833,13 +834,144 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(updatedListPage.summaryList.getRowByIndex(1).value).containsText("Bob Jones")
     }
 
-    private fun createTestGovBodyMember(name: String) =
-        uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel(
-            name = name,
-            type = GoverningBodyMemberType.DIRECTOR,
-            dateOfBirth = kotlinx.datetime.LocalDate(1970, 1, 1),
-            address =
-                uk.gov.communities.prsdb.webapp.models.dataModels
-                    .AddressDataModel(singleLineAddress = "Test Address"),
-        )
+    @Test
+    fun `editing a governing body member pre-fills all questions including looked-up address`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val memberListPage =
+            navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                mapOf(
+                    1 to
+                        createTestGovBodyMember(
+                            name = "Alice Smith",
+                            type = GoverningBodyMemberType.TRUSTEE,
+                            dateOfBirth = kotlinx.datetime.LocalDate(1985, 3, 15),
+                            addressSearchPostcode = "EG1 2AA",
+                            addressSearchHouseNameOrNumber = "1",
+                            selectedAddress = "1 PRSDB Square, EG1 2AA",
+                        ),
+                ),
+            )
+
+        memberListPage.summaryList
+            .getRowByIndex(0)
+            .actions
+            .getActionLink("Change")
+            .clickAndWait()
+
+        val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        assertEquals("TRUSTEE", whoToProvidePage.form.radios.selectedValue)
+        whoToProvidePage.form.submit()
+
+        val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
+        assertThat(namePage.form.nameInput).hasValue("Alice Smith")
+        namePage.form.submit()
+
+        val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
+        assertThat(dobPage.form.dayInput).hasValue("15")
+        assertThat(dobPage.form.monthInput).hasValue("3")
+        assertThat(dobPage.form.yearInput).hasValue("1985")
+        dobPage.form.submit()
+
+        val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+        lookupAddressPage.form.submit()
+
+        val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
+        assertEquals("1 PRSDB Square, EG1 2AA", selectAddressPage.form.addressRadios.selectedValue)
+        selectAddressPage.form.submit()
+
+        val updatedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        assertThat(updatedListPage.summaryList.getRowByIndex(0).value).containsText("Alice Smith")
+    }
+
+    @Test
+    fun `editing a governing body member pre-fills manual address`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val memberListPage =
+            navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
+                mapOf(
+                    1 to
+                        createTestGovBodyMember(
+                            name = "Bob Jones",
+                            type = GoverningBodyMemberType.DIRECTOR,
+                            dateOfBirth = kotlinx.datetime.LocalDate(1990, 7, 20),
+                            addressSearchPostcode = "EG1 2AA",
+                            addressSearchHouseNameOrNumber = "1",
+                            selectedAddress = MANUAL_ADDRESS_CHOSEN,
+                            manualAddressLineOne = "123 Main Street",
+                            manualAddressLineTwo = "Flat 4",
+                            manualTownOrCity = "London",
+                            manualCounty = "Greater London",
+                            manualPostcode = "EG1 2AA",
+                        ),
+                ),
+            )
+
+        memberListPage.summaryList
+            .getRowByIndex(0)
+            .actions
+            .getActionLink("Change")
+            .clickAndWait()
+
+        val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        whoToProvidePage.form.submit()
+
+        val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
+        namePage.form.submit()
+
+        val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
+        dobPage.form.submit()
+
+        val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        assertThat(lookupAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+        assertThat(lookupAddressPage.form.houseNameOrNumberInput).hasValue("1")
+        lookupAddressPage.form.submit()
+
+        val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
+        assertEquals(MANUAL_ADDRESS_CHOSEN, selectAddressPage.form.addressRadios.selectedValue)
+        selectAddressPage.form.submit()
+
+        val manualAddressPage = assertPageIs(page, OrgGovBodyMemberManualAddressFormPageLandlordRegistration::class)
+        assertThat(manualAddressPage.form.addressLineOneInput).hasValue("123 Main Street")
+        assertThat(manualAddressPage.form.addressLineTwoInput).hasValue("Flat 4")
+        assertThat(manualAddressPage.form.townOrCityInput).hasValue("London")
+        assertThat(manualAddressPage.form.countyInput).hasValue("Greater London")
+        assertThat(manualAddressPage.form.postcodeInput).hasValue("EG1 2AA")
+        manualAddressPage.form.submit()
+
+        val updatedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        assertThat(updatedListPage.summaryList.getRowByIndex(0).value).containsText("Bob Jones")
+    }
+
+    private fun createTestGovBodyMember(
+        name: String,
+        type: GoverningBodyMemberType = GoverningBodyMemberType.DIRECTOR,
+        dateOfBirth: kotlinx.datetime.LocalDate = kotlinx.datetime.LocalDate(1970, 1, 1),
+        addressSearchPostcode: String? = null,
+        addressSearchHouseNameOrNumber: String? = null,
+        selectedAddress: String? = null,
+        manualAddressLineOne: String? = null,
+        manualAddressLineTwo: String? = null,
+        manualTownOrCity: String? = null,
+        manualCounty: String? = null,
+        manualPostcode: String? = null,
+    ) = uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel(
+        name = name,
+        type = type,
+        dateOfBirth = dateOfBirth,
+        address =
+            uk.gov.communities.prsdb.webapp.models.dataModels
+                .AddressDataModel(singleLineAddress = "Test Address"),
+        addressSearchPostcode = addressSearchPostcode,
+        addressSearchHouseNameOrNumber = addressSearchHouseNameOrNumber,
+        selectedAddress = selectedAddress,
+        manualAddressLineOne = manualAddressLineOne,
+        manualAddressLineTwo = manualAddressLineTwo,
+        manualTownOrCity = manualTownOrCity,
+        manualCounty = manualCounty,
+        manualPostcode = manualPostcode,
+    )
 }

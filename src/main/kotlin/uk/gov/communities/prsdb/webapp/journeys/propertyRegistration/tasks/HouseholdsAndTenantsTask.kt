@@ -1,9 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
@@ -19,7 +19,7 @@ class HouseholdsAndTenantsTask(
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val provideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep,
-) : DuplicableTaskWithDependencies<HouseholdsAndTenantsState, HouseHoldsAndTenantsDependencies>(journeyStateService),
+) : Task<HouseholdsAndTenantsState, HouseHoldsAndTenantsDependencies>(journeyStateService),
     HouseholdsAndTenantsState {
     override val taskState get() = this
 

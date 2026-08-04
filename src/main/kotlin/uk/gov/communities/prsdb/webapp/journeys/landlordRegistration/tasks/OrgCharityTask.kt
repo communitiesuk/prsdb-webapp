@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCharityState
@@ -23,7 +23,7 @@ class OrgCharityTask(
     override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
     override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
     override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
-) : DuplicableTask<OrgCharityState>(journeyStateService),
+) : TaskWithoutDependencies<OrgCharityState>(journeyStateService),
     OrgCharityState {
     override val taskState get() = this
 

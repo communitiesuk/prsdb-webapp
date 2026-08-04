@@ -8,6 +8,7 @@ landlordDetails:
   registeredLandlords:
     heading: 'Registered landlords ({0})'
     currentUserCardTitle: '{0} (you)'
+    currentOrgCardTitle: '{0} (your organisation)'
     viewLandlordRecord: View landlord record (opens in new tab)
     removeMe: Remove me
   registeredLandlord:

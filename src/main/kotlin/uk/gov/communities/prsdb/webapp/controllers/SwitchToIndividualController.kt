@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
@@ -39,9 +38,8 @@ class SwitchToIndividualController(
     fun getJourneyStep(
         @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
     ): ModelAndView {
-        throwExceptionIfUnauthorized(propertyOwnershipId, principal)
+        throwExceptionIfUnauthorized(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
@@ -50,9 +48,8 @@ class SwitchToIndividualController(
         @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
         @RequestParam formData: FormData,
-        principal: Principal,
     ): ModelAndView {
-        throwExceptionIfUnauthorized(propertyOwnershipId, principal)
+        throwExceptionIfUnauthorized(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 
@@ -73,10 +70,9 @@ class SwitchToIndividualController(
     fun getSuccess(
         model: Model,
         @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
         session: HttpSession,
     ): String {
-        throwExceptionIfUnauthorized(propertyOwnershipId, principal)
+        throwExceptionIfUnauthorized(propertyOwnershipId)
 
         val switchedId = session.getAttribute(SWITCHED_TO_INDIVIDUAL_PROPERTY_ID) as? Long
         if (switchedId != propertyOwnershipId) {
@@ -90,11 +86,8 @@ class SwitchToIndividualController(
         return "switchToIndividualSuccess"
     }
 
-    private fun throwExceptionIfUnauthorized(
-        propertyOwnershipId: Long,
-        principal: Principal,
-    ) {
-        if (!propertyOwnershipService.getIsLandlord(propertyOwnershipId, principal.name)) {
+    private fun throwExceptionIfUnauthorized(propertyOwnershipId: Long) {
+        if (!propertyOwnershipService.isCurrentUserLandlord(propertyOwnershipId)) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
     }

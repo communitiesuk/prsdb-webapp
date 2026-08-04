@@ -26,7 +26,7 @@ class OrgGovBodyMemberNameStepConfig :
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? GoverningBodyMemberNameFormModel
         if (!formModel?.name.isNullOrBlank()) return defaultContent
 
-        val editingMember = getEditingMemberOrNull(state) ?: return defaultContent
+        val editingMember = state.editingGovBodyMember ?: return defaultContent
         val prepopulatedFormModel = formModel ?: GoverningBodyMemberNameFormModel()
         prepopulatedFormModel.name = editingMember.name
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
@@ -35,9 +35,6 @@ class OrgGovBodyMemberNameStepConfig :
     override fun chooseTemplate(state: OrgGovBodyState) = "forms/nameForm"
 
     override fun mode(state: OrgGovBodyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
-
-    private fun getEditingMemberOrNull(state: OrgGovBodyState) =
-        state.editingGovBodyMemberId?.let { state.governingBodyMembersMap?.get(it) }
 }
 
 @JourneyFrameworkComponent

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.name
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -17,10 +16,8 @@ class CompleteNameUpdateStepConfig(
     override fun mode(state: UpdateNameJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateNameJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
         val newName = state.nameStep.formModel.notNullValue(NameFormModel::name)
-
-        landlordService.updateLandlordName(baseUserId, newName)
+        landlordService.updateLandlordName(newName)
     }
 
     override fun resolveNextDestination(

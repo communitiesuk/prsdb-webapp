@@ -18,23 +18,20 @@ class LeavePropertyService(
     private val session: HttpSession,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
-    fun getPropertyOwnershipIfUserCanLeave(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): PropertyOwnership {
+    fun getPropertyOwnershipIfUserCanLeave(propertyOwnershipId: Long): PropertyOwnership {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val currentLandlord = userToLandlordService.getCurrentLandlordForUser()
         val isLandlordOnProperty =
-            // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-            propertyOwnership.landlords.any { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == baseUserId
-            }
+            propertyOwnership
+                .landlords
+                .any { it.id == currentLandlord.id }
         val isJointlyOwned = propertyOwnership.landlords.size >= 2
         if (!isLandlordOnProperty || !isJointlyOwned) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "User $baseUserId is not authorised to leave property ownership $propertyOwnershipId",
+                "Landlord ${currentLandlord.id} is not authorised to leave property ownership $propertyOwnershipId",
             )
         }
         return propertyOwnership

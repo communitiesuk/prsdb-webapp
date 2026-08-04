@@ -92,6 +92,14 @@ jobs:
   all-tests:
     name: Build and test
     needs: [test, lint]
+    # Without always() this job is skipped when a shard fails, and a skipped required check does not block
+    # merging, so the result of the jobs it depends on has to be asserted explicitly.
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - run: echo "All shards and lint passed"
+      - name: Check shard and lint results
+        run: |
+          echo "test=${{ needs.test.result }} lint=${{ needs.lint.result }}"
+          if [ "${{ needs.test.result }}" != "success" ] || [ "${{ needs.lint.result }}" != "success" ]; then
+            exit 1
+          fi

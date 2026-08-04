@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
@@ -22,7 +22,7 @@ class LicensingTask(
     override val selectiveLicenceStep: SelectiveLicenceStep,
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
-) : DuplicableTask<LicensingState>(journeyStateService),
+) : TaskWithoutDependencies<LicensingState>(journeyStateService),
     LicensingState {
     override val taskState get() = this
 

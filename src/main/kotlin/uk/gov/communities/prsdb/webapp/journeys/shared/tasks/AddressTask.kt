@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -29,7 +29,7 @@ abstract class AddressTask(
     override val selectAddressStep: SelectAddressStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
-) : DuplicableTask<AddressState>(journeyStateService),
+) : TaskWithoutDependencies<AddressState>(journeyStateService),
     AddressState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")

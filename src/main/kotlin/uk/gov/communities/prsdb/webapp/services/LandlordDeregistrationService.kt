@@ -24,6 +24,7 @@ class LandlordDeregistrationService(
      */
     @Transactional
     fun deregisterLandlord(baseUserId: String) {
+        // TODO: PDJB-1404: Update deregistration journey for org landlords
         individualLandlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
             val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
 
