@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
@@ -136,8 +136,8 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateLandlordForUser(
-        landlordUpdate: LandlordUpdateModel,
+    fun updateIndividualLandlordForUser(
+        landlordUpdate: IndividualLandlordUpdateModel,
         checkUpdateIsValid: () -> Unit,
     ): Landlord {
         checkUpdateIsValid()
@@ -165,36 +165,36 @@ class LandlordService(
 
     @Transactional
     fun updateLandlordEmail(email: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(email = email),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(email = email),
         ) {}
     }
 
     @Transactional
     fun updateLandlordPhoneNumber(phoneNumber: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(phoneNumber = phoneNumber),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(phoneNumber = phoneNumber),
         ) {}
     }
 
     @Transactional
     fun updateLandlordName(name: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(name = name),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(name = name),
         ) {}
     }
 
     @Transactional
     fun updateLandlordAddress(address: AddressDataModel) {
-        updateLandlordForUser(
-            LandlordUpdateModel(address = address),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(address = address),
         ) {}
     }
 
     @Transactional
     fun updateLandlordDateOfBirth(dateOfBirth: LocalDate) {
-        updateLandlordForUser(
-            LandlordUpdateModel(
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(
                 email = null,
                 name = null,
                 phoneNumber = null,
@@ -257,7 +257,7 @@ class LandlordService(
     }
 
     private fun sendUpdateConfirmationEmail(
-        landlordUpdate: LandlordUpdateModel,
+        landlordUpdate: IndividualLandlordUpdateModel,
         landlord: IndividualLandlord,
         oldEmail: String,
     ) {

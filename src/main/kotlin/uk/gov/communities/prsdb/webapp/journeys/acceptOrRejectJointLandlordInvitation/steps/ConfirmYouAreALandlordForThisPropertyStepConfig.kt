@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -85,7 +84,6 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(acceptingLandlord is IndividualLandlord)
         acceptedEmailSender.sendEmail(
             acceptingLandlord.email,
             JointLandlordInvitationAcceptedEmail(
@@ -100,7 +98,6 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             .filter { it.id != acceptingLandlord.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
-                check(landlord is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(

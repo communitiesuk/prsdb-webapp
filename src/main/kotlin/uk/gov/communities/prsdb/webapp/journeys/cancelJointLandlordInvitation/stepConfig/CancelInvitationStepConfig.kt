@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -51,7 +50,6 @@ class CancelInvitationStepConfig(
 
         // Email the canceller
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(cancellerLandlord is IndividualLandlord)
         cancellerEmailSender.sendEmail(
             cancellerLandlord.email,
             JointLandlordInvitationCancellationCancellerEmail(
@@ -67,7 +65,6 @@ class CancelInvitationStepConfig(
             .filterNot { cancellerLandlord.id == it.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach {
-                check(it is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     it.email,
                     JointLandlordInvitationCancellationOtherLandlordEmail(

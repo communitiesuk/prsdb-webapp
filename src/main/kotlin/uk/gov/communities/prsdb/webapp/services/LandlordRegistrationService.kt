@@ -116,7 +116,12 @@ class LandlordRegistrationService(
                 registrantPhoneNumber = organisationRegistrantPhoneNumber,
             )
 
-        organisationLandlordUserService.createOrganisationLandlordUser(landlord, baseUser)
+        organisationLandlordUserService.createOrganisationLandlordUser(
+            landlord,
+            baseUser,
+            organisationRegistrantName,
+            organisationRegistrantEmail,
+        )
 
         if (!organisationHasCompanyNumber) {
             organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, organisationGoverningBodyMembers)
@@ -140,10 +145,10 @@ class LandlordRegistrationService(
     private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
         // TODO: PDJB-1274: reassess which address and name to send to once there is a general way to email a landlord
         organisationalRegistrationConfirmationSender.sendEmail(
-            landlord.registrantEmail!!,
+            landlord.registrantEmail,
             OrganisationalLandlordRegistrationConfirmationEmail(
-                registrantName = landlord.registrantName!!,
-                organisationName = landlord.name!!,
+                registrantName = landlord.registrantName,
+                organisationName = landlord.name,
                 lrn = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 prsdURL = absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),

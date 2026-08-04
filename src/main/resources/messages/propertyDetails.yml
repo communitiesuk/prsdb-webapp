@@ -112,24 +112,27 @@ complianceInformation:
     gasCert:
       expired:
         mainText: This property’s gas safety certificate has expired.
+        linkText: View gas safety certificate
     electricalCert:
       expired:
         mainText: This property’s electrical safety certificate has expired.
+        linkText: View electrical safety certificate
     epc:
       expired:
         mainText: This property’s EPC has expired.
+        linkText: View EPC
     multipleExpired:
       mainText: Multiple compliance certificates for this property have expired.
     missing:
-      mainText: You must add compliance certificates for this property.
+      beforePdjb939:
+        mainText: You must add compliance certificates for this property.
+      landlord:
+        mainText: You must finish adding this property’s compliance certificates.
+      localCouncil:
+        mainText: This property is missing compliance certificates.
     missingAndExpired:
       mainText: There are problems with this property's compliance certificates.
 
-  noCompliance:
-    landlordView:
-      mainText: This property does not have any compliance information.
-    localCouncilView:
-      mainText: The landlord has not added any compliance information for this property.
 deregisterPropertyLink:
   text: Deregister property
 propertyRecord:
@@ -150,15 +153,51 @@ propertyRecord:
   licensing:
     heading: Property licensing
     rowName: Licensing
-    provideLaterOccupied: Provide this later (before {0})
-    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    provideLaterWithDeadline: Provide this later (before {0})
+    provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
     councilNotProvided: These details have not been provided yet.
   tenancy:
     heading: Tenancy details
     rowName: Tenancy
-    provideLaterOccupied: Provide this later (before {0})
+    provideLaterWithDeadline: Provide this later (before {0})
+    provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
     councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
+    councilNotProvided: These details have not been provided yet.
+  notificationBanner:
+    afterLinkText: .
+    landlord:
+      licensing:
+        mainText: You must finish adding this property’s licensing details.
+        linkText: View property licensing
+      tenancy:
+        mainText: You must finish adding this property’s tenancy details.
+        linkText: View tenancy details
+      licensingAndTenancy:
+        beforeLinkText: 'You must finish adding this property’s '
+        licensingLinkText: licensing details
+        middleText: ' and '
+        tenancyLinkText: tenancy details
+      propertyAndCompliance:
+        beforeLinkText: 'You must finish providing '
+        propertyLinkText: property and tenancy details
+        middleText: ' and valid '
+        complianceLinkText: compliance certificates
+    localCouncil:
+      licensing:
+        mainText: This property is missing licensing details.
+        linkText: View property licensing
+      tenancy:
+        mainText: This property is missing tenancy details.
+        linkText: View tenancy details
+      licensingAndTenancy:
+        mainText: This property is missing licensing and tenancy details.
+        linkText: View property and tenancy details
+      propertyAndCompliance:
+        beforeLinkText: 'This registration is missing '
+        propertyLinkText: property and tenancy details
+        middleText: ' and valid '
+        complianceLinkText: compliance certificates
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type
