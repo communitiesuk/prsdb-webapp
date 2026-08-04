@@ -39,16 +39,20 @@ org:
   tabs:
     organisationDetails: Organisation details
     organisationContacts: Organisation contacts
+  registrationDate: Registration date
+  lrn: Landlord Registration Number
+  landlordType: Landlord type
+  landlordTypeValue: Organisation
   name: Organisation name
   address: Organisation address
   email: Organisation email
   phone: Organisation phone number
   organisationType: Organisation type
-  isCompany: Company
   companyNumber: Companies House number
-  isCharity: Charity
-  isTrust: Trust
+  registeredCharity: Registered charity
+  charityCommission: Charity commission
   charityNumber: Charity number
+  registeredWithCompaniesHouse: Registered with Companies House
   mainContactHeading: Main contact
   mainContactName: Name
   mainContactEmail: Email
