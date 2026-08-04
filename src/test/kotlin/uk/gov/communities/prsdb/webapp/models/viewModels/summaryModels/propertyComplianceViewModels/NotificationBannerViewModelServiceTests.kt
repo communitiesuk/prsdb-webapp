@@ -326,6 +326,16 @@ class NotificationBannerViewModelServiceTests {
                 service.getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView = true, beforePdjb939 = true),
             )
         }
+
+        @Test
+        fun `landlord flag-off view keeps the generic link for a single expired cert`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload()
+
+            assertEquals(
+                expectedBeforePdjb939Message("propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText"),
+                service.getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView = true, beforePdjb939 = true),
+            )
+        }
     }
 
     @Nested
@@ -361,7 +371,7 @@ class NotificationBannerViewModelServiceTests {
         fun `landlord view populates the legacy compliance banner`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
 
-            val banner = service.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView = true)
+            val messages = service.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView = true)
 
             assertEquals(
                 listOf(
@@ -370,7 +380,7 @@ class NotificationBannerViewModelServiceTests {
                         links = expectedLinks,
                     ),
                 ),
-                banner.messages,
+                messages,
             )
         }
 
@@ -378,19 +388,9 @@ class NotificationBannerViewModelServiceTests {
         fun `local council view shows no compliance banner`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
 
-            val banner = service.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView = false)
+            val messages = service.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView = false)
 
-            assertEquals(emptyList(), banner.messages)
-        }
-
-        @Test
-        fun `landlord view falls back to the no-compliance message when no certificates exist`() {
-            val banner = service.getBeforePdjb939NotificationBanner(propertyCompliance = null, isLandlordView = true)
-
-            assertEquals(
-                listOf(NotificationMessage(mainText = "propertyDetails.complianceInformation.noCompliance.landlordView.mainText")),
-                banner.messages,
-            )
+            assertEquals(emptyList(), messages)
         }
     }
 }

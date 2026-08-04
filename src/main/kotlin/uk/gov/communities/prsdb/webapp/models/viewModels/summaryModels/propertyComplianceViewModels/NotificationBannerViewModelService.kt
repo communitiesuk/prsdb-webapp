@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939NotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationBannerLink
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
@@ -31,20 +30,14 @@ class NotificationBannerViewModelService {
     }
 
     fun getBeforePdjb939NotificationBanner(
-        propertyCompliance: PropertyCompliance?,
+        propertyCompliance: PropertyCompliance,
         isLandlordView: Boolean,
-    ): PropertyDetailsBeforePdjb939NotificationBannerViewModel {
-        val complianceMessages =
-            propertyCompliance?.let {
-                if (isLandlordView) {
-                    getComplianceNotificationMessageKeys(it, isLandlordView, beforePdjb939 = true)
-                } else {
-                    emptyList()
-                }
-            }
-
-        return PropertyDetailsBeforePdjb939NotificationBannerViewModel.fromState(isLandlordView, complianceMessages)
-    }
+    ): List<NotificationMessage> =
+        if (isLandlordView) {
+            getComplianceNotificationMessageKeys(propertyCompliance, isLandlordView, beforePdjb939 = true)
+        } else {
+            emptyList()
+        }
 
     fun getComplianceNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
@@ -57,7 +50,7 @@ class NotificationBannerViewModelService {
         val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
 
-        val (mainTextKey, linkTextKey) =
+        val (mainTextKey, specificLinkTextKey) =
             when {
                 statusModel.displayAnyMissingOrFaulty && statusModel.expiredCertificateCount > 0 -> {
                     "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText" to VIEW_COMPLIANCE_CERTIFICATES_KEY
@@ -88,6 +81,11 @@ class NotificationBannerViewModelService {
                     return emptyList()
                 }
             }
+
+        // Before PDJB-939 the compliance banner always used a single generic "view compliance
+        // certificates" link, so keep that for the flag-off path and only use the cert-specific
+        // link text for the new (flag-on) banner.
+        val linkTextKey = if (beforePdjb939) VIEW_COMPLIANCE_CERTIFICATES_KEY else specificLinkTextKey
 
         return listOf(
             NotificationMessage(

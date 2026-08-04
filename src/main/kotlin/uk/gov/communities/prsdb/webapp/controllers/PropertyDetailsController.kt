@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
@@ -209,16 +210,17 @@ class PropertyDetailsController(
         isLandlordView: Boolean,
         propertyDetails: PropertyDetailsViewModelBase,
         propertyCompliance: PropertyCompliance,
-    ): Any =
+    ): List<NotificationMessage> =
         if (provideLaterEnabled) {
             val provideLaterDetails = propertyDetails as PropertyDetailsViewModel
-            notificationBannerViewModelService.getPropertyDetailsNotificationBanner(
-                propertyCompliance = propertyCompliance,
-                isLandlordView = isLandlordView,
-                isOccupied = provideLaterDetails.isOccupied,
-                isLicensingProvideLater = provideLaterDetails.isLicensingProvideLater,
-                isTenancyProvideLater = provideLaterDetails.isTenancyProvideLater,
-            )
+            notificationBannerViewModelService
+                .getPropertyDetailsNotificationBanner(
+                    propertyCompliance = propertyCompliance,
+                    isLandlordView = isLandlordView,
+                    isOccupied = provideLaterDetails.isOccupied,
+                    isLicensingProvideLater = provideLaterDetails.isLicensingProvideLater,
+                    isTenancyProvideLater = provideLaterDetails.isTenancyProvideLater,
+                ).messages
         } else {
             notificationBannerViewModelService.getBeforePdjb939NotificationBanner(propertyCompliance, isLandlordView)
         }

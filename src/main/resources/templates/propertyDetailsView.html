@@ -15,9 +15,9 @@
                 </div>
             </th:block>
             <div id="notification-banner"
-                 th:replace="${notificationBanner != null and !notificationBanner.messages.isEmpty()} ? ~{fragments/banners/notificationBanner ::
+                 th:replace="${notificationBanner != null and !notificationBanner.isEmpty()} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
-                <th:block th:each="message : ${notificationBanner.messages}">
+                <th:block th:each="message : ${notificationBanner}">
                     <h2 class="govuk-notification-banner__heading"><span
                         th:if="${message.mainText != null}" th:remove="tag"><span th:utext="#{${message.mainText}}" th:remove="tag"></span> </span><th:block
                         th:each="link : ${message.links}"><span
