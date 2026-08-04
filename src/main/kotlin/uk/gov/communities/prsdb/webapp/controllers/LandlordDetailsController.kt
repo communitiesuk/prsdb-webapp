@@ -46,14 +46,23 @@ class LandlordDetailsController(
     fun getUserLandlordDetails(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
-        if (landlord is OrganisationLandlord) {
-            if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-                throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+        return when (landlord) {
+            is OrganisationLandlord -> {
+                if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                    throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+                }
+                getOrgLandlordDetails(landlord, model)
             }
-            return getOrgLandlordDetails(landlord, model)
+            is IndividualLandlord -> getIndividualLandlordDetails(landlord, model)
+            else -> throw IllegalArgumentException("Unknown landlord type")
         }
+    }
 
-        val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = true)
+    private fun getIndividualLandlordDetails(
+        landlord: IndividualLandlord,
+        model: Model,
+    ): String {
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
 
         model.addAttribute("landlord", landlordViewModel)
 
