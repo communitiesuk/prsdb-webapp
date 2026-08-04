@@ -206,21 +206,18 @@ class NftDataSeeder(
                                     tenancyProvideLater = NftDataFaker.generateBoolean(probabilityTrue = 0.4),
                                 )
 
-                            val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
-                            if (NftDataFaker.generateBoolean(probabilityTrue = probabilityOfComplianceRecord)) {
-                                val complianceId = (++complianceRecordsAdded).toLong()
-                                fileUploadsAdded =
-                                    addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
-                                        fileUploadStmt,
-                                        gasSafetyFileUploadsStmt,
-                                        electricalSafetyFileUploadsStmt,
-                                        propertyComplianceStmt,
-                                        complianceId,
-                                        propertyOwnershipId,
-                                        propertyOwnershipCreatedDate,
-                                        fileUploadsAdded,
-                                    )
-                            }
+                            val complianceId = (++complianceRecordsAdded).toLong()
+                            fileUploadsAdded =
+                                addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
+                                    fileUploadStmt,
+                                    gasSafetyFileUploadsStmt,
+                                    electricalSafetyFileUploadsStmt,
+                                    propertyComplianceStmt,
+                                    complianceId,
+                                    propertyOwnershipId,
+                                    propertyOwnershipCreatedDate,
+                                    fileUploadsAdded,
+                                )
                         } else {
                             val hasReminderEmailBeenSent = NftDataFaker.generateBoolean(probabilityTrue = 0.25)
                             addIncompletePropertyToBatch(
