@@ -178,5 +178,6 @@ class OrgLandlordDashboardTests : IntegrationTestWithImmutableData("data-local.s
         val dashboard = navigator.goToLandlordDashboard()
         assertThat(dashboard.dashboardBannerHeading).containsText("Local Organisation Landlord")
         assertThat(dashboard.dashboardBannerSubHeading).containsText("Landlord registration number")
+        assertThat(dashboard.dashboardBannerSubHeading).containsText("L-CKG4-JFNZ")
     }
 }
