@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -15,11 +17,14 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
@@ -40,6 +45,9 @@ class PropertyDetailsControllerTests(
     private lateinit var viewModelFactory: PropertyComplianceViewModelFactory
 
     @MockitoBean
+    private lateinit var notificationBannerViewModelService: NotificationBannerViewModelService
+
+    @MockitoBean
     private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
@@ -49,8 +57,14 @@ class PropertyDetailsControllerTests(
     private lateinit var featureFlagManager: FeatureFlagManager
 
     @BeforeEach
-    fun setUpFeatureFlag() {
+    fun setUp() {
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
+            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        whenever(notificationBannerViewModelService.getPropertyDetailsNotificationBanner(anyOrNull(), any(), any(), any(), any()))
+            .thenReturn(PropertyDetailsNotificationBannerViewModel.fromState(true, false, false, false, emptyList()))
+        whenever(notificationBannerViewModelService.getBeforePdjb939NotificationBanner(anyOrNull(), any()))
+            .thenReturn(emptyList())
     }
 
     @Nested
