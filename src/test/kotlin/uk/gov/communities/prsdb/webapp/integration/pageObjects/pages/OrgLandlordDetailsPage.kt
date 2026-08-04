@@ -32,9 +32,7 @@ class OrgLandlordDetailsPage(
     // Governing body member cards are titled "1. Director", "2. Partner", etc. - a 1-based index
     // followed by the member's role - so their titles start with one or more digits and a dot.
     // The other contact cards (Main contact, Lead trustee, Registration contact) do not, so this
-    // regex counts only the governing body member cards. Scoped to the organisation contacts tab
-    // panel so that numbered cards on other tabs (e.g. a future redesign of the registered
-    // properties tab) are not miscounted.
+    // regex counts only the governing body member cards.
     fun governingBodyMemberCardCount(): Int =
         page
             .locator("#organisation-contacts h2.govuk-summary-card__title")
