@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -56,14 +55,15 @@ class IncompletePropertiesReminderTaskLogic(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
-        val pagesOfProperties = incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+        val pagesOfProperties =
+            incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         for (page in 0..<pagesOfProperties) {
-            val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
+            val incompleteProperties =
+                incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
             incompleteProperties.forEach { property ->
                 // TODO: PDJB-1274: Update emails to account for org landlord
                 val landlord = property.landlord
-                check(landlord is IndividualLandlord)
                 try {
                     emailSender.sendEmail(
                         landlord.email,

@@ -8,11 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.SWITCHED_TO_INDIVIDUAL_PROPERTY_ID
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyState
@@ -157,6 +157,7 @@ class CompleteSwitchToIndividualStepConfigTests {
         val stepConfig = setupStepConfig()
         val propertyOwnershipId = 1L
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        val emailCaptor = argumentCaptor<SwitchToIndividualConfirmationEmail>()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
@@ -164,9 +165,11 @@ class CompleteSwitchToIndividualStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
+        val landlord = propertyOwnership.landlords.first()
         verify(mockSwitchToIndividualConfirmationEmailSender).sendEmail(
-            eq((propertyOwnership.landlords.first() as IndividualLandlord).email),
-            any<SwitchToIndividualConfirmationEmail>(),
+            eq(landlord.email),
+            emailCaptor.capture(),
         )
+        assertEquals(landlord.name, emailCaptor.firstValue.landlordName)
     }
 }

@@ -104,8 +104,8 @@ class InviteJointLandlordStepConfigTests {
         whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("session@example.com"))
         whenever(mockJourneyState.dependencies).thenReturn(mockDependencies)
         whenever(mockDependencies.existingInvitedEmails).thenReturn(listOf("existing@example.com"))
-        whenever(mockDependencies.existingLandlordEmails).thenReturn(listOf("landlord@example.com"))
-        whenever(mockDependencies.loggedInLandlordEmail).thenReturn("me@example.com")
+        whenever(mockDependencies.existingLandlordEmails).thenReturn(listOf("sole-user@example.com"))
+        whenever(mockDependencies.loggedInLandlordEmail).thenReturn("sole-user@example.com")
         whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
 
         val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
@@ -115,8 +115,8 @@ class InviteJointLandlordStepConfigTests {
         assertEquals(listOf("session@example.com", "existing@example.com"), invitedAddresses)
         @Suppress("UNCHECKED_CAST")
         val landlordEmails = result["existingLandlordEmails"] as List<String>
-        assertEquals(listOf("landlord@example.com"), landlordEmails)
-        assertEquals("me@example.com", result["loggedInLandlordEmail"])
+        assertEquals(listOf("sole-user@example.com"), landlordEmails)
+        assertEquals("sole-user@example.com", result["loggedInLandlordEmail"])
     }
 
     private fun setupStepConfig(): InviteJointLandlordStepConfig {

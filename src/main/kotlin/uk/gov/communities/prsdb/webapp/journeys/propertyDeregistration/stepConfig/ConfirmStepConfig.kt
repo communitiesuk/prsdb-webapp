@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConf
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -58,7 +57,6 @@ class ConfirmStepConfig(
         // TODO: PDJB-1274: Update emails to account for org landlord
         val landlordContacts =
             propertyOwnership.landlords.map { landlord ->
-                check(landlord is IndividualLandlord)
                 landlord.name to landlord.email
             }
         val cancelledInvitationEmailAddresses =
@@ -67,7 +65,10 @@ class ConfirmStepConfig(
         val multiLineAddress = propertyOwnership.address.toMultiLineAddress()
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, singleLineAddress)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(
+            state.propertyOwnershipId,
+            singleLineAddress,
+        )
 
         landlordContacts.forEach { (landlordName, landlordEmail) ->
             confirmationEmailSender.sendEmail(

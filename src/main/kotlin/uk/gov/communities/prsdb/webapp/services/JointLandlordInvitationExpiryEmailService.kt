@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
@@ -48,7 +47,6 @@ class JointLandlordInvitationExpiryEmailService(
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { recipient ->
-            check(recipient is IndividualLandlord)
             expiryEmailNotificationService.sendEmail(
                 recipient.email,
                 JointLandlordInvitationExpiryEmail(
