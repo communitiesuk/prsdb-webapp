@@ -42,7 +42,7 @@ class PropertyDetailsViewModel(
 
     val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
-            if (isOccupied && hasBeenOccupiedSinceRegistration) {
+            if (hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
                 messageSource.getMessageForKey("propertyDetails.propertyRecord.licensing.councilNotProvided")
@@ -100,10 +100,10 @@ class PropertyDetailsViewModel(
     private fun licensingProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.licensing.rowName",
-            if (isOccupied && hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterOccupied")
+            if (hasBeenOccupiedSinceRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterWithDeadline")
             } else {
-                "propertyDetails.propertyRecord.licensing.provideLaterUnoccupied"
+                "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
             },
             changeLinkMessageKey,
             getUpdateLicensingBaseRoute(propertyOwnership.id) +
@@ -115,9 +115,9 @@ class PropertyDetailsViewModel(
         row(
             "propertyDetails.propertyRecord.tenancy.rowName",
             if (hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied")
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline")
             } else {
-                "propertyDetails.propertyRecord.tenancy.provideLaterUnoccupied"
+                "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
             changeLinkMessageKey,
             UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +

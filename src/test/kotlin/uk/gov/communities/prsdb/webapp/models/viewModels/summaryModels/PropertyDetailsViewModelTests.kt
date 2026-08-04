@@ -259,7 +259,7 @@ class PropertyDetailsViewModelTests {
             )
 
         val licensingRow = viewModel.licensingSection.single()
-        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
+        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterNoDeadline", licensingRow.fieldValue)
     }
 
     @Test
@@ -292,7 +292,7 @@ class PropertyDetailsViewModelTests {
 
         val licensingRow = viewModel.licensingSection.single()
         assertEquals("propertyDetails.propertyRecord.licensing.rowName", licensingRow.fieldHeading)
-        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterUnoccupied", licensingRow.fieldValue)
+        assertEquals("propertyDetails.propertyRecord.licensing.provideLaterNoDeadline", licensingRow.fieldValue)
         assertNull(viewModel.licensingProvideLaterParagraph)
     }
 
@@ -383,7 +383,7 @@ class PropertyDetailsViewModelTests {
             )
 
         assertEquals(
-            "Message for propertyDetails.propertyRecord.tenancy.provideLaterOccupied",
+            "Message for propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline",
             viewModel.tenancySection.single().fieldValue,
         )
     }
@@ -406,7 +406,7 @@ class PropertyDetailsViewModelTests {
             )
 
         assertEquals(
-            "propertyDetails.propertyRecord.tenancy.provideLaterUnoccupied",
+            "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline",
             viewModel.tenancySection.single().fieldValue,
         )
     }
