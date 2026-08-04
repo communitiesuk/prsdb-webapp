@@ -33,8 +33,10 @@ update:
   title: Update Landlord record
 org:
   title: Organisation landlord record
-  heading: 'TODO PDJB-1251: Organisation landlord record'
-  organisationDetails: Organisation details
+  removeRecord: Delete organisation
+  tabs:
+    organisationDetails: Organisation details
+    organisationContacts: Organisation contacts
   name: Organisation name
   address: Organisation address
   email: Organisation email
@@ -54,3 +56,4 @@ org:
   leadTrusteeEmail: Email
   leadTrusteePhone: Phone number
   governingBodyHeading: Governing body members
+  governingBodyChange: Add, change or remove members of your governing body
