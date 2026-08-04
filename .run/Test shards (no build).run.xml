@@ -1,11 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Test all shards" type="CompoundRunConfigurationType">
+  <configuration default="false" name="Test shards (no build)" type="CompoundRunConfigurationType">
     <toRun name="Test shard 1 of 4" type="GradleRunConfiguration" />
     <toRun name="Test shard 2 of 4" type="GradleRunConfiguration" />
     <toRun name="Test shard 3 of 4" type="GradleRunConfiguration" />
     <toRun name="Test shard 4 of 4" type="GradleRunConfiguration" />
-    <method v="2">
-      <option name="Gradle.BeforeRunTask" enabled="true" tasks="testClasses" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
-    </method>
+    <method v="2" />
   </configuration>
 </component>
