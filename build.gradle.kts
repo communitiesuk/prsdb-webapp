@@ -165,8 +165,8 @@ tasks.withType<KotlinCompile> {
 val shardIndex = (project.findProperty("shardIndex") as String?)?.toInt()
 val shardCount = (project.findProperty("shardCount") as String?)?.toInt()
 
-require(shardCount == null || (shardIndex != null && shardIndex in 0 until shardCount)) {
-    "shardIndex must be set and within 0..<shardCount when shardCount is given"
+require(shardCount == null || (shardIndex != null && shardIndex in 1..shardCount)) {
+    "shardIndex must be set and within 1..shardCount when shardCount is given"
 }
 
 tasks.withType<Test> {
@@ -189,7 +189,8 @@ tasks.withType<Test> {
                 if (!path.endsWith(".class")) {
                     false
                 } else {
-                    Math.floorMod(path.substringBefore('$').hashCode(), shardCount) != shardIndex
+                    val topLevelClass = path.removeSuffix(".class").substringBefore('$')
+                    Math.floorMod(topLevelClass.hashCode(), shardCount) != shardIndex - 1
                 }
             }
         }
