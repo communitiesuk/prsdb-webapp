@@ -39,18 +39,20 @@ class LandlordController(
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
 
-    // TODO: PDJB-1278: Update landlord dashboard for org landlords
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
     fun landlordDashboard(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        check(landlord is IndividualLandlord)
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
+        // TODO: PDJB-1396: Add a generic way to get incomplete properties for any landlord type
+        val numberOfIncompleteProperties =
+            if (landlord is IndividualLandlord) landlord.incompleteProperties.size else 0
+
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
-                numberOfIncompleteProperties = landlord.incompleteProperties.size,
+                numberOfIncompleteProperties = numberOfIncompleteProperties,
                 numberOfComplianceActions = numberOfComplianceActions,
             )
 
