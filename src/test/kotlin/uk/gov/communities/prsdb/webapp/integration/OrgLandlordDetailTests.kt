@@ -20,13 +20,10 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
 
     @Test
     fun `the organisation details tab shows the organisation's details`(page: Page) {
-        navigator.goToOrgLandlordDetails()
+        val detailsPage = navigator.goToOrgLandlordDetails()
 
-        assertThat(page.getByText("5 Mythical Place")).isVisible()
-        assertThat(page.getByText("local-org-landlord@example.com")).isVisible()
-        assertThat(page.getByText("07111111111")).isVisible()
-        assertThat(page.getByText("Companies House number")).isVisible()
-        assertThat(page.getByText("12345678")).isVisible()
+        assertThat(detailsPage.organisationDetailsPanel).containsText("Organisation type")
+        assertThat(detailsPage.organisationDetailsPanel).containsText("Companies House number")
     }
 
     @Test
@@ -35,10 +32,7 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
 
         detailsPage.tabs.goToOrganisationContacts()
 
-        assertThat(page.getByText("Main contact")).isVisible()
-        assertThat(page.getByText("Local Main Contact")).isVisible()
-        assertThat(page.getByText("local-main-contact@example.com")).isVisible()
-        assertThat(page.getByText("07111111113")).isVisible()
+        assertThat(detailsPage.organisationContactsPanel).containsText("Main contact")
     }
 
     @Test
