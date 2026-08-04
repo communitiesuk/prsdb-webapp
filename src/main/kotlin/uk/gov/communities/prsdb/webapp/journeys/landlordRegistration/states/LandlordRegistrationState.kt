@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
@@ -18,6 +19,7 @@ interface LandlordRegistrationState :
     val individualLandlordLocationTask: IndividualLandlordLocationTask
     val orgLandlordRegistrationTask: OrgLandlordRegistrationTask
     val landlordTypeStep: LandlordTypeStep
+    val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     override val finishCyaStep: FinishCyaJourneyStep

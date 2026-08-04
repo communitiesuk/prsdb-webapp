@@ -28,16 +28,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTaskWithOccupationRequired
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -118,7 +117,7 @@ class UpdateOccupancyJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            task(journey.occupationTask) {
+            task(journey.occupationTask.inJourney(journey)) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -151,11 +150,11 @@ class UpdateOccupancyJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.occupationTask)
+                    checkAnswerTask(journey.occupationTask.inJourney(journey))
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
+                    checkAnswerTask(journey.householdsAndTenantsTask)
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
@@ -163,7 +162,7 @@ class UpdateOccupancyJourneyFactory(
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
@@ -177,7 +176,7 @@ class UpdateOccupancyJourneyFactory(
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
                 else -> {
@@ -251,7 +250,7 @@ class UpdateOccupancyJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateOccupancyJourney(
     // Occupancy task
-    override val occupationTask: OccupationTaskWithOccupationRequired,
+    override val occupationTask: OccupationTask,
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
@@ -285,6 +284,8 @@ class UpdateOccupancyJourney(
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+
+    override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
 }
 
 interface UpdateOccupancyJourneyState :

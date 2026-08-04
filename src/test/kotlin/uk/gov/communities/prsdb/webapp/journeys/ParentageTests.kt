@@ -212,9 +212,28 @@ class ParentageTests {
     }
 
     @Test
+    fun `isComplete on an outcome step returns a single parent with the condition checking that the step has any outcome`() {
+        // Arrange
+        val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
+
+        // Act
+        val parent = step.isComplete()
+
+        // Assert
+        whenever(step.outcome).thenReturn(TestEnum.ENUM_VALUE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome).thenReturn(TestEnum.ALTERNATIVE_VALUE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome).thenReturn(null)
+        assertFalse(parent.allowsChild())
+    }
+
+    @Test
     fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
         // Arrange
-        val task = mock<Task<*>>()
+        val task = mock<Task<*, *>>()
         val step = mock<SubjourneyExitStep>()
         whenever(task.exitStep).thenReturn(step)
 

@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -62,7 +62,7 @@ class UpdateEpcJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            duplicableTask(journey.epcDetailsTask) {
+            task(journey.epcDetailsTask) {
                 withDependencies { journey }
                 initialStep()
                 backUrl { propertyComplianceRoute }
@@ -108,7 +108,7 @@ class UpdateEpcJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            duplicableCheckAnswerTask(
+            checkAnswerTask(
                 journey.epcDetailsTask,
                 { journey },
             )

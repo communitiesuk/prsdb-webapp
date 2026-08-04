@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -24,6 +25,23 @@ class LookupAddressStepConfig(
         )
 
     override fun chooseTemplate(state: AddressSearchState) = "forms/lookupAddressForm"
+
+    override fun resolvePageContent(
+        state: AddressSearchState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val prefillPostcode = defaultContent[PREFILL_POSTCODE] as? String ?: return defaultContent
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? LookupAddressFormModel ?: return defaultContent
+        if (!formModel.postcode.isNullOrBlank()) return defaultContent
+        formModel.postcode = prefillPostcode
+        formModel.houseNameOrNumber = defaultContent[PREFILL_HOUSE_NAME_OR_NUMBER] as? String
+        return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_POSTCODE = "lookupPrefillPostcode"
+        const val PREFILL_HOUSE_NAME_OR_NUMBER = "lookupPrefillHouseNameOrNumber"
+    }
 
     override fun mode(state: AddressSearchState) =
         state.cachedAddresses?.let {

@@ -238,7 +238,7 @@ class LandlordServiceTests {
             val saved = landlordCaptor.value
             assertEquals("Test Org", saved.name)
             assertEquals(orgAddress, saved.address)
-            assertEquals("org@test.com", saved.email)
+            assertEquals("org@test.com", saved.wholeOrgEmail)
             assertEquals("020 1234 5678", saved.phoneNumber)
             assertEquals(true, saved.isCompany)
             assertEquals(false, saved.isCharity)
