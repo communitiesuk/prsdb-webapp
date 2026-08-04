@@ -33,7 +33,7 @@ update:
   title: Update Landlord record
 org:
   title: Organisation landlord record
-  heading: 'TODO PDJB-1276: Organisation landlord record'
+  heading: 'TODO PDJB-1251: Organisation landlord record'
   organisationDetails: Organisation details
   name: Organisation name
   address: Organisation address

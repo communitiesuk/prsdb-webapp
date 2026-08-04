@@ -25,7 +25,7 @@ class IndividualLandlord() : Landlord() {
         private set
 
     @Column(name = "individual_name")
-    lateinit var name: String
+    override lateinit var name: String
 
     @Column(name = "individual_email")
     lateinit var email: String
