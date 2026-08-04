@@ -65,6 +65,7 @@ class LandlordTypeChangeRedirectStepConfigTests {
     @Test
     fun `mode throws UnrecoverableJourneyStateException when no landlord type has been selected`() {
         setupLandlordType(null)
+        whenever(mockState.journeyId).thenReturn("journey-id")
 
         assertThrows(UnrecoverableJourneyStateException::class.java) {
             stepConfig.mode(mockState)
@@ -79,13 +80,15 @@ class LandlordTypeChangeRedirectStepConfigTests {
 
     private fun setupOrgTaskExitOutcome(outcome: SubjourneyComplete?) {
         val mockTask = mock<OrgLandlordRegistrationTask>()
-        whenever(mockTask.exitStep).thenReturn(mockExitStep(outcome))
+        val exitStep = mockExitStep(outcome)
+        whenever(mockTask.exitStep).thenReturn(exitStep)
         whenever(mockState.orgLandlordRegistrationTask).thenReturn(mockTask)
     }
 
     private fun setupIndividualTaskExitOutcome(outcome: SubjourneyComplete?) {
         val mockTask = mock<IndividualLandlordLocationTask>()
-        whenever(mockTask.exitStep).thenReturn(mockExitStep(outcome))
+        val exitStep = mockExitStep(outcome)
+        whenever(mockTask.exitStep).thenReturn(exitStep)
         whenever(mockState.individualLandlordLocationTask).thenReturn(mockTask)
     }
 
