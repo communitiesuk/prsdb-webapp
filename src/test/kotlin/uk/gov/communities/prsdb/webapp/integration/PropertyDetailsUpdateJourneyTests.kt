@@ -213,6 +213,17 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             }
 
             @Test
+            fun `Update licensing flow does not show provide this later action`(page: Page) {
+                featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+                val propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+
+                assertThat(updateLicensingTypePage.provideThisLaterButton).isHidden()
+            }
+
+            @Test
             fun `A property can have its licensing number updated again from the check licensing answers page`(page: Page) {
                 val firstNewLicenceNumber = "SL456"
                 val secondNewLicenceNumber = "SL789"

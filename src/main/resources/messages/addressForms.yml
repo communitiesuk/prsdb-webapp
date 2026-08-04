@@ -1,0 +1,93 @@
+nonEnglandOrWalesAddress:
+  heading: This private beta is only available to landlords who live in England or Wales
+  paragraph:
+    one: You cannot currently test this service without a contact address in England or Wales.
+    two:
+      beforeLink: 'If you made a mistake, '
+      linkText: go back
+      afterLink: .
+lookupAddress:
+  landlordRegistration:
+    fieldSetHeading: What is your contact address?
+    fieldSetHint: This must be an address within England or Wales.
+  trusteeRegistration:
+    fieldSetHeading: What is the lead trustee’s contact address?
+    fieldSetHint: Use an address where the trustee can receive correspondence
+  govBodyMemberRegistration:
+    fieldSetHeading: What is their contact address?
+    fieldSetHint: Use an address where they can receive correspondence
+  propertyRegistration:
+    fieldSetHeading: What is the property address?
+    fieldSetHint: This should be an address within England
+  organisationLandlordRegistration:
+    fieldSetHeading: What is your organisation’s address?
+    fieldSetHint: Enter a UK postal address, not a PO Box
+  postcode:
+    label: Postcode
+    hint: 'For example, AA3 1AB'
+    error:
+      missing: Enter a postcode
+  houseNameOrNumber:
+    label: Property name or number
+    hint: 'For example, 15 or Prospect Cottage'
+    error:
+      missing: Enter a house name or number
+selectAddress:
+  fieldSetHeading: Select your address
+  govBodyMemberRegistration:
+    fieldSetHeading: Select their address
+  organisationLandlordRegistration:
+    fieldSetHeading: Select your organisation’s address
+  fieldSetHint:
+    beforePostcode: '{0,,addressCount} addresses found for'
+    beforeHouseNameOrNumber: and
+    beforeLink: .
+    link: Search again
+  error:
+    missing: Select an address
+  addAddressManually: I want to manually enter my address
+noAddressFound:
+  heading: 'No matching address in England or Wales found for {0,,postcode} and {1,,houseNumber}'
+  english:
+    heading: 'No matching address in England found for {0,,postcode} and {1,,houseNameOrNumber}'
+    paragraph:
+      one:
+        beforeLink: Check the property address is in England and
+      two: Or you can enter the property address manually.
+  paragraph:
+    one:
+      beforeLink: Check the contact address is in England or Wales and
+      linkText: search again.
+    two: Or you can enter the contact address manually.
+  button:
+    text: Enter address manually
+manualAddress:
+  landlordRegistration:
+    fieldSetHeading: What is your contact address?
+    fieldSetHint: This must be an address within England or Wales.
+  trusteeRegistration:
+    fieldSetHeading: What is the lead trustee’s contact address?
+  govBodyMemberRegistration:
+    fieldSetHeading: What is their contact address?
+  propertyRegistration:
+    fieldSetHeading: What is the property address?
+  organisationLandlordRegistration:
+    fieldSetHeading: What is your organisation’s address?
+    fieldSetHint: Enter a UK postal address, not a PO Box
+  fieldSetHint: This should be an address within England
+  addressLineOne:
+    label: Address line 1
+    error:
+      missing: 'Enter the first line of an address, typically the building and street'
+  addressLineTwo:
+    label: Address line 2 (optional)
+  townOrCity:
+    label: Town or city
+    error:
+      missing: Enter town or city
+  county:
+    label: County (optional)
+  postcode:
+    label: Postcode
+    error:
+      missing: Enter postcode

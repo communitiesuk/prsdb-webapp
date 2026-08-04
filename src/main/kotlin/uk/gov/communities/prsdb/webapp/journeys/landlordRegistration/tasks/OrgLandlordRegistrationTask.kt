@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
@@ -18,12 +17,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
     override val orgNameStep: OrgNameStep,
-    override val orgAddressStep: OrgAddressStep,
+    override val orgAddressTask: OrgAddressTask,
     override val orgEmailStep: OrgEmailStep,
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
@@ -42,16 +42,15 @@ class OrgLandlordRegistrationTask(
         subJourney(state) {
             step(journey.orgNameStep) {
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
-                nextStep { journey.orgAddressStep }
+                nextStep { journey.orgAddressTask.firstStep }
             }
-            step(journey.orgAddressStep) {
-                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+            task(journey.orgAddressTask, OrgAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgNameStep.isComplete() }
                 nextStep { journey.orgEmailStep }
             }
             step(journey.orgEmailStep) {
                 routeSegment(OrgEmailStep.ROUTE_SEGMENT)
-                parents { journey.orgAddressStep.isComplete() }
+                parents { journey.orgAddressTask.isComplete() }
                 nextStep { journey.orgPhoneNumberStep }
             }
             step(journey.orgPhoneNumberStep) {

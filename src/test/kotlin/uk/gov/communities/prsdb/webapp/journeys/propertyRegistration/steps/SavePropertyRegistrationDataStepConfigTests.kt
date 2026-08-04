@@ -51,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExempt
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
@@ -187,6 +186,58 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = eq(epcExemptionReason),
             epcMeesExemptionReason = eq(meesExemptionReason),
             epcProvideLater = eq(false),
+            licenseProvideLater = eq(false),
+            tenancyProvideLater = any(),
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached passes licenseProvideLater as true when the user provides licensing later`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.licensingTask.licensingTypeStep.outcome).thenReturn(LicensingTypeMode.PROVIDE_LATER)
+        whenever(mockState.licensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = anyOrNull(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = anyOrNull(),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = anyOrNull(),
+            licenseProvideLater = eq(true),
             tenancyProvideLater = eq(false),
         )
     }
@@ -235,6 +286,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = anyOrNull(),
             epcMeesExemptionReason = anyOrNull(),
             epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = any(),
         )
 
@@ -289,6 +341,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
         )
     }
@@ -339,6 +392,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
         )
     }
@@ -389,6 +443,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
             epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
         )
     }
@@ -450,13 +505,13 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockPropertyTypeStep.formModel).thenReturn(propertyTypeFormModel)
 
         val mockLicensingTypeStep = mock<LicensingTypeStep>()
-        val licensingTypeFormModel = LicensingTypeFormModel().apply { licensingType = LicensingType.SELECTIVE_LICENCE }
         val mockLicensingTask = mock<LicensingTask>()
         whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
         whenever(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
-        whenever(mockLicensingTypeStep.formModel).thenReturn(licensingTypeFormModel)
+        whenever(mockLicensingTypeStep.outcome).thenReturn(LicensingTypeMode.SELECTIVE_LICENCE)
 
         whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
+        whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
 
         val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }

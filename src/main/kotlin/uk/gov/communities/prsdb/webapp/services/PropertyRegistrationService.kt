@@ -68,6 +68,7 @@ class PropertyRegistrationService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
+        licenseProvideLater: Boolean = false,
         tenancyProvideLater: Boolean? = null,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -93,6 +94,7 @@ class PropertyRegistrationService(
                 markedJointLandlord,
                 tenancyProvideLater,
                 mutableSetOf(landlord),
+                licenseProvideLater = licenseProvideLater,
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
@@ -139,6 +141,7 @@ class PropertyRegistrationService(
         markedJointLandlord: Boolean,
         tenancyProvideLater: Boolean?,
         landlords: MutableSet<Landlord>,
+        licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -147,7 +150,7 @@ class PropertyRegistrationService(
         val address = addressService.findOrCreateAddress(addressModel)
 
         val license =
-            if (licenseType != LicensingType.NO_LICENSING) {
+            if (LicenseService.licenceShouldBeStored(licenseType)) {
                 licenseService.createLicense(licenseType, licenceNumber)
             } else {
                 null
@@ -172,6 +175,7 @@ class PropertyRegistrationService(
             tenancyProvideLater = tenancyProvideLater,
             address = address,
             license = license,
+            licenseProvideLater = licenseProvideLater,
         )
     }
 

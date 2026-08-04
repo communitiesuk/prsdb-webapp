@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -74,9 +73,7 @@ class SavePropertyRegistrationDataStepConfig(
                 } else {
                     null
                 },
-            licenseType =
-                state.licensingTask.licensingTypeStep.formModel
-                    .notNullValue(LicensingTypeFormModel::licensingType),
+            licenseType = state.licensingTask.getLicensingType(),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
             ownershipType =
                 state.ownershipAndLandlordsTask.ownershipTypeStep.formModel
@@ -168,6 +165,7 @@ class SavePropertyRegistrationDataStepConfig(
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
             epcProvideLater = state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            licenseProvideLater = state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
             tenancyProvideLater = state.provideTenancyDetailsLater,
         )
     }

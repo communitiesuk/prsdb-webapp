@@ -10,7 +10,7 @@ class LookupAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.lookupAddress.postcode.error.missing",
+                messageKey = "addressForms.lookupAddress.postcode.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
@@ -20,7 +20,7 @@ class LookupAddressFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.lookupAddress.houseNameOrNumber.error.missing",
+                messageKey = "addressForms.lookupAddress.houseNameOrNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],

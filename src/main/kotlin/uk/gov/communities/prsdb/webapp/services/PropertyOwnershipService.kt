@@ -63,6 +63,7 @@ class PropertyOwnershipService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean = false,
+        licenseProvideLater: Boolean? = null,
         tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
@@ -88,6 +89,7 @@ class PropertyOwnershipService(
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
                 markedJointLandlord = markedJointLandlord,
+                licenseProvideLater = licenseProvideLater,
                 tenancyProvideLater = tenancyProvideLater,
             ).apply {
                 if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
@@ -236,6 +238,7 @@ class PropertyOwnershipService(
                 licenceNumber,
             )
         propertyOwnership.license = updatedLicence
+        propertyOwnership.licenseProvideLater = false
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

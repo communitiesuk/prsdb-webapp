@@ -23,13 +23,16 @@ class GovBodyMemberAddressTask(
     ) {
     override val lookupAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.lookupAddress.govBodyMemberRegistration.fieldSetHeading",
-            "fieldSetHint" to "forms.lookupAddress.govBodyMemberRegistration.fieldSetHint",
+            "fieldSetHeading" to "addressForms.lookupAddress.govBodyMemberRegistration.fieldSetHeading",
+            "fieldSetHint" to "addressForms.lookupAddress.govBodyMemberRegistration.fieldSetHint",
         )
+
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf("fieldSetHeading" to "addressForms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
 
     override val manualAddressContentProperties: Map<String, Any?> =
         mapOf(
-            "fieldSetHeading" to "forms.manualAddress.govBodyMemberRegistration.fieldSetHeading",
+            "fieldSetHeading" to "addressForms.manualAddress.govBodyMemberRegistration.fieldSetHeading",
             "fieldSetHint" to null,
         )
 
