@@ -79,6 +79,10 @@ fun Task<*, *>.isComplete() =
         exitStep.outcome == SubjourneyComplete.COMPLETE
     }
 
+/**
+ * Parentage that is satisfied once this step has any outcome, regardless of which outcome was chosen.
+ * This is the step-level counterpart to [Task.isComplete], which checks that a task's exit step has been reached.
+ */
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.isComplete(): Parentage = SingleParent(this) { outcome != null }
 
 fun JourneyStep<*, *, *>.always(): Parentage = SingleParent(this) { true }
