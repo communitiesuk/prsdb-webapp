@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -11,6 +12,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -77,5 +79,30 @@ class LicenseServiceTests {
         verify(mockLicenseRepository).delete(licence)
 
         assertNull(updatedLicence)
+    }
+
+    @Test
+    fun `updateLicence returns null and does not delete when there is no existing licence and the new licenceType is NO_LICENSING`() {
+        val updatedLicence = licenseService.updateLicence(null, LicensingType.NO_LICENSING, null)
+
+        verify(mockLicenseRepository, never()).delete(any(License::class.java))
+        verify(mockLicenseRepository, never()).save(any(License::class.java))
+
+        assertNull(updatedLicence)
+    }
+
+    @Test
+    fun `licenceShouldBeStored returns true for a licence type other than NO_LICENSING or PROVIDE_LATER`() {
+        assertTrue(LicenseService.licenceShouldBeStored(LicensingType.SELECTIVE_LICENCE))
+    }
+
+    @Test
+    fun `licenceShouldBeStored returns false for NO_LICENSING`() {
+        assertFalse(LicenseService.licenceShouldBeStored(LicensingType.NO_LICENSING))
+    }
+
+    @Test
+    fun `licenceShouldBeStored returns false for PROVIDE_LATER`() {
+        assertFalse(LicenseService.licenceShouldBeStored(LicensingType.PROVIDE_LATER))
     }
 }

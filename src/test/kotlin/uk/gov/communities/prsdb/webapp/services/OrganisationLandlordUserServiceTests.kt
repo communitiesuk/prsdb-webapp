@@ -29,11 +29,19 @@ class OrganisationLandlordUserServiceTests {
     @Test
     fun `createOrganisationLandlordUser saves and returns an OrganisationLandlordUser linking landlord to user`() {
         val baseUser = PrsdbUser("user-123")
+        val name = "Alice Registrant"
+        val email = "alice@example.com"
 
         whenever(mockOrganisationLandlordUserRepository.save(any<OrganisationLandlordUser>()))
             .thenAnswer { it.arguments[0] }
 
-        val result = organisationLandlordUserService.createOrganisationLandlordUser(mockOrganisationLandlord, baseUser)
+        val result =
+            organisationLandlordUserService.createOrganisationLandlordUser(
+                mockOrganisationLandlord,
+                baseUser,
+                name,
+                email,
+            )
 
         val captor = captor<OrganisationLandlordUser>()
         verify(mockOrganisationLandlordUserRepository).save(captor.capture())
@@ -41,6 +49,8 @@ class OrganisationLandlordUserServiceTests {
         val saved = captor.value
         assertEquals(mockOrganisationLandlord, saved.organisationLandlord)
         assertEquals(baseUser, saved.baseUser)
+        assertEquals(name, saved.name)
+        assertEquals(email, saved.email)
         assertEquals(result, saved)
     }
 }

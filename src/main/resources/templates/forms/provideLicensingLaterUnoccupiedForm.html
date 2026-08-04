@@ -1,0 +1,26 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{registerProperty.provideLicensingLater.unoccupied.heading}">registerProperty.provideLicensingLater.unoccupied.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.unoccupied.paragraph.one}">registerProperty.provideLicensingLater.unoccupied.paragraph.one</p>
+            <h2 class="govuk-heading-m" th:text="#{registerProperty.provideLicensingLater.unoccupied.whenToAdd.heading}">registerProperty.provideLicensingLater.unoccupied.whenToAdd.heading</h2>
+            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.unoccupied.whenToAdd.paragraph.one}">registerProperty.provideLicensingLater.unoccupied.whenToAdd.paragraph.one</p>
+            <p class="govuk-body" th:text="#{registerProperty.provideLicensingLater.unoccupied.whenToAdd.paragraph.two}">registerProperty.provideLicensingLater.unoccupied.whenToAdd.paragraph.two</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.one}">registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.one</li>
+                <li th:text="#{registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.two}">registerProperty.provideLicensingLater.weWillNeedToKnow.bullet.two</li>
+            </ul>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>

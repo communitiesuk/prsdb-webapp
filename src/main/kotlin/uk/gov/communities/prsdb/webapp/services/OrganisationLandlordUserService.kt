@@ -15,5 +15,10 @@ class OrganisationLandlordUserService(
     fun createOrganisationLandlordUser(
         organisationLandlord: OrganisationLandlord,
         baseUser: PrsdbUser,
-    ): OrganisationLandlordUser = organisationLandlordUserRepository.save(OrganisationLandlordUser(organisationLandlord, baseUser))
+        name: String,
+        email: String,
+    ): OrganisationLandlordUser =
+        organisationLandlordUserRepository.save(
+            OrganisationLandlordUser(organisationLandlord, baseUser, name, email),
+        )
 }

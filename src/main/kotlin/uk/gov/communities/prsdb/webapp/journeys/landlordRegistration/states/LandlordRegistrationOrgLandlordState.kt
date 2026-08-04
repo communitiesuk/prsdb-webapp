@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
@@ -12,10 +11,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadT
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgNameStep: OrgNameStep
-    val orgAddressStep: OrgAddressStep
+    val orgAddressTask: OrgAddressTask
     val orgEmailStep: OrgEmailStep
     val orgPhoneNumberStep: OrgPhoneNumberStep
     val orgTypeStep: OrgTypeStep

@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
@@ -69,6 +68,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
@@ -140,7 +140,7 @@ class PropertyRegistrationJourneyFactory(
                 HmoMandatoryLicenceStep.ROUTE_SEGMENT,
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
                 -> {
-                    checkAnswerTask(journey.licensingTask)
+                    checkAnswerTask(journey.licensingTask, { journey })
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
@@ -282,6 +282,7 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
                 task(journey.licensingTask) {
+                    withDependencies { journey }
                     parents { journey.ownershipAndLandlordsTask.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
@@ -438,6 +439,7 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.rentedOut.licensing", shouldUseNumbering = false)
                 task(journey.licensingTask) {
+                    withDependencies { journey }
                     parents {
                         OrParents(
                             journey.occupied.hasOutcome(YesOrNo.YES),
@@ -637,6 +639,7 @@ class PropertyRegistrationJourney(
     override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
 
     override val allowProvideCertificateLaterRoute: Boolean = true
+    override val allowProvideLicensingLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -646,11 +649,7 @@ class PropertyRegistrationJourney(
 
     override val loggedInLandlordEmail: String?
         // TODO: PDJB-1274: Update emails to account for org landlord
-        get() {
-            val landlord = userToLandlordService.getCurrentLandlordForUser()
-            check(landlord is IndividualLandlord)
-            return landlord.email
-        }
+        get() = userToLandlordService.getCurrentLandlordForUser().email
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
@@ -663,6 +662,7 @@ interface PropertyRegistrationJourneyState :
     GasSafetyDependencies,
     ElectricalSafetyDependencies,
     EpcDependencies,
+    LicensingDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep

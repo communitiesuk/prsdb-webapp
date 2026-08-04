@@ -13,6 +13,9 @@ class License(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 ) : ModifiableAuditableEntity() {
+    // This only ever holds an actual licensed type (e.g. SELECTIVE_LICENCE, HMO_MANDATORY_LICENCE,
+    // HMO_ADDITIONAL_LICENCE). A License is never created for NO_LICENSING or PROVIDE_LATER, so this must not be
+    // used to determine a property's overall licensing state. Use PropertyOwnership.licenseType for that.
     @Column(nullable = false)
     lateinit var licenseType: LicensingType
 
