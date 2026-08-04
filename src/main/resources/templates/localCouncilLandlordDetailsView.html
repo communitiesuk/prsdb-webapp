@@ -4,7 +4,7 @@
     <main class="govuk-main-wrapper" id="main-content">
         <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 
-        <h1 class="govuk-heading-l" th:text="${landlord.name}">name</h1>
+        <h1 class="govuk-heading-l" th:text="${landlord.name}">landlord.name</h1>
 
         <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${landlord.name}, ${lastModifiedDate})}"></div>
 
@@ -24,7 +24,7 @@
                         <tbody class="govuk-table__body">
                         <tr class="govuk_table__row" th:each="property: ${registeredPropertiesList}">
                             <td class="govuk-table__cell">
-                                <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">${property.address}</a>
+                                <a class="govuk-link" th:text="${property.address}" th:href="@{${property.recordLink}}">property.address</a>
                             </td>
                             <td class="govuk-table__cell" th:text="${property.registrationNumber}"></td>
                             <td class="govuk-table__cell" th:text="${property.localCouncilName}"></td>
