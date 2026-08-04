@@ -143,7 +143,6 @@ class LandlordService(
         checkUpdateIsValid()
         val landlordEntity = userToLandlordService.getCurrentLandlordForUser()
         check(landlordEntity is IndividualLandlord)
-        // TODO: PDJB-1274: Update emails to account for org landlord
 
         val existingEmail = landlordEntity.email
 
