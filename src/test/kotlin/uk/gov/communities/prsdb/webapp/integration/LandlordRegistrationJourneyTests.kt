@@ -359,9 +359,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
 
-        // TODO: PDJB-1278: Check that clicking the go to dashboard button goes to the dashboard
+        val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
+        assertThat(dashboardPage.dashboardBannerHeading).hasText("Test Organisation Name")
     }
 
     @Test
