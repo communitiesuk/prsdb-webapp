@@ -83,6 +83,10 @@ class LandlordDetailsController(
         model.addAttribute("governingBodyMembers", governingBodyMembers)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
+        model.addAttribute(
+            "deleteLandlordRecordUrl",
+            DeregisterOrganisationLandlordController.ORGANISATION_LANDLORD_DEREGISTRATION_PATH,
+        )
 
         return "orgLandlordDetailsView"
     }
