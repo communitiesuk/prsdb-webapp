@@ -117,6 +117,7 @@ class LandlordDashboardUrlTests(
                 mock(),
                 mock(),
                 mockEmailNotificationService,
+                mock(),
                 absoluteUrlProvider,
             )
 
