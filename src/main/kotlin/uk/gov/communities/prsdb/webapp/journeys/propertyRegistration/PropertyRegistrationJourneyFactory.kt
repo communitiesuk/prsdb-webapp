@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
