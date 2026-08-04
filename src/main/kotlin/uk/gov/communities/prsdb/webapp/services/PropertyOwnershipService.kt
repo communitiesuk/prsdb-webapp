@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
@@ -86,7 +87,7 @@ class PropertyOwnershipService(
                 rentAmount = rentAmount,
                 markedJointLandlord = markedJointLandlord,
             ).apply {
-                if (isOccupied) lastOccupiedDate = LocalDate.now()
+                if (isOccupied) lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
             },
         )
     }
@@ -276,7 +277,7 @@ class PropertyOwnershipService(
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
         if (!wasOccupied && propertyOwnership.isOccupied) {
-            propertyOwnership.lastOccupiedDate = LocalDate.now()
+            propertyOwnership.lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         }
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
@@ -297,7 +298,7 @@ class PropertyOwnershipService(
         if (!wasOccupied && propertyOwnership.isOccupied) {
             // Becoming occupied defaults to "provide tenancy details later": flag the property so the record shows
             // the deadline prompt (lastOccupiedDate + 28 days) until the landlord provides the details.
-            propertyOwnership.lastOccupiedDate = LocalDate.now()
+            propertyOwnership.lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
             propertyOwnership.tenancyProvideLater = true
         }
         if (wasOccupied && !propertyOwnership.isOccupied) {
