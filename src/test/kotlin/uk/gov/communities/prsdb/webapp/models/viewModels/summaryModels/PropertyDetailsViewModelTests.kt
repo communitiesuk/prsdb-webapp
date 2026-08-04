@@ -502,9 +502,9 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             )
 
@@ -527,13 +527,18 @@ class PropertyDetailsViewModelTests {
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             ),
             viewModel.tenancySection.map { it.fieldHeading },
+        )
+
+        assertEquals(
+            listOf(true, false, true, false, false, true, false),
+            viewModel.tenancySection.map { it.withoutBottomBorder },
         )
 
         fun rowValue(heading: String) = viewModel.tenancySection.single { it.fieldHeading == heading }.fieldValue
