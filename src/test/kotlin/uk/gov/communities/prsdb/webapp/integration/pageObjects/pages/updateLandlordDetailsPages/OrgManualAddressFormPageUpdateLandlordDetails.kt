@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordAddressController

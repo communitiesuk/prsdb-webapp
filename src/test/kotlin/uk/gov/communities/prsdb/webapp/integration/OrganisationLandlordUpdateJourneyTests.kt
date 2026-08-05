@@ -8,11 +8,12 @@ import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLookupAddressFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgManualAddressFormPageUpdateLandlordDetails
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgSelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgLookupAddressFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNoAddressFoundFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgSelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 @WithOrgLandlordProfile
@@ -57,13 +58,13 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
 
-        val lookupAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val newSelectedAddress = "1 PRSDB Square, EG1 2AA"
-        val selectAddressPage = assertPageIs(page, OrgSelectAddressFormPageUpdateLandlordDetails::class)
-        BaseComponent.assertThat(selectAddressPage.warning).isVisible()
-        selectAddressPage.selectAddressAndSubmit(newSelectedAddress)
+        val selectOrgAddressPage = assertPageIs(page, OrgSelectAddressFormPageUpdateLandlordDetails::class)
+        BaseComponent.assertThat(selectOrgAddressPage.warning).isVisible()
+        selectOrgAddressPage.selectAddressAndSubmit(newSelectedAddress)
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(updatedDetailsPage.mainContent).containsText(newSelectedAddress)
@@ -74,18 +75,18 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
 
-        val lookupAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+        val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
-        val selectAddressPage = assertPageIs(page, OrgSelectAddressFormPageUpdateLandlordDetails::class)
-        selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
+        val selectOrgAddressPage = assertPageIs(page, OrgSelectAddressFormPageUpdateLandlordDetails::class)
+        selectOrgAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
 
         val newFirstLine = "3 Example Road"
         val newTown = "Vilton"
         val newPostcode = "AB1 9YZ"
-        val manualAddressPage = assertPageIs(page, OrgManualAddressFormPageUpdateLandlordDetails::class)
-        BaseComponent.assertThat(manualAddressPage.warning).isVisible()
-        manualAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
+        val manualOrgAddressPage = assertPageIs(page, OrgManualAddressFormPageUpdateLandlordDetails::class)
+        BaseComponent.assertThat(manualOrgAddressPage.warning).isVisible()
+        manualOrgAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
 
         val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -98,5 +99,50 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
 
         assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+    }
+
+    @Test
+    fun `Submitting an empty organisation house number and postcode on the address lookup page shows validation errors`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+
+        val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("", "")
+        assertThat(lookupOrgAddressPage.form.getErrorMessage("houseNameOrNumber")).containsText("Enter a house name or number")
+        assertThat(lookupOrgAddressPage.form.getErrorMessage("postcode")).containsText("Enter a postcode")
+    }
+
+    @Test
+    fun `Submitting an empty organisation address, city and postcode on the manual address page shows validation errors`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+
+        val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("1", "1")
+
+        val noMatchingOrgAddressPage = assertPageIs(page, OrgNoAddressFoundFormPageUpdateLandlordDetails::class)
+        noMatchingOrgAddressPage.form.submit()
+
+        val manualOrgAddressPage = assertPageIs(page, OrgManualAddressFormPageUpdateLandlordDetails::class)
+        manualOrgAddressPage.submitAddress(addressLineOne = "", townOrCity = "", postcode = "")
+
+        assertThat(manualOrgAddressPage.form.getErrorMessage("addressLineOne"))
+            .containsText("Enter the first line of an address, typically the building and street")
+        assertThat(manualOrgAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+        assertThat(manualOrgAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+    }
+
+    @Test
+    fun `Submitting the form with no option selected on organisation select address page shows a validation error`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationAddressChangeLinkAndWait()
+
+        val lookupOrgAddressPage = assertPageIs(page, OrgLookupAddressFormPageUpdateLandlordDetails::class)
+        lookupOrgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectOrgAddressPage = assertPageIs(page, OrgSelectAddressFormPageUpdateLandlordDetails::class)
+        selectOrgAddressPage.form.submit()
+
+        assertThat(selectOrgAddressPage.form.getErrorMessage("address")).containsText("Select an address")
     }
 }
