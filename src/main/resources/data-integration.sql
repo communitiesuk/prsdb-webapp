@@ -237,10 +237,10 @@ VALUES (11, 900, 1, '2026-07-30 00:00:00+00',
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO organisation_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
 VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'registrant@example.com', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
 
-SELECT setval(pg_get_serial_sequence('organisation_landlord_user', 'id'), (SELECT MAX(id) FROM organisation_landlord_user));
+SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
 INSERT INTO organisation_governing_body_member (id, organisation_landlord_id, type, name, date_of_birth, address_id, created_date)
 VALUES (1, 11, 1, 'Governing Body Trustee', '1985-03-20', 1, '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;

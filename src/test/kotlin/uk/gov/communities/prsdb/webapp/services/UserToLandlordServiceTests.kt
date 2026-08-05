@@ -15,9 +15,9 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -28,10 +28,10 @@ class UserToLandlordServiceTests {
     private lateinit var individualLandlordRepository: IndividualLandlordRepository
 
     @Mock
-    private lateinit var organisationLandlordUserRepository: OrganisationLandlordUserRepository
+    private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
     private val service: UserToLandlordService
-        get() = UserToLandlordService(individualLandlordRepository, organisationLandlordUserRepository)
+        get() = UserToLandlordService(individualLandlordRepository, organisationalLandlordUserRepository)
 
     @AfterEach
     fun tearDown() {
@@ -55,9 +55,9 @@ class UserToLandlordServiceTests {
         val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
         val landlord = OrganisationLandlord()
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
-        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
             listOf(
-                OrganisationLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
+                OrganisationalLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
             ),
         )
 
@@ -70,7 +70,7 @@ class UserToLandlordServiceTests {
     fun `getLandlordForBaseUserId throws when user is not associated with a landlord`() {
         val baseUserId = "non-landlord-user"
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
-        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
         assertThrows<ResponseStatusException> {
             service.getLandlordForBaseUserId(baseUserId)
@@ -81,7 +81,7 @@ class UserToLandlordServiceTests {
     fun `getLandlordForBaseUserIdOrNull returns null when user is not associated with a landlord`() {
         val baseUserId = "non-landlord-user"
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
-        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
         val result = service.getLandlordForBaseUserIdOrNull(baseUserId)
 
@@ -106,11 +106,52 @@ class UserToLandlordServiceTests {
         val baseUserId = "non-landlord-user"
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
-        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(emptyList())
 
         val exception = assertThrows<ResponseStatusException> { service.getCurrentLandlordForUser() }
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+    }
+
+    @Test
+    fun `getCurrentOrganisationLandlordForUser returns organisation landlord for authenticated user`() {
+        val baseUserId = "organisation-user"
+        val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
+        val landlord = OrganisationLandlord()
+        setMockPrincipal(baseUserId)
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
+        val organisationalLandlordUser =
+            OrganisationalLandlordUser(
+                organisationLandlord = landlord,
+                baseUser = baseUser,
+                name = "Alice Registrant",
+                email = "alice@example.com",
+            )
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
+            listOf(organisationalLandlordUser),
+        )
+
+        val result = service.getCurrentOrganisationLandlordForUser()
+
+        assertEquals(landlord, result)
+    }
+
+    @Test
+    fun `getCurrentOrganisationLandlordForUser throws when authenticated user has an individual landlord`() {
+        val baseUserId = "individual-user"
+        setMockPrincipal(baseUserId)
+        val mockLandlord = MockLandlordData.createIndividualLandlord()
+        whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId))
+            .thenReturn(
+                mockLandlord,
+            )
+
+        val exception =
+            assertThrows<IllegalStateException> {
+                service.getCurrentOrganisationLandlordForUser()
+            }
+
+        assertEquals("Expected organisation landlord, but got INDIVIDUAL", exception.message)
     }
 
     private fun setMockPrincipal(name: String) {
