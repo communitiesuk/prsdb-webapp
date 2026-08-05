@@ -644,6 +644,28 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
     }
 
+    @Test
+    fun `The landlord type change link re-walks the individual journey when switching back to a previously-completed individual type`(
+        page: Page,
+    ) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage =
+            navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                LandlordStateSessionBuilder
+                    .beforeOrgCheckAnswers()
+                    .withEnglandOrWalesResidence()
+                    .withLookupAddress()
+                    .withSelectedAddress(),
+            )
+        checkAnswersPage.landlordDetails.landlordTypeRow.clickNamedActionLinkAndWait("Change")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+    }
+
     // TODO PDJB-1237: add a test for the organisation type change link once the org type update journey is wired into
     //  LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgTypeStep.ROUTE_SEGMENT branch is currently empty).
 

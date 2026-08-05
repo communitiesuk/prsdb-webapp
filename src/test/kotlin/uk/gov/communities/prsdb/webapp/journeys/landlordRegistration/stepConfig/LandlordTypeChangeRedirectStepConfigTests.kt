@@ -26,6 +26,7 @@ class LandlordTypeChangeRedirectStepConfigTests {
     fun `mode returns ORGANISATION_TASK when the organisation type is selected and its task is incomplete`() {
         setupLandlordType(LandlordTypeMode.ORGANISATION)
         setupOrgTaskExitOutcome(null)
+        setupLandlordTypeUnchanged(true)
 
         val result = stepConfig.mode(mockState)
 
@@ -33,9 +34,10 @@ class LandlordTypeChangeRedirectStepConfigTests {
     }
 
     @Test
-    fun `mode returns CHECK_ANSWERS when the organisation type is selected and its task is complete`() {
+    fun `mode returns CHECK_ANSWERS when the organisation type is unchanged and its task is complete`() {
         setupLandlordType(LandlordTypeMode.ORGANISATION)
         setupOrgTaskExitOutcome(SubjourneyComplete.COMPLETE)
+        setupLandlordTypeUnchanged(true)
 
         val result = stepConfig.mode(mockState)
 
@@ -43,9 +45,21 @@ class LandlordTypeChangeRedirectStepConfigTests {
     }
 
     @Test
+    fun `mode returns ORGANISATION_TASK when the organisation type is newly selected even if its task is complete`() {
+        setupLandlordType(LandlordTypeMode.ORGANISATION)
+        setupOrgTaskExitOutcome(SubjourneyComplete.COMPLETE)
+        setupLandlordTypeUnchanged(false)
+
+        val result = stepConfig.mode(mockState)
+
+        assertEquals(LandlordTypeChangeDestination.ORGANISATION_TASK, result)
+    }
+
+    @Test
     fun `mode returns INDIVIDUAL_TASK when the individual type is selected and its task is incomplete`() {
         setupLandlordType(LandlordTypeMode.INDIVIDUAL)
         setupIndividualTaskExitOutcome(null)
+        setupLandlordTypeUnchanged(true)
 
         val result = stepConfig.mode(mockState)
 
@@ -53,13 +67,25 @@ class LandlordTypeChangeRedirectStepConfigTests {
     }
 
     @Test
-    fun `mode returns CHECK_ANSWERS when the individual type is selected and its task is complete`() {
+    fun `mode returns CHECK_ANSWERS when the individual type is unchanged and its task is complete`() {
         setupLandlordType(LandlordTypeMode.INDIVIDUAL)
         setupIndividualTaskExitOutcome(SubjourneyComplete.COMPLETE)
+        setupLandlordTypeUnchanged(true)
 
         val result = stepConfig.mode(mockState)
 
         assertEquals(LandlordTypeChangeDestination.CHECK_ANSWERS, result)
+    }
+
+    @Test
+    fun `mode returns INDIVIDUAL_TASK when the individual type is newly selected even if its task is complete`() {
+        setupLandlordType(LandlordTypeMode.INDIVIDUAL)
+        setupIndividualTaskExitOutcome(SubjourneyComplete.COMPLETE)
+        setupLandlordTypeUnchanged(false)
+
+        val result = stepConfig.mode(mockState)
+
+        assertEquals(LandlordTypeChangeDestination.INDIVIDUAL_TASK, result)
     }
 
     @Test
@@ -76,6 +102,15 @@ class LandlordTypeChangeRedirectStepConfigTests {
         val mockLandlordTypeStep = mock<LandlordTypeStep>()
         whenever(mockLandlordTypeStep.outcome).thenReturn(outcome)
         whenever(mockState.landlordTypeStep).thenReturn(mockLandlordTypeStep)
+    }
+
+    private fun setupLandlordTypeUnchanged(unchanged: Boolean) {
+        val currentData = mapOf<String, Any?>("landlordType" to "ORGANISATION")
+        val baseData = if (unchanged) currentData else mapOf<String, Any?>("landlordType" to "INDIVIDUAL")
+        whenever(mockState.getStepData(LandlordTypeStep.ROUTE_SEGMENT)).thenReturn(currentData)
+        val mockBaseState = mock<LandlordRegistrationState>()
+        whenever(mockBaseState.getStepData(LandlordTypeStep.ROUTE_SEGMENT)).thenReturn(baseData)
+        whenever(mockState.getBaseJourneyState()).thenReturn(mockBaseState)
     }
 
     private fun setupOrgTaskExitOutcome(outcome: SubjourneyComplete?) {
