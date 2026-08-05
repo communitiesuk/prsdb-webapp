@@ -10,18 +10,18 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationLandlordController.Companion.ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController.Companion.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordDeregistration.OrganisationLandlordDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep
 
-@WebMvcTest(DeregisterOrganisationLandlordController::class)
-class DeregisterOrganisationLandlordControllerTests(
+@WebMvcTest(DeregisterOrganisationalLandlordController::class)
+class DeregisterOrganisationalLandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var organisationLandlordDeregistrationJourneyFactory: OrganisationLandlordDeregistrationJourneyFactory
+    private lateinit var organisationalLandlordDeregistrationJourneyFactory: OrganisationalLandlordDeregistrationJourneyFactory
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -29,7 +29,7 @@ class DeregisterOrganisationLandlordControllerTests(
     @Test
     fun `getJourneyStep returns a redirect for an unauthenticated user`() {
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -39,7 +39,7 @@ class DeregisterOrganisationLandlordControllerTests(
     @WithMockUser
     fun `getJourneyStep returns 403 for a user who is not a landlord`() {
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { isForbidden() }
             }
@@ -49,14 +49,14 @@ class DeregisterOrganisationLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
-            organisationLandlordDeregistrationJourneyFactory.createJourneySteps(),
+            organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
         ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { isOk() }
             }
@@ -66,11 +66,11 @@ class DeregisterOrganisationLandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            organisationLandlordDeregistrationJourneyFactory.createJourneySteps(),
+            organisationalLandlordDeregistrationJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/unknown-step")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/unknown-step")
             .andExpect {
                 status { isNotFound() }
             }
@@ -81,15 +81,15 @@ class DeregisterOrganisationLandlordControllerTests(
     fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
         val journeyId = "test-journey-id"
 
-        whenever(organisationLandlordDeregistrationJourneyFactory.createJourneySteps())
+        whenever(organisationalLandlordDeregistrationJourneyFactory.createJourneySteps())
             .thenThrow(NoSuchJourneyException())
-        whenever(organisationLandlordDeregistrationJourneyFactory.initializeJourneyState()).thenReturn(journeyId)
+        whenever(organisationalLandlordDeregistrationJourneyFactory.initializeJourneyState()).thenReturn(journeyId)
 
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}?journeyId=$journeyId")
+                redirectedUrl("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}?journeyId=$journeyId")
             }
     }
 
@@ -97,7 +97,7 @@ class DeregisterOrganisationLandlordControllerTests(
     @WithMockUser
     fun `getConfirmation returns 200 for an authenticated user without the landlord role`() {
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
             }
@@ -106,7 +106,7 @@ class DeregisterOrganisationLandlordControllerTests(
     @Test
     fun `getConfirmation returns a redirect for an unauthenticated user`() {
         mvc
-            .get("$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { is3xxRedirection() }
             }

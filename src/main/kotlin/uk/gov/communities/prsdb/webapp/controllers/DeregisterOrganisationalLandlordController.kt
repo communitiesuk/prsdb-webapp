@@ -10,20 +10,20 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_ORGANISATION_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_ORGANISATIONAL_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationLandlordController.Companion.ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController.Companion.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordDeregistration.OrganisationLandlordDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep
 
 @PrsdbController
-@RequestMapping(ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE)
-class DeregisterOrganisationLandlordController(
-    private val organisationLandlordDeregistrationJourneyFactory: OrganisationLandlordDeregistrationJourneyFactory,
+@RequestMapping(ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE)
+class DeregisterOrganisationalLandlordController(
+    private val organisationalLandlordDeregistrationJourneyFactory: OrganisationalLandlordDeregistrationJourneyFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
@@ -46,8 +46,8 @@ class DeregisterOrganisationLandlordController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { organisationLandlordDeregistrationJourneyFactory.createJourneySteps() },
-            initialiseJourney = { organisationLandlordDeregistrationJourneyFactory.initializeJourneyState() },
+            createRoutingMap = { organisationalLandlordDeregistrationJourneyFactory.createJourneySteps() },
+            initialiseJourney = { organisationalLandlordDeregistrationJourneyFactory.initializeJourneyState() },
             dispatch = dispatch,
         )
 
@@ -57,14 +57,14 @@ class DeregisterOrganisationLandlordController(
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(): String {
         // TODO: PDJB-1484 - Add session/deregistration guards and build the real success page content
-        return "deregisterOrganisationLandlordConfirmation"
+        return "deregisterOrganisationalLandlordConfirmation"
     }
 
     companion object {
-        const val ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_ORGANISATION_LANDLORD_JOURNEY_URL"
+        const val ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_ORGANISATIONAL_LANDLORD_JOURNEY_URL"
 
-        const val ORGANISATION_LANDLORD_DEREGISTRATION_PATH =
-            "$ORGANISATION_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}"
+        const val ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH =
+            "$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}"
     }
 }

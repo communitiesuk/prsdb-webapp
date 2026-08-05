@@ -1,7 +1,0 @@
-title: Deregister Organisation Landlord
-confirmation:
-  banner:
-    heading: Organisation deleted
-    body: No longer registered as a landlord
-  paragraph:
-    one: 'TODO: PDJB-1484 - Organisation deregistration confirmation content'

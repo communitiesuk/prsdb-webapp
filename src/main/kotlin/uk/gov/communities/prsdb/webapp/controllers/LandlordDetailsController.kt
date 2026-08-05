@@ -85,7 +85,7 @@ class LandlordDetailsController(
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
             "deleteLandlordRecordUrl",
-            DeregisterOrganisationLandlordController.ORGANISATION_LANDLORD_DEREGISTRATION_PATH,
+            DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
         )
 
         return "orgLandlordDetailsView"
