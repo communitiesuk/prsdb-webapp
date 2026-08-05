@@ -174,36 +174,29 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `An organisation landlord can update organisation name from landlord details and return to details page`(page: Page) {
-            // Org landlord details page
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
 
-            // Update org name page
             val updateOrgNamePage = assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
             updateOrgNamePage.submitName("Updated Organisation Name")
 
-            // Check updated value on details page
             val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
             assertThat(updatedDetailsPage.mainContent).containsText("Updated Organisation Name")
         }
 
         @Test
         fun `Organisation name change link opens the organisation name update page`(page: Page) {
-            // Org landlord details page
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
 
-            // Update org name page
             assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
         }
 
         @Test
         fun `Submitting an empty organisation name on update shows a validation error`(page: Page) {
-            // Org landlord details page
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
 
-            // Update org name page
             val updateOrgNamePage = assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
             updateOrgNamePage.submitName("")
             assertThat(updateOrgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
