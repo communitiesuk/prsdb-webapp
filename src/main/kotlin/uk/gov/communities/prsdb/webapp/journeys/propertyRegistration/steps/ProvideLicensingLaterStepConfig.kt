@@ -13,7 +13,7 @@ class ProvideLicensingLaterStepConfig : AbstractRequestableStepConfig<Complete, 
 
     override fun getStepSpecificContent(state: LicensingState) =
         mapOf(
-            "submitButtonText" to if (state.isOccupied == true) "forms.buttons.continue" else "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: LicensingState): String =
