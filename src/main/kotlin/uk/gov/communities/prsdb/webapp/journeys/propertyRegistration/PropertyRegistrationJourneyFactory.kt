@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
@@ -55,6 +54,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -142,6 +142,10 @@ class PropertyRegistrationJourneyFactory(
                 HmoAdditionalLicenceStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.licensingTask, { journey })
+                }
+
+                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.tenancyDetailsTask)
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
