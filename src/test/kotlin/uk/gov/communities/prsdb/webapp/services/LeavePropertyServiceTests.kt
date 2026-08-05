@@ -114,6 +114,27 @@ class LeavePropertyServiceTests {
     }
 
     @Test
+    fun `leavePropertyOwnership removes an organisation landlord and sends them a confirmation email`() {
+        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val orgLandlord = MockLandlordData.createOrgLandlord(name = "Org Landlord", registrantEmail = "org.user@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(orgLandlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+                address = address,
+            )
+
+        leavePropertyService.leavePropertyOwnership(orgLandlord, propertyOwnership)
+
+        verify(mockPropertyOwnershipService).removeLandlord(propertyOwnership, orgLandlord)
+
+        val emailCaptor = argumentCaptor<JointLandlordYouLeftConfirmation>()
+        verify(emailSender).sendEmail(eq("org.user@example.com"), emailCaptor.capture())
+        val sentEmail = emailCaptor.firstValue
+        assertEquals("Org Landlord", sentEmail.recipientName)
+        assertEquals(address.toMultiLineAddress(), sentEmail.propertyAddress)
+    }
+
+    @Test
     fun `leavePropertyOwnership sends swap to individual nudge email`() {
         val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership =
