@@ -579,6 +579,70 @@ class JointLandlordInvitationServiceTests {
             verify(mockInvitationEmailSender, times(0)).sendEmail(any(), any())
             verify(mockConfirmationEmailSender, times(0)).sendEmail(any(), any())
         }
+
+        @Test
+        fun `sendInvitationEmails sends confirmation email to an organisation inviting landlord`() {
+            val orgLandlord =
+                MockLandlordData.createOrgLandlord(name = "Org Landlord", registrantEmail = "org.user@example.com")
+            ReflectionTestUtils.setField(orgLandlord, "id", 1L)
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(id = 123L, landlords = mutableSetOf(orgLandlord))
+            val jointLandlordEmails = listOf("new@example.com")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(URI("https://example.com/invite/test-token"))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, orgLandlord)
+
+            val emailModelCaptor = argumentCaptor<JointLandlordInvitationConfirmationEmail>()
+            verify(mockConfirmationEmailSender).sendEmail(eq("org.user@example.com"), emailModelCaptor.capture())
+            assertEquals("Org Landlord", emailModelCaptor.firstValue.senderName)
+        }
+
+        @Test
+        fun `sendInvitationEmails skips emails already an organisation landlord on the property`() {
+            val existingOrgLandlord =
+                MockLandlordData.createOrgLandlord(registrantEmail = "existing@example.com")
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = 123L,
+                    landlords = mutableSetOf(MockLandlordData.createIndividualLandlord(), existingOrgLandlord),
+                )
+            val jointLandlordEmails = listOf("existing@example.com", "new@example.com")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(URI("https://example.com/invite/test-token"))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            val emailCaptor = argumentCaptor<String>()
+            verify(mockInvitationEmailSender, times(1)).sendEmail(emailCaptor.capture(), any())
+            assertEquals(listOf("new@example.com"), emailCaptor.allValues)
+        }
+
+        @Test
+        fun `sendInvitationEmails sends notify-existing email to an existing organisation landlord`() {
+            val jointLandlordEmails = listOf("new@example.com")
+            val existingOrgLandlord =
+                MockLandlordData.createOrgLandlord(name = "Existing Org", registrantEmail = "existing@example.com")
+            ReflectionTestUtils.setField(existingOrgLandlord, "id", 2L)
+            ReflectionTestUtils.setField(invitingLandlord, "id", 1L)
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = 123L,
+                    landlords = mutableSetOf(invitingLandlord, existingOrgLandlord),
+                )
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(URI("https://example.com/invite/test-token"))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            val emailModelCaptor = argumentCaptor<JointLandlordInvitationNotifyExistingEmail>()
+            verify(mockNotifyExistingEmailSender).sendEmail(eq("existing@example.com"), emailModelCaptor.capture())
+            assertEquals("Existing Org", emailModelCaptor.firstValue.recipientName)
+            assertEquals(listOf("new@example.com"), emailModelCaptor.firstValue.jointLandlordEmails)
+        }
     }
 
     @Nested
@@ -1009,6 +1073,30 @@ class JointLandlordInvitationServiceTests {
                     invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
                 }
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        }
+
+        @Test
+        fun `resendInvitation succeeds for an organisation inviting landlord`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord(name = "Org Landlord")
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+            val oldInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "joint@example.com",
+                    propertyOwnership = propertyOwnership,
+                    invitingLandlordName = orgLandlord.name,
+                )
+            val mockUri = URI("https://example.com/invite/new-token")
+
+            whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))
+                .thenReturn(Optional.of(oldInvitation))
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(mockUri)
+
+            val result = invitationService.resendInvitation(oldInvitation.id, propertyOwnership, orgLandlord)
+
+            assertEquals("joint@example.com", result)
+            verify(mockJointLandlordInvitationRepository).save(argThat { token == oldInvitation.token })
+            verify(mockInvitationEmailSender).sendEmail(eq("joint@example.com"), any())
         }
     }
 
