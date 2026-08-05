@@ -489,9 +489,7 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextDestination { _ ->
-                        Destination(journey.cyaStep)
-                    }
+                    nextStep { journey.cyaStep }
                     saveProgress()
                 }
             }
