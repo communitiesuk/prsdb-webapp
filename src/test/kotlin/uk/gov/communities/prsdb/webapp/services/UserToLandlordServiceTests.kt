@@ -136,7 +136,9 @@ class UserToLandlordServiceTests {
         val baseUserId = "individual-user"
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId))
-            .thenReturn(MockLandlordData.createIndividualLandlord())
+            .thenReturn(
+                MockLandlordData.createIndividualLandlord(),
+            )
 
         val exception = assertThrows<IllegalStateException> {
             service.getCurrentOrganisationLandlordForUser()
