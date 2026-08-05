@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRAT
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -83,7 +83,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     private lateinit var userToLandlordService: UserToLandlordService
 
     @Autowired
-    private lateinit var organisationLandlordUserRepository: OrganisationLandlordUserRepository
+    private lateinit var organisationalLandlordUserRepository: OrganisationalLandlordUserRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
@@ -341,7 +341,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         checkAnswersPage.confirmAndSubmit()
 
         val createdOrgLandlord =
-            assertNotNull(organisationLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull())
+            assertNotNull(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull())
                 .organisationLandlord
         val createdOrgLandlordRegNum = RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
 
@@ -359,9 +359,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
 
-        // TODO: PDJB-1278: Check that clicking the go to dashboard button goes to the dashboard
+        val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
+        assertThat(dashboardPage.dashboardBannerHeading).hasText("Test Organisation Name")
     }
 
     @Test

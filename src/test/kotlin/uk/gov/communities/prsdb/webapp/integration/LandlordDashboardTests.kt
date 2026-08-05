@@ -170,3 +170,14 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         }
     }
 }
+
+@WithOrgLandlordProfile
+class OrgLandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Test
+    fun `the dashboard loads displaying the organisation name and lrn`() {
+        val dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.dashboardBannerHeading).containsText("Local Organisation Landlord")
+        assertThat(dashboard.dashboardBannerSubHeading).containsText("Landlord registration number")
+        assertThat(dashboard.dashboardBannerSubHeading).containsText("L-CH5R-2T2J")
+    }
+}

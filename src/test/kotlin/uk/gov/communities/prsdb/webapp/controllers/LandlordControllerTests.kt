@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 
 @WebMvcTest(LandlordController::class)
 class LandlordControllerTests(
@@ -97,6 +98,19 @@ class LandlordControllerTests(
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard returns 200 for an org landlord user`() {
+        val landlord = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("landlordName", landlord.name) }
             }
     }
 
