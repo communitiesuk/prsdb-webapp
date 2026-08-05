@@ -38,6 +38,7 @@
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
+        <h3 class="govuk-heading-s" th:text="#{registerProperty.taskList.rentedOut.licensing}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
