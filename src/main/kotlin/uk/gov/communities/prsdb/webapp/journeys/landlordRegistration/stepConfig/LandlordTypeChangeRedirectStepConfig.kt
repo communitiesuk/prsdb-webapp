@@ -22,11 +22,7 @@ class LandlordTypeChangeRedirectStepConfig :
                     "Cannot determine landlord type change destination: no landlord type has been selected",
                 )
             }
-        val landlordTypeUnchanged =
-            state.getStepData(LandlordTypeStep.ROUTE_SEGMENT) ==
-                state.getBaseJourneyState().getStepData(LandlordTypeStep.ROUTE_SEGMENT)
-        val selectedTaskComplete = selectedTask.exitStep.outcome == SubjourneyComplete.COMPLETE
-        return if (landlordTypeUnchanged && selectedTaskComplete) {
+        return if (selectedTask.exitStep.outcome == SubjourneyComplete.COMPLETE) {
             LandlordTypeChangeDestination.CHECK_ANSWERS
         } else {
             taskDestination
