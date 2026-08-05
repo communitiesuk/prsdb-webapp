@@ -45,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
@@ -149,6 +150,10 @@ class PropertyRegistrationJourneyFactory(
                     } else {
                         checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
+                }
+
+                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.tenancyDetailsTask)
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {

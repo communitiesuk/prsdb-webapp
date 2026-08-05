@@ -1143,6 +1143,14 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationCheckAnswersPageWithProvideTenancyDetailsLater(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithProvideTenancyDetailsLater().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationCheckAnswersPageOccupied(
         households: Int = 2,
         people: Int = 4,

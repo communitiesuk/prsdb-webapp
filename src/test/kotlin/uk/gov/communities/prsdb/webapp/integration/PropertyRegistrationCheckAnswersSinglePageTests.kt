@@ -27,6 +27,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
@@ -171,6 +173,24 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             checkAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
             val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
             selectiveLicencePage.submitLicenseNumber("SL-99999")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the tenancy details change link navigates to the households page when tenancy details have been provided later`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithProvideTenancyDetailsLater()
+            checkAnswersPage.summaryList.tenancyDetailsRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `selecting provide later again in the tenancy details CYA sub-journey returns to the property registration CYA`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithProvideTenancyDetailsLater()
+            checkAnswersPage.summaryList.tenancyDetailsRow.clickFirstActionLinkAndWait()
+            val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
+            householdsPage.submitProvideThisLater()
+            val confirmationPage = assertPageIs(page, ProvideTenancyDetailsLaterFormPagePropertyRegistration::class)
+            confirmationPage.form.submit()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }

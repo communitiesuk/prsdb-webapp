@@ -56,7 +56,10 @@ class PropertyRegistrationCyaStepConfig(
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
                             state,
                             messageSource,
-                            Destination(state.tenancyDetailsTask.firstStep),
+                            Destination.VisitableStep(
+                                state.tenancyDetailsTask.householdsAndTenantsTask.households,
+                                state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
+                            ),
                         )
                     } else {
                         occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
