@@ -17,7 +17,7 @@ import java.time.LocalDate
 class LandlordRegistrationService(
     private val landlordService: LandlordService,
     private val prsdbUserService: PrsdbUserService,
-    private val organisationUserService: OrganisationUserService,
+    private val organisationalLandlordUserService: OrganisationalLandlordUserService,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
     private val registrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>,
     private val organisationalRegistrationConfirmationSender: EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>,
@@ -116,7 +116,7 @@ class LandlordRegistrationService(
                 registrantPhoneNumber = organisationRegistrantPhoneNumber,
             )
 
-        organisationUserService.createOrganisationUser(
+        organisationalLandlordUserService.createOrganisationalLandlordUser(
             landlord,
             baseUser,
             organisationRegistrantName,

@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 
 @Suppress("ktlint:standard:function-naming")
-interface OrganisationUserRepository : JpaRepository<OrganisationUser, Long> {
-    fun findByBaseUser_Id(baseUserId: String): List<OrganisationUser>
+interface OrganisationalLandlordUserRepository : JpaRepository<OrganisationalLandlordUser, Long> {
+    fun findByBaseUser_Id(baseUserId: String): List<OrganisationalLandlordUser>
 
     fun existsByBaseUser_IdAndOrganisationLandlord_Id(
         baseUserId: String,

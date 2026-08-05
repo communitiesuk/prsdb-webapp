@@ -121,7 +121,7 @@ class UserRolesServiceTests {
     }
 
     @Test
-    fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for an organisation user`() {
+    fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for an organisation landlord user`() {
         val baseUser = MockPrsdbUserData.createPrsdbUser()
         val organisationLandlord = OrganisationLandlord()
         whenever(userToLandlordService.getLandlordForBaseUserIdOrNull(baseUser.id)).thenReturn(organisationLandlord)

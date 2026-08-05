@@ -6,7 +6,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 /**
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 @PrsdbWebService
 class UserToLandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
-    private val organisationUserRepository: OrganisationUserRepository,
+    private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
     fun getCurrentLandlordForUser(): Landlord {
         // TODO: PDJB-1477: Improve this method with caching
@@ -55,7 +55,7 @@ class UserToLandlordService(
     fun getLandlordForBaseUserIdOrNull(baseUserId: String): Landlord? {
         val landlords =
             listOfNotNull(individualLandlordRepository.findByBaseUser_Id(baseUserId)) +
-                organisationUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
+                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
 
         if (landlords.size > 1) {
             throw PrsdbWebException("Multiple landlords were found for user with baseUserId $baseUserId")
