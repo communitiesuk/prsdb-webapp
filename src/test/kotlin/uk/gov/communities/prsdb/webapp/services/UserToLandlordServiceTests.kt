@@ -120,10 +120,14 @@ class UserToLandlordServiceTests {
         val landlord = OrganisationLandlord()
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
-        whenever(organisationLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
-            listOf(
-                OrganisationLandlordUser(landlord, baseUser, "Alice Registrant", "alice@example.com"),
-            ),
+        val organisationalLandlordUser = OrganisationalLandlordUser(
+            organisationLandlord = landlord,
+            baseUser = baseUser,
+            name = "Alice Registrant",
+            email = "alice@example.com",
+        )
+        whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
+            listOf(organisationalLandlordUser),
         )
 
         val result = service.getCurrentOrganisationLandlordForUser()
