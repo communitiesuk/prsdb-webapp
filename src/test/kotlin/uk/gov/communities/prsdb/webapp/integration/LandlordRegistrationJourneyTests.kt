@@ -357,7 +357,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
-        assertThat(confirmationPage.surveyLink).isVisible()
+        assertThat(confirmationPage.surveyLink).not().isVisible()
         confirmationPage.goToDashboardLink.clickAndWait()
 
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)

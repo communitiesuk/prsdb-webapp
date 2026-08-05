@@ -133,6 +133,23 @@ class RegisterLandlordControllerTests(
                         "landlordRegistrationSurveyUrl",
                         LANDLORD_REGISTRATION_SURVEY_URL,
                     )
+                    attribute("showSurveyLink", true)
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation hides survey link for org landlords`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("showSurveyLink", false)
                 }
             }
     }
