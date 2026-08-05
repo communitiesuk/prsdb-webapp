@@ -34,11 +34,13 @@
                 registerAsALandlord.confirmation.whatYouNeedToDo.bullet.two
             </li>
         </ul>
-        <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-            #{common.confirmationPage.feedback.heading},
-            #{registerAsALandlord.confirmation.feedback.body},
-            ${landlordRegistrationSurveyUrl})}">
-        </div>
+        <th:block th:if="${showSurveyLink}">
+            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                #{common.confirmationPage.feedback.heading},
+                #{registerAsALandlord.confirmation.feedback.body},
+                ${landlordRegistrationSurveyUrl})}">
+            </div>
+        </th:block>
         <p class="govuk-body">
             <a class="govuk-link"
                th:href="@{${landlordDashboardUrl}}"

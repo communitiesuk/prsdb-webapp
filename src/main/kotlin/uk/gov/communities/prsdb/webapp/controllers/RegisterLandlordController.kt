@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -70,6 +71,7 @@ class RegisterLandlordController(
             RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
         )
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("showSurveyLink", landlord is IndividualLandlord)
         model.addAttribute("landlordRegistrationSurveyUrl", LANDLORD_REGISTRATION_SURVEY_URL)
 
         return "registerAsALandlordConfirmation"
