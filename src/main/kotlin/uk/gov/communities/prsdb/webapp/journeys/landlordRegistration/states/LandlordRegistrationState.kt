@@ -9,11 +9,15 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordLocationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
 interface LandlordRegistrationState :
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    OrgTypeUpdateState {
     val emailStep: EmailStep
     val phoneNumberStep: PhoneNumberStep
     val individualLandlordLocationTask: IndividualLandlordLocationTask
@@ -24,4 +28,6 @@ interface LandlordRegistrationState :
     val identityTask: IdentityTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
+    val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
+    val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep
 }

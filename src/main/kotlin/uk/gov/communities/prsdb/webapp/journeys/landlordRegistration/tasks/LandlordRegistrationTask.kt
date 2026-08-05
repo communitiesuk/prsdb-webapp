@@ -5,10 +5,12 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -37,10 +39,15 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRouteMode
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -61,6 +68,8 @@ class LandlordRegistrationTask(
     override val privacyNoticeStep: PrivacyNoticeStep,
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep,
+    override val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
 ) : TaskWithoutDependencies<LandlordRegistrationState>(journeyStateService),
@@ -69,6 +78,10 @@ class LandlordRegistrationTask(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var previousOrgTypeMode: OrgTypeMode by delegateProvider.requiredDelegate("previous-org-type")
+
+    override val orgTypeStep: OrgTypeStep
+        get() = orgLandlordRegistrationTask.orgTypeStep
 
     override val taskState get() = this
 
@@ -173,6 +186,26 @@ class LandlordRegistrationTask(
             }
         }
 
+    override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState {
+        // TODO: PDJB-585: Remove this cast
+        val newJourney = super.createChildJourneyState(childJourneyId) as LandlordRegistrationTask
+
+        val orgTypeStep = orgLandlordRegistrationTask.orgTypeStep
+        // only wire this in if the CYA journey is on an org landlord journey & has orgTypeStep set up
+        if (orgTypeStep.initialisationStage == StepInitialisationStage.FULLY_INITIALISED) {
+            orgTypeStep.formModelOrNull?.let { orgTypeFormModel ->
+                newJourney.previousOrgTypeMode =
+                    if (OrgType.TRUST in orgTypeFormModel.getSelectedOrgTypes()) {
+                        OrgTypeMode.INCLUDES_TRUST
+                    } else {
+                        OrgTypeMode.EXCLUDES_TRUST
+                    }
+            }
+        }
+
+        return newJourney
+    }
+
     companion object {
         fun <T : LandlordRegistrationState> checkYourAnswersJourneyMap(
             state: T,
@@ -224,11 +257,17 @@ class LandlordRegistrationTask(
                             }
                             nextDestination { destination ->
                                 when (destination) {
-                                    LandlordTypeChangeDestination.CHECK_ANSWERS -> Destination(journey.finishCyaStep)
-                                    LandlordTypeChangeDestination.INDIVIDUAL_TASK ->
+                                    LandlordTypeChangeDestination.CHECK_ANSWERS -> {
+                                        Destination(journey.finishCyaStep)
+                                    }
+
+                                    LandlordTypeChangeDestination.INDIVIDUAL_TASK -> {
                                         Destination(journey.individualLandlordLocationTask.firstStep)
-                                    LandlordTypeChangeDestination.ORGANISATION_TASK ->
+                                    }
+
+                                    LandlordTypeChangeDestination.ORGANISATION_TASK -> {
                                         Destination(journey.orgLandlordRegistrationTask.firstStep)
+                                    }
                                 }
                             }
                         }
@@ -262,9 +301,45 @@ class LandlordRegistrationTask(
                     }
 
                     OrgTypeStep.ROUTE_SEGMENT -> {
-                        // TODO PDJB-1237 : replace this placeholder with the org type update journey
-                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, OrgTypeStep.ROUTE_SEGMENT) {
-                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1237: Organisation type update journey" }
+                        step(journey.orgLandlordRegistrationTask.orgTypeStep) {
+                            initialStep()
+                            routeSegment(OrgTypeStep.ROUTE_SEGMENT)
+                            nextStep { journey.orgTypeUpdateRoutingStep }
+                        }
+                        step(journey.orgTypeUpdateRoutingStep) {
+                            parents { journey.orgLandlordRegistrationTask.orgTypeStep.isComplete() }
+                            nextDestination { mode ->
+                                when (mode) {
+                                    OrgTypeUpdateRouteMode.TRUST_UNCHANGED -> Destination(journey.finishCyaStep)
+                                    OrgTypeUpdateRouteMode.ADDING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                                    OrgTypeUpdateRouteMode.REMOVING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                                }
+                            }
+                        }
+                        step(journey.orgTypeTrustInterruptionStep) {
+                            routeSegment(OrgTypeTrustInterruptionStep.ROUTE_SEGMENT)
+                            parents {
+                                OrParents(
+                                    journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                                    journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.REMOVING_TRUST),
+                                )
+                            }
+                            nextStep {
+                                if (journey.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST) {
+                                    journey.orgLandlordRegistrationTask.leadTrusteeTask.firstStep
+                                } else {
+                                    journey.finishCyaStep
+                                }
+                            }
+                        }
+                        task(journey.orgLandlordRegistrationTask.leadTrusteeTask) {
+                            parents {
+                                AndParents(
+                                    journey.orgTypeTrustInterruptionStep.isComplete(),
+                                    journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                                )
+                            }
+                            nextStep { journey.finishCyaStep }
                         }
                     }
 
