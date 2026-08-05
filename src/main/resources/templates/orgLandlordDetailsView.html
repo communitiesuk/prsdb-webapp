@@ -31,7 +31,7 @@
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.address}">landlordDetails.org.address</strong><br/>
                     <span th:text="${orgLandlord.singleLineAddress}">orgLandlord.singleLineAddress</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1444: Add update journey -->
+                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-address/lookup-address'}">Change</a>
                 </p>
 
                 <p class="govuk-body">
