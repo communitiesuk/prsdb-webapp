@@ -115,6 +115,7 @@ class LeavePropertyServiceTests {
 
     @Test
     fun `leavePropertyOwnership removes an organisation landlord and sends them a confirmation email`() {
+        // Arrange
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val orgLandlord = MockLandlordData.createOrgLandlord(name = "Org Landlord", registrantEmail = "org.user@example.com")
         val propertyOwnership =
@@ -123,8 +124,10 @@ class LeavePropertyServiceTests {
                 address = address,
             )
 
+        // Act
         leavePropertyService.leavePropertyOwnership(orgLandlord, propertyOwnership)
 
+        // Assert
         verify(mockPropertyOwnershipService).removeLandlord(propertyOwnership, orgLandlord)
 
         val emailCaptor = argumentCaptor<JointLandlordYouLeftConfirmation>()
