@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropert
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlordUser
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -150,7 +150,7 @@ class MockLandlordData {
                     mainContactEmail = mainContactEmail,
                     mainContactPhone = mainContactPhoneNumber,
                 )
-            OrganisationLandlordUser(
+            OrganisationalLandlordUser(
                 organisationLandlord = landlord,
                 baseUser = baseUser,
                 name = registrantName,
