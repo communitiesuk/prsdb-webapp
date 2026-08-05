@@ -1,5 +1,5 @@
 INSERT INTO prsdb_user (id, created_date)
-VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24');
+VALUES ('urn:fdc:gov.uk:2022:ORG01', '10/14/24');
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1);
@@ -29,7 +29,7 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1,
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
-VALUES (1, 1, 'urn:fdc:gov.uk:2022:UVWXY', 'Priya Registrant', 'priya.registrant@keystoneliving.com', current_date);
+VALUES (1, 1, 'urn:fdc:gov.uk:2022:ORG01', 'Priya Registrant', 'priya.registrant@keystoneliving.com', current_date);
 SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
 INSERT INTO organisation_governing_body_member (id, created_date, organisation_landlord_id, type, name, date_of_birth, address_id)
