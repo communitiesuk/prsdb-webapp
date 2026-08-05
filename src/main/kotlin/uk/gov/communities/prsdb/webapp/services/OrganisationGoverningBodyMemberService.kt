@@ -14,7 +14,7 @@ class OrganisationGoverningBodyMemberService(
     private val addressService: AddressService,
 ) {
     fun getGoverningBodyMembers(organisationalLandlord: OrganisationalLandlord): List<OrganisationGoverningBodyMember> =
-        organisationGoverningBodyMemberRepository.findAllByOrganisationLandlord_Id(organisationalLandlord.id)
+        organisationGoverningBodyMemberRepository.findAllByOrganisationalLandlord_Id(organisationalLandlord.id)
 
     @Transactional
     fun createGoverningBodyMembers(
