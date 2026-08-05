@@ -88,7 +88,7 @@ class LandlordDetailsControllerTests(
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
-                view { name("individualLandlordDetailsViewAugust2026Redesign") }
+                view { name("individualLandlordDetailsView") }
             }
         }
 
@@ -107,7 +107,7 @@ class LandlordDetailsControllerTests(
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
-                view { name("individualLandlordDetailsViewOld") }
+                view { name("individualLandlordDetailsViewBeforePdjb1492") }
             }
         }
 

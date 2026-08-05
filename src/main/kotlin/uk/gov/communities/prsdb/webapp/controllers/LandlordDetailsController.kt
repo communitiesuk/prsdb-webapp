@@ -70,9 +70,9 @@ class LandlordDetailsController(
         addUserLandlordDetailsSharedAttributes(landlord, model)
 
         return if (isOrgLandlordRegistrationEnabled) {
-            "individualLandlordDetailsViewAugust2026Redesign"
+            "individualLandlordDetailsView"
         } else {
-            "individualLandlordDetailsViewOld"
+            "individualLandlordDetailsViewBeforePdjb1492"
         }
     }
 
