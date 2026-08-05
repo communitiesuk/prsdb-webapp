@@ -1776,9 +1776,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured occupied journey supports provide licensing later and shows it on check answers`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
+        fun `restructured occupied journey completes full flow and shows answers on check answers`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1801,10 +1799,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             occupancyPage.submitIsOccupied()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
-            licensingTypePage.submitProvideThisLater()
-            val provideLicensingLaterPage = assertPageIs(page, ProvideLicensingLaterFormPagePropertyRegistration::class)
-            assertThat(provideLicensingLaterPage.insetText).isVisible()
-            provideLicensingLaterPage.form.submit()
+            licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
 
             val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             hasGasSupplyPage.submitHasNoGasSupply()
