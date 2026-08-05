@@ -17,7 +17,6 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
 
-        // The route of the task this step sits under, if any. See the `urlPath` extension for how it composes.
         val urlPathPrefix: String? get() = stepConfig.urlPathPrefix
 
         override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
