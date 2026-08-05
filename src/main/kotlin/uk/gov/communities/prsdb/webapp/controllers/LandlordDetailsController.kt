@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -39,7 +38,6 @@ class LandlordDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -77,11 +75,8 @@ class LandlordDetailsController(
         orgLandlord: OrganisationLandlord,
         model: Model,
     ): String {
-        val governingBodyMembers =
-            organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
-
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
-        model.addAttribute("orgLandlordContacts", OrganisationalLandlordContactsViewModel(orgLandlord, governingBodyMembers))
+        model.addAttribute("orgLandlordContacts", OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers))
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
