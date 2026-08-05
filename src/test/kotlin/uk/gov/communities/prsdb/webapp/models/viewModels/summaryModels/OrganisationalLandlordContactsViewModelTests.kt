@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBody
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
-class OrganisationLandlordContactsViewModelTests {
+class OrganisationalLandlordContactsViewModelTests {
     private val address = MockLandlordData.createAddress("3rd Floor, 88 Kingsway Square, London, ZX1 4GP")
 
     @Test
     fun `main contact card has the expected title, action and rows`() {
         val orgLandlord = MockLandlordData.createOrgLandlord()
-        val viewModel = OrganisationLandlordContactsViewModel(orgLandlord, emptyList())
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList())
 
         val card = viewModel.mainContactCard
         assertEquals("landlordDetails.org.mainContactHeading", card.title)
@@ -29,7 +29,7 @@ class OrganisationLandlordContactsViewModelTests {
     @Test
     fun `lead trustee card is null for a non-trust organisation`() {
         val orgLandlord = MockLandlordData.createOrgLandlord(isTrust = false)
-        assertNull(OrganisationLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard)
+        assertNull(OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard)
     }
 
     @Test
@@ -43,7 +43,7 @@ class OrganisationLandlordContactsViewModelTests {
                 leadTrusteePhoneNumber = "0123456789",
                 leadTrusteeAddress = address,
             )
-        val card = OrganisationLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard!!
+        val card = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard!!
         assertEquals("landlordDetails.org.leadTrusteeHeading", card.title)
         assertEquals(
             listOf(
@@ -77,7 +77,7 @@ class OrganisationLandlordContactsViewModelTests {
                     address,
                 ),
             )
-        val viewModel = OrganisationLandlordContactsViewModel(orgLandlord, members)
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, members)
 
         assertEquals(true, viewModel.showGoverningBody)
         assertEquals(2, viewModel.governingBodyMemberCards.size)
@@ -99,14 +99,14 @@ class OrganisationLandlordContactsViewModelTests {
 
     @Test
     fun `governing body section is hidden when there are no members`() {
-        val viewModel = OrganisationLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList())
+        val viewModel = OrganisationalLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList())
         assertEquals(false, viewModel.showGoverningBody)
         assertEquals(0, viewModel.governingBodyMemberCards.size)
     }
 
     @Test
     fun `registration contact card has no action and the expected rows`() {
-        val card = OrganisationLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList()).registrationContactCard
+        val card = OrganisationalLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList()).registrationContactCard
         assertEquals("landlordDetails.org.registrationContactHeading", card.title)
         assertNull(card.actions)
         assertEquals(

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableD
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import kotlin.test.assertEquals
 
-class OrganisationLandlordDetailsPageTests : IntegrationTest() {
+class OrganisationalLandlordDetailsPageTests : IntegrationTest() {
     @Nested
     inner class BasicOrgLandlord : NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-basic.sql") {
         @Test

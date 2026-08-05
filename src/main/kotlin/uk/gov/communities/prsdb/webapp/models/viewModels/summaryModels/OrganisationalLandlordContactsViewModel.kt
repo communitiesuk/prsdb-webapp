@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBody
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 
-class OrganisationLandlordContactsViewModel(
+class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationLandlord,
     governingBodyMembers: List<OrganisationGoverningBodyMember>,
 ) {

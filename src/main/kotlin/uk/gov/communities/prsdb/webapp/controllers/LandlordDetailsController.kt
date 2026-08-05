@@ -25,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationLandlordContactsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
@@ -81,7 +81,7 @@ class LandlordDetailsController(
             organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
 
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
-        model.addAttribute("orgLandlordContacts", OrganisationLandlordContactsViewModel(orgLandlord, governingBodyMembers))
+        model.addAttribute("orgLandlordContacts", OrganisationalLandlordContactsViewModel(orgLandlord, governingBodyMembers))
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
