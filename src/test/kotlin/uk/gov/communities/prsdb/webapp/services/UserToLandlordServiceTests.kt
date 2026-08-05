@@ -144,7 +144,10 @@ class UserToLandlordServiceTests {
             service.getCurrentOrganisationLandlordForUser()
         }
 
-        assertEquals("Expected organisation landlord, but got INDIVIDUAL", exception.message)
+        assertEquals(
+            "Expected organisation landlord, but got INDIVIDUAL",
+            exception.message,
+        )
     }
 
     private fun setMockPrincipal(name: String) {
