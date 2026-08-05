@@ -28,9 +28,9 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1,
         'Anita Locke', '2001-03-08', 'anita.locke@keystoneliving.com', '03333333333', 2);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO organisation_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
 VALUES (1, 1, 'urn:fdc:gov.uk:2022:UVWXY', 'Priya Registrant', 'priya.registrant@keystoneliving.com', current_date);
-SELECT setval(pg_get_serial_sequence('organisation_landlord_user', 'id'), (SELECT MAX(id) FROM organisation_landlord_user));
+SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
 INSERT INTO organisation_governing_body_member (id, created_date, organisation_landlord_id, type, name, date_of_birth, address_id)
 VALUES (1, current_date, 1, 0, 'David Director', '1974-03-18', 3),

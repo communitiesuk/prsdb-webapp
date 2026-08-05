@@ -22,6 +22,6 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1,
         'Sam Main-Contact', 'sam.maincontact@meadowbrook.example', '02555555555');
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO organisation_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
 VALUES (1, 1, 'urn:fdc:gov.uk:2022:UVWXY', 'Riya Registrant', 'riya.registrant@meadowbrook.example', current_date);
-SELECT setval(pg_get_serial_sequence('organisation_landlord_user', 'id'), (SELECT MAX(id) FROM organisation_landlord_user));
+SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
