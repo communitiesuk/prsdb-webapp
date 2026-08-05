@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -34,7 +34,7 @@ class OrganisationGoverningBodyMemberServiceTests {
     private lateinit var organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     @Mock
-    private lateinit var mockOrganisationLandlord: OrganisationLandlord
+    private lateinit var mockOrganisationLandlord: OrganisationalLandlord
 
     @Test
     fun `createGoverningBodyMembers saves each member with resolved address`() {

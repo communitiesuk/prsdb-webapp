@@ -22,7 +22,7 @@ class OrganisationalLandlordUser() : AuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "organisation_landlord_id", nullable = false)
-    lateinit var organisationLandlord: OrganisationLandlord
+    lateinit var organisationLandlord: OrganisationalLandlord
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false)
@@ -35,7 +35,7 @@ class OrganisationalLandlordUser() : AuditableEntity() {
     lateinit var email: String
 
     constructor(
-        organisationLandlord: OrganisationLandlord,
+        organisationLandlord: OrganisationalLandlord,
         baseUser: PrsdbUser,
         name: String,
         email: String,

@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
@@ -13,12 +13,12 @@ class OrganisationGoverningBodyMemberService(
     private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
     private val addressService: AddressService,
 ) {
-    fun getGoverningBodyMembers(organisationLandlord: OrganisationLandlord): List<OrganisationGoverningBodyMember> =
+    fun getGoverningBodyMembers(organisationLandlord: OrganisationalLandlord): List<OrganisationGoverningBodyMember> =
         organisationGoverningBodyMemberRepository.findAllByOrganisationLandlord_Id(organisationLandlord.id)
 
     @Transactional
     fun createGoverningBodyMembers(
-        organisationLandlord: OrganisationLandlord,
+        organisationLandlord: OrganisationalLandlord,
         members: List<GoverningBodyMemberDataModel>,
     ) {
         members.forEach { member ->

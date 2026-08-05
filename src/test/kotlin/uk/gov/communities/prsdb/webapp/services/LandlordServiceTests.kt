@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -111,7 +111,7 @@ class LandlordServiceTests {
 
     @Test
     fun `retrieveLandlordById returns an organisation landlord`() {
-        val landlord = OrganisationLandlord()
+        val landlord = OrganisationalLandlord()
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
 
         val result = landlordService.retrieveLandlordById(landlord.id)
@@ -203,7 +203,7 @@ class LandlordServiceTests {
             leadTrusteeEmail: String? = null,
             leadTrusteePhoneNumber: String? = null,
             leadTrusteeAddress: AddressDataModel? = null,
-        ): OrganisationLandlord =
+        ): OrganisationalLandlord =
             landlordService.createOrganisationLandlord(
                 organisationName = "Test Org",
                 organisationAddress = orgAddressDataModel,
@@ -233,7 +233,7 @@ class LandlordServiceTests {
         fun `creates an organisation landlord and returns it`() {
             val result = createOrganisationLandlord()
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
 
             val saved = landlordCaptor.value
@@ -270,7 +270,7 @@ class LandlordServiceTests {
 
             verify(mockAddressService, times(2)).findOrCreateAddress(any())
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
             assertEquals(trusteeAddress, landlordCaptor.value.leadTrusteeAddress)
         }
@@ -281,7 +281,7 @@ class LandlordServiceTests {
 
             verify(mockAddressService, times(1)).findOrCreateAddress(any())
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
             assertNull(landlordCaptor.value.leadTrusteeAddress)
         }
@@ -667,7 +667,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser updates the organisation name`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
@@ -679,7 +679,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser skips null fields`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
@@ -690,7 +690,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordName updates the organisation name via updateOrganisationLandlordForUser`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 

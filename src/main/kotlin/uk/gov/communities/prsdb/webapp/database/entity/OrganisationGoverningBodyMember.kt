@@ -20,7 +20,7 @@ class OrganisationGoverningBodyMember() : ModifiableAuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "organisation_landlord_id", nullable = false)
-    lateinit var organisationLandlord: OrganisationLandlord
+    lateinit var organisationLandlord: OrganisationalLandlord
 
     @Column(nullable = false)
     lateinit var type: GoverningBodyMemberType
@@ -36,7 +36,7 @@ class OrganisationGoverningBodyMember() : ModifiableAuditableEntity() {
     lateinit var address: Address
 
     constructor(
-        organisationLandlord: OrganisationLandlord,
+        organisationLandlord: OrganisationalLandlord,
         type: GoverningBodyMemberType,
         name: String,
         dateOfBirth: LocalDate,

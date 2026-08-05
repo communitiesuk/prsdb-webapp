@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
@@ -53,7 +53,7 @@ class UserToLandlordServiceTests {
     fun `getLandlordForBaseUserId returns organisation landlord associated with user`() {
         val baseUserId = "organisation-user"
         val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
-        val landlord = OrganisationLandlord()
+        val landlord = OrganisationalLandlord()
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         whenever(organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(
             listOf(
@@ -117,7 +117,7 @@ class UserToLandlordServiceTests {
     fun `getCurrentOrganisationLandlordForUser returns organisation landlord for authenticated user`() {
         val baseUserId = "organisation-user"
         val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
-        val landlord = OrganisationLandlord()
+        val landlord = OrganisationalLandlord()
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         val organisationalLandlordUser =

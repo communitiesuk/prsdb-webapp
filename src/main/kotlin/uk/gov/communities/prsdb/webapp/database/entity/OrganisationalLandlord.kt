@@ -15,7 +15,7 @@ import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
-class OrganisationLandlord() : Landlord() {
+class OrganisationalLandlord() : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION

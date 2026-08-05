@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
@@ -12,7 +12,7 @@ class PropertyDetailsLandlordViewModelBuilder {
         private fun landlordEmail(landlord: Landlord): String =
             when (landlord) {
                 is IndividualLandlord -> landlord.email
-                is OrganisationLandlord -> landlord.wholeOrgEmail
+                is OrganisationalLandlord -> landlord.wholeOrgEmail
                 else -> throw IllegalArgumentException("Unknown landlord type")
             }
 

@@ -5,7 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -25,9 +25,9 @@ class UserToLandlordService(
         return getLandlordForBaseUserId(baseUserId)
     }
 
-    fun getCurrentOrganisationLandlordForUser(): OrganisationLandlord {
+    fun getCurrentOrganisationLandlordForUser(): OrganisationalLandlord {
         val landlord = getCurrentLandlordForUser()
-        check(landlord is OrganisationLandlord) { "Expected organisation landlord, but got ${landlord.landlordType}" }
+        check(landlord is OrganisationalLandlord) { "Expected organisation landlord, but got ${landlord.landlordType}" }
         return landlord
     }
 
