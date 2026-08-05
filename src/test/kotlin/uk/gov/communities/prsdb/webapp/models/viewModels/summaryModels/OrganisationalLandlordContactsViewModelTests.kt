@@ -59,7 +59,7 @@ class OrganisationalLandlordContactsViewModelTests {
 
     @Test
     fun `governing body cards are numbered per member with role, name, dob and address`() {
-        val orgLandlord = MockLandlordData.createOrgLandlord()
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
         val members =
             listOf(
                 OrganisationGoverningBodyMember(
@@ -98,8 +98,12 @@ class OrganisationalLandlordContactsViewModelTests {
     }
 
     @Test
-    fun `governing body section is hidden when there are no members`() {
-        val viewModel = OrganisationalLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList())
+    fun `governing body section is hidden for a registered company org landlord`() {
+        val viewModel =
+            OrganisationalLandlordContactsViewModel(
+                MockLandlordData.createOrgLandlord(isCompany = true, companyNumber = "12345678"),
+                emptyList(),
+            )
         assertEquals(false, viewModel.showGoverningBody)
         assertEquals(0, viewModel.governingBodyMemberCards.size)
     }

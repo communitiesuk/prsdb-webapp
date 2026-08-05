@@ -46,7 +46,7 @@ class OrganisationalLandlordContactsViewModel(
             )
         }
 
-    val showGoverningBody: Boolean = governingBodyMembers.isNotEmpty()
+    val showGoverningBody: Boolean = orgLandlord.hasGoverningBody
 
     // TODO: PDJB-1471: link the governing body members link to its update journey
     val governingBodyMembersLinkUrl: String = PLACEHOLDER_URL

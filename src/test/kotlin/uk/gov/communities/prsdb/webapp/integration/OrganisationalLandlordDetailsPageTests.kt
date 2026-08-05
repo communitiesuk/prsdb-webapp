@@ -37,7 +37,7 @@ class OrganisationalLandlordDetailsPageTests : IntegrationTest() {
     @Nested
     inner class TrustWithGoverningBodyMembers : NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-trust.sql") {
         @Test
-        fun `organisation contacts cards show the correct rows for each contact type of a trust org landlord`() {
+        fun `organisation contacts cards show the main, lead trustee and registration contacts for a trust org landlord`() {
             val detailsPage = navigator.goToOrgLandlordDetails()
             detailsPage.tabs.goToOrganisationContacts()
 
@@ -55,6 +55,19 @@ class OrganisationalLandlordDetailsPageTests : IntegrationTest() {
             assertThat(leadTrustee.summaryList.phoneNumberRow.value).containsText("03333333333")
             assertThat(leadTrustee.summaryList.addressRow.value).containsText("88 Kingsway Square")
 
+            val registrationContact = detailsPage.registrationContactCard
+            assertThat(registrationContact.title).containsText("Registration contact")
+            assertThat(registrationContact.summaryList.nameRow.value).containsText("Priya Registrant")
+            assertThat(registrationContact.summaryList.dateOfBirthRow.value).containsText("1 January 1990")
+            assertThat(registrationContact.summaryList.emailRow.value).containsText("priya.registrant@keystoneliving.com")
+            assertThat(registrationContact.summaryList.phoneNumberRow.value).containsText("01111111111")
+        }
+
+        @Test
+        fun `organisation contacts show a card for each governing body member with the correct rows`() {
+            val detailsPage = navigator.goToOrgLandlordDetails()
+            detailsPage.tabs.goToOrganisationContacts()
+
             assertThat(detailsPage.governingBodyMembersLink).isVisible()
             assertEquals(2, detailsPage.governingBodyMemberCardCount())
 
@@ -71,13 +84,6 @@ class OrganisationalLandlordDetailsPageTests : IntegrationTest() {
             assertThat(partner.summaryList.nameRow.value).containsText("Omar Hassan")
             assertThat(partner.summaryList.dateOfBirthRow.value).containsText("8 March 2001")
             assertThat(partner.summaryList.addressRow.value).containsText("34 Partner Lane")
-
-            val registrationContact = detailsPage.registrationContactCard
-            assertThat(registrationContact.title).containsText("Registration contact")
-            assertThat(registrationContact.summaryList.nameRow.value).containsText("Priya Registrant")
-            assertThat(registrationContact.summaryList.dateOfBirthRow.value).containsText("1 January 1990")
-            assertThat(registrationContact.summaryList.emailRow.value).containsText("priya.registrant@keystoneliving.com")
-            assertThat(registrationContact.summaryList.phoneNumberRow.value).containsText("01111111111")
         }
     }
 }
