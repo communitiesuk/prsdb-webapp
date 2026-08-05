@@ -27,7 +27,7 @@ class UserToLandlordService(
 
     fun getCurrentOrganisationLandlordForUser(): OrganisationLandlord {
         val landlord = getCurrentLandlordForUser()
-        check(landlord is OrganisationLandlord)
+        check(landlord is OrganisationLandlord) { "Expected organisation landlord, but got ${landlord.landlordType}" }
         return landlord
     }
 

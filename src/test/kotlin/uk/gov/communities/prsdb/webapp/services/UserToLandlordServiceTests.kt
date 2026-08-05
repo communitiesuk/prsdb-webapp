@@ -137,9 +137,11 @@ class UserToLandlordServiceTests {
         setMockPrincipal(baseUserId)
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(MockLandlordData.createIndividualLandlord())
 
-        assertThrows<IllegalStateException> {
+        val exception = assertThrows<IllegalStateException> {
             service.getCurrentOrganisationLandlordForUser()
         }
+        
+        assertEquals("Expected organisation landlord, but got INDIVIDUAL", exception.message)
     }
 
     private fun setMockPrincipal(name: String) {
