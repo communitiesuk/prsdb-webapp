@@ -67,6 +67,7 @@ class UpdateOrganisationLandlordNameController(
         )
 
     companion object {
-        const val UPDATE_ORG_NAME_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/update-organisation-name"
+        const val UPDATE_ORG_NAME_PATH_SEGMENT = "update-organisation-name"
+        const val UPDATE_ORG_NAME_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/$UPDATE_ORG_NAME_PATH_SEGMENT"
     }
 }
