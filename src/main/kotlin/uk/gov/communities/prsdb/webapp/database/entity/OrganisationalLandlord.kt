@@ -97,7 +97,7 @@ class OrganisationalLandlord() : Landlord() {
     // We eager fetch these as we're temporarily using them to get the email for an org landlord.
     // We assume one org user per landlord for now so this eager fetch will be cheap.
     // TODO: PDJB-1274: This eager fetch will no longer be needed once we support multiple users in an org. Remove it
-    @OneToMany(mappedBy = "organisationLandlord", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
     private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
 
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.

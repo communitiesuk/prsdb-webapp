@@ -72,13 +72,13 @@ class OrganisationGoverningBodyMemberServiceTests {
         assertEquals(GoverningBodyMemberType.DIRECTOR, saved[0].type)
         assertEquals(LocalDate.of(1970, 5, 12), saved[0].dateOfBirth)
         assertEquals(address1, saved[0].address)
-        assertEquals(mockOrganisationLandlord, saved[0].organisationLandlord)
+        assertEquals(mockOrganisationLandlord, saved[0].organisationalLandlord)
 
         assertEquals("Trustee Tina", saved[1].name)
         assertEquals(GoverningBodyMemberType.TRUSTEE, saved[1].type)
         assertEquals(LocalDate.of(1985, 3, 20), saved[1].dateOfBirth)
         assertEquals(address2, saved[1].address)
-        assertEquals(mockOrganisationLandlord, saved[1].organisationLandlord)
+        assertEquals(mockOrganisationLandlord, saved[1].organisationalLandlord)
     }
 
     @Test

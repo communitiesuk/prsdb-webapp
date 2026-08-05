@@ -13,12 +13,12 @@ class OrganisationalLandlordUserService(
 ) {
     @Transactional
     fun createOrganisationalLandlordUser(
-        organisationLandlord: OrganisationalLandlord,
+        organisationalLandlord: OrganisationalLandlord,
         baseUser: PrsdbUser,
         name: String,
         email: String,
     ): OrganisationalLandlordUser =
         organisationalLandlordUserRepository.save(
-            OrganisationalLandlordUser(organisationLandlord, baseUser, name, email),
+            OrganisationalLandlordUser(organisationalLandlord, baseUser, name, email),
         )
 }

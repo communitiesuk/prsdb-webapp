@@ -13,19 +13,19 @@ class OrganisationGoverningBodyMemberService(
     private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
     private val addressService: AddressService,
 ) {
-    fun getGoverningBodyMembers(organisationLandlord: OrganisationalLandlord): List<OrganisationGoverningBodyMember> =
-        organisationGoverningBodyMemberRepository.findAllByOrganisationLandlord_Id(organisationLandlord.id)
+    fun getGoverningBodyMembers(organisationalLandlord: OrganisationalLandlord): List<OrganisationGoverningBodyMember> =
+        organisationGoverningBodyMemberRepository.findAllByOrganisationLandlord_Id(organisationalLandlord.id)
 
     @Transactional
     fun createGoverningBodyMembers(
-        organisationLandlord: OrganisationalLandlord,
+        organisationalLandlord: OrganisationalLandlord,
         members: List<GoverningBodyMemberDataModel>,
     ) {
         members.forEach { member ->
             val memberAddress = addressService.findOrCreateAddress(member.address)
             organisationGoverningBodyMemberRepository.save(
                 OrganisationGoverningBodyMember(
-                    organisationLandlord = organisationLandlord,
+                    organisationalLandlord = organisationalLandlord,
                     type = member.type,
                     name = member.name,
                     dateOfBirth = member.dateOfBirth.toJavaLocalDate(),

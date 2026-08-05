@@ -151,7 +151,7 @@ class MockLandlordData {
                     mainContactPhone = mainContactPhoneNumber,
                 )
             OrganisationalLandlordUser(
-                organisationLandlord = landlord,
+                organisationalLandlord = landlord,
                 baseUser = baseUser,
                 name = registrantName,
                 email = registrantEmail,

@@ -122,7 +122,7 @@ class UserToLandlordServiceTests {
         whenever(individualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(null)
         val organisationalLandlordUser =
             OrganisationalLandlordUser(
-                organisationLandlord = landlord,
+                organisationalLandlord = landlord,
                 baseUser = baseUser,
                 name = "Alice Registrant",
                 email = "alice@example.com",

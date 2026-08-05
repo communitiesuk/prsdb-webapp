@@ -47,7 +47,7 @@ class OrganisationalLandlordUserServiceTests {
         verify(mockOrganisationalLandlordUserRepository).save(captor.capture())
 
         val saved = captor.value
-        assertEquals(mockOrganisationLandlord, saved.organisationLandlord)
+        assertEquals(mockOrganisationLandlord, saved.organisationalLandlord)
         assertEquals(baseUser, saved.baseUser)
         assertEquals(name, saved.name)
         assertEquals(email, saved.email)

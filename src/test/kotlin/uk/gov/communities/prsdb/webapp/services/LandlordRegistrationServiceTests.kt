@@ -279,7 +279,7 @@ class LandlordRegistrationServiceTests {
         private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
         private val orgDashboardUri = URI("http://example.com/landlord-dashboard")
 
-        private val organisationLandlord =
+        private val organisationalLandlord =
             OrganisationalLandlord(
                 registrationNumber = orgRegistrationNumber,
                 name = "Test Org",
@@ -333,7 +333,7 @@ class LandlordRegistrationServiceTests {
                     any(),
                     any(),
                 ),
-            ).thenReturn(organisationLandlord)
+            ).thenReturn(organisationalLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
         }
 

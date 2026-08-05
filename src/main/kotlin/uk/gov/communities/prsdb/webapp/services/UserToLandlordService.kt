@@ -62,7 +62,7 @@ class UserToLandlordService(
     fun getLandlordForBaseUserIdOrNull(baseUserId: String): Landlord? {
         val landlords =
             listOfNotNull(individualLandlordRepository.findByBaseUser_Id(baseUserId)) +
-                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
+                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationalLandlord }
 
         if (landlords.size > 1) {
             throw PrsdbWebException("Multiple landlords were found for user with baseUserId $baseUserId")
