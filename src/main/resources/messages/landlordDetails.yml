@@ -5,6 +5,8 @@ personalDetails:
   heading: Personal details
   lrn: Landlord Registration Number
   registrationDate: Registration date
+  landlordType: Landlord type
+  landlordTypeValue: Individual
   name: Name
   dateOfBirth: Date of birth
   oneLoginVerified: Verified by GOV.UK One Login
