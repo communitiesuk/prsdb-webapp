@@ -42,6 +42,8 @@ class PropertyDetailsPageLandlordView(
 
     val cancelInvitationLink = Link.byText(page, "Cancel invitation")
 
+    val resendInvitationLink = Link.byText(page, "Send a new email invitation")
+
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
 
