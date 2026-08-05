@@ -91,7 +91,10 @@ class LandlordDetailsControllerTests(
                 status { isOk() }
                 view { name("orgLandlordDetailsView") }
                 model {
-                    attribute("deleteLandlordRecordUrl", DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+                    attribute(
+                        "deleteLandlordRecordUrl",
+                        DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
+                    )
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
                     attributeExists(
                         "orgLandlord",

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 /**
@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 @PrsdbWebService
 class UserToLandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
-    private val organisationLandlordUserRepository: OrganisationLandlordUserRepository,
+    private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
 ) {
     fun getCurrentLandlordForUser(): Landlord {
         // TODO: PDJB-1477: Improve this method with caching
@@ -62,7 +62,7 @@ class UserToLandlordService(
     fun getLandlordForBaseUserIdOrNull(baseUserId: String): Landlord? {
         val landlords =
             listOfNotNull(individualLandlordRepository.findByBaseUser_Id(baseUserId)) +
-                organisationLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
+                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
 
         if (landlords.size > 1) {
             throw PrsdbWebException("Multiple landlords were found for user with baseUserId $baseUserId")

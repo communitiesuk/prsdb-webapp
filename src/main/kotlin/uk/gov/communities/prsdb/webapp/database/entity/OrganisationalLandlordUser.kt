@@ -12,10 +12,10 @@ import jakarta.persistence.UniqueConstraint
 
 @Entity
 @Table(
-    name = "organisation_landlord_user",
+    name = "organisational_landlord_user",
     uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_landlord_id", "subject_identifier"])],
 )
-class OrganisationLandlordUser() : AuditableEntity() {
+class OrganisationalLandlordUser() : AuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
@@ -44,6 +44,6 @@ class OrganisationLandlordUser() : AuditableEntity() {
         this.baseUser = baseUser
         this.name = name
         this.email = email
-        organisationLandlord.addOrganisationLandlordUser(this)
+        organisationLandlord.addOrganisationalLandlordUser(this)
     }
 }
