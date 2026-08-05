@@ -176,7 +176,7 @@ class ConfirmStepConfigTests {
                 mockConfirmationEmailSender,
                 mockInviteeCancellationEmailSender,
             )
-        stepConfig.routeSegment = ConfirmStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ConfirmStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

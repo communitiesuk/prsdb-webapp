@@ -71,7 +71,7 @@ class LookupAddressStepConfigTests {
 
     private fun setupStepConfig(): LookupAddressStepConfig {
         val stepConfig = LookupAddressStepConfig(mockAddressService)
-        stepConfig.routeSegment = LookupAddressStep.ROUTE_SEGMENT
+        stepConfig.urlPath = LookupAddressStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

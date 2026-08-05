@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
+import java.util.Stack
 
 interface ConfigurableElement<TMode : Enum<TMode>> {
     val initialiserName: String
@@ -49,6 +50,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
 
     fun saveProgress(shouldSaveProgress: Boolean = true): ConfigurableElement<TMode>
+
+    fun prefixRouteWith(prefixProvider: () -> String): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -60,6 +63,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var additionalContentProviders: MutableList<() -> Map<String, Any?>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
     var shouldSaveProgress: Boolean = false
+    val routePrefixProviders: Stack<() -> String> = Stack()
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -120,6 +124,18 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         this.shouldSaveProgress = shouldSaveProgress
         return this
     }
+
+    override fun prefixRouteWith(prefixProvider: () -> String): ConfigurableElement<TMode> {
+        routePrefixProviders.push(prefixProvider)
+        return this
+    }
+
+    fun buildPath(initial: String?): String? =
+        routePrefixProviders.fold(initial) { current, prefixProvider ->
+            current?.let {
+                "${prefixProvider()}/$current"
+            } ?: prefixProvider()
+        }
 
     override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> =
         backDestination { backUrlProvider()?.let { Destination.ExternalUrl(it) } ?: Destination.Nowhere() }
@@ -216,7 +232,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         checkForUninitialisedParents(parentage.potentialParents)
 
         step.initialize(
-            segment,
+            segment?.let { elementConfiguration.buildPath(segment) },
             state,
             elementConfiguration.backDestinationOverride,
             elementConfiguration.nextDestinationProvider

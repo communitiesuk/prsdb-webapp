@@ -138,7 +138,7 @@ class SelectAddressStepConfigTests {
 
     private fun setupStepConfig(): SelectAddressStepConfig {
         val stepConfig = SelectAddressStepConfig(mockAddressAvailabilityService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

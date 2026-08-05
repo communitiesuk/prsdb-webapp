@@ -16,7 +16,7 @@ class JourneyStateDelegateProvider(
 
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
-            throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
+            throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }
@@ -26,7 +26,7 @@ class JourneyStateDelegateProvider(
     private var routePrefix: String? = null
 
     fun bindRoutePrefix(routePrefix: String?) {
-        this.routePrefix = routePrefix
+        this.routePrefix = this.routePrefix?.let { "$it/$routePrefix" } ?: routePrefix
     }
 
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {

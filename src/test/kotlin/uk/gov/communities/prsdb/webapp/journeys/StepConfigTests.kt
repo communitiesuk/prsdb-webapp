@@ -32,7 +32,7 @@ class StepConfigTests {
         val step = TestStepConfig()
         val state: JourneyState = mock()
         val routeSegment = "test-segment"
-        step.routeSegment = routeSegment
+        step.urlPath = routeSegment
 
         // Test when there is data in the state
         whenever(state.getStepData(routeSegment)).thenReturn(mapOf("field" to "value", "otherField" to "123"))
@@ -52,7 +52,7 @@ class StepConfigTests {
     fun `isRouteSegmentInitialised returns true if and only if routeSegment has been initialised`() {
         val step = TestStepConfig()
         assertFalse(step.isRouteSegmentInitialised())
-        step.routeSegment = "testSegment"
+        step.urlPath = "testSegment"
         assertTrue(step.isRouteSegmentInitialised())
     }
 }

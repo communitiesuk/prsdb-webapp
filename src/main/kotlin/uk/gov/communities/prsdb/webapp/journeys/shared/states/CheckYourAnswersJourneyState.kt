@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.urlPath
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
@@ -29,7 +28,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
             cyaUrlPath =
                 when (destination) {
                     is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
+                    is Destination.VisitableStep -> destination.step.urlPath
                     else -> null
                 }
         }

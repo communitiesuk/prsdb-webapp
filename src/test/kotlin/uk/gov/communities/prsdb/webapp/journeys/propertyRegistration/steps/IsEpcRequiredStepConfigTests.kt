@@ -72,7 +72,7 @@ class IsEpcRequiredStepConfigTests {
 
     private fun setupStepConfig(): IsEpcRequiredStepConfig {
         val stepConfig = IsEpcRequiredStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

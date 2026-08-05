@@ -145,7 +145,7 @@ class UploadElectricalCertStepConfigTests {
     private fun setupStepConfig(): UploadElectricalCertStepConfig {
         val stepConfig =
             UploadElectricalCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService, userToLandlordService)
-        stepConfig.routeSegment = UploadElectricalCertStep.ROUTE_SEGMENT
+        stepConfig.urlPath = UploadElectricalCertStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

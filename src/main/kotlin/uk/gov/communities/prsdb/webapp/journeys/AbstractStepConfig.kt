@@ -94,21 +94,17 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     fun getFormModelFromState(state: TState): TFormModel =
         getFormModelFromStateOrNull(state)
-            ?: throw NotNullFormModelValueIsNullException("Form model for step '$routeSegment' is null in journey state")
+            ?: throw NotNullFormModelValueIsNullException("Form model for step '$urlPath' is null in journey state")
 
     // TODO PDJB-585: It is ugly that step config has a value set during JourneyStep initialisation - it is only used to make "getFormModelFromState" work
     // Perhaps either the routeSegment or formModel should be passed into that method instead (and therefore all the other functions)
     // Alternatively, steps could reflexively access the form model on the JourneyStep in state without needing the route segment
     // Another idea would to have this be set directly in the DSL (but enforce that it is set before the other values)
-    lateinit var routeSegment: String
+    lateinit var urlPath: String
 
-    // When a step belongs to a task with a route, this holds that route. The step's identity and data key
-    // stays `routeSegment`; only its URL path is prefixed with the route.
-    var urlPathPrefix: String? = null
+    val stepDataKey: String get() = urlPath
 
-    val stepDataKey: String get() = urlPathPrefix?.let { "$it/$routeSegment" } ?: routeSegment
-
-    fun isRouteSegmentInitialised(): Boolean = ::routeSegment.isInitialized
+    fun isRouteSegmentInitialised(): Boolean = ::urlPath.isInitialized
 
     @Autowired
     lateinit var validator: Validator

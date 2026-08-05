@@ -102,7 +102,7 @@ class LicensingDetailsHelperTests {
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {
-                whenever(this.routeSegment).thenReturn("licensing-type")
+                whenever(this.urlPath).thenReturn("licensing-type")
                 whenever(this.isStepReachable).thenReturn(true)
             }
         whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)
@@ -136,7 +136,7 @@ class LicensingDetailsHelperTests {
             }
 
         whenever(licenceNumberStepMock.isStepReachable).thenReturn(true)
-        whenever(licenceNumberStepMock.routeSegment).thenReturn("licence-number")
+        whenever(licenceNumberStepMock.urlPath).thenReturn("licence-number")
 
         return stateMock
     }
@@ -146,7 +146,7 @@ class LicensingDetailsHelperTests {
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {
-                whenever(this.routeSegment).thenReturn("licensing-type")
+                whenever(this.urlPath).thenReturn("licensing-type")
                 whenever(this.isStepReachable).thenReturn(true)
             }
         whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -29,10 +28,8 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
-import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
-import uk.gov.communities.prsdb.webapp.journeys.urlPath
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
 class TaskInitialiserTests {
@@ -79,7 +76,7 @@ class TaskInitialiserTests {
 
         val nextStepMock = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
         val nextStepSegment = "nextStepSegment"
-        whenever(nextStepMock.routeSegment).thenReturn(nextStepSegment)
+        whenever(nextStepMock.urlPath).thenReturn(nextStepSegment)
         whenever(nextStepMock.currentJourneyId).thenReturn("journeyId")
 
         val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
@@ -105,7 +102,7 @@ class TaskInitialiserTests {
         val destination = lambdaCaptor.firstValue.invoke(SubjourneyComplete.COMPLETE)
         assertTrue(destination is Destination.VisitableStep)
         with(destination as Destination.VisitableStep) {
-            assertEquals(nextStepSegment, step.routeSegment)
+            assertEquals(nextStepSegment, step.urlPath)
             assertEquals("journeyId", step.currentJourneyId)
         }
     }
@@ -380,15 +377,13 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `routeSegment sets the task route as the url path prefix on each requestable step`() {
+    fun `routeSegment binds the task route so delegate keys and the sub-journey are scoped by it`() {
         // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-
-        val stepConfig = RouteTestStepConfig()
-        val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.routeSegment("task-route")
@@ -399,23 +394,21 @@ class TaskInitialiserTests {
         builder.build()
 
         // Assert
-        assertEquals("task-route", stepConfig.urlPathPrefix)
+        verify(taskMock).bindRoute("task-route")
     }
 
     @Test
-    fun `routeSegment prepends the task route to an existing prefix so nested routed tasks compose`() {
+    fun `a nested task's bindRoute receives the outer and inner routes composed`() {
         // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-
-        val stepConfig = RouteTestStepConfig()
-        stepConfig.urlPathPrefix = "inner-route"
-        val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
-        builder.routeSegment("outer-route")
+        builder.routeSegment("inner-route")
+        builder.prefixRouteWith { "outer-route" }
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
@@ -423,19 +416,16 @@ class TaskInitialiserTests {
         builder.build()
 
         // Assert
-        assertEquals("outer-route/inner-route", stepConfig.urlPathPrefix)
+        verify(taskMock).bindRoute("outer-route/inner-route")
     }
 
     @Test
-    fun `a task without a routeSegment does not set a url path prefix on its steps`() {
+    fun `a task without a routeSegment binds a null route`() {
         // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-
-        val stepConfig = RouteTestStepConfig()
-        val step = JourneyStep.RequestableStep(stepConfig)
-        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
 
         val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
         builder.nextDestination { mock() }
@@ -445,7 +435,7 @@ class TaskInitialiserTests {
         builder.build()
 
         // Assert
-        assertNull(stepConfig.urlPathPrefix)
+        verify(taskMock).bindRoute(null)
     }
 
     @Test
@@ -469,8 +459,7 @@ class TaskInitialiserTests {
 
         // Assert
         val landingStep = built.filterIsInstance<TaskRouteRedirectStep>().single()
-        assertEquals("task-route", landingStep.routeSegment)
-        assertNull(landingStep.urlPathPrefix)
+        assertEquals("task-route", landingStep.urlPath)
     }
 
     @Test
@@ -564,29 +553,25 @@ class TaskInitialiserTests {
     }
 
     @Test
-    fun `an inner routed task's landing step composes with an outer task route`() {
-        // Arrange: simulate an inner routed task whose landing step already carries the inner route,
-        // then apply an outer task route on top.
+    fun `a nested routed task's landing step composes its urlPath with the outer task's route`() {
+        // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
         whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
-
-        val innerLandingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
-        innerLandingStep.stepConfig.routeSegment = "inner-route"
-        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf<JourneyStep<*, *, *>>(innerLandingStep))
+        whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
         val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
-        builder.routeSegment("outer-route")
+        builder.routeSegment("inner-route")
+        builder.prefixRouteWith { "outer-route" }
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
         // Act
-        builder.build()
+        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().single()
 
         // Assert
-        assertEquals("outer-route", innerLandingStep.urlPathPrefix)
-        assertEquals("outer-route/inner-route", innerLandingStep.urlPath)
+        assertEquals("outer-route/inner-route", landingStep.urlPath)
     }
 
     @Test
@@ -708,13 +693,31 @@ class TaskInitialiserTests {
         fun `a nested self-stated task registers its key scoped by its route so a matching state key collides`() {
             // The inner task under route "inner" registers "cached" as "inner/cached"; a root state key of the same
             // scoped form collides, proving the nested task's keys reach the shared registry through the nested build.
-            val builder = JourneyBuilder(stateRegisteringKey("inner/cached"))
+            val propertyKey = "inner/cached"
+            val builder = JourneyBuilder(stateRegisteringKey(propertyKey))
             builder.task(taskContaining(KeyedSelfStatedTask("cached"), innerRoute = "inner")) {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
 
-            assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+            val exception = assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+            assertEquals("Delegate key '$propertyKey' is already in use in this journey", exception.message)
+        }
+
+        @Test
+        fun `a nested task under an outer routed task registers its key scoped by both routes so a matching state key collides`() {
+            // The inner task under route "inner", itself nested inside an outer task under route "outer", should
+            // register "cached" as "outer/inner/cached" - symmetric with how urlPathPrefix composes outer and inner
+            // route segments on requestable steps. A root state key of the same scoped form should therefore collide.
+            val propertyKey = "outer/inner/cached"
+            val builder = JourneyBuilder(stateRegisteringKey(propertyKey))
+            builder.task(taskContaining(KeyedSelfStatedTask("cached"), innerRoute = "inner"), routeSegment = "outer") {
+                parents { NoParents() }
+                nextDestination { Destination.ExternalUrl("done") }
+            }
+
+            val exception = assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
+            assertEquals("Delegate key '$propertyKey' is already in use in this journey", exception.message)
         }
 
         // A journey root state that registers a single delegate key, so its keys can be collided against a task's.
@@ -736,7 +739,6 @@ class TaskInitialiserTests {
                 override fun makeSubJourney(state: JourneyState) =
                     subJourney(state) {
                         task(inner, innerRoute) {
-                            parents { NoParents() }
                             nextDestination { Destination.ExternalUrl("inner-done") }
                         }
                         exitStep { parents { NoParents() } }

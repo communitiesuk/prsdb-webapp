@@ -91,24 +91,6 @@ class JourneyStepTests {
         assertFalse(isReachable)
     }
 
-    @Test
-    fun `urlPath is the route segment when the step has no url path prefix`() {
-        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
-        whenever(step.routeSegment).thenReturn("my-segment")
-        whenever(step.urlPathPrefix).thenReturn(null)
-
-        assertEquals("my-segment", step.urlPath)
-    }
-
-    @Test
-    fun `urlPath prefixes the route segment with the url path prefix when the step is in a routed task`() {
-        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
-        whenever(step.routeSegment).thenReturn("my-segment")
-        whenever(step.urlPathPrefix).thenReturn("task-route")
-
-        assertEquals("task-route/my-segment", step.urlPath)
-    }
-
     @ParameterizedTest
     @MethodSource("journeyStepProvider")
     fun `validateSubmittedData binds valid data to form model with no errors`(
@@ -263,7 +245,7 @@ class JourneyStepTests {
         val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
-        whenever(stepConfig.routeSegment).thenReturn("stepId")
+        whenever(stepConfig.urlPath).thenReturn("stepId")
         whenever(stepConfig.stepDataKey).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
@@ -292,7 +274,7 @@ class JourneyStepTests {
         val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
-        whenever(stepConfig.routeSegment).thenReturn("stepId")
+        whenever(stepConfig.urlPath).thenReturn("stepId")
         whenever(stepConfig.stepDataKey).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
@@ -324,7 +306,7 @@ class JourneyStepTests {
         val internalStepConfig: AbstractInternalStepConfig<TestEnum, JourneyState> = mock()
         val step = JourneyStep.InternalStep(internalStepConfig)
         whenever(step.stepConfig.formModelClass).thenReturn(Nothing::class)
-        whenever(step.stepConfig.routeSegment).thenReturn("stepId")
+        whenever(step.stepConfig.urlPath).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
             null,
@@ -502,7 +484,7 @@ class JourneyStepTests {
     ) {
         // Arrange
         whenever(journeyStep.stepConfig.mode(any())).thenReturn(null)
-        whenever(journeyStep.stepConfig.routeSegment).thenReturn("stepId")
+        whenever(journeyStep.stepConfig.urlPath).thenReturn("stepId")
 
         val state: JourneyState = mock()
         whenever(state.journeyId).thenReturn("jid123")
@@ -687,7 +669,7 @@ class JourneyStepTests {
         )
 
         // Assert
-        verify(stepConfig).routeSegment = "stepId"
+        verify(stepConfig).urlPath = "stepId"
     }
 
     @Test
