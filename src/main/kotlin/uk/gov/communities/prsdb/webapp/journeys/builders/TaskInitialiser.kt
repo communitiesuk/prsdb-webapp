@@ -68,6 +68,8 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
 
+        exitStepOverride?.let { task.setCustomExitStep(it) }
+
         val taskSubJourney =
             task.getTaskSubJourneyBuilder(state) {
                 nextDestination(nonNullDestinationProvider)
