@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -108,6 +109,14 @@ class OrganisationLandlord() : Landlord() {
     internal fun addOrganisationalLandlordUser(organisationalLandlordUser: OrganisationalLandlordUser) {
         organisationalLandlordUsers.add(organisationalLandlordUser)
     }
+
+    @OneToMany(mappedBy = "organisationLandlord")
+    @OrderBy("id ASC")
+    private val governingBodyMemberList: MutableList<OrganisationGoverningBodyMember> = mutableListOf()
+
+    @get:Transient
+    val governingBodyMembers: List<OrganisationGoverningBodyMember>
+        get() = governingBodyMemberList.toList()
 
     constructor(
         registrationNumber: RegistrationNumber,
