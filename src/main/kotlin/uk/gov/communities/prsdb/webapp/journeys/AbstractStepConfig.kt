@@ -104,7 +104,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     val stepDataKey: String get() = urlPath
 
-    fun isRouteSegmentInitialised(): Boolean = ::urlPath.isInitialized
+    fun isUrlPathInitialised(): Boolean = ::urlPath.isInitialized
 
     @Autowired
     lateinit var validator: Validator

@@ -51,8 +51,8 @@ class StepConfigTests {
     @Test
     fun `isRouteSegmentInitialised returns true if and only if routeSegment has been initialised`() {
         val step = TestStepConfig()
-        assertFalse(step.isRouteSegmentInitialised())
+        assertFalse(step.isUrlPathInitialised())
         step.urlPath = "testSegment"
-        assertTrue(step.isRouteSegmentInitialised())
+        assertTrue(step.isUrlPathInitialised())
     }
 }

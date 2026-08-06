@@ -17,16 +17,16 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val urlPath: String get() = stepConfig.urlPath
 
-        override fun getRouteSegmentOrNull(): String? = stepConfig.urlPath
+        override fun getUrlPathOrNull(): String? = stepConfig.urlPath
 
-        override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
+        override fun isUrlPathInitialised(): Boolean = stepConfig.isUrlPathInitialised()
 
         override fun initialiseStepPath(path: String?) {
-            if (isRouteSegmentInitialised()) {
-                throw JourneyInitialisationException("routeSegment is already initialised")
+            if (isUrlPathInitialised()) {
+                throw JourneyInitialisationException("urlPath is already initialised")
             }
             if (path == null) {
-                throw JourneyInitialisationException("routeSegment cannot be null for a requestable step")
+                throw JourneyInitialisationException("urlPath cannot be null for a requestable step")
             }
 
             stepConfig.urlPath = path
@@ -41,14 +41,14 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
         stepConfig: AbstractInternalStepConfig<TEnum, TState>,
     ) : JourneyStep<TEnum, Nothing, TState>(stepConfig) {
-        override fun getRouteSegmentOrNull(): String? = null
+        override fun getUrlPathOrNull(): String? = null
 
-        override fun isRouteSegmentInitialised(): Boolean = true
+        override fun isUrlPathInitialised(): Boolean = true
 
         override fun initialiseStepPath(path: String?) {
             path?.let {
                 throw JourneyInitialisationException(
-                    "route segment cannot be set for an internal step - was set to $path",
+                    "step path cannot be set for an internal step - was set to $path",
                 )
             }
         }
@@ -56,9 +56,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         override fun submitFormData(bindingResult: BindingResult) {}
     }
 
-    abstract fun getRouteSegmentOrNull(): String?
+    abstract fun getUrlPathOrNull(): String?
 
-    abstract fun isRouteSegmentInitialised(): Boolean
+    abstract fun isUrlPathInitialised(): Boolean
 
     protected abstract fun initialiseStepPath(path: String?)
 
@@ -102,16 +102,16 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     }
 
     protected fun addStepData(
-        routeSegment: String,
+        stepDataKey: String,
         data: FormData,
     ) {
         stepConfig.beforeStepDataIsAdded(state, data)
-        state.addStepData(routeSegment, data)
+        state.addStepData(stepDataKey, data)
         stepConfig.afterStepDataIsAdded(state)
     }
 
-    fun clearFormData(routeSegment: String) {
-        state.clearStepData(routeSegment)
+    fun clearFormData(stepDataKey: String) {
+        state.clearStepData(stepDataKey)
     }
 
     fun saveStateIfAllowed() {
@@ -201,7 +201,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private val isBaseClassInitialised: Boolean
         get() =
-            isRouteSegmentInitialised() && ::state.isInitialized && ::nextDestination.isInitialized && ::parentage.isInitialized
+            isUrlPathInitialised() && ::state.isInitialized && ::nextDestination.isInitialized && ::parentage.isInitialized
 
     fun initialize(
         path: String?,

@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.Parentage
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
-import java.util.Stack
 
 interface ConfigurableElement<TMode : Enum<TMode>> {
     val initialiserName: String
@@ -63,7 +62,8 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var additionalContentProviders: MutableList<() -> Map<String, Any?>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
     var shouldSaveProgress: Boolean = false
-    val routePrefixProviders: Stack<() -> String> = Stack()
+    var routePrefixProvider: (() -> String)? = null
+    val prefix get() = routePrefixProvider?.invoke()
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -126,16 +126,20 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     }
 
     override fun prefixRouteWith(prefixProvider: () -> String): ConfigurableElement<TMode> {
-        routePrefixProviders.push(prefixProvider)
+        if (routePrefixProvider != null) {
+            throw JourneyInitialisationException(
+                "$initialiserName has already been prefixed.",
+                NotImplementedError("Handle sequential prefixing FILO"),
+            )
+        }
+        routePrefixProvider = prefixProvider
         return this
     }
 
-    fun buildPath(initial: String?): String? =
-        routePrefixProviders.fold(initial) { current, prefixProvider ->
-            current?.let {
-                "${prefixProvider()}/$current"
-            } ?: prefixProvider()
-        }
+    fun buildPrefixedPath(ownPath: String?): String? =
+        listOfNotNull(prefix, ownPath)
+            .ifEmpty { null }
+            ?.joinToString("/")
 
     override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> =
         backDestination { backUrlProvider()?.let { Destination.ExternalUrl(it) } ?: Destination.Nowhere() }
@@ -232,7 +236,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         checkForUninitialisedParents(parentage.potentialParents)
 
         step.initialize(
-            segment?.let { elementConfiguration.buildPath(segment) },
+            segment?.let { elementConfiguration.buildPrefixedPath(it) },
             state,
             elementConfiguration.backDestinationOverride,
             elementConfiguration.nextDestinationProvider

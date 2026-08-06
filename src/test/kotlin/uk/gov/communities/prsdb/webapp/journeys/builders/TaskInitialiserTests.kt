@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
@@ -552,8 +556,13 @@ class TaskInitialiserTests {
         assertSame(firstStep, (destination as Destination.VisitableStep).step)
     }
 
-    @Test
-    fun `a nested routed task's landing step composes its urlPath with the outer task's route`() {
+    @MethodSource("myFunc")
+    @ParameterizedTest
+    fun `a nested routed task's landing step composes its urlPath with the outer task's route`(
+        inner: String?,
+        outer: String?,
+        built: String?,
+    ) {
         // Arrange
         val taskMock = mockTask()
         val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
@@ -561,17 +570,17 @@ class TaskInitialiserTests {
         whenever(subJourneyBuilderMock.build(any())).thenReturn(listOf())
         whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
 
-        val builder = TaskInitialiser<JourneyState, Nothing>(taskMock, mock())
-        builder.routeSegment("inner-route")
-        builder.prefixRouteWith { "outer-route" }
+        val builder = TaskInitialiser(taskMock, mock())
+        inner?.let { builder.routeSegment(it) }
+        outer?.let { builder.prefixRouteWith { it } }
         builder.nextDestination { mock() }
         builder.parents { NoParents() }
 
         // Act
-        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().single()
+        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().singleOrNull()
 
         // Assert
-        assertEquals("outer-route/inner-route", landingStep.urlPath)
+        assertEquals(built, landingStep?.urlPath)
     }
 
     @Test
@@ -647,6 +656,7 @@ class TaskInitialiserTests {
     // delegate-key collisions ACROSS providers (journey state vs task, task vs task) - the case a single provider's
     // own duplicate-key guard cannot see.
     @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     inner class CollisionRegistryTests {
         @Test
         fun `a route-less task key colliding with a journey state key throws when the journey builds`() {
@@ -704,20 +714,24 @@ class TaskInitialiserTests {
             assertEquals("Delegate key '$propertyKey' is already in use in this journey", exception.message)
         }
 
-        @Test
-        fun `a nested task under an outer routed task registers its key scoped by both routes so a matching state key collides`() {
+        @MethodSource("myFunc")
+        @ParameterizedTest
+        fun `a nested task under an outer routed task registers its key scoped by both routes so a matching state key collides`(
+            inner: String?,
+            outer: String?,
+            built: String,
+        ) {
             // The inner task under route "inner", itself nested inside an outer task under route "outer", should
             // register "cached" as "outer/inner/cached" - symmetric with how urlPathPrefix composes outer and inner
             // route segments on requestable steps. A root state key of the same scoped form should therefore collide.
-            val propertyKey = "outer/inner/cached"
-            val builder = JourneyBuilder(stateRegisteringKey(propertyKey))
-            builder.task(taskContaining(KeyedSelfStatedTask("cached"), innerRoute = "inner"), routeSegment = "outer") {
+            val builder = JourneyBuilder(stateRegisteringKey(built))
+            builder.task(taskContaining(KeyedSelfStatedTask("cached"), innerRoute = inner), routeSegment = outer) {
                 parents { NoParents() }
                 nextDestination { Destination.ExternalUrl("done") }
             }
 
             val exception = assertThrows<JourneyInitialisationException> { builder.buildRoutingMap() }
-            assertEquals("Delegate key '$propertyKey' is already in use in this journey", exception.message)
+            assertEquals("Delegate key '$built' is already in use in this journey", exception.message)
         }
 
         // A journey root state that registers a single delegate key, so its keys can be collided against a task's.
@@ -731,7 +745,7 @@ class TaskInitialiserTests {
         // registry threading through the nested build can be exercised.
         private fun taskContaining(
             inner: TaskWithoutDependencies<JourneyState>,
-            innerRoute: String,
+            innerRoute: String?,
         ): TaskWithoutDependencies<JourneyState> =
             object : TaskWithoutDependencies<JourneyState>(mock()) {
                 override val taskState: JourneyState get() = this
@@ -765,5 +779,46 @@ class TaskInitialiserTests {
                     unreachableStepUrl { "unreachable" }
                 }
         }
+
+        fun myFunc() =
+            listOf(
+                Arguments.of(
+                    "inner-route",
+                    null,
+                    "inner-route/cached",
+                ),
+                Arguments.of(
+                    null,
+                    "outer-route",
+                    "outer-route/cached",
+                ),
+                Arguments.of(
+                    "inner-route",
+                    "outer-route",
+                    "outer-route/inner-route/cached",
+                ),
+            )
+    }
+
+    companion object {
+        @JvmStatic
+        fun myFunc() =
+            listOf(
+                Arguments.of(
+                    "inner-route",
+                    null,
+                    "inner-route",
+                ),
+                Arguments.of(
+                    null,
+                    "outer-route",
+                    null,
+                ),
+                Arguments.of(
+                    "inner-route",
+                    "outer-route",
+                    "outer-route/inner-route",
+                ),
+            )
     }
 }

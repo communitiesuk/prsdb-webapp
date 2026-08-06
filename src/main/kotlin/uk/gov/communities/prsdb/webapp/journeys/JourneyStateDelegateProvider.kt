@@ -26,7 +26,7 @@ class JourneyStateDelegateProvider(
     private var routePrefix: String? = null
 
     fun bindRoutePrefix(routePrefix: String?) {
-        this.routePrefix = this.routePrefix?.let { "$it/$routePrefix" } ?: routePrefix
+        this.routePrefix = routePrefix
     }
 
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {

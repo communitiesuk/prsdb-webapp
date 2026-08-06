@@ -615,7 +615,7 @@ class JourneyStepTests {
             false,
         )
 
-        whenever(stepConfig.isRouteSegmentInitialised()).thenReturn(true)
+        whenever(stepConfig.isUrlPathInitialised()).thenReturn(true)
 
         // Act & Assert
         assertThrows<JourneyInitialisationException> {

@@ -58,7 +58,7 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
             )
         }
 
-        val routePrefix = elementConfiguration.buildPath(taskSegment)
+        val routePrefix = elementConfiguration.buildPrefixedPath(taskSegment)
         task.bindRoute(routePrefix)
 
         // bindKeyRegistry must be called AFTER bindRoute, so the route-scoped keys are registered.
@@ -110,7 +110,7 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         // Prefix every requestable step in this task with the task route, so its URL path becomes
         // "<taskRoute>/<routeSegment>" (internal steps have no URL). Nested tasks will subsequently be
         // prefixed themselves and become "<outerTask>/<innerTask>/<routeSegment>"
-        val landingStep = elementConfiguration.buildPath(taskSegment)?.let { createLandingStep(it) }
+        val landingStep = taskSegment?.let { elementConfiguration.buildPrefixedPath(taskSegment)?.let { createLandingStep(it) } }
 
         return builtSteps + listOfNotNull(landingStep)
     }
