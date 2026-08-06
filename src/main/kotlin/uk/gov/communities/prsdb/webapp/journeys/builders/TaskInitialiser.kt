@@ -41,8 +41,6 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         return this
     }
 
-    // Provides the live enclosing state a task reads through Task.dependencies.
-    // For dependency-free tasks TDependencies is Nothing, so this cannot be called.
     private var dependenciesProvider: (() -> TDependencies)? = null
 
     fun withDependencies(provider: () -> TDependencies) {
@@ -53,8 +51,6 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
     }
 
     override fun build(registry: DelegateKeyRegistry): List<JourneyStep<*, *, *>> {
-        // Bind the enclosing state (if this task declares a dependency contract) before its sub-journey builds.
-        // dependencies is only read at runtime, so ordering relative to bindRoute/bindKeyRegistry is immaterial.
         dependenciesProvider?.let { task.bindDependencies(it()) }
         if (task.requiresDependencies && !task.areDependenciesBound) {
             throw JourneyInitialisationException(
@@ -62,12 +58,9 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
             )
         }
 
-        // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime,
-        // so it namespaces its stored data keys.
         task.bindRoute(taskRoute)
 
-        // Attach the task to the shared registry AFTER bindRoute, so its keys register in their final route-scoped
-        // form and collide against the journey state's keys and every other task's keys.
+        // bindKeyRegistry must be called AFTER bindRoute, so the route-scoped keys are registered.
         task.bindKeyRegistry(registry)
 
         val nonNullDestinationProvider =
@@ -111,10 +104,8 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         val builtSteps = taskSubJourney.build(registry)
 
         // Prefix every requestable step in this task with the task route, so its URL path becomes
-        // "<taskRoute>/<routeSegment>" (internal steps have no URL). Prepending rather than overwriting lets
-        // nested routed tasks compose to "<outer>/<inner>/<routeSegment>", as inner tasks build first.
-        // Then append a landing step keyed by the bare task route that redirects to the task's first step,
-        // so a request to "<taskRoute>" resolves to the task's genuine first step (internal or requestable).
+        // "<taskRoute>/<routeSegment>" (internal steps have no URL). Nested tasks will subsequently be
+        // prefixed themselves and become "<outerTask>/<innerTask>/<routeSegment>"
         val stepsWithLanding =
             taskRoute?.let { route ->
                 builtSteps.filterIsInstance<JourneyStep.RequestableStep<*, *, *>>().forEach { step ->
@@ -127,10 +118,6 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         return stepsWithLanding
     }
 
-    // Created AFTER the prefixing loop so its own route is not applied twice, and appended (not prepended) so
-    // SubJourneyBuilder.firstStep stays the task's first real step (no landing-to-landing redirect chains). As a
-    // RequestableStep it is still picked up by an outer routed task's prefixing loop, composing to "<outer>/<route>".
-    // It is always reachable; the task's firstStep owns the real reachability logic.
     private fun createLandingStep(route: String): TaskRouteRedirectStep {
         val landingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
         landingStep.initialize(
