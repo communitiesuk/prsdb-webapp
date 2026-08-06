@@ -42,7 +42,7 @@ class ElectricalCertExpiredStepConfigTests {
 
     private fun setupStepConfig(): ElectricalCertExpiredStepConfig {
         val stepConfig = ElectricalCertExpiredStepConfig()
-        stepConfig.routeSegment = ElectricalCertExpiredStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ElectricalCertExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

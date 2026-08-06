@@ -42,7 +42,7 @@ class ElectricalCertMissingStepConfigTests {
 
     private fun setupStepConfig(): ElectricalCertMissingStepConfig {
         val stepConfig = ElectricalCertMissingStepConfig()
-        stepConfig.routeSegment = ElectricalCertMissingStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ElectricalCertMissingStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

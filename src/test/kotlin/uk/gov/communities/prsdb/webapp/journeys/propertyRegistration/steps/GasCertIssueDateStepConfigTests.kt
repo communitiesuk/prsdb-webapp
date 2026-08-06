@@ -56,7 +56,7 @@ class GasCertIssueDateStepConfigTests {
 
     private fun setupStepConfig(): GasCertIssueDateStepConfig {
         val stepConfig = GasCertIssueDateStepConfig()
-        stepConfig.routeSegment = GasCertIssueDateStep.ROUTE_SEGMENT
+        stepConfig.urlPath = GasCertIssueDateStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

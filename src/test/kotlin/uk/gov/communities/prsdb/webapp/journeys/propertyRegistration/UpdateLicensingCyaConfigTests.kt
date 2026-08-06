@@ -60,7 +60,7 @@ class UpdateLicensingCyaConfigTests {
                 propertyOwnershipService = mockPropertyOwnershipService,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
-        stepConfig.routeSegment = UpdateLicensingCyaStep.ROUTE_SEGMENT
+        stepConfig.urlPath = UpdateLicensingCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
         whenever(mockState.propertyId).thenReturn(propertyId)

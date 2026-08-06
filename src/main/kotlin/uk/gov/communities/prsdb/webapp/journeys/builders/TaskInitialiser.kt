@@ -34,10 +34,10 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         stepConfigurations.add(step to configuration)
     }
 
-    private var taskRoute: String? = null
+    private var taskSegment: String? = null
 
     fun routeSegment(segment: String): TaskInitialiser<TStateInit, TDependencies> {
-        taskRoute = segment
+        taskSegment = segment
         return this
     }
 
@@ -58,7 +58,8 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
             )
         }
 
-        task.bindRoute(taskRoute)
+        val routePrefix = elementConfiguration.buildPrefixedPath(taskSegment)
+        task.bindRoute(routePrefix)
 
         // bindKeyRegistry must be called AFTER bindRoute, so the route-scoped keys are registered.
         task.bindKeyRegistry(registry)
@@ -78,6 +79,11 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
             elementConfiguration.unreachableStepDestination?.let { unreachableStepDestinationIfNotSet(it) }
             elementConfiguration.additionalContentProviders.forEach { contentValueProvider ->
                 withAdditionalContentProperties(contentValueProvider)
+            }
+            routePrefix?.let {
+                prefixRouteWith {
+                    it
+                }
             }
         }
         taskSubJourney.configureFirst {
@@ -106,22 +112,15 @@ class TaskInitialiser<TStateInit : JourneyState, TDependencies : Any>(
         // Prefix every requestable step in this task with the task route, so its URL path becomes
         // "<taskRoute>/<routeSegment>" (internal steps have no URL). Nested tasks will subsequently be
         // prefixed themselves and become "<outerTask>/<innerTask>/<routeSegment>"
-        val stepsWithLanding =
-            taskRoute?.let { route ->
-                builtSteps.filterIsInstance<JourneyStep.RequestableStep<*, *, *>>().forEach { step ->
-                    val existingPrefix = step.stepConfig.urlPathPrefix
-                    step.stepConfig.urlPathPrefix = if (existingPrefix != null) "$route/$existingPrefix" else route
-                }
-                builtSteps + createLandingStep(route)
-            } ?: builtSteps
+        val landingStep = taskSegment?.let { elementConfiguration.buildPrefixedPath(taskSegment)?.let { createLandingStep(it) } }
 
-        return stepsWithLanding
+        return builtSteps + listOfNotNull(landingStep)
     }
 
-    private fun createLandingStep(route: String): TaskRouteRedirectStep {
+    private fun createLandingStep(taskPath: String): TaskRouteRedirectStep {
         val landingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
         landingStep.initialize(
-            segment = route,
+            path = taskPath,
             state = state,
             backDestinationOverride = null,
             redirectDestinationProvider = { Destination(task.firstStep) },
