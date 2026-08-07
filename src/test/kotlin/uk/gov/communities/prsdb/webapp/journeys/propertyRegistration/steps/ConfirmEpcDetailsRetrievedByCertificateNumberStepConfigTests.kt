@@ -23,7 +23,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfigTests {
 
     private fun setupStepConfig(): ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig {
         val stepConfig = ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(mockEpcCertificateUrlProvider)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

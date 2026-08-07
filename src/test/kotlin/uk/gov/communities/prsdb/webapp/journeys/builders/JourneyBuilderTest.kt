@@ -332,7 +332,7 @@ class JourneyBuilderTest {
             // Arrange 2
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.build(any())).thenReturn(listOf(builtStep))
-            whenever(builtStep.routeSegment).thenReturn("segment")
+            whenever(builtStep.urlPath).thenReturn("segment")
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             // Act 2
@@ -355,8 +355,7 @@ class JourneyBuilderTest {
             val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(mockStepInitialiser.build(any())).thenReturn(listOf(builtStep))
-            whenever(builtStep.routeSegment).thenReturn("segment")
-            whenever(builtStep.urlPathPrefix).thenReturn("task-route")
+            whenever(builtStep.urlPath).thenReturn("segment")
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             // Act
@@ -364,7 +363,7 @@ class JourneyBuilderTest {
 
             // Assert
             val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
-            assertEquals("task-route/segment", typedMap.keys.single())
+            assertEquals("segment", typedMap.keys.single())
             assertSame(builtStep, typedMap.values.single().journeyStep)
         }
     }
@@ -471,8 +470,7 @@ class JourneyBuilderTest {
         val uninitialisedTask = mock<TaskWithoutDependencies<JourneyState>>()
 
         val landingStep = mock<TaskRouteRedirectStep>()
-        whenever(landingStep.routeSegment).thenReturn("task-route")
-        whenever(landingStep.urlPathPrefix).thenReturn(null)
+        whenever(landingStep.urlPath).thenReturn("task-route")
         whenever(landingStep.lifecycleOrchestrator).thenReturn(RedirectingStepLifecycleOrchestrator(landingStep))
 
         mockConstruction(TaskInitialiser::class.java) { mock, _ ->
@@ -1000,8 +998,7 @@ class JourneyBuilderTest {
             val task = mock<TestSelfStatedTask>()
 
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-            whenever(builtStep.routeSegment).thenReturn("lookup-address")
-            whenever(builtStep.urlPathPrefix).thenReturn("lead-trustee-address")
+            whenever(builtStep.urlPath).thenReturn("lead-trustee-address/lookup-address")
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             mockConstruction(TaskInitialiser::class.java) { mock, _ ->
@@ -1033,8 +1030,7 @@ class JourneyBuilderTest {
             val task = mock<TestSelfStatedTask>()
 
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
-            whenever(builtStep.routeSegment).thenReturn("lookup-address")
-            whenever(builtStep.urlPathPrefix).thenReturn(null)
+            whenever(builtStep.urlPath).thenReturn("lookup-address")
             whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
 
             mockConstruction(TaskInitialiser::class.java) { mock, _ ->

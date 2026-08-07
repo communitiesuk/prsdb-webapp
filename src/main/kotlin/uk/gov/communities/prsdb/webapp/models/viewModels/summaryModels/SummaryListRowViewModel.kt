@@ -19,6 +19,9 @@ data class SummaryListRowViewModel(
     val optionalFieldValueParam: Any? = null,
     val tagColour: String? = null,
 ) {
+    val hasActions: Boolean
+        get() = actions.isNotEmpty()
+
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
             fieldValue.map { getSingleValueMessageKey(it) }
@@ -109,6 +112,8 @@ data class SummaryListRowViewModel(
             )
     }
 }
+
+fun anyRowHasActions(rows: List<SummaryListRowViewModel>?): Boolean = rows?.any { it.hasActions } == true
 
 data class SummaryListRowActionsInputWithDestination(
     val text: String,

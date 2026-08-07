@@ -38,7 +38,7 @@ class ReasonStepConfigTests {
 
     private fun setupStepConfig(): ReasonStepConfig {
         val stepConfig = ReasonStepConfig()
-        stepConfig.routeSegment = ReasonStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ReasonStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

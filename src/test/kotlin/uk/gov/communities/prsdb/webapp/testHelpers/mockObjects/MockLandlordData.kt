@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
@@ -110,9 +110,9 @@ class MockLandlordData {
             mainContactPhoneNumber: String = "07123456781",
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
-        ): OrganisationLandlord {
+        ): OrganisationalLandlord {
             val landlord =
-                OrganisationLandlord(
+                OrganisationalLandlord(
                     registrationNumber = registrationNumber,
                     name = name,
                     address = address,
@@ -138,7 +138,7 @@ class MockLandlordData {
                     mainContactPhone = mainContactPhoneNumber,
                 )
             OrganisationalLandlordUser(
-                organisationLandlord = landlord,
+                organisationalLandlord = landlord,
                 baseUser = baseUser,
                 name = registrantName,
                 email = registrantEmail,

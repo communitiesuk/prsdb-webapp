@@ -15,7 +15,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -34,7 +34,7 @@ class OrganisationGoverningBodyMemberServiceTests {
     private lateinit var organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     @Mock
-    private lateinit var mockOrganisationLandlord: OrganisationLandlord
+    private lateinit var mockOrganisationLandlord: OrganisationalLandlord
 
     @Test
     fun `createGoverningBodyMembers saves each member with resolved address`() {
@@ -72,13 +72,13 @@ class OrganisationGoverningBodyMemberServiceTests {
         assertEquals(GoverningBodyMemberType.DIRECTOR, saved[0].type)
         assertEquals(LocalDate.of(1970, 5, 12), saved[0].dateOfBirth)
         assertEquals(address1, saved[0].address)
-        assertEquals(mockOrganisationLandlord, saved[0].organisationLandlord)
+        assertEquals(mockOrganisationLandlord, saved[0].organisationalLandlord)
 
         assertEquals("Trustee Tina", saved[1].name)
         assertEquals(GoverningBodyMemberType.TRUSTEE, saved[1].type)
         assertEquals(LocalDate.of(1985, 3, 20), saved[1].dateOfBirth)
         assertEquals(address2, saved[1].address)
-        assertEquals(mockOrganisationLandlord, saved[1].organisationLandlord)
+        assertEquals(mockOrganisationLandlord, saved[1].organisationalLandlord)
     }
 
     @Test

@@ -42,7 +42,7 @@ class GasCertExpiredStepConfigTests {
 
     private fun setupStepConfig(): GasCertExpiredStepConfig {
         val stepConfig = GasCertExpiredStepConfig()
-        stepConfig.routeSegment = GasCertExpiredStep.ROUTE_SEGMENT
+        stepConfig.urlPath = GasCertExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

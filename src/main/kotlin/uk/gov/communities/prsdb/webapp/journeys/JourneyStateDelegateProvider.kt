@@ -16,7 +16,7 @@ class JourneyStateDelegateProvider(
 
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
-            throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
+            throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }

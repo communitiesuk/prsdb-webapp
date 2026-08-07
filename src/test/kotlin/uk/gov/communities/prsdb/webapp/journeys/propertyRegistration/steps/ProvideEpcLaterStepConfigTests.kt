@@ -53,7 +53,7 @@ class ProvideEpcLaterStepConfigTests {
 
     private fun setupStepConfig(): ProvideEpcLaterStepConfig {
         val stepConfig = ProvideEpcLaterStepConfig()
-        stepConfig.routeSegment = ProvideEpcLaterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ProvideEpcLaterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }
