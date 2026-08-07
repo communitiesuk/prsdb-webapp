@@ -247,8 +247,8 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"), email = emailAddress1)
         val landlord2 =
             MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"), email = emailAddress2)
-        whenever(landlordService.getLandlordForBaseUserIdOrNull(landlord1.baseUser.id)).thenReturn(landlord1)
-        whenever(landlordService.getLandlordForBaseUserIdOrNull(landlord2.baseUser.id)).thenReturn(landlord2)
+        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
+        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
@@ -285,8 +285,8 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
                 baseUser = MockLandlordData.createPrsdbUser("user-2"),
                 email = emailAddress2,
             )
-        whenever(landlordService.getLandlordForBaseUserIdOrNull(landlord1.baseUser.id)).thenReturn(landlord1)
-        whenever(landlordService.getLandlordForBaseUserIdOrNull(landlord2.baseUser.id)).thenReturn(landlord2)
+        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
+        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0))
             .thenReturn(
