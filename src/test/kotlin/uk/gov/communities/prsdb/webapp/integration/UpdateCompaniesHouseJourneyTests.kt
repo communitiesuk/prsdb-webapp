@@ -30,15 +30,14 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `An organisation landlord can update the company number and return to the details page`(page: Page) {
+    fun `Keeping the same registration answer skips the interruption and updates the company number`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
+        // The seeded landlord is already registered with Companies House, so re-answering Yes is unchanged and the
+        // interruption is skipped.
         isRegisteredCompanyPage.submitYes()
-
-        val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
-        interruptionPage.clickContinue()
 
         val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
         companyNumberPage.submitCompanyNumber("87654321")
@@ -51,11 +50,12 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `Answering no routes to the governing body members flow`(page: Page) {
+    fun `Changing the registration answer to no shows the interruption then routes to the governing body flow`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
+        // The seeded landlord is registered with Companies House, so answering No is a change and shows the interruption.
         isRegisteredCompanyPage.submitNo()
 
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)

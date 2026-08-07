@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCompaniesHouseChangeDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
@@ -300,7 +301,16 @@ class LandlordRegistrationTask(
 
                     OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
                     -> {
-                        checkAnswerTask(journey.orgLandlordRegistrationTask.orgCompaniesHouseChangeTask)
+                        val changeTask = journey.orgLandlordRegistrationTask.orgCompaniesHouseChangeTask
+                        checkAnswerTask(
+                            changeTask,
+                            {
+                                OrgCompaniesHouseChangeDependencies {
+                                    changeTask.companiesHouseTask.orgIsRegisteredCompanyStep.stepConfig
+                                        .mode(journey.getBaseJourneyState())
+                                }
+                            },
+                        )
                     }
 
                     OrgCompanyNumberStep.ROUTE_SEGMENT,
