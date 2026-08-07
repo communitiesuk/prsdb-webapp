@@ -559,6 +559,9 @@ checkPropertyAnswers:
     noLicensing: None
     licensingProvideLater: Provide this later
   tenancyDetails:
+    restructureAndSkipping:
+      heading: Tenancy details
+      tenancyDetailsRow: Tenancy details
     heading: Tenancy and rental information
     occupied: Occupied by tenants
     households: Number of households

@@ -72,7 +72,7 @@ class ConfirmOnlyLandlordStepConfigTests {
 
     private fun setupStepConfig(): ConfirmOnlyLandlordStepConfig {
         val stepConfig = ConfirmOnlyLandlordStepConfig(mockPropertyOwnershipService)
-        stepConfig.routeSegment = ConfirmOnlyLandlordStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ConfirmOnlyLandlordStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

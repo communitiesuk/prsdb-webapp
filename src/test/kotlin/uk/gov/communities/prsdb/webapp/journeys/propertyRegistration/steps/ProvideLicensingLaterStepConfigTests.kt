@@ -45,7 +45,7 @@ class ProvideLicensingLaterStepConfigTests {
 
     private fun setupStepConfig(): ProvideLicensingLaterStepConfig {
         val stepConfig = ProvideLicensingLaterStepConfig()
-        stepConfig.routeSegment = ProvideLicensingLaterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ProvideLicensingLaterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

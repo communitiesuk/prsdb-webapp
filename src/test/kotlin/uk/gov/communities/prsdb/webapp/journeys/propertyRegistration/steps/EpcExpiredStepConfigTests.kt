@@ -53,7 +53,7 @@ class EpcExpiredStepConfigTests {
 
     private fun setupStepConfig(): EpcExpiredStepConfig {
         val stepConfig = EpcExpiredStepConfig()
-        stepConfig.routeSegment = EpcExpiredStep.ROUTE_SEGMENT
+        stepConfig.urlPath = EpcExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

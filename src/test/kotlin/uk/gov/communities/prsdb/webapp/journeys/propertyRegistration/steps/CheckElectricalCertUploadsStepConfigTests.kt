@@ -43,7 +43,7 @@ class CheckElectricalCertUploadsStepConfigTests {
     @BeforeEach
     fun setup() {
         stepConfig = CheckElectricalCertUploadsStepConfig(mockMemberIdService, mockUploadService)
-        stepConfig.routeSegment = CheckElectricalCertUploadsStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckElectricalCertUploadsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
     }
 
