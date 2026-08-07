@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 
 // TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton view model with summary list rows
 class OrgLandlordViewModel(
-    orgLandlord: OrganisationLandlord,
+    orgLandlord: OrganisationalLandlord,
 ) {
     val name: String = orgLandlord.name
 
