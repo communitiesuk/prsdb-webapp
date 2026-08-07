@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCompaniesHouseChangeDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCompaniesHouseChangeState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
@@ -27,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 class OrgCompaniesHouseChangeTask(
     journeyStateService: JourneyStateService,
     override val companiesHouseTask: OrgCompaniesHouseTask,
-    override val orgGovBodyTask: OrgGovBodyTask,
+    override val orgGovBodyMembersTask: OrgGovBodyMembersTask,
     override val orgCompaniesHouseInterruptionStep: OrgCompaniesHouseInterruptionStep,
 ) : Task<OrgCompaniesHouseChangeState, OrgCompaniesHouseChangeDependencies>(journeyStateService),
     OrgCompaniesHouseChangeState {
@@ -46,7 +47,7 @@ class OrgCompaniesHouseChangeTask(
                     when {
                         answerHasChanged(journey) -> Destination(journey.orgCompaniesHouseInterruptionStep)
                         mode == YesOrNo.YES -> Destination(journey.companiesHouseTask.orgCompanyNumberStep)
-                        else -> Destination(journey.orgGovBodyTask.firstStep)
+                        else -> Destination(journey.orgGovBodyMembersTask.firstStep)
                     }
                 }
             }
@@ -62,7 +63,7 @@ class OrgCompaniesHouseChangeTask(
                     if (journey.companiesHouseTask.orgIsRegisteredCompanyStep.outcome == YesOrNo.YES) {
                         Destination(journey.companiesHouseTask.orgCompanyNumberStep)
                     } else {
-                        Destination(journey.orgGovBodyTask.firstStep)
+                        Destination(journey.orgGovBodyMembersTask.firstStep)
                     }
                 }
             }
@@ -71,15 +72,21 @@ class OrgCompaniesHouseChangeTask(
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
                 nextStep { exitStep }
             }
-            task(journey.orgGovBodyTask) {
+            task(journey.orgGovBodyMembersTask) {
                 parents { journey.companiesHouseTask.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO) }
                 nextStep { exitStep }
+                withDependencies {
+                    OrgGovBodyMembersDependencies(
+                        whoToProvideEmptyBackDestination = { Destination(journey.companiesHouseTask.orgIsRegisteredCompanyStep) },
+                        removeLastMemberDestination = { Destination(journey.orgGovBodyMembersTask.orgGovBodyWhoToProvideStep) },
+                    )
+                }
             }
             exitStep {
                 parents {
                     OrParents(
                         journey.companiesHouseTask.orgCompanyNumberStep.isComplete(),
-                        journey.orgGovBodyTask.isComplete(),
+                        journey.orgGovBodyMembersTask.isComplete(),
                     )
                 }
             }

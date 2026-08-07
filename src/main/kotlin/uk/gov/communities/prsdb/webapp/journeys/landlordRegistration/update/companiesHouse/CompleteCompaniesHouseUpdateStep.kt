@@ -35,7 +35,7 @@ class CompleteCompaniesHouseUpdateStepConfig(
             landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = false, companyNumber = null)
             governingBodyMemberService.replaceGoverningBodyMembers(
                 userToLandlordService.getCurrentOrganisationLandlordForUser(),
-                state.orgGovBodyTask.governingBodyMembersMap?.values?.toList().orEmpty(),
+                state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
             )
         }
     }

@@ -327,7 +327,9 @@ class LandlordRegistrationTask(
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
                         checkAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask) {
-                            configureStep(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep) {
+                            configureStep(
+                                journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
+                            ) {
                                 backDestination { journey.returnToCyaPageDestination }
                             }
                         }

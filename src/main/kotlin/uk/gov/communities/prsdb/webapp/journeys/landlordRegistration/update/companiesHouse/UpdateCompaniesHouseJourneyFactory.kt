@@ -14,9 +14,10 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -46,7 +47,7 @@ class UpdateCompaniesHouseJourneyFactory(
                     when {
                         answerHasChanged(journey) -> Destination(journey.interruptionStep)
                         mode == YesOrNo.YES -> Destination(journey.orgCompanyNumberStep)
-                        else -> Destination(journey.orgGovBodyTask.firstStep)
+                        else -> Destination(journey.orgGovBodyMembersTask.firstStep)
                     }
                 }
             }
@@ -62,7 +63,7 @@ class UpdateCompaniesHouseJourneyFactory(
                     if (journey.orgIsRegisteredCompanyStep.outcome == YesOrNo.YES) {
                         Destination(journey.orgCompanyNumberStep)
                     } else {
-                        Destination(journey.orgGovBodyTask.firstStep)
+                        Destination(journey.orgGovBodyMembersTask.firstStep)
                     }
                 }
             }
@@ -71,16 +72,22 @@ class UpdateCompaniesHouseJourneyFactory(
                 parents { journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkAnswersStep }
             }
-            task(journey.orgGovBodyTask) {
+            task(journey.orgGovBodyMembersTask) {
                 parents { journey.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO) }
                 nextStep { journey.checkAnswersStep }
+                withDependencies {
+                    OrgGovBodyMembersDependencies(
+                        whoToProvideEmptyBackDestination = { Destination(journey.orgIsRegisteredCompanyStep) },
+                        removeLastMemberDestination = { Destination(journey.orgGovBodyMembersTask.orgGovBodyWhoToProvideStep) },
+                    )
+                }
             }
             step(journey.checkAnswersStep) {
                 routeSegment(CompaniesHouseUpdateCheckAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.orgCompanyNumberStep.isComplete(),
-                        journey.orgGovBodyTask.isComplete(),
+                        journey.orgGovBodyMembersTask.isComplete(),
                     )
                 }
                 nextStep { journey.completeCompaniesHouseUpdateStep }
@@ -107,7 +114,7 @@ class UpdateCompaniesHouseJourney(
     override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
     override val interruptionStep: CompaniesHouseUpdateInterruptionStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
-    override val orgGovBodyTask: OrgGovBodyTask,
+    override val orgGovBodyMembersTask: OrgGovBodyMembersTask,
     override val checkAnswersStep: CompaniesHouseUpdateCheckAnswersStep,
     override val completeCompaniesHouseUpdateStep: CompleteCompaniesHouseUpdateStep,
     journeyStateService: JourneyStateService,
@@ -131,7 +138,7 @@ interface UpdateCompaniesHouseJourneyState : JourneyState {
     val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
     val interruptionStep: CompaniesHouseUpdateInterruptionStep
     val orgCompanyNumberStep: OrgCompanyNumberStep
-    val orgGovBodyTask: OrgGovBodyTask
+    val orgGovBodyMembersTask: OrgGovBodyMembersTask
     val checkAnswersStep: CompaniesHouseUpdateCheckAnswersStep
     val completeCompaniesHouseUpdateStep: CompleteCompaniesHouseUpdateStep
 

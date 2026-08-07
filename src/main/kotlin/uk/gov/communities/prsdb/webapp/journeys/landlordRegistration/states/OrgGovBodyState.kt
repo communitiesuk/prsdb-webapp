@@ -1,35 +1,17 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.HasAnyGovBodyMembersStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.RemoveGovBodyMemberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
 
+// The registration governing body flow: the "provide details about your governing body" gate (and its must-provide-info
+// dead-end) followed by the shared member-management flow. The member-management flow lives in the nested members task;
+// consumers reach member data and steps via orgGovBodyMembersTask. This wrapper does NOT implement OrgGovBodyMembersState
+// itself - doing so via delegation would forward the wrapper's whole JourneyState (and its delegate-key binding) to the
+// members task instance, double-registering the members task's delegate keys when it is also mounted as a sub-task.
 interface OrgGovBodyState : JourneyState {
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
     val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
-    val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
-    val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
-    val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
-    val govBodyMemberAddressTask: AddressTask
-    val orgGovBodyMemberListStep: OrgGovBodyMemberListStep
-    val hasAnyGovBodyMembersStep: HasAnyGovBodyMembersStep
-    val saveGovBodyMemberStep: SaveGovBodyMemberStep
-    val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep
-    val removeGovBodyMemberStep: RemoveGovBodyMemberStep
-    var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
-    var nextGoverningBodyMemberId: Int?
-    var editingGovBodyMemberId: Int?
-
-    val editingGovBodyMember: GoverningBodyMemberDataModel?
-        get() = editingGovBodyMemberId?.let { governingBodyMembersMap?.get(it) }
+    val orgGovBodyMembersTask: OrgGovBodyMembersTask
 }
