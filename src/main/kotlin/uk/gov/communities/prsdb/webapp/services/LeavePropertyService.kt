@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
@@ -41,7 +40,6 @@ class LeavePropertyService(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
-        check(landlord is IndividualLandlord)
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
         TransactionHelper.runAfterTransactionCommits {
