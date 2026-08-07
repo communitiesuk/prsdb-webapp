@@ -83,7 +83,9 @@ class OrgLandlordViewModelTests {
         )
         assertEquals(
             "commonText.other",
-            viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.charityCommission" }.fieldValue,
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
+                .getConvertedFieldValue(),
         )
     }
 
@@ -131,7 +133,9 @@ class OrgLandlordViewModelTests {
                 "registerAsALandlord.orgType.checkbox.charity",
                 "registerAsALandlord.orgType.checkbox.trust",
             ),
-            viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.organisationType" }.fieldValue as List<*>,
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.organisationType" }
+                .getConvertedFieldValue() as List<*>,
         )
     }
 
@@ -144,7 +148,9 @@ class OrgLandlordViewModelTests {
 
         assertIterableEquals(
             listOf("commonText.other"),
-            viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.organisationType" }.fieldValue as List<*>,
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.organisationType" }
+                .getConvertedFieldValue() as List<*>,
         )
     }
 
@@ -158,16 +164,7 @@ class OrgLandlordViewModelTests {
                 charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
                 charityNumber = "0123456",
             )
-        val changeableHeadings =
-            listOf(
-                "landlordDetails.org.name",
-                "landlordDetails.org.address",
-                "landlordDetails.org.email",
-                "landlordDetails.org.phone",
-                "landlordDetails.org.organisationType",
-                "landlordDetails.org.registeredCharity",
-                "landlordDetails.org.registeredWithCompaniesHouse",
-            )
+        val changeableHeadings = listOf("landlordDetails.org.name")
 
         val viewModel = OrgLandlordViewModel(landlord)
 
