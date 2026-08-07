@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LandlordDetailsBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 class OrgLandlordDetailsPage(
     page: Page,
@@ -19,9 +21,12 @@ class OrgLandlordDetailsPage(
     val organisationContactsPanel: Locator = page.locator("#organisation-contacts")
     val mainContent: Locator = page.locator("main")
     private val organisationNameChangeLink = Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
+    private val organisationAddressChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
 
+    fun clickOrganisationAddressChangeLinkAndWait() = organisationAddressChangeLink.clickAndWait()
     val mainContactCard = MainContactSummaryCard(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)
     val registrationContactCard = RegistrationContactSummaryCard(page)

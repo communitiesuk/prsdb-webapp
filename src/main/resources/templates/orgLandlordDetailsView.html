@@ -25,14 +25,14 @@
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.name}">landlordDetails.org.name</strong><br/>
                     <span th:text="${orgLandlord.name}">orgLandlord.name</span><br/>
-                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-name/organisation-name'}">Change</a>
+                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-name/organisation-name'}" th:text="#{forms.links.change}">forms.links.change</a>
                 </p> <!-- TODO: PDJB-1474: Update links instead of using hrefs -->
 
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.address}">landlordDetails.org.address</strong><br/>
                     <span th:text="${orgLandlord.singleLineAddress}">orgLandlord.singleLineAddress</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1444: Add update journey -->
-                </p>
+                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-address/lookup-address'}" th:text="#{forms.links.change}">forms.links.change</a>
+                </p> <!-- TODO: PDJB-1474: Update links instead of using hrefs -->
 
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.email}">landlordDetails.org.email</strong><br/>

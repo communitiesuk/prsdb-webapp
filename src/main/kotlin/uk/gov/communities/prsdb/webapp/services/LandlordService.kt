@@ -208,7 +208,11 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
+        orgLandlordUpdate.address?.let {
+            landlordEntity.address = addressService.findOrCreateAddress(it)
+        }
 
+        sendOrgUpdateConfirmationEmail(orgLandlordUpdate, landlordEntity)
         return landlordEntity
     }
 
@@ -216,6 +220,13 @@ class LandlordService(
     fun updateOrganisationLandlordName(orgName: String) {
         updateOrganisationLandlordForUser(
             OrganisationLandlordUpdateModel(name = orgName),
+        )
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordAddress(address: AddressDataModel) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(address = address),
         )
     }
 
@@ -284,6 +295,31 @@ class LandlordService(
                     ),
                 )
             }
+        }
+    }
+
+    private fun sendOrgUpdateConfirmationEmail(
+        orgLandlordUpdate: OrganisationLandlordUpdateModel,
+        landlord: OrganisationLandlord,
+    ) {
+        val updatedDetail =
+            when {
+                orgLandlordUpdate.address != null -> "organisation address"
+                else -> null
+            }
+
+        updatedDetail?.let { detail ->
+            updateConfirmationSender.sendEmail(
+                landlord.email,
+                LandlordUpdateConfirmation(
+                    registrationNumber =
+                        RegistrationNumberDataModel
+                            .fromRegistrationNumber(landlord.registrationNumber)
+                            .toString(),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    updatedDetail = detail,
+                ),
+            )
         }
     }
 }
