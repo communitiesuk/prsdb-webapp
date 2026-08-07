@@ -76,9 +76,13 @@ class LandlordRegistrationCyaStepConfig(
             val mainContact = org.orgMainContactStep.formModel
 
             val governingBodyMembers =
-                (org.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap())
-                    .values
-                    .toList()
+                if (hasCompanyNumber) {
+                    emptyList()
+                } else {
+                    (org.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap())
+                        .values
+                        .toList()
+                }
 
             landlordRegistrationService.registerOrganisationLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
@@ -277,7 +281,11 @@ class LandlordRegistrationCyaStepConfig(
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),
-            "governingBodyMemberCards" to (listOfNotNull(getLeadTrusteeCard(state)) + getGovBodyMemberCards(state)),
+            "governingBodyMemberCards" to
+                (
+                    listOfNotNull(getLeadTrusteeCard(state)) +
+                        if (isRegisteredWithCompaniesHouse(state)) emptyList() else getGovBodyMemberCards(state)
+                ),
             "mainContactCard" to getMainContactCard(state),
         )
 
@@ -543,6 +551,10 @@ class LandlordRegistrationCyaStepConfig(
                 ),
         )
     }
+
+    private fun isRegisteredWithCompaniesHouse(state: LandlordRegistrationState): Boolean =
+        state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
+            .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
         val members = state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap()
