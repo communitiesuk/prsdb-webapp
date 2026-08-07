@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 
 class OrganisationalLandlordContactsViewModel(
-    orgLandlord: OrganisationalLandlord,
+    orgLandlord: OrganisationLandlord,
     governingBodyMembers: List<OrganisationGoverningBodyMember>,
 ) {
     // TODO: PDJB-1244: link the main contact "Change" action to its update journey

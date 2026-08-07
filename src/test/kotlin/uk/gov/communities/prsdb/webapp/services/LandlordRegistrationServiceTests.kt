@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -279,8 +279,8 @@ class LandlordRegistrationServiceTests {
         private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
         private val orgDashboardUri = URI("http://example.com/landlord-dashboard")
 
-        private val organisationalLandlord =
-            OrganisationalLandlord(
+        private val organisationLandlord =
+            OrganisationLandlord(
                 registrationNumber = orgRegistrationNumber,
                 name = "Test Org",
                 address = Address(AddressDataModel(singleLineAddress = "1 Org St")),
@@ -333,7 +333,7 @@ class LandlordRegistrationServiceTests {
                     any(),
                     any(),
                 ),
-            ).thenReturn(organisationalLandlord)
+            ).thenReturn(organisationLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
         }
 

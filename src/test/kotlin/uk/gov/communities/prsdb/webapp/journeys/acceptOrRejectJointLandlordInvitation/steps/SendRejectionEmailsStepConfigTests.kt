@@ -43,7 +43,7 @@ class SendRejectionEmailsStepConfigTests {
                 name = "Lois Lane",
                 email = "lois@example.com",
             )
-        val organisationalLandlord =
+        val organisationLandlord =
             MockLandlordData.createOrgLandlord(
                 name = "Clark Properties Ltd",
                 registrantName = "Clark Kent",
@@ -53,7 +53,7 @@ class SendRejectionEmailsStepConfigTests {
             MockLandlordData.createPropertyOwnership(
                 id = 42L,
                 address = address,
-                landlords = mutableSetOf(individualLandlord, organisationalLandlord),
+                landlords = mutableSetOf(individualLandlord, organisationLandlord),
             )
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
@@ -81,10 +81,10 @@ class SendRejectionEmailsStepConfigTests {
             ),
         )
         verify(mockRejectionEmailSender).sendEmail(
-            eq(organisationalLandlord.email),
+            eq(organisationLandlord.email),
             eq(
                 JointLandlordInvitationRejectionEmail(
-                    recipientName = organisationalLandlord.name,
+                    recipientName = organisationLandlord.name,
                     inviteeEmail = "invitee@example.com",
                     propertyAddress = propertyAddress,
                     propertyRecordUrl = "http://localhost/property/42",

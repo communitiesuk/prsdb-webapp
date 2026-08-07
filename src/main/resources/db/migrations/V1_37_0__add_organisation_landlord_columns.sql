@@ -12,7 +12,7 @@ ALTER TABLE landlord RENAME COLUMN is_verified TO individual_is_verified;
 ALTER TABLE landlord RENAME COLUMN has_accepted_privacy_notice TO individual_has_accepted_privacy_notice;
 ALTER TABLE landlord RENAME COLUMN has_responded_to_feedback TO individual_has_responded_to_feedback;
 
--- Relax NOT NULL on IndividualLandlord-specific columns so OrganisationalLandlord rows can have NULLs
+-- Relax NOT NULL on IndividualLandlord-specific columns so OrganisationLandlord rows can have NULLs
 ALTER TABLE landlord ALTER COLUMN individual_subject_identifier DROP NOT NULL;
 ALTER TABLE landlord ALTER COLUMN individual_name DROP NOT NULL;
 ALTER TABLE landlord ALTER COLUMN individual_email DROP NOT NULL;
@@ -30,7 +30,7 @@ DROP INDEX IF EXISTS landlord_details_gist_idx;
 CREATE INDEX landlord_details_gin_idx ON landlord USING gin (gin_landlord_details(individual_phone_number, individual_email, individual_name) gin_trgm_ops);
 CREATE INDEX landlord_details_gist_idx ON landlord USING gist (gist_landlord_details(individual_phone_number, individual_email, individual_name) gist_trgm_ops(siglen=256));
 
--- Add OrganisationalLandlord columns (all nullable)
+-- Add OrganisationLandlord columns (all nullable)
 ALTER TABLE landlord ADD COLUMN organisation_landlord_name VARCHAR(255);
 ALTER TABLE landlord ADD COLUMN organisation_address_id BIGINT;
 ALTER TABLE landlord ADD COLUMN organisation_email VARCHAR(255);
