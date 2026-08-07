@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
@@ -46,14 +46,20 @@ class LandlordDetailsController(
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
         return when (landlord) {
-            is OrganisationLandlord -> {
+            is OrganisationalLandlord -> {
                 if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
                     throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
                 }
                 getOrgLandlordDetails(landlord, model)
             }
-            is IndividualLandlord -> getIndividualLandlordDetails(landlord, model)
-            else -> throw IllegalArgumentException("Unknown landlord type")
+
+            is IndividualLandlord -> {
+                getIndividualLandlordDetails(landlord, model)
+            }
+
+            else -> {
+                throw IllegalArgumentException("Unknown landlord type")
+            }
         }
     }
 
@@ -77,7 +83,7 @@ class LandlordDetailsController(
 
     // TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton page with proper summary list content
     private fun getOrgLandlordDetails(
-        orgLandlord: OrganisationLandlord,
+        orgLandlord: OrganisationalLandlord,
         model: Model,
     ): String {
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
