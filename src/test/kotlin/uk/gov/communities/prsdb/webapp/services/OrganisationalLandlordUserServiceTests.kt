@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
@@ -24,7 +24,7 @@ class OrganisationalLandlordUserServiceTests {
     private lateinit var organisationalLandlordUserService: OrganisationalLandlordUserService
 
     @Mock
-    private lateinit var mockOrganisationLandlord: OrganisationalLandlord
+    private lateinit var mockOrganisationLandlord: OrganisationLandlord
 
     @Test
     fun `createOrganisationalLandlordUser saves and returns an OrganisationalLandlordUser linking landlord to user`() {
@@ -47,7 +47,7 @@ class OrganisationalLandlordUserServiceTests {
         verify(mockOrganisationalLandlordUserRepository).save(captor.capture())
 
         val saved = captor.value
-        assertEquals(mockOrganisationLandlord, saved.organisationalLandlord)
+        assertEquals(mockOrganisationLandlord, saved.organisationLandlord)
         assertEquals(baseUser, saved.baseUser)
         assertEquals(name, saved.name)
         assertEquals(email, saved.email)

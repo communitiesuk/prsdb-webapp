@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationName.UpdateOrganisationNameJourneyFactory
@@ -68,7 +68,7 @@ class UpdateOrganisationLandlordNameControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getUpdateStep returns 200 for an organisation landlord`() {
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationLandlord())
         whenever(
             mockJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(OrgNameStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -123,7 +123,7 @@ class UpdateOrganisationLandlordNameControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `postUpdateStep returns 200 for an organisation landlord`() {
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationalLandlord())
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(OrganisationLandlord())
         whenever(
             mockJourneyFactory.createJourneySteps(),
         ).thenReturn(mapOf(OrgNameStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
