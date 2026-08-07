@@ -46,7 +46,7 @@ org:
   name: Organisation name
   address: Organisation address
   email: Organisation email
-  phone: Organisation phone number
+  phone: Organisation phone
   organisationType: Organisation type
   companyNumber: Companies House number
   registeredCharity: Registered charity
