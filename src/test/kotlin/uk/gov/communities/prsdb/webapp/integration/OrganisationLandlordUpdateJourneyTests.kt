@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrgan
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeTrustInterruptionPageUpdateOrganisationType
+import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
 class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -139,6 +141,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             cyaPage.submit()
 
             orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+            assertEquals(ORGANISATION_CONTACTS_FRAGMENT, orgLandlordDetailsPage.tabs.activeTabPanelId)
             assertThat(orgLandlordDetailsPage.mainContent).containsText("Company")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Trust")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Existing Lead Trustee")

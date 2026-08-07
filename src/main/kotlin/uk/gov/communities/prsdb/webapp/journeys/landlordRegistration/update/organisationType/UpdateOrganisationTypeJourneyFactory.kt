@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -108,7 +109,13 @@ class UpdateOrganisationTypeJourneyFactory(
             }
             step(journey.completeOrganisationTypeUpdateStep) {
                 parents { journey.orgTypeCyaStep.isComplete() }
-                nextUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
+                nextUrl {
+                    if (journey.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.REMOVING_TRUST) {
+                        "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE#$ORGANISATION_CONTACTS_FRAGMENT"
+                    } else {
+                        LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
+                    }
+                }
             }
         }
     }
