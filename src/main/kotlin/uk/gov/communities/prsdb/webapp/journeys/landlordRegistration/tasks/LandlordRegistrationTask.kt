@@ -300,10 +300,7 @@ class LandlordRegistrationTask(
 
                     OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
                     -> {
-                        // TODO PDJB-1238 : replace this placeholder with the companies house update journey
-                        checkAnswerStep(journey.orgLandlordRegistrationTask.updateDetailsTodoStep, checkingAnswersFor) {
-                            withAdditionalContentProperty { "todoComment" to "TODO PDJB-1238: Companies House update journey" }
-                        }
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.orgCompaniesHouseChangeTask)
                     }
 
                     OrgCompanyNumberStep.ROUTE_SEGMENT,
