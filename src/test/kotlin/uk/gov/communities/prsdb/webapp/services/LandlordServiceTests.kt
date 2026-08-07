@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -707,6 +708,37 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationLandlordName is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordName.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordCompaniesHouseDetails sets isCompany and companyNumber when registered`() {
+        val orgLandlord = OrganisationLandlord()
+        orgLandlord.isCompany = false
+        orgLandlord.companyNumber = null
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = true, companyNumber = "12345678")
+
+        assertTrue(orgLandlord.isCompany)
+        assertEquals("12345678", orgLandlord.companyNumber)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordCompaniesHouseDetails clears the companyNumber when not registered`() {
+        val orgLandlord = OrganisationLandlord()
+        orgLandlord.isCompany = true
+        orgLandlord.companyNumber = "12345678"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = false, companyNumber = null)
+
+        assertFalse(orgLandlord.isCompany)
+        assertNull(orgLandlord.companyNumber)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordCompaniesHouseDetails is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordCompaniesHouseDetails.hasAnnotation<Transactional>())
     }
 
     companion object {

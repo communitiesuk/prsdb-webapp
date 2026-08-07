@@ -63,7 +63,7 @@
                         <strong th:text="#{landlordDetails.org.companyNumber}">landlordDetails.org.companyNumber</strong><br/>
                         <span th:text="${orgLandlord.companyNumber}">orgLandlord.companyNumber</span><br/>
                     </th:block>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1238: Add update journey -->
+                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-companies-house/organisation-companies-house'}" th:text="#{forms.links.change}">forms.links.change</a>
                 </p>
 
                 <p class="govuk-body">

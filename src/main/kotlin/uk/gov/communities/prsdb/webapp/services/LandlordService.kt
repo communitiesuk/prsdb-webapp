@@ -219,6 +219,16 @@ class LandlordService(
         )
     }
 
+    @Transactional
+    fun updateOrganisationLandlordCompaniesHouseDetails(
+        isCompany: Boolean,
+        companyNumber: String?,
+    ) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.isCompany = isCompany
+        landlordEntity.companyNumber = companyNumber
+    }
+
     fun searchForLandlords(
         searchTerm: String,
         localCouncilBaseUserId: String,

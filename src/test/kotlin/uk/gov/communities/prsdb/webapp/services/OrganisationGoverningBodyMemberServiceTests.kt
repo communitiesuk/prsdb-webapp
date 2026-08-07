@@ -110,4 +110,37 @@ class OrganisationGoverningBodyMemberServiceTests {
 
         verify(mockAddressService).findOrCreateAddress(eq(addressDataModel))
     }
+
+    @Test
+    fun `replaceGoverningBodyMembers deletes existing members then saves the new ones`() {
+        val addressDataModel = AddressDataModel(singleLineAddress = "10 Partner Place", postcode = "N1 1AA")
+        val resolvedAddress = Address(addressDataModel)
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(resolvedAddress)
+        whenever(mockOrganisationLandlord.id).thenReturn(42L)
+
+        val members =
+            listOf(
+                GoverningBodyMemberDataModel(
+                    name = "Partner Pat",
+                    type = GoverningBodyMemberType.PARTNER,
+                    dateOfBirth = kotlinx.datetime.LocalDate(1990, 8, 1),
+                    address = addressDataModel,
+                ),
+            )
+
+        organisationGoverningBodyMemberService.replaceGoverningBodyMembers(mockOrganisationLandlord, members)
+
+        verify(mockOrganisationGoverningBodyMemberRepository).deleteByOrganisationLandlord_Id(42L)
+        verify(mockOrganisationGoverningBodyMemberRepository, times(1)).save(any())
+    }
+
+    @Test
+    fun `replaceGoverningBodyMembers deletes existing members and saves nothing when the new list is empty`() {
+        whenever(mockOrganisationLandlord.id).thenReturn(42L)
+
+        organisationGoverningBodyMemberService.replaceGoverningBodyMembers(mockOrganisationLandlord, emptyList())
+
+        verify(mockOrganisationGoverningBodyMemberRepository).deleteByOrganisationLandlord_Id(42L)
+        verify(mockOrganisationGoverningBodyMemberRepository, never()).save(any())
+    }
 }
