@@ -132,7 +132,7 @@ class HasElectricalCertStepConfigTests {
 
     private fun setupStepConfig(): HasElectricalCertStepConfig {
         val stepConfig = HasElectricalCertStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

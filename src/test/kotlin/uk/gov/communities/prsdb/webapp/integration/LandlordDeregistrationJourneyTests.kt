@@ -29,7 +29,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         @Test
         fun `User with properties can navigate the whole journey`(page: Page) {
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             assertThat(areYouSurePage.form.fieldsetHeading)
                 .containsText("Are you sure you want to delete your account and all your properties?")
@@ -61,7 +61,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         @Test
         fun `User with no properties can navigate the whole journey`(page: Page) {
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account?")
             areYouSurePage.submitWantsToProceed()
@@ -103,7 +103,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
 
             // Deregister landlord
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             areYouSurePage.submitWantsToProceed()
 
@@ -145,7 +145,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             @Autowired jdbcTemplate: JdbcTemplate,
         ) {
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             areYouSurePage.submitWantsToProceed()
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
@@ -176,7 +176,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
         @Test
         fun `deregistering sends the swap to individual nudge email exactly once per jointly-owned property`(page: Page) {
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             areYouSurePage.submitWantsToProceed()
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)

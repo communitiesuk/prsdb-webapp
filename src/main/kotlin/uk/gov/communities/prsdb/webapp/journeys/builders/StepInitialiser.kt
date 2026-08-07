@@ -49,6 +49,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
 
     fun saveProgress(shouldSaveProgress: Boolean = true): ConfigurableElement<TMode>
+
+    fun prefixRouteWith(prefixProvider: () -> String): ConfigurableElement<TMode>
 }
 
 class ElementConfiguration<TMode : Enum<TMode>>(
@@ -60,6 +62,8 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var additionalContentProviders: MutableList<() -> Map<String, Any?>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
     var shouldSaveProgress: Boolean = false
+    var routePrefixProvider: (() -> String)? = null
+    val prefix get() = routePrefixProvider?.invoke()
     override var tags: Set<String> = emptySet()
 
     override fun nextStep(nextStepProvider: (mode: TMode) -> JourneyStep<*, *, *>): ConfigurableElement<TMode> =
@@ -120,6 +124,22 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         this.shouldSaveProgress = shouldSaveProgress
         return this
     }
+
+    override fun prefixRouteWith(prefixProvider: () -> String): ConfigurableElement<TMode> {
+        if (routePrefixProvider != null) {
+            throw JourneyInitialisationException(
+                "$initialiserName has already been prefixed.",
+                NotImplementedError("Handle sequential prefixing FILO"),
+            )
+        }
+        routePrefixProvider = prefixProvider
+        return this
+    }
+
+    fun buildPrefixedPath(ownPath: String?): String? =
+        listOfNotNull(prefix, ownPath)
+            .ifEmpty { null }
+            ?.joinToString("/")
 
     override fun backUrl(backUrlProvider: () -> String?): ConfigurableElement<TMode> =
         backDestination { backUrlProvider()?.let { Destination.ExternalUrl(it) } ?: Destination.Nowhere() }
@@ -216,7 +236,7 @@ class StepInitialiser<TStep : AbstractStepConfig<TMode, *, TState>, in TState : 
         checkForUninitialisedParents(parentage.potentialParents)
 
         step.initialize(
-            segment,
+            segment?.let { elementConfiguration.buildPrefixedPath(it) },
             state,
             elementConfiguration.backDestinationOverride,
             elementConfiguration.nextDestinationProvider

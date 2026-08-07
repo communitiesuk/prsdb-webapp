@@ -39,8 +39,6 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
-        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
         <th:block th:if="${jointLandlordsDetails != null}">
             <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
@@ -78,6 +76,10 @@
         <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
             <p class="govuk-body" th:text="#{${epcInsetTextKey}}"></p>
         </div>
+        <th:block th:if="${!#lists.isEmpty(tenancyDetails)}">
+            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.heading}"></h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
+        </th:block>
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">

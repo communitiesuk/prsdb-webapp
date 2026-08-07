@@ -5,7 +5,4 @@ import org.springframework.stereotype.Repository
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 
 @Repository
-@Suppress("ktlint:standard:function-naming")
-interface OrganisationGoverningBodyMemberRepository : JpaRepository<OrganisationGoverningBodyMember, Long> {
-    fun findAllByOrganisationalLandlord_Id(organisationalLandlordId: Long): List<OrganisationGoverningBodyMember>
-}
+interface OrganisationGoverningBodyMemberRepository : JpaRepository<OrganisationGoverningBodyMember, Long>

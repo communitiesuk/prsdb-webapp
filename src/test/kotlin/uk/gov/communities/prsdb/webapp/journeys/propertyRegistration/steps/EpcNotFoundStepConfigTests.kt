@@ -24,7 +24,7 @@ class EpcNotFoundStepConfigTests {
 
     private fun setupStepConfig(): EpcNotFoundStepConfig {
         val stepConfig = EpcNotFoundStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }
@@ -68,7 +68,7 @@ class EpcNotFoundStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(formModel)
         whenever(mockFindYourEpcStep.isStepReachable).thenReturn(true)
-        whenever(mockFindYourEpcStep.routeSegment).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
+        whenever(mockFindYourEpcStep.urlPath).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)
@@ -86,7 +86,7 @@ class EpcNotFoundStepConfigTests {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(null)
         whenever(mockFindYourEpcStep.isStepReachable).thenReturn(true)
-        whenever(mockFindYourEpcStep.routeSegment).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
+        whenever(mockFindYourEpcStep.urlPath).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)

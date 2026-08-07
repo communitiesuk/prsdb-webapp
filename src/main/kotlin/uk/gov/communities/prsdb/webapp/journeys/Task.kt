@@ -7,16 +7,16 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-// The single task base. A task owns its own JourneyState and namespaces its stored data behind a route prefix,
-// so the same task can be added to a journey more than once, each instance isolated by its route. A null route
-// keeps bare keys.
-//
-// Subclasses supply the task's steps, its task-specific state, and makeSubJourney; this base owns the route
-// binding and key-registry wiring (the actual scoping is done by the inherited delegateProvider).
-//
-// If a task needs typed access to the enclosing journey/sibling state, it declares a TDependencies contract; the
-// mount site binds the live state via withDependencies { }. Tasks with no such need use TaskWithoutDependencies
-// (TDependencies = Nothing, requiresDependencies = false).
+/**
+ * Base class for all tasks in the journey framework
+ *
+ * All tasks inherit from this class either directly or via TaskWithoutDependencies. Add them to a journey
+ * DSL with the `task` function. Implementors must specify the `taskState`, usually by implementing their
+ * own state interface and returning `this`. They must also implement the `makeSubJourney(state)` function
+ * by calling `subJourney(state) { <DSL> }` and specifying the Task structure in DSL.
+ *
+ * @property dependencies External dependencies, normally the enclosing journey or task
+ */
 abstract class Task<TState : JourneyState, TDependencies : Any>(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService) {
@@ -27,18 +27,12 @@ abstract class Task<TState : JourneyState, TDependencies : Any>(
 
     abstract val taskState: TState
 
-    // Whether this task must have its dependencies bound at the mount site. True by default;
-    // TaskWithoutDependencies overrides it to false so a bare task(...) { } call needs no
-    // withDependencies { }.
     open val requiresDependencies: Boolean = true
 
-    // Nullable backing field rather than lateinit so that TaskWithoutDependencies (TDependencies = Nothing) is legal
     private var boundDependencies: TDependencies? = null
 
     val areDependenciesBound: Boolean get() = boundDependencies != null
 
-    // The typed, live reference to the enclosing dependencies, bound at build time by the mount site. Reads
-    // reflect later mutations to the enclosing state because it holds the state instance itself.
     val dependencies: TDependencies
         get() = boundDependencies ?: throw UninitializedPropertyAccessException("dependencies have not been bound")
 

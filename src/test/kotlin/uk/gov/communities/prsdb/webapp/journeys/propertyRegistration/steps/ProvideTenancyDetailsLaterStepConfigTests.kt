@@ -61,7 +61,7 @@ class ProvideTenancyDetailsLaterStepConfigTests {
 
     private fun setupStepConfig(): ProvideTenancyDetailsLaterStepConfig {
         val stepConfig = ProvideTenancyDetailsLaterStepConfig()
-        stepConfig.routeSegment = ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

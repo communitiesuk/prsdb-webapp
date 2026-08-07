@@ -53,7 +53,7 @@ class LowEnergyRatingStepConfigTests {
 
     private fun setupStepConfig(): LowEnergyRatingStepConfig {
         val stepConfig = LowEnergyRatingStepConfig()
-        stepConfig.routeSegment = LowEnergyRatingStep.ROUTE_SEGMENT
+        stepConfig.urlPath = LowEnergyRatingStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

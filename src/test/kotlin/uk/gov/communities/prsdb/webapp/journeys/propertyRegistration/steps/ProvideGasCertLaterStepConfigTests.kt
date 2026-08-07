@@ -42,7 +42,7 @@ class ProvideGasCertLaterStepConfigTests {
 
     private fun setupStepConfig(): ProvideGasCertLaterStepConfig {
         val stepConfig = ProvideGasCertLaterStepConfig()
-        stepConfig.routeSegment = ProvideGasCertLaterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ProvideGasCertLaterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

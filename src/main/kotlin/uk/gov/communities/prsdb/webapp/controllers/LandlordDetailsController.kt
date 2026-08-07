@@ -25,9 +25,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrgLandlordViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.OrganisationalLandlordContactsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
@@ -38,7 +38,6 @@ class LandlordDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
-    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
@@ -68,13 +67,18 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true)
+        val isOrgLandlordRegistrationEnabled = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
 
         model.addAttribute("landlord", landlordViewModel)
 
         addUserLandlordDetailsSharedAttributes(landlord, model)
 
-        return "landlordDetailsView"
+        return if (isOrgLandlordRegistrationEnabled) {
+            "individualLandlordDetailsView"
+        } else {
+            "individualLandlordDetailsViewBeforePdjb1492"
+        }
     }
 
     // TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton page with proper summary list content
@@ -82,11 +86,8 @@ class LandlordDetailsController(
         orgLandlord: OrganisationalLandlord,
         model: Model,
     ): String {
-        val governingBodyMembers =
-            organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)
-
         model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
-        model.addAttribute("governingBodyMembers", governingBodyMembers)
+        model.addAttribute("orgLandlordContacts", OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers))
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(

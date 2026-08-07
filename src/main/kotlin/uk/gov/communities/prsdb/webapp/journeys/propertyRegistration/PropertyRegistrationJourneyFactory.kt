@@ -54,6 +54,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -143,6 +144,10 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.licensingTask, { journey })
                 }
 
+                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.tenancyDetailsTask)
+                }
+
                 OccupiedStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
                         checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
@@ -151,9 +156,11 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
+                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.tenancyDetailsTask)
+                }
+
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    // TODO PDJB-942: If changing from provide-this-later to actual households for tenancy details, route through
-                    //  the rent section so the user can fill in missing rent details before returning to CYA
                     checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
                 }
 
@@ -491,12 +498,7 @@ class PropertyRegistrationJourneyFactory(
                         )
                     }
                     backStep { journey.taskListStep }
-                    nextDestination { _ ->
-                        when {
-                            journey.provideTenancyDetailsLater -> Destination(journey.cyaStep)
-                            else -> Destination(journey.taskListStep)
-                        }
-                    }
+                    nextStep { journey.cyaStep }
                     saveProgress()
                 }
             }

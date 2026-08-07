@@ -21,7 +21,7 @@ The framework aims to:
 | **Journey** | A complete multi-page form flow modelled as a directed graph, where users navigate through a series of pages to complete a task.                                                  |
 | **Journey Element / Element** | A node in the journey graph. Examples include steps and tasks.                                                                                                                    |
 | **Step** | The basic building block of a journey representing an individual page where users provide input or view information or a purely logical node of the journey.                      |
-| **Task** | A reusable group of steps with its own internal structure. Acts as a "black box" within the larger journey with a common start point and exit point.                              |
+| **Task** | A reusable group of steps with its own state, acting as a "black box" within the larger journey with a common start point and exit point. Can optionally carry a route segment so the same task can be included in a journey more than once. |
 | **Mode** | An enum value representing how a user's answer affects journey structure. Derived from the user's input and/or external factors. Returns `null` if the page has not been answered. |
 | **Outcome** | Similar to mode but accounts for reachability — the mode value if the step is reachable, `null` otherwise.                                                                        |
 | **Reachability** | Whether a step can be visited, determined by the completion status of parent steps.                                                                                               |
@@ -35,3 +35,5 @@ The framework aims to:
 | **Savable Journey** | A journey whose state can be persisted to a database, allowing users to resume the journey in a later session.                                                                    |
 | **Requestable Step** | A step that can be directly accessed via a URL, representing a page in the journey.                                                                                               |
 | **Internal Step** | A step without an associated page that performs logic related to journey structure.                                                           |
+| **Routing Map** | The `Map<String, StepLifecycleOrchestrator>` returned by a journey factory, keyed by step path. |
+| **Journey Step Dispatcher** | The shared component (`JourneyStepDispatcher`) that controllers delegate to for routing-map lookup, journey (re-)initialisation on missing state, and journey-base-path handling. |

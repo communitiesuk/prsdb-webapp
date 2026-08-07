@@ -340,3 +340,44 @@ VALUES
        (31, 31, null, null),
        (32, 32, null, null),
        (33, 33, null, null);
+
+-- Organisation landlord: landlord_type = 1, with a property in LC 1
+INSERT INTO prsdb_user (id, created_date)
+VALUES ('urn:fdc:gov.uk:2022:OrgLandlordUser', '01/15/25');
+
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (66, '01/15/25', 9009009009, 1);
+
+INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
+VALUES (39, '01/15/25', '01/15/25', 1039, '99 Org Street, EG1 9ZZ', 1, 'EG1 9ZZ'),
+       (40, '01/15/25', '01/15/25', 1040, '100 Org Property Road, EG1 9ZY', 1, 'EG1 9ZY');
+
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, landlord_type,
+                      organisation_landlord_name, organisation_address_id, organisation_email,
+                      organisation_phone_number, organisation_registrant_name, organisation_registrant_date_of_birth,
+                      organisation_registrant_email, organisation_registrant_phone_number,
+                      organisation_is_company, organisation_is_charity, organisation_is_trust,
+                      organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
+VALUES (34, '01/15/25', '01/15/25', 66, 1,
+        'Test Org Landlord Corp', 39, 'org@example.com',
+        '07999999999', 'Org Registrant', '01/01/1980',
+        'registrant@example.com', '07888888888',
+        false, false, false,
+        'Main Contact', 'contact@example.com', '07777777777');
+
+INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, created_date, name, email)
+VALUES (1, 34, 'urn:fdc:gov.uk:2022:OrgLandlordUser', '01/15/25', 'Org User', 'orguser@example.com');
+
+INSERT INTO registration_number (id, created_date, number, type)
+VALUES (67, '01/15/25', 0006001034, 0);
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied)
+VALUES (34, true, 1, 0, 0, 67, 40, '01/15/25', '01/15/25', null, 1,
+        null, null, null, null, null, null, null, false);
+
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (34, 34, '2025-01-15');
+
+INSERT INTO property_compliance (id, property_ownership_id, has_gas_supply, epc_exemption_reason)
+VALUES (34, 34, null, null);

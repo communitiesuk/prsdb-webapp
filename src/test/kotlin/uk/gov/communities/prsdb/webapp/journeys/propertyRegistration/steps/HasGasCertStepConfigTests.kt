@@ -114,7 +114,7 @@ class HasGasCertStepConfigTests {
 
     private fun setupStepConfig(): HasGasCertStepConfig {
         val stepConfig = HasGasCertStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }
