@@ -110,7 +110,7 @@ class OrganisationalLandlord() : Landlord() {
         organisationalLandlordUsers.add(organisationalLandlordUser)
     }
 
-    @OneToMany(mappedBy = "organisationLandlord")
+    @OneToMany(mappedBy = "organisationalLandlord")
     @OrderBy("id ASC")
     private val governingBodyMemberList: MutableList<OrganisationGoverningBodyMember> = mutableListOf()
 
