@@ -1,4 +1,4 @@
-<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction, tagColour, optionalValueParam)" class="govuk-summary-list__row"
+<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction, tagColour, optionalValueParam, anyRowHasActions)" class="govuk-summary-list__row"
      th:classappend="${withoutBottomBorder} ? 'govuk-summary-list__row--no-border' : ''">
     <dt class="govuk-summary-list__key" th:text="#{${heading}(${optionalHeadingParam})}">
     </dt>
@@ -31,7 +31,7 @@
                th:text="${optionalValueParam != null ? #messages.msgOrNull(value, optionalValueParam) : #messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
         </th:block>
     </dd>
-    <dd class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
+    <dd th:if="${actions != null and !actions.isEmpty()}" class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <ul class="govuk-summary-list__actions-list">
             <li th:each="action: ${actions}" class="govuk-summary-list__actions-list-item">
                 <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">
@@ -40,4 +40,5 @@
             </li>
         </ul>
     </dd>
+    <span th:if="${(actions == null or actions.isEmpty()) and anyRowHasActions}" class="govuk-summary-list__actions"></span>
 </div>

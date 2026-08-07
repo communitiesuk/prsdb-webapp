@@ -268,10 +268,16 @@ class LandlordRegistrationTask(
                         }
                     }
 
-                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
-                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
-                    -> {
+                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT -> {
                         checkAnswerTask(journey.orgLandlordRegistrationTask.charityTask)
+                    }
+
+                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.charityTask) {
+                            configureStep(journey.orgLandlordRegistrationTask.charityTask.orgCharityRegisteredWithStep) {
+                                backDestination { journey.returnToCyaPageDestination }
+                            }
+                        }
                     }
 
                     OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
