@@ -583,12 +583,12 @@ VALUES (1, current_date-22,current_date-22, 'example-incomplete-journey1', '{"jo
 
 SELECT setval(pg_get_serial_sequence('saved_journey_state', 'id'), (SELECT MAX(id) FROM saved_journey_state));
 
-INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3),
-       (1, 4),
-       (1, 5);
+INSERT INTO landlord_incomplete_properties (user_id, saved_journey_state_id)
+VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
+       ('urn:fdc:gov.uk:2022:UVWXY', 2),
+       ('urn:fdc:gov.uk:2022:UVWXY', 3),
+       ('urn:fdc:gov.uk:2022:UVWXY', 4),
+       ('urn:fdc:gov.uk:2022:UVWXY', 5);
 
 INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),

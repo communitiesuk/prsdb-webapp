@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
  * Given a user, find the landlord they're associated with
  * Normally assumed to be the current landlord you're logged in as
  */
-@PrsdbWebService
+@Service
 class UserToLandlordService(
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,

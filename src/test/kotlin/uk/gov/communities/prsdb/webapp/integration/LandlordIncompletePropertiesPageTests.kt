@@ -110,4 +110,15 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             assertPageIs(page, LandlordIncompletePropertiesPage::class)
         }
     }
+
+    @Nested
+    inner class OrganisationLandlordUserIsolation :
+        NestedIntegrationTestWithImmutableData("data-mockuser-org-landlord-with-incomplete-properties.sql") {
+        @Test
+        fun `a user does not see an incomplete property started by a colleague in the same organisation`() {
+            val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
+            assertThat(incompletePropertiesPage.pagination).not().isVisible()
+            assertThat(incompletePropertiesPage.firstSummaryCard.title).not().isVisible()
+        }
+    }
 }

@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
@@ -26,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
+import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
@@ -34,21 +35,24 @@ class LandlordController(
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
+    private val usersIncompletePropertyService: UsersIncompletePropertyService,
     private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
 
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
-    fun landlordDashboard(model: Model): String {
+    fun landlordDashboard(
+        model: Model,
+        principal: Principal,
+    ): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
-        // TODO: PDJB-1396: Add a generic way to get incomplete properties for any landlord type
         val numberOfIncompleteProperties =
-            if (landlord is IndividualLandlord) landlord.incompleteProperties.size else 0
+            usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount(principal.name)
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(

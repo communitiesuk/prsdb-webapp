@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.time.LocalDate
 import kotlin.system.exitProcess
 
@@ -46,6 +47,7 @@ class IncompletePropertiesReminderTaskLogic(
     private val emailSender: EmailNotificationService<IncompletePropertyReminderEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val incompletePropertiesService: IncompletePropertiesService,
+    private val landlordService: UserToLandlordService,
 ) {
     @Transactional
     fun sendIncompletePropertyReminders() {
@@ -62,8 +64,10 @@ class IncompletePropertiesReminderTaskLogic(
             val incompleteProperties =
                 incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
             incompleteProperties.forEach { property ->
-                // TODO: PDJB-1274: Update emails to account for org landlord
-                val landlord = property.landlord
+                // TODO: PDJB-1274: Org landlords currently only have one email (the single org user's), tracked
+                //  via the eager-fetched organisationalLandlordUsers on OrganisationLandlord. Update once true
+                //  multi-user org email routing is supported.
+                val landlord = landlordService.getLandlordForBaseUserId(property.user.id)
                 try {
                     emailSender.sendEmail(
                         landlord.email,
