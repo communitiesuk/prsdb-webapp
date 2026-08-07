@@ -75,7 +75,6 @@ class LandlordDetailsController(
         }
     }
 
-    // TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton page with proper summary list content
     private fun getOrgLandlordDetails(
         orgLandlord: OrganisationLandlord,
         model: Model,
