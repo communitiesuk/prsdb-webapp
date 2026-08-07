@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.io.ByteArrayOutputStream
@@ -42,6 +43,9 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
 
     @Mock
     private lateinit var incompletePropertiesService: IncompletePropertiesService
+
+    @Mock
+    private lateinit var landlordService: UserToLandlordService
 
     @InjectMocks
     private lateinit var taskLogic: IncompletePropertiesReminderTaskLogic
@@ -239,15 +243,22 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             1,
         )
 
+        val landlord1 =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"), email = emailAddress1)
+        val landlord2 =
+            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"), email = emailAddress2)
+        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
+        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
+
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress1),
+                        user = landlord1.baseUser,
                         savedJourneyState = savedJourneyState1,
                     ),
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress2),
+                        user = landlord2.baseUser,
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),
@@ -264,11 +275,24 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             2,
         )
 
+        val landlord1 =
+            MockLandlordData.createIndividualLandlord(
+                baseUser = MockLandlordData.createPrsdbUser("user-1"),
+                email = emailAddress1,
+            )
+        val landlord2 =
+            MockLandlordData.createIndividualLandlord(
+                baseUser = MockLandlordData.createPrsdbUser("user-2"),
+                email = emailAddress2,
+            )
+        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
+        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
+
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0))
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress1),
+                        user = landlord1.baseUser,
                         savedJourneyState = savedJourneyState1,
                     ),
                 ),
@@ -278,7 +302,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        landlord = MockLandlordData.createIndividualLandlord(email = emailAddress2),
+                        user = landlord2.baseUser,
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),

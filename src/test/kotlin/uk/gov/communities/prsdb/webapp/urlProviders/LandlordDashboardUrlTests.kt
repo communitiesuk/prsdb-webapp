@@ -42,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import java.time.LocalDate
@@ -100,6 +101,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
