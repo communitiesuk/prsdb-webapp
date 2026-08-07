@@ -70,10 +70,10 @@ class OrgLandlordViewModel(
                     // TODO: PDJB-1239: Add update journey
                     null,
                 )
-                landlord.charityRegisteredWith?.let { charityRegulator ->
-                    addRow("landlordDetails.org.charityCommission", charityRegulator)
+                if (landlord.isRegisteredCharity) {
+                    addRow("landlordDetails.org.charityCommission", landlord.charityRegisteredWith)
                 }
-                if (landlord.charityNumber != null) {
+                if (landlord.hasCharityNumber) {
                     addRow("landlordDetails.org.charityNumber", landlord.charityNumber)
                 }
                 addRow(
