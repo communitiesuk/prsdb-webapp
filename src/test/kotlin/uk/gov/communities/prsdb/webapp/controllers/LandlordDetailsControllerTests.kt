@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -31,9 +30,6 @@ class LandlordDetailsControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    private lateinit var organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -117,7 +113,6 @@ class LandlordDetailsControllerTests(
             val orgLandlord = MockLandlordData.createOrgLandlord()
             whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
             whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
-            whenever(organisationGoverningBodyMemberService.getGoverningBodyMembers(orgLandlord)).thenReturn(emptyList())
             whenever(
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
                     orgLandlord,
@@ -136,7 +131,7 @@ class LandlordDetailsControllerTests(
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
                     attributeExists(
                         "orgLandlord",
-                        "governingBodyMembers",
+                        "orgLandlordContacts",
                         "registeredPropertiesList",
                         "registerPropertyUrl",
                         "backUrl",

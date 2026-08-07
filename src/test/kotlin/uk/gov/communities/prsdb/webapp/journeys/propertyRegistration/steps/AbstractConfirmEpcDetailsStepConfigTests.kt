@@ -35,7 +35,7 @@ class AbstractConfirmEpcDetailsStepConfigTests {
                 override fun chooseTemplate(state: EpcDetailState) = ""
             }
         stepConfig.usingEpc { usingEpc }
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

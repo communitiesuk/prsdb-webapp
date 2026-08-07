@@ -83,7 +83,7 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `setter extracts routeSegment from a VisitableStep destination`() {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockStep.routeSegment).thenReturn("step-route")
+            whenever(mockStep.urlPath).thenReturn("step-route")
 
             val state = createTestState()
             state.returnToCyaPageDestination = Destination.VisitableStep(mockStep, "some-journey-id")
@@ -103,7 +103,7 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `returns existing journey ID if one already exists for the step`() {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockStep.routeSegment).thenReturn("existing-step")
+            whenever(mockStep.urlPath).thenReturn("existing-step")
 
             val state = createTestState(cyaJourneys = mutableMapOf("existing-step" to "existing-cya-journey-id"))
             val result = state.getCyaJourneyId(mockStep)
@@ -114,7 +114,7 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `creates a new journey ID if one does not exist for the step`() {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockStep.routeSegment).thenReturn("new-step")
+            whenever(mockStep.urlPath).thenReturn("new-step")
 
             val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
 
@@ -128,10 +128,10 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `sets checkingAnswersFor on the child journey state`() {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockStep.routeSegment).thenReturn("new-step")
+            whenever(mockStep.urlPath).thenReturn("new-step")
 
             val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockCyaStep.routeSegment).thenReturn("check-answers")
+            whenever(mockCyaStep.urlPath).thenReturn("check-answers")
 
             val state = createTestState(cyaJourneys = mutableMapOf(), cyaStep = mockCyaStep)
             state.getCyaJourneyId(mockStep)
@@ -142,10 +142,10 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `sets returnToCyaPageDestination on the child journey state`() {
             val mockStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockStep.routeSegment).thenReturn("new-step")
+            whenever(mockStep.urlPath).thenReturn("new-step")
 
             val mockCyaStep = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(mockCyaStep.routeSegment).thenReturn("check-answers")
+            whenever(mockCyaStep.urlPath).thenReturn("check-answers")
 
             val originalJourneyId = "base-id"
 
@@ -161,7 +161,7 @@ class CheckYourAnswersJourneyStateTests {
             val childDestination = state.childState?.returnToCyaPageDestination
             assertTrue(childDestination is Destination.StepRoute)
             with(childDestination as Destination.StepRoute) {
-                assertEquals(mockCyaStep.routeSegment, routeSegment)
+                assertEquals(mockCyaStep.urlPath, routeSegment)
                 assertEquals(originalJourneyId, journeyId)
             }
         }

@@ -83,7 +83,7 @@ class CheckJointLandlordsStepConfigTests {
 
     private fun setupStepConfig(): CheckJointLandlordsStepConfig {
         val stepConfig = CheckJointLandlordsStepConfig(urlParameterService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         setupStepDestinations()
         whenever(urlParameterService.createParameterPair(any())).thenAnswer {
@@ -99,12 +99,12 @@ class CheckJointLandlordsStepConfigTests {
 
     private fun setupStepDestinations() {
         whenever(mockJourneyState.inviteAnotherJointLandlordStep).thenReturn(inviteAnotherJointLandlordStep)
-        whenever(inviteAnotherJointLandlordStep.routeSegment).thenReturn(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
+        whenever(inviteAnotherJointLandlordStep.urlPath).thenReturn(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
         whenever(inviteAnotherJointLandlordStep.currentJourneyId).thenReturn(journeyId)
         whenever(inviteAnotherJointLandlordStep.isStepReachable).thenReturn(true)
 
         whenever(mockJourneyState.removeJointLandlordAreYouSureStep).thenReturn(removeJointLandlordAreYouSureStep)
-        whenever(removeJointLandlordAreYouSureStep.routeSegment).thenReturn(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
+        whenever(removeJointLandlordAreYouSureStep.urlPath).thenReturn(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
         whenever(removeJointLandlordAreYouSureStep.currentJourneyId).thenReturn(journeyId)
         whenever(removeJointLandlordAreYouSureStep.isStepReachable).thenReturn(true)
     }

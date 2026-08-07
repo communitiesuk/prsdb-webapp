@@ -72,7 +72,7 @@ class CannotDeregisterStepConfigTests {
 
     private fun setupStepConfig(): CannotDeregisterStepConfig {
         val stepConfig = CannotDeregisterStepConfig(mockPropertyOwnershipService, mockAbsoluteUrlProvider)
-        stepConfig.routeSegment = CannotDeregisterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CannotDeregisterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

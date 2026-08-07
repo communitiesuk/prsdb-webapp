@@ -99,7 +99,7 @@ class InviteJointLandlordStepConfigTests {
     @Test
     fun `enrichSubmittedDataBeforeValidation includes both session and existing invited emails`() {
         val stepConfig = InviteJointLandlordStepConfig(urlParameterService)
-        stepConfig.routeSegment = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
+        stepConfig.urlPath = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("session@example.com"))
         whenever(mockJourneyState.dependencies).thenReturn(mockDependencies)
@@ -121,7 +121,7 @@ class InviteJointLandlordStepConfigTests {
 
     private fun setupStepConfig(): InviteJointLandlordStepConfig {
         val stepConfig = InviteJointLandlordStepConfig(urlParameterService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockJourneyState.inviteJointLandlordStep).thenReturn(inviteJointLandlordStep)
