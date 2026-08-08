@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -28,16 +27,6 @@ class UpdateOrganisationTypeJourneyFactory(
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
-
-        if (!state.isStateInitialized) {
-            state.previousOrgTypeMode =
-                if (userToLandlordService.getCurrentOrganisationLandlordForUser().isTrust) {
-                    OrgTypeMode.INCLUDES_TRUST
-                } else {
-                    OrgTypeMode.EXCLUDES_TRUST
-                }
-            state.isStateInitialized = true
-        }
 
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
@@ -55,7 +44,10 @@ class UpdateOrganisationTypeJourneyFactory(
                     )
                 }
             }
-            step(journey.orgTypeUpdateRoutingStep) {
+            step<OrgTypeUpdateRouteMode, OrgTypeUpdateRoutingStepConfig>(journey.orgTypeUpdateRoutingStep) {
+                stepSpecificInitialisation {
+                    usingPreviousIsTrust { getPreviousIsTrustFromDatabase(userToLandlordService) }
+                }
                 parents { journey.orgTypeStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
@@ -132,7 +124,6 @@ interface UpdateOrganisationTypeJourneyState :
     val leadTrusteeTask: LeadTrusteeTask
     val orgTypeCyaStep: OrgTypeCyaStep
     val completeOrganisationTypeUpdateStep: CompleteOrganisationTypeUpdateStep
-    var isStateInitialized: Boolean
 }
 
 @JourneyFrameworkComponent
@@ -147,9 +138,6 @@ class UpdateOrganisationTypeJourney(
     private val journeyName: String = "organisation-type",
 ) : AbstractJourneyState(journeyStateService),
     UpdateOrganisationTypeJourneyState {
-    override var previousOrgTypeMode: OrgTypeMode by delegateProvider.requiredDelegate("previous-org-type")
-    override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(

@@ -5,12 +5,10 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
-import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -39,15 +37,14 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -78,7 +75,6 @@ class LandlordRegistrationTask(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-    override var previousOrgTypeMode: OrgTypeMode by delegateProvider.requiredDelegate("previous-org-type")
 
     override val orgTypeStep: OrgTypeStep
         get() = orgLandlordRegistrationTask.orgTypeStep
@@ -186,26 +182,6 @@ class LandlordRegistrationTask(
             }
         }
 
-    override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState {
-        // TODO: PDJB-585: Remove this cast
-        val newJourney = super.createChildJourneyState(childJourneyId) as LandlordRegistrationTask
-
-        val orgTypeStep = orgLandlordRegistrationTask.orgTypeStep
-        // only wire this in if the CYA journey is on an org landlord journey & has orgTypeStep set up
-        if (orgTypeStep.initialisationStage == StepInitialisationStage.FULLY_INITIALISED) {
-            orgTypeStep.formModelOrNull?.let { orgTypeFormModel ->
-                newJourney.previousOrgTypeMode =
-                    if (OrgType.TRUST in orgTypeFormModel.getSelectedOrgTypes()) {
-                        OrgTypeMode.INCLUDES_TRUST
-                    } else {
-                        OrgTypeMode.EXCLUDES_TRUST
-                    }
-            }
-        }
-
-        return newJourney
-    }
-
     companion object {
         fun <T : LandlordRegistrationState> checkYourAnswersJourneyMap(
             state: T,
@@ -306,7 +282,15 @@ class LandlordRegistrationTask(
                             routeSegment(OrgTypeStep.ROUTE_SEGMENT)
                             nextStep { journey.orgTypeUpdateRoutingStep }
                         }
-                        step(journey.orgTypeUpdateRoutingStep) {
+                        step<OrgTypeUpdateRouteMode, OrgTypeUpdateRoutingStepConfig>(journey.orgTypeUpdateRoutingStep) {
+                            stepSpecificInitialisation {
+                                usingPreviousIsTrust {
+                                    getPreviousIsTrustFromBaseJourney(
+                                        journey,
+                                        journey.orgLandlordRegistrationTask.orgTypeStep,
+                                    )
+                                }
+                            }
                             parents { journey.orgLandlordRegistrationTask.orgTypeStep.isComplete() }
                             nextDestination { mode ->
                                 when (mode) {
