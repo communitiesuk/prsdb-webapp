@@ -117,7 +117,7 @@ class LandlordServiceTests {
 
     @Test
     fun `retrieveLandlordById returns an organisation landlord`() {
-        val landlord = OrganisationalLandlord()
+        val landlord = createOrgLandlord()
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
 
         val result = landlordService.retrieveLandlordById(landlord.id)
@@ -673,8 +673,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser updates the organisation name`() {
-        val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = "New Org Name"))
@@ -685,8 +684,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser skips null fields`() {
-        val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = null))
@@ -696,13 +694,22 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordName updates the organisation name via updateOrganisationLandlordForUser`() {
-        val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         landlordService.updateOrganisationLandlordName("New Org Name")
 
         assertEquals("New Org Name", orgLandlord.name)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation name.",
+                ),
+            ),
+        )
     }
 
     @Test
