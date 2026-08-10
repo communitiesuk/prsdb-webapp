@@ -331,6 +331,18 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(actionLink).hasAttribute("target", "_blank")
                 assertThat(actionLink).hasAttribute("rel", "noreferrer noopener")
             }
+
+            @Test
+            fun `an org landlord is shown as a card with name, LRN, email and a view landlord record link`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(48)
+                detailsPage.tabs.goToLandlordDetails()
+
+                val orgCard =
+                    detailsPage.landlordSummaryCards.single { it.title.getText() == "Local Organisation Landlord" }
+                assertThat(orgCard.summaryList.registrationNumberRow.value).not().isEmpty()
+                assertThat(orgCard.summaryList.emailAddressRow.value).containsText("local-org-landlord@example.com")
+                assertThat(orgCard.getAction("View landlord record").link).isVisible()
+            }
         }
 
         // Test properties used for notification banner tests:

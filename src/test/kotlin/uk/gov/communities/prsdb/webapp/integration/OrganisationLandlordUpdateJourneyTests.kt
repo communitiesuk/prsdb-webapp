@@ -10,6 +10,13 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Com
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeAddressLookupPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeCyaPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeDobFormPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeEmailFormPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
@@ -178,5 +185,53 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         private const val LEAD_TRUSTEE_NAME = "Test Lead Trustee Name"
         private const val LEAD_TRUSTEE_EMAIL = "trustee@test.com"
         private const val LEAD_TRUSTEE_PHONE = "07123456789"
+    }
+
+    @Nested
+    inner class LeadTrusteeUpdates : NestedIntegrationTestWithMutableData("data-mockuser-org-landlord-trust.sql") {
+        @Test
+        fun `A trust org landlord can complete the full lead trustee update journey`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.leadTrusteeCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+
+            // Lead Trustee Name
+            val namePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateLeadTrustee::class)
+            val newName = "Updated Trustee Name"
+            namePage.submitName(newName)
+
+            // Lead Trustee DOB
+            val dobPage = assertPageIs(page, LeadTrusteeDobFormPageUpdateLeadTrustee::class)
+            dobPage.submitDate("15", "6", "1985")
+
+            // Lead Trustee Email
+            val emailPage = assertPageIs(page, LeadTrusteeEmailFormPageUpdateLeadTrustee::class)
+            emailPage.submitEmail("updated.trustee@example.com")
+
+            // Lead Trustee Phone
+            val phonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateLeadTrustee::class)
+            phonePage.submitPhoneNumber("07999888777")
+
+            // Lead Trustee Address Lookup
+            val addressLookupPage = assertPageIs(page, LeadTrusteeAddressLookupPageUpdateLeadTrustee::class)
+            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+            // Select Address
+            val selectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressPageUpdateLeadTrustee::class)
+            selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+            // CYA page
+            // TODO: PDJB-1470: Implement this
+            val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
+            cyaPage.submit()
+
+            // Back to landlord details
+            val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+            updatedDetailsPage.tabs.goToOrganisationContacts()
+            assertThat(updatedDetailsPage.leadTrusteeCard.summaryList.nameRow.value).containsText(newName)
+        }
     }
 }

@@ -21,6 +21,11 @@ abstract class OrgTypeFormPage(
 
     fun selectNoneOfThese() = form.orgTypeCheckboxes.checkCheckbox(OrgType.NONE.toString())
 
+    fun submitCompany() {
+        selectCompany()
+        form.submit()
+    }
+
     class OrgTypeForm(
         page: Page,
     ) : FormWithSectionHeader(page) {

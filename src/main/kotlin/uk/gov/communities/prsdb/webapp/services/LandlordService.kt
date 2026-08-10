@@ -299,6 +299,25 @@ class LandlordService(
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
     }
 
+    @Transactional
+    fun updateOrganisationLandlordLeadTrustee(
+        name: String,
+        dateOfBirth: LocalDate,
+        email: String,
+        phone: String,
+        addressDataModel: AddressDataModel,
+    ) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                leadTrusteeName = name,
+                leadTrusteeDateOfBirth = dateOfBirth,
+                leadTrusteeEmail = email,
+                leadTrusteePhone = phone,
+                leadTrusteeAddress = addressDataModel,
+            ),
+        )
+    }
+
     fun searchForLandlords(
         searchTerm: String,
         localCouncilBaseUserId: String,
@@ -330,7 +349,12 @@ class LandlordService(
                 throw RepositoryQueryTimeoutException("Landlord search with query '$searchTerm' timed out")
             }
 
-        return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }
+        return landlordPage.map {
+            LandlordSearchResultViewModel.fromDataModel(
+                it,
+                backLinkService.storeCurrentUrlReturningKey(),
+            )
+        }
     }
 
     private fun sendUpdateConfirmationEmail(
