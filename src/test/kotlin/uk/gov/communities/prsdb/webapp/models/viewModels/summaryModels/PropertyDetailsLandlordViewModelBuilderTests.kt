@@ -173,5 +173,74 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             assertEquals("/local-council/landlord-details/${landlord.id}", card.actions!![0].url)
             assertEquals(true, card.actions!![0].opensInNewTab)
         }
+
+        @Test
+        fun `org landlord card has title of org name and two rows LRN and whole-org email`() {
+            val orgLandlord =
+                MockLandlordData.createOrgLandlord(
+                    name = "ACME Properties Ltd",
+                    email = "info@acme.com",
+                    registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 9012L),
+                )
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    setOf(orgLandlord),
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            val card = cards.single()
+            assertEquals("ACME Properties Ltd", card.title)
+            assertEquals(2, card.summaryList.size)
+            assertEquals("landlordDetails.personalDetails.lrn", card.summaryList[0].fieldHeading)
+            assertEquals(9012L, (card.summaryList[0].fieldValue as RegistrationNumberDataModel).number)
+            assertEquals("landlordDetails.personalDetails.emailAddress", card.summaryList[1].fieldHeading)
+            assertEquals("info@acme.com", card.summaryList[1].fieldValue)
+        }
+
+        @Test
+        fun `org landlord card has a view landlord record action that opens in new tab`() {
+            val orgLandlord = MockLandlordData.createOrgLandlord(name = "ACME Properties Ltd", email = "info@acme.com")
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    setOf(orgLandlord),
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            val card = cards.single()
+            assertEquals(1, card.actions!!.size)
+            assertEquals(
+                "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                card.actions!![0].text,
+            )
+            assertEquals("/local-council/landlord-details/${orgLandlord.id}", card.actions!![0].url)
+            assertEquals(true, card.actions!![0].opensInNewTab)
+        }
+
+        @Test
+        fun `mixed individual and org landlords are sorted by name and both keep the view record link`() {
+            val individual =
+                MockLandlordData.createIndividualLandlord(
+                    name = "Zoe Adams",
+                    email = "zoe@example.com",
+                    phoneNumber = "07700000000",
+                )
+            val org = MockLandlordData.createOrgLandlord(name = "Acme Ltd", email = "info@acme.com")
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    setOf(individual, org),
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            assertEquals(2, cards.size)
+            assertEquals("Acme Ltd", cards[0].title)
+            assertEquals(2, cards[0].summaryList.size)
+            assertEquals(1, cards[0].actions!!.size)
+            assertEquals("Zoe Adams", cards[1].title)
+            assertEquals(4, cards[1].summaryList.size)
+            assertEquals(1, cards[1].actions!!.size)
+        }
     }
 }

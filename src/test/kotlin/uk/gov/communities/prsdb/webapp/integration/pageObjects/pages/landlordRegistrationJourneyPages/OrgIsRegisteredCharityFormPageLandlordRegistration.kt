@@ -2,36 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 
 class OrgIsRegisteredCharityFormPageLandlordRegistration(
     page: Page,
-) : BasePage(
+) : PageWithYesNoRadios(
         page,
         "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}",
-    ) {
-    val form = OrgIsRegisteredCharityFormLandlord(page)
-
-    fun submitYes() {
-        form.selectYes()
-        form.submit()
-    }
-
-    fun submitNo() {
-        form.selectNo()
-        form.submit()
-    }
-
-    class OrgIsRegisteredCharityFormLandlord(
-        page: Page,
-    ) : FormWithSectionHeader(page) {
-        val charityRadios = Radios(locator)
-
-        fun selectYes() = charityRadios.selectValue("true")
-
-        fun selectNo() = charityRadios.selectValue("false")
-    }
-}
+    )

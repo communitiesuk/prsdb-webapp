@@ -17,7 +17,18 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.EmailFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationRejectedConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LandlordTypeFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LookupAddressFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgAddressFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgCompanyNumberFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgEmailFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgIsRegisteredCharityFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgIsRegisteredCompanyFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgMainContactFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgNameFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgPhoneNumberFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgSelectAddressFormPageAcceptJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.OrgTypeFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PhoneNumberFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PrivacyNoticePageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PropertyJoinedConfirmationPage
@@ -132,6 +143,76 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
             acceptOrRejectPage.rejectInvitation()
             assertPageIs(page, InvitationRejectedConfirmationPage::class)
+        }
+
+        @Test
+        fun `User with a valid token can accept the invitation, register as an organisation landlord and reach a confirmation page`(
+            page: Page,
+        ) {
+            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+            val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+            whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
+
+            val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
+            acceptOrRejectPage.acceptInvitation()
+
+            val privacyNoticePage = assertPageIs(page, PrivacyNoticePageAcceptJointLandlordInvitation::class)
+            privacyNoticePage.agreeAndSubmit()
+
+            val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageAcceptJointLandlordInvitation::class)
+            confirmIdentityPage.confirm()
+
+            val emailPage = assertPageIs(page, EmailFormPageAcceptJointLandlordInvitation::class)
+            emailPage.submitEmail("registrant@example.com")
+
+            val phoneNumPage = assertPageIs(page, PhoneNumberFormPageAcceptJointLandlordInvitation::class)
+            phoneNumPage.submitPhoneNumber("07123456789")
+
+            val landlordTypePage = assertPageIs(page, LandlordTypeFormPageAcceptJointLandlordInvitation::class)
+            landlordTypePage.submitOrganisation()
+
+            val orgNamePage = assertPageIs(page, OrgNameFormPageAcceptJointLandlordInvitation::class)
+            orgNamePage.submitName("Test Organisation Name")
+
+            val orgAddressPage = assertPageIs(page, OrgAddressFormPageAcceptJointLandlordInvitation::class)
+            orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+            val orgSelectAddressPage = assertPageIs(page, OrgSelectAddressFormPageAcceptJointLandlordInvitation::class)
+            orgSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+            val orgEmailPage = assertPageIs(page, OrgEmailFormPageAcceptJointLandlordInvitation::class)
+            orgEmailPage.submitEmail("test.address@provider.com")
+
+            val orgPhoneNumberPage = assertPageIs(page, OrgPhoneNumberFormPageAcceptJointLandlordInvitation::class)
+            orgPhoneNumberPage.submitPhoneNumber("07777777777")
+
+            val orgTypePage = assertPageIs(page, OrgTypeFormPageAcceptJointLandlordInvitation::class)
+            orgTypePage.submitCompany()
+
+            val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageAcceptJointLandlordInvitation::class)
+            orgIsRegisteredCharityPage.submitNo()
+
+            val orgIsRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageAcceptJointLandlordInvitation::class)
+            orgIsRegisteredCompanyPage.submitYes()
+
+            val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageAcceptJointLandlordInvitation::class)
+            orgCompanyNumberPage.submitCompanyNumber("12345678")
+
+            val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageAcceptJointLandlordInvitation::class)
+            orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPageAcceptJointLandlordInvitation::class)
+            checkAnswersPage.confirmAndSubmit()
+
+            val confirmYouAreALandlordForThisPropertyPage = assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
+            assertThat(confirmYouAreALandlordForThisPropertyPage.propertyAddress).containsText("2 Fake Way")
+            assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).isVisible()
+            assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).containsText("L-")
+            confirmYouAreALandlordForThisPropertyPage.form.submit()
+
+            val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
+            assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
+            assertThat(confirmationPage.surveyLink.locator).isVisible()
         }
     }
 }
