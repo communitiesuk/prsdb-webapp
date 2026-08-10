@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -45,6 +47,10 @@ class OrganisationalLandlordContactsViewModelTests {
             )
         val card = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard!!
         assertEquals("landlordDetails.org.leadTrusteeHeading", card.title)
+        assertEquals(
+            "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
+            card.actions!!.single().url,
+        )
         assertEquals(
             listOf(
                 "landlordDetails.org.leadTrusteeName",
