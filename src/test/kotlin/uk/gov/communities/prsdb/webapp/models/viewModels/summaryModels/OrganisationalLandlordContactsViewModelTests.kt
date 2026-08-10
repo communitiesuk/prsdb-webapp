@@ -48,7 +48,7 @@ class OrganisationalLandlordContactsViewModelTests {
         val card = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard!!
         assertEquals("landlordDetails.org.leadTrusteeHeading", card.title)
         assertEquals(
-            UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE + "/" + LeadTrusteeNameStep.ROUTE_SEGMENT,
+            "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
             card.actions!!.single().url,
         )
         assertEquals(

@@ -33,7 +33,7 @@ class OrganisationalLandlordContactsViewModel(
                 title = "landlordDetails.org.leadTrusteeHeading",
                 actions =
                     SummaryCardActionViewModel.changeAction(
-                        UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE + "/" + LeadTrusteeNameStep.ROUTE_SEGMENT,
+                        "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
                     ),
                 summaryList =
                     mutableListOf<SummaryListRowViewModel>()
