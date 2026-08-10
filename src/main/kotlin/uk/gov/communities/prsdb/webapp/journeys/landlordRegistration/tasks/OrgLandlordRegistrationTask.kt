@@ -32,7 +32,7 @@ class OrgLandlordRegistrationTask(
     override val companiesHouseTask: OrgCompaniesHouseTask,
     override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
-    // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
+    // TODO PDJB-1237: remove this placeholder once the org type update journey exists.
     override val updateDetailsTodoStep: UpdateDetailsTodoStep,
 ) : TaskWithoutDependencies<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {

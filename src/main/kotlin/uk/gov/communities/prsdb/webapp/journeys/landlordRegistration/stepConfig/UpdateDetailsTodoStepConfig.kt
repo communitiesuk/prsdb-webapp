@@ -7,9 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1237 PDJB-1238: remove this placeholder step once the organisation type and companies house update
-//  journeys exist. It renders a dead-end TODO page (no continue button) so the corresponding check-your-answers change
-//  links don't 404. The todoComment shown is supplied per branch where the step is wired into the journey map.
+// TODO PDJB-1237: remove this placeholder step once the organisation type update journey exists. It renders a
+//  dead-end TODO page (no continue button) so the organisation type check-your-answers change link doesn't 404.
 @JourneyFrameworkComponent
 class UpdateDetailsTodoStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class

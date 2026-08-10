@@ -341,8 +341,10 @@ class Navigator(
         return createValidPage(page, OrgCompanyNumberFormPageLandlordRegistration::class)
     }
 
-    fun skipToLandlordRegistrationOrgCheckAnswersPage(): OrgCheckAnswersPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCheckAnswers().build())
+    fun skipToLandlordRegistrationOrgCheckAnswersPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeOrgCheckAnswers(),
+    ): OrgCheckAnswersPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
         navigateToLandlordRegistrationJourneyStep(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgCheckAnswersPageLandlordRegistration::class)
     }

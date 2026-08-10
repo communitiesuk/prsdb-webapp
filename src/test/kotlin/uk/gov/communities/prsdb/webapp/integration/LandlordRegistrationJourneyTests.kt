@@ -647,9 +647,56 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     // TODO PDJB-1237: add a test for the organisation type change link once the org type update journey is wired into
     //  LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgTypeStep.ROUTE_SEGMENT branch is currently empty).
 
-    // TODO PDJB-1238: add tests for the Companies House and company number change links once the companies update
-    //  journey is wired into LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgIsRegisteredCompanyStep /
-    //  OrgCompanyNumberStep branch is currently empty).
+    @Test
+    fun `The Companies House change link routes into the companies house update flow`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
+
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `The company number change link opens the company number page and returns to check answers`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage =
+            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
+                LandlordStateSessionBuilder
+                    .beforeOrgCheckAnswers()
+                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
+                    .withOrgCompanyNumber(),
+            )
+        checkAnswersPage.landlordDetails.companiesHouseNumberRow.clickNamedActionLinkAndWait("Change")
+
+        val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+        companyNumberPage.submitCompanyNumber("87654321")
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Keeping the same Companies House answer skips the interruption and returns via the company number page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage =
+            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
+                LandlordStateSessionBuilder
+                    .beforeOrgCheckAnswers()
+                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
+                    .withOrgCompanyNumber(),
+            )
+        checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
+
+        val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+        isRegisteredCompanyPage.submitYes()
+
+        val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+        companyNumberPage.submitCompanyNumber("87654321")
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
 
     @Test
     fun `Selecting no on companies house skips the company number question and goes to the governing body journey`(page: Page) {
