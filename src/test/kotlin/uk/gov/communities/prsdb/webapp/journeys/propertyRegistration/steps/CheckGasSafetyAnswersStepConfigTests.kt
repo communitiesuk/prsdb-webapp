@@ -22,7 +22,7 @@ class CheckGasSafetyAnswersStepConfigTests {
 
     private fun setupStepConfig(): CheckGasSafetyAnswersStepConfig {
         val stepConfig = CheckGasSafetyAnswersStepConfig(mockUploadService)
-        stepConfig.routeSegment = CheckGasSafetyAnswersStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckGasSafetyAnswersStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

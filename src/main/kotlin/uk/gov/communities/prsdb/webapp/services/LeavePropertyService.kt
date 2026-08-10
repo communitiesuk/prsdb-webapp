@@ -42,6 +42,7 @@ class LeavePropertyService(
     ) {
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
+        // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
         TransactionHelper.runAfterTransactionCommits {
             confirmationEmailSender.sendEmail(
                 landlord.email,

@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -22,6 +23,12 @@ class UserToLandlordService(
         // TODO: PDJB-1477: Improve this method with caching
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         return getLandlordForBaseUserId(baseUserId)
+    }
+
+    fun getCurrentOrganisationLandlordForUser(): OrganisationalLandlord {
+        val landlord = getCurrentLandlordForUser()
+        check(landlord is OrganisationalLandlord) { "Expected organisation landlord, but got ${landlord.landlordType}" }
+        return landlord
     }
 
     fun getCurrentLandlordForUserOrNull(): Landlord? {
@@ -55,7 +62,7 @@ class UserToLandlordService(
     fun getLandlordForBaseUserIdOrNull(baseUserId: String): Landlord? {
         val landlords =
             listOfNotNull(individualLandlordRepository.findByBaseUser_Id(baseUserId)) +
-                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationLandlord }
+                organisationalLandlordUserRepository.findByBaseUser_Id(baseUserId).map { it.organisationalLandlord }
 
         if (landlords.size > 1) {
             throw PrsdbWebException("Multiple landlords were found for user with baseUserId $baseUserId")

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConf
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -31,8 +30,6 @@ class DeregisterStepConfig(
     override fun afterStepIsReached(state: LandlordDeregistrationJourneyState) {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        // TODO: PDJB-1435: Update landlord deregistration for org landlords
-        check(landlord is IndividualLandlord)
 
         val soleLandlordProperties = landlord.landlordships.toList()
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()

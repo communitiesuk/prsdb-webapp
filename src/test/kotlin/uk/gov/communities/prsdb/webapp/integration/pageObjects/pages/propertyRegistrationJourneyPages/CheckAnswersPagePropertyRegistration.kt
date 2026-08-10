@@ -24,6 +24,21 @@ class CheckAnswersPagePropertyRegistration(
 
     val complianceSummaryList = ComplianceSummaryList(page)
 
+    val tenancyHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
+
+    val restructuredTenancyHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+    private val restructuredTenancyRowKeys =
+        page
+            .locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
+            .locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
+
+    fun restructuredTenancyRowHeadings(): List<String> {
+        val rowCount = restructuredTenancyRowKeys.count()
+        return (0 until rowCount).map { index -> restructuredTenancyRowKeys.nth(index).innerText().trim() }
+    }
+
     val jointLandlordsHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
 
@@ -45,6 +60,8 @@ class CheckAnswersPagePropertyRegistration(
         val ownershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
+        val occupiedByTenantsRow = getRow("Occupied by tenants")
+        val tenancyDetailsRow = getRow("Tenancy details")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")

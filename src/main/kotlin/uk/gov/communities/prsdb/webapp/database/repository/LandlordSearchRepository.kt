@@ -43,6 +43,7 @@ class LandlordSearchRepositoryImpl(
                 FROM landlord l
                 JOIN registration_number r ON l.registration_number_id = r.id
                 WHERE r.number = :searchTerm
+                $INDIVIDUAL_LANDLORD_FILTER
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER else "" }
             )
             $SELECT_FROM_RESULTING_LANDLORDS;
@@ -67,6 +68,7 @@ class LandlordSearchRepositoryImpl(
                   FROM landlord l
                   ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
                   WHERE gin_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) %> :searchTerm
+                  $INDIVIDUAL_LANDLORD_FILTER
                   ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_GROUP_BY else "" }
                   LIMIT $MAX_ENTRIES_IN_LANDLORDS_SEARCH
                  ) subquery;
@@ -86,6 +88,7 @@ class LandlordSearchRepositoryImpl(
                 FROM landlord l
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_JOIN else "" }
                 WHERE gist_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) %> :searchTerm
+                $INDIVIDUAL_LANDLORD_FILTER
                 ${if (restrictToLocalCouncil) LOCAL_COUNCIL_FILTER_GROUP_BY else "" }
                 ORDER BY gist_landlord_details(l.individual_phone_number, l.individual_email, l.individual_name) <->> :searchTerm
                 LIMIT :limit OFFSET :offset
@@ -104,6 +107,11 @@ class LandlordSearchRepositoryImpl(
     }
 
     companion object {
+        // TODO PDJB-1280: Add org LL to LC search
+        // Note that this filter is only a final preventative measure. Removing it will still likely not show org LLs as they don't have
+        // the correct database cols set.
+        private const val INDIVIDUAL_LANDLORD_FILTER = "AND l.landlord_type = 0"
+
         // Filters results to only landlords who have active property ownerships in LC user's LC
         private const val LOCAL_COUNCIL_FILTER =
             """

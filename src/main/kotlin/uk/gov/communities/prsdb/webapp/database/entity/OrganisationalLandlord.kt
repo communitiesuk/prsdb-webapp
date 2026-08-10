@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -15,7 +16,7 @@ import java.time.LocalDate
 
 @Entity
 @DiscriminatorValue("1")
-class OrganisationLandlord() : Landlord() {
+class OrganisationalLandlord() : Landlord() {
     @get:Transient
     override val landlordType: LandlordType
         get() = LandlordType.ORGANISATION
@@ -97,7 +98,7 @@ class OrganisationLandlord() : Landlord() {
     // We eager fetch these as we're temporarily using them to get the email for an org landlord.
     // We assume one org user per landlord for now so this eager fetch will be cheap.
     // TODO: PDJB-1274: This eager fetch will no longer be needed once we support multiple users in an org. Remove it
-    @OneToMany(mappedBy = "organisationLandlord", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "organisationalLandlord", fetch = FetchType.EAGER)
     private val organisationalLandlordUsers: MutableSet<OrganisationalLandlordUser> = mutableSetOf()
 
     // TODO PDJB-1274: The single-user assumption must be removed to support multiple organisation users.
@@ -108,6 +109,14 @@ class OrganisationLandlord() : Landlord() {
     internal fun addOrganisationalLandlordUser(organisationalLandlordUser: OrganisationalLandlordUser) {
         organisationalLandlordUsers.add(organisationalLandlordUser)
     }
+
+    @OneToMany(mappedBy = "organisationalLandlord")
+    @OrderBy("id ASC")
+    private val governingBodyMemberList: MutableList<OrganisationGoverningBodyMember> = mutableListOf()
+
+    @get:Transient
+    val governingBodyMembers: List<OrganisationGoverningBodyMember>
+        get() = governingBodyMemberList.toList()
 
     constructor(
         registrationNumber: RegistrationNumber,

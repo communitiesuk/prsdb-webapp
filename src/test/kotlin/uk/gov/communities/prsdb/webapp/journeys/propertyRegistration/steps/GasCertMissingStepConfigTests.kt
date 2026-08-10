@@ -42,7 +42,7 @@ class GasCertMissingStepConfigTests {
 
     private fun setupStepConfig(): GasCertMissingStepConfig {
         val stepConfig = GasCertMissingStepConfig()
-        stepConfig.routeSegment = GasCertMissingStep.ROUTE_SEGMENT
+        stepConfig.urlPath = GasCertMissingStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

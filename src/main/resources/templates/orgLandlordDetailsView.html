@@ -25,8 +25,8 @@
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.name}">landlordDetails.org.name</strong><br/>
                     <span th:text="${orgLandlord.name}">orgLandlord.name</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1234: Add update journey -->
-                </p>
+                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-name/organisation-name'}">Change</a>
+                </p> <!-- TODO: PDJB-1474: Update links instead of using hrefs -->
 
                 <p class="govuk-body">
                     <strong th:text="#{landlordDetails.org.address}">landlordDetails.org.address</strong><br/>
@@ -79,48 +79,26 @@
 
             <div id="organisation-contacts-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-contacts', ~{::#organisation-contacts-panel/content()})}">
                 <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">landlordDetails.org.mainContactHeading</h2>
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.mainContactCard.title}, ${orgLandlordContacts.mainContactCard.cardNumber}, ${orgLandlordContacts.mainContactCard.actions}, ${orgLandlordContacts.mainContactCard.summaryList})}"></div>
 
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.mainContactName}">landlordDetails.org.mainContactName</strong><br/>
-                    <span th:text="${orgLandlord.mainContactName}">orgLandlord.mainContactName</span><br/>
-                    <strong th:text="#{landlordDetails.org.mainContactEmail}">landlordDetails.org.mainContactEmail</strong><br/>
-                    <span th:text="${orgLandlord.mainContactEmail}">orgLandlord.mainContactEmail</span><br/>
-                    <strong th:text="#{landlordDetails.org.mainContactPhone}">landlordDetails.org.mainContactPhone</strong><br/>
-                    <span th:text="${orgLandlord.mainContactPhone}">orgLandlord.mainContactPhone</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1244: Add update journey -->
-                </p>
-
-                <th:block th:if="${orgLandlord.leadTrusteeName != null}">
+                <th:block th:if="${orgLandlordContacts.leadTrusteeCard != null}">
                     <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">landlordDetails.org.leadTrusteeHeading</h2>
+                    <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.leadTrusteeCard.title}, ${orgLandlordContacts.leadTrusteeCard.cardNumber}, ${orgLandlordContacts.leadTrusteeCard.actions}, ${orgLandlordContacts.leadTrusteeCard.summaryList})}"></div>
+                </th:block>
 
+                <th:block th:if="${orgLandlordContacts.showGoverningBody}">
+                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">landlordDetails.org.governingBody.heading</h2>
                     <p class="govuk-body">
-                        <strong th:text="#{landlordDetails.org.leadTrusteeName}">landlordDetails.org.leadTrusteeName</strong><br/>
-                        <span th:text="${orgLandlord.leadTrusteeName}">orgLandlord.leadTrusteeName</span><br/>
-                        <th:block th:if="${orgLandlord.leadTrusteeEmail != null}">
-                            <strong th:text="#{landlordDetails.org.leadTrusteeEmail}">landlordDetails.org.leadTrusteeEmail</strong><br/>
-                            <span th:text="${orgLandlord.leadTrusteeEmail}">orgLandlord.leadTrusteeEmail</span><br/>
-                        </th:block>
-                        <th:block th:if="${orgLandlord.leadTrusteePhone != null}">
-                            <strong th:text="#{landlordDetails.org.leadTrusteePhone}">landlordDetails.org.leadTrusteePhone</strong><br/>
-                            <span th:text="${orgLandlord.leadTrusteePhone}">orgLandlord.leadTrusteePhone</span><br/>
-                        </th:block>
-                        <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1469: Add update journey -->
+                        <a class="govuk-link" th:href="@{${orgLandlordContacts.governingBodyMembersLinkUrl}}"
+                           th:text="#{landlordDetails.org.governingBody.membersLink}">landlordDetails.org.governingBody.membersLink</a>
                     </p>
-                </th:block>
-
-                <th:block th:unless="${#lists.isEmpty(governingBodyMembers)}">
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBodyHeading}">landlordDetails.org.governingBodyHeading</h2>
-
-                    <th:block th:each="member : ${governingBodyMembers}">
-                        <p class="govuk-body">
-                            <strong th:text="${member.name}">member.name</strong><br/>
-                            <span th:text="${member.type}">member.type</span><br/>
-                            <span th:text="${member.dateOfBirth}">member.dateOfBirth</span><br/>
-                            <span th:text="${member.address.singleLineAddress}">member.address.singleLineAddress</span>
-                        </p>
+                    <th:block th:each="card : ${orgLandlordContacts.governingBodyMemberCards}">
+                        <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
                     </th:block>
-                    <a class="govuk-link" href="#" th:text="#{landlordDetails.org.governingBodyChange}">landlordDetails.org.governingBodyChange</a> <!-- TODO: PDJB-1471: Add update journey -->
                 </th:block>
+
+                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.registrationContactHeading}">landlordDetails.org.registrationContactHeading</h2>
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.registrationContactCard.title}, ${orgLandlordContacts.registrationContactCard.cardNumber}, ${orgLandlordContacts.registrationContactCard.actions}, ${orgLandlordContacts.registrationContactCard.summaryList})}"></div>
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">

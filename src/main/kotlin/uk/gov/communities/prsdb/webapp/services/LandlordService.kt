@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
@@ -99,13 +100,13 @@ class LandlordService(
         registrantDateOfBirth: LocalDate,
         registrantEmail: String,
         registrantPhoneNumber: String,
-    ): OrganisationLandlord {
+    ): OrganisationalLandlord {
         val orgAddress = addressService.findOrCreateAddress(organisationAddress)
         val trusteeAddress = leadTrusteeAddress?.let { addressService.findOrCreateAddress(it) }
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
         val landlord =
-            OrganisationLandlord(
+            OrganisationalLandlord(
                 registrationNumber = registrationNumber,
                 name = organisationName,
                 address = orgAddress,
@@ -200,6 +201,22 @@ class LandlordService(
                 dateOfBirth = dateOfBirth,
             ),
         ) {}
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordForUser(orgLandlordUpdate: OrganisationLandlordUpdateModel): Landlord {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+
+        orgLandlordUpdate.name?.let { landlordEntity.name = it }
+
+        return landlordEntity
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordName(orgName: String) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(name = orgName),
+        )
     }
 
     fun searchForLandlords(
