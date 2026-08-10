@@ -121,6 +121,18 @@ class OccupancyDetailsHelperTests {
     }
 
     @Test
+    fun `getRestructuredOccupancySummaryList returns the occupied row for occupied properties`() {
+        whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
+        whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
+        whenever(mockOccupationState.getCyaJourneyId(mockOccupiedStep)).thenReturn("occupied-cya")
+
+        val rows = helper.getRestructuredOccupancySummaryList(mockOccupationState)
+
+        assertEquals(1, rows.size)
+        assertEquals("forms.checkPropertyAnswers.occupancy.question", rows[0].fieldHeading)
+    }
+
+    @Test
     fun `getCheckYourAnswersSummaryList includes all tenancy rows when property is occupied`() {
         whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })

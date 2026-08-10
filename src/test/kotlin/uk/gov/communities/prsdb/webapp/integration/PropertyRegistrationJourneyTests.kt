@@ -1488,6 +1488,39 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+
+            assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
+        }
+
+        @Test
+        fun `restructured CYA shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
+            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
+        }
+
+        @Test
+        fun `the occupancy question change link on the restructured CYA navigates to the occupancy page`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+        }
+
+        @Test
         @Suppress("ktlint:standard:max-line-length")
         fun `restructured occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
@@ -2260,7 +2293,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
             assertThat(checkAnswersPage.tenancyHeading).isVisible()
+            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.key).containsText("Occupied by tenants")
             assertThat(checkAnswersPage.restructuredTenancyHeading).isHidden()
+            assertThat(checkAnswersPage.occupancyHeading).isHidden()
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow).isHidden()
             assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.key).containsText("Occupied by tenants")
             assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
             assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
