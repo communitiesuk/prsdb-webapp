@@ -11,7 +11,7 @@ class LeadTrusteeCyaPageUpdateLeadTrustee(
 ) : BasePage(page, "$UPDATE_LEAD_TRUSTEE_ROUTE/${UpdateLeadTrusteeCyaStep.ROUTE_SEGMENT}") {
     val form = PostForm(page)
 
-    fun submitAndContinue() {
+    fun submit() {
         form.submit()
     }
 }

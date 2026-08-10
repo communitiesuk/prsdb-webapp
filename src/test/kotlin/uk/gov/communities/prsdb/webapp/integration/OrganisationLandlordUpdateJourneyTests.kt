@@ -168,7 +168,10 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         fun `Lead trustee change link opens the lead trustee name update page`(page: Page) {
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-            orgLandlordDetailsPage.leadTrusteeCard.getAction("Change").link.clickAndWait()
+            orgLandlordDetailsPage.leadTrusteeCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
 
             assertPageIs(page, LeadTrusteeNameFormPageUpdateLeadTrustee::class)
         }
@@ -177,7 +180,10 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         fun `A trust org landlord can complete the full lead trustee update journey`(page: Page) {
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-            orgLandlordDetailsPage.leadTrusteeCard.getAction("Change").link.clickAndWait()
+            orgLandlordDetailsPage.leadTrusteeCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
 
             // Lead Trustee Name
             val namePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateLeadTrustee::class)
@@ -206,7 +212,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
             // CYA TODO page
             val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
-            cyaPage.submitAndContinue()
+            cyaPage.submit()
 
             // Back to landlord details
             val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
