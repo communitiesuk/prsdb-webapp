@@ -140,7 +140,7 @@ leadTrusteePhone:
   error:
     missing: Enter a phone number including the country code for international numbers
 orgType:
-  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
   checkbox:
     company: Company
