@@ -275,8 +275,11 @@ class LandlordRegistrationCyaStepConfig(
 
     // Organisation landlord content
 
-    private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> =
-        mapOf(
+    private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> {
+        val registeredWithCompaniesHouse =
+            state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
+                .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+        return mapOf(
             "title" to "registerAsALandlord.title",
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
             "yourDetailsCard" to getYourDetailsCard(state),
@@ -284,10 +287,11 @@ class LandlordRegistrationCyaStepConfig(
             "governingBodyMemberCards" to
                 (
                     listOfNotNull(getLeadTrusteeCard(state)) +
-                        if (isRegisteredWithCompaniesHouse(state)) emptyList() else getGovBodyMemberCards(state)
+                        if (registeredWithCompaniesHouse) emptyList() else getGovBodyMemberCards(state)
                 ),
             "mainContactCard" to getMainContactCard(state),
         )
+    }
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
         val verified = state.identityTask.getIsIdentityVerified()
@@ -551,10 +555,6 @@ class LandlordRegistrationCyaStepConfig(
                 ),
         )
     }
-
-    private fun isRegisteredWithCompaniesHouse(state: LandlordRegistrationState): Boolean =
-        state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
-            .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
         val members = state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap()

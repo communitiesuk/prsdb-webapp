@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -28,6 +30,7 @@ class UpdateCompaniesHouseController(
     private val journeyFactory: UpdateCompaniesHouseJourneyFactory,
     private val userToLandlordService: UserToLandlordService,
 ) {
+    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
         principal: Principal,
@@ -37,6 +40,7 @@ class UpdateCompaniesHouseController(
         return dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
     }
 
+    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         principal: Principal,

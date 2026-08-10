@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordR
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
@@ -40,6 +41,7 @@ class LandlordService(
     private val backLinkService: BackUrlStorageService,
     private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
@@ -223,10 +225,12 @@ class LandlordService(
     fun updateOrganisationLandlordCompaniesHouseDetails(
         isCompany: Boolean,
         companyNumber: String?,
+        governingBodyMembers: List<GoverningBodyMemberDataModel>,
     ) {
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
         landlordEntity.isCompany = isCompany
         landlordEntity.companyNumber = companyNumber
+        organisationGoverningBodyMemberService.replaceGoverningBodyMembers(landlordEntity, governingBodyMembers)
     }
 
     fun searchForLandlords(

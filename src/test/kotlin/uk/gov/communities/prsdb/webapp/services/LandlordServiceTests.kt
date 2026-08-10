@@ -82,6 +82,9 @@ class LandlordServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
+
     private lateinit var landlordService: LandlordService
 
     @BeforeEach
@@ -97,6 +100,7 @@ class LandlordServiceTests {
                 mockBackUrlStorageService,
                 updateConfirmationSender,
                 absoluteUrlProvider,
+                mockOrganisationGoverningBodyMemberService,
             )
     }
 
@@ -717,10 +721,15 @@ class LandlordServiceTests {
         orgLandlord.companyNumber = null
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
-        landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = true, companyNumber = "12345678")
+        landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+            isCompany = true,
+            companyNumber = "12345678",
+            governingBodyMembers = emptyList(),
+        )
 
         assertTrue(orgLandlord.isCompany)
         assertEquals("12345678", orgLandlord.companyNumber)
+        verify(mockOrganisationGoverningBodyMemberService).replaceGoverningBodyMembers(orgLandlord, emptyList())
     }
 
     @Test
@@ -730,7 +739,11 @@ class LandlordServiceTests {
         orgLandlord.companyNumber = "12345678"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
-        landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = false, companyNumber = null)
+        landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+            isCompany = false,
+            companyNumber = null,
+            governingBodyMembers = emptyList(),
+        )
 
         assertFalse(orgLandlord.isCompany)
         assertNull(orgLandlord.companyNumber)

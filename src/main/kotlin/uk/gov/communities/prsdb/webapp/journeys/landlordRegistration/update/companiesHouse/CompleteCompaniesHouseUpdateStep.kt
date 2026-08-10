@@ -9,14 +9,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCompanyFormModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.OrganisationGoverningBodyMemberService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class CompleteCompaniesHouseUpdateStepConfig(
     private val landlordService: LandlordService,
-    private val governingBodyMemberService: OrganisationGoverningBodyMemberService,
-    private val userToLandlordService: UserToLandlordService,
 ) : AbstractInternalStepConfig<Complete, UpdateCompaniesHouseJourneyState>() {
     override fun mode(state: UpdateCompaniesHouseJourneyState): Complete = Complete.COMPLETE
 
@@ -26,16 +22,16 @@ class CompleteCompaniesHouseUpdateStepConfig(
         if (isCompany) {
             val companyNumber =
                 state.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber)
-            landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = true, companyNumber = companyNumber)
-            governingBodyMemberService.replaceGoverningBodyMembers(
-                userToLandlordService.getCurrentOrganisationLandlordForUser(),
-                emptyList(),
+            landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+                isCompany = true,
+                companyNumber = companyNumber,
+                governingBodyMembers = emptyList(),
             )
         } else {
-            landlordService.updateOrganisationLandlordCompaniesHouseDetails(isCompany = false, companyNumber = null)
-            governingBodyMemberService.replaceGoverningBodyMembers(
-                userToLandlordService.getCurrentOrganisationLandlordForUser(),
-                state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
+            landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+                isCompany = false,
+                companyNumber = null,
+                governingBodyMembers = state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
             )
         }
     }
