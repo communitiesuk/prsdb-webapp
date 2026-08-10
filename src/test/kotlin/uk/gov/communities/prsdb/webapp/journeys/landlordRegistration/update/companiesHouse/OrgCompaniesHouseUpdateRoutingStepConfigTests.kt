@@ -18,17 +18,17 @@ class OrgCompaniesHouseUpdateRoutingStepConfigTests {
     @Nested
     inner class ModeTests {
         @Test
-        fun `mode returns UNCHANGED when previous is registered and new answer is yes`() {
+        fun `mode returns UNCHANGED_COMPANY when previous is registered and new answer is yes`() {
             val result = configuredConfig(true).mode(stateWith(YesOrNo.YES))
 
-            assertEquals(OrgCompaniesHouseUpdateRouteMode.UNCHANGED, result)
+            assertEquals(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY, result)
         }
 
         @Test
-        fun `mode returns UNCHANGED when previous is not registered and new answer is no`() {
+        fun `mode returns UNCHANGED_NON_COMPANY when previous is not registered and new answer is no`() {
             val result = configuredConfig(false).mode(stateWith(YesOrNo.NO))
 
-            assertEquals(OrgCompaniesHouseUpdateRouteMode.UNCHANGED, result)
+            assertEquals(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY, result)
         }
 
         @Test

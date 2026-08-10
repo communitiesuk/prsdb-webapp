@@ -48,6 +48,7 @@ class OrgGovBodyMembersTask(
     override fun makeSubJourney(state: OrgGovBodyMembersState) =
         subJourney(state) {
             step(journey.hasAnyGovBodyMembersStep) {
+                backDestination { dependencies.whoToProvideEmptyBackDestination() }
                 nextStep { mode ->
                     when (mode) {
                         AnyMembers.NO_MEMBERS -> journey.orgGovBodyWhoToProvideStep

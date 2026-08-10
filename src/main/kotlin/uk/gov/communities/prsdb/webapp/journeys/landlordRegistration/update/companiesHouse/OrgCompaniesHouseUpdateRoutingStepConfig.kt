@@ -9,7 +9,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 enum class OrgCompaniesHouseUpdateRouteMode {
-    UNCHANGED,
+    UNCHANGED_COMPANY,
+    UNCHANGED_NON_COMPANY,
     CHANGED_TO_COMPANY,
     CHANGED_TO_NON_COMPANY,
 }
@@ -40,7 +41,12 @@ class OrgCompaniesHouseUpdateRoutingStepConfig :
     override fun mode(state: OrgCompaniesHouseUpdateState): OrgCompaniesHouseUpdateRouteMode? {
         val currentIsRegisteredCompany = state.orgIsRegisteredCompanyStep.outcome?.let { it == YesOrNo.YES } ?: return null
         return when {
-            previousIsRegisteredCompany() == currentIsRegisteredCompany -> OrgCompaniesHouseUpdateRouteMode.UNCHANGED
+            previousIsRegisteredCompany() == currentIsRegisteredCompany ->
+                if (currentIsRegisteredCompany) {
+                    OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY
+                } else {
+                    OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY
+                }
             currentIsRegisteredCompany -> OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY
             else -> OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
         }
