@@ -84,7 +84,13 @@
     "subject": "You have updated your landlord details",
     "bodyLocation": "/emails/IndividualLandlordUpdateConfirmation.md"
   },
-
+  {
+    "test_id": "dba4cde2-c217-4c7e-a012-ffd4b86b8294",
+    "prod_id": "ef8e7b2e-6c71-4daa-93ae-7aa141d3ee29",
+    "enumName": "ORGANISATIONAL_LANDLORD_UPDATE_CONFIRMATION",
+    "subject": "Landlord details updated",
+    "bodyLocation": "/emails/OrganisationalLandlordUpdateConfirmation.md"
+  },
   {
     "test_id": "a3187b99-e677-47b8-8c70-94cbc0e21c20",
     "prod_id": "0db7f03b-2493-4fc9-99dd-23264b641363",

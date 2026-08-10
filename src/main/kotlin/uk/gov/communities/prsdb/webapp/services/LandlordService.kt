@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 import kotlin.String
@@ -38,7 +39,8 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
+    private val individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
+    private val orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
@@ -330,7 +332,7 @@ class LandlordService(
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
-                updateConfirmationSender.sendEmail(
+                individualUpdateConfirmationSender.sendEmail(
                     email,
                     IndividualLandlordUpdateConfirmation(
                         registrationNumber =
@@ -343,5 +345,18 @@ class LandlordService(
                 )
             }
         }
+    }
+
+    private fun sendOrgUpdateConfirmationEmail(
+        emailAddress: String,
+        updatedDetail: String,
+    ) {
+        orgUpdateConfirmationSender.sendEmail(
+            emailAddress,
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                updatedDetail = "The $updatedDetail.",
+            ),
+        )
     }
 }

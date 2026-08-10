@@ -42,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
@@ -77,7 +78,10 @@ class LandlordServiceTests {
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
     @Mock
-    private lateinit var updateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>
+    private lateinit var individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>
+
+    @Mock
+    private lateinit var orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>
 
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -95,7 +99,8 @@ class LandlordServiceTests {
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
-                updateConfirmationSender,
+                individualUpdateConfirmationSender,
+                orgUpdateConfirmationSender,
                 absoluteUrlProvider,
             )
     }
@@ -584,13 +589,13 @@ class LandlordServiceTests {
                 expectedDetail,
             )
 
-        verify(updateConfirmationSender).sendEmail(
+        verify(individualUpdateConfirmationSender).sendEmail(
             eq(originalEmailAddress),
             eq(expectedEmailModel),
         )
 
         updateModel.email?.let {
-            verify(updateConfirmationSender).sendEmail(
+            verify(individualUpdateConfirmationSender).sendEmail(
                 eq(it),
                 eq(expectedEmailModel),
             )
@@ -619,8 +624,8 @@ class LandlordServiceTests {
 
         // Assert
         assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
-        verify(updateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
-        verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
+        verify(individualUpdateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
+        verify(individualUpdateConfirmationSender, times(1)).sendEmail(any(), any())
     }
 
     @Test
