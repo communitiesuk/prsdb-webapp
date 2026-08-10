@@ -22,45 +22,33 @@ class CompleteOrganisationTypeUpdateStepConfig(
         val selectedOrgTypes = state.orgTypeStep.formModel.getSelectedOrgTypes()
         val addingTrust = state.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST
 
-        landlordService.updateOrganisationLandlordType(
-            isCompany = OrgType.COMPANY in selectedOrgTypes,
-            isCharity = OrgType.CHARITY in selectedOrgTypes,
-            isTrust = OrgType.TRUST in selectedOrgTypes,
-            leadTrusteeName =
-                if (addingTrust) {
+        if (addingTrust) {
+            landlordService.updateOrganisationLandlordTypeAndLeadTrustee(
+                isCompany = OrgType.COMPANY in selectedOrgTypes,
+                isCharity = OrgType.CHARITY in selectedOrgTypes,
+                isTrust = OrgType.TRUST in selectedOrgTypes,
+                leadTrusteeName =
                     state.leadTrusteeTask.leadTrusteeNameStep.formModel
-                        .notNullValue(LeadTrusteeNameFormModel::name)
-                } else {
-                    null
-                },
-            leadTrusteeDateOfBirth =
-                if (addingTrust) {
+                        .notNullValue(LeadTrusteeNameFormModel::name),
+                leadTrusteeDateOfBirth =
                     state.leadTrusteeTask.leadTrusteeDobStep.formModel
-                        .toLocalDateOrNull()
-                } else {
-                    null
-                },
-            leadTrusteeEmail =
-                if (addingTrust) {
+                        .toLocalDateOrNull(),
+                leadTrusteeEmail =
                     state.leadTrusteeTask.leadTrusteeEmailStep.formModel
-                        .notNullValue(LeadTrusteeEmailFormModel::emailAddress)
-                } else {
-                    null
-                },
-            leadTrusteePhone =
-                if (addingTrust) {
+                        .notNullValue(LeadTrusteeEmailFormModel::emailAddress),
+                leadTrusteePhone =
                     state.leadTrusteeTask.leadTrusteePhoneStep.formModel
-                        .notNullValue(LeadTrusteePhoneFormModel::phoneNumber)
-                } else {
-                    null
-                },
-            leadTrusteeAddress =
-                if (addingTrust) {
-                    state.leadTrusteeTask.trusteeAddressTask.getAddress()
-                } else {
-                    null
-                },
-        )
+                        .notNullValue(LeadTrusteePhoneFormModel::phoneNumber),
+                leadTrusteeAddress =
+                    state.leadTrusteeTask.trusteeAddressTask.getAddress(),
+            )
+        } else {
+            landlordService.updateOrganisationLandlordType(
+                isCompany = OrgType.COMPANY in selectedOrgTypes,
+                isCharity = OrgType.CHARITY in selectedOrgTypes,
+                isTrust = OrgType.TRUST in selectedOrgTypes,
+            )
+        }
     }
 
     override fun resolveNextDestination(
