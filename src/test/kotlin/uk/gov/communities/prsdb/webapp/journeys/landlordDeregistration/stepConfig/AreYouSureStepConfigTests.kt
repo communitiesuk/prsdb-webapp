@@ -78,7 +78,7 @@ class AreYouSureStepConfigTests {
 
     private fun setupStepConfig(): AreYouSureStepConfig {
         val stepConfig = AreYouSureStepConfig()
-        stepConfig.routeSegment = AreYouSureStep.ROUTE_SEGMENT
+        stepConfig.urlPath = AreYouSureStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

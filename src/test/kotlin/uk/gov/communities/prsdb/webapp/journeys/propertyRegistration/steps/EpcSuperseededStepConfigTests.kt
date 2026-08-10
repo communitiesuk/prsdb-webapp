@@ -24,7 +24,7 @@ class EpcSuperseededStepConfigTests {
 
     private fun setupStepConfig(): EpcSuperseededStepConfig {
         val stepConfig = EpcSuperseededStepConfig(mockEpcCertificateUrlProvider)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

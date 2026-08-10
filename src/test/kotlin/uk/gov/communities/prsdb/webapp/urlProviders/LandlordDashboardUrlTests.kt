@@ -117,6 +117,7 @@ class LandlordDashboardUrlTests(
                 mock(),
                 mock(),
                 mockEmailNotificationService,
+                mock(),
                 absoluteUrlProvider,
             )
 
@@ -176,6 +177,7 @@ class LandlordDashboardUrlTests(
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),

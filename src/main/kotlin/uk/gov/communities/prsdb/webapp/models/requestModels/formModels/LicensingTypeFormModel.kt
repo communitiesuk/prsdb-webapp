@@ -1,14 +1,29 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import jakarta.validation.constraints.NotNull
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
+import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class LicensingTypeFormModel : FormModel {
-    @NotNull(message = "forms.licensingType.radios.error.missing")
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "forms.licensingType.radios.error.missing",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "licensingTypeIsValidForAction",
+            ),
+        ],
+    )
     var licensingType: LicensingType? = null
+
+    var action: String? = null
+
+    fun licensingTypeIsValidForAction(): Boolean = action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME || licensingType != null
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): LicensingTypeFormModel =

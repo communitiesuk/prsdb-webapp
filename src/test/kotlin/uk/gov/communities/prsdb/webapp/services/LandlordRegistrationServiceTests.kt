@@ -19,13 +19,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordRegistrationConfirmationEmail
 import java.net.URI
 import java.time.LocalDate
 
@@ -38,13 +39,17 @@ class LandlordRegistrationServiceTests {
     private lateinit var mockPrsdbUserService: PrsdbUserService
 
     @Mock
-    private lateinit var mockOrganisationLandlordUserService: OrganisationLandlordUserService
+    private lateinit var mockOrganisationalLandlordUserService: OrganisationalLandlordUserService
 
     @Mock
     private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     @Mock
     private lateinit var mockRegistrationConfirmationSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @Mock
+    private lateinit var mockOrgRegistrationConfirmationSender:
+        EmailNotificationService<OrganisationalLandlordRegistrationConfirmationEmail>
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -62,9 +67,10 @@ class LandlordRegistrationServiceTests {
             LandlordRegistrationService(
                 mockLandlordService,
                 mockPrsdbUserService,
-                mockOrganisationLandlordUserService,
+                mockOrganisationalLandlordUserService,
                 mockOrganisationGoverningBodyMemberService,
                 mockRegistrationConfirmationSender,
+                mockOrgRegistrationConfirmationSender,
                 mockAbsoluteUrlProvider,
             )
         whenever(mockPrsdbUserService.findOrCreatePrsdbUser("user-123")).thenReturn(baseUser)
@@ -197,7 +203,16 @@ class LandlordRegistrationServiceTests {
         fun stubIndividualLandlord() {
             whenever(
                 mockLandlordService.createIndividualLandlord(
-                    any(), any(), any(), any(), any(), any(), any(), any(), anyOrNull(), anyOrNull(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
                 ),
             ).thenReturn(individualLandlord)
             whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
@@ -261,6 +276,36 @@ class LandlordRegistrationServiceTests {
 
     @Nested
     inner class OrganisationLandlordRegistration {
+        private val orgRegistrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 7654321)
+        private val orgDashboardUri = URI("http://example.com/landlord-dashboard")
+
+        private val organisationalLandlord =
+            OrganisationalLandlord(
+                registrationNumber = orgRegistrationNumber,
+                name = "Test Org",
+                address = Address(AddressDataModel(singleLineAddress = "1 Org St")),
+                email = "org@test.com",
+                phoneNumber = "020 1234 5678",
+                registrantName = "Alice",
+                registrantDateOfBirth = LocalDate.of(1990, 1, 1),
+                registrantEmail = "alice@test.com",
+                registrantPhoneNumber = "072",
+                isCompany = false,
+                isCharity = false,
+                isTrust = false,
+                companyNumber = null,
+                charityRegisteredWith = null,
+                charityNumber = null,
+                leadTrusteeName = null,
+                leadTrusteeDateOfBirth = null,
+                leadTrusteeEmail = null,
+                leadTrusteePhone = null,
+                leadTrusteeAddress = null,
+                mainContactName = "Bob",
+                mainContactEmail = "bob@test.com",
+                mainContactPhone = "071",
+            )
+
         @BeforeEach
         fun stubOrganisationLandlord() {
             whenever(
@@ -288,7 +333,8 @@ class LandlordRegistrationServiceTests {
                     any(),
                     any(),
                 ),
-            ).thenReturn(OrganisationLandlord())
+            ).thenReturn(organisationalLandlord)
+            whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(orgDashboardUri)
         }
 
         @Test
@@ -447,10 +493,32 @@ class LandlordRegistrationServiceTests {
         }
 
         @Test
-        fun `registerOrganisationLandlord creates an OrganisationLandlordUser`() {
+        fun `registerOrganisationLandlord creates an OrganisationalLandlordUser`() {
             registerOrganisationLandlord()
 
-            verify(mockOrganisationLandlordUserService).createOrganisationLandlordUser(any(), eq(baseUser))
+            verify(mockOrganisationalLandlordUserService).createOrganisationalLandlordUser(
+                any(),
+                eq(baseUser),
+                eq("Alice"),
+                eq("alice@test.com"),
+            )
+        }
+
+        @Test
+        fun `registerOrganisationLandlord sends a registration confirmation email to the registrant email`() {
+            registerOrganisationLandlord()
+
+            verify(mockOrgRegistrationConfirmationSender).sendEmail(
+                eq("alice@test.com"),
+                eq(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
+                        registrantName = "Alice",
+                        organisationName = "Test Org",
+                        lrn = RegistrationNumberDataModel.fromRegistrationNumber(orgRegistrationNumber).toString(),
+                        prsdURL = orgDashboardUri.toString(),
+                    ),
+                ),
+            )
         }
     }
 }

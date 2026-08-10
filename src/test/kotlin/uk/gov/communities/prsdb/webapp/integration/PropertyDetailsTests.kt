@@ -117,7 +117,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(
+                    detailsPage.notificationBanner,
+                ).containsText("You must finish adding this property’s compliance certificates")
             }
 
             @Test
@@ -135,7 +137,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
+                assertThat(
+                    detailsPage.notificationBanner,
+                ).containsText("You must finish adding this property’s compliance certificates")
             }
 
             @Test
@@ -227,6 +231,21 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val thirdCard = detailsPage.landlordSummaryCards[2]
                 assertEquals("Tobias Evans", thirdCard.title.getText())
                 assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
+            }
+
+            @Test
+            fun `joint property with org landlord shows org landlord card with LRN and email`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(2, detailsPage.landlordSummaryCards.size)
+                val currentUserCard = detailsPage.landlordSummaryCards[0]
+                assertEquals("Alexander Smith (you)", currentUserCard.title.getText())
+
+                val orgCard = detailsPage.landlordSummaryCards[1]
+                assertEquals("Local Organisation Landlord", orgCard.title.getText())
+                assertThat(orgCard.summaryList.emailAddressRow.value).containsText("local-org-landlord@example.com")
+                assertThat(orgCard.summaryList.registrationNumberRow.value).not().isEmpty()
             }
         }
     }
@@ -322,27 +341,30 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Nested
         inner class NotificationBanner {
             @Test
-            fun `is not visible when certs are missing`(page: Page) {
+            fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("This property is missing compliance certificates")
             }
 
             @Test
-            fun `is not visible when certs are expired`(page: Page) {
+            fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
             }
 
             @Test
-            fun `is not visible when epc has a low rating and mees exemption is missing`(page: Page) {
+            fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("This property is missing compliance certificates")
             }
 
             @Test
@@ -465,8 +487,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.ownershipTypeRow.value).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).isVisible()
 
-            assertThat(detailsPage.sectionHeading("Licensing information")).not().isVisible()
-            assertThat(detailsPage.sectionHeading("Tenancy and rental information")).not().isVisible()
+            assertThat(detailsPage.sectionHeading("Licensing information")).isHidden()
+            assertThat(detailsPage.sectionHeading("Tenancy and rental information")).isHidden()
         }
 
         @Test
@@ -490,14 +512,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             assertThat(detailsPage.sectionHeading("Occupied by tenants")).isVisible()
             assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-            assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+            assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
         }
 
         @Nested
         inner class OccupiedWithLicensingAndTenancySkipped {
             // Property 39: occupied (0 tenants, 0 households), no licence, no tenancy details.
-            // last_occupied_date is seeded to 7 days ago, so the provide-later deadline is
-            // (7 days ago + PROVIDE_LATER_DEADLINE_DAYS) days from today.
+            // created_date and last_occupied_date are both seeded to 7 days ago (occupied at registration),
+            // so the provide-later deadline is (7 days ago + PROVIDE_LATER_DEADLINE_DAYS) days from today.
             private val expectedDeadline =
                 LocalDate
                     .now()
@@ -530,6 +552,35 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Nested
+        inner class OccupiedAfterRegistrationWithLicensingAndTenancySkipped {
+            // Property 43: occupied with licensing and tenancy skipped, but created_date (05/02/25) is earlier
+            // than last_occupied_date (7 days ago), i.e. it became occupied after registration. Such properties
+            // show a provide-later prompt with no deadline date.
+            @Test
+            fun `landlord view shows no-deadline provide later rows for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
+
+                assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.licensingRow.value,
+                ).containsText("Provide this later (within 28 days of the property being occupied)")
+                assertThat(
+                    detailsPage.propertyDetailsSummaryList.tenancyRow.value,
+                ).containsText("Provide this later (within 28 days of the property being occupied)")
+            }
+
+            @Test
+            fun `local council view shows not provided paragraphs for both licensing and tenancy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
+
+                assertThat(
+                    detailsPage.bodyParagraph("These details have not been provided yet"),
+                ).hasCount(2)
+            }
+        }
+
+        @Nested
         inner class UnoccupiedWithLicensingSkipped {
             // Property 9: unoccupied (0 tenants), no licence.
             @Test
@@ -539,14 +590,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
                 assertThat(detailsPage.propertyDetailsSummaryList.licensingRow.value)
                     .containsText("Provide this later (within 28 days of the property being occupied)")
-                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
             }
 
             @Test
             fun `local council view shows a not provided licensing paragraph and hides the tenancy section`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(9)
 
-                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(1)
@@ -587,7 +638,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
                 assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
             }
 
             @Test
@@ -595,10 +646,120 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(7)
 
                 assertThat(detailsPage.propertyDetailsSummaryList.licensingTypeRow.value).isVisible()
-                assertThat(detailsPage.sectionHeading("Tenancy details")).not().isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isHidden()
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
+            }
+        }
+
+        @Nested
+        inner class ProvideLaterNotificationBanner {
+            @Test
+            fun `landlord view shows the tenancy-only provide-later banner`(page: Page) {
+                // Property 41: occupied, licence present, tenancy skipped, fully compliant.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(41)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("You must finish adding this property’s tenancy details. ")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("licensing")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+            }
+
+            @Test
+            fun `local council view shows the tenancy-only provide-later banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(41)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing tenancy details")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("licensing")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+            }
+
+            @Test
+            fun `landlord view shows the licensing-only provide-later banner`(page: Page) {
+                // Property 42: occupied, no licence, tenancy provided, fully compliant.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(42)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("You must finish adding this property’s licensing details")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("tenancy")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+            }
+
+            @Test
+            fun `local council view shows the licensing-only provide-later banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(42)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading).containsText("This property is missing licensing details")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("tenancy")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+            }
+
+            @Test
+            fun `landlord view shows the both provide-later banner with links to licensing and tenancy`(page: Page) {
+                // Property 43: occupied, no licence, tenancy skipped, fully compliant.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(43)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("You must finish adding this property’s licensing details and tenancy details")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+                assertThat(
+                    page.locator(".govuk-notification-banner__heading a.govuk-notification-banner__link"),
+                ).hasCount(2)
+            }
+
+            @Test
+            fun `local council view shows the both provide-later banner with a single link`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(43)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("This property is missing licensing and tenancy details")
+                assertThat(detailsPage.notificationBanner.content.heading).not().containsText("certificate")
+                assertThat(
+                    page.locator(".govuk-notification-banner__heading a.govuk-notification-banner__link"),
+                ).hasCount(1)
+            }
+
+            @Test
+            fun `landlord view shows the combined provide-later and compliance banner`(page: Page) {
+                // Property 39: occupied, no licence, no tenancy details, has a compliance issue.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("You must finish providing property and tenancy details and valid compliance certificates")
+            }
+
+            @Test
+            fun `local council view shows the combined provide-later and compliance banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
+
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+            }
+
+            @Test
+            fun `no provide-later banner is shown for an unoccupied property with licensing skipped`(page: Page) {
+                // Property 9: unoccupied, no licence.
+                navigator.goToPropertyDetailsLandlordView(9)
+
+                assertThat(page.getByText("You must finish adding")).isHidden()
+                assertThat(page.getByText("You must finish providing")).isHidden()
+            }
+
+            @Test
+            fun `no notification banner is shown when all fields are completed and the property is compliant`(page: Page) {
+                // Property 40: occupied, licence present, full tenancy details, fully compliant.
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
+
+                assertThat(detailsPage.notificationBanner).isHidden()
             }
         }
     }
@@ -643,5 +804,32 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.expiredInvitationsDetails.locator("summary").click()
             assertThat(detailsPage.expiredInvitationsDetails.locator(".prsdb-link-group-list")).isHidden()
         }
+    }
+}
+
+@WithOrgLandlordProfile
+class PropertyDetailsOrgLandlordTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @Test
+    fun `property solely owned by org landlord shows your organisation in card title`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(47)
+        detailsPage.tabs.goToLandlordDetails()
+
+        assertEquals(1, detailsPage.landlordSummaryCards.size)
+        val orgCard = detailsPage.landlordSummaryCards[0]
+        assertEquals("Local Organisation Landlord (your organisation)", orgCard.title.getText())
+    }
+
+    @Test
+    fun `joint property shows your organisation for org landlord and not for other landlord`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(48)
+        detailsPage.tabs.goToLandlordDetails()
+
+        assertEquals(2, detailsPage.landlordSummaryCards.size)
+
+        val orgCard = detailsPage.landlordSummaryCards[0]
+        assertEquals("Local Organisation Landlord (your organisation)", orgCard.title.getText())
+
+        val otherCard = detailsPage.landlordSummaryCards[1]
+        assertEquals("Alexander Smith", otherCard.title.getText())
     }
 }

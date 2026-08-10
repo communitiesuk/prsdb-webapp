@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -71,13 +71,13 @@ class UpdateTenancyDetailsJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
-            duplicableTask(journey.householdsAndTenantsTask) {
+            task(journey.householdsAndTenantsTask) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
             }
-            duplicableTask(journey.rentIncludesBillsTask) {
+            task(journey.rentIncludesBillsTask) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
             }
@@ -86,7 +86,7 @@ class UpdateTenancyDetailsJourneyFactory(
                 parents { journey.rentIncludesBillsTask.isComplete() }
                 nextStep { journey.rentFrequencyAndAmountTask.firstStep }
             }
-            duplicableTask(journey.rentFrequencyAndAmountTask) {
+            task(journey.rentFrequencyAndAmountTask) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.cyaStep }
             }
@@ -114,11 +114,11 @@ class UpdateTenancyDetailsJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.householdsAndTenantsTask)
+                    checkAnswerTask(journey.householdsAndTenantsTask)
                 }
 
                 RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentIncludesBillsTask)
+                    checkAnswerTask(journey.rentIncludesBillsTask)
                 }
 
                 BillsIncludedStep.ROUTE_SEGMENT -> {
@@ -132,7 +132,7 @@ class UpdateTenancyDetailsJourneyFactory(
                 }
 
                 RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
-                    duplicableCheckAnswerTask(journey.rentFrequencyAndAmountTask)
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
                 else -> {

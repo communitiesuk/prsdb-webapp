@@ -126,7 +126,7 @@ class UpdateOccupancyCyaConfigTests {
                 messageSource = mockMessageSource,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
-        stepConfig.routeSegment = UpdateOccupancyCyaStep.ROUTE_SEGMENT
+        stepConfig.urlPath = UpdateOccupancyCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
         whenever(mockState.propertyId).thenReturn(propertyId)

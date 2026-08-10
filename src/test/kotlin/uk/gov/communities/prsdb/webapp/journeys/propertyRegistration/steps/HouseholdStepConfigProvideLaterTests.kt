@@ -36,7 +36,7 @@ class HouseholdStepConfigProvideLaterTests {
 
     private fun setupStepConfig(): HouseholdStepConfig {
         val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

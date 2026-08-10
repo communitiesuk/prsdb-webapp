@@ -12,7 +12,7 @@ abstract class LandlordDetailsBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val tabs = LandlordDetailsTabs(page)
+    open val tabs: LandlordDetailsTabs = LandlordDetailsTabs(page)
     val backLink = BackLink.default(page)
     val personalDetailsSummaryList = LandlordPersonalDetailsSummaryList(page)
     val registeredPropertiesTable = Table(page)
@@ -21,7 +21,7 @@ abstract class LandlordDetailsBasePage(
 
     fun getPropertyAddressLink(address: String) = Link.byText(page, address)
 
-    class LandlordDetailsTabs(
+    open class LandlordDetailsTabs(
         page: Page,
     ) : Tabs(page) {
         fun goToRegisteredProperties() {
@@ -37,5 +37,6 @@ abstract class LandlordDetailsBasePage(
         val phoneNumberRow = getRow("Telephone number")
         val addressRow = getRow("Contact address")
         val dateOfBirthRow = getRow("Date of birth")
+        val landlordTypeRow = getRow("Landlord type")
     }
 }

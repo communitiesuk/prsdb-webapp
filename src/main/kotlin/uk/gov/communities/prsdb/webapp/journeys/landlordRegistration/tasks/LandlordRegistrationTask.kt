@@ -7,11 +7,10 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -21,10 +20,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeDestination
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
@@ -42,10 +42,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class LandlordRegistrationTask(
@@ -56,12 +57,13 @@ class LandlordRegistrationTask(
     override val individualLandlordLocationTask: IndividualLandlordLocationTask,
     override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     override val landlordTypeStep: LandlordTypeStep,
+    override val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep,
     override val privacyNoticeStep: PrivacyNoticeStep,
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
-) : DuplicableTask<LandlordRegistrationState>(journeyStateService),
+) : TaskWithoutDependencies<LandlordRegistrationState>(journeyStateService),
     LandlordRegistrationState {
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
@@ -83,7 +85,7 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            duplicableTask(journey.identityTask) {
+            task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.emailStep }
             }
@@ -97,7 +99,7 @@ class LandlordRegistrationTask(
                 parents { journey.emailStep.isComplete() }
                 nextStep { journey.individualLandlordLocationTask.firstStep }
             }
-            duplicableTask(journey.individualLandlordLocationTask) {
+            task(journey.individualLandlordLocationTask) {
                 parents { journey.phoneNumberStep.isComplete() }
                 nextStep { journey.cyaStep }
             }
@@ -117,7 +119,7 @@ class LandlordRegistrationTask(
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                 nextStep { journey.identityTask.firstStep }
             }
-            duplicableTask(journey.identityTask) {
+            task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.emailStep }
             }
@@ -142,11 +144,11 @@ class LandlordRegistrationTask(
                     }
                 }
             }
-            duplicableTask(journey.orgLandlordRegistrationTask) {
+            task(journey.orgLandlordRegistrationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { journey.cyaStep }
             }
-            duplicableTask(journey.individualLandlordLocationTask) {
+            task(journey.individualLandlordLocationTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { journey.cyaStep }
             }
@@ -207,20 +209,34 @@ class LandlordRegistrationTask(
                     }
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
+                        checkAnswerTask(journey.individualLandlordLocationTask.addressTask, null)
                     }
 
                     LandlordTypeStep.ROUTE_SEGMENT -> {
                         step(journey.landlordTypeStep) {
                             initialStep()
                             routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                            nextDestination { mode -> destinationForSelectedLandlordType(journey, mode) }
+                            nextStep { journey.landlordTypeChangeRedirectStep }
                         }
-                        duplicableTask(journey.individualLandlordLocationTask) {
+                        step(journey.landlordTypeChangeRedirectStep) {
+                            parents {
+                                journey.landlordTypeStep.isComplete()
+                            }
+                            nextDestination { destination ->
+                                when (destination) {
+                                    LandlordTypeChangeDestination.CHECK_ANSWERS -> Destination(journey.finishCyaStep)
+                                    LandlordTypeChangeDestination.INDIVIDUAL_TASK ->
+                                        Destination(journey.individualLandlordLocationTask.firstStep)
+                                    LandlordTypeChangeDestination.ORGANISATION_TASK ->
+                                        Destination(journey.orgLandlordRegistrationTask.firstStep)
+                                }
+                            }
+                        }
+                        task(journey.individualLandlordLocationTask) {
                             parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                             nextStep { journey.finishCyaStep }
                         }
-                        duplicableTask(journey.orgLandlordRegistrationTask) {
+                        task(journey.orgLandlordRegistrationTask) {
                             parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                             nextStep { journey.finishCyaStep }
                         }
@@ -230,8 +246,11 @@ class LandlordRegistrationTask(
                         checkAnswerStep(journey.orgLandlordRegistrationTask.orgNameStep, OrgNameStep.ROUTE_SEGMENT)
                     }
 
-                    OrgAddressStep.ROUTE_SEGMENT -> {
-                        checkAnswerStep(journey.orgLandlordRegistrationTask.orgAddressStep, OrgAddressStep.ROUTE_SEGMENT)
+                    "${OrgAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
+                        checkAnswerTask(
+                            journey.orgLandlordRegistrationTask.orgAddressTask,
+                            OrgAddressTask.ROUTE_SEGMENT,
+                        )
                     }
 
                     OrgEmailStep.ROUTE_SEGMENT -> {
@@ -249,10 +268,16 @@ class LandlordRegistrationTask(
                         }
                     }
 
-                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
-                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
-                    -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.charityTask, null)
+                    OrgIsRegisteredCharityStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.charityTask)
+                    }
+
+                    OrgCharityRegisteredWithStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.charityTask) {
+                            configureStep(journey.orgLandlordRegistrationTask.charityTask.orgCharityRegisteredWithStep) {
+                                backDestination { journey.returnToCyaPageDestination }
+                            }
+                        }
                     }
 
                     OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT,
@@ -296,11 +321,15 @@ class LandlordRegistrationTask(
                     }
 
                     LeadTrusteeNameStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.leadTrusteeTask, null)
                     }
 
                     OrgGovBodyMemberListStep.ROUTE_SEGMENT -> {
-                        duplicableCheckAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask, null)
+                        checkAnswerTask(journey.orgLandlordRegistrationTask.orgGovBodyTask) {
+                            configureStep(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep) {
+                                backDestination { journey.returnToCyaPageDestination }
+                            }
+                        }
                     }
 
                     OrgMainContactStep.ROUTE_SEGMENT -> {
@@ -312,21 +341,5 @@ class LandlordRegistrationTask(
                     nextDestination { Destination.Nowhere() }
                 }
             }
-
-        private fun destinationForSelectedLandlordType(
-            journey: LandlordRegistrationState,
-            landlordType: LandlordTypeMode,
-        ): Destination {
-            val selectedTask =
-                when (landlordType) {
-                    LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask
-                    LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask
-                }
-            return if (selectedTask.exitStep.outcome == SubjourneyComplete.COMPLETE) {
-                Destination(journey.finishCyaStep)
-            } else {
-                Destination(selectedTask.firstStep)
-            }
-        }
     }
 }

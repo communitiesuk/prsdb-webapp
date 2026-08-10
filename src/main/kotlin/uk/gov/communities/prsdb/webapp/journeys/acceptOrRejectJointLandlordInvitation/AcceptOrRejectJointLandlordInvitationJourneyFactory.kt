@@ -80,7 +80,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                     }
                 }
             }
-            duplicableTask(journey.landlordRegistrationTask) {
+            task(journey.landlordRegistrationTask) {
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.markLandlordRegistrationCompleteStep }
             }

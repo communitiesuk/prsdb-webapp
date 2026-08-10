@@ -53,6 +53,9 @@ abstract class ComplianceViewModelFactoryBase(
         }
 
     private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
+        // TODO PDJB-1479: Only show the dated deadline for properties that were occupied at registration. Properties
+        //  that became occupied after registration should show a provide-later message without a date, mirroring the
+        //  tenancy/licensing details on the property record (see PropertyDetailsViewModel).
         val deadline =
             lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                 ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")

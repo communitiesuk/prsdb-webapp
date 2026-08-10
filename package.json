@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "rollup --config",
-    "test": "node --test src/test/js/**/*.test.js"
+    "test": "node --test src/test/js/**/*.test.js",
+    "test-shards-finished": "echo All test shards have finished"
   },
   "babel": {
     "plugins": [

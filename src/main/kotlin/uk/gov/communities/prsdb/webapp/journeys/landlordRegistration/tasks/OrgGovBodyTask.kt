@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
@@ -18,6 +18,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
@@ -36,7 +39,7 @@ class OrgGovBodyTask(
     override val saveGovBodyMemberStep: SaveGovBodyMemberStep,
     override val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep,
     override val removeGovBodyMemberStep: RemoveGovBodyMemberStep,
-) : DuplicableTask<OrgGovBodyState>(journeyStateService),
+) : TaskWithoutDependencies<OrgGovBodyState>(journeyStateService),
     OrgGovBodyState {
     override val taskState get() = this
 
@@ -108,18 +111,50 @@ class OrgGovBodyTask(
                 parents { journey.orgGovBodyMemberNameStep.isComplete() }
                 nextStep { journey.govBodyMemberAddressTask.firstStep }
             }
-            duplicableTask(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
+            task(journey.govBodyMemberAddressTask, GovBodyMemberAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgGovBodyMemberDobStep.isComplete() }
                 nextStep { journey.saveGovBodyMemberStep }
+                configureStep(journey.govBodyMemberAddressTask.lookupAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember = journey.editingGovBodyMember
+                        if (editingMember != null) {
+                            mapOf(
+                                LookupAddressStepConfig.PREFILL_POSTCODE to editingMember.addressSearchPostcode,
+                                LookupAddressStepConfig.PREFILL_HOUSE_NAME_OR_NUMBER to editingMember.addressSearchHouseNameOrNumber,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember = journey.editingGovBodyMember
+                        mapOf(
+                            SelectAddressStepConfig.PREFILL_SELECTED_ADDRESS to editingMember?.selectedAddress,
+                        )
+                    }
+                }
+                configureStep(journey.govBodyMemberAddressTask.manualAddressStep) {
+                    withAdditionalContentProperties {
+                        val editingMember = journey.editingGovBodyMember
+                        if (editingMember?.manualAddressLineOne != null) {
+                            mapOf(
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_ONE to editingMember.manualAddressLineOne,
+                                ManualAddressStepConfig.PREFILL_ADDRESS_LINE_TWO to editingMember.manualAddressLineTwo,
+                                ManualAddressStepConfig.PREFILL_TOWN_OR_CITY to editingMember.manualTownOrCity,
+                                ManualAddressStepConfig.PREFILL_COUNTY to editingMember.manualCounty,
+                                ManualAddressStepConfig.PREFILL_POSTCODE to editingMember.manualPostcode,
+                            )
+                        } else {
+                            emptyMap()
+                        }
+                    }
+                }
             }
             step(journey.saveGovBodyMemberStep) {
                 parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
-                configureStep(journey.govBodyMemberAddressTask.selectAddressStep) {
-                    withAdditionalContentProperties {
-                        mapOf("fieldSetHeading" to "forms.selectAddress.govBodyMemberRegistration.fieldSetHeading")
-                    }
-                }
             }
             step(journey.orgGovBodyMemberListStep) {
                 routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)

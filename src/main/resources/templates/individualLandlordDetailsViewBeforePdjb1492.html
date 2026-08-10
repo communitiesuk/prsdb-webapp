@@ -1,0 +1,33 @@
+<!--/*@thymesVar id="registerPropertyUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{landlordDetails.title},~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
+
+        <div class="moj-page-header-actions">
+            <div class="moj-page-header-actions__title">
+                <h1 class="govuk-heading-l" th:text="${landlord.name}">landlord.name</h1>
+            </div>
+
+            <div class="moj-page-header-actions__actions">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteLandlordRecordUrl}, #{landlordDetails.removeRecord})}"></a>
+            </div>
+        </div>
+
+        <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
+            <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('personal-details', #{landlordDetails.personalDetails.heading})}"></li>
+                <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem(${registeredPropertiesTabId}, #{landlordDetails.registeredProperties.heading})}"></li>
+            </ul>
+
+            <div id="personal-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('personal-details', ~{::#personal-details-panel/content()})}">
+                <dl th:replace="~{fragments/summaryList :: summaryList(${landlord.personalDetails})}" ></dl>
+            </div>
+
+            <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
+                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+            </div>
+        </div>
+    </main>
+</html>

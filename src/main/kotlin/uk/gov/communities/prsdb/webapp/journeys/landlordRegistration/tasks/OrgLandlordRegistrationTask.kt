@@ -3,13 +3,12 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
@@ -18,12 +17,13 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask(
     journeyStateService: JourneyStateService,
     override val orgNameStep: OrgNameStep,
-    override val orgAddressStep: OrgAddressStep,
+    override val orgAddressTask: OrgAddressTask,
     override val orgEmailStep: OrgEmailStep,
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
@@ -34,7 +34,7 @@ class OrgLandlordRegistrationTask(
     override val orgMainContactStep: OrgMainContactStep,
     // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
     override val updateDetailsTodoStep: UpdateDetailsTodoStep,
-) : DuplicableTask<LandlordRegistrationOrgLandlordState>(journeyStateService),
+) : TaskWithoutDependencies<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
 
@@ -42,16 +42,15 @@ class OrgLandlordRegistrationTask(
         subJourney(state) {
             step(journey.orgNameStep) {
                 routeSegment(OrgNameStep.ROUTE_SEGMENT)
-                nextStep { journey.orgAddressStep }
+                nextStep { journey.orgAddressTask.firstStep }
             }
-            step(journey.orgAddressStep) {
-                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+            task(journey.orgAddressTask, OrgAddressTask.ROUTE_SEGMENT) {
                 parents { journey.orgNameStep.isComplete() }
                 nextStep { journey.orgEmailStep }
             }
             step(journey.orgEmailStep) {
                 routeSegment(OrgEmailStep.ROUTE_SEGMENT)
-                parents { journey.orgAddressStep.isComplete() }
+                parents { journey.orgAddressTask.isComplete() }
                 nextStep { journey.orgPhoneNumberStep }
             }
             step(journey.orgPhoneNumberStep) {
@@ -69,11 +68,11 @@ class OrgLandlordRegistrationTask(
                     }
                 }
             }
-            duplicableTask(journey.leadTrusteeTask) {
+            task(journey.leadTrusteeTask) {
                 parents { journey.orgTypeStep.hasOutcome(OrgTypeMode.INCLUDES_TRUST) }
                 nextStep { journey.charityTask.firstStep }
             }
-            duplicableTask(journey.charityTask) {
+            task(journey.charityTask) {
                 parents {
                     OrParents(
                         journey.leadTrusteeTask.isComplete(),
@@ -82,7 +81,7 @@ class OrgLandlordRegistrationTask(
                 }
                 nextStep { journey.companiesHouseTask.firstStep }
             }
-            duplicableTask(journey.companiesHouseTask) {
+            task(journey.companiesHouseTask) {
                 parents { journey.charityTask.isComplete() }
                 nextDestination {
                     if (journey.companiesHouseTask.orgIsRegisteredCompanyStep.outcome == YesOrNo.NO) {
@@ -92,7 +91,7 @@ class OrgLandlordRegistrationTask(
                     }
                 }
             }
-            duplicableTask(journey.orgGovBodyTask) {
+            task(journey.orgGovBodyTask) {
                 parents { journey.companiesHouseTask.orgIsRegisteredCompanyStep.hasOutcome(YesOrNo.NO) }
                 nextStep { journey.orgMainContactStep }
             }

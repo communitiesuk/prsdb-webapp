@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -14,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.GovBodyMemberAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
@@ -49,7 +50,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrust
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
@@ -108,13 +108,44 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgAddress(): LandlordStateSessionBuilder {
-        val manualAddressFormModel =
-            ManualAddressFormModel().apply {
-                addressLineOne = "1 Example Street"
-                townOrCity = "Exampleton"
+        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
+        val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
                 postcode = "EG1 2AB"
-            }
-        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, manualAddressFormModel)
+                houseNameOrNumber = "1"
+            },
+        )
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = singleLineAddress },
+        )
+        return self()
+    }
+
+    fun withOrgManualAddressSelected(): LandlordStateSessionBuilder {
+        val routePrefix = OrgAddressTask.ROUTE_SEGMENT
+        val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                postcode = "EG1 2AB"
+                houseNameOrNumber = "1"
+            },
+        )
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = MANUAL_ADDRESS_CHOSEN },
+        )
         return self()
     }
 
@@ -348,6 +379,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgName() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
         fun beforeOrgAddress() = beforeOrgName().withOrgName()
+
+        fun beforeOrgManualAddress() = beforeOrgAddress().withOrgManualAddressSelected()
 
         fun beforeOrgEmail() = beforeOrgAddress().withOrgAddress()
 

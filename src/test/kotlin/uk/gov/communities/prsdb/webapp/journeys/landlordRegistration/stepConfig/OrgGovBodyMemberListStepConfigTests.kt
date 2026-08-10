@@ -20,7 +20,7 @@ class OrgGovBodyMemberListStepConfigTests {
     @Test
     fun `afterStepIsReached resets editingGovBodyMemberId to null`() {
         val stepConfig = OrgGovBodyMemberListStepConfig(urlParameterService)
-        stepConfig.routeSegment = OrgGovBodyMemberListStep.ROUTE_SEGMENT
+        stepConfig.urlPath = OrgGovBodyMemberListStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
         stepConfig.afterStepIsReached(mockState)

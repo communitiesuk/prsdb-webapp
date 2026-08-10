@@ -58,7 +58,7 @@ class EpcInDateAtStartOfTenancyCheckStepConfigTests {
 
     private fun setupStepConfig(): EpcInDateAtStartOfTenancyCheckStepConfig {
         val stepConfig = EpcInDateAtStartOfTenancyCheckStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

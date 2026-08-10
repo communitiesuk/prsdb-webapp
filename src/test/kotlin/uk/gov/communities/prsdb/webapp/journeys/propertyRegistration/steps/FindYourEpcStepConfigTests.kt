@@ -26,7 +26,7 @@ class FindYourEpcStepConfigTests {
 
     private fun setupStepConfig(): FindYourEpcStepConfig {
         val stepConfig = FindYourEpcStepConfig(mockEpcLookupService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

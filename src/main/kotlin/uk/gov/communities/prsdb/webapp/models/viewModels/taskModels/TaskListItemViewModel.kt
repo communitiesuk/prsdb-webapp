@@ -14,7 +14,7 @@ data class TaskListItemViewModel(
     companion object {
         fun fromTask(
             nameKey: String,
-            task: Task<*>,
+            task: Task<*, *>,
             hintKey: String? = null,
         ): TaskListItemViewModel =
             TaskListItemViewModel(

@@ -229,6 +229,22 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertPageIs(page, SearchLandlordRegisterPage::class)
             assertThat(resultTable.getCell(0, LANDLORD_COL_INDEX)).containsText("Alexander Smith\nL-CKSQ-3SX9")
         }
+
+        @Test
+        fun `searching by an organisation landlord LRN returns no results`() {
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("L-DGHK-QSQT")
+
+            assertTrue(searchLandlordRegisterPage.noResultErrorMessage.isVisible)
+        }
+
+        @Test
+        fun `organisation landlords do not appear in fuzzy search results`() {
+            val searchLandlordRegisterPage = navigator.goToLandlordSearchPage()
+            searchLandlordRegisterPage.searchBar.search("Test Org Landlord Corp")
+
+            assertTrue(searchLandlordRegisterPage.noResultErrorMessage.isVisible)
+        }
     }
 
     @Nested

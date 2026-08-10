@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -69,6 +68,7 @@ class PropertyRegistrationService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
         epcProvideLater: Boolean? = null,
+        licenseProvideLater: Boolean = false,
         tenancyProvideLater: Boolean? = null,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
@@ -94,6 +94,7 @@ class PropertyRegistrationService(
                 markedJointLandlord,
                 tenancyProvideLater,
                 mutableSetOf(landlord),
+                licenseProvideLater = licenseProvideLater,
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
@@ -140,6 +141,7 @@ class PropertyRegistrationService(
         markedJointLandlord: Boolean,
         tenancyProvideLater: Boolean?,
         landlords: MutableSet<Landlord>,
+        licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -148,7 +150,7 @@ class PropertyRegistrationService(
         val address = addressService.findOrCreateAddress(addressModel)
 
         val license =
-            if (licenseType != LicensingType.NO_LICENSING) {
+            if (LicenseService.licenceShouldBeStored(licenseType)) {
                 licenseService.createLicense(licenseType, licenceNumber)
             } else {
                 null
@@ -173,6 +175,7 @@ class PropertyRegistrationService(
             tenancyProvideLater = tenancyProvideLater,
             address = address,
             license = license,
+            licenseProvideLater = licenseProvideLater,
         )
     }
 
@@ -183,11 +186,10 @@ class PropertyRegistrationService(
         jointLandlordEmails: List<String>?,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
         confirmationEmailSender.sendEmail(
             landlord.email,
             PropertyRegistrationConfirmationEmail(
-                RegistrationNumberDataModel.Companion
+                RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
                 addressModel.singleLineAddress,

@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -367,7 +366,6 @@ class PropertyComplianceService(
                 )
 
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
             ComplianceUpdateConfirmationEmail(
@@ -387,27 +385,24 @@ class PropertyComplianceService(
         val otherLandlords =
             propertyOwnership.landlords.filter { it.id != currentLandlord.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
-        otherLandlords
-            .map { landlord ->
-                landlord as IndividualLandlord
-            }.forEach { otherLandlord ->
-                complianceUpdateConfirmationSender.sendEmail(
-                    otherLandlord.email,
-                    ComplianceUpdateConfirmationEmail(
-                        landlordName = otherLandlord.name,
-                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                        dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                        newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
-                        complianceUpdateType = updateType,
-                        certificateType = certificateType,
-                        certificateTypeLabel = certificateTypeLabel,
-                        expiryDate = formattedExpiryDate,
-                        deadlineDate = formattedDeadlineDate,
-                        isJointLandlord = true,
-                    ),
-                )
-            }
+        otherLandlords.forEach { otherLandlord ->
+            complianceUpdateConfirmationSender.sendEmail(
+                otherLandlord.email,
+                ComplianceUpdateConfirmationEmail(
+                    landlordName = otherLandlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                    complianceUpdateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = formattedExpiryDate,
+                    deadlineDate = formattedDeadlineDate,
+                    isJointLandlord = true,
+                ),
+            )
+        }
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(

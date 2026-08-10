@@ -53,7 +53,7 @@ class EpcMissingStepConfigTests {
 
     private fun setupStepConfig(): EpcMissingStepConfig {
         val stepConfig = EpcMissingStepConfig()
-        stepConfig.routeSegment = EpcMissingStep.ROUTE_SEGMENT
+        stepConfig.urlPath = EpcMissingStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }
