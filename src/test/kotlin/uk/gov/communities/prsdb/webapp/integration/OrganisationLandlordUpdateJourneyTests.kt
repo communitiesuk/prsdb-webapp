@@ -165,18 +165,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     @Nested
     inner class LeadTrusteeUpdates : NestedIntegrationTestWithMutableData("data-mockuser-org-landlord-trust.sql") {
         @Test
-        fun `Lead trustee change link opens the lead trustee name update page`(page: Page) {
-            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-            orgLandlordDetailsPage.leadTrusteeCard
-                .getAction("Change")
-                .link
-                .clickAndWait()
-
-            assertPageIs(page, LeadTrusteeNameFormPageUpdateLeadTrustee::class)
-        }
-
-        @Test
         fun `A trust org landlord can complete the full lead trustee update journey`(page: Page) {
             val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
             orgLandlordDetailsPage.tabs.goToOrganisationContacts()
@@ -210,7 +198,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             val selectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressPageUpdateLeadTrustee::class)
             selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
-            // CYA TODO page
+            // CYA page
+            // TODO: PDJB-1470: Implement this
             val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
             cyaPage.submit()
 
