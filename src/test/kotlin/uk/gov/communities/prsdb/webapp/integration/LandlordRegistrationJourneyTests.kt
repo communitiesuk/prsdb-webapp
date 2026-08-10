@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgSelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeTrustInterruptionPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -644,8 +645,77 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
     }
 
-    // TODO PDJB-1237: add a test for the organisation type change link once the org type update journey is wired into
-    //  LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgTypeStep.ROUTE_SEGMENT branch is currently empty).
+    @Test
+    fun `The organisation type change link returns to the org check answers page with the updated value`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationTypeRow.clickNamedActionLinkAndWait("Change")
+
+        val orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        orgTypePage.selectCharity()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationTypeRow).containsText("Charity")
+        assertThat(updatedCheckAnswersPage.landlordDetails.organisationTypeRow).containsText("Trust")
+    }
+
+    @Test
+    fun `The organisation type change link shows interruption pages when trust status changes`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        var checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+        checkAnswersPage.landlordDetails.organisationTypeRow.clickNamedActionLinkAndWait("Change")
+
+        var orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        orgTypePage.selectCharity()
+        orgTypePage.form.submit()
+
+        var interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageLandlordRegistration::class)
+        interruptionPage.submit()
+
+        checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Charity")
+        assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).not().containsText("Trust")
+        assertThat(checkAnswersPage.leadTrusteeCard).hasCount(0)
+
+        checkAnswersPage.landlordDetails.organisationTypeRow.clickNamedActionLinkAndWait("Change")
+
+        orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        orgTypePage.selectCharity()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageLandlordRegistration::class)
+        interruptionPage.submit()
+
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
+        leadTrusteeNamePage.submitName("Reassigned Lead Trustee")
+
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
+
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        leadTrusteeEmailPage.submitEmail("reassigned.trustee@test.com")
+
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
+        leadTrusteePhonePage.submitPhoneNumber("07123456789")
+
+        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val leadTrusteeSelectAddressPage =
+            assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
+        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        checkAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+        assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Charity")
+        assertThat(checkAnswersPage.landlordDetails.organisationTypeRow).containsText("Trust")
+        assertThat(checkAnswersPage.leadTrusteeCard).containsText("Reassigned Lead Trustee")
+        assertThat(checkAnswersPage.leadTrusteeCard).containsText("reassigned.trustee@test.com")
+    }
 
     // TODO PDJB-1238: add tests for the Companies House and company number change links once the companies update
     //  journey is wired into LandlordRegistrationTask.checkYourAnswersJourneyMap (the OrgIsRegisteredCompanyStep /
