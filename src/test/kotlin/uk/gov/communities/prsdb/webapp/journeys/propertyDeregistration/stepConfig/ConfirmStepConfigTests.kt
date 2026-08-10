@@ -72,7 +72,10 @@ class ConfirmStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId, propertyAddress)
+        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(
+            propertyOwnershipId,
+            propertyAddress,
+        )
     }
 
     @Test
@@ -85,7 +88,10 @@ class ConfirmStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmail>())
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq("james@example.com"),
+            any<PropertyDeregistrationConfirmationEmail>(),
+        )
     }
 
     @Test
@@ -170,7 +176,7 @@ class ConfirmStepConfigTests {
                 mockConfirmationEmailSender,
                 mockInviteeCancellationEmailSender,
             )
-        stepConfig.routeSegment = ConfirmStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ConfirmStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

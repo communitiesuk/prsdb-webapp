@@ -1,0 +1,7 @@
+ALTER TABLE organisation_landlord_user RENAME TO organisational_landlord_user;
+
+ALTER INDEX idx_organisation_landlord_user_subject RENAME TO idx_organisational_landlord_user_subject;
+ALTER INDEX idx_organisation_landlord_user_organisation_landlord RENAME TO idx_organisational_landlord_user_organisation_landlord;
+
+ALTER TABLE organisational_landlord_user RENAME CONSTRAINT org_landlord_user_org_landlord_id_subject_identifier_key
+    TO organisational_landlord_user_org_landlord_id_subject_identifier_key;

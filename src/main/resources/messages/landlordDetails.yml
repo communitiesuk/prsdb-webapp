@@ -5,6 +5,8 @@ personalDetails:
   heading: Personal details
   lrn: Landlord Registration Number
   registrationDate: Registration date
+  landlordType: Landlord type
+  landlordTypeValue: Individual
   name: Name
   dateOfBirth: Date of birth
   oneLoginVerified: Verified by GOV.UK One Login
@@ -33,8 +35,10 @@ update:
   title: Update Landlord record
 org:
   title: Organisation landlord record
-  heading: 'TODO PDJB-1276: Organisation landlord record'
-  organisationDetails: Organisation details
+  removeRecord: Delete organisation
+  tabs:
+    organisationDetails: Organisation details
+    organisationContacts: Organisation contacts
   name: Organisation name
   address: Organisation address
   email: Organisation email
@@ -53,4 +57,27 @@ org:
   leadTrusteeName: Name
   leadTrusteeEmail: Email
   leadTrusteePhone: Phone number
-  governingBodyHeading: Governing body members
+  leadTrusteeDateOfBirth: Date of birth
+  leadTrusteeAddress: Address
+  governingBody:
+    heading: Governing body
+    membersLink: Add, change or remove members of your governing body
+    role: Role
+    memberName: Name
+    memberDateOfBirth: Date of birth
+    memberAddress: Address
+    type:
+      director: Director
+      trustee: Trustee
+      partner: Partner
+      other: Other
+    memberCardTitle:
+      director: "{0}. Director"
+      trustee: "{0}. Trustee"
+      partner: "{0}. Partner"
+      other: "{0}. Other"
+  registrationContactHeading: Registration contact
+  registrationContactName: Name
+  registrationContactDateOfBirth: Date of birth
+  registrationContactEmail: Email
+  registrationContactPhone: Phone number

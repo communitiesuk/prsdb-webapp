@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.PERSONAL_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -54,6 +55,25 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             propertyDetailsView.backLink.clickAndWait()
             val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
             assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+        }
+
+        @Test
+        fun `the personal details tab shows landlord type row when the org landlord flag is enabled`(page: Page) {
+            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+            val detailsPage = navigator.goToLandlordDetails()
+
+            assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).isVisible()
+            assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).containsText("Individual")
+        }
+
+        @Test
+        fun `the personal details tab does not show landlord type row when the org landlord flag is disabled`(page: Page) {
+            featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+
+            val detailsPage = navigator.goToLandlordDetails()
+
+            assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).isHidden()
         }
 
         @Nested

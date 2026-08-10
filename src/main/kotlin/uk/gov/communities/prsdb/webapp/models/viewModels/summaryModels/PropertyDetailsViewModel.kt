@@ -42,7 +42,7 @@ class PropertyDetailsViewModel(
 
     val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
-            if (isOccupied) {
+            if (hasBeenOccupiedSinceRegistration) {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.councilOccupied")
             } else {
                 messageSource.getMessageForKey("propertyDetails.propertyRecord.licensing.councilNotProvided")
@@ -53,36 +53,57 @@ class PropertyDetailsViewModel(
 
     val tenancySection: List<SummaryListRowViewModel> =
         when {
-            !showTenancySection -> emptyList()
-            isTenancyProvideLater && isLandlordView -> listOf(tenancyProvideLaterRow())
-            isTenancyProvideLater && !isLandlordView -> emptyList()
-            else ->
+            !showTenancySection -> {
+                emptyList()
+            }
+
+            isTenancyProvideLater && isLandlordView -> {
+                listOf(tenancyProvideLaterRow())
+            }
+
+            isTenancyProvideLater && !isLandlordView -> {
+                emptyList()
+            }
+
+            else -> {
                 buildList {
                     add(householdsRow())
                     add(tenantsRow())
-                    add(rentFrequencyRow())
-                    add(furnishedStatusRow())
                     add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow())
-                    add(rentAmountRow())
+                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+                    add(furnishedStatusRow())
+                    add(rentFrequencyRow(withoutBottomBorder = true))
+                    add(rentAmountRow(includeChangeLink = false))
                 }
+            }
         }
 
     val tenancyProvideLaterParagraph: String? =
         when {
-            !showTenancySection || isLandlordView -> null
-            isTenancyProvideLater ->
+            !showTenancySection || isLandlordView -> {
+                null
+            }
+
+            isTenancyProvideLater && hasBeenOccupiedSinceRegistration -> {
                 getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.councilOccupied")
-            else -> null
+            }
+
+            isTenancyProvideLater -> {
+                messageSource.getMessageForKey("propertyDetails.propertyRecord.tenancy.councilNotProvided")
+            }
+
+            else -> {
+                null
+            }
         }
 
     private fun licensingProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.licensing.rowName",
-            if (isOccupied) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterOccupied")
+            if (hasBeenOccupiedSinceRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterWithDeadline")
             } else {
-                "propertyDetails.propertyRecord.licensing.provideLaterUnoccupied"
+                "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
             },
             changeLinkMessageKey,
             getUpdateLicensingBaseRoute(propertyOwnership.id) +
@@ -93,7 +114,11 @@ class PropertyDetailsViewModel(
     private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancy.rowName",
-            getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterOccupied"),
+            if (hasBeenOccupiedSinceRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline")
+            } else {
+                "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
+            },
             changeLinkMessageKey,
             UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",

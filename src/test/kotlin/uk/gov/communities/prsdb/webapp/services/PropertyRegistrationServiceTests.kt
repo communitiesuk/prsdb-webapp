@@ -12,6 +12,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -169,6 +170,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
+                licenseProvideLater = false,
                 tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -212,6 +214,7 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            licenseProvideLater = false,
             tenancyProvideLater = null,
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
@@ -263,6 +266,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -353,6 +357,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -454,6 +459,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
+                licenseProvideLater = false,
                 tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -478,6 +484,7 @@ class PropertyRegistrationServiceTests {
             customPropertyType = customPropertyType,
         )
 
+        verify(mockLicenseService, never()).createLicense(any(), any())
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = ownershipType,
             isOccupied = true,
@@ -495,6 +502,115 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+            licenseProvideLater = false,
+        )
+    }
+
+    @Test
+    fun `registerProperty does not create a license and sets licenseProvideLater when the user provides licensing later`() {
+        // Arrange
+        val ownershipType = OwnershipType.FREEHOLD
+        val numberOfHouseholds = 1
+        val numberOfPeople = 2
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val propertyType = PropertyType.DETACHED_HOUSE
+        val customPropertyType = "End terrace"
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val numberOfBedrooms = 1
+        val billsIncludedList = "Electricity, Water"
+        val customBillsIncluded = "Internet"
+        val furnishedStatus = FurnishedStatus.FURNISHED
+        val rentFrequency = RentFrequency.OTHER
+        val customRentFrequency = "Fortnightly"
+        val rentAmount = 123.toBigDecimal()
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                ownershipType = ownershipType,
+                currentNumHouseholds = numberOfHouseholds,
+                currentNumTenants = numberOfPeople,
+                landlords = mutableSetOf(landlord),
+                propertyBuildType = propertyType,
+                address = address,
+                license = null,
+                registrationNumber = registrationNumber,
+                numberOfBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = ownershipType,
+                isOccupied = true,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfPeople,
+                landlords = mutableSetOf(landlord),
+                propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
+                address = address,
+                license = null,
+                numBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+                licenseProvideLater = true,
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressModel = addressDataModel,
+            propertyType = propertyType,
+            licenseType = LicensingType.PROVIDE_LATER,
+            licenceNumber = "",
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
+            customPropertyType = customPropertyType,
+            licenseProvideLater = true,
+        )
+
+        // Assert
+        verify(mockLicenseService, never()).createLicense(any(), any())
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = ownershipType,
+            isOccupied = true,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            landlords = mutableSetOf(landlord),
+            propertyBuildType = propertyType,
+            customPropertyType = customPropertyType,
+            address = address,
+            license = null,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
+            licenseProvideLater = true,
             tenancyProvideLater = null,
         )
     }
@@ -549,6 +665,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                licenseProvideLater = false,
                 tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -629,6 +746,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                licenseProvideLater = false,
                 tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -706,6 +824,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = RentFrequency.MONTHLY,
                 customRentFrequency = null,
                 rentAmount = 123.toBigDecimal(),
+                licenseProvideLater = false,
                 tenancyProvideLater = null,
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -773,6 +892,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -819,6 +939,7 @@ class PropertyRegistrationServiceTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             markedJointLandlord = eq(true),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = anyOrNull(),
         )
     }
@@ -860,6 +981,7 @@ class PropertyRegistrationServiceTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
                 tenancyProvideLater = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
@@ -906,6 +1028,7 @@ class PropertyRegistrationServiceTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             markedJointLandlord = any(),
+            licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
         )
     }

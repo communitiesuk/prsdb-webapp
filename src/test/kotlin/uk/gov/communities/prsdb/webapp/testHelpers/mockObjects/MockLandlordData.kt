@@ -14,7 +14,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUser
 import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -96,6 +97,7 @@ class MockLandlordData {
         }
 
         fun createOrgLandlord(
+            baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "Organisation landlord",
             address: Address = createAddress(),
             email: String = "organisation@example.com",
@@ -121,9 +123,9 @@ class MockLandlordData {
             mainContactPhoneNumber: String = "07123456781",
             createdDate: Instant = Instant.now(),
             propertyOwnerships: Set<PropertyOwnership> = emptySet(),
-        ): OrganisationLandlord {
+        ): OrganisationalLandlord {
             val landlord =
-                OrganisationLandlord(
+                OrganisationalLandlord(
                     registrationNumber = registrationNumber,
                     name = name,
                     address = address,
@@ -148,6 +150,12 @@ class MockLandlordData {
                     mainContactEmail = mainContactEmail,
                     mainContactPhone = mainContactPhoneNumber,
                 )
+            OrganisationalLandlordUser(
+                organisationalLandlord = landlord,
+                baseUser = baseUser,
+                name = registrantName,
+                email = registrantEmail,
+            )
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
             ReflectionTestUtils.setField(
@@ -251,6 +259,7 @@ class MockLandlordData {
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
             lastOccupiedDate: LocalDate? = LocalDate.of(2025, 1, 1),
+            createdDate: Instant = Instant.now(),
             licenseProvideLater: Boolean = false,
             tenancyProvideLater: Boolean = false,
         ): PropertyOwnership {
@@ -274,6 +283,7 @@ class MockLandlordData {
                     rentFrequency = rentFrequency,
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
+                    createdDate = createdDate,
                     licenseProvideLater = licenseProvideLater,
                     tenancyProvideLater = tenancyProvideLater,
                 )

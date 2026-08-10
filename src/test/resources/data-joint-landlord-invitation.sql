@@ -40,6 +40,16 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 200.00, true, current_date - INTERVAL '7 days');
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
+-- Every registered property has a compliance record (see PropertyDetailsController), so both
+-- property ownerships need one for their property details pages to load.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+VALUES (1, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (2, 2, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (2, 1, '2025-01-15'),
        (1, 2, '2025-01-15');

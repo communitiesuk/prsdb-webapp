@@ -83,7 +83,7 @@ class ConfirmMissingComplianceStepConfigTests {
 
     private fun setupStepConfig(): ConfirmMissingComplianceStepConfig {
         val stepConfig = ConfirmMissingComplianceStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

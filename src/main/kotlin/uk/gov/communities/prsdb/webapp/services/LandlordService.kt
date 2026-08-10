@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -19,7 +19,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
@@ -99,13 +100,13 @@ class LandlordService(
         registrantDateOfBirth: LocalDate,
         registrantEmail: String,
         registrantPhoneNumber: String,
-    ): OrganisationLandlord {
+    ): OrganisationalLandlord {
         val orgAddress = addressService.findOrCreateAddress(organisationAddress)
         val trusteeAddress = leadTrusteeAddress?.let { addressService.findOrCreateAddress(it) }
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
         val landlord =
-            OrganisationLandlord(
+            OrganisationalLandlord(
                 registrationNumber = registrationNumber,
                 name = organisationName,
                 address = orgAddress,
@@ -135,14 +136,13 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateLandlordForUser(
-        landlordUpdate: LandlordUpdateModel,
+    fun updateIndividualLandlordForUser(
+        landlordUpdate: IndividualLandlordUpdateModel,
         checkUpdateIsValid: () -> Unit,
     ): Landlord {
         checkUpdateIsValid()
         val landlordEntity = userToLandlordService.getCurrentLandlordForUser()
         check(landlordEntity is IndividualLandlord)
-        // TODO: PDJB-1274: Update emails to account for org landlord
 
         val existingEmail = landlordEntity.email
 
@@ -164,36 +164,36 @@ class LandlordService(
 
     @Transactional
     fun updateLandlordEmail(email: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(email = email),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(email = email),
         ) {}
     }
 
     @Transactional
     fun updateLandlordPhoneNumber(phoneNumber: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(phoneNumber = phoneNumber),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(phoneNumber = phoneNumber),
         ) {}
     }
 
     @Transactional
     fun updateLandlordName(name: String) {
-        updateLandlordForUser(
-            LandlordUpdateModel(name = name),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(name = name),
         ) {}
     }
 
     @Transactional
     fun updateLandlordAddress(address: AddressDataModel) {
-        updateLandlordForUser(
-            LandlordUpdateModel(address = address),
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(address = address),
         ) {}
     }
 
     @Transactional
     fun updateLandlordDateOfBirth(dateOfBirth: LocalDate) {
-        updateLandlordForUser(
-            LandlordUpdateModel(
+        updateIndividualLandlordForUser(
+            IndividualLandlordUpdateModel(
                 email = null,
                 name = null,
                 phoneNumber = null,
@@ -201,6 +201,22 @@ class LandlordService(
                 dateOfBirth = dateOfBirth,
             ),
         ) {}
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordForUser(orgLandlordUpdate: OrganisationLandlordUpdateModel): Landlord {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+
+        orgLandlordUpdate.name?.let { landlordEntity.name = it }
+
+        return landlordEntity
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordName(orgName: String) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(name = orgName),
+        )
     }
 
     fun searchForLandlords(
@@ -238,7 +254,7 @@ class LandlordService(
     }
 
     private fun sendUpdateConfirmationEmail(
-        landlordUpdate: LandlordUpdateModel,
+        landlordUpdate: IndividualLandlordUpdateModel,
         landlord: IndividualLandlord,
         oldEmail: String,
     ) {

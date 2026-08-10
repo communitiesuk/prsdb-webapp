@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -29,7 +29,7 @@ abstract class AddressTask(
     override val selectAddressStep: SelectAddressStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
-) : DuplicableTask<AddressState>(journeyStateService),
+) : TaskWithoutDependencies<AddressState>(journeyStateService),
     AddressState {
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
@@ -37,8 +37,9 @@ abstract class AddressTask(
 
     // Field-set content for the address steps, supplied by content-specific subclasses (e.g. LandlordAddressTask,
     // TrusteeAddressTask) and applied to the relevant steps in makeSubJourney.
-    protected abstract val lookupAddressContentProperties: Map<String, Any?>
-    protected abstract val manualAddressContentProperties: Map<String, Any?>
+    protected open val lookupAddressContentProperties: Map<String, Any?> = emptyMap()
+    protected open val selectAddressContentProperties: Map<String, Any?> = emptyMap()
+    protected open val manualAddressContentProperties: Map<String, Any?> = emptyMap()
 
     override val taskState get() = this
 
@@ -73,6 +74,7 @@ abstract class AddressTask(
                         else -> exitStep
                     }
                 }
+                withAdditionalContentProperties { selectAddressContentProperties }
             }
             step(journey.noAddressFoundStep) {
                 routeSegment(NoAddressFoundStep.ROUTE_SEGMENT)

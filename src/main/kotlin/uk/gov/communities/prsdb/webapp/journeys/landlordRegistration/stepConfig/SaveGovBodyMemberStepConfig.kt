@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -30,6 +31,10 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 ?: throw PrsdbWebException("Governing body member date of birth is invalid")
 
         val address = state.govBodyMemberAddressTask.getAddress()
+        val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
+        val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
+        val wentManual = selectFormModel?.address == MANUAL_ADDRESS_CHOSEN
+        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -46,6 +51,14 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 type = type,
                 dateOfBirth = dateOfBirth,
                 address = address,
+                addressSearchPostcode = lookupFormModel?.postcode,
+                addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
+                selectedAddress = selectFormModel?.address,
+                manualAddressLineOne = manualFormModel?.addressLineOne,
+                manualAddressLineTwo = manualFormModel?.addressLineTwo,
+                manualTownOrCity = manualFormModel?.townOrCity,
+                manualCounty = manualFormModel?.county,
+                manualPostcode = manualFormModel?.postcode,
             )
 
         currentMap[targetKey] = member

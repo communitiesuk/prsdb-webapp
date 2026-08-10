@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class PropertyOwnershipTests {
@@ -42,5 +44,38 @@ class PropertyOwnershipTests {
 
         assertFalse(property.landlords.contains(landlord))
         assertTrue(property.landlords.contains(coLandlord))
+    }
+
+    @Test
+    fun `licenseType is PROVIDE_LATER when the landlord chose to provide licensing details later`() {
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"),
+                licenseProvideLater = true,
+            )
+
+        assertEquals(LicensingType.PROVIDE_LATER, property.licenseType)
+    }
+
+    @Test
+    fun `licenseType is the stored licence type when a licence is stored and details were not deferred`() {
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                license = License(LicensingType.SELECTIVE_LICENCE, "L1234"),
+                licenseProvideLater = false,
+            )
+
+        assertEquals(LicensingType.SELECTIVE_LICENCE, property.licenseType)
+    }
+
+    @Test
+    fun `licenseType is NO_LICENSING when no licence is stored and details were not deferred`() {
+        val property =
+            MockLandlordData.createPropertyOwnership(
+                license = null,
+                licenseProvideLater = false,
+            )
+
+        assertEquals(LicensingType.NO_LICENSING, property.licenseType)
     }
 }

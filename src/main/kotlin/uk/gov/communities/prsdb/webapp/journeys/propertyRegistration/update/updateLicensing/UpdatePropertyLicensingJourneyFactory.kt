@@ -13,9 +13,10 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.duplicableCheckAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -55,7 +56,7 @@ class UpdateLicensingJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            duplicableCheckAnswerTask(journey.licensingTask)
+            checkAnswerTask(journey.licensingTask, { journey })
             configureStep(journey.licensingTask.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
@@ -71,7 +72,8 @@ class UpdateLicensingJourneyFactory(
         journey(state) {
             val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(journey.propertyId)
             unreachableStepUrl { propertyDetailsRoute }
-            duplicableTask(journey.licensingTask) {
+            task(journey.licensingTask) {
+                withDependencies { journey }
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -117,9 +119,13 @@ class UpdateLicensingJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val allowProvideLicensingLaterRoute: Boolean = false
+    override val isOccupied: Boolean? = null
 }
 
 interface UpdateLicensingJourneyState :
+    LicensingDependencies,
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
     override val finishCyaStep: FinishCyaJourneyStep

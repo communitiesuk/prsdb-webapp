@@ -82,7 +82,7 @@ class CheckPendingInvitationsStepConfigTests {
     private fun setupStepConfig(): CheckPendingInvitationsStepConfig {
         val stepConfig =
             CheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
-        stepConfig.routeSegment = CheckPendingInvitationsStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckPendingInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

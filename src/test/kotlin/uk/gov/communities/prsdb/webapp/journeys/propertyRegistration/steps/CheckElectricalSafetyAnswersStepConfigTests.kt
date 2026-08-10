@@ -22,7 +22,7 @@ class CheckElectricalSafetyAnswersStepConfigTests {
 
     private fun setupStepConfig(): CheckElectricalSafetyAnswersStepConfig {
         val stepConfig = CheckElectricalSafetyAnswersStepConfig(mockUploadService)
-        stepConfig.routeSegment = CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

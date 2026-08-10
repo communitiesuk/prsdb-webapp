@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -29,6 +30,8 @@ class MessageKeyConverter {
 
                 is FurnishedStatus -> convertFurnishedStatus(enum)
 
+                is GoverningBodyMemberType -> convertGoverningBodyMemberType(enum)
+
                 is RentFrequency -> convertRentFrequency(enum)
 
                 is BillsIncluded -> convertBillsIncluded(enum)
@@ -44,6 +47,14 @@ class MessageKeyConverter {
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
+            }
+
+        private fun convertGoverningBodyMemberType(type: GoverningBodyMemberType): String =
+            when (type) {
+                GoverningBodyMemberType.DIRECTOR -> "landlordDetails.org.governingBody.type.director"
+                GoverningBodyMemberType.TRUSTEE -> "landlordDetails.org.governingBody.type.trustee"
+                GoverningBodyMemberType.PARTNER -> "landlordDetails.org.governingBody.type.partner"
+                GoverningBodyMemberType.OTHER -> "landlordDetails.org.governingBody.type.other"
             }
 
         private fun convertBillsIncluded(billsIncluded: BillsIncluded): String =
@@ -83,6 +94,7 @@ class MessageKeyConverter {
                 LicensingType.HMO_MANDATORY_LICENCE -> "forms.licensingType.radios.option.hmoMandatory.label"
                 LicensingType.HMO_ADDITIONAL_LICENCE -> "forms.licensingType.radios.option.hmoAdditional.label"
                 LicensingType.NO_LICENSING -> "forms.checkPropertyAnswers.propertyDetails.noLicensing"
+                LicensingType.PROVIDE_LATER -> "forms.checkPropertyAnswers.propertyDetails.licensingProvideLater"
             }
 
         private fun convertOwnershipType(ownershipType: OwnershipType): String =

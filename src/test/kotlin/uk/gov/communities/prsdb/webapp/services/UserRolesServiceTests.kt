@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -123,8 +123,8 @@ class UserRolesServiceTests {
     @Test
     fun `getLandlordRolesForSubjectId returns ROLE_LANDLORD for an organisation landlord user`() {
         val baseUser = MockPrsdbUserData.createPrsdbUser()
-        val organisationLandlord = OrganisationLandlord()
-        whenever(userToLandlordService.getLandlordForBaseUserIdOrNull(baseUser.id)).thenReturn(organisationLandlord)
+        val organisationalLandlord = OrganisationalLandlord()
+        whenever(userToLandlordService.getLandlordForBaseUserIdOrNull(baseUser.id)).thenReturn(organisationalLandlord)
 
         val roles = userRolesService.getLandlordRolesForSubjectId(baseUser.id)
 

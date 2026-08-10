@@ -52,8 +52,8 @@ class ParentageTests {
         val andParents = AndParents(DisallowingParent(), *allowingParents)
 
         // Act
-        val actualAncestryRoutes = andParents.ancestry.map { it.getRouteSegmentOrNull() }
-        val actualAllowingParentRoutes = andParents.allowingParentSteps.map { it.getRouteSegmentOrNull() }
+        val actualAncestryRoutes = andParents.ancestry.map { it.getUrlPathOrNull() }
+        val actualAllowingParentRoutes = andParents.allowingParentSteps.map { it.getUrlPathOrNull() }
 
         // Assert
         assertContentEquals(allowingParentRoutes, actualAncestryRoutes)
@@ -70,7 +70,7 @@ class ParentageTests {
         val andParents = AndParents(*(allowingParents + disallowingParents).toTypedArray())
 
         // Act
-        val actualPotentialParentRoutes = andParents.potentialParents.map { it.getRouteSegmentOrNull() }
+        val actualPotentialParentRoutes = andParents.potentialParents.map { it.getUrlPathOrNull() }
 
         // Assert
         val expectedRoutes = allowingParentRoutes + disallowingParentRoutes
@@ -100,8 +100,8 @@ class ParentageTests {
         val orParents = OrParents(DisallowingParent(), *allowingParents)
 
         // Act
-        val actualAncestryRoutes = orParents.ancestry.map { it.getRouteSegmentOrNull() }
-        val actualAllowingParentRoutes = orParents.allowingParentSteps.map { it.getRouteSegmentOrNull() }
+        val actualAncestryRoutes = orParents.ancestry.map { it.getUrlPathOrNull() }
+        val actualAllowingParentRoutes = orParents.allowingParentSteps.map { it.getUrlPathOrNull() }
 
         // Assert
         assertContentEquals(allowingParentRoutes, actualAncestryRoutes)
@@ -118,7 +118,7 @@ class ParentageTests {
         val orParents = OrParents(*(allowingParents + disallowingParents).toTypedArray())
 
         // Act
-        val actualPotentialParentRoutes = orParents.potentialParents.map { it.getRouteSegmentOrNull() }
+        val actualPotentialParentRoutes = orParents.potentialParents.map { it.getUrlPathOrNull() }
 
         // Assert
         val expectedRoutes = allowingParentRoutes + disallowingParentRoutes
@@ -170,7 +170,7 @@ class ParentageTests {
         val singleParent = SingleParent(parentStep) { true }
 
         // Act
-        val ancestryRoutes = singleParent.ancestry.map { it.getRouteSegmentOrNull() }
+        val ancestryRoutes = singleParent.ancestry.map { it.getUrlPathOrNull() }
 
         // Assert
         assertContentEquals(listOf("parent", "parent-ancestry-step"), ancestryRoutes)
@@ -212,9 +212,28 @@ class ParentageTests {
     }
 
     @Test
+    fun `isComplete on an outcome step returns a single parent with the condition checking that the step has any outcome`() {
+        // Arrange
+        val step = mock<JourneyStep.RequestableStep<TestEnum, *, *>>()
+
+        // Act
+        val parent = step.isComplete()
+
+        // Assert
+        whenever(step.outcome).thenReturn(TestEnum.ENUM_VALUE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome).thenReturn(TestEnum.ALTERNATIVE_VALUE)
+        assertTrue(parent.allowsChild())
+
+        whenever(step.outcome).thenReturn(null)
+        assertFalse(parent.allowsChild())
+    }
+
+    @Test
     fun `isComplete returns a single parent with the condition checking that tasks final step is complete`() {
         // Arrange
-        val task = mock<Task<*>>()
+        val task = mock<Task<*, *>>()
         val step = mock<SubjourneyExitStep>()
         whenever(task.exitStep).thenReturn(step)
 
@@ -232,7 +251,7 @@ class ParentageTests {
     companion object {
         fun mockStepWithRoute(route: String): JourneyStep<*, *, *> {
             val step: JourneyStep<*, *, *> = mock<JourneyStep.RequestableStep<*, *, *>>()
-            whenever(step.getRouteSegmentOrNull()).thenReturn(route)
+            whenever(step.getUrlPathOrNull()).thenReturn(route)
             return step
         }
     }

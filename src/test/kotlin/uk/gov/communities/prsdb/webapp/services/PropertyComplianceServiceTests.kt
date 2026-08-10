@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -86,7 +87,8 @@ class PropertyComplianceServiceTests {
         MockLandlordData.createIndividualLandlord(
             baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId),
         )
-    private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+    private val mockPropertyOwnership =
+        MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
     private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
@@ -98,7 +100,9 @@ class PropertyComplianceServiceTests {
 
     @BeforeEach
     fun setup() {
-        lenient().`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://test.example.com"))
+        lenient()
+            .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
+            .thenReturn(URI("https://test.example.com"))
         lenient()
             .`when`(
                 mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
@@ -110,8 +114,8 @@ class PropertyComplianceServiceTests {
         SecurityContextHolder.clearContext()
     }
 
-    private fun setMockPrincipal() {
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(mockLoggedInLandlord)
+    private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
     }
 
     @Test
@@ -463,8 +467,16 @@ class PropertyComplianceServiceTests {
                 electricalCertType = CertificateType.Eicr,
             )
 
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, mockPropertyOwnership.id, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(20L, mockPropertyOwnership.id, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                10L,
+                mockPropertyOwnership.id,
+                CertificateType.GasSafetyCert,
+            )
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                20L,
+                mockPropertyOwnership.id,
+                CertificateType.Eicr,
+            )
         }
 
         @Test
@@ -623,7 +635,11 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                10L,
+                propertyOwnershipId,
+                CertificateType.GasSafetyCert,
+            )
         }
 
         @Test
@@ -646,7 +662,11 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
+                any<Long>(),
+                any(),
+                eq(CertificateType.Eicr),
+            )
         }
 
         @Test
@@ -915,7 +935,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -995,7 +1019,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -1119,7 +1147,11 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
+                any<Long>(),
+                any(),
+                eq(CertificateType.GasSafetyCert),
+            )
         }
 
         @Test
@@ -1313,7 +1345,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -1393,7 +1429,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )

@@ -3,20 +3,17 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationRejectionEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
@@ -39,26 +36,30 @@ class SendRejectionEmailsStepConfigTests {
     fun `afterStepIsReached sends rejection email to all landlords`() {
         // Arrange
         val stepConfig = setupStepConfig()
-
-        val landlord1 = mock<IndividualLandlord>()
-        whenever(landlord1.name).thenReturn("Lois Lane")
-        whenever(landlord1.email).thenReturn("lois@example.com")
-
-        val landlord2 = mock<IndividualLandlord>()
-        whenever(landlord2.name).thenReturn("Clark Kent")
-        whenever(landlord2.email).thenReturn("clark@example.com")
-
-        val mockAddress = mock<Address>()
-        whenever(mockAddress.toMultiLineAddress()).thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
-
-        val mockPropertyOwnership = mock<PropertyOwnership>()
-        whenever(mockPropertyOwnership.address).thenReturn(mockAddress)
-        whenever(mockPropertyOwnership.landlords).thenReturn(mutableSetOf(landlord1, landlord2))
-        whenever(mockPropertyOwnership.id).thenReturn(42L)
-
-        val invitation = mock<JointLandlordInvitation>()
-        whenever(invitation.registeredOwnership).thenReturn(mockPropertyOwnership)
-        whenever(invitation.invitedEmail).thenReturn("invitee@example.com")
+        val address = MockLandlordData.createAddress("Flat 1, 11 Elm Drive, London, NW8 2DK")
+        val propertyAddress = address.toMultiLineAddress()
+        val individualLandlord =
+            MockLandlordData.createIndividualLandlord(
+                name = "Lois Lane",
+                email = "lois@example.com",
+            )
+        val organisationalLandlord =
+            MockLandlordData.createOrgLandlord(
+                name = "Clark Properties Ltd",
+                registrantName = "Clark Kent",
+                registrantEmail = "clark@example.com",
+            )
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 42L,
+                address = address,
+                landlords = mutableSetOf(individualLandlord, organisationalLandlord),
+            )
+        val invitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                email = "invitee@example.com",
+                propertyOwnership = propertyOwnership,
+            )
 
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
@@ -69,23 +70,23 @@ class SendRejectionEmailsStepConfigTests {
 
         // Assert
         verify(mockRejectionEmailSender).sendEmail(
-            eq("lois@example.com"),
+            eq(individualLandlord.email),
             eq(
                 JointLandlordInvitationRejectionEmail(
-                    recipientName = "Lois Lane",
+                    recipientName = individualLandlord.name,
                     inviteeEmail = "invitee@example.com",
-                    propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                    propertyAddress = propertyAddress,
                     propertyRecordUrl = "http://localhost/property/42",
                 ),
             ),
         )
         verify(mockRejectionEmailSender).sendEmail(
-            eq("clark@example.com"),
+            eq(organisationalLandlord.email),
             eq(
                 JointLandlordInvitationRejectionEmail(
-                    recipientName = "Clark Kent",
+                    recipientName = organisationalLandlord.name,
                     inviteeEmail = "invitee@example.com",
-                    propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                    propertyAddress = propertyAddress,
                     propertyRecordUrl = "http://localhost/property/42",
                 ),
             ),
@@ -96,22 +97,16 @@ class SendRejectionEmailsStepConfigTests {
     fun `afterStepIsReached stores rejection property address in session`() {
         // Arrange
         val stepConfig = setupStepConfig()
-
-        val mockAddress = mock<Address>()
-        whenever(mockAddress.toMultiLineAddress()).thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
-
-        val landlord = mock<IndividualLandlord>()
-        whenever(landlord.name).thenReturn("Lois Lane")
-        whenever(landlord.email).thenReturn("lois@example.com")
-
-        val mockPropertyOwnership = mock<PropertyOwnership>()
-        whenever(mockPropertyOwnership.address).thenReturn(mockAddress)
-        whenever(mockPropertyOwnership.landlords).thenReturn(mutableSetOf(landlord))
-        whenever(mockPropertyOwnership.id).thenReturn(42L)
-
-        val invitation = mock<JointLandlordInvitation>()
-        whenever(invitation.registeredOwnership).thenReturn(mockPropertyOwnership)
-        whenever(invitation.invitedEmail).thenReturn("invitee@example.com")
+        val address = MockLandlordData.createAddress("Flat 1, 11 Elm Drive, London, NW8 2DK")
+        val propertyAddress = address.toMultiLineAddress()
+        val landlord = MockLandlordData.createOrgLandlord()
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 42L,
+                address = address,
+                landlords = mutableSetOf(landlord),
+            )
+        val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
 
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
@@ -121,9 +116,7 @@ class SendRejectionEmailsStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockInvitationService).addRejectedPropertyAddressToSession(
-            "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
-        )
+        verify(mockInvitationService).addRejectedPropertyAddressToSession(propertyAddress)
     }
 
     private fun setupStepConfig() =

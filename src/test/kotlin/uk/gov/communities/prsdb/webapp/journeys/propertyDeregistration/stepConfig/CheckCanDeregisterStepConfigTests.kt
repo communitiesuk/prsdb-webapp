@@ -55,7 +55,7 @@ class CheckCanDeregisterStepConfigTests {
 
     private fun setupStepConfig(): CheckCanDeregisterStepConfig {
         val stepConfig = CheckCanDeregisterStepConfig(mockPropertyOwnershipService)
-        stepConfig.routeSegment = CheckCanDeregisterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckCanDeregisterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -35,11 +36,11 @@ class SelectAddressStepConfig(
             } +
                 listOf(
                     RadiosDividerViewModel("forms.radios.dividerText"),
-                    RadiosButtonViewModel(MANUAL_ADDRESS_CHOSEN, labelMsgKey = "forms.selectAddress.addAddressManually"),
+                    RadiosButtonViewModel(MANUAL_ADDRESS_CHOSEN, labelMsgKey = "addressForms.selectAddress.addAddressManually"),
                 )
 
         return mapOf(
-            "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
+            "fieldSetHeading" to "addressForms.selectAddress.fieldSetHeading",
             "submitButtonText" to "forms.buttons.useThisAddress",
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
@@ -50,6 +51,21 @@ class SelectAddressStepConfig(
     }
 
     override fun chooseTemplate(state: AddressState) = "forms/selectAddressForm"
+
+    override fun resolvePageContent(
+        state: AddressState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val prefillSelectedAddress = defaultContent[PREFILL_SELECTED_ADDRESS] as? String ?: return defaultContent
+        val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? SelectAddressFormModel ?: return defaultContent
+        if (!formModel.address.isNullOrBlank()) return defaultContent
+        formModel.address = prefillSelectedAddress
+        return defaultContent + (FORM_MODEL_ATTR_NAME to formModel)
+    }
+
+    companion object {
+        const val PREFILL_SELECTED_ADDRESS = "selectPrefillSelectedAddress"
+    }
 
     override fun mode(state: AddressState) =
         getFormModelFromStateOrNull(state)?.address?.let { selectedAddress ->
@@ -69,7 +85,7 @@ class SelectAddressStepConfig(
             if (selectedAddress != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedAddress) == null) {
                 bindingResult.rejectValueWithMessageKey(
                     SelectAddressFormModel::address.name,
-                    "forms.selectAddress.error.invalidSelection",
+                    "addressForms.selectAddress.error.invalidSelection",
                 )
             }
         }
