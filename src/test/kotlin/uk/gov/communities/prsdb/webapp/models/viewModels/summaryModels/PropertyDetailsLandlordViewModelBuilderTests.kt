@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -200,7 +199,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         }
 
         @Test
-        fun `org landlord card has no action link`() {
+        fun `org landlord card has a view landlord record action that opens in new tab`() {
             val orgLandlord = MockLandlordData.createOrgLandlord(name = "ACME Properties Ltd", email = "info@acme.com")
 
             val cards =
@@ -209,11 +208,18 @@ class PropertyDetailsLandlordViewModelBuilderTests {
                     landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
                 )
 
-            assertTrue(cards.single().actions.isNullOrEmpty())
+            val card = cards.single()
+            assertEquals(1, card.actions!!.size)
+            assertEquals(
+                "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                card.actions!![0].text,
+            )
+            assertEquals("/local-council/landlord-details/${orgLandlord.id}", card.actions!![0].url)
+            assertEquals(true, card.actions!![0].opensInNewTab)
         }
 
         @Test
-        fun `mixed individual and org landlords are sorted by name, individuals keep four rows and link, org gets two rows and no link`() {
+        fun `mixed individual and org landlords are sorted by name and both keep the view record link`() {
             val individual =
                 MockLandlordData.createIndividualLandlord(
                     name = "Zoe Adams",
@@ -231,7 +237,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             assertEquals(2, cards.size)
             assertEquals("Acme Ltd", cards[0].title)
             assertEquals(2, cards[0].summaryList.size)
-            assertTrue(cards[0].actions.isNullOrEmpty())
+            assertEquals(1, cards[0].actions!!.size)
             assertEquals("Zoe Adams", cards[1].title)
             assertEquals(4, cards[1].summaryList.size)
             assertEquals(1, cards[1].actions!!.size)

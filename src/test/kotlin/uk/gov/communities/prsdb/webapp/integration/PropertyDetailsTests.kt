@@ -333,7 +333,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `an org landlord is shown as a card with name, LRN and email and no view landlord record link`(page: Page) {
+            fun `an org landlord is shown as a card with name, LRN, email and a view landlord record link`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(48)
                 detailsPage.tabs.goToLandlordDetails()
 
@@ -341,7 +341,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     detailsPage.landlordSummaryCards.single { it.title.getText() == "Local Organisation Landlord" }
                 assertThat(orgCard.summaryList.registrationNumberRow.value).not().isEmpty()
                 assertThat(orgCard.summaryList.emailAddressRow.value).containsText("local-org-landlord@example.com")
-                assertThat(orgCard.getAction("View landlord record").link).not().isVisible()
+                assertThat(orgCard.getAction("View landlord record").link).isVisible()
             }
         }
 

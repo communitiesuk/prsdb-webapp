@@ -91,6 +91,15 @@ class PropertyDetailsLandlordViewModelBuilder {
                             SummaryCardViewModel(
                                 title = landlord.name,
                                 summaryList = buildLocalCouncilOrgCardRows(landlord),
+                                actions =
+                                    listOf(
+                                        // TODO: PDJB-1432: Link this to the landlord record for an org landlord
+                                        SummaryCardActionViewModel(
+                                            text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                            url = landlordDetailsUrlProvider(landlord),
+                                            opensInNewTab = true,
+                                        ),
+                                    ),
                             )
 
                         else -> throw IllegalArgumentException("Unknown landlord type")
