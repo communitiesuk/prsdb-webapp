@@ -248,6 +248,24 @@ class LandlordService(
         isCompany: Boolean,
         isCharity: Boolean,
         isTrust: Boolean,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isCompany = isCompany,
+                    isCharity = isCharity,
+                    isTrust = isTrust,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordTypeAndLeadTrustee(
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
         leadTrusteeName: String? = null,
         leadTrusteeDateOfBirth: LocalDate? = null,
         leadTrusteeEmail: String? = null,
@@ -268,17 +286,7 @@ class LandlordService(
                 ),
             )
 
-        updateConfirmationSender.sendEmail(
-            landlord.email,
-            LandlordUpdateConfirmation(
-                registrationNumber =
-                    RegistrationNumberDataModel
-                        .fromRegistrationNumber(landlord.registrationNumber)
-                        .toString(),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                updatedDetail = "organisation type and lead trustee details",
-            ),
-        )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
     }
 
     fun searchForLandlords(

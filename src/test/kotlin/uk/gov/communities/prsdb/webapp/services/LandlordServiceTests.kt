@@ -732,17 +732,38 @@ class LandlordServiceTests {
         landlordService.updateOrganisationLandlordType(isCompany = false, isCharity = false, isTrust = false)
 
         val expectedEmailModel =
-            LandlordUpdateConfirmation(
-                RegistrationNumberDataModel.fromRegistrationNumber(orgLandlord.registrationNumber).toString(),
+            OrganisationalLandlordUpdateConfirmation(
                 dashboardUrl,
-                "organisation type and lead trustee details",
+                "The organisation type.",
             )
-        verify(updateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
     }
 
     @Test
     fun `updateOrganisationLandlordType is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordType.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordTypeAndLeadTrustee sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordTypeAndLeadTrustee(isCompany = false, isCharity = false, isTrust = true)
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The organisation type and lead trustee details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordTypeAndLeadTrustee is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordTypeAndLeadTrustee.hasAnnotation<Transactional>())
     }
 
     companion object {
