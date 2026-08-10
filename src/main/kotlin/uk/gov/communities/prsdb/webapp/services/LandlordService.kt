@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -102,13 +102,13 @@ class LandlordService(
         registrantDateOfBirth: LocalDate,
         registrantEmail: String,
         registrantPhoneNumber: String,
-    ): OrganisationLandlord {
+    ): OrganisationalLandlord {
         val orgAddress = addressService.findOrCreateAddress(organisationAddress)
         val trusteeAddress = leadTrusteeAddress?.let { addressService.findOrCreateAddress(it) }
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 
         val landlord =
-            OrganisationLandlord(
+            OrganisationalLandlord(
                 registrationNumber = registrationNumber,
                 name = organisationName,
                 address = orgAddress,
@@ -222,7 +222,7 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateOrganisationLandlordCompaniesHouseDetails(
+    fun updateOrganisationalLandlordCompaniesHouseDetails(
         isCompany: Boolean,
         companyNumber: String?,
         governingBodyMembers: List<GoverningBodyMemberDataModel>,

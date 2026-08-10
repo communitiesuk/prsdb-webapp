@@ -7,7 +7,5 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBody
 @Repository
 @Suppress("ktlint:standard:function-naming")
 interface OrganisationGoverningBodyMemberRepository : JpaRepository<OrganisationGoverningBodyMember, Long> {
-    fun findAllByOrganisationLandlord_Id(organisationLandlordId: Long): List<OrganisationGoverningBodyMember>
-
-    fun deleteByOrganisationLandlord_Id(organisationLandlordId: Long)
+    fun deleteByOrganisationalLandlord_Id(organisationalLandlordId: Long)
 }

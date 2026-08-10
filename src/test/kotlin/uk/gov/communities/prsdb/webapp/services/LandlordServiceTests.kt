@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
@@ -116,7 +116,7 @@ class LandlordServiceTests {
 
     @Test
     fun `retrieveLandlordById returns an organisation landlord`() {
-        val landlord = OrganisationLandlord()
+        val landlord = OrganisationalLandlord()
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
 
         val result = landlordService.retrieveLandlordById(landlord.id)
@@ -208,7 +208,7 @@ class LandlordServiceTests {
             leadTrusteeEmail: String? = null,
             leadTrusteePhoneNumber: String? = null,
             leadTrusteeAddress: AddressDataModel? = null,
-        ): OrganisationLandlord =
+        ): OrganisationalLandlord =
             landlordService.createOrganisationLandlord(
                 organisationName = "Test Org",
                 organisationAddress = orgAddressDataModel,
@@ -238,7 +238,7 @@ class LandlordServiceTests {
         fun `creates an organisation landlord and returns it`() {
             val result = createOrganisationLandlord()
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
 
             val saved = landlordCaptor.value
@@ -275,7 +275,7 @@ class LandlordServiceTests {
 
             verify(mockAddressService, times(2)).findOrCreateAddress(any())
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
             assertEquals(trusteeAddress, landlordCaptor.value.leadTrusteeAddress)
         }
@@ -286,7 +286,7 @@ class LandlordServiceTests {
 
             verify(mockAddressService, times(1)).findOrCreateAddress(any())
 
-            val landlordCaptor = captor<OrganisationLandlord>()
+            val landlordCaptor = captor<OrganisationalLandlord>()
             verify(mockOrganisationLandlordRepository).save(landlordCaptor.capture())
             assertNull(landlordCaptor.value.leadTrusteeAddress)
         }
@@ -672,7 +672,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser updates the organisation name`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
@@ -684,7 +684,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser skips null fields`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
@@ -695,7 +695,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordName updates the organisation name via updateOrganisationLandlordForUser`() {
-        val orgLandlord = OrganisationLandlord()
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.name = "Old Org Name"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
@@ -715,13 +715,13 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordCompaniesHouseDetails sets isCompany and companyNumber when registered`() {
-        val orgLandlord = OrganisationLandlord()
+    fun `updateOrganisationalLandlordCompaniesHouseDetails sets isCompany and companyNumber when registered`() {
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.isCompany = false
         orgLandlord.companyNumber = null
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
-        landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+        landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
             isCompany = true,
             companyNumber = "12345678",
             governingBodyMembers = emptyList(),
@@ -733,13 +733,13 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordCompaniesHouseDetails clears the companyNumber when not registered`() {
-        val orgLandlord = OrganisationLandlord()
+    fun `updateOrganisationalLandlordCompaniesHouseDetails clears the companyNumber when not registered`() {
+        val orgLandlord = OrganisationalLandlord()
         orgLandlord.isCompany = true
         orgLandlord.companyNumber = "12345678"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
-        landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+        landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
             isCompany = false,
             companyNumber = null,
             governingBodyMembers = emptyList(),
@@ -750,8 +750,8 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordCompaniesHouseDetails is annotated with @Transactional`() {
-        assertTrue(landlordService::updateOrganisationLandlordCompaniesHouseDetails.hasAnnotation<Transactional>())
+    fun `updateOrganisationalLandlordCompaniesHouseDetails is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationalLandlordCompaniesHouseDetails.hasAnnotation<Transactional>())
     }
 
     companion object {

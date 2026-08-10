@@ -42,7 +42,7 @@ class ProvideElectricalCertLaterStepConfigTests {
 
     private fun setupStepConfig(): ProvideElectricalCertLaterStepConfig {
         val stepConfig = ProvideElectricalCertLaterStepConfig()
-        stepConfig.routeSegment = ProvideElectricalCertLaterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ProvideElectricalCertLaterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

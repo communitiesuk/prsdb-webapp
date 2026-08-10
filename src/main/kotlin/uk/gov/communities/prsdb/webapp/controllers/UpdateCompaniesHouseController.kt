@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -36,7 +36,7 @@ class UpdateCompaniesHouseController(
         principal: Principal,
         @PathVariable stepPath: String,
     ): ModelAndView {
-        checkUserIsOrganisationLandlord()
+        checkUserIsOrganisationalLandlord()
         return dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
     }
 
@@ -47,13 +47,13 @@ class UpdateCompaniesHouseController(
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        checkUserIsOrganisationLandlord()
+        checkUserIsOrganisationalLandlord()
         return dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
     }
 
-    private fun checkUserIsOrganisationLandlord() {
+    private fun checkUserIsOrganisationalLandlord() {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
-        if (landlord !is OrganisationLandlord) {
+        if (landlord !is OrganisationalLandlord) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
                 "Only organisation landlords can update their Companies House details",

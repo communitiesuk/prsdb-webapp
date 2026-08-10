@@ -124,7 +124,7 @@ class HasEpcStepConfigTests {
 
     private fun setupStepConfig(): HasEpcStepConfig {
         val stepConfig = HasEpcStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

@@ -71,7 +71,7 @@ class ManualAddressStepConfigTests {
 
     private fun setupStepConfig(): ManualAddressStepConfig {
         val stepConfig = ManualAddressStepConfig()
-        stepConfig.routeSegment = ManualAddressStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ManualAddressStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

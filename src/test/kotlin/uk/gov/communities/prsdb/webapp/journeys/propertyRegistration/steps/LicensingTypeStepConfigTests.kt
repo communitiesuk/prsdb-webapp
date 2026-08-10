@@ -96,7 +96,7 @@ class LicensingTypeStepConfigTests {
 
     private fun setupStepConfig(): LicensingTypeStepConfig {
         val stepConfig = LicensingTypeStepConfig(featureFlagManager)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

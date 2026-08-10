@@ -342,7 +342,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val createdOrgLandlord =
             assertNotNull(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull())
-                .organisationLandlord
+                .organisationalLandlord
         val createdOrgLandlordRegNum = RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
 
         verify(orgConfirmationEmailSender).sendEmail(

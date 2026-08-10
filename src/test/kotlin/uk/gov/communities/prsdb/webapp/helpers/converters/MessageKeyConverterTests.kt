@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -113,6 +114,12 @@ class MessageKeyConverterTests {
     @ParameterizedTest
     @EnumSource(FileUploadStatus::class)
     fun `convert returns a resolvable message key for every FileUploadStatus`(value: FileUploadStatus) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    @ParameterizedTest
+    @EnumSource(GoverningBodyMemberType::class)
+    fun `convert returns a resolvable message key for every GoverningBodyMemberType`(value: GoverningBodyMemberType) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 }

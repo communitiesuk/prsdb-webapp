@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.OrganisationLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -83,7 +83,7 @@ class LandlordRegistrationService(
         organisationRegistrantEmail: String,
         organisationRegistrantPhoneNumber: String,
         organisationGoverningBodyMembers: List<GoverningBodyMemberDataModel>,
-    ): OrganisationLandlord {
+    ): OrganisationalLandlord {
         val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
 
         val isTrust = OrgType.TRUST in organisationTypes
@@ -142,7 +142,7 @@ class LandlordRegistrationService(
         )
     }
 
-    private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationLandlord) {
+    private fun sendOrganisationalRegistrationConfirmationEmail(landlord: OrganisationalLandlord) {
         // TODO: PDJB-1274: reassess which address and name to send to once there is a general way to email a landlord
         organisationalRegistrationConfirmationSender.sendEmail(
             landlord.registrantEmail,

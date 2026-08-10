@@ -56,7 +56,7 @@ class ElectricalCertExpiryDateStepConfigTests {
 
     private fun setupStepConfig(): ElectricalCertExpiryDateStepConfig {
         val stepConfig = ElectricalCertExpiryDateStepConfig()
-        stepConfig.routeSegment = ElectricalCertExpiryDateStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ElectricalCertExpiryDateStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

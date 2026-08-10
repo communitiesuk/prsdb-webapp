@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
+import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -40,6 +42,7 @@ class LandlordRegistrationCyaStepConfig(
     private val landlordRegistrationService: LandlordRegistrationService,
     private val securityContextService: SecurityContextService,
     private val featureFlagManager: FeatureFlagManager,
+    private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) =
         if (isOrgLandlord(state)) {
@@ -391,7 +394,7 @@ class LandlordRegistrationCyaStepConfig(
                     org.orgTypeStep.formModel.orgTypes
                         .filterNotNull()
                         .filter { it.isNotBlank() }
-                        .map { orgTypeMessageKey(it) },
+                        .joinToString(", ") { messageSource.getMessageForKey(orgTypeMessageKey(it)) },
                     Destination.VisitableStep(org.orgTypeStep, state.getCyaJourneyId(org.orgTypeStep)),
                 ),
             )

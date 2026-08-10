@@ -76,7 +76,7 @@ class CheckInvitationsStepConfigTests {
     @Test
     fun `mode returns null when form model is not saved`() {
         val stepConfig = CheckInvitationsStepConfig()
-        stepConfig.routeSegment = CheckInvitationsStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         whenever(mockJourneyState.getStepData(CheckInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
 
@@ -86,7 +86,7 @@ class CheckInvitationsStepConfigTests {
     @Test
     fun `mode returns COMPLETE when form model is saved`() {
         val stepConfig = CheckInvitationsStepConfig()
-        stepConfig.routeSegment = CheckInvitationsStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         whenever(mockJourneyState.getStepData(CheckInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
@@ -95,12 +95,12 @@ class CheckInvitationsStepConfigTests {
 
     private fun setupStepConfig(): CheckInvitationsStepConfig {
         val stepConfig = CheckInvitationsStepConfig()
-        stepConfig.routeSegment = CheckInvitationsStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockJourneyState.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
         whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
-        whenever(mockCheckJointLandlordsStep.routeSegment).thenReturn(CheckJointLandlordsStep.ROUTE_SEGMENT)
+        whenever(mockCheckJointLandlordsStep.urlPath).thenReturn(CheckJointLandlordsStep.ROUTE_SEGMENT)
         whenever(mockCheckJointLandlordsStep.currentJourneyId).thenReturn(journeyId)
         whenever(mockCheckJointLandlordsStep.isStepReachable).thenReturn(true)
 

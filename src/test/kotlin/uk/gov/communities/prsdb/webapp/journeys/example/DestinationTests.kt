@@ -23,7 +23,7 @@ class DestinationTests {
         val routeSegment = "test-segment"
 
         whenever(mockStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.urlPath).thenReturn(routeSegment)
 
         // Act
         val destination = Destination(mockStep)
@@ -41,7 +41,7 @@ class DestinationTests {
         val journeyId = "explicit-journey-id"
         val routeSegment = "explicit-segment"
 
-        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.urlPath).thenReturn(routeSegment)
 
         // Act
         val destination = Destination.VisitableStep(mockStep, journeyId)
@@ -60,7 +60,7 @@ class DestinationTests {
         val routeSegment = "test-segment"
 
         whenever(mockStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.urlPath).thenReturn(routeSegment)
         whenever(mockStep.isStepReachable).thenReturn(false)
 
         // Act
@@ -79,7 +79,7 @@ class DestinationTests {
         val routeSegment = "test-segment"
 
         whenever(mockStep.currentJourneyId).thenReturn(journeyId)
-        whenever(mockStep.routeSegment).thenReturn(routeSegment)
+        whenever(mockStep.urlPath).thenReturn(routeSegment)
         whenever(mockStep.isStepReachable).thenReturn(true)
 
         // Act

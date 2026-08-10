@@ -22,13 +22,13 @@ class CompleteCompaniesHouseUpdateStepConfig(
         if (isCompany) {
             val companyNumber =
                 state.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber)
-            landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+            landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
                 isCompany = true,
                 companyNumber = companyNumber,
                 governingBodyMembers = emptyList(),
             )
         } else {
-            landlordService.updateOrganisationLandlordCompaniesHouseDetails(
+            landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
                 isCompany = false,
                 companyNumber = null,
                 governingBodyMembers = state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
