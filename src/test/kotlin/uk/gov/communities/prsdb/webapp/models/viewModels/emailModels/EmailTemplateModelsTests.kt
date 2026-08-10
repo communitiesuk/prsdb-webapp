@@ -102,8 +102,8 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
-                    "/emails/LandlordUpdateConfirmation.md",
+                    IndividualLandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
+                    "/emails/IndividualLandlordUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     BetaFeedbackEmail("feedback", "email@test.com", "referrer"),

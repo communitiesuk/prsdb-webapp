@@ -80,9 +80,9 @@
   {
     "test_id": "f808f0c9-b7c0-48c5-b9a7-f289e999ccd0",
     "prod_id": "7410b9e9-2d57-475b-b912-66b3ca1421bf",
-    "enumName": "LANDLORD_UPDATE_CONFIRMATION",
+    "enumName": "INDIVIDUAL_LANDLORD_UPDATE_CONFIRMATION",
     "subject": "You have updated your landlord details",
-    "bodyLocation": "/emails/LandlordUpdateConfirmation.md"
+    "bodyLocation": "/emails/IndividualLandlordUpdateConfirmation.md"
   },
 
   {

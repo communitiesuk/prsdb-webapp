@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 import kotlin.String
@@ -38,7 +38,7 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
+    private val updateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
@@ -332,7 +332,7 @@ class LandlordService(
             emails.forEach { email ->
                 updateConfirmationSender.sendEmail(
                     email,
-                    LandlordUpdateConfirmation(
+                    IndividualLandlordUpdateConfirmation(
                         registrationNumber =
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(landlord.registrationNumber)

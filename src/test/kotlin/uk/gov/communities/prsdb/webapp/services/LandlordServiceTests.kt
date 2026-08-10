@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDat
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
@@ -77,7 +77,7 @@ class LandlordServiceTests {
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
     @Mock
-    private lateinit var updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>
+    private lateinit var updateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>
 
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -578,7 +578,7 @@ class LandlordServiceTests {
 
         // Assert
         val expectedEmailModel =
-            LandlordUpdateConfirmation(
+            IndividualLandlordUpdateConfirmation(
                 RegistrationNumberDataModel.fromRegistrationNumber(landlordEntity.registrationNumber).toString(),
                 dashboardUrl,
                 expectedDetail,
