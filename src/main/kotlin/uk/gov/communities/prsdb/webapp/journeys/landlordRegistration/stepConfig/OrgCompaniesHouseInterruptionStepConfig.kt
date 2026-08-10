@@ -7,8 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-1447: replace this placeholder with the real Companies House change interruption page(s). Shared by the
-//  standalone update journey and the organisation check-your-answers change flow, so it uses the generic JourneyState.
+// TODO PDJB-1447: replace this placeholder with the real Companies House change interruption page(s).
 @JourneyFrameworkComponent
 class OrgCompaniesHouseInterruptionStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
