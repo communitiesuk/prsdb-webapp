@@ -243,12 +243,10 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationalLandlordCompaniesHouseDetails(
-        isCompany: Boolean,
         companyNumber: String?,
         governingBodyMembers: List<GoverningBodyMemberDataModel>,
     ) {
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
-        landlordEntity.isCompany = isCompany
         landlordEntity.companyNumber = companyNumber
         organisationGoverningBodyMemberService.replaceGoverningBodyMembers(landlordEntity, governingBodyMembers)
     }

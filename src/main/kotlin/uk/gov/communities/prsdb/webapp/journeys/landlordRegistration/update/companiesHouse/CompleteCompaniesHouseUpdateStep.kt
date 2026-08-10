@@ -17,19 +17,17 @@ class CompleteCompaniesHouseUpdateStepConfig(
     override fun mode(state: UpdateCompaniesHouseJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateCompaniesHouseJourneyState) {
-        val isCompany =
+        val isRegisteredWithCompaniesHouse =
             state.orgIsRegisteredCompanyStep.formModel.notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
-        if (isCompany) {
+        if (isRegisteredWithCompaniesHouse) {
             val companyNumber =
                 state.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber)
             landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-                isCompany = true,
                 companyNumber = companyNumber,
                 governingBodyMembers = emptyList(),
             )
         } else {
             landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-                isCompany = false,
                 companyNumber = null,
                 governingBodyMembers = state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
             )

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -716,21 +715,33 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationalLandlordCompaniesHouseDetails sets isCompany and companyNumber when registered`() {
+    fun `updateOrganisationalLandlordCompaniesHouseDetails sets the companyNumber and clears governing body members when registered`() {
         val orgLandlord = OrganisationalLandlord()
         orgLandlord.isCompany = false
         orgLandlord.companyNumber = null
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-            isCompany = true,
             companyNumber = "12345678",
             governingBodyMembers = emptyList(),
         )
 
-        assertTrue(orgLandlord.isCompany)
         assertEquals("12345678", orgLandlord.companyNumber)
         verify(mockOrganisationGoverningBodyMemberService).replaceGoverningBodyMembers(orgLandlord, emptyList())
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordCompaniesHouseDetails does not change the organisation type flag`() {
+        val orgLandlord = OrganisationalLandlord()
+        orgLandlord.isCompany = true
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
+            companyNumber = null,
+            governingBodyMembers = emptyList(),
+        )
+
+        assertTrue(orgLandlord.isCompany)
     }
 
     @Test
@@ -741,12 +752,10 @@ class LandlordServiceTests {
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-            isCompany = false,
             companyNumber = null,
             governingBodyMembers = emptyList(),
         )
 
-        assertFalse(orgLandlord.isCompany)
         assertNull(orgLandlord.companyNumber)
     }
 
