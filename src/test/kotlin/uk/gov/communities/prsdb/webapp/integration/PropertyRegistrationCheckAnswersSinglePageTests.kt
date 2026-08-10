@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
@@ -173,6 +174,22 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             checkAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
             val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
             selectiveLicencePage.submitLicenseNumber("SL-99999")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the occupancy question change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            occupancyPage.submitIsVacant()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
