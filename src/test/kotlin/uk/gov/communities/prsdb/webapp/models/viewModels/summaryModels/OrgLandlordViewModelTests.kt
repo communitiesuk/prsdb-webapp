@@ -82,7 +82,7 @@ class OrgLandlordViewModelTests {
             viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.registeredCharity" }.fieldValue,
         )
         assertEquals(
-            "commonText.other",
+            "forms.orgCharityRegisteredWith.radios.option.none",
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
                 .getConvertedFieldValue(),
@@ -140,14 +140,14 @@ class OrgLandlordViewModelTests {
     }
 
     @Test
-    fun `an organisation with no selected organisation types shows other`() {
+    fun `an organisation with no selected organisation types shows none of these`() {
         val landlord =
             MockLandlordData.createOrgLandlord(isCompany = false, isCharity = false, isTrust = false)
 
         val viewModel = OrgLandlordViewModel(landlord)
 
         assertIterableEquals(
-            listOf("commonText.other"),
+            listOf("registerAsALandlord.orgType.checkbox.none"),
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.organisationType" }
                 .getConvertedFieldValue() as List<*>,

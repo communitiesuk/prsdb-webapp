@@ -953,7 +953,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 )
 
             assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("Yes")
-            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).containsText("Other")
+            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).containsText("None of these")
             assertThat(checkAnswersPage.landlordDetails.charityNumberRow.value).hasCount(0)
         }
 
