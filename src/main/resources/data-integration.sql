@@ -228,7 +228,7 @@ INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
                       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
 VALUES (11, 900, 1, '2026-07-30 00:00:00+00',
         'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
-        'Test Registrant', '1980-01-01', 'registrant@example.com', '07777777778',
+        'Test Registrant', '1980-01-01', 'Team-PRSDB+orglandlord@softwire.com', '07777777778',
         true, true, true,
         '12345678', 0, '1234567',
         'Lead Trustee Name', '1975-06-15', 'lead.trustee@example.com',
@@ -238,7 +238,7 @@ VALUES (11, 900, 1, '2026-07-30 00:00:00+00',
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO organisational_landlord_user (id, organisation_landlord_id, subject_identifier, name, email, created_date)
-VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'registrant@example.com', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+VALUES (1, 11, 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw', 'Test Registrant', 'Team-PRSDB+orglandlord@softwire.com', '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
