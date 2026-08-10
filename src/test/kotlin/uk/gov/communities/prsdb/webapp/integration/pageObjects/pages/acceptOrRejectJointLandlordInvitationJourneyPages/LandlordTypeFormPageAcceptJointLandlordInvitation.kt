@@ -2,27 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LandlordTypeFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 
 class LandlordTypeFormPageAcceptJointLandlordInvitation(
     page: Page,
-) : BasePage(
+) : LandlordTypeFormBasePage(
         page,
         "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${LandlordTypeStep.ROUTE_SEGMENT}",
-    ) {
-    val form = LandlordTypeForm(page)
-
-    fun submitOrganisation() {
-        form.landlordTypeRadios.selectValue("ORGANISATION")
-        form.submit()
-    }
-
-    class LandlordTypeForm(
-        page: Page,
-    ) : FormWithSectionHeader(page) {
-        val landlordTypeRadios = Radios(locator)
-    }
-}
+    )
