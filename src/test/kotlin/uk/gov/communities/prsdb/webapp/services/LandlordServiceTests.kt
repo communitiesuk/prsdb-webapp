@@ -766,6 +766,29 @@ class LandlordServiceTests {
         assertTrue(landlordService::updateOrganisationLandlordTypeAndLeadTrustee.hasAnnotation<Transactional>())
     }
 
+    @Test
+    fun `updateOrganisationLandlordLeadTrustee sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordLeadTrustee(
+            name = "New Trustee",
+            dateOfBirth = LocalDate.of(1990, 1, 1),
+            email = "trustee@example.com",
+            phone = "07123456789",
+            addressDataModel = AddressDataModel("2 Trustee Road, TR1 3CD"),
+        )
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The lead trustee details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
     companion object {
         @JvmStatic
         fun getUpdateAndExpectedEmailPairs() =
