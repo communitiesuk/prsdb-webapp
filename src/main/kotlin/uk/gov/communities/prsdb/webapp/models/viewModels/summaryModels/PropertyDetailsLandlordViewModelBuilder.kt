@@ -76,7 +76,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                         is IndividualLandlord ->
                             SummaryCardViewModel(
                                 title = landlord.name,
-                                summaryList = buildLocalCouncilCardRows(landlord),
+                                summaryList = buildLocalCouncilIndividualCardRows(landlord),
                                 actions =
                                     listOf(
                                         SummaryCardActionViewModel(
@@ -118,7 +118,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
             )
 
-        private fun buildLocalCouncilCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLocalCouncilIndividualCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",
