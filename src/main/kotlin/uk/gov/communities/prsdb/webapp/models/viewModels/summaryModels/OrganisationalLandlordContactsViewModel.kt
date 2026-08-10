@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 
 class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationalLandlord,
@@ -23,14 +25,16 @@ class OrganisationalLandlordContactsViewModel(
                     }.toList(),
         )
 
-    // TODO: PDJB-1469: link the lead trustee "Change" action to its update journey
     val leadTrusteeCard: SummaryCardViewModel? =
         if (!orgLandlord.hasLeadTrustee) {
             null
         } else {
             SummaryCardViewModel(
                 title = "landlordDetails.org.leadTrusteeHeading",
-                actions = SummaryCardActionViewModel.changeAction(PLACEHOLDER_URL),
+                actions =
+                    SummaryCardActionViewModel.changeAction(
+                        "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
+                    ),
                 summaryList =
                     mutableListOf<SummaryListRowViewModel>()
                         .apply {

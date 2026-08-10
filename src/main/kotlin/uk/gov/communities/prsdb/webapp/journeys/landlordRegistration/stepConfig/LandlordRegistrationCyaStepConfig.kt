@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
@@ -391,10 +392,9 @@ class LandlordRegistrationCyaStepConfig(
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.organisationType",
-                    org.orgTypeStep.formModel.orgTypes
-                        .filterNotNull()
-                        .filter { it.isNotBlank() }
-                        .joinToString(", ") { messageSource.getMessageForKey(orgTypeMessageKey(it)) },
+                    org.orgTypeStep.formModel
+                        .getSelectedOrgTypes()
+                        .joinToString(", ") { messageSource.getMessageForKey(MessageKeyConverter.convert(it)) },
                     Destination.VisitableStep(org.orgTypeStep, state.getCyaJourneyId(org.orgTypeStep)),
                 ),
             )
@@ -427,7 +427,7 @@ class LandlordRegistrationCyaStepConfig(
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "registerAsALandlord.orgCheckAnswers.landlordDetails.charityCommission",
-                        regulatorMessageKey(charityRegulator),
+                        charityRegulator,
                         Destination.VisitableStep(
                             org.charityTask.orgCharityRegisteredWithStep,
                             state.getCyaJourneyId(org.charityTask.orgCharityRegisteredWithStep),
@@ -675,22 +675,6 @@ class LandlordRegistrationCyaStepConfig(
             CharityRegulator.NONE, null -> null
         }
     }
-
-    private fun orgTypeMessageKey(orgTypeName: String) =
-        when (orgTypeName) {
-            OrgType.COMPANY.name -> "registerAsALandlord.orgType.checkbox.company"
-            OrgType.CHARITY.name -> "registerAsALandlord.orgType.checkbox.charity"
-            OrgType.TRUST.name -> "registerAsALandlord.orgType.checkbox.trust"
-            else -> "commonText.other"
-        }
-
-    private fun regulatorMessageKey(regulator: CharityRegulator) =
-        when (regulator) {
-            CharityRegulator.ENGLAND_AND_WALES -> "forms.orgCharityRegisteredWith.radios.option.englandAndWales"
-            CharityRegulator.NORTHERN_IRELAND -> "forms.orgCharityRegisteredWith.radios.option.northernIreland"
-            CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
-            CharityRegulator.NONE -> "commonText.other"
-        }
 }
 
 @JourneyFrameworkComponent

@@ -22,7 +22,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberData
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 import kotlin.String
@@ -39,7 +40,8 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
+    private val individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
+    private val orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
 ) {
@@ -236,9 +238,11 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationLandlordName(orgName: String) {
-        updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(name = orgName),
-        )
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(name = orgName),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
     }
 
     @Transactional
@@ -253,6 +257,24 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationLandlordType(
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isCompany = isCompany,
+                    isCharity = isCharity,
+                    isTrust = isTrust,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordTypeAndLeadTrustee(
         isCompany: Boolean,
         isCharity: Boolean,
         isTrust: Boolean,
@@ -276,15 +298,24 @@ class LandlordService(
                 ),
             )
 
-        updateConfirmationSender.sendEmail(
-            landlord.email,
-            LandlordUpdateConfirmation(
-                registrationNumber =
-                    RegistrationNumberDataModel
-                        .fromRegistrationNumber(landlord.registrationNumber)
-                        .toString(),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                updatedDetail = "organisation type and lead trustee details",
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordLeadTrustee(
+        name: String,
+        dateOfBirth: LocalDate,
+        email: String,
+        phone: String,
+        addressDataModel: AddressDataModel,
+    ) {
+        updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                leadTrusteeName = name,
+                leadTrusteeDateOfBirth = dateOfBirth,
+                leadTrusteeEmail = email,
+                leadTrusteePhone = phone,
+                leadTrusteeAddress = addressDataModel,
             ),
         )
     }
@@ -320,7 +351,12 @@ class LandlordService(
                 throw RepositoryQueryTimeoutException("Landlord search with query '$searchTerm' timed out")
             }
 
-        return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }
+        return landlordPage.map {
+            LandlordSearchResultViewModel.fromDataModel(
+                it,
+                backLinkService.storeCurrentUrlReturningKey(),
+            )
+        }
     }
 
     private fun sendUpdateConfirmationEmail(
@@ -342,9 +378,9 @@ class LandlordService(
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
-                updateConfirmationSender.sendEmail(
+                individualUpdateConfirmationSender.sendEmail(
                     email,
-                    LandlordUpdateConfirmation(
+                    IndividualLandlordUpdateConfirmation(
                         registrationNumber =
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(landlord.registrationNumber)
@@ -355,5 +391,18 @@ class LandlordService(
                 )
             }
         }
+    }
+
+    private fun sendOrgUpdateConfirmationEmail(
+        emailAddress: String,
+        updatedDetail: String,
+    ) {
+        orgUpdateConfirmationSender.sendEmail(
+            emailAddress,
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                updatedDetail = "The $updatedDetail.",
+            ),
+        )
     }
 }
