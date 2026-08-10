@@ -26,7 +26,7 @@ class OrgCompaniesHouseUpdateRoutingStepConfig :
     }
 
     fun getPreviousIsRegisteredCompanyFromDatabase(userToLandlordService: UserToLandlordService): Boolean =
-        userToLandlordService.getCurrentOrganisationLandlordForUser().isCompany
+        userToLandlordService.getCurrentOrganisationLandlordForUser().isRegisteredCompany
 
     fun getPreviousIsRegisteredCompanyFromBaseJourney(
         state: CheckYourAnswersJourneyState,
