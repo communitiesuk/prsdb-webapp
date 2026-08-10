@@ -33,6 +33,7 @@ class OrgLandlordDetailsPage(
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)
     val registrationContactCard = RegistrationContactSummaryCard(page)
     val governingBodyMembersLink = Link.byText(page, "Add, change or remove members of your governing body")
+    val organisationDetailsSummaryList = OrganisationDetailsSummaryList(page)
 
     fun governingBodyMemberCard(title: String) = GoverningBodyMemberSummaryCard(page, title)
 
@@ -113,5 +114,21 @@ class OrgLandlordDetailsPage(
         fun goToOrganisationDetails() = goToTab("Organisation details")
 
         fun goToOrganisationContacts() = goToTab("Organisation contacts")
+    }
+
+    class OrganisationDetailsSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val registrationDateRow = getRow("Registration date")
+        val lrnRow = getRow("Landlord Registration Number")
+        val landlordTypeRow = getRow("Landlord type")
+        val nameRow = getRow("Organisation name")
+        val addressRow = getRow("Organisation address")
+        val emailRow = getRow("Organisation email")
+        val phoneRow = getRow("Organisation phone")
+        val organisationTypeRow = getRow("Organisation type")
+        val registeredCharityRow = getRow("Registered charity")
+        val registeredWithCompaniesHouseRow = getRow("Registered with Companies House")
+        val companyNumberRow = getRow("Companies House number")
     }
 }
