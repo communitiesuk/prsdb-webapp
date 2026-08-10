@@ -109,6 +109,18 @@ class OccupancyDetailsHelperTests {
     }
 
     @Test
+    fun `getRestructuredOccupancySummaryList returns the occupied row for unoccupied properties`() {
+        whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
+        whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = false })
+        whenever(mockOccupationState.getCyaJourneyId(mockOccupiedStep)).thenReturn("occupied-cya")
+
+        val rows = helper.getRestructuredOccupancySummaryList(mockOccupationState)
+
+        assertEquals(1, rows.size)
+        assertEquals("forms.checkPropertyAnswers.occupancy.question", rows[0].fieldHeading)
+    }
+
+    @Test
     fun `getCheckYourAnswersSummaryList includes all tenancy rows when property is occupied`() {
         whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
@@ -148,6 +160,60 @@ class OccupancyDetailsHelperTests {
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.households", rows[1].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.people", rows[2].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.bedrooms", rows[3].fieldHeading)
+    }
+
+    @Test
+    fun `getRestructuredCheckYourAnswersSummaryList includes tenancy rows when property is occupied`() {
+        whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
+        whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
+        whenever(mockOccupationState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.COMPLETE)
+        whenever(mockHouseholdStep.formModel).thenReturn(NumberOfHouseholdsFormModel().apply { numberOfHouseholds = "2" })
+        whenever(mockTenantsStep.formModel).thenReturn(NewNumberOfPeopleFormModel().apply { numberOfPeople = "5" })
+        whenever(mockOccupationState.getCyaJourneyId(mockHouseholdStep)).thenReturn("households-cya")
+        whenever(mockOccupationState.getCyaJourneyId(mockTenantsStep)).thenReturn("tenants-cya")
+        whenever(mockOccupationState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
+        whenever(mockFurnishedStatusStep.formModel).thenReturn(
+            FurnishedStatusFormModel().apply { furnishedStatus = FurnishedStatus.FURNISHED },
+        )
+        whenever(mockOccupationState.getCyaJourneyId(mockFurnishedStatusStep)).thenReturn("furnished-cya")
+        whenever(mockOccupationState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockRentIncludesBillsTask.rentIncludesBills).thenReturn(mockRentIncludesBillsStep)
+        whenever(mockOccupationState.getCyaJourneyId(mockRentIncludesBillsStep)).thenReturn("rent-bills-cya")
+        whenever(mockOccupationState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
+        whenever(mockRentFrequencyAndAmountTask.rentFrequency).thenReturn(mockRentFrequencyStep)
+        whenever(mockRentFrequencyStep.formModel).thenReturn(RentFrequencyFormModel().apply { rentFrequency = RentFrequency.MONTHLY })
+        whenever(mockOccupationState.getCyaJourneyId(mockRentFrequencyStep)).thenReturn("frequency-cya")
+        whenever(mockRentFrequencyAndAmountTask.rentAmount).thenReturn(mockRentAmountStep)
+        lenient().`when`(mockRentAmountStep.formModel).thenReturn(
+            RentAmountFormModel().apply { rentAmount = "500" },
+        )
+        whenever(mockOccupationState.getCyaJourneyId(mockRentAmountStep)).thenReturn("amount-cya")
+
+        val rows = helper.getRestructuredCheckYourAnswersSummaryList(mockOccupationState, mockMessageSource)
+
+        assertEquals(6, rows.size)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.households", rows[0].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.people", rows[1].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.furnishedStatus", rows[2].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills", rows[3].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentFrequency", rows[4].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentAmount", rows[5].fieldHeading)
+    }
+
+    @Test
+    fun `getRestructuredCheckYourAnswersSummaryList uses provide later tenancy row when households are deferred`() {
+        whenever(mockOccupationState.occupied).thenReturn(mockOccupiedStep)
+        whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = true })
+        whenever(mockOccupationState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
+        whenever(mockHouseholdStep.outcome).thenReturn(HouseholdMode.PROVIDE_THIS_LATER)
+        whenever(mockOccupationState.getCyaJourneyId(mockHouseholdStep)).thenReturn("households-cya")
+
+        val rows = helper.getRestructuredCheckYourAnswersSummaryList(mockOccupationState, mockMessageSource)
+
+        assertEquals(1, rows.size)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
     }
 
     @Test

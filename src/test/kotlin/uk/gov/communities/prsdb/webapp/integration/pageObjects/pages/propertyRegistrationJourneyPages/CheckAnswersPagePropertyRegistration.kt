@@ -22,6 +22,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
+    val occupancyHeading =
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
+
     val complianceSummaryList = ComplianceSummaryList(page)
 
     val tenancyHeading =
@@ -60,6 +63,7 @@ class CheckAnswersPagePropertyRegistration(
         val ownershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
+        val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
         val occupiedByTenantsRow = getRow("Occupied by tenants")
         val tenancyDetailsRow = getRow("Tenancy details")
         val numberOfHouseholdsRow = getRow("Number of households")
