@@ -236,9 +236,11 @@ class LandlordService(
 
     @Transactional
     fun updateOrganisationLandlordName(orgName: String) {
-        updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(name = orgName),
-        )
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(name = orgName),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
     }
 
     @Transactional
