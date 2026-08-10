@@ -72,7 +72,7 @@ class OrgGovBodyMembersTask(
             }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS) }
+                parents { journey.hasAnyGovBodyMembersStep.isComplete() }
                 backDestination {
                     if (journey.governingBodyMembersMap.isNullOrEmpty()) {
                         dependencies.whoToProvideEmptyBackDestination()

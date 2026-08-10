@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseChangeTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
@@ -25,9 +24,6 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val charityTask: OrgCharityTask
     val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep
-
-    // TODO PDJB-1447: Companies House change task for the check-your-answers change flow (see PDJB-1447).
-    val orgCompaniesHouseChangeTask: OrgCompaniesHouseChangeTask
 
     // TODO PDJB-1237: remove this placeholder once the org type update journey exists.
     val updateDetailsTodoStep: UpdateDetailsTodoStep

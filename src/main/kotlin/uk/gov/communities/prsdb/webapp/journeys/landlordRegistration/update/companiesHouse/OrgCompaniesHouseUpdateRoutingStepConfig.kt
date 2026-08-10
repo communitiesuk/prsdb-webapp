@@ -3,7 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.com
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 enum class OrgCompaniesHouseUpdateRouteMode {
     UNCHANGED,
@@ -11,16 +14,34 @@ enum class OrgCompaniesHouseUpdateRouteMode {
     CHANGED_TO_NON_COMPANY,
 }
 
-// Internal routing step that detects whether the landlord's Companies House answer has changed, and if so in which
-// direction, so the interruption is shown only on a change.
 @JourneyFrameworkComponent
 class OrgCompaniesHouseUpdateRoutingStepConfig :
     AbstractInternalStepConfig<OrgCompaniesHouseUpdateRouteMode, OrgCompaniesHouseUpdateState>() {
+    private lateinit var previousIsRegisteredCompany: () -> Boolean
+
+    fun usingPreviousIsRegisteredCompany(previousIsRegisteredCompany: () -> Boolean): OrgCompaniesHouseUpdateRoutingStepConfig {
+        this.previousIsRegisteredCompany = previousIsRegisteredCompany
+        return this
+    }
+
+    fun getPreviousIsRegisteredCompanyFromDatabase(userToLandlordService: UserToLandlordService): Boolean =
+        userToLandlordService.getCurrentOrganisationLandlordForUser().isCompany
+
+    fun getPreviousIsRegisteredCompanyFromBaseJourney(
+        state: CheckYourAnswersJourneyState,
+        orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
+    ): Boolean =
+        orgIsRegisteredCompanyStep.stepConfig
+            .getFormModelFromState(state.getBaseJourneyState())
+            .companiesHouse == true
+
+    override fun isSubClassInitialised() = ::previousIsRegisteredCompany.isInitialized
+
     override fun mode(state: OrgCompaniesHouseUpdateState): OrgCompaniesHouseUpdateRouteMode? {
-        val current = state.orgIsRegisteredCompanyStep.outcome ?: return null
+        val currentIsRegisteredCompany = state.orgIsRegisteredCompanyStep.outcome?.let { it == YesOrNo.YES } ?: return null
         return when {
-            current == state.previousIsRegisteredCompany -> OrgCompaniesHouseUpdateRouteMode.UNCHANGED
-            current == YesOrNo.YES -> OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY
+            previousIsRegisteredCompany() == currentIsRegisteredCompany -> OrgCompaniesHouseUpdateRouteMode.UNCHANGED
+            currentIsRegisteredCompany -> OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY
             else -> OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
         }
     }

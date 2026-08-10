@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompa
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.CompaniesHouseUpdateInterruptionPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.OrgCompanyNumberFormPageUpdateCompaniesHouse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 
 @WithOrgLandlordProfile
 class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -61,6 +61,6 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
         interruptionPage.clickContinue()
 
-        assertTrue(page.url().contains(OrgGovBodyDetailsStep.ROUTE_SEGMENT))
+        assertTrue(page.url().contains(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT))
     }
 }

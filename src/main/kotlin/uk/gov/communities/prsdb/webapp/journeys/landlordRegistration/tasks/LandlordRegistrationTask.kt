@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgCompaniesHouseChangeDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
@@ -30,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
@@ -41,6 +41,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.orgCompaniesHouseChangeCyaFlow
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -62,6 +64,8 @@ class LandlordRegistrationTask(
     override val privacyNoticeStep: PrivacyNoticeStep,
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    override val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep,
+    override val orgCompaniesHouseInterruptionStep: OrgCompaniesHouseInterruptionStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationTask>,
 ) : TaskWithoutDependencies<LandlordRegistrationState>(journeyStateService),
@@ -70,6 +74,9 @@ class LandlordRegistrationTask(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
+        get() = orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep
 
     override val taskState get() = this
 
@@ -301,16 +308,7 @@ class LandlordRegistrationTask(
 
                     OrgIsRegisteredCompanyStep.ROUTE_SEGMENT,
                     -> {
-                        val changeTask = journey.orgLandlordRegistrationTask.orgCompaniesHouseChangeTask
-                        checkAnswerTask(
-                            changeTask,
-                            {
-                                OrgCompaniesHouseChangeDependencies {
-                                    changeTask.companiesHouseTask.orgIsRegisteredCompanyStep.stepConfig
-                                        .mode(journey.getBaseJourneyState())
-                                }
-                            },
-                        )
+                        orgCompaniesHouseChangeCyaFlow()
                     }
 
                     OrgCompanyNumberStep.ROUTE_SEGMENT,

@@ -32,9 +32,6 @@ class OrgLandlordRegistrationTask(
     override val companiesHouseTask: OrgCompaniesHouseTask,
     override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
-    // TODO PDJB-1447: this change task is only wired into the check-your-answers change flow for the Companies House
-    //  row. Its interruption page's real content/switch-detection logic will be implemented in PDJB-1447.
-    override val orgCompaniesHouseChangeTask: OrgCompaniesHouseChangeTask,
     // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
     override val updateDetailsTodoStep: UpdateDetailsTodoStep,
 ) : TaskWithoutDependencies<LandlordRegistrationOrgLandlordState>(journeyStateService),

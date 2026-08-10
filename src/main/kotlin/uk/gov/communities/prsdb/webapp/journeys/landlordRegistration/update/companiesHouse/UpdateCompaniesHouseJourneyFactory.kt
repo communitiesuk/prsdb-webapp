@@ -30,10 +30,6 @@ class UpdateCompaniesHouseJourneyFactory(
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        if (state.wasRegisteredWithCompaniesHouse == null) {
-            state.wasRegisteredWithCompaniesHouse = userToLandlordService.getCurrentOrganisationLandlordForUser().isCompany
-        }
-
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
             configure { withAdditionalContentProperty { "title" to "landlordDetails.update.title" } }
@@ -44,7 +40,10 @@ class UpdateCompaniesHouseJourneyFactory(
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
                 nextStep { journey.orgCompaniesHouseUpdateRoutingStep }
             }
-            step(journey.orgCompaniesHouseUpdateRoutingStep) {
+            step<OrgCompaniesHouseUpdateRouteMode, OrgCompaniesHouseUpdateRoutingStepConfig>(journey.orgCompaniesHouseUpdateRoutingStep) {
+                stepSpecificInitialisation {
+                    usingPreviousIsRegisteredCompany { getPreviousIsRegisteredCompanyFromDatabase(userToLandlordService) }
+                }
                 parents { journey.orgIsRegisteredCompanyStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
@@ -145,11 +144,6 @@ class UpdateCompaniesHouseJourney(
     private val journeyName: String = "companies-house",
 ) : AbstractJourneyState(journeyStateService),
     UpdateCompaniesHouseJourneyState {
-    override var wasRegisteredWithCompaniesHouse: Boolean? by delegateProvider.nullableDelegate("wasRegisteredWithCompaniesHouse")
-
-    override val previousIsRegisteredCompany: YesOrNo?
-        get() = wasRegisteredWithCompaniesHouse?.let { if (it) YesOrNo.YES else YesOrNo.NO }
-
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(
@@ -166,8 +160,4 @@ interface UpdateCompaniesHouseJourneyState : OrgCompaniesHouseUpdateState {
     val orgGovBodyMembersTask: OrgGovBodyMembersTask
     val checkAnswersStep: CompaniesHouseUpdateCheckAnswersStep
     val completeCompaniesHouseUpdateStep: CompleteCompaniesHouseUpdateStep
-
-    // The landlord's Companies House registration status before this update began (their current DB record), persisted
-    // when the journey starts and exposed to the routing step as previousIsRegisteredCompany.
-    var wasRegisteredWithCompaniesHouse: Boolean?
 }
