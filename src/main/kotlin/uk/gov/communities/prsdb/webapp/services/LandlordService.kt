@@ -297,15 +297,18 @@ class LandlordService(
         phone: String,
         addressDataModel: AddressDataModel,
     ) {
-        updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(
-                leadTrusteeName = name,
-                leadTrusteeDateOfBirth = dateOfBirth,
-                leadTrusteeEmail = email,
-                leadTrusteePhone = phone,
-                leadTrusteeAddress = addressDataModel,
-            ),
-        )
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    leadTrusteeName = name,
+                    leadTrusteeDateOfBirth = dateOfBirth,
+                    leadTrusteeEmail = email,
+                    leadTrusteePhone = phone,
+                    leadTrusteeAddress = addressDataModel,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "lead trustee details")
     }
 
     fun searchForLandlords(
