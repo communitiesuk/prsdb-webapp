@@ -208,6 +208,26 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
+        orgLandlordUpdate.isCompany?.let { landlordEntity.isCompany = it }
+        orgLandlordUpdate.isCharity?.let { landlordEntity.isCharity = it }
+        orgLandlordUpdate.isTrust?.let { isTrust ->
+            landlordEntity.isTrust = isTrust
+            if (!isTrust) {
+                landlordEntity.leadTrusteeName = null
+                landlordEntity.leadTrusteeDateOfBirth = null
+                landlordEntity.leadTrusteeEmail = null
+                landlordEntity.leadTrusteePhone = null
+                landlordEntity.leadTrusteeAddress = null
+            }
+        }
+
+        orgLandlordUpdate.leadTrusteeName?.let { landlordEntity.leadTrusteeName = it }
+        orgLandlordUpdate.leadTrusteeDateOfBirth?.let { landlordEntity.leadTrusteeDateOfBirth = it }
+        orgLandlordUpdate.leadTrusteeEmail?.let { landlordEntity.leadTrusteeEmail = it }
+        orgLandlordUpdate.leadTrusteePhone?.let { landlordEntity.leadTrusteePhone = it }
+        orgLandlordUpdate.leadTrusteeAddress?.let {
+            landlordEntity.leadTrusteeAddress = addressService.findOrCreateAddress(it)
+        }
 
         return landlordEntity
     }
@@ -216,6 +236,44 @@ class LandlordService(
     fun updateOrganisationLandlordName(orgName: String) {
         updateOrganisationLandlordForUser(
             OrganisationLandlordUpdateModel(name = orgName),
+        )
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordType(
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+        leadTrusteeName: String? = null,
+        leadTrusteeDateOfBirth: LocalDate? = null,
+        leadTrusteeEmail: String? = null,
+        leadTrusteePhone: String? = null,
+        leadTrusteeAddress: AddressDataModel? = null,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isCompany = isCompany,
+                    isCharity = isCharity,
+                    isTrust = isTrust,
+                    leadTrusteeName = leadTrusteeName,
+                    leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
+                    leadTrusteeEmail = leadTrusteeEmail,
+                    leadTrusteePhone = leadTrusteePhone,
+                    leadTrusteeAddress = leadTrusteeAddress,
+                ),
+            )
+
+        updateConfirmationSender.sendEmail(
+            landlord.email,
+            LandlordUpdateConfirmation(
+                registrationNumber =
+                    RegistrationNumberDataModel
+                        .fromRegistrationNumber(landlord.registrationNumber)
+                        .toString(),
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                updatedDetail = "organisation type and lead trustee details",
+            ),
         )
     }
 

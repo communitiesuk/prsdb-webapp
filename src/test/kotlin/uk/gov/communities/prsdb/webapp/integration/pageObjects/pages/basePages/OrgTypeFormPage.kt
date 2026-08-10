@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 
-abstract class OrgTypeFormBasePage(
+abstract class OrgTypeFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
@@ -13,7 +13,11 @@ abstract class OrgTypeFormBasePage(
 
     fun selectCompany() = form.orgTypeCheckboxes.checkCheckbox(OrgType.COMPANY.toString())
 
+    fun selectCharity() = form.orgTypeCheckboxes.checkCheckbox(OrgType.CHARITY.toString())
+
     fun selectTrust() = form.orgTypeCheckboxes.checkCheckbox(OrgType.TRUST.toString())
+
+    fun deselectTrust() = form.orgTypeCheckboxes.getCheckbox(OrgType.TRUST.toString()).uncheck()
 
     fun selectNoneOfThese() = form.orgTypeCheckboxes.checkCheckbox(OrgType.NONE.toString())
 
