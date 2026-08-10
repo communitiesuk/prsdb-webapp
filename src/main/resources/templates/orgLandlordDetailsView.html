@@ -53,7 +53,7 @@
                     <span th:if="${orgLandlord.isCompany}" th:text="#{landlordDetails.org.isCompany}">landlordDetails.org.isCompany</span>
                     <span th:if="${orgLandlord.isCharity}" th:text="#{landlordDetails.org.isCharity}">landlordDetails.org.isCharity</span>
                     <span th:if="${orgLandlord.isTrust}" th:text="#{landlordDetails.org.isTrust}">landlordDetails.org.isTrust</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1237: Add update journey -->
+                    <a class="govuk-link" th:href="@{/landlord/landlord-details/update-organisation-type/organisation-type}" th:text="#{forms.links.change}">forms.links.change</a>
                 </p>
 
                 <p class="govuk-body">

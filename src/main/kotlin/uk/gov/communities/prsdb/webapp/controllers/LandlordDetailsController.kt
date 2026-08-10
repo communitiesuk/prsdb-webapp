@@ -153,6 +153,7 @@ class LandlordDetailsController(
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
         const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val ORGANISATION_CONTACTS_FRAGMENT = "organisation-contacts"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
         fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =

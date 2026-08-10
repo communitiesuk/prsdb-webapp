@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Land
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
@@ -752,6 +753,29 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationalLandlordCompaniesHouseDetails is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationalLandlordCompaniesHouseDetails.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordType sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordType(isCompany = false, isCharity = false, isTrust = false)
+
+        val expectedEmailModel =
+            LandlordUpdateConfirmation(
+                RegistrationNumberDataModel.fromRegistrationNumber(orgLandlord.registrationNumber).toString(),
+                dashboardUrl,
+                "organisation type and lead trustee details",
+            )
+        verify(updateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordType is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordType.hasAnnotation<Transactional>())
     }
 
     companion object {

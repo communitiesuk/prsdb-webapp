@@ -5,12 +5,14 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LandlordDetailsBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 
 class OrgLandlordDetailsPage(
     page: Page,
@@ -20,13 +22,18 @@ class OrgLandlordDetailsPage(
     val organisationDetailsPanel: Locator = page.locator("#organisation-details")
     val organisationContactsPanel: Locator = page.locator("#organisation-contacts")
     val mainContent: Locator = page.locator("main")
-    private val organisationNameChangeLink = Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
+    private val organisationNameChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
     private val companiesHouseChangeLink =
         Link(page.locator("a[href='$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}']"))
+    private val organisationTypeChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
 
     fun clickCompaniesHouseChangeLinkAndWait() = companiesHouseChangeLink.clickAndWait()
+
+    fun clickOrganisationTypeChangeLinkAndWait() = organisationTypeChangeLink.clickAndWait()
 
     val mainContactCard = MainContactSummaryCard(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)

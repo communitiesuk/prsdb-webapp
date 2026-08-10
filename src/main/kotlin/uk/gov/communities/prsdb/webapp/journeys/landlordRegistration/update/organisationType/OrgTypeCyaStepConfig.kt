@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,25 +7,23 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// Placeholder step retained from before the update journeys existed. It renders a dead-end TODO page (no continue
-//  button). Both the companies house and org type update journeys now exist, so it is no longer wired into any CYA
-//  change link and can be removed in a cleanup.
 @JourneyFrameworkComponent
-class UpdateDetailsTodoStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class OrgTypeCyaStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = emptyMap<String, Any?>()
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf("todoComment" to "TODO PDJB-1445: Organisation type check your answers page")
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoNoContinue"
+    override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
-final class UpdateDetailsTodoStep(
-    stepConfig: UpdateDetailsTodoStepConfig,
+final class OrgTypeCyaStep(
+    stepConfig: OrgTypeCyaStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "update-details-todo"
+        const val ROUTE_SEGMENT = "organisation-type-check-your-answers"
     }
 }

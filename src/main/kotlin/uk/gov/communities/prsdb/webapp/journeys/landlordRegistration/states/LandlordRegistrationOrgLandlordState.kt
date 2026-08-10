@@ -25,6 +25,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep
 
-    // TODO PDJB-1237: remove this placeholder once the org type update journey exists.
+    // Placeholder step retained from before the update journeys existed. Both the companies house and org type
+    //  update journeys now exist, so this is no longer wired into any CYA change link and can be removed in a cleanup.
     val updateDetailsTodoStep: UpdateDetailsTodoStep
 }
