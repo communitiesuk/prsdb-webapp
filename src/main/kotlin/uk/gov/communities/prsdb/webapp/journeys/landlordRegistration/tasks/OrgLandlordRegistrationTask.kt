@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
@@ -32,9 +31,6 @@ class OrgLandlordRegistrationTask(
     override val companiesHouseTask: OrgCompaniesHouseTask,
     override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
-    // Placeholder step retained from before the update journeys existed. Both the companies house and org type
-    //  update journeys now exist, so this is no longer wired into any CYA change link and can be removed in a cleanup.
-    override val updateDetailsTodoStep: UpdateDetailsTodoStep,
 ) : TaskWithoutDependencies<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this

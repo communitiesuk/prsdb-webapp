@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
@@ -24,8 +23,4 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val charityTask: OrgCharityTask
     val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep
-
-    // Placeholder step retained from before the update journeys existed. Both the companies house and org type
-    //  update journeys now exist, so this is no longer wired into any CYA change link and can be removed in a cleanup.
-    val updateDetailsTodoStep: UpdateDetailsTodoStep
 }
