@@ -178,7 +178,9 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the occupancy question change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
+        fun `the occupancy question change link starts a CYA sub-journey that returns to the property registration CYA on submit`(
+            page: Page,
+        ) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
