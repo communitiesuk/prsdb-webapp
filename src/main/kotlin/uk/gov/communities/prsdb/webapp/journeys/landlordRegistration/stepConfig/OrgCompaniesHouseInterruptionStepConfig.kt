@@ -2,32 +2,46 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 // TODO PDJB-1447: replace this placeholder with the real Companies House change interruption page(s).
 @JourneyFrameworkComponent
 class OrgCompaniesHouseInterruptionStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+    AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgCompaniesHouseUpdateState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
+    override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState) =
         mapOf(
             "title" to "registerAsALandlord.title",
             "todoComment" to "TODO PDJB-1447: Companies House change interruption page",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: OrgCompaniesHouseUpdateState) = "forms/todo"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun afterStepDataIsAdded(state: OrgCompaniesHouseUpdateState) {
+        // When changing to a non-company, this interruption replaces the outer governing body task's first step, so
+        // recording HAS_DETAILS keeps that task complete in the base journey and returns the user to the check answers page.
+        if (state.orgIsRegisteredCompanyStep.outcome == YesOrNo.NO) {
+            state.addStepData(
+                OrgGovBodyDetailsStep.ROUTE_SEGMENT,
+                mapOf(OrgGovBodyDetailsFormModel::orgGovBodyDetailsMode.name to OrgGovBodyDetailsMode.HAS_DETAILS.name),
+            )
+        }
+    }
+
+    override fun mode(state: OrgCompaniesHouseUpdateState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class OrgCompaniesHouseInterruptionStep(
     interruptionStepConfig: OrgCompaniesHouseInterruptionStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(interruptionStepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, OrgCompaniesHouseUpdateState>(interruptionStepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-companies-house-interruption"
     }
