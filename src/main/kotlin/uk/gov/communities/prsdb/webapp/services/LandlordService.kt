@@ -246,13 +246,19 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateOrganisationalLandlordCompaniesHouseDetails(
-        companyNumber: String?,
-        governingBodyMembers: List<GoverningBodyMemberDataModel>,
-    ) {
+    fun updateOrganisationalLandlordToRegisteredCompany(companyNumber: String) {
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
         landlordEntity.companyNumber = companyNumber
+        organisationGoverningBodyMemberService.replaceGoverningBodyMembers(landlordEntity, emptyList())
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information")
+    }
+
+    @Transactional
+    fun updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers: List<GoverningBodyMemberDataModel>) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.companyNumber = null
         organisationGoverningBodyMemberService.replaceGoverningBodyMembers(landlordEntity, governingBodyMembers)
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
     }
 
     @Transactional

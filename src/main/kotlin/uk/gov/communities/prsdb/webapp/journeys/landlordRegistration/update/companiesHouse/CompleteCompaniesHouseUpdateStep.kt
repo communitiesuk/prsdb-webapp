@@ -30,14 +30,10 @@ class CompleteCompaniesHouseUpdateStepConfig(
         if (isRegisteredWithCompaniesHouse) {
             val companyNumber =
                 state.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber)
-            landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-                companyNumber = companyNumber,
-                governingBodyMembers = emptyList(),
-            )
+            landlordService.updateOrganisationalLandlordToRegisteredCompany(companyNumber)
         } else {
-            landlordService.updateOrganisationalLandlordCompaniesHouseDetails(
-                companyNumber = null,
-                governingBodyMembers = state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
+            landlordService.updateOrganisationalLandlordToNonRegisteredCompany(
+                state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
             )
         }
     }
