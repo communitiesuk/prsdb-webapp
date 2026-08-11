@@ -19,9 +19,10 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithImmu
         val detailsPage = navigator.goToOrgLandlordDetails()
         detailsPage.deleteOrganisationLink.clickAndWait()
 
-        assertPageIs(page, AreYouSureFormPageOrganisationalLandlordDeregistration::class)
+        val areYouSurePage = assertPageIs(page, AreYouSureFormPageOrganisationalLandlordDeregistration::class)
 
-        // TODO: PDJB-1482 - Assert the real "are you sure" page content, then submit to proceed through the journey
+        areYouSurePage.submitYesDelete()
+
         // TODO: PDJB-1483 - Assert the organisational landlord and its related records are deleted after submitting
         // TODO: PDJB-1484 - Assert the "Organisation deleted" confirmation page content and that the dashboard is no longer accessible
     }
