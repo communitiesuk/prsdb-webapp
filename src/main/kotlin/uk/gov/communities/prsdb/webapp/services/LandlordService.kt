@@ -233,6 +233,10 @@ class LandlordService(
             landlordEntity.leadTrusteeAddress = addressService.findOrCreateAddress(it)
         }
 
+        orgLandlordUpdate.mainContactName?.let { landlordEntity.mainContactName = it }
+        orgLandlordUpdate.mainContactEmail?.let { landlordEntity.mainContactEmail = it }
+        orgLandlordUpdate.mainContactPhone?.let { landlordEntity.mainContactPhone = it }
+
         return landlordEntity
     }
 
@@ -259,6 +263,24 @@ class LandlordService(
         landlordEntity.companyNumber = null
         organisationGoverningBodyMemberService.createGoverningBodyMembers(landlordEntity, governingBodyMembers)
         sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordMainContact(
+        name: String,
+        email: String,
+        phone: String,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    mainContactName = name,
+                    mainContactEmail = email,
+                    mainContactPhone = phone,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
     }
 
     @Transactional
@@ -315,15 +337,18 @@ class LandlordService(
         phone: String,
         addressDataModel: AddressDataModel,
     ) {
-        updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(
-                leadTrusteeName = name,
-                leadTrusteeDateOfBirth = dateOfBirth,
-                leadTrusteeEmail = email,
-                leadTrusteePhone = phone,
-                leadTrusteeAddress = addressDataModel,
-            ),
-        )
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    leadTrusteeName = name,
+                    leadTrusteeDateOfBirth = dateOfBirth,
+                    leadTrusteeEmail = email,
+                    leadTrusteePhone = phone,
+                    leadTrusteeAddress = addressDataModel,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "lead trustee details")
     }
 
     fun searchForLandlords(

@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import java.time.LocalDate
 import kotlin.system.exitProcess
 
@@ -46,6 +47,7 @@ class IncompletePropertiesReminderTaskLogic(
     private val emailSender: EmailNotificationService<IncompletePropertyReminderEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val incompletePropertiesService: IncompletePropertiesService,
+    private val landlordUserEmailService: LandlordUserEmailService,
 ) {
     @Transactional
     fun sendIncompletePropertyReminders() {
@@ -61,12 +63,20 @@ class IncompletePropertiesReminderTaskLogic(
         for (page in 0..<pagesOfProperties) {
             val incompleteProperties =
                 incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
+            val emailsByUserId =
+                landlordUserEmailService.getEmailsByBaseUserId(incompleteProperties.map { it.user.id }.distinct())
             incompleteProperties.forEach { property ->
-                // TODO: PDJB-1274: Update emails to account for org landlord
-                val landlord = property.landlord
+                val recipientEmail = emailsByUserId[property.user.id]
+                if (recipientEmail == null) {
+                    println(
+                        "No email address found for the user who started incomplete property with savedJourneyStateId: " +
+                            property.savedJourneyState.id,
+                    )
+                    return@forEach
+                }
                 try {
                     emailSender.sendEmail(
-                        landlord.email,
+                        recipientEmail,
                         IncompletePropertyReminderEmail(
                             singleLineAddress =
                                 property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
