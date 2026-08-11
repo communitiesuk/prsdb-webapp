@@ -747,7 +747,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Keeping the same Companies House answer skips the interruption and returns via the company number page`(page: Page) {
+    fun `Keeping the same Companies House answer returns straight to check answers`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val checkAnswersPage =
@@ -761,9 +761,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         isRegisteredCompanyPage.submitYes()
-
-        val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
-        companyNumberPage.submitCompanyNumber("87654321")
 
         assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
     }

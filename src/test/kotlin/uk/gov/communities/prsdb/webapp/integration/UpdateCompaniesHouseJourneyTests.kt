@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.CompaniesHouseUpdateCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.CompaniesHouseUpdateInterruptionPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.OrgCompanyNumberFormPageUpdateCompaniesHouse
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateCompaniesHousePages.OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 
@@ -30,23 +29,20 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `Keeping the same registration answer skips the interruption and updates the company number`(page: Page) {
+    fun `Keeping the same registration answer returns straight to check answers with the company number unchanged`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
-        // The seeded landlord is already registered with Companies House, so re-answering Yes is unchanged and the
-        // interruption is skipped.
+        // The seeded landlord is already registered with Companies House, so re-answering Yes is unchanged and returns
+        // straight to check answers without the interruption or company number page.
         isRegisteredCompanyPage.submitYes()
-
-        val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
-        companyNumberPage.submitCompanyNumber("87654321")
 
         val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
         checkAnswersPage.confirmAndSubmit()
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
-        assertThat(updatedDetailsPage.mainContent).containsText("87654321")
+        assertThat(updatedDetailsPage.mainContent).containsText("12345678")
     }
 
     @Test
