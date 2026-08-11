@@ -158,5 +158,5 @@ provideLicensingLater:
   weWillNeedToKnow:
     intro: 'We’ll need to know:'
     bullet:
-      one: if your property needs a licence or not
-      two: details about the licence (if your property needs one)
+      one: if your property needs a license or not
+      two: details about the license (if your property needs one)

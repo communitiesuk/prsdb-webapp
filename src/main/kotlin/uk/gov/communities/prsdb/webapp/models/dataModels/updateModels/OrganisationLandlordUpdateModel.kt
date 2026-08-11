@@ -14,4 +14,7 @@ data class OrganisationLandlordUpdateModel(
     val leadTrusteeEmail: String? = null,
     val leadTrusteePhone: String? = null,
     val leadTrusteeAddress: AddressDataModel? = null,
+    val mainContactName: String? = null,
+    val mainContactEmail: String? = null,
+    val mainContactPhone: String? = null,
 )

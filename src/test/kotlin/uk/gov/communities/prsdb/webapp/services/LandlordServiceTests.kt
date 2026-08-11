@@ -769,6 +769,57 @@ class LandlordServiceTests {
     }
 
     @Test
+    fun `updateOrganisationLandlordForUser updates the main contact details`() {
+        val orgLandlord =
+            createOrgLandlord(
+                mainContactName = "Old Name",
+                mainContactEmail = "old@example.com",
+                mainContactPhoneNumber = "07111111111",
+            )
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                mainContactName = "New Name",
+                mainContactEmail = "new@example.com",
+                mainContactPhone = "07222222222",
+            ),
+        )
+
+        assertEquals("New Name", orgLandlord.mainContactName)
+        assertEquals("new@example.com", orgLandlord.mainContactEmail)
+        assertEquals("07222222222", orgLandlord.mainContactPhone)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordMainContact sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordMainContact(
+            name = "New Name",
+            email = "new@example.com",
+            phone = "07222222222",
+        )
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The main contact.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordMainContact is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordMainContact.hasAnnotation<Transactional>())
+    }
+
+    @Test
     fun `updateOrganisationLandlordType sends a confirmation email`() {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
@@ -810,6 +861,29 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationLandlordTypeAndLeadTrustee is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordTypeAndLeadTrustee.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordLeadTrustee sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordLeadTrustee(
+            name = "New Trustee",
+            dateOfBirth = LocalDate.of(1990, 1, 1),
+            email = "trustee@example.com",
+            phone = "07123456789",
+            addressDataModel = AddressDataModel("2 Trustee Road, TR1 3CD"),
+        )
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The lead trustee details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
     }
 
     companion object {

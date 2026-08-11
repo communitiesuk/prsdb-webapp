@@ -27,8 +27,8 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier)
 VALUES (1, current_date, current_date, 'example-incomplete-journey1', '{}', 'urn:fdc:gov.uk:2022:UVWXY');
 
-INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
-VALUES (1, 1);
+INSERT INTO landlord_incomplete_properties (user_id, saved_journey_state_id)
+VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1);
 
 INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'LIC123456');

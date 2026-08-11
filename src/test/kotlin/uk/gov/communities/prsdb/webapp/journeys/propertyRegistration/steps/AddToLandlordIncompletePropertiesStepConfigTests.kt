@@ -9,22 +9,22 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
 @ExtendWith(MockitoExtension::class)
 class AddToLandlordIncompletePropertiesStepConfigTests {
     @Mock
-    private lateinit var mockIncompletePropertyForLandlordService: IncompletePropertyForLandlordService
+    private lateinit var mockUsersIncompletePropertyService: UsersIncompletePropertyService
 
     private lateinit var stepConfig: AddToLandlordIncompletePropertiesStepConfig
 
     @BeforeEach
     fun setUp() {
-        stepConfig = AddToLandlordIncompletePropertiesStepConfig(mockIncompletePropertyForLandlordService)
+        stepConfig = AddToLandlordIncompletePropertiesStepConfig(mockUsersIncompletePropertyService)
     }
 
     @Test
-    fun `afterSaveState calls addIncompletePropertyToLandlord with the saved journey state`() {
+    fun `afterSaveState calls addIncompletePropertyForUser with the saved journey state`() {
         // Arrange
         val mockState = mock<JourneyState>()
         val mockSavedJourneyState = mock<SavedJourneyState>()
@@ -33,6 +33,6 @@ class AddToLandlordIncompletePropertiesStepConfigTests {
         stepConfig.afterSaveState(mockState, mockSavedJourneyState)
 
         // Assert
-        verify(mockIncompletePropertyForLandlordService).addIncompletePropertyToLandlord(mockSavedJourneyState)
+        verify(mockUsersIncompletePropertyService).addIncompletePropertyForUser(mockSavedJourneyState)
     }
 }

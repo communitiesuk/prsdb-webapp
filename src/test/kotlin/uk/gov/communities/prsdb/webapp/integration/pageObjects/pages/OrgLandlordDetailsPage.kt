@@ -35,6 +35,8 @@ class OrgLandlordDetailsPage(
 
     fun clickOrganisationEmailChangeLinkAndWait() = organisationEmailChangeLink.clickAndWait()
 
+    fun clickMainContactChangeLinkAndWait() = mainContactCard.getAction("Change").link.clickAndWait()
+
     val mainContactCard = MainContactSummaryCard(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)
     val registrationContactCard = RegistrationContactSummaryCard(page)
