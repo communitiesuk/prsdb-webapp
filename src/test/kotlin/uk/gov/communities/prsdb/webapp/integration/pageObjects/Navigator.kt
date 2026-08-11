@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
@@ -130,6 +131,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgIsRegisteredCompanyFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.AreYouSureFormPageOrganisationalLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
@@ -275,6 +277,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
+import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep as OrgAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep as DeregistrationConfirmStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep as RegistrationEpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep as RegistrationEpcMissingStep
@@ -1027,7 +1030,9 @@ class Navigator(
     fun skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage():
         ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber().build(),
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber()
+                .build(),
         )
         navigateToPropertyRegistrationJourneyStep(ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT)
         return createValidPage(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
@@ -1120,7 +1125,9 @@ class Navigator(
     }
 
     fun skipToPropertyRegistrationConfirmMissingCompliancePage(): ConfirmMissingComplianceFormPagePropertyRegistration {
-        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationConfirmMissingCompliance().build())
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationConfirmMissingCompliance().build(),
+        )
         navigateToPropertyRegistrationJourneyStep(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
         return createValidPage(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
     }
@@ -1132,13 +1139,17 @@ class Navigator(
     }
 
     fun skipToPropertyRegistrationCheckAnswersPageWithJointLandlords(): CheckAnswersPagePropertyRegistration {
-        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithJointLandlords().build())
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithJointLandlords().build(),
+        )
         navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPageWithSelectiveLicence(): CheckAnswersPagePropertyRegistration {
-        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithSelectiveLicence().build())
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersWithSelectiveLicence().build(),
+        )
         navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
@@ -1173,7 +1184,9 @@ class Navigator(
     }
 
     fun skipToPropertyRegistrationCheckAnswersPageNoEpc(): CheckAnswersPagePropertyRegistration {
-        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersNoEpcExempt().build())
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersNoEpcExempt().build(),
+        )
         navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
@@ -1358,6 +1371,13 @@ class Navigator(
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 
+    fun goToOrgLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageOrganisationalLandlordDeregistration {
+        navigate(
+            "${DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE}/${OrgAreYouSureStep.ROUTE_SEGMENT}",
+        )
+        return createValidPage(page, AreYouSureFormPageOrganisationalLandlordDeregistration::class)
+    }
+
     fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
         navigate(LOCAL_COUNCIL_DASHBOARD_URL)
         return createValidPage(page, LocalCouncilDashboardPage::class)
@@ -1439,17 +1459,29 @@ class Navigator(
 
     fun goToEditAdminsPage(localCouncilAdminId: Long): EditLocalCouncilAdminPage {
         navigate("$SYSTEM_OPERATOR_ROUTE/$EDIT_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
-        return createValidPage(page, EditLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
+        return createValidPage(
+            page,
+            EditLocalCouncilAdminPage::class,
+            mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
+        )
     }
 
     fun goToDeleteLocalCouncilAdminPage(localCouncilAdminId: Long): DeleteLocalCouncilAdminPage {
         navigate("$SYSTEM_OPERATOR_ROUTE/$DELETE_ADMIN_PATH_SEGMENT/$localCouncilAdminId")
-        return createValidPage(page, DeleteLocalCouncilAdminPage::class, mapOf("localCouncilAdminId" to localCouncilAdminId.toString()))
+        return createValidPage(
+            page,
+            DeleteLocalCouncilAdminPage::class,
+            mapOf("localCouncilAdminId" to localCouncilAdminId.toString()),
+        )
     }
 
     fun goToCancelAdminInvitePage(invitationId: Long): CancelLocalCouncilAdminInvitationPage {
         navigate("$SYSTEM_OPERATOR_ROUTE/$CANCEL_INVITATION_PATH_SEGMENT/$invitationId")
-        return createValidPage(page, CancelLocalCouncilAdminInvitationPage::class, mapOf("invitationId" to invitationId.toString()))
+        return createValidPage(
+            page,
+            CancelLocalCouncilAdminInvitationPage::class,
+            mapOf("invitationId" to invitationId.toString()),
+        )
     }
 
     fun goToCookiesPage(): CookiesPage {
@@ -1470,7 +1502,12 @@ class Navigator(
     fun navigate(path: String): Response? = page.navigate("http://localhost:$port$path")
 
     private fun navigateToLandlordRegistrationJourneyStep(stepRouteSegment: String) {
-        navigate(JourneyStateService.urlWithJourneyState("$LANDLORD_REGISTRATION_ROUTE/$stepRouteSegment", TEST_JOURNEY_ID))
+        navigate(
+            JourneyStateService.urlWithJourneyState(
+                "$LANDLORD_REGISTRATION_ROUTE/$stepRouteSegment",
+                TEST_JOURNEY_ID,
+            ),
+        )
     }
 
     private fun setJourneyStateInSession(journeyState: Map<String, Any>) {
