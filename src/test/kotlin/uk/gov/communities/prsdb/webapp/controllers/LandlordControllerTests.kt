@@ -125,7 +125,7 @@ class LandlordControllerTests(
     fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an individual landlord`() {
         val landlord = createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount("user-123")).thenReturn(3)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(3)
 
         val result =
             mvc
@@ -145,7 +145,7 @@ class LandlordControllerTests(
     fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an org landlord`() {
         val landlord = createOrgLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount("org-user-123")).thenReturn(2)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
 
         val result =
             mvc

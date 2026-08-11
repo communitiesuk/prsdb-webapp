@@ -43,12 +43,11 @@ class IncompletePropertiesController(
     @GetMapping("/${INCOMPLETE_PROPERTIES_PATH_SEGMENT}")
     fun landlordIncompleteProperties(
         model: Model,
-        principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
         val pagedIncompleteProperties =
-            usersIncompletePropertyService.getCurrentUsersIncompleteProperties(principal.name, page - 1)
+            usersIncompletePropertyService.getCurrentUsersIncompleteProperties(page - 1)
 
         if (pagedIncompleteProperties.totalPages != 0 && pagedIncompleteProperties.totalPages < page) {
             return "redirect:${LandlordController.INCOMPLETE_PROPERTIES_URL}"

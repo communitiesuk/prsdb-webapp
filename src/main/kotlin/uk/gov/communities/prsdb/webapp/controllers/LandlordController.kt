@@ -26,7 +26,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
-import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
 @PrsdbController
@@ -42,17 +41,14 @@ class LandlordController(
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
 
     @GetMapping("/$DASHBOARD_PATH_SEGMENT")
-    fun landlordDashboard(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun landlordDashboard(model: Model): String {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord) +
                 propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         val numberOfIncompleteProperties =
-            usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount(principal.name)
+            usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(

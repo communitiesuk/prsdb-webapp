@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
@@ -18,10 +19,8 @@ class UsersIncompletePropertyService(
     private val repository: SavedJourneyStateRepository,
     private val incompletePropertiesRepository: IncompletePropertiesRepository,
 ) {
-    fun getCurrentUsersIncompleteProperties(
-        principalName: String,
-        requestedPageIndex: Int,
-    ): Page<IncompletePropertiesDataModel> {
+    fun getCurrentUsersIncompleteProperties(requestedPageIndex: Int): Page<IncompletePropertiesDataModel> {
+        val principalName = SecurityContextHolder.getContext().authentication.name
         val pageRequest =
             PageRequest.of(
                 requestedPageIndex,
@@ -40,8 +39,8 @@ class UsersIncompletePropertyService(
             }
     }
 
-    fun getCurrentUsersIncompletePropertiesCount(principalName: String): Int =
-        incompletePropertiesRepository.countByUser_Id(principalName).toInt()
+    fun getCurrentUsersIncompletePropertiesCount(): Int =
+        incompletePropertiesRepository.countByUser_Id(SecurityContextHolder.getContext().authentication.name).toInt()
 
     fun deleteIncompleteProperty(
         journeyId: String,

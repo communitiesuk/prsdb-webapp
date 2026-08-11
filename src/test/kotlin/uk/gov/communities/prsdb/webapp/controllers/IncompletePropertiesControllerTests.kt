@@ -54,7 +54,7 @@ class IncompletePropertiesControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
         whenever(
-            usersIncompletePropertyService.getCurrentUsersIncompleteProperties("user", 0),
+            usersIncompletePropertyService.getCurrentUsersIncompleteProperties(0),
         ).thenReturn(PageImpl(emptyList()))
         mvc
             .get(LandlordController.Companion.INCOMPLETE_PROPERTIES_URL)
@@ -67,7 +67,7 @@ class IncompletePropertiesControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties redirects when page exceeds total pages`() {
         whenever(
-            usersIncompletePropertyService.getCurrentUsersIncompleteProperties("user", 2),
+            usersIncompletePropertyService.getCurrentUsersIncompleteProperties(2),
         ).thenReturn(PageImpl(emptyList(), PageRequest.of(2, 3), 3))
 
         mvc
