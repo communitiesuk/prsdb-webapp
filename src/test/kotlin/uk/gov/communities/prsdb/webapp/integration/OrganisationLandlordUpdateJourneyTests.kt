@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
@@ -50,14 +51,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     }
 
     @Test
-    fun `Organisation name change link opens the organisation name update page`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
-
-        assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
-    }
-
-    @Test
     fun `Submitting an empty organisation name on update shows a validation error`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
@@ -65,6 +58,38 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         val updateOrgNamePage = assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
         updateOrgNamePage.submitName("")
         assertThat(updateOrgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+    }
+
+    @Test
+    fun `An organisation landlord can update organisation email from landlord details and return to details page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
+
+        val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
+        updateOrgEmailPage.submitEmail("updated-organisation@example.com")
+
+        val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(updatedDetailsPage.mainContent).containsText("updated-organisation@example.com")
+    }
+
+    @Test
+    fun `Submitting an empty organisation email on update shows a validation error`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
+
+        val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
+        updateOrgEmailPage.submitEmail("")
+        assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter a valid email address")
+    }
+
+    @Test
+    fun `Submitting a malformed organisation email on update shows a validation error`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
+
+        val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
+        updateOrgEmailPage.submitEmail("not-an-email")
+        assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
     }
 
     @Test
