@@ -7,6 +7,8 @@
 <!--/*@thymesVar id="emailLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="phoneNumberLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="submitButton" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -16,6 +18,9 @@
         <div th:replace="~{fragments/forms/emailInput :: emailInput(#{${emailLabel}}, 'emailAddress', null)}"></div>
         <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(#{${phoneNumberLabel}}, 'phoneNumber', null)}"></div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </th:block>
 </html>

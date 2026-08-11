@@ -29,8 +29,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
@@ -132,7 +132,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @MockitoSpyBean
-    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
+    private lateinit var incompletePropertiesRepository: IncompletePropertiesRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
@@ -194,7 +194,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -1652,7 +1652,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.restructuredTenancyHeading).containsText("Tenancy details")
             assertThat(checkAnswersPage.tenancyHeading).isHidden()
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
         }
 
@@ -1662,7 +1664,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitProvideThisLater()
 
@@ -1678,7 +1682,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitNumberOfHouseholds(1)
 
@@ -1699,7 +1705,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitNumberOfHouseholds(1)
 
@@ -1730,7 +1738,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            checkAnswersPage.summaryList.tenancyDetailsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.tenancyDetailsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitNumberOfHouseholds(1)
 
@@ -1842,7 +1852,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `Changing number of households from CYA only goes through households and people then returns to CYA`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
-            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitNumberOfHouseholds(3)
 
@@ -1971,7 +1983,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -2535,7 +2547,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `Changing number of households from CYA does not go through rent and bills and returns to CYA`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
-            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions.getActionLink("Change").clickAndWait()
+            checkAnswersPage.summaryList.numberOfHouseholdsRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
             val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
             householdsPage.submitNumberOfHouseholds(3)
 

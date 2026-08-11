@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -21,7 +23,10 @@ class OrganisationalLandlordContactsViewModelTests {
         val card = viewModel.mainContactCard
         assertEquals("landlordDetails.org.mainContactHeading", card.title)
         assertEquals("forms.links.change", card.actions!!.single().text)
-        assertEquals("#", card.actions!!.single().url)
+        assertEquals(
+            "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}",
+            card.actions!!.single().url,
+        )
         assertEquals(
             listOf("landlordDetails.org.mainContactName", "landlordDetails.org.mainContactEmail", "landlordDetails.org.mainContactPhone"),
             card.summaryList.map { it.fieldHeading },

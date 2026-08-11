@@ -2,20 +2,24 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 
 class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationalLandlord,
     governingBodyMembers: List<OrganisationGoverningBodyMember>,
 ) {
-    // TODO: PDJB-1244: link the main contact "Change" action to its update journey
     val mainContactCard: SummaryCardViewModel =
         SummaryCardViewModel(
             title = "landlordDetails.org.mainContactHeading",
-            actions = SummaryCardActionViewModel.changeAction(PLACEHOLDER_URL),
+            actions =
+                SummaryCardActionViewModel.changeAction(
+                    "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}",
+                ),
             summaryList =
                 mutableListOf<SummaryListRowViewModel>()
                     .apply {
