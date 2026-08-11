@@ -597,4 +597,5 @@ VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a',
        ('jl.expired.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222d', 'Inviting landlord', current_date - 90),
        ('jl.pending.three@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333a', 'Inviting landlord', current_date),
        ('jl.pending.four@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333b', 'Inviting landlord', current_date - 10),
-       ('jl.pending.one@example.com', 13, '2234abcd-5678-abcd-1234-567abcd4444a', 'Inviting landlord', current_date);
+       ('jl.pending.one@example.com', 13, '2234abcd-5678-abcd-1234-567abcd4444a', 'Inviting landlord', current_date),
+       ('jl.pending.org@example.com', 48, '2234abcd-5678-abcd-1234-567abcd5555a', 'Local Organisation Landlord', current_date);
