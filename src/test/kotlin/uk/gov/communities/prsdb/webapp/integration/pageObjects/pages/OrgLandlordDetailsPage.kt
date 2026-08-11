@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Summar
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LandlordDetailsBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 
@@ -28,6 +30,8 @@ class OrgLandlordDetailsPage(
         Link(page.locator("a[href='$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}']"))
     private val organisationEmailChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_EMAIL_ROUTE/${OrgEmailStep.ROUTE_SEGMENT}']"))
+    private val organisationCharityChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_CHARITY_ROUTE/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
 
@@ -36,6 +40,8 @@ class OrgLandlordDetailsPage(
     fun clickOrganisationEmailChangeLinkAndWait() = organisationEmailChangeLink.clickAndWait()
 
     fun clickMainContactChangeLinkAndWait() = mainContactCard.getAction("Change").link.clickAndWait()
+
+    fun clickOrganisationCharityChangeLinkAndWait() = organisationCharityChangeLink.clickAndWait()
 
     val mainContactCard = MainContactSummaryCard(page)
     val leadTrusteeCard = LeadTrusteeSummaryCard(page)

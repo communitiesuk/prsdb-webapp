@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
@@ -17,7 +18,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityRegisteredWithFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityTodoPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgIsRegisteredCharityFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
@@ -182,6 +187,48 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(
             updatePage.form.getErrorMessage(),
         ).containsText("Enter a phone number including the country code for international numbers")
+    }
+
+    @Test
+    fun `Answering no to registered charity goes straight to the check your answers placeholder`(page: Page) {
+        startCharityUpdateJourney(page).submitNo()
+
+        assertOnCheckYourAnswersPlaceholder(page)
+    }
+
+    @Test
+    fun `Answering yes then none goes to the check your answers placeholder`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.NONE)
+
+        assertOnCheckYourAnswersPlaceholder(page)
+    }
+
+    @Test
+    fun `Selecting England and Wales asks for a charity number then goes to the placeholder`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber("1234567")
+
+        assertOnCheckYourAnswersPlaceholder(page)
+    }
+
+    // The is-registered-charity URL is a prefix of the registered-with URL, so the heading is asserted to confirm
+    // which step the journey is actually on
+    private fun startCharityUpdateJourney(page: Page): OrgIsRegisteredCharityFormPageUpdateLandlordDetails {
+        navigator.goToOrgLandlordDetails().clickOrganisationCharityChangeLinkAndWait()
+
+        val charityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageUpdateLandlordDetails::class)
+        assertThat(charityPage.heading).containsText("Is your organisation a registered charity?")
+        return charityPage
+    }
+
+    private fun assertOnCheckYourAnswersPlaceholder(page: Page) {
+        val todoPage = assertPageIs(page, OrgCharityTodoPageUpdateLandlordDetails::class)
+        assertThat(todoPage.heading).containsText("PDJB-1463")
     }
 
     @Test
