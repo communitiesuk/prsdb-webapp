@@ -732,13 +732,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `The company number change link opens the company number page and returns to check answers`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        val checkAnswersPage =
-            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
-                LandlordStateSessionBuilder
-                    .beforeOrgCheckAnswers()
-                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
-                    .withOrgCompanyNumber(),
-            )
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.companiesHouseNumberRow.clickNamedActionLinkAndWait("Change")
 
         val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
@@ -751,13 +745,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Keeping the same Companies House answer returns straight to check answers`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        val checkAnswersPage =
-            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
-                LandlordStateSessionBuilder
-                    .beforeOrgCheckAnswers()
-                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
-                    .withOrgCompanyNumber(),
-            )
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
@@ -770,13 +758,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Changing the Companies House answer to no requires the governing body questions before returning to check answers`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
-        val checkAnswersPage =
-            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
-                LandlordStateSessionBuilder
-                    .beforeOrgCheckAnswers()
-                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
-                    .withOrgCompanyNumber(),
-            )
+        val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
