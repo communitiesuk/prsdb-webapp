@@ -174,6 +174,10 @@ class OrganisationalLandlord() : Landlord() {
 
     @get:Transient
     val isRegisteredCharity: Boolean
+        get() = charityRegisteredWith != null
+
+    @get:Transient
+    val hasCharityNumber: Boolean
         get() = charityNumber != null
 
     @get:Transient

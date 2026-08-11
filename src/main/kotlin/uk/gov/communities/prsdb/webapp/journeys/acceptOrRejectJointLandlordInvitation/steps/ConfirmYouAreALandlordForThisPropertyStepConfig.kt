@@ -83,7 +83,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
-        // TODO: PDJB-1274: Update emails to account for org landlord
+        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         acceptedEmailSender.sendEmail(
             acceptingLandlord.email,
             JointLandlordInvitationAcceptedEmail(
@@ -98,6 +98,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             .filter { it.id != acceptingLandlord.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
+                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
                 otherLandlordEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(

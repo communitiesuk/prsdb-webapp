@@ -185,7 +185,7 @@ class PropertyRegistrationService(
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
     ) {
-        // TODO: PDJB-1274: Update emails to account for org landlord
+        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
             landlord.email,
             PropertyRegistrationConfirmationEmail(

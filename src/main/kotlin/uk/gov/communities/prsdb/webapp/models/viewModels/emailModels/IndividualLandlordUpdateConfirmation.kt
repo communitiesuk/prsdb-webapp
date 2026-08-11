@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 import java.net.URI
 
-data class LandlordUpdateConfirmation(
+data class IndividualLandlordUpdateConfirmation(
     val registrationNumber: String,
     val dashboardUrl: URI,
     val updatedDetail: String,
@@ -11,7 +11,7 @@ data class LandlordUpdateConfirmation(
     private val dashboardUrlKey = "dashboard url"
     private val updatedDetailKey = "updated detail"
 
-    override val template = EmailTemplate.LANDLORD_UPDATE_CONFIRMATION
+    override val template = EmailTemplate.INDIVIDUAL_LANDLORD_UPDATE_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(

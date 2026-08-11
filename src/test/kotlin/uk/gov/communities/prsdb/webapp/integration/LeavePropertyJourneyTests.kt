@@ -46,3 +46,28 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
         assertEquals(404, response?.status())
     }
 }
+
+@WithOrgLandlordProfile
+class LeavePropertyOrgLandlordJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    private val jointPropertyOwnershipId = 48L
+
+    @Test
+    fun `An org landlord can leave a joint property and reach the confirmation page`(page: Page) {
+        val confirmPage = navigator.goToLeavePropertyConfirmPage(jointPropertyOwnershipId)
+        assertThat(confirmPage.heading).containsText("Joint Org House")
+        confirmPage.submitConfirm()
+
+        val confirmationPage =
+            assertPageIs(
+                page,
+                ConfirmationPageLeaveProperty::class,
+                mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()),
+            )
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
+            .containsText("No longer registered as a landlord for Joint Org House")
+
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+}

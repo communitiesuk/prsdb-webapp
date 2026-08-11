@@ -19,14 +19,6 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `the organisation details tab shows the organisation's details`(page: Page) {
-        val detailsPage = navigator.goToOrgLandlordDetails()
-
-        assertThat(detailsPage.organisationDetailsPanel).containsText("Organisation type")
-        assertThat(detailsPage.organisationDetailsPanel).containsText("Companies House number")
-    }
-
-    @Test
     fun `the organisation contacts tab shows the main contact's details`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
 
@@ -59,5 +51,22 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
 
         detailsPage.tabs.goToOrganisationDetails()
         assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
+    }
+
+    @Test
+    fun `the organisation details tab shows the organisation's registration and organisation type details`(page: Page) {
+        val detailsPage = navigator.goToOrgLandlordDetails()
+        val summaryList = detailsPage.organisationDetailsSummaryList
+
+        assertThat(summaryList.lrnRow.value).containsText("L-")
+        assertThat(summaryList.landlordTypeRow.value).containsText("Organisation")
+        assertThat(summaryList.nameRow.value).containsText("Local Organisation Landlord")
+        assertThat(summaryList.addressRow.value).containsText("FA1 1AE")
+        assertThat(summaryList.emailRow.value).containsText("local-org-landlord@example.com")
+        assertThat(summaryList.phoneRow.value).containsText("07111111111")
+        assertThat(summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(summaryList.registeredCharityRow.value).containsText("No")
+        assertThat(summaryList.registeredWithCompaniesHouseRow.value).containsText("Yes")
+        assertThat(summaryList.companyNumberRow.value).containsText("12345678")
     }
 }
