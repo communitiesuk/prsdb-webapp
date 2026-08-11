@@ -231,6 +231,10 @@ class LandlordService(
             landlordEntity.leadTrusteeAddress = addressService.findOrCreateAddress(it)
         }
 
+        orgLandlordUpdate.mainContactName?.let { landlordEntity.mainContactName = it }
+        orgLandlordUpdate.mainContactEmail?.let { landlordEntity.mainContactEmail = it }
+        orgLandlordUpdate.mainContactPhone?.let { landlordEntity.mainContactPhone = it }
+
         return landlordEntity
     }
 
@@ -241,6 +245,24 @@ class LandlordService(
                 OrganisationLandlordUpdateModel(name = orgName),
             )
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordMainContact(
+        name: String,
+        email: String,
+        phone: String,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    mainContactName = name,
+                    mainContactEmail = email,
+                    mainContactPhone = phone,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
     }
 
     @Transactional
