@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse
 
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
@@ -7,9 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionOutcome
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 
@@ -39,47 +38,45 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
             }
         }
     }
-    step<OrgCompaniesHouseInterruptionOutcome, OrgCompaniesHouseInterruptionStepConfig>(journey.orgCompaniesHouseInterruptionStep) {
+    step(journey.orgCompaniesHouseInterruptionStep) {
         routeSegment(OrgCompaniesHouseInterruptionStep.ROUTE_SEGMENT)
-        stepSpecificInitialisation {
-            usingChangingToCompany {
-                journey.orgCompaniesHouseUpdateRoutingStep.outcome == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY
-            }
-        }
         parents {
             OrParents(
                 journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY),
                 journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY),
             )
         }
-        nextDestination { outcome ->
-            when (outcome) {
-                OrgCompaniesHouseInterruptionOutcome.TO_COMPANY ->
-                    Destination(journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep)
-                OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY ->
-                    Destination(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.firstStep)
+        nextStep {
+            if (journey.orgCompaniesHouseUpdateRoutingStep.outcome == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY) {
+                journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep
+            } else {
+                journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.firstStep
             }
         }
     }
     step(journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep) {
         routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
         parents {
-            journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_COMPANY)
+            AndParents(
+                journey.orgCompaniesHouseInterruptionStep.isComplete(),
+                journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY),
+            )
         }
+        backDestination { Destination(journey.orgCompaniesHouseInterruptionStep) }
         nextStep { journey.finishCyaStep }
     }
     task(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask) {
         parents {
-            journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY)
+            AndParents(
+                journey.orgCompaniesHouseInterruptionStep.isComplete(),
+                journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY),
+            )
         }
         nextStep { journey.finishCyaStep }
         withDependencies {
             OrgGovBodyMembersDependencies(
-                whoToProvideEmptyBackDestination = {
-                    Destination(journey.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep)
-                },
-                removeLastMemberDestination = {
-                    Destination(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyWhoToProvideStep)
+                govBodyMembersIntroBackDestination = {
+                    Destination(journey.orgCompaniesHouseInterruptionStep)
                 },
             )
         }

@@ -43,8 +43,7 @@ class OrgGovBodyTask(
                 nextStep { exitStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
-                        whoToProvideEmptyBackDestination = { Destination(journey.orgGovBodyDetailsStep) },
-                        removeLastMemberDestination = { Destination(journey.orgGovBodyDetailsStep) },
+                        govBodyMembersIntroBackDestination = { Destination(journey.orgGovBodyDetailsStep) },
                     )
                 }
             }

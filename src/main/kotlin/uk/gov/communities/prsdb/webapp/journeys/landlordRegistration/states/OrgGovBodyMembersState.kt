@@ -32,6 +32,5 @@ interface OrgGovBodyMembersState : JourneyState {
 }
 
 class OrgGovBodyMembersDependencies(
-    val whoToProvideEmptyBackDestination: () -> Destination,
-    val removeLastMemberDestination: () -> Destination,
+    val govBodyMembersIntroBackDestination: () -> Destination,
 )

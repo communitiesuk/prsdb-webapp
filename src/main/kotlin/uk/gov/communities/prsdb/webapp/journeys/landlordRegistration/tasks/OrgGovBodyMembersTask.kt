@@ -48,7 +48,7 @@ class OrgGovBodyMembersTask(
     override fun makeSubJourney(state: OrgGovBodyMembersState) =
         subJourney(state) {
             step(journey.hasAnyGovBodyMembersStep) {
-                backDestination { dependencies.whoToProvideEmptyBackDestination() }
+                backDestination { dependencies.govBodyMembersIntroBackDestination() }
                 nextStep { mode ->
                     when (mode) {
                         AnyMembers.NO_MEMBERS -> journey.orgGovBodyWhoToProvideStep
@@ -67,7 +67,7 @@ class OrgGovBodyMembersTask(
                 nextDestination { mode ->
                     when (mode) {
                         AnyMembers.SOME_MEMBERS -> Destination(journey.orgGovBodyMemberListStep)
-                        AnyMembers.NO_MEMBERS -> dependencies.removeLastMemberDestination()
+                        AnyMembers.NO_MEMBERS -> dependencies.govBodyMembersIntroBackDestination()
                     }
                 }
             }
@@ -76,7 +76,7 @@ class OrgGovBodyMembersTask(
                 parents { journey.hasAnyGovBodyMembersStep.isComplete() }
                 backDestination {
                     if (journey.governingBodyMembersMap.isNullOrEmpty()) {
-                        dependencies.whoToProvideEmptyBackDestination()
+                        dependencies.govBodyMembersIntroBackDestination()
                     } else {
                         Destination(journey.orgGovBodyMemberListStep)
                     }
