@@ -32,10 +32,8 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
         parents { journey.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.isComplete() }
         nextDestination { mode ->
             when (mode) {
-                OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY ->
-                    Destination(journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep)
-                OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY ->
-                    Destination(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.firstStep)
+                OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.finishCyaStep)
+                OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY -> Destination(journey.finishCyaStep)
                 OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY -> Destination(journey.orgCompaniesHouseInterruptionStep)
                 OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY -> Destination(journey.orgCompaniesHouseInterruptionStep)
             }
@@ -66,19 +64,13 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
     step(journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep) {
         routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
         parents {
-            OrParents(
-                journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY),
-                journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_COMPANY),
-            )
+            journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_COMPANY)
         }
         nextStep { journey.finishCyaStep }
     }
     task(journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask) {
         parents {
-            OrParents(
-                journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
-                journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY),
-            )
+            journey.orgCompaniesHouseInterruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY)
         }
         nextStep { journey.finishCyaStep }
         withDependencies {

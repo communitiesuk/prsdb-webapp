@@ -47,8 +47,8 @@ class UpdateCompaniesHouseJourneyFactory(
                 parents { journey.orgIsRegisteredCompanyStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
-                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.orgCompanyNumberStep)
-                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY -> Destination(journey.orgGovBodyMembersTask.firstStep)
+                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.checkAnswersStep)
+                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY -> Destination(journey.checkAnswersStep)
                         OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY -> Destination(journey.interruptionStep)
                         OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY -> Destination(journey.interruptionStep)
                     }
@@ -77,19 +77,13 @@ class UpdateCompaniesHouseJourneyFactory(
             step(journey.orgCompanyNumberStep) {
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY),
-                        journey.interruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_COMPANY),
-                    )
+                    journey.interruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_COMPANY)
                 }
                 nextStep { journey.checkAnswersStep }
             }
             task(journey.orgGovBodyMembersTask) {
                 parents {
-                    OrParents(
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
-                        journey.interruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY),
-                    )
+                    journey.interruptionStep.hasOutcome(OrgCompaniesHouseInterruptionOutcome.TO_NON_COMPANY)
                 }
                 nextStep { journey.checkAnswersStep }
                 withDependencies {
@@ -103,6 +97,8 @@ class UpdateCompaniesHouseJourneyFactory(
                 routeSegment(CompaniesHouseUpdateCheckAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
+                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY),
+                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
                         journey.orgCompanyNumberStep.isComplete(),
                         journey.orgGovBodyMembersTask.isComplete(),
                     )

@@ -17,6 +17,14 @@ class CompleteCompaniesHouseUpdateStepConfig(
     override fun mode(state: UpdateCompaniesHouseJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateCompaniesHouseJourneyState) {
+        val routeMode = state.orgCompaniesHouseUpdateRoutingStep.outcome
+        val companiesHouseRegistrationChanged =
+            routeMode == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY ||
+                routeMode == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
+        if (!companiesHouseRegistrationChanged) {
+            return
+        }
+
         val isRegisteredWithCompaniesHouse =
             state.orgIsRegisteredCompanyStep.formModel.notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
         if (isRegisteredWithCompaniesHouse) {
