@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
@@ -13,9 +14,10 @@ class AreYouSureStepConfig :
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: OrganisationalLandlordDeregistrationJourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1482 - Org landlord deregistration are you sure page")
+        mapOf("cancelLinkUrl" to LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
 
-    override fun chooseTemplate(state: OrganisationalLandlordDeregistrationJourneyState) = "forms/todo"
+    override fun chooseTemplate(state: OrganisationalLandlordDeregistrationJourneyState) =
+        "forms/organisationalLandlordDeregistrationAreYouSure"
 
     override fun mode(state: OrganisationalLandlordDeregistrationJourneyState) =
         getFormModelFromStateOrNull(

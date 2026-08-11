@@ -18,12 +18,15 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import kotlin.test.assertEquals
 
 @WebMvcTest(LandlordController::class)
 class LandlordControllerTests(
@@ -40,6 +43,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -112,6 +118,46 @@ class LandlordControllerTests(
                 status { isOk() }
                 model { attribute("landlordName", landlord.name) }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user-123")
+    fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an individual landlord`() {
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(3)
+
+        val result =
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect { status { isOk() } }
+                .andReturn()
+
+        val bannerViewModel =
+            result.modelAndView
+                ?.model
+                ?.get("landlordDashboardNotificationBannerViewModel") as LandlordDashboardNotificationBannerViewModel
+        assertEquals(3, bannerViewModel.numberOfIncompleteProperties)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "org-user-123")
+    fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an org landlord`() {
+        val landlord = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
+
+        val result =
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect { status { isOk() } }
+                .andReturn()
+
+        val bannerViewModel =
+            result.modelAndView
+                ?.model
+                ?.get("landlordDashboardNotificationBannerViewModel") as LandlordDashboardNotificationBannerViewModel
+        assertEquals(2, bannerViewModel.numberOfIncompleteProperties)
     }
 
     @Test

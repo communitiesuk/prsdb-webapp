@@ -171,7 +171,7 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO landlord_incomplete_properties 
-            (landlord_id, saved_journey_state_id) 
+            (user_id, saved_journey_state_id) 
             VALUES (?, ?)
             """
         return connection.prepareStatement(query)

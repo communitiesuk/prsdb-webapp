@@ -5,6 +5,7 @@ import java.time.LocalDate
 
 data class OrganisationLandlordUpdateModel(
     val name: String? = null,
+    val email: String? = null,
     val isCompany: Boolean? = null,
     val isCharity: Boolean? = null,
     val isTrust: Boolean? = null,
@@ -13,4 +14,7 @@ data class OrganisationLandlordUpdateModel(
     val leadTrusteeEmail: String? = null,
     val leadTrusteePhone: String? = null,
     val leadTrusteeAddress: AddressDataModel? = null,
+    val mainContactName: String? = null,
+    val mainContactEmail: String? = null,
+    val mainContactPhone: String? = null,
 )
