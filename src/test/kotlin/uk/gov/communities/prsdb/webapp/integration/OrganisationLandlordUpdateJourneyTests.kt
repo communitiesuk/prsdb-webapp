@@ -209,6 +209,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgTypePage.form.submit()
 
         val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
         cyaPage.submit()
 
         orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -250,6 +252,11 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Trust")
+        assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(LEAD_TRUSTEE_NAME)
+        assertThat(cyaPage.leadTrusteeCard.summaryList.emailRow.value).containsText(LEAD_TRUSTEE_EMAIL)
+        assertThat(cyaPage.leadTrusteeCard.summaryList.phoneRow.value).containsText(LEAD_TRUSTEE_PHONE)
         cyaPage.submit()
 
         orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -300,6 +307,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             interruptionPage.submit()
 
             val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+            assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+            BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
             cyaPage.submit()
 
             orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
