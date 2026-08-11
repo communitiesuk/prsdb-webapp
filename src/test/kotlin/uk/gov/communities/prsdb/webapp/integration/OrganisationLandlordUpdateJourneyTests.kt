@@ -212,6 +212,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgTypePage.form.submit()
 
         val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("You must provide trustee details")
+        assertThat(interruptionPage.body).containsText("your organisation is a trust")
         interruptionPage.submit()
 
         val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateOrganisationType::class)
@@ -243,6 +245,23 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(orgLandlordDetailsPage.mainContent).containsText(LEAD_TRUSTEE_PHONE)
     }
 
+    @Test
+    fun `Go back link on adding trust interruption page returns to the organisation type page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationTypeChangeLinkAndWait()
+
+        val orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCompany()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        interruptionPage.goBackLink.click()
+        page.waitForLoadState()
+
+        assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+    }
+
     @Nested
     inner class RemovingTrustUpdates : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
         @BeforeEach
@@ -261,6 +280,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             orgTypePage.form.submit()
 
             val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+            assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+            assertThat(interruptionPage.body).containsText("company")
+            assertThat(interruptionPage.body).containsText("lead trustee details will be removed")
             interruptionPage.submit()
 
             val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
