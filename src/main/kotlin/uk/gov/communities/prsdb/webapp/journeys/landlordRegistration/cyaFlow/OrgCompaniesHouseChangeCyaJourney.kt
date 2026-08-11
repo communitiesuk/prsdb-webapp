@@ -9,10 +9,13 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 // Companies House change sub-journey from the organisation CYA page; the interruption only shows on a changed answer.
 fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCyaJourney() {
@@ -40,8 +43,11 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
             }
         }
     }
-    step(journey.orgCompaniesHouseInterruptionStep) {
+    step<Complete, OrgCompaniesHouseInterruptionStepConfig>(journey.orgCompaniesHouseInterruptionStep) {
         routeSegment(OrgCompaniesHouseInterruptionStep.ROUTE_SEGMENT)
+        stepSpecificInitialisation {
+            recordingGovBodyDetailsCompleteAt(OrgGovBodyDetailsStep.ROUTE_SEGMENT)
+        }
         parents {
             OrParents(
                 journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY),

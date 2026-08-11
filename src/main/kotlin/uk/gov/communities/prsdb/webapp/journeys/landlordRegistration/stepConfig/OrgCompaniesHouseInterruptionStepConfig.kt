@@ -16,6 +16,16 @@ class OrgCompaniesHouseInterruptionStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgCompaniesHouseUpdateState>() {
     override val formModelClass = NoInputFormModel::class
 
+    // Data key of the governing body details step this interruption stands in for when changing to a non-company.
+    // Journeys that embed such a step (the registration CYA flow) supply it during wiring; it's null in the standalone
+    // update journey, which has no governing body details step and so needs nothing recorded.
+    private var govBodyDetailsStepDataKey: String? = null
+
+    fun recordingGovBodyDetailsCompleteAt(stepDataKey: String): OrgCompaniesHouseInterruptionStepConfig {
+        this.govBodyDetailsStepDataKey = stepDataKey
+        return this
+    }
+
     override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState) =
         mapOf(
             "title" to "registerAsALandlord.title",
@@ -26,12 +36,16 @@ class OrgCompaniesHouseInterruptionStepConfig :
 
     override fun afterStepDataIsAdded(state: OrgCompaniesHouseUpdateState) {
         // When changing to a non-company, this interruption replaces the outer governing body task's first step, so
-        // recording HAS_DETAILS keeps that task complete in the base journey and returns the user to the check answers page.
+        // recording HAS_DETAILS against that step keeps the task complete in the base journey and returns the user to
+        // the check answers page. The step is supplied as a dependency, so nothing is recorded in the standalone
+        // update journey, which has no governing body details step.
         if (state.orgIsRegisteredCompanyStep.outcome == YesOrNo.NO) {
-            state.addStepData(
-                OrgGovBodyDetailsStep.ROUTE_SEGMENT,
-                mapOf(OrgGovBodyDetailsFormModel::orgGovBodyDetailsMode.name to OrgGovBodyDetailsMode.HAS_DETAILS.name),
-            )
+            govBodyDetailsStepDataKey?.let { stepDataKey ->
+                state.addStepData(
+                    stepDataKey,
+                    mapOf(OrgGovBodyDetailsFormModel::orgGovBodyDetailsMode.name to OrgGovBodyDetailsMode.HAS_DETAILS.name),
+                )
+            }
         }
     }
 
