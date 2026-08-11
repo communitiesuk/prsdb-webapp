@@ -755,7 +755,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Changing the Companies House answer to no requires the governing body questions before returning to check answers`(page: Page) {
+    fun `Changing the Companies House answer to no routes through the governing body member flow before returning to check answers`(
+        page: Page,
+    ) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
@@ -767,24 +769,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val interruptionPage = assertPageIs(page, CompaniesHouseInterruptionPageLandlordRegistration::class)
         interruptionPage.submit()
 
-        val govBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
-        govBodyDetailsPage.submitHasDetails()
-
-        val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
-        whoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.TRUSTEE)
-
-        val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
-        namePage.submitName("Alice Smith")
-
-        val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
-        dobPage.submitDate("10", "3", "1985")
-
-        val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
-        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
-
-        val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
-        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
-
+        // Changing to a non-company routes into the governing body member flow rather than straight back to check answers.
         val memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
         memberListPage.form.submit()
 
