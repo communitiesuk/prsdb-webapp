@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlordUse
 interface OrganisationalLandlordUserRepository : JpaRepository<OrganisationalLandlordUser, Long> {
     fun findByBaseUser_Id(baseUserId: String): List<OrganisationalLandlordUser>
 
+    fun findByBaseUser_IdIn(baseUserIds: Collection<String>): List<OrganisationalLandlordUser>
+
     fun findByOrganisationalLandlord(organisationalLandlord: OrganisationalLandlord): List<OrganisationalLandlordUser>
 
     fun existsByBaseUser_IdAndOrganisationalLandlord_Id(

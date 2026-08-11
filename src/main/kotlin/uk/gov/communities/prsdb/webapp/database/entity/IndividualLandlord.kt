@@ -5,7 +5,6 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
@@ -59,15 +58,6 @@ class IndividualLandlord() : Landlord() {
     @Column(name = "individual_has_accepted_privacy_notice")
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
-
-    @OneToMany(
-        mappedBy = "landlord",
-        orphanRemoval = true,
-    )
-    private lateinit var landlordIncompleteProperties: MutableSet<LandlordIncompleteProperties>
-
-    val incompleteProperties: List<SavedJourneyState>
-        get() = landlordIncompleteProperties.map { it.savedJourneyState }.toList()
 
     constructor(
         baseUser: PrsdbUser,
