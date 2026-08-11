@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -10,10 +11,34 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgTypeUpdateState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: OrgTypeUpdateState) =
-        mapOf("todoComment" to "TODO PDJB-1466: Organisation type trust interruption page")
+    override fun getStepSpecificContent(state: OrgTypeUpdateState): Map<String, Any> {
+        val isAddingTrust = state.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST
+        if (isAddingTrust) return emptyMap()
 
-    override fun chooseTemplate(state: OrgTypeUpdateState) = "forms/todo"
+        val selectedOrgTypes =
+            state.orgTypeStep.stepConfig
+                .getFormModelFromState(state)
+                .getSelectedOrgTypes()
+                .filter { it != OrgType.TRUST }
+        return mapOf("selectedOrgTypeLabelKeys" to selectedOrgTypes.map { orgTypeToLabelKey(it) })
+    }
+
+    private fun orgTypeToLabelKey(orgType: OrgType): String =
+        when (orgType) {
+            OrgType.COMPANY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.company"
+            OrgType.CHARITY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.charity"
+            OrgType.NONE -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.none"
+            else -> orgType.name.lowercase()
+        }
+
+    override fun chooseTemplate(state: OrgTypeUpdateState): String {
+        val isAddingTrust = state.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST
+        return if (isAddingTrust) {
+            "forms/orgTypeAddingTrustInterruptionForm"
+        } else {
+            "forms/orgTypeRemovingTrustInterruptionForm"
+        }
+    }
 
     override fun mode(state: OrgTypeUpdateState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
