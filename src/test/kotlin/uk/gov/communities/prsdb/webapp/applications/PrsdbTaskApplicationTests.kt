@@ -36,12 +36,12 @@ import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
+import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
@@ -100,7 +100,7 @@ class PrsdbTaskApplicationTests {
                 DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
                 DeleteExpiredJointLandlordInvitationsTaskLogic::class.simpleBeanName,
-                UserToLandlordService::class.simpleBeanName,
+                LandlordUserEmailService::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

@@ -10,6 +10,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -25,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import java.io.ByteArrayOutputStream
@@ -45,7 +46,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @Mock
-    private lateinit var landlordService: UserToLandlordService
+    private lateinit var landlordUserEmailService: LandlordUserEmailService
 
     @InjectMocks
     private lateinit var taskLogic: IncompletePropertiesReminderTaskLogic
@@ -195,6 +196,72 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
     }
 
+    @Test
+    fun `sendIncompletePropertyReminders looks up emails once per page rather than once per property`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        setupTwoEntriesOnOneDatabasePage()
+
+        // Act
+        taskLogic.sendIncompletePropertyReminders()
+
+        // Assert
+        verify(landlordUserEmailService, times(1)).getEmailsByBaseUserId(any())
+    }
+
+    @Test
+    fun `sendIncompletePropertyReminders prints an error then continues if no email is found for the user`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        val reminderCutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
+        val userWithoutEmail = MockLandlordData.createPrsdbUser("user-without-email")
+        val user2 = MockLandlordData.createPrsdbUser("user-2")
+
+        whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(1)
+        whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
+            .thenReturn(
+                listOf(
+                    LandlordIncompleteProperties(
+                        user = userWithoutEmail,
+                        savedJourneyState = savedJourneyState1,
+                    ),
+                    LandlordIncompleteProperties(
+                        user = user2,
+                        savedJourneyState = savedJourneyState2,
+                    ),
+                ),
+            )
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(userWithoutEmail.id, user2.id)))
+            .thenReturn(mapOf(user2.id to emailAddress2))
+
+        // Act, capturing stdout
+        // Assert does not throw and stdout contains expected messages
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+        System.setOut(PrintStream(outContent))
+        try {
+            assertDoesNotThrow {
+                // Act
+                taskLogic.sendIncompletePropertyReminders()
+            }
+
+            val output = outContent.toString()
+            assertTrue(
+                output.contains("No email address found for the user who started incomplete property with savedJourneyStateId: 1"),
+            )
+        } finally {
+            System.setOut(originalOut)
+        }
+
+        verify(emailSender, never()).sendEmail(eq(emailAddress1), any())
+        verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
+        verify(incompletePropertiesService, never()).recordReminderEmailSent(savedJourneyState1)
+        verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
+    }
+
     private fun setupTwoEmailsToSend() {
         val propertyAddress1 = "Address One"
         val propertyAddress2 = "Address Two"
@@ -243,22 +310,21 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             1,
         )
 
-        val landlord1 =
-            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"), email = emailAddress1)
-        val landlord2 =
-            MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"), email = emailAddress2)
-        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
-        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
+        val user1 = MockLandlordData.createPrsdbUser("user-1")
+        val user2 = MockLandlordData.createPrsdbUser("user-2")
+
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(user1.id, user2.id)))
+            .thenReturn(mapOf(user1.id to emailAddress1, user2.id to emailAddress2))
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        user = landlord1.baseUser,
+                        user = user1,
                         savedJourneyState = savedJourneyState1,
                     ),
                     LandlordIncompleteProperties(
-                        user = landlord2.baseUser,
+                        user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),
@@ -275,24 +341,19 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             2,
         )
 
-        val landlord1 =
-            MockLandlordData.createIndividualLandlord(
-                baseUser = MockLandlordData.createPrsdbUser("user-1"),
-                email = emailAddress1,
-            )
-        val landlord2 =
-            MockLandlordData.createIndividualLandlord(
-                baseUser = MockLandlordData.createPrsdbUser("user-2"),
-                email = emailAddress2,
-            )
-        whenever(landlordService.getLandlordForBaseUserId(landlord1.baseUser.id)).thenReturn(landlord1)
-        whenever(landlordService.getLandlordForBaseUserId(landlord2.baseUser.id)).thenReturn(landlord2)
+        val user1 = MockLandlordData.createPrsdbUser("user-1")
+        val user2 = MockLandlordData.createPrsdbUser("user-2")
+
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(user1.id)))
+            .thenReturn(mapOf(user1.id to emailAddress1))
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(user2.id)))
+            .thenReturn(mapOf(user2.id to emailAddress2))
 
         whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate, 0))
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        user = landlord1.baseUser,
+                        user = user1,
                         savedJourneyState = savedJourneyState1,
                     ),
                 ),
@@ -302,7 +363,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .thenReturn(
                 listOf(
                     LandlordIncompleteProperties(
-                        user = landlord2.baseUser,
+                        user = user2,
                         savedJourneyState = savedJourneyState2,
                     ),
                 ),

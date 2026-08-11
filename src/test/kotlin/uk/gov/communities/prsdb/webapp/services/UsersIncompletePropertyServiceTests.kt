@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyS
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
-class IncompletePropertyForLandlordServiceTests {
+class UsersIncompletePropertyServiceTests {
     @Mock
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
@@ -51,7 +51,7 @@ class IncompletePropertyForLandlordServiceTests {
     }
 
     @Test
-    fun `getIncompletePropertiesForLandlord returns a page of CurrentUsersIncomplete properties data models  user`() {
+    fun `getCurrentUsersIncompleteProperties returns a page of incomplete properties data models`() {
         val principalName = "user-123"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = principalName)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
@@ -69,7 +69,7 @@ class IncompletePropertyForLandlordServiceTests {
     }
 
     @Test
-    fun `getIncompletePropertiesForLandlord returns only the CurrentUsersIncomplete properties  user, not their colleagues'`() {
+    fun `getCurrentUsersIncompleteProperties queries the repository by the requesting user's id, not an org-wide id`() {
         val requestingUserId = "org-user-1"
         val prsdbUser = MockLandlordData.createPrsdbUser(id = requestingUserId)
         val savedJourneyState = MockSavedJourneyStateData.createSavedJourneyState(baseUser = prsdbUser)
@@ -77,8 +77,6 @@ class IncompletePropertyForLandlordServiceTests {
         val pageRequest =
             PageRequest.of(0, MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE, Sort.by("savedJourneyState.createdDate"))
 
-        // The repository is mocked to only return this user's own entry - this test documents/locks in
-        // that the service passes through the requesting user's id (not an org-wide id) to the repository.
         whenever(incompletePropertiesRepository.findByUser_Id(requestingUserId, pageRequest))
             .thenReturn(PageImpl(listOf(lip), pageRequest, 1))
 
@@ -89,7 +87,7 @@ class IncompletePropertyForLandlordServiceTests {
     }
 
     @Test
-    fun `getNumberOfIncompletePropertiesForUser returns the count from the repository for the given user`() {
+    fun `getCurrentUsersIncompletePropertiesCount returns the count from the repository for the given user`() {
         val userId = "user-123"
         whenever(incompletePropertiesRepository.countByUser_Id(userId)).thenReturn(3L)
 
