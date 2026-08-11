@@ -34,6 +34,7 @@ interface OrgGovBodyMembersState : JourneyState {
 class OrgGovBodyMembersDependencies(
     // The destination the members sub-journey backs out to when at its start (the intro/first step, the who-to-provide
     // step with no members yet, or after removing the last member). It's injected because this reusable task is embedded
-    // at different points (registration, standalone update, CYA change) that each back out to a different step.
+    // at different points (registration, standalone update, CYA change) that each back out to a different step, and don't
+    // necessarily use back behaviour - e.g. routing to it from an action.
     val govBodyMembersIntroBackDestination: () -> Destination,
 )

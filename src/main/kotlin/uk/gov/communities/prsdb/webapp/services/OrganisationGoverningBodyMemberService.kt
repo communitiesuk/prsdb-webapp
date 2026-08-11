@@ -33,11 +33,7 @@ class OrganisationGoverningBodyMemberService(
     }
 
     @Transactional
-    fun replaceGoverningBodyMembers(
-        organisationLandlord: OrganisationalLandlord,
-        members: List<GoverningBodyMemberDataModel>,
-    ) {
+    fun clearGoverningBodyMembers(organisationLandlord: OrganisationalLandlord) {
         organisationGoverningBodyMemberRepository.deleteByOrganisationalLandlord_Id(organisationLandlord.id)
-        createGoverningBodyMembers(organisationLandlord, members)
     }
 }

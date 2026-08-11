@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CompaniesHouseInterruptionPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmationPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -761,6 +762,49 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         isRegisteredCompanyPage.submitYes()
+
+        assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Changing the Companies House answer to no requires the governing body questions before returning to check answers`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val checkAnswersPage =
+            navigator.skipToLandlordRegistrationOrgCheckAnswersPage(
+                LandlordStateSessionBuilder
+                    .beforeOrgCheckAnswers()
+                    .withOrgIsRegisteredCompany(registeredWithCompaniesHouse = true)
+                    .withOrgCompanyNumber(),
+            )
+        checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
+
+        val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
+        isRegisteredCompanyPage.submitNo()
+
+        val interruptionPage = assertPageIs(page, CompaniesHouseInterruptionPageLandlordRegistration::class)
+        interruptionPage.submit()
+
+        val govBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+        govBodyDetailsPage.submitHasDetails()
+
+        val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        whoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.TRUSTEE)
+
+        val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
+        namePage.submitName("Alice Smith")
+
+        val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
+        dobPage.submitDate("10", "3", "1985")
+
+        val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        memberListPage.form.submit()
 
         assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
     }

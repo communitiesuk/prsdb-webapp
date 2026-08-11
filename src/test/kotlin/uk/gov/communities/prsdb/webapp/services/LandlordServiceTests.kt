@@ -737,7 +737,7 @@ class LandlordServiceTests {
         landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
 
         assertEquals("12345678", orgLandlord.companyNumber)
-        verify(mockOrganisationGoverningBodyMemberService).replaceGoverningBodyMembers(orgLandlord, emptyList())
+        verify(mockOrganisationGoverningBodyMemberService).clearGoverningBodyMembers(orgLandlord)
     }
 
     @Test
@@ -785,7 +785,7 @@ class LandlordServiceTests {
         landlordService.updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers)
 
         assertNull(orgLandlord.companyNumber)
-        verify(mockOrganisationGoverningBodyMemberService).replaceGoverningBodyMembers(orgLandlord, governingBodyMembers)
+        verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(orgLandlord, governingBodyMembers)
     }
 
     @Test

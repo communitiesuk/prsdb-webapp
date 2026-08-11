@@ -55,7 +55,7 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         isRegisteredCompanyPage.submitNo()
 
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
-        interruptionPage.clickContinue()
+        interruptionPage.submit()
 
         assertTrue(page.url().contains(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT))
     }

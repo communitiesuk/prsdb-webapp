@@ -69,10 +69,7 @@ class LandlordRegistrationCyaStepConfig(
                 org.charityTask.orgIsRegisteredCharityStep.formModel.notNullValue(
                     OrgIsRegisteredCharityFormModel::charity,
                 )
-            val hasCompanyNumber =
-                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
-                    OrgIsRegisteredCompanyFormModel::companiesHouse,
-                )
+            val hasCompanyNumber = isRegisteredWithCompaniesHouse(state)
 
             val charityRegulator =
                 if (isRegisteredCharity) org.charityTask.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
@@ -279,10 +276,12 @@ class LandlordRegistrationCyaStepConfig(
 
     // Organisation landlord content
 
+    private fun isRegisteredWithCompaniesHouse(state: LandlordRegistrationState): Boolean =
+        state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
+            .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+
     private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> {
-        val registeredWithCompaniesHouse =
-            state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
-                .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+        val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
         return mapOf(
             "title" to "registerAsALandlord.title",
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
@@ -439,10 +438,7 @@ class LandlordRegistrationCyaStepConfig(
                 add(charityNumberRow(state, charityRegulator))
             }
 
-            val registeredWithCompaniesHouse =
-                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
-                    OrgIsRegisteredCompanyFormModel::companiesHouse,
-                )
+            val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
