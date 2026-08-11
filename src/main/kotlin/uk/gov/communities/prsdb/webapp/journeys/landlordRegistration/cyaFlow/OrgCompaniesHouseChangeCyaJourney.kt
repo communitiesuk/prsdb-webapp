@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.cyaFlow
 
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -11,9 +11,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgG
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRouteMode
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStepConfig
 
-// Companies House change sub-flow from the organisation CYA page; the interruption only shows on a changed answer.
-fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCyaFlow() {
+// Companies House change sub-journey from the organisation CYA page; the interruption only shows on a changed answer.
+fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCyaJourney() {
     step(journey.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep) {
         initialStep()
         routeSegment(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
