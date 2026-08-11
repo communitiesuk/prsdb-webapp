@@ -723,6 +723,52 @@ class LandlordServiceTests {
     }
 
     @Test
+    fun `updateOrganisationLandlordForUser updates the organisation email`() {
+        val orgLandlord = createOrgLandlord(email = "old@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(email = "new@example.com"),
+        )
+
+        assertEquals("new@example.com", orgLandlord.wholeOrgEmail)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser skips null email field`() {
+        val orgLandlord = createOrgLandlord(email = "existing@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(email = null))
+
+        assertEquals("existing@example.com", orgLandlord.wholeOrgEmail)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordEmail sends confirmation to the account email`() {
+        val orgLandlord = createOrgLandlord(email = "old-contact@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordEmail("new-contact@example.com")
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation email address.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordEmail is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordEmail.hasAnnotation<Transactional>())
+    }
+
+    @Test
     fun `updateOrganisationLandlordForUser updates the main contact details`() {
         val orgLandlord =
             createOrgLandlord(
