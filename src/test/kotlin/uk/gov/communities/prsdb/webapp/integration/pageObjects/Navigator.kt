@@ -1183,6 +1183,17 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationCheckAnswersPageUnoccupiedWithTenancyDetails(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswersOccupied()
+                .withOccupancyStatus(false)
+                .build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationCheckAnswersPageNoEpc(): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersNoEpcExempt().build(),
