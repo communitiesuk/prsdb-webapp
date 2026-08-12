@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRAT
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 
 @WithOrgLandlordProfile
-class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithMutableData("data-local.sql") {
+class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
     fun setup() {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
@@ -26,7 +26,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithMutableData
     }
 
     @Nested
-    inner class RemovingTrustInterruption : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
+    inner class RemovingTrustInterruption : NestedIntegrationTestWithImmutableData("data-org-landlord-trust.sql") {
         @BeforeEach
         fun setup() {
             featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
