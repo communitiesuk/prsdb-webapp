@@ -5,7 +5,7 @@ allowed-tools: powershell read_powershell grep glob view edit ask_user
 ---
 
 For doing markups of PRs after they've been reviewed:
-1. Use GitHub MCP to find the PR and the status of the last run.
+1. Use GitHub MCP to find the PR, then find the most recent workflow run for the PR's HEAD commit.
 2. You can tell if it's a test fail or a lint fail by inspecting the logs
     1. Test fails will have "> Task :test" around line 450
     2. Lint fails will have "KtLint found code style violations. Please see the following reports:" around line 350. In this case, run the `ktlintFormat` gradle task and finish.
