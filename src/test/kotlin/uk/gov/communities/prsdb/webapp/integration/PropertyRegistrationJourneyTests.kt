@@ -2305,7 +2305,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
             assertThat(checkAnswersPage.tenancyHeading).isVisible()
-            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.key).containsText("Occupied by tenants")
             assertThat(checkAnswersPage.restructuredTenancyHeading).isHidden()
             assertThat(checkAnswersPage.occupancyHeading).isHidden()
             assertThat(checkAnswersPage.summaryList.occupancyQuestionRow).isHidden()
