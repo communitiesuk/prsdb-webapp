@@ -106,6 +106,7 @@ class OccupancyDetailsHelperTests {
 
         assertEquals(1, rows.size)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.occupied", rows[0].fieldHeading)
+        assertEquals(false, rows[0].fieldValue)
     }
 
     @Test
@@ -118,6 +119,7 @@ class OccupancyDetailsHelperTests {
 
         assertEquals(1, rows.size)
         assertEquals("forms.checkPropertyAnswers.occupancy.question", rows[0].fieldHeading)
+        assertEquals(false, rows[0].fieldValue)
     }
 
     @Test
@@ -130,6 +132,7 @@ class OccupancyDetailsHelperTests {
 
         assertEquals(1, rows.size)
         assertEquals("forms.checkPropertyAnswers.occupancy.question", rows[0].fieldHeading)
+        assertEquals(true, rows[0].fieldValue)
     }
 
     @Test
