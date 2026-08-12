@@ -19,6 +19,7 @@ buttons:
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
   continueAnyway: Continue anyway
+  findAddress: Find address
 links:
   change: Change
   remove: Remove

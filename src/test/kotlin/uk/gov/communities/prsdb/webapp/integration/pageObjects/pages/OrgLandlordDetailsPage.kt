@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.L
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 class OrgLandlordDetailsPage(
     page: Page,
@@ -24,12 +26,16 @@ class OrgLandlordDetailsPage(
     val mainContent: Locator = page.locator("main")
     private val organisationNameChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
+    private val organisationAddressChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}']"))
     private val organisationTypeChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}']"))
     private val organisationEmailChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_EMAIL_ROUTE/${OrgEmailStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
+
+    fun clickOrganisationAddressChangeLinkAndWait() = organisationAddressChangeLink.clickAndWait()
 
     fun clickOrganisationTypeChangeLinkAndWait() = organisationTypeChangeLink.clickAndWait()
 

@@ -210,6 +210,9 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
+        orgLandlordUpdate.address?.let {
+            landlordEntity.address = addressService.findOrCreateAddress(it)
+        }
         orgLandlordUpdate.email?.let { landlordEntity.wholeOrgEmail = it }
         orgLandlordUpdate.isCompany?.let { landlordEntity.isCompany = it }
         orgLandlordUpdate.isCharity?.let { landlordEntity.isCharity = it }
@@ -341,6 +344,15 @@ class LandlordService(
             )
 
         sendOrgUpdateConfirmationEmail(landlord.email, "lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordAddress(address: AddressDataModel) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(address = address),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation address")
     }
 
     fun searchForLandlords(
