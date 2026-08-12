@@ -56,27 +56,27 @@ class LandlordDeregistrationServiceTests {
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
-    fun `deregisterLandlord deletes the user from the landlord table, and the prsdb_user table if they are not a different type of user`() {
+    fun `deregisterIndividualLandlord deletes the user from the landlord table, prsdb_user table if not a different type of user`() {
         val baseUserId = "one-login-user"
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
         verify(mockPrsdbUserRepository).deleteById(baseUserId)
     }
 
     @Test
-    fun `deregisterLandlord deletes the user from the landlord table, but not the prsdb_user table if they are a different type of user`() {
+    fun `deregisterIndividualLandlord deletes the user from the landlord table, not prsdb_user table if a different type of user`() {
         val baseUserId = "one-login-user"
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
         verify(mockPrsdbUserRepository, never()).deleteById(baseUserId)
     }
 
     @Test
-    fun `deregisterLandlord deletes properties the landlord solely owns`() {
+    fun `deregisterIndividualLandlord deletes properties the landlord solely owns`() {
         val baseUserId = "one-login-user"
         val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
@@ -85,13 +85,13 @@ class LandlordDeregistrationServiceTests {
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
         verify(mockPropertyOwnershipRepository).deleteAll(listOf(soleProperty))
     }
 
     @Test
-    fun `deregisterLandlord does not delete properties with another co-owner`() {
+    fun `deregisterIndividualLandlord does not delete properties with another co-owner`() {
         val baseUserId = "one-login-user"
         val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
@@ -103,14 +103,14 @@ class LandlordDeregistrationServiceTests {
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
         verify(mockPropertyOwnershipRepository).deleteAll(emptyList())
         verify(mockPropertyOwnershipService).removeLandlord(jointProperty, landlord)
     }
 
     @Test
-    fun `deregisterLandlord deletes only solely-owned properties when the landlord owns a mix`() {
+    fun `deregisterIndividualLandlord deletes only solely-owned properties when the landlord owns a mix`() {
         val baseUserId = "one-login-user"
         val landlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
@@ -122,7 +122,7 @@ class LandlordDeregistrationServiceTests {
         whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
 
         verify(mockPropertyOwnershipRepository).deleteAll(listOf(soleProperty))
         verify(mockPropertyOwnershipService).removeLandlord(jointProperty, landlord)

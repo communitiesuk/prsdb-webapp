@@ -31,7 +31,7 @@ class LandlordDeregistrationService(
      * This would be in case this action can lead a property marked as JL but without any active invitations.
      */
     @Transactional
-    fun deregisterLandlord(baseUserId: String) {
+    fun deregisterIndividualLandlord(baseUserId: String) {
         individualLandlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
             deregisterLandlordProperties(landlord)
         }
