@@ -256,8 +256,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgTypePage.form.submit()
 
         val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
-        interruptionPage.goBackLink.click()
-        page.waitForLoadState()
+        interruptionPage.goBackLink.clickAndWait()
 
         assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
     }
