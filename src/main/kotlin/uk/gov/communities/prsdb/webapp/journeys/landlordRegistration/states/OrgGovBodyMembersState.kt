@@ -23,10 +23,12 @@ interface OrgGovBodyMembersState :
     val saveGovBodyMemberStep: SaveGovBodyMemberStep
     val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep
     val removeGovBodyMemberStep: RemoveGovBodyMemberStep
+    val allowRemovingLastMember: Boolean
 }
 
 class OrgGovBodyMembersDependencies(
     // The state slice that owns the collected members. The reusable members task reads and writes the
     // members list through this, so the list can live in the enclosing outer task or journey.
     val listState: GovBodyMembersListState,
+    val allowRemovingLastMember: Boolean = true,
 )

@@ -1,12 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGoverningBodyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 
 class OrganisationalLandlordContactsViewModel(
@@ -56,8 +58,8 @@ class OrganisationalLandlordContactsViewModel(
 
     val showGoverningBody: Boolean = orgLandlord.hasGoverningBody
 
-    // TODO: PDJB-1471: link the governing body members link to its update journey
-    val governingBodyMembersLinkUrl: String = PLACEHOLDER_URL
+    val governingBodyMembersLinkUrl: String =
+        "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${OrgGovBodyMemberListStep.ROUTE_SEGMENT}"
 
     val governingBodyMemberCards: List<SummaryCardViewModel> =
         governingBodyMembers.mapIndexed { index, member ->
@@ -70,7 +72,10 @@ class OrganisationalLandlordContactsViewModel(
                             addRow("landlordDetails.org.governingBody.role", member.type)
                             addRow("landlordDetails.org.governingBody.memberName", member.name)
                             addRow("landlordDetails.org.governingBody.memberDateOfBirth", member.dateOfBirth)
-                            addRow("landlordDetails.org.governingBody.memberAddress", member.address.toMultiLineAddress().split("\n"))
+                            addRow(
+                                "landlordDetails.org.governingBody.memberAddress",
+                                member.address.toMultiLineAddress().split("\n"),
+                            )
                         }.toList(),
             )
         }
@@ -89,8 +94,6 @@ class OrganisationalLandlordContactsViewModel(
         )
 
     companion object {
-        private const val PLACEHOLDER_URL = "#"
-
         private fun memberCardTitleKey(type: GoverningBodyMemberType): String =
             when (type) {
                 GoverningBodyMemberType.DIRECTOR -> "landlordDetails.org.governingBody.memberCardTitle.director"
