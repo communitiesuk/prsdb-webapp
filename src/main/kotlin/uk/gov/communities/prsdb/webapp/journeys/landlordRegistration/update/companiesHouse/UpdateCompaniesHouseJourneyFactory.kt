@@ -46,8 +46,8 @@ class UpdateCompaniesHouseJourneyFactory(
                 parents { journey.orgIsRegisteredCompanyStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
-                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.checkAnswersStep)
-                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY -> Destination(journey.checkAnswersStep)
+                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.orgCompanyNumberStep)
+                        OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY -> Destination(journey.orgGovBodyMembersTask.firstStep)
                         OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY -> Destination(journey.interruptionStep)
                         OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY -> Destination(journey.interruptionStep)
                     }
@@ -72,25 +72,45 @@ class UpdateCompaniesHouseJourneyFactory(
             step(journey.orgCompanyNumberStep) {
                 routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
                 parents {
-                    AndParents(
-                        journey.interruptionStep.isComplete(),
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY),
+                    OrParents(
+                        AndParents(
+                            journey.interruptionStep.isComplete(),
+                            journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY),
+                        ),
+                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY),
                     )
                 }
-                backDestination { Destination(journey.interruptionStep) }
+                backDestination {
+                    if (journey.orgCompaniesHouseUpdateRoutingStep.outcome == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY) {
+                        Destination(journey.interruptionStep)
+                    } else {
+                        Destination(journey.orgIsRegisteredCompanyStep)
+                    }
+                }
                 nextStep { journey.checkAnswersStep }
             }
             task(journey.orgGovBodyMembersTask) {
                 parents {
-                    AndParents(
-                        journey.interruptionStep.isComplete(),
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY),
+                    OrParents(
+                        AndParents(
+                            journey.interruptionStep.isComplete(),
+                            journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY),
+                        ),
+                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
                     )
                 }
                 nextStep { journey.checkAnswersStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
-                        govBodyMembersIntroBackDestination = { Destination(journey.interruptionStep) },
+                        govBodyMembersIntroBackDestination = {
+                            if (journey.orgCompaniesHouseUpdateRoutingStep.outcome ==
+                                OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
+                            ) {
+                                Destination(journey.interruptionStep)
+                            } else {
+                                Destination(journey.orgIsRegisteredCompanyStep)
+                            }
+                        },
                     )
                 }
             }
@@ -98,8 +118,6 @@ class UpdateCompaniesHouseJourneyFactory(
                 routeSegment(CompaniesHouseUpdateCheckAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY),
-                        journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
                         journey.orgCompanyNumberStep.isComplete(),
                         journey.orgGovBodyMembersTask.isComplete(),
                     )

@@ -17,14 +17,9 @@ class CompleteCompaniesHouseUpdateStepConfig(
     override fun mode(state: UpdateCompaniesHouseJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateCompaniesHouseJourneyState) {
-        val routeMode = state.orgCompaniesHouseUpdateRoutingStep.outcome
-        val companiesHouseRegistrationChanged =
-            routeMode == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY ||
-                routeMode == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
-        if (!companiesHouseRegistrationChanged) {
-            return
-        }
-
+        // The standalone journey always routes through the company number / governing body questions (there's a single
+        // change link), so the collected answers are always persisted here regardless of whether the registration
+        // status itself changed.
         val isRegisteredWithCompaniesHouse =
             state.orgIsRegisteredCompanyStep.formModel.notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
         if (isRegisteredWithCompaniesHouse) {

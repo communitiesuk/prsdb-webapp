@@ -39,14 +39,18 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `Keeping the same registration answer returns straight to check answers with the company number unchanged`(page: Page) {
+    fun `Keeping the same registration answer routes through the company number page before check answers`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
 
         val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
-        // The seeded landlord is already registered with Companies House, so re-answering Yes is unchanged and returns
-        // straight to check answers without the interruption or company number page.
+        // The seeded landlord is already registered with Companies House, so re-answering Yes is unchanged. There's a
+        // single change link for the whole Companies House section, so the journey still routes through the company
+        // number page (skipping the interruption) rather than straight to check answers.
         isRegisteredCompanyPage.submitYes()
+
+        val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
+        companyNumberPage.submitCompanyNumber("12345678")
 
         val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
         checkAnswersPage.confirmAndSubmit()
@@ -66,6 +70,27 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
         interruptionPage.submit()
+
+        assertTrue(page.url().contains(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT))
+    }
+
+    @Test
+    fun `Keeping the non-company answer routes straight to the governing body flow without the interruption`(page: Page) {
+        val landlord =
+            organisationalLandlordUserRepository
+                .findByBaseUser_Id("urn:fdc:gov.uk:2022:ORG01")
+                .single()
+                .organisationalLandlord
+        landlord.companyNumber = null
+        organisationLandlordRepository.save(landlord)
+
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
+
+        val isRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
+        // The landlord is now not registered with Companies House, so answering No is unchanged and routes straight to
+        // the governing body flow (skipping the interruption) because of the single Companies House change link.
+        isRegisteredCompanyPage.submitNo()
 
         assertTrue(page.url().contains(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT))
     }

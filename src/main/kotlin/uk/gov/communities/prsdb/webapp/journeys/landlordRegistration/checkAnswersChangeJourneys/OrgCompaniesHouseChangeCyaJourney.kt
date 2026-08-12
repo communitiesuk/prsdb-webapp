@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.cyaFlow
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys
 
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination

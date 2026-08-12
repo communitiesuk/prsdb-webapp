@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.cyaFlow.orgCompaniesHouseChangeCyaJourney
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys.orgCompaniesHouseChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
