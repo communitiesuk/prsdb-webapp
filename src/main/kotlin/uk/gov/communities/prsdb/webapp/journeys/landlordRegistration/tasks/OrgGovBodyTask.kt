@@ -32,6 +32,7 @@ class OrgGovBodyTask(
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
     override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
+    override var orgGovBodyDetailsMode: OrgGovBodyDetailsMode? by delegateProvider.nullableDelegate("orgGovBodyDetailsMode")
 
     override fun makeSubJourney(state: OrgGovBodyState) =
         subJourney(state) {

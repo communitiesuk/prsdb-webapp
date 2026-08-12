@@ -8,7 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGo
 
 interface OrgGovBodyState :
     JourneyState,
-    GovBodyMembersListState {
+    GovBodyMembersListState,
+    GovBodyDetailsModeState {
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
     val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
     val orgGovBodyMembersTask: OrgGovBodyMembersTask
