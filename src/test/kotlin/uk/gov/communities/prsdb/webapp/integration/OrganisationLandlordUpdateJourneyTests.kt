@@ -7,11 +7,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.GoverningBodyCyaPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberDobFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberListFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberNameFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyWhoToProvideFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeAddressLookupPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeCyaPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeDobFormPageUpdateLeadTrustee
@@ -308,6 +316,64 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Trust")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Existing Lead Trustee")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Lead trustee")
+        }
+    }
+
+    @Nested
+    inner class GoverningBodyUpdateTests : NestedIntegrationTestWithMutableData("data-mockuser-org-landlord-trust.sql") {
+        @Test
+        fun `A trust org landlord can update governing body members`(page: Page) {
+            var orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.governingBodyMembersLink.clickAndWait()
+
+            var memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(memberListPage.heading).containsText("added 2 people")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("David Director")
+            assertThat(memberListPage.summaryList.getRowByIndex(1).value).containsText("Omar Hassan")
+            BaseComponent.assertThat(memberListPage.getChangeActionLink(0)).isVisible()
+            BaseComponent.assertThat(memberListPage.getRemoveActionLink(0)).isVisible()
+
+            memberListPage.getChangeActionLink(0).clickAndWait()
+
+            val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageUpdateGoverningBody::class)
+            assertEquals("DIRECTOR", whoToProvidePage.form.radios.selectedValue)
+            whoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.TRUSTEE)
+
+            val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(namePage.form.nameInput).hasValue("David Director")
+            namePage.submitName("Updated Trustee Name")
+
+            val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(dobPage.form.dayInput).hasValue("18")
+            BaseComponent.assertThat(dobPage.form.monthInput).hasValue("3")
+            BaseComponent.assertThat(dobPage.form.yearInput).hasValue("1974")
+            dobPage.submitDate("19", "4", "1980")
+
+            val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody::class)
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+            val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody::class)
+            selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+            memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(memberListPage.heading).containsText("added 2 people")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).key).containsText("Person 1")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("Updated Trustee Name")
+
+            memberListPage.form.submit()
+
+            val cyaPage = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
+            cyaPage.submit()
+
+            orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            assertEquals(2, orgLandlordDetailsPage.governingBodyMemberCardCount())
+            val updatedCard = orgLandlordDetailsPage.governingBodyMemberCard("1. Trustee")
+            assertThat(updatedCard.summaryList.roleRow.value).containsText("Trustee")
+            assertThat(updatedCard.summaryList.nameRow.value).containsText("Updated Trustee Name")
+            assertThat(updatedCard.summaryList.dateOfBirthRow.value).containsText("19 April 1980")
+            assertThat(updatedCard.summaryList.addressRow.value).containsText("1 PRSDB Square")
         }
     }
 
