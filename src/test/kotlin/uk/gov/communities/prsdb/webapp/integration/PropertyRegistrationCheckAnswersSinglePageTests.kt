@@ -119,14 +119,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             page: Page,
         ) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("Yes")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
 
-            checkAnswersPage.summaryList.occupiedByTenantsRow.actions.firstActionLink
+            checkAnswersPage.summaryList.occupancyQuestionRow.actions.firstActionLink
                 .clickAndWait()
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             occupancyPage.submitIsVacant()
             val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(updatedCheckAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("No")
+            assertThat(updatedCheckAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
         }
 
         @Test
@@ -134,14 +134,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             page: Page,
         ) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageUnoccupiedWithTenancyDetails()
-            assertThat(checkAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("No")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
 
-            checkAnswersPage.summaryList.occupiedByTenantsRow.actions.firstActionLink
+            checkAnswersPage.summaryList.occupancyQuestionRow.actions.firstActionLink
                 .clickAndWait()
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             occupancyPage.submitIsOccupied()
             val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(updatedCheckAnswersPage.summaryList.occupiedByTenantsRow.value).containsText("Yes")
+            assertThat(updatedCheckAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
         }
 
         @Test
