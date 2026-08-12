@@ -35,7 +35,7 @@ class DeregisterStepConfig(
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
         val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.deregisterIndividualLandlord(baseUserId)
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
 
         // TODO: PDJB-1274: Update emails to account for org landlord
