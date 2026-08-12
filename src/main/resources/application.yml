@@ -54,6 +54,9 @@ epc:
 server:
   error:
     path: /error
+  servlet:
+    session:
+      timeout: 1h
   tomcat:
     redirect-context-root: false
   forward-headers-strategy: native

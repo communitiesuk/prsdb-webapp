@@ -64,7 +64,7 @@ class DeregisterStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockLandlordDeregistrationService).deregisterLandlord(baseUserId)
+        verify(mockLandlordDeregistrationService).deregisterIndividualLandlord(baseUserId)
     }
 
     @Test
