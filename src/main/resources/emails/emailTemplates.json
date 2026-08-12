@@ -282,7 +282,7 @@
     "bodyLocation": "/emails/OrganisationalLandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "3dc778e2-f538-424f-84fa-d7bd1abd2f28",
+    "test_id": "726180c6-c955-433f-8007-14869bdf4947",
     "prod_id": "36388e0e-1118-40cf-bf63-b96b8e1bfd64",
     "enumName": "ORGANISATIONAL_LANDLORD_DEREGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Your organisation has been removed from Register your rental property",
