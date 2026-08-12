@@ -17,14 +17,17 @@ data class AddressDataModel(
     val townName: String? = null,
     val postcode: String? = null,
 ) {
-    fun toMultiLineAddress(): String =
-        if (hasAddressComponents()) {
-            buildMultiLineAddressFromComponents()
+    fun toMultiLineAddress(): String {
+        val multiLineFromComponents = buildMultiLineAddressFromComponents()
+        return if (significantCharacters(multiLineFromComponents) == significantCharacters(singleLineAddress)) {
+            multiLineFromComponents
         } else {
+            // The stored components don't fully reconstruct the single-line address (e.g. a building number is
+            // stored but the street name isn't), so fall back to the single-line address to avoid dropping parts
+            // of the address.
             singleLineAddress.replace(", ", "\n")
         }
-
-    private fun hasAddressComponents(): Boolean = streetName != null || buildingName != null || buildingNumber != null
+    }
 
     private fun buildMultiLineAddressFromComponents(): String =
         listOfNotNull(
@@ -36,6 +39,8 @@ data class AddressDataModel(
             townName,
             postcode,
         ).joinToString("\n")
+
+    private fun significantCharacters(value: String): List<Char> = value.lowercase().filter { it.isLetterOrDigit() }.toList().sorted()
 
     companion object {
         fun fromManualAddressData(

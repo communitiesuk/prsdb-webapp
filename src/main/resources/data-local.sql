@@ -223,6 +223,11 @@ VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB
 
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
+-- Populate the street name for the numbered PRSDB Square sample addresses so their stored components match the
+-- single-line address. Production NGD address data always includes the street name, so this keeps local data
+-- consistent and lets the details pages render the full multi-line address.
+UPDATE address SET street_name = 'PRSDB Square' WHERE building_number IS NOT NULL AND single_line_address LIKE '%PRSDB Square%';
+
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
                       individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified, individual_has_accepted_privacy_notice)
 VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:fdc:gov.uk:2022:UVWXY',
