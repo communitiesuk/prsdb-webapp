@@ -1,11 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys.OrgCompaniesHouseChangeGovBodyTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
@@ -32,8 +31,7 @@ interface LandlordRegistrationState :
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
-    val orgCompaniesHouseInterruptionStep: OrgCompaniesHouseInterruptionStep
-    val orgCompaniesHouseChangeGovBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep
+    val orgCompaniesHouseChangeGovBodyTask: OrgCompaniesHouseChangeGovBodyTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
     val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
