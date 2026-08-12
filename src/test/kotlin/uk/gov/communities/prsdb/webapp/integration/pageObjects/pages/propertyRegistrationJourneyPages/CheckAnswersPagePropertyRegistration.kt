@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
+import java.util.regex.Pattern
 
 class CheckAnswersPagePropertyRegistration(
     page: Page,
@@ -64,7 +65,7 @@ class CheckAnswersPagePropertyRegistration(
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
-        val occupiedByTenantsRow = getRow("Occupied by tenants")
+        val occupiedByTenantsRow = getRow(Pattern.compile("^Occupied by tenants$"))
         val tenancyDetailsRow = getRow("Tenancy details")
         val numberOfHouseholdsRow = getRow("Number of households")
         val numberOfTenantsRow = getRow("Number of tenants")

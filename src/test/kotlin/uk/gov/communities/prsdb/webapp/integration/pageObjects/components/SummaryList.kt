@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
+import java.util.regex.Pattern
 
 open class SummaryList(
     parentLocator: Locator,
@@ -10,6 +11,8 @@ open class SummaryList(
     constructor(page: Page, index: Int? = null) : this(page.locator("html"), index)
 
     protected fun getRow(key: String) = SummaryListRow.byKey(locator, key)
+
+    protected fun getRow(key: Pattern) = SummaryListRow.byKey(locator, key)
 
     protected fun getRow(index: Int) = SummaryListRow.byIndex(locator, index)
 
@@ -22,6 +25,21 @@ open class SummaryList(
                 key: String,
             ) = SummaryListRow(
                 // Locate the row which has a key which has the given text
+                parentLocator.locator(
+                    ".govuk-summary-list__row",
+                    Locator.LocatorOptions().setHas(
+                        parentLocator.page().locator(
+                            ".govuk-summary-list__key",
+                            Page.LocatorOptions().setHasText(key),
+                        ),
+                    ),
+                ),
+            )
+
+            fun byKey(
+                parentLocator: Locator,
+                key: Pattern,
+            ) = SummaryListRow(
                 parentLocator.locator(
                     ".govuk-summary-list__row",
                     Locator.LocatorOptions().setHas(
