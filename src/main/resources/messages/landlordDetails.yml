@@ -33,6 +33,10 @@ registeredProperties:
     link: Register a property
 update:
   title: Update Landlord record
+  companiesHouse:
+    cya:
+      companyDetails:
+        heading: Company details
 org:
   title: Organisation landlord record
   removeRecord: Delete organisation
