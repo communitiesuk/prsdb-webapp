@@ -5,7 +5,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
 
-interface OrgGovBodyState : JourneyState {
+interface OrgGovBodyState :
+    JourneyState,
+    GovBodyMembersListState {
     val orgGovBodyDetailsStep: OrgGovBodyDetailsStep
     val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep
     val orgGovBodyMembersTask: OrgGovBodyMembersTask

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgG
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
 @JourneyFrameworkComponent
@@ -21,6 +22,12 @@ class OrgGovBodyTask(
 ) : TaskWithoutDependencies<OrgGovBodyState>(journeyStateService),
     OrgGovBodyState {
     override val taskState get() = this
+
+    override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>? by delegateProvider.nullableDelegate(
+        "governingBodyMembersMap",
+    )
+    override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
 
     override fun makeSubJourney(state: OrgGovBodyState) =
         subJourney(state) {
@@ -43,6 +50,7 @@ class OrgGovBodyTask(
                 nextStep { exitStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
+                        listState = journey,
                         govBodyMembersIntroBackDestination = { Destination(journey.orgGovBodyDetailsStep) },
                     )
                 }

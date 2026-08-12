@@ -11,9 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SaveGovBodyMemberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.SetStateForGovBodyMemberEditStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
-import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
-interface OrgGovBodyMembersState : JourneyState {
+interface OrgGovBodyMembersState :
+    JourneyState,
+    GovBodyMembersListState {
     val orgGovBodyWhoToProvideStep: OrgGovBodyWhoToProvideStep
     val orgGovBodyMemberNameStep: OrgGovBodyMemberNameStep
     val orgGovBodyMemberDobStep: OrgGovBodyMemberDobStep
@@ -23,15 +24,12 @@ interface OrgGovBodyMembersState : JourneyState {
     val saveGovBodyMemberStep: SaveGovBodyMemberStep
     val setStateForGovBodyMemberEditStep: SetStateForGovBodyMemberEditStep
     val removeGovBodyMemberStep: RemoveGovBodyMemberStep
-    var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
-    var nextGoverningBodyMemberId: Int?
-    var editingGovBodyMemberId: Int?
-
-    val editingGovBodyMember: GoverningBodyMemberDataModel?
-        get() = editingGovBodyMemberId?.let { governingBodyMembersMap?.get(it) }
 }
 
 class OrgGovBodyMembersDependencies(
+    // The state slice that owns the collected members. The reusable members task reads and writes the
+    // members list through this, so the list can live in the enclosing outer task or journey.
+    val listState: GovBodyMembersListState,
     // The destination the members sub-journey backs out to when at its start (the intro/first step, the who-to-provide
     // step with no members yet, or after removing the last member). It's injected because this reusable task is embedded
     // at different points (registration, standalone update, CYA change) that each back out to a different step, and don't

@@ -39,11 +39,21 @@ class OrgGovBodyMembersTask(
     OrgGovBodyMembersState {
     override val taskState get() = this
 
-    override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>? by delegateProvider.nullableDelegate(
-        "governingBodyMembersMap",
-    )
-    override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
-    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
+    override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>?
+        get() = dependencies.listState.governingBodyMembersMap
+        set(value) {
+            dependencies.listState.governingBodyMembersMap = value
+        }
+    override var nextGoverningBodyMemberId: Int?
+        get() = dependencies.listState.nextGoverningBodyMemberId
+        set(value) {
+            dependencies.listState.nextGoverningBodyMemberId = value
+        }
+    override var editingGovBodyMemberId: Int?
+        get() = dependencies.listState.editingGovBodyMemberId
+        set(value) {
+            dependencies.listState.editingGovBodyMemberId = value
+        }
 
     override fun makeSubJourney(state: OrgGovBodyMembersState) =
         subJourney(state) {

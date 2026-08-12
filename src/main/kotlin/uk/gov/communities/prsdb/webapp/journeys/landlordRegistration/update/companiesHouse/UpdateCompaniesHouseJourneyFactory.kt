@@ -13,11 +13,13 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.GovBodyMembersListState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
@@ -102,6 +104,7 @@ class UpdateCompaniesHouseJourneyFactory(
                 nextStep { journey.checkAnswersStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
+                        listState = journey,
                         govBodyMembersIntroBackDestination = {
                             if (journey.orgCompaniesHouseUpdateRoutingStep.outcome ==
                                 OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
@@ -147,6 +150,12 @@ class UpdateCompaniesHouseJourney(
     private val journeyName: String = "companies-house",
 ) : AbstractJourneyState(journeyStateService),
     UpdateCompaniesHouseJourneyState {
+    override var governingBodyMembersMap: Map<Int, GoverningBodyMemberDataModel>? by delegateProvider.nullableDelegate(
+        "governingBodyMembersMap",
+    )
+    override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
+    override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
+
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(
@@ -155,7 +164,9 @@ class UpdateCompaniesHouseJourney(
     }
 }
 
-interface UpdateCompaniesHouseJourneyState : OrgCompaniesHouseUpdateState {
+interface UpdateCompaniesHouseJourneyState :
+    OrgCompaniesHouseUpdateState,
+    GovBodyMembersListState {
     override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
     val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
     val interruptionStep: OrgCompaniesHouseInterruptionStep

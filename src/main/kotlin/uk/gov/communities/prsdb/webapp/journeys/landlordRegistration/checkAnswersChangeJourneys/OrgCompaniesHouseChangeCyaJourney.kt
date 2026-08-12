@@ -83,6 +83,7 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
         nextStep { journey.finishCyaStep }
         withDependencies {
             OrgGovBodyMembersDependencies(
+                listState = journey.orgLandlordRegistrationTask.orgGovBodyTask,
                 govBodyMembersIntroBackDestination = {
                     Destination(journey.orgCompaniesHouseInterruptionStep)
                 },
