@@ -51,22 +51,28 @@ class PropertyRegistrationCyaStepConfig(
                         getPropertyDetailsSummaryList(state)
                     },
                 "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask),
-                "tenancyDetails" to
+                "occupancyDetails" to
                     if (isRestructured) {
-                        occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
-                            state,
-                            messageSource,
-                            Destination.VisitableStep(
-                                state.tenancyDetailsTask.householdsAndTenantsTask.households,
-                                state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
-                            ),
-                        )
+                        occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
                     } else {
-                        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+                        null
                     },
             )
 
         content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
+        if (isRestructured) {
+            content["tenancyDetails"] =
+                occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
+                    state,
+                    messageSource,
+                    Destination.VisitableStep(
+                        state.tenancyDetailsTask.householdsAndTenantsTask.households,
+                        state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
+                    ),
+                )
+        } else {
+            content["tenancyDetails"] = occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+        }
 
         content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
         content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
