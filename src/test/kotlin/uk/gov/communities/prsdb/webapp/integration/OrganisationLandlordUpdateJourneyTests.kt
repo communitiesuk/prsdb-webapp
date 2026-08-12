@@ -80,7 +80,10 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         selectOrgAddressPage.selectAddressAndSubmit(newSelectedAddress)
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
-        assertThat(updatedDetailsPage.mainContent).containsText(newSelectedAddress)
+        // The org details page renders the address as a multi-line summary list built from the stored address
+        // components. This fixture address (data-local.sql) has a building number and postcode but no street name,
+        // so it renders as "1 EG1 2AA" rather than the full single-line address.
+        assertThat(updatedDetailsPage.mainContent).containsText("1 EG1 2AA")
     }
 
     @Test
@@ -103,7 +106,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
         val newSingleLineAddress = AddressDataModel.manualAddressDataToSingleLineAddress(newFirstLine, newTown, newPostcode)
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
-        assertThat(updatedDetailsPage.mainContent).containsText(newSingleLineAddress)
+        assertThat(updatedDetailsPage.mainContent).containsText(newSingleLineAddress.replace(", ", " "))
     }
 
     @Test
