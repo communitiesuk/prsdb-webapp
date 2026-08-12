@@ -26,15 +26,21 @@ class DeregisterStepConfig(
     override fun afterStepIsReached(state: OrganisationalLandlordDeregistrationJourneyState) {
         val orgLandlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
+        // The name is read before deletion, as the organisation is unavailable afterwards
+        val organisationName = orgLandlord.name
+
         val jointlyOwnedProperties = orgLandlord.landlordships.filterNot { it.isSolelyOwnedBy(orgLandlord) }
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
+
+        // Stored only once the deletion has succeeded, as this doubles as the "deregistered in this session" flag
+        landlordDeregistrationService.addDeregisteredOrganisationNameToSession(organisationName)
 
         deregistrationEmailSender.sendEmail(
             orgLandlord.registrantEmail,
             OrganisationalLandlordDeregistrationConfirmationEmail(
                 registrantName = orgLandlord.registrantName,
-                organisationName = orgLandlord.name,
+                organisationName = organisationName,
             ),
         )
 
