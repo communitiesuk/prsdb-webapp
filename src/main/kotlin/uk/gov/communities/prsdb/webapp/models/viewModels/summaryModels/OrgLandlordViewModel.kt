@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class OrgLandlordViewModel(
     landlord: OrganisationalLandlord,
     messageSource: MessageSource,
+    withChangeLinks: Boolean = true,
 ) {
     val name: String = landlord.name
 
@@ -47,6 +48,7 @@ class OrgLandlordViewModel(
                     landlord.name,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_NAME_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.address",
@@ -54,18 +56,21 @@ class OrgLandlordViewModel(
                     CHANGE_LINK_MESSAGE_KEY,
                     // TODO: PDJB-1444: Add update journey
                     null,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.email",
                     landlord.wholeOrgEmail,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_EMAIL_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.phone",
                     landlord.phoneNumber,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_PHONE_NUMBER_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.organisationType",
@@ -74,12 +79,14 @@ class OrgLandlordViewModel(
                     },
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_TYPE_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.registeredCharity",
                     MessageKeyConverter.convert(landlord.isRegisteredCharity),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_CHARITY_URL,
+                    withActionLink = withChangeLinks,
                     withoutBottomBorder = landlord.isRegisteredCharity,
                 )
                 if (landlord.isRegisteredCharity) {
@@ -98,6 +105,7 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCompany),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_COMPANIES_HOUSE_URL,
+                    withActionLink = withChangeLinks,
                     withoutBottomBorder = landlord.isRegisteredCompany,
                 )
                 if (landlord.isRegisteredCompany) {

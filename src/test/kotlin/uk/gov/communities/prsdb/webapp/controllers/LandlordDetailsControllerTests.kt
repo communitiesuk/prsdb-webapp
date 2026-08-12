@@ -204,4 +204,57 @@ class LandlordDetailsControllerTests(
             }
         }
     }
+
+    @Nested
+    inner class GetOrgLandlordDetailsAsLcUserTests {
+        private val orgLandlord = MockLandlordData.createOrgLandlord()
+
+        @BeforeEach
+        fun setUp() {
+            whenever(landlordService.retrieveLandlordById(orgLandlord.id)).thenReturn(orgLandlord)
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlord(
+                    orgLandlord.id,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails returns the LC org details view for an organisation landlord`() {
+            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
+
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
+                status { isOk() }
+                view { name("localCouncilOrgLandlordDetailsView") }
+                model {
+                    attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+                    attributeExists("orgLandlord", "orgLandlordContacts", "registeredPropertiesList", "backUrl")
+                    attributeDoesNotExist("deleteLandlordRecordUrl", "lastModifiedDate")
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `getLandlordDetails returns the LC org details view for an LC admin`() {
+            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(true)
+
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
+                status { isOk() }
+                view { name("localCouncilOrgLandlordDetailsView") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getLandlordDetails returns 404 for an organisation landlord when the org landlord flag is disabled`() {
+            whenever(featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)).thenReturn(false)
+
+            mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
+                status { isNotFound() }
+            }
+        }
+    }
 }

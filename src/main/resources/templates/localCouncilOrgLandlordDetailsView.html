@@ -1,4 +1,3 @@
-<!--/*@thymesVar id="registerPropertyUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="page" th:replace="~{fragments/layout :: layout(#{landlordDetails.org.title},~{::#page/content()}, false)}">
     <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
@@ -6,11 +5,6 @@
         <span class="govuk-caption-l" th:text="#{landlordDetails.heading}">landlordDetails.heading</span>
 
         <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">orgLandlord.name</h1>
-
-        <p class="govuk-body">
-            <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
-               th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>
-        </p>
 
         <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
             <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
@@ -28,7 +22,7 @@
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
-                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+                <th:block th:replace="~{fragments/tabs/localCouncilRegisteredPropertiesPanel :: localCouncilRegisteredPropertiesPanelContent}"></th:block>
             </div>
         </div>
     </main>
