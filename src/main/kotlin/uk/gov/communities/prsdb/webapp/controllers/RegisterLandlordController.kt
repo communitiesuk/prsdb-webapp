@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -70,7 +72,13 @@ class RegisterLandlordController(
             RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
         )
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
-        model.addAttribute("landlordRegistrationSurveyUrl", LANDLORD_REGISTRATION_SURVEY_URL)
+        val surveyUrl =
+            if (landlord.landlordType == LandlordType.ORGANISATION) {
+                ORG_LANDLORD_REGISTRATION_SURVEY_URL
+            } else {
+                INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
+            }
+        model.addAttribute("landlordRegistrationSurveyUrl", surveyUrl)
 
         return "registerAsALandlordConfirmation"
     }
