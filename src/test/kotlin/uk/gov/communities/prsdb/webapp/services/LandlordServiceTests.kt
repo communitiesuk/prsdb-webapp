@@ -729,7 +729,6 @@ class LandlordServiceTests {
         val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
         whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         landlordService.updateOrganisationLandlordForUser(
             OrganisationLandlordUpdateModel(address = newAddressDataModel),

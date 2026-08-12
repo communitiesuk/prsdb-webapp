@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class OrgLandlordViewModel(
@@ -43,8 +45,7 @@ class OrgLandlordViewModel(
                     "landlordDetails.org.address",
                     landlord.address.toMultiLineAddress().split("\n"),
                     CHANGE_LINK_MESSAGE_KEY,
-                    // TODO: PDJB-1444: Add update journey
-                    null,
+                    UPDATE_ORG_ADDRESS_URL,
                 )
                 addRow(
                     "landlordDetails.org.email",
@@ -94,6 +95,8 @@ class OrgLandlordViewModel(
         private const val CHANGE_LINK_MESSAGE_KEY = "forms.links.change"
 
         private const val UPDATE_ORG_NAME_URL = "$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}"
+
+        private const val UPDATE_ORG_ADDRESS_URL = "$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}"
 
         private const val UPDATE_ORG_EMAIL_URL = "$UPDATE_ORG_EMAIL_ROUTE/${OrgEmailStep.ROUTE_SEGMENT}"
 
