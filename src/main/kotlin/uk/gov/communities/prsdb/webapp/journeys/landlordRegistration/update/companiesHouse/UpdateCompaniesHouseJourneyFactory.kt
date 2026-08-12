@@ -19,6 +19,7 @@ class UpdateCompaniesHouseJourneyFactory(
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+        state.updateCompaniesHouseTask.initialiseGoverningBodyMembersFromDatabase()
 
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }

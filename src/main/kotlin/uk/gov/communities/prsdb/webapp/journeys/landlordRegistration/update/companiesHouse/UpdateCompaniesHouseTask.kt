@@ -39,6 +39,19 @@ class UpdateCompaniesHouseTask(
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
     override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
 
+    private var governingBodyMembersInitialised: Boolean? by delegateProvider.nullableDelegate("governingBodyMembersInitialised")
+
+    fun initialiseGoverningBodyMembersFromDatabase() {
+        if (governingBodyMembersInitialised == true) return
+        val existingMembers = userToLandlordService.getCurrentOrganisationLandlordForUser().governingBodyMembers
+        governingBodyMembersMap =
+            existingMembers
+                .mapIndexed { index, member -> (index + 1) to GoverningBodyMemberDataModel.fromEntity(member) }
+                .toMap()
+        nextGoverningBodyMemberId = existingMembers.size + 1
+        governingBodyMembersInitialised = true
+    }
+
     override fun makeSubJourney(state: UpdateCompaniesHouseTaskState) =
         subJourney(state) {
             step(journey.orgIsRegisteredCompanyStep) {
@@ -118,7 +131,7 @@ class UpdateCompaniesHouseTask(
                 parents { journey.orgGovBodyMembersTask.isComplete() }
                 nextStep { mode ->
                     when (mode) {
-                        AnyMembers.NO_MEMBERS ->
+                        AnyMembers.NO_MEMBERS -> {
                             if (journey.orgCompaniesHouseUpdateRoutingStep.outcome ==
                                 OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
                             ) {
@@ -126,7 +139,11 @@ class UpdateCompaniesHouseTask(
                             } else {
                                 journey.orgIsRegisteredCompanyStep
                             }
-                        AnyMembers.SOME_MEMBERS -> exitStep
+                        }
+
+                        AnyMembers.SOME_MEMBERS -> {
+                            exitStep
+                        }
                     }
                 }
             }

@@ -271,6 +271,7 @@ class LandlordService(
     fun updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers: List<GoverningBodyMemberDataModel>) {
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
         landlordEntity.companyNumber = null
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
         organisationGoverningBodyMemberService.createGoverningBodyMembers(landlordEntity, governingBodyMembers)
         sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
     }
