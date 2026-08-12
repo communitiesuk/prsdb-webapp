@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistr
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -33,6 +34,14 @@ class DeregisterStepConfig(
         }
 
         securityContextService.refreshContext()
+    }
+
+    override fun resolveNextDestination(
+        state: OrganisationalLandlordDeregistrationJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        state.deleteJourney()
+        return defaultDestination
     }
 }
 
