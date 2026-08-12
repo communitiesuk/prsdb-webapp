@@ -224,9 +224,11 @@ class LandlordService(
             }
         }
 
-        orgLandlordUpdate.isRegisteredCharity?.let { isRegisteredCharity ->
-            landlordEntity.charityRegisteredWith = if (isRegisteredCharity) orgLandlordUpdate.charityRegisteredWith else null
-            landlordEntity.charityNumber = if (isRegisteredCharity) orgLandlordUpdate.charityNumber else null
+        // isRegisteredCharity is only a marker that the charity details are being updated - the details themselves are
+        // always assigned, so that switching to a regulator with no charity number clears any previously recorded one
+        orgLandlordUpdate.isRegisteredCharity?.let {
+            landlordEntity.charityRegisteredWith = orgLandlordUpdate.charityRegisteredWith
+            landlordEntity.charityNumber = orgLandlordUpdate.charityNumber
         }
 
         orgLandlordUpdate.leadTrusteeName?.let { landlordEntity.leadTrusteeName = it }
@@ -327,15 +329,26 @@ class LandlordService(
     }
 
     @Transactional
-    fun updateOrganisationLandlordCharity(
-        isRegisteredCharity: Boolean,
+    fun updateOrganisationLandlordAsNotARegisteredCharity() = updateOrganisationLandlordCharityDetails(null, null)
+
+    @Transactional
+    fun updateOrganisationLandlordAsRegisteredCharityWithNoRegulator() =
+        updateOrganisationLandlordCharityDetails(CharityRegulator.NONE, null)
+
+    @Transactional
+    fun updateOrganisationLandlordCharityRegistration(
+        charityRegisteredWith: CharityRegulator,
+        charityNumber: String,
+    ) = updateOrganisationLandlordCharityDetails(charityRegisteredWith, charityNumber)
+
+    private fun updateOrganisationLandlordCharityDetails(
         charityRegisteredWith: CharityRegulator?,
         charityNumber: String?,
     ) {
         val landlord =
             updateOrganisationLandlordForUser(
                 OrganisationLandlordUpdateModel(
-                    isRegisteredCharity = isRegisteredCharity,
+                    isRegisteredCharity = charityRegisteredWith != null,
                     charityRegisteredWith = charityRegisteredWith,
                     charityNumber = charityNumber,
                 ),

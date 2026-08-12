@@ -867,17 +867,15 @@ class LandlordServiceTests {
 
     @ParameterizedTest
     @EnumSource(value = CharityRegulator::class, names = ["ENGLAND_AND_WALES", "SCOTLAND", "NORTHERN_IRELAND"])
-    fun `updateOrganisationLandlordCharity sets the charity details and sends a confirmation email`(charityRegulator: CharityRegulator) {
+    fun `updateOrganisationLandlordCharityRegistration sets the charity details and sends a confirmation email`(
+        charityRegulator: CharityRegulator,
+    ) {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
-        landlordService.updateOrganisationLandlordCharity(
-            isRegisteredCharity = true,
-            charityRegisteredWith = charityRegulator,
-            charityNumber = "1234567",
-        )
+        landlordService.updateOrganisationLandlordCharityRegistration(charityRegulator, "1234567")
 
         assertEquals(charityRegulator, orgLandlord.charityRegisteredWith)
         assertEquals("1234567", orgLandlord.charityNumber)
@@ -890,44 +888,38 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordCharity clears the charity details when the organisation is not a registered charity`() {
+    fun `updateOrganisationLandlordAsNotARegisteredCharity clears the charity details`() {
         val orgLandlord = createOrgLandlord()
         orgLandlord.charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES
         orgLandlord.charityNumber = "1234567"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
-        landlordService.updateOrganisationLandlordCharity(
-            isRegisteredCharity = false,
-            charityRegisteredWith = null,
-            charityNumber = null,
-        )
+        landlordService.updateOrganisationLandlordAsNotARegisteredCharity()
 
         assertNull(orgLandlord.charityRegisteredWith)
         assertNull(orgLandlord.charityNumber)
     }
 
     @Test
-    fun `updateOrganisationLandlordCharity clears the charity number when no regulator is selected`() {
+    fun `updateOrganisationLandlordAsRegisteredCharityWithNoRegulator clears the charity number`() {
         val orgLandlord = createOrgLandlord()
         orgLandlord.charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES
         orgLandlord.charityNumber = "1234567"
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
-        landlordService.updateOrganisationLandlordCharity(
-            isRegisteredCharity = true,
-            charityRegisteredWith = CharityRegulator.NONE,
-            charityNumber = null,
-        )
+        landlordService.updateOrganisationLandlordAsRegisteredCharityWithNoRegulator()
 
         assertEquals(CharityRegulator.NONE, orgLandlord.charityRegisteredWith)
         assertNull(orgLandlord.charityNumber)
     }
 
     @Test
-    fun `updateOrganisationLandlordCharity is annotated with @Transactional`() {
-        assertTrue(landlordService::updateOrganisationLandlordCharity.hasAnnotation<Transactional>())
+    fun `the organisation landlord charity update methods are annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordAsNotARegisteredCharity.hasAnnotation<Transactional>())
+        assertTrue(landlordService::updateOrganisationLandlordAsRegisteredCharityWithNoRegulator.hasAnnotation<Transactional>())
+        assertTrue(landlordService::updateOrganisationLandlordCharityRegistration.hasAnnotation<Transactional>())
     }
 
     @Test

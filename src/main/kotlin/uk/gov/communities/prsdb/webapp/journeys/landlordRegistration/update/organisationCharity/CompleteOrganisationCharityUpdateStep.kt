@@ -23,14 +23,20 @@ class CompleteOrganisationCharityUpdateStepConfig(
 
     override fun afterStepIsReached(state: UpdateOrganisationCharityJourneyState) {
         val task = state.charityTask
-        val isRegisteredCharity = task.orgIsRegisteredCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)
-        val charityRegisteredWith = if (isRegisteredCharity) task.getCharityRegisteredWith() else null
 
-        landlordService.updateOrganisationLandlordCharity(
-            isRegisteredCharity = isRegisteredCharity,
-            charityRegisteredWith = charityRegisteredWith,
-            charityNumber = charityRegisteredWith?.let { task.getCharityNumber(it) },
-        )
+        if (!task.orgIsRegisteredCharityStep.formModel.notNullValue(OrgIsRegisteredCharityFormModel::charity)) {
+            landlordService.updateOrganisationLandlordAsNotARegisteredCharity()
+            return
+        }
+
+        val charityRegisteredWith = task.getCharityRegisteredWith()
+        val charityNumber = task.getCharityNumber(charityRegisteredWith)
+
+        if (charityNumber == null) {
+            landlordService.updateOrganisationLandlordAsRegisteredCharityWithNoRegulator()
+        } else {
+            landlordService.updateOrganisationLandlordCharityRegistration(charityRegisteredWith, charityNumber)
+        }
     }
 
     override fun resolveNextDestination(
