@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -39,6 +40,7 @@ class LandlordDetailsController(
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
+    private val messageSource: MessageSource,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -48,7 +50,10 @@ class LandlordDetailsController(
         return when (landlord) {
             is OrganisationalLandlord -> {
                 if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-                    throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+                    throw ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Organisation landlords are not currently available",
+                    )
                 }
                 getOrgLandlordDetails(landlord, model)
             }
@@ -68,7 +73,8 @@ class LandlordDetailsController(
         model: Model,
     ): String {
         val isOrgLandlordRegistrationEnabled = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
-        val landlordViewModel = LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
+        val landlordViewModel =
+            LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
 
         model.addAttribute("landlord", landlordViewModel)
 
@@ -85,8 +91,11 @@ class LandlordDetailsController(
         orgLandlord: OrganisationalLandlord,
         model: Model,
     ): String {
-        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord))
-        model.addAttribute("orgLandlordContacts", OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers))
+        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource))
+        model.addAttribute(
+            "orgLandlordContacts",
+            OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers),
+        )
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
@@ -151,7 +160,8 @@ class LandlordDetailsController(
 
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
-        const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE =
+            "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val ORGANISATION_CONTACTS_FRAGMENT = "organisation-contacts"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 

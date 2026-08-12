@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
@@ -10,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeControl
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
@@ -21,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 
 class OrgLandlordViewModel(
     landlord: OrganisationalLandlord,
+    messageSource: MessageSource,
 ) {
     val name: String = landlord.name
 
@@ -66,7 +70,9 @@ class OrgLandlordViewModel(
                 )
                 addRow(
                     "landlordDetails.org.organisationType",
-                    landlord.organisationTypes,
+                    landlord.organisationTypes.joinToString(", ") { orgType ->
+                        messageSource.getMessageForKey(getOrgTypeMessageKey(orgType))
+                    },
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_TYPE_URL,
                 )
@@ -75,9 +81,17 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCharity),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_CHARITY_URL,
+                    // charityNumber and charityRegisteredWith are independently nullable, so the
+                    // charity row section can start with either of them present
+                    withoutBottomBorder = landlord.isRegisteredCharity || landlord.hasCharityNumber,
                 )
                 if (landlord.isRegisteredCharity) {
-                    addRow("landlordDetails.org.charityCommission", landlord.charityRegisteredWith)
+                    addRow(
+                        key = "landlordDetails.org.charityCommission",
+                        value = landlord.charityRegisteredWith,
+                        withActionLink = false,
+                        withoutBottomBorder = landlord.hasCharityNumber,
+                    )
                 }
                 if (landlord.hasCharityNumber) {
                     addRow("landlordDetails.org.charityNumber", landlord.charityNumber)
@@ -87,14 +101,22 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCompany),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_COMPANIES_HOUSE_URL,
+                    withoutBottomBorder = landlord.isRegisteredCompany,
                 )
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
                 }
             }.toList()
 
+    // The details page labels OrgType.NONE as "Other", unlike the registration form and its check
+    // answers page, which use the "None of these" checkbox text the landlord actually selected.
+    private fun getOrgTypeMessageKey(orgType: OrgType): String =
+        if (orgType == OrgType.NONE) ORG_TYPE_OTHER_MESSAGE_KEY else MessageKeyConverter.convert(orgType)
+
     companion object {
         private const val CHANGE_LINK_MESSAGE_KEY = "forms.links.change"
+
+        private const val ORG_TYPE_OTHER_MESSAGE_KEY = "landlordDetails.org.organisationTypeOther"
 
         private const val UPDATE_ORG_NAME_URL = "$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}"
 
