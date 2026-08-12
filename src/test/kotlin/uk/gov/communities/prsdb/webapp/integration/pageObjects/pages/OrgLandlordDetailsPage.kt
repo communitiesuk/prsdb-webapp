@@ -142,6 +142,8 @@ class OrgLandlordDetailsPage(
         val phoneRow = getRow("Organisation phone")
         val organisationTypeRow = getRow("Organisation type")
         val registeredCharityRow = getRow("Registered charity")
+        val charityCommissionRow = getRow("Charity commission")
+        val charityNumberRow = getRow("Charity number")
         val registeredWithCompaniesHouseRow = getRow("Registered with Companies House")
         val companyNumberRow = getRow("Companies House number")
     }

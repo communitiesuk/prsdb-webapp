@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import java.security.Principal
 
@@ -26,18 +25,19 @@ class UpdateOrganisationCharityJourneyFactory(
             task(journey.charityTask) {
                 initialStep()
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-                nextStep { journey.updateDetailsTodoStep }
+                nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "landlordDetails.update.title"
                 }
             }
-            step(journey.updateDetailsTodoStep) {
-                routeSegment(UpdateDetailsTodoStep.ROUTE_SEGMENT)
+            step(journey.cyaStep) {
+                routeSegment(UpdateOrganisationCharityCyaStep.ROUTE_SEGMENT)
                 parents { journey.charityTask.isComplete() }
+                nextStep { journey.completeOrganisationCharityUpdateStep }
+            }
+            step(journey.completeOrganisationCharityUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-                withAdditionalContentProperty {
-                    "todoComment" to "TODO PDJB-1463: Organisation charity check your answers page"
-                }
             }
         }
     }
@@ -48,7 +48,8 @@ class UpdateOrganisationCharityJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateOrganisationCharityJourney(
     override val charityTask: OrgCharityTask,
-    override val updateDetailsTodoStep: UpdateDetailsTodoStep,
+    override val cyaStep: UpdateOrganisationCharityCyaStep,
+    override val completeOrganisationCharityUpdateStep: CompleteOrganisationCharityUpdateStep,
     journeyStateService: JourneyStateService,
     private val journeyName: String = "organisation-charity",
 ) : AbstractJourneyState(journeyStateService),
@@ -64,5 +65,6 @@ class UpdateOrganisationCharityJourney(
 
 interface UpdateOrganisationCharityJourneyState : JourneyState {
     val charityTask: OrgCharityTask
-    val updateDetailsTodoStep: UpdateDetailsTodoStep
+    val cyaStep: UpdateOrganisationCharityCyaStep
+    val completeOrganisationCharityUpdateStep: CompleteOrganisationCharityUpdateStep
 }

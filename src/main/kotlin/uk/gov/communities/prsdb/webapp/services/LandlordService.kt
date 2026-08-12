@@ -224,6 +224,11 @@ class LandlordService(
             }
         }
 
+        orgLandlordUpdate.isRegisteredCharity?.let { isRegisteredCharity ->
+            landlordEntity.charityRegisteredWith = if (isRegisteredCharity) orgLandlordUpdate.charityRegisteredWith else null
+            landlordEntity.charityNumber = if (isRegisteredCharity) orgLandlordUpdate.charityNumber else null
+        }
+
         orgLandlordUpdate.leadTrusteeName?.let { landlordEntity.leadTrusteeName = it }
         orgLandlordUpdate.leadTrusteeDateOfBirth?.let { landlordEntity.leadTrusteeDateOfBirth = it }
         orgLandlordUpdate.leadTrusteeEmail?.let { landlordEntity.leadTrusteeEmail = it }
@@ -319,6 +324,24 @@ class LandlordService(
             )
 
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordCharity(
+        isRegisteredCharity: Boolean,
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isRegisteredCharity = isRegisteredCharity,
+                    charityRegisteredWith = charityRegisteredWith,
+                    charityNumber = charityNumber,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "charity registration details")
     }
 
     @Transactional
