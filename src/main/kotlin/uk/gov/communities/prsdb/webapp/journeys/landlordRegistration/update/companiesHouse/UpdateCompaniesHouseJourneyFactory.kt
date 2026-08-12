@@ -15,10 +15,13 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.GovBodyMembersListState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
@@ -101,20 +104,22 @@ class UpdateCompaniesHouseJourneyFactory(
                         journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.UNCHANGED_NON_COMPANY),
                     )
                 }
-                nextStep { journey.checkAnswersStep }
+                backDestination { journey.govBodyMembersIntroBackDestination() }
+                nextStep { journey.govBodyMembersBackRoutingStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
                         listState = journey,
-                        govBodyMembersIntroBackDestination = {
-                            if (journey.orgCompaniesHouseUpdateRoutingStep.outcome ==
-                                OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY
-                            ) {
-                                Destination(journey.interruptionStep)
-                            } else {
-                                Destination(journey.orgIsRegisteredCompanyStep)
-                            }
-                        },
                     )
+                }
+            }
+            step<AnyMembers, GovBodyMembersBackRoutingStepConfig>(journey.govBodyMembersBackRoutingStep) {
+                stepSpecificInitialisation { usingMembersList { journey.governingBodyMembersMap } }
+                parents { journey.orgGovBodyMembersTask.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.govBodyMembersIntroBackDestination()
+                        AnyMembers.SOME_MEMBERS -> Destination(journey.checkAnswersStep)
+                    }
                 }
             }
             step(journey.checkAnswersStep) {
@@ -122,7 +127,7 @@ class UpdateCompaniesHouseJourneyFactory(
                 parents {
                     OrParents(
                         journey.orgCompanyNumberStep.isComplete(),
-                        journey.orgGovBodyMembersTask.isComplete(),
+                        journey.govBodyMembersBackRoutingStep.hasOutcome(AnyMembers.SOME_MEMBERS),
                     )
                 }
                 nextStep { journey.completeCompaniesHouseUpdateStep }
@@ -144,6 +149,7 @@ class UpdateCompaniesHouseJourney(
     override val interruptionStep: OrgCompaniesHouseInterruptionStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
     override val orgGovBodyMembersTask: OrgGovBodyMembersTask,
+    override val govBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep,
     override val checkAnswersStep: CompaniesHouseUpdateCheckAnswersStep,
     override val completeCompaniesHouseUpdateStep: CompleteCompaniesHouseUpdateStep,
     journeyStateService: JourneyStateService,
@@ -155,6 +161,16 @@ class UpdateCompaniesHouseJourney(
     )
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
     override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
+
+    // Where the governing body members sub-journey backs out to: the interruption when the answer changed to a
+    // non-company, otherwise the (unchanged) is-registered-company question. Also used to route back once the list
+    // has been emptied.
+    fun govBodyMembersIntroBackDestination(): Destination =
+        if (orgCompaniesHouseUpdateRoutingStep.outcome == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY) {
+            Destination(interruptionStep)
+        } else {
+            Destination(orgIsRegisteredCompanyStep)
+        }
 
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
@@ -172,6 +188,7 @@ interface UpdateCompaniesHouseJourneyState :
     val interruptionStep: OrgCompaniesHouseInterruptionStep
     val orgCompanyNumberStep: OrgCompanyNumberStep
     val orgGovBodyMembersTask: OrgGovBodyMembersTask
+    val govBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep
     val checkAnswersStep: CompaniesHouseUpdateCheckAnswersStep
     val completeCompaniesHouseUpdateStep: CompleteCompaniesHouseUpdateStep
 }

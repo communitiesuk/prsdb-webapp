@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -58,7 +59,6 @@ class OrgGovBodyMembersTask(
     override fun makeSubJourney(state: OrgGovBodyMembersState) =
         subJourney(state) {
             step(journey.hasAnyGovBodyMembersStep) {
-                backDestination { dependencies.govBodyMembersIntroBackDestination() }
                 nextStep { mode ->
                     when (mode) {
                         AnyMembers.NO_MEMBERS -> journey.orgGovBodyWhoToProvideStep
@@ -77,19 +77,17 @@ class OrgGovBodyMembersTask(
                 nextDestination { mode ->
                     when (mode) {
                         AnyMembers.SOME_MEMBERS -> Destination(journey.orgGovBodyMemberListStep)
-                        AnyMembers.NO_MEMBERS -> dependencies.govBodyMembersIntroBackDestination()
+                        AnyMembers.NO_MEMBERS -> Destination(exitStep)
                     }
                 }
             }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyGovBodyMembersStep.isComplete() }
-                backDestination {
-                    if (journey.governingBodyMembersMap.isNullOrEmpty()) {
-                        dependencies.govBodyMembersIntroBackDestination()
-                    } else {
-                        Destination(journey.orgGovBodyMemberListStep)
-                    }
+                parents {
+                    OrParents(
+                        journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                        journey.orgGovBodyMemberListStep.isComplete(),
+                    )
                 }
                 nextStep { journey.orgGovBodyMemberNameStep }
             }
@@ -156,7 +154,12 @@ class OrgGovBodyMembersTask(
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.orgGovBodyMemberListStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgGovBodyMemberListStep.isComplete(),
+                        journey.removeGovBodyMemberStep.hasOutcome(AnyMembers.NO_MEMBERS),
+                    )
+                }
             }
         }
 }

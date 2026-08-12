@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.Land
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeDestination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
@@ -70,6 +71,7 @@ class LandlordRegistrationTask(
     override val finishCyaStep: FinishCyaJourneyStep,
     override val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep,
     override val orgCompaniesHouseInterruptionStep: OrgCompaniesHouseInterruptionStep,
+    override val orgCompaniesHouseChangeGovBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep,
     override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep,
     override val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep,
     journeyStateService: JourneyStateService,

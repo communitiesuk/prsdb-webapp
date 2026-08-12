@@ -8,8 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMustProvideInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
@@ -19,6 +22,7 @@ class OrgGovBodyTask(
     override val orgGovBodyDetailsStep: OrgGovBodyDetailsStep,
     override val orgGovBodyMustProvideInfoStep: OrgGovBodyMustProvideInfoStep,
     override val orgGovBodyMembersTask: OrgGovBodyMembersTask,
+    override val govBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep,
 ) : TaskWithoutDependencies<OrgGovBodyState>(journeyStateService),
     OrgGovBodyState {
     override val taskState get() = this
@@ -47,16 +51,26 @@ class OrgGovBodyTask(
             }
             task(journey.orgGovBodyMembersTask) {
                 parents { journey.orgGovBodyDetailsStep.hasOutcome(OrgGovBodyDetailsMode.HAS_DETAILS) }
-                nextStep { exitStep }
+                backDestination { Destination(journey.orgGovBodyDetailsStep) }
+                nextStep { journey.govBodyMembersBackRoutingStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
                         listState = journey,
-                        govBodyMembersIntroBackDestination = { Destination(journey.orgGovBodyDetailsStep) },
                     )
                 }
             }
-            exitStep {
+            step<AnyMembers, GovBodyMembersBackRoutingStepConfig>(journey.govBodyMembersBackRoutingStep) {
+                stepSpecificInitialisation { usingMembersList { journey.governingBodyMembersMap } }
                 parents { journey.orgGovBodyMembersTask.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.orgGovBodyDetailsStep
+                        AnyMembers.SOME_MEMBERS -> exitStep
+                    }
+                }
+            }
+            exitStep {
+                parents { journey.govBodyMembersBackRoutingStep.hasOutcome(AnyMembers.SOME_MEMBERS) }
             }
         }
 }

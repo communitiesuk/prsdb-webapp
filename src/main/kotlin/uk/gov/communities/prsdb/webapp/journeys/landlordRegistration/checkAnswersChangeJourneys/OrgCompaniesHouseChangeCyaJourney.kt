@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersDependencies
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.GovBodyMembersBackRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseInterruptionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 // Companies House change sub-journey from the organisation CYA page; the interruption only shows on a changed answer.
@@ -80,14 +82,24 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
                 journey.orgCompaniesHouseUpdateRoutingStep.hasOutcome(OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_NON_COMPANY),
             )
         }
-        nextStep { journey.finishCyaStep }
+        backDestination { Destination(journey.orgCompaniesHouseInterruptionStep) }
+        nextStep { journey.orgCompaniesHouseChangeGovBodyMembersBackRoutingStep }
         withDependencies {
             OrgGovBodyMembersDependencies(
                 listState = journey.orgLandlordRegistrationTask.orgGovBodyTask,
-                govBodyMembersIntroBackDestination = {
-                    Destination(journey.orgCompaniesHouseInterruptionStep)
-                },
             )
+        }
+    }
+    step<AnyMembers, GovBodyMembersBackRoutingStepConfig>(journey.orgCompaniesHouseChangeGovBodyMembersBackRoutingStep) {
+        stepSpecificInitialisation {
+            usingMembersList { journey.orgLandlordRegistrationTask.orgGovBodyTask.governingBodyMembersMap }
+        }
+        parents { journey.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.isComplete() }
+        nextDestination { mode ->
+            when (mode) {
+                AnyMembers.NO_MEMBERS -> Destination(journey.orgCompaniesHouseInterruptionStep)
+                AnyMembers.SOME_MEMBERS -> Destination(journey.finishCyaStep)
+            }
         }
     }
 }
