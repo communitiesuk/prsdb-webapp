@@ -355,8 +355,12 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
             // CYA page
-            // TODO: PDJB-1470: Implement this
             val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(newName)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.dateOfBirthRow.value).containsText("15 June 1985")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.emailRow.value).containsText("updated.trustee@example.com")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.phoneRow.value).containsText("07999888777")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 PRSDB Square")
             cyaPage.submit()
 
             // Back to landlord details
