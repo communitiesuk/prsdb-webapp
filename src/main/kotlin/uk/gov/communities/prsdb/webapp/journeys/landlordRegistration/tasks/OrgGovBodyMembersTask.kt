@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -81,12 +82,21 @@ class OrgGovBodyMembersTask(
                     }
                 }
             }
+            step(journey.orgGovBodyMemberListStep) {
+                routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
+                parents {
+                    journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                nextStep { exitStep }
+            }
             step(journey.orgGovBodyWhoToProvideStep) {
                 routeSegment(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.NO_MEMBERS),
-                        journey.orgGovBodyMemberListStep.isComplete(),
+                        SingleParent(journey.orgGovBodyMemberListStep) {
+                            !journey.governingBodyMembersMap.isNullOrEmpty()
+                        },
                     )
                 }
                 nextStep { journey.orgGovBodyMemberNameStep }
@@ -145,13 +155,6 @@ class OrgGovBodyMembersTask(
             step(journey.saveGovBodyMemberStep) {
                 parents { journey.govBodyMemberAddressTask.isComplete() }
                 nextStep { journey.orgGovBodyMemberListStep }
-            }
-            step(journey.orgGovBodyMemberListStep) {
-                routeSegment(OrgGovBodyMemberListStep.ROUTE_SEGMENT)
-                parents {
-                    journey.hasAnyGovBodyMembersStep.hasOutcome(AnyMembers.SOME_MEMBERS)
-                }
-                nextStep { exitStep }
             }
             exitStep {
                 parents {
