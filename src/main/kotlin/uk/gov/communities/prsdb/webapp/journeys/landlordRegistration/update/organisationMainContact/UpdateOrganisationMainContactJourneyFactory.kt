@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -32,13 +31,6 @@ class UpdateOrganisationMainContactJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "landlordDetails.update.title",
-                        "sectionHeaderInfo" to
-                            SectionHeaderViewModel(
-                                sectionNameKey = "landlordDetails.heading",
-                                sectionNumber = 0,
-                                totalSections = 0,
-                                useNumbering = false,
-                            ),
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "submitButton" to "transactionSubmitButton",
                         "showWarning" to true,
