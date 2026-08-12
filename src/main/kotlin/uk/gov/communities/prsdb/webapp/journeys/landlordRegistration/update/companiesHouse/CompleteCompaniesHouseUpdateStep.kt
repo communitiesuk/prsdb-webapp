@@ -21,14 +21,16 @@ class CompleteCompaniesHouseUpdateStepConfig(
         // change link), so the collected answers are always persisted here regardless of whether the registration
         // status itself changed.
         val isRegisteredWithCompaniesHouse =
-            state.orgIsRegisteredCompanyStep.formModel.notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+            state.updateCompaniesHouseTask.orgIsRegisteredCompanyStep.formModel
+                .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
         if (isRegisteredWithCompaniesHouse) {
             val companyNumber =
-                state.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber)
+                state.updateCompaniesHouseTask.orgCompanyNumberStep.formModel
+                    .notNullValue(OrgCompanyNumberFormModel::companyNumber)
             landlordService.updateOrganisationalLandlordToRegisteredCompany(companyNumber)
         } else {
             landlordService.updateOrganisationalLandlordToNonRegisteredCompany(
-                state.orgGovBodyMembersTask.governingBodyMembersMap?.values?.toList().orEmpty(),
+                state.updateCompaniesHouseTask.governingBodyMembersMap?.values?.toList().orEmpty(),
             )
         }
     }
