@@ -35,8 +35,8 @@ class OrgTypeTrustInterruptionStepConfigTests {
             val labelKeys = content["selectedOrgTypeLabelKeys"] as List<String>
             assertEquals(
                 listOf(
-                    "updateLandlordDetails.orgTypeTrustInterruption.orgType.company",
-                    "updateLandlordDetails.orgTypeTrustInterruption.orgType.charity",
+                    "registerAsALandlord.orgTypeTrustInterruption.orgType.company",
+                    "registerAsALandlord.orgTypeTrustInterruption.orgType.charity",
                 ),
                 labelKeys,
             )
@@ -50,7 +50,7 @@ class OrgTypeTrustInterruptionStepConfigTests {
             val content = stepConfig.getStepSpecificContent(state)
 
             val labelKeys = content["selectedOrgTypeLabelKeys"] as List<String>
-            assertEquals(listOf("updateLandlordDetails.orgTypeTrustInterruption.orgType.company"), labelKeys)
+            assertEquals(listOf("registerAsALandlord.orgTypeTrustInterruption.orgType.company"), labelKeys)
         }
     }
 

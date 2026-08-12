@@ -26,9 +26,9 @@ class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complet
 
     private fun orgTypeToLabelKey(orgType: OrgType): String =
         when (orgType) {
-            OrgType.COMPANY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.company"
-            OrgType.CHARITY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.charity"
-            OrgType.NONE -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.none"
+            OrgType.COMPANY -> "registerAsALandlord.orgTypeTrustInterruption.orgType.company"
+            OrgType.CHARITY -> "registerAsALandlord.orgTypeTrustInterruption.orgType.charity"
+            OrgType.NONE -> "registerAsALandlord.orgTypeTrustInterruption.orgType.none"
             OrgType.TRUST -> throw PrsdbWebException("Trust is not a valid org type for the removing trust interruption page")
         }
 
