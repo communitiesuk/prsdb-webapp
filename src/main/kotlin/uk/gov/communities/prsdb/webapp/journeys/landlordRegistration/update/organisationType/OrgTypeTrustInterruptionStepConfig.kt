@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.org
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -28,7 +29,7 @@ class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complet
             OrgType.COMPANY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.company"
             OrgType.CHARITY -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.charity"
             OrgType.NONE -> "updateLandlordDetails.orgTypeTrustInterruption.orgType.none"
-            else -> orgType.name.lowercase()
+            OrgType.TRUST -> throw PrsdbWebException("Trust is not a valid org type for the removing trust interruption page")
         }
 
     override fun chooseTemplate(state: OrgTypeUpdateState): String {
