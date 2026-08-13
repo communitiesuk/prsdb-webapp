@@ -153,9 +153,9 @@ abstract class IntegrationTest {
     }
 
     private fun isExternalUrl(url: String): Boolean {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) return false
+        // Anything that is not a network request, such as about:blank or a data: URI, has no host to compare
         val host = runCatching { URI(url).host }.getOrNull() ?: return false
-        return host != "localhost" && host != "127.0.0.1"
+        return host !in LOCAL_HOSTS
     }
 
     @AfterEach
@@ -183,5 +183,9 @@ abstract class IntegrationTest {
         val page = browserContext.newPage()
         val navigator = Navigator(page, port)
         return Pair(page, navigator)
+    }
+
+    companion object {
+        private val LOCAL_HOSTS = setOf("localhost", "127.0.0.1")
     }
 }
