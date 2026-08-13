@@ -93,11 +93,6 @@ abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneySta
         val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
-        if (journeyElements.isEmpty()) {
-            taskInitialiser.configureFirst {
-                additionalFirstElementConfiguration.forEach { it() }
-            }
-        }
         journeyElements.add(taskInitialiser)
     }
 
