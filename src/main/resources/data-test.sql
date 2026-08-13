@@ -205,7 +205,7 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (50, '2026-07-21 00:00:00+00', 210000000050, 1), -- Yvonne Andrews
        (51, '2026-07-21 00:00:00+00', 210000000051, 1), -- Mobin Ibrahim Patel
        (52, '2026-07-21 00:00:00+00', 210000000052, 1), -- Sarah Warren
-       (53, '2026-08-13 00:00:00+00', 172360128083, 1) ON CONFLICT DO NOTHING; -- Aimie Robinson
+       (53, '2026-08-13 00:00:00+00', 210000000053, 1) ON CONFLICT DO NOTHING; -- Aimie Robinson
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
