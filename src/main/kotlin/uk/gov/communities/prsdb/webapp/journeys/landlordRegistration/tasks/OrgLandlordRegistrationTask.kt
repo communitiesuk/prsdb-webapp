@@ -106,7 +106,7 @@ class OrgLandlordRegistrationTask(
                 backStep {
                     when (journey.companiesHouseTask.orgIsRegisteredCompanyStep.outcome) {
                         YesOrNo.YES -> journey.companiesHouseTask.orgCompanyNumberStep
-                        YesOrNo.NO -> journey.orgGovBodyTask.orgGovBodyMemberListStep
+                        YesOrNo.NO -> journey.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep
                         else -> throw IllegalStateException(
                             "orgIsRegisteredCompanyStep must have an outcome for orgMainContactStep to be reachable",
                         )
