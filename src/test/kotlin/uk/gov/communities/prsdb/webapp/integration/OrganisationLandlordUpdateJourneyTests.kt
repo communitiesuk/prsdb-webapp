@@ -287,6 +287,14 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     }
 
     @Test
+    fun `Organisation phone number change link opens the organisation phone number update page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+        assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+    }
+
+    @Test
     fun `Submitting an empty organisation phone number on update shows a validation error`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
