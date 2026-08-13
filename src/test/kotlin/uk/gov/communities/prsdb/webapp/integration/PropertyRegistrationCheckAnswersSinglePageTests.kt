@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
@@ -111,6 +112,36 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
             hasGasSupplyPage.submitHasNoGasSupply()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the occupancy change link navigates to the occupancy page and changing from occupied to unoccupied returns to the CYA page`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.actions.firstActionLink
+                .clickAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            occupancyPage.submitIsVacant()
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(updatedCheckAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
+        }
+
+        @Test
+        fun `the occupancy change link navigates to the occupancy page and changing from unoccupied to occupied returns to the CYA page`(
+            page: Page,
+        ) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageUnoccupiedWithTenancyDetails()
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.actions.firstActionLink
+                .clickAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            occupancyPage.submitIsOccupied()
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(updatedCheckAnswersPage.summaryList.occupancyQuestionRow.value).containsText("Yes")
         }
 
         @Test

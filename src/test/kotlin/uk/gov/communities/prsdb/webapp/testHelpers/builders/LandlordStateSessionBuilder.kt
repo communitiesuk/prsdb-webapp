@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -64,7 +63,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegi
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -73,7 +71,8 @@ class LandlordStateSessionBuilder(
     override val mockLocalCouncilService: LocalCouncilService = mock(),
 ) : JourneyStateSessionBuilder<LandlordStateSessionBuilder>(),
     IdentityStateBuilder<LandlordStateSessionBuilder>,
-    AddressStateBuilder<LandlordStateSessionBuilder> {
+    AddressStateBuilder<LandlordStateSessionBuilder>,
+    OrgTypeStateBuilder<LandlordStateSessionBuilder> {
     fun withPrivacyNotice(): LandlordStateSessionBuilder {
         val privacyNoticeFormModel =
             LandlordPrivacyNoticeFormModel().apply {
@@ -158,12 +157,6 @@ class LandlordStateSessionBuilder(
     fun withOrgPhoneNumber(phoneNumber: String = "07123456789"): LandlordStateSessionBuilder {
         val formModel = OrgPhoneNumberFormModel().apply { this.phoneNumber = phoneNumber }
         withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, formModel)
-        return self()
-    }
-
-    fun withOrgType(orgTypes: List<OrgType> = listOf(OrgType.COMPANY)): LandlordStateSessionBuilder {
-        val formModel = OrgTypeFormModel().apply { this.orgTypes = orgTypes.map { it.name }.toMutableList() }
-        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 

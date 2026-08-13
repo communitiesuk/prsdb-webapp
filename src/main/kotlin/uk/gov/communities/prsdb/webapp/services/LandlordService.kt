@@ -210,6 +210,7 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
+        orgLandlordUpdate.email?.let { landlordEntity.wholeOrgEmail = it }
         orgLandlordUpdate.isCompany?.let { landlordEntity.isCompany = it }
         orgLandlordUpdate.isCharity?.let { landlordEntity.isCharity = it }
         orgLandlordUpdate.isTrust?.let { isTrust ->
@@ -223,6 +224,13 @@ class LandlordService(
             }
         }
 
+        // isRegisteredCharity is only a marker that the charity details are being updated - the details themselves are
+        // always assigned, so that switching to a regulator with no charity number clears any previously recorded one
+        orgLandlordUpdate.isRegisteredCharity?.let {
+            landlordEntity.charityRegisteredWith = orgLandlordUpdate.charityRegisteredWith
+            landlordEntity.charityNumber = orgLandlordUpdate.charityNumber
+        }
+
         orgLandlordUpdate.leadTrusteeName?.let { landlordEntity.leadTrusteeName = it }
         orgLandlordUpdate.leadTrusteeDateOfBirth?.let { landlordEntity.leadTrusteeDateOfBirth = it }
         orgLandlordUpdate.leadTrusteeEmail?.let { landlordEntity.leadTrusteeEmail = it }
@@ -230,6 +238,10 @@ class LandlordService(
         orgLandlordUpdate.leadTrusteeAddress?.let {
             landlordEntity.leadTrusteeAddress = addressService.findOrCreateAddress(it)
         }
+
+        orgLandlordUpdate.mainContactName?.let { landlordEntity.mainContactName = it }
+        orgLandlordUpdate.mainContactEmail?.let { landlordEntity.mainContactEmail = it }
+        orgLandlordUpdate.mainContactPhone?.let { landlordEntity.mainContactPhone = it }
 
         return landlordEntity
     }
@@ -241,6 +253,33 @@ class LandlordService(
                 OrganisationLandlordUpdateModel(name = orgName),
             )
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordEmail(email: String) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(email = email),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation email address")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordMainContact(
+        name: String,
+        email: String,
+        phone: String,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    mainContactName = name,
+                    mainContactEmail = email,
+                    mainContactPhone = phone,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
     }
 
     @Transactional
@@ -287,6 +326,35 @@ class LandlordService(
             )
 
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordAsNotARegisteredCharity() = updateOrganisationLandlordCharityDetails(null, null)
+
+    @Transactional
+    fun updateOrganisationLandlordAsRegisteredCharityWithNoRegulator() =
+        updateOrganisationLandlordCharityDetails(CharityRegulator.NONE, null)
+
+    @Transactional
+    fun updateOrganisationLandlordCharityRegistration(
+        charityRegisteredWith: CharityRegulator,
+        charityNumber: String,
+    ) = updateOrganisationLandlordCharityDetails(charityRegisteredWith, charityNumber)
+
+    private fun updateOrganisationLandlordCharityDetails(
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isRegisteredCharity = charityRegisteredWith != null,
+                    charityRegisteredWith = charityRegisteredWith,
+                    charityNumber = charityNumber,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "charity registration details")
     }
 
     @Transactional

@@ -28,6 +28,6 @@ interface LandlordRegistrationState :
     val identityTask: IdentityTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
-    val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
+    override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
     val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep
 }
