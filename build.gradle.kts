@@ -300,6 +300,11 @@ buildscript {
             // extra["jackson-bom.version"] override above only applies to the project's dependency
             // management, not here, so GHSA-5gvw-p9qm-jgwh / GHSA-mhm7-754m-9p8w are reported against it.
             force("com.fasterxml.jackson:jackson-bom:2.21.5")
+            // CVE-2026-54399 / GHSA-hf6x-8p5f-cgmf: httpcore5 HTTP/1 header parsing memory-exhaustion DoS
+            // (fixed in 5.4.3). Pulled transitively via spring-boot-buildpack-platform -> httpclient5 onto
+            // the build classpath, so it is reported even though it is build-time only.
+            force("org.apache.httpcomponents.core5:httpcore5:5.4.3")
+            force("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3")
         }
     }
 }
