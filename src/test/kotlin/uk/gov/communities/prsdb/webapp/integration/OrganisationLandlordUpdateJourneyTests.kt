@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgIsRegisteredCharityFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
@@ -272,6 +273,37 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
     // TODO: PDJB-1463: this page is a placeholder that does not yet list the submitted answers
     private fun submitCyaPage(page: Page) = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
+
+    @Test
+    fun `An organisation landlord can update the organisation phone number and return to details page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+        val updatePhonePage = assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+        updatePhonePage.submitPhoneNumber("07999123456")
+
+        val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(updatedDetailsPage.mainContent).containsText("07999123456")
+    }
+
+    @Test
+    fun `Organisation phone number change link opens the organisation phone number update page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+        assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+    }
+
+    @Test
+    fun `Submitting an empty organisation phone number on update shows a validation error`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+        val updatePhonePage = assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+        updatePhonePage.submitPhoneNumber("")
+        assertThat(updatePhonePage.form.getErrorMessage())
+            .containsText("Enter a phone number including the country code for international numbers")
+    }
 
     @Test
     fun `An organisation landlord can update organisation type when trust status is unchanged`(page: Page) {
