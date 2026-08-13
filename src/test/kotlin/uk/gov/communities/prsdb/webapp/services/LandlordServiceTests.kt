@@ -685,6 +685,18 @@ class LandlordServiceTests {
     }
 
     @Test
+    fun `updateOrganisationLandlordForUser updates the organisation phone number`() {
+        val orgLandlord = OrganisationalLandlord()
+        orgLandlord.phoneNumber = "01111111111"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(phoneNumber = "02222222222"))
+
+        assertEquals("02222222222", orgLandlord.phoneNumber)
+        verify(mockUserToLandlordService).getCurrentOrganisationLandlordForUser()
+    }
+
+    @Test
     fun `updateOrganisationLandlordForUser skips null fields`() {
         val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
@@ -819,6 +831,32 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationLandlordMainContact is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordMainContact.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordPhoneNumber updates the phone number and sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.phoneNumber = "01111111111"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordPhoneNumber("02222222222")
+
+        assertEquals("02222222222", orgLandlord.phoneNumber)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation phone number.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordPhoneNumber is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordPhoneNumber.hasAnnotation<Transactional>())
     }
 
     @Test
