@@ -213,6 +213,7 @@ class LandlordService(
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
         orgLandlordUpdate.email?.let { landlordEntity.wholeOrgEmail = it }
+        orgLandlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
         orgLandlordUpdate.isCompany?.let { landlordEntity.isCompany = it }
         orgLandlordUpdate.isCharity?.let { landlordEntity.isCharity = it }
         orgLandlordUpdate.isTrust?.let { isTrust ->
@@ -299,6 +300,16 @@ class LandlordService(
             )
 
         sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordPhoneNumber(phoneNumber: String) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(phoneNumber = phoneNumber),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation phone number")
     }
 
     @Transactional
