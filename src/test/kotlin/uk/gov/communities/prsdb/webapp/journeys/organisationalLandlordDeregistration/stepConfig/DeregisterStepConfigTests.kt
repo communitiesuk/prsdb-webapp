@@ -4,15 +4,20 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyState
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class DeregisterStepConfigTests {
@@ -27,6 +32,9 @@ class DeregisterStepConfigTests {
 
     @Mock
     lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
+    @Mock
+    lateinit var mockConfirmationEmailSender: EmailNotificationService<OrganisationalLandlordDeregistrationConfirmationEmail>
 
     @Mock
     lateinit var mockState: OrganisationalLandlordDeregistrationJourneyState
@@ -66,6 +74,32 @@ class DeregisterStepConfigTests {
         verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(jointProperty)
     }
 
+    @Test
+    fun `afterStepIsReached sends the confirmation email to the registrant email`() {
+        val stepConfig = setupStepConfig()
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                name = "Example Housing Association",
+                email = "organisation@example.com",
+                registrantName = "Sam Smith",
+                registrantEmail = "sam.smith@example.com",
+            )
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(landlord)
+
+        stepConfig.afterStepIsReached(mockState)
+
+        val emailCaptor = argumentCaptor<OrganisationalLandlordDeregistrationConfirmationEmail>()
+        verify(mockConfirmationEmailSender).sendEmail(eq("sam.smith@example.com"), emailCaptor.capture())
+
+        assertEquals(
+            OrganisationalLandlordDeregistrationConfirmationEmail(
+                registrantName = "Sam Smith",
+                organisationName = "Example Housing Association",
+            ),
+            emailCaptor.firstValue,
+        )
+    }
+
     private fun setupMocks() =
         MockLandlordData.createOrgLandlord().also { orgLandlord ->
             whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
@@ -77,5 +111,6 @@ class DeregisterStepConfigTests {
             mockUserToLandlordService,
             mockSecurityContextService,
             mockSwapToIndividualNudgeEmailService,
+            mockConfirmationEmailSender,
         )
 }
