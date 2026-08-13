@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
@@ -14,10 +14,10 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 @JourneyFrameworkComponent
 class OrgGovBodyMemberListStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgGovBodyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgGovBodyMembersState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: OrgGovBodyState) =
+    override fun getStepSpecificContent(state: OrgGovBodyMembersState) =
         mapOf(
             "addAnotherTitle" to "forms.orgGovBodyMemberList.heading",
             "optionalAddAnotherTitleParam" to (state.governingBodyMembersMap?.size ?: 0),
@@ -29,13 +29,13 @@ class OrgGovBodyMemberListStepConfig(
             "addAnotherUrl" to Destination(state.orgGovBodyWhoToProvideStep).toUrlStringOrNull(),
         )
 
-    override fun afterStepIsReached(state: OrgGovBodyState) {
+    override fun afterStepIsReached(state: OrgGovBodyMembersState) {
         // ensure that if you ever get to this page we reset any state that is used by one of the buttons.
         // this means we can be certain all the buttons will always work even if you use the browser back buttons.
         state.editingGovBodyMemberId = null
     }
 
-    private fun getMemberRows(state: OrgGovBodyState): List<SummaryListRowViewModel> {
+    private fun getMemberRows(state: OrgGovBodyMembersState): List<SummaryListRowViewModel> {
         val membersMap = state.governingBodyMembersMap ?: emptyMap()
         return membersMap
             .toList()
@@ -64,15 +64,15 @@ class OrgGovBodyMemberListStepConfig(
             }
     }
 
-    override fun chooseTemplate(state: OrgGovBodyState): String = "forms/addAnotherForm"
+    override fun chooseTemplate(state: OrgGovBodyMembersState): String = "forms/addAnotherForm"
 
-    override fun mode(state: OrgGovBodyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: OrgGovBodyMembersState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class OrgGovBodyMemberListStep(
     stepConfig: OrgGovBodyMemberListStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, OrgGovBodyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, OrgGovBodyMembersState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-governing-body-member-list"
     }

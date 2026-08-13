@@ -15,7 +15,9 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
+import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
@@ -28,6 +30,8 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(AcceptOrRejectJointLandlordInvitationController::class)
 class AcceptOrRejectJointLandlordInvitationControllerTests(
@@ -38,6 +42,9 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
     @MockitoBean
     private lateinit var invitationService: JointLandlordInvitationService
+
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -75,7 +82,10 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
             val expectedRedirectUrl =
                 JourneyStateService
-                    .urlWithJourneyState("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}", journeyId)
+                    .urlWithJourneyState(
+                        "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
+                        journeyId,
+                    )
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE?$TOKEN=$validToken")
@@ -243,13 +253,49 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @WithMockUser(roles = ["LANDLORD"])
         @Test
-        fun `getConfirmation returns 200 for a landlord user`() {
-            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(Pair("1 Fake Street\nFaketown\nFK1 2AB", 1L))
+        fun `getConfirmation returns 200 and individual survey URL for an individual landlord user`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createIndividualLandlord())
 
             mvc
                 .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
                 .andExpect {
                     status { isOk() }
+                    model {
+                        attribute(
+                            "landlordRegistrationSurveyUrl",
+                            INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL,
+                        )
+                    }
+                }
+        }
+
+        @WithMockUser(roles = ["LANDLORD"])
+        @Test
+        fun `getConfirmation returns 200 and org survey URL for an org landlord user`() {
+            whenever(invitationService.getLastAcceptedPropertyFromSession()).thenReturn(
+                Pair(
+                    "1 Fake Street\nFaketown\nFK1 2AB",
+                    1L,
+                ),
+            )
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(MockLandlordData.createOrgLandlord())
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute(
+                            "landlordRegistrationSurveyUrl",
+                            ORG_LANDLORD_REGISTRATION_SURVEY_URL,
+                        )
+                    }
                 }
         }
 

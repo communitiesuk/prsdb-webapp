@@ -164,7 +164,15 @@ class OrgLandlordViewModelTests {
                 charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
                 charityNumber = "0123456",
             )
-        val changeableHeadings = listOf("landlordDetails.org.name", "landlordDetails.org.email", "landlordDetails.org.organisationType")
+        val changeableHeadings =
+            listOf(
+                "landlordDetails.org.name",
+                "landlordDetails.org.email",
+                "landlordDetails.org.phone",
+                "landlordDetails.org.organisationType",
+                "landlordDetails.org.registeredCharity",
+                "landlordDetails.org.registeredWithCompaniesHouse",
+            )
 
         val viewModel = OrgLandlordViewModel(landlord)
 

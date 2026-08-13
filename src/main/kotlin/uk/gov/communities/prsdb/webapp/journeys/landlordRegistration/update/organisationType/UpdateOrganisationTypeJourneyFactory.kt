@@ -119,7 +119,7 @@ interface UpdateOrganisationTypeJourneyState :
     JourneyState,
     OrgTypeUpdateState {
     override val orgTypeStep: OrgTypeStep
-    val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
+    override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
     val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep
     val leadTrusteeTask: LeadTrusteeTask
     val orgTypeCyaStep: OrgTypeCyaStep

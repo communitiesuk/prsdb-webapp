@@ -1,0 +1,35 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <div class="moj-interruption-card">
+        <div class="moj-interruption-card__content">
+            <h1 class="govuk-heading-l moj-interruption-card__heading"
+                th:text="#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.heading}">
+                registerAsALandlord.orgTypeTrustInterruption.addingTrust.heading
+            </h1>
+            <div class="govuk-body-l moj-interruption-card__body">
+                <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.one}">
+                    registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.one
+                </p>
+                <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.two}">
+                    registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.two
+                </p>
+            </div>
+            <div class="govuk-button-group moj-interruption-card__actions">
+                <button type="submit" class="govuk-button govuk-button--inverse" data-module="govuk-button"
+                        th:text="#{forms.buttons.continueWithChange}">
+                    forms.buttons.continueWithChange
+                </button>
+                <a class="govuk-link govuk-link--inverse" th:href="@{${backUrl}}"
+                   th:text="#{forms.links.goBack}">
+                    forms.links.goBack
+                </a>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

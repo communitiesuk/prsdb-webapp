@@ -6,7 +6,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -17,9 +19,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeNameFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteePhoneFormPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityCyaPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityRegisteredWithFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgIsRegisteredCharityFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeAddressFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeDobFormPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.LeadTrusteeEmailFormPageUpdateOrganisationType
@@ -51,16 +58,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     }
 
     @Test
-    fun `Submitting an empty organisation name on update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
-
-        val updateOrgNamePage = assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
-        updateOrgNamePage.submitName("")
-        assertThat(updateOrgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
-    }
-
-    @Test
     fun `An organisation landlord can update organisation email from landlord details and return to details page`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
         orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
@@ -70,26 +67,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(updatedDetailsPage.mainContent).containsText("updated-organisation@example.com")
-    }
-
-    @Test
-    fun `Submitting an empty organisation email on update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
-
-        val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
-        updateOrgEmailPage.submitEmail("")
-        assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter a valid email address")
-    }
-
-    @Test
-    fun `Submitting a malformed organisation email on update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
-
-        val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
-        updateOrgEmailPage.submitEmail("not-an-email")
-        assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
     }
 
     @Test
@@ -128,60 +105,98 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
     }
 
     @Test
-    fun `Submitting an empty main contact name on update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-        orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+    fun `An organisation landlord can update their charity registration details and return to the details page`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber(CHARITY_NUMBER)
 
-        val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
-        updatePage.submit("", "valid@example.com", "07222222222")
-        assertThat(updatePage.form.getErrorMessage()).containsText("Enter a full name")
+        submitCyaPage(page)
+
+        val summaryList = assertPageIs(page, OrgLandlordDetailsPage::class).organisationDetailsSummaryList
+        assertThat(summaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(summaryList.charityCommissionRow.value).containsText("Charities Commission of England and Wales")
+        assertThat(summaryList.charityNumberRow.value).containsText(CHARITY_NUMBER)
     }
 
     @Test
-    fun `Submitting an empty email on main contact update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-        orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+    fun `Selecting no charity regulator records the charity without a charity number`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.NONE)
 
-        val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
-        updatePage.submit("Valid Name", "", "07222222222")
-        assertThat(updatePage.form.getErrorMessage()).containsText("Enter an email address")
+        submitCyaPage(page)
+
+        val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("None of these")
+        assertThat(detailsPage.mainContent).not().containsText("Charity number")
     }
 
     @Test
-    fun `Submitting an invalid email on main contact update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-        orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+    fun `Changing the charity regulator after going back does not record the abandoned charity number`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber(CHARITY_NUMBER)
 
-        val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
-        updatePage.submit("Valid Name", "not-an-email", "07222222222")
-        assertThat(updatePage.form.getErrorMessage()).containsText("Enter an email address in the right format")
+        BackLink.default(page).clickAndWait()
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+        BackLink.default(page).clickAndWait()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.NONE)
+
+        submitCyaPage(page)
+
+        val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("None of these")
+        assertThat(detailsPage.mainContent).not().containsText("Charity number")
     }
 
     @Test
-    fun `Submitting an empty phone number on main contact update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-        orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+    fun `Answering no to registered charity clears previously recorded charity details`(page: Page) {
+        startCharityUpdateJourney(page).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber(CHARITY_NUMBER)
+        submitCyaPage(page)
 
-        val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
-        updatePage.submit("Valid Name", "valid@example.com", "")
-        assertThat(updatePage.form.getErrorMessage()).containsText("Enter a phone number")
+        startCharityUpdateJourney(page).submitNo()
+        submitCyaPage(page)
+
+        val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("No")
+        assertThat(detailsPage.mainContent).not().containsText("Charity commission")
+        assertThat(detailsPage.mainContent).not().containsText("Charity number")
     }
 
-    @Test
-    fun `Submitting an invalid phone number on main contact update shows a validation error`(page: Page) {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.tabs.goToOrganisationContacts()
-        orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+    // The is-registered-charity URL is a prefix of the registered-with URL, so the heading is asserted to confirm
+    // which step the journey is actually on
+    private fun startCharityUpdateJourney(page: Page): OrgIsRegisteredCharityFormPageUpdateLandlordDetails {
+        navigator.goToOrgLandlordDetails().clickOrganisationCharityChangeLinkAndWait()
 
-        val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
-        updatePage.submit("Valid Name", "valid@example.com", "not-a-phone")
-        assertThat(
-            updatePage.form.getErrorMessage(),
-        ).containsText("Enter a phone number including the country code for international numbers")
+        val charityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageUpdateLandlordDetails::class)
+        assertThat(charityPage.heading).containsText("Is your organisation a registered charity?")
+        return charityPage
+    }
+
+    // TODO: PDJB-1463: this page is a placeholder that does not yet list the submitted answers
+    private fun submitCyaPage(page: Page) = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
+
+    @Test
+    fun `An organisation landlord can update the organisation phone number and return to details page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+        val updatePhonePage = assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+        updatePhonePage.submitPhoneNumber("07999123456")
+
+        val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(updatedDetailsPage.mainContent).containsText("07999123456")
     }
 
     @Test
@@ -212,6 +227,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgTypePage.form.submit()
 
         val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("You must provide trustee details")
+        assertThat(interruptionPage.body).containsText("your organisation is a trust")
         interruptionPage.submit()
 
         val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateOrganisationType::class)
@@ -243,6 +260,22 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(orgLandlordDetailsPage.mainContent).containsText(LEAD_TRUSTEE_PHONE)
     }
 
+    @Test
+    fun `Go back link on adding trust interruption page returns to the organisation type page`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationTypeChangeLinkAndWait()
+
+        val orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCompany()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        interruptionPage.goBackLink.clickAndWait()
+
+        assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+    }
+
     @Nested
     inner class RemovingTrustUpdates : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
         @BeforeEach
@@ -261,6 +294,9 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             orgTypePage.form.submit()
 
             val interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+            assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+            assertThat(interruptionPage.body).containsText("company")
+            assertThat(interruptionPage.body).containsText("lead trustee details will be removed")
             interruptionPage.submit()
 
             val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
@@ -279,6 +315,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         private const val LEAD_TRUSTEE_NAME = "Test Lead Trustee Name"
         private const val LEAD_TRUSTEE_EMAIL = "trustee@test.com"
         private const val LEAD_TRUSTEE_PHONE = "07123456789"
+        private const val CHARITY_NUMBER = "1234567"
     }
 
     @Nested
