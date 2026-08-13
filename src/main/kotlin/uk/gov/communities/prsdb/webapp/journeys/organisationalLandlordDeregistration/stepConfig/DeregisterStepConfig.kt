@@ -30,7 +30,6 @@ class DeregisterStepConfig(
 
         landlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord)
 
-        // TODO: PDJB-1485 - Send org landlord deregistration confirmation emails to all team members
         deregistrationEmailSender.sendEmail(
             orgLandlord.registrantEmail,
             OrganisationalLandlordDeregistrationConfirmationEmail(
