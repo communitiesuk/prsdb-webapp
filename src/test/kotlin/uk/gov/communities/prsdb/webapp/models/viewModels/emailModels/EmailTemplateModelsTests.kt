@@ -44,6 +44,13 @@ class EmailTemplateModelsTests {
                     "/emails/OrganisationalLandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
+                    OrganisationalLandlordDeregistrationConfirmationEmail(
+                        registrantName = "Sam Smith",
+                        organisationName = "Example Housing Association",
+                    ),
+                    "/emails/OrganisationalLandlordDeregistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
                         "1 Street Name, AB1 2CD",
