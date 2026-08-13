@@ -11,9 +11,12 @@ interface UpdateCompaniesHouseTaskState :
     OrgCompaniesHouseUpdateState,
     GovBodyMembersListState {
     override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
+    val initialiseGovBodyMembersStep: InitialiseGovBodyMembersStep
     val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
     val interruptionStep: OrgCompaniesHouseInterruptionStep
     val orgCompanyNumberStep: OrgCompanyNumberStep
     val orgGovBodyMembersTask: OrgGovBodyMembersTask
     val govBodyMembersBackRoutingStep: GovBodyMembersBackRoutingStep
+
+    var governingBodyMembersInitialised: Boolean?
 }

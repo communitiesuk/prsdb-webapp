@@ -24,6 +24,7 @@ class UpdateCompaniesHouseTask(
     journeyStateService: JourneyStateService,
     private val userToLandlordService: UserToLandlordService,
     override val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
+    override val initialiseGovBodyMembersStep: InitialiseGovBodyMembersStep,
     override val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep,
     override val interruptionStep: OrgCompaniesHouseInterruptionStep,
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
@@ -39,30 +40,23 @@ class UpdateCompaniesHouseTask(
     override var nextGoverningBodyMemberId: Int? by delegateProvider.nullableDelegate("nextGoverningBodyMemberId")
     override var editingGovBodyMemberId: Int? by delegateProvider.nullableDelegate("editingGovBodyMemberId")
 
-    private var governingBodyMembersInitialised: Boolean? by delegateProvider.nullableDelegate("governingBodyMembersInitialised")
-
-    fun initialiseGoverningBodyMembersFromDatabase() {
-        if (governingBodyMembersInitialised == true) return
-        val existingMembers = userToLandlordService.getCurrentOrganisationLandlordForUser().governingBodyMembers
-        governingBodyMembersMap =
-            existingMembers
-                .mapIndexed { index, member -> (index + 1) to GoverningBodyMemberDataModel.fromEntity(member) }
-                .toMap()
-        nextGoverningBodyMemberId = existingMembers.size + 1
-        governingBodyMembersInitialised = true
-    }
+    override var governingBodyMembersInitialised: Boolean? by delegateProvider.nullableDelegate("governingBodyMembersInitialised")
 
     override fun makeSubJourney(state: UpdateCompaniesHouseTaskState) =
         subJourney(state) {
             step(journey.orgIsRegisteredCompanyStep) {
                 routeSegment(OrgIsRegisteredCompanyStep.ROUTE_SEGMENT)
+                nextStep { journey.initialiseGovBodyMembersStep }
+            }
+            step(journey.initialiseGovBodyMembersStep) {
+                parents { journey.orgIsRegisteredCompanyStep.isComplete() }
                 nextStep { journey.orgCompaniesHouseUpdateRoutingStep }
             }
             step<OrgCompaniesHouseUpdateRouteMode, OrgCompaniesHouseUpdateRoutingStepConfig>(journey.orgCompaniesHouseUpdateRoutingStep) {
                 stepSpecificInitialisation {
                     usingPreviousIsRegisteredCompany { getPreviousIsRegisteredCompanyFromDatabase(userToLandlordService) }
                 }
-                parents { journey.orgIsRegisteredCompanyStep.isComplete() }
+                parents { journey.initialiseGovBodyMembersStep.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
                         OrgCompaniesHouseUpdateRouteMode.UNCHANGED_COMPANY -> Destination(journey.orgCompanyNumberStep)
