@@ -19,6 +19,7 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
@@ -39,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
@@ -88,6 +90,9 @@ class LandlordServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
+
     private lateinit var landlordService: LandlordService
 
     @BeforeEach
@@ -104,6 +109,7 @@ class LandlordServiceTests {
                 individualUpdateConfirmationSender,
                 orgUpdateConfirmationSender,
                 absoluteUrlProvider,
+                mockOrganisationGoverningBodyMemberService,
             )
     }
 
@@ -857,6 +863,101 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationLandlordPhoneNumber is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordPhoneNumber.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany sets the companyNumber and clears governing body members`() {
+        val orgLandlord = createOrgLandlord(isCompany = false, companyNumber = null)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        assertEquals("12345678", orgLandlord.companyNumber)
+        verify(mockOrganisationGoverningBodyMemberService).clearGoverningBodyMembers(orgLandlord)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany does not change the organisation type flag`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = null)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        assertTrue(orgLandlord.isCompany)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The company registration information.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationalLandlordToRegisteredCompany.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany clears the companyNumber and sets governing body members`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = "12345678")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        val governingBodyMembers = listOf(mock<GoverningBodyMemberDataModel>())
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers)
+
+        assertNull(orgLandlord.companyNumber)
+        verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(orgLandlord, governingBodyMembers)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany does not change the organisation type flag`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = "12345678")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(emptyList())
+
+        assertTrue(orgLandlord.isCompany)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(emptyList())
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The company registration information and governing body details.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationalLandlordToNonRegisteredCompany.hasAnnotation<Transactional>())
     }
 
     @Test

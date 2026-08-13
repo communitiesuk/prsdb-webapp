@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordR
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
@@ -42,6 +43,7 @@ class LandlordService(
     private val individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
     private val orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
@@ -263,6 +265,23 @@ class LandlordService(
                 OrganisationLandlordUpdateModel(email = email),
             )
         sendOrgUpdateConfirmationEmail(landlord.email, "organisation email address")
+    }
+
+    @Transactional
+    fun updateOrganisationalLandlordToRegisteredCompany(companyNumber: String) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.companyNumber = companyNumber
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information")
+    }
+
+    @Transactional
+    fun updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers: List<GoverningBodyMemberDataModel>) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.companyNumber = null
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
+        organisationGoverningBodyMemberService.createGoverningBodyMembers(landlordEntity, governingBodyMembers)
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
     }
 
     @Transactional

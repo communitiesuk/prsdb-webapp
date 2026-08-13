@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
@@ -12,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
@@ -84,8 +86,7 @@ class OrgLandlordViewModel(
                     "landlordDetails.org.registeredWithCompaniesHouse",
                     MessageKeyConverter.convert(landlord.isRegisteredCompany),
                     CHANGE_LINK_MESSAGE_KEY,
-                    // TODO: PDJB-1238: Add update journey
-                    null,
+                    UPDATE_COMPANIES_HOUSE_URL,
                 )
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
@@ -104,5 +105,7 @@ class OrgLandlordViewModel(
         private const val UPDATE_ORG_TYPE_URL = "$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}"
 
         private const val UPDATE_ORG_CHARITY_URL = "$UPDATE_ORG_CHARITY_ROUTE/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}"
+
+        private const val UPDATE_COMPANIES_HOUSE_URL = "$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}"
     }
 }
