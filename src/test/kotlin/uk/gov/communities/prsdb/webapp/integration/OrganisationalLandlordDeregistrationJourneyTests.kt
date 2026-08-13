@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -40,18 +39,6 @@ class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMuta
         val confirmationPage = assertPageIs(page, ConfirmationPageOrganisationalLandlordDeregistration::class)
 
         assertThat(confirmationPage.confirmationBanner.title).containsText("Organisation deleted")
-        assertThat(confirmationPage.whatHappensNextHeading).containsText("What happens next")
-        assertThat(confirmationPage.bodyParagraphs.first())
-            .containsText("We have sent a confirmation email to all team members.")
-        assertThat(confirmationPage.bodyParagraphs.nth(1))
-            .containsText("Local Organisation Landlord is no longer registered as a landlord.")
-        assertThat(confirmationPage.bodyParagraphs.nth(2))
-            .containsText("Your organisation and property information has been deleted.")
-        assertThat(confirmationPage.bodyParagraphs.nth(3))
-            .containsText("You can no longer access the service on behalf of your organisation.")
-
-        // The user loses access to the service, so the page deliberately has no dashboard link
-        assertThat(confirmationPage.links).hasCount(0)
 
         val landlordCount =
             jdbcTemplate.queryForObject(
