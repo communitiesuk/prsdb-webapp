@@ -69,10 +69,7 @@ class LandlordRegistrationCyaStepConfig(
                 org.charityTask.orgIsRegisteredCharityStep.formModel.notNullValue(
                     OrgIsRegisteredCharityFormModel::charity,
                 )
-            val hasCompanyNumber =
-                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
-                    OrgIsRegisteredCompanyFormModel::companiesHouse,
-                )
+            val hasCompanyNumber = isRegisteredWithCompaniesHouse(state)
 
             val charityRegulator =
                 if (isRegisteredCharity) org.charityTask.orgCharityRegisteredWithStep.formModel.charityRegisteredWith else null
@@ -80,9 +77,13 @@ class LandlordRegistrationCyaStepConfig(
             val mainContact = org.orgMainContactStep.formModel
 
             val governingBodyMembers =
-                (org.orgGovBodyTask.governingBodyMembersMap ?: emptyMap())
-                    .values
-                    .toList()
+                if (hasCompanyNumber) {
+                    emptyList()
+                } else {
+                    (org.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap())
+                        .values
+                        .toList()
+                }
 
             landlordRegistrationService.registerOrganisationLandlord(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
@@ -275,15 +276,25 @@ class LandlordRegistrationCyaStepConfig(
 
     // Organisation landlord content
 
-    private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> =
-        mapOf(
+    private fun isRegisteredWithCompaniesHouse(state: LandlordRegistrationState): Boolean =
+        state.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep.formModel
+            .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+
+    private fun getOrgStepContent(state: LandlordRegistrationState): Map<String, Any?> {
+        val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
+        return mapOf(
             "title" to "registerAsALandlord.title",
             "submitButtonText" to "registerAsALandlord.orgCheckAnswers.submitButton",
             "yourDetailsCard" to getYourDetailsCard(state),
             "landlordDetails" to getLandlordDetailsRows(state),
-            "governingBodyMemberCards" to (listOfNotNull(getLeadTrusteeCard(state)) + getGovBodyMemberCards(state)),
+            "governingBodyMemberCards" to
+                (
+                    listOfNotNull(getLeadTrusteeCard(state)) +
+                        if (registeredWithCompaniesHouse) emptyList() else getGovBodyMemberCards(state)
+                ),
             "mainContactCard" to getMainContactCard(state),
         )
+    }
 
     private fun getYourDetailsCard(state: LandlordRegistrationState): SummaryCardViewModel {
         val verified = state.identityTask.getIsIdentityVerified()
@@ -427,10 +438,7 @@ class LandlordRegistrationCyaStepConfig(
                 add(charityNumberRow(state, charityRegulator))
             }
 
-            val registeredWithCompaniesHouse =
-                org.companiesHouseTask.orgIsRegisteredCompanyStep.formModel.notNullValue(
-                    OrgIsRegisteredCompanyFormModel::companiesHouse,
-                )
+            val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
@@ -548,7 +556,7 @@ class LandlordRegistrationCyaStepConfig(
     }
 
     private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
-        val members = state.orgLandlordRegistrationTask.orgGovBodyTask.governingBodyMembersMap ?: emptyMap()
+        val members = state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap()
         return members
             .toList()
             .sortedBy { it.first }
@@ -582,9 +590,9 @@ class LandlordRegistrationCyaStepConfig(
                     actions =
                         SummaryCardActionViewModel.changeAction(
                             Destination.VisitableStep(
-                                state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
                                 state.getCyaJourneyId(
-                                    state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMemberListStep,
+                                    state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
                                 ),
                             ),
                         ),

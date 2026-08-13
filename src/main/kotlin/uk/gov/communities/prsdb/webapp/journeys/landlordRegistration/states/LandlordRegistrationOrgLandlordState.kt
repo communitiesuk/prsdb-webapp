@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCompaniesHouseTask
@@ -24,7 +23,4 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val charityTask: OrgCharityTask
     val leadTrusteeTask: LeadTrusteeTask
     val orgMainContactStep: OrgMainContactStep
-
-    // TODO PDJB-1238: remove this placeholder once the companies house update journey exists.
-    val updateDetailsTodoStep: UpdateDetailsTodoStep
 }
