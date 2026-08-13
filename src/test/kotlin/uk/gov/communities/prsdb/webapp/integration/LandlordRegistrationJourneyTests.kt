@@ -1067,6 +1067,54 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertThat(updatedListPage.summaryList.getRowByIndex(0).value).containsText("Bob Jones")
     }
 
+    @Test
+    fun `the back link on the org check answers page returns to the main contact page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the individual check answers page returns to the select address page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationCheckAnswersPage(
+            LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
+        )
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the main contact page returns to the governing body member list page when not a registered company`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the main contact page returns to the company number page when a registered company`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationMainContactPage(
+            LandlordStateSessionBuilder.beforeOrgCompanyNumber().withOrgCompanyNumber(),
+        )
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+    }
+
     private fun createTestGovBodyMember(
         name: String,
         type: GoverningBodyMemberType = GoverningBodyMemberType.DIRECTOR,
