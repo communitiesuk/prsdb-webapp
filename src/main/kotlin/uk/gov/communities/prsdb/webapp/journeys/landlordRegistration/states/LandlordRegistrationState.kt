@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.checkAnswersChangeJourneys.OrgCompaniesHouseChangeGovBodyTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeChangeRedirectStep
@@ -9,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordLocationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeUpdateState
@@ -17,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 
 interface LandlordRegistrationState :
     CheckYourAnswersJourneyState,
+    OrgCompaniesHouseUpdateState,
     OrgTypeUpdateState {
     val emailStep: EmailStep
     val phoneNumberStep: PhoneNumberStep
@@ -26,8 +30,10 @@ interface LandlordRegistrationState :
     val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
+    val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
+    val orgCompaniesHouseChangeGovBodyTask: OrgCompaniesHouseChangeGovBodyTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
-    val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
+    override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
     val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep
 }

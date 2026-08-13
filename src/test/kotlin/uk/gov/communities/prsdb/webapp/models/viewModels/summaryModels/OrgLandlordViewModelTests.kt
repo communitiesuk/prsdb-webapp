@@ -169,7 +169,10 @@ class OrgLandlordViewModelTests {
                 "landlordDetails.org.name",
                 "landlordDetails.org.address",
                 "landlordDetails.org.email",
+                "landlordDetails.org.phone",
                 "landlordDetails.org.organisationType",
+                "landlordDetails.org.registeredCharity",
+                "landlordDetails.org.registeredWithCompaniesHouse",
             )
 
         val viewModel = OrgLandlordViewModel(landlord)

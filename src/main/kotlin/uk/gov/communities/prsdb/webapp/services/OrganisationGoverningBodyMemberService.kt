@@ -31,4 +31,9 @@ class OrganisationGoverningBodyMemberService(
             )
         }
     }
+
+    @Transactional
+    fun clearGoverningBodyMembers(organisationLandlord: OrganisationalLandlord) {
+        organisationGoverningBodyMemberRepository.deleteByOrganisationalLandlord_Id(organisationLandlord.id)
+    }
 }
