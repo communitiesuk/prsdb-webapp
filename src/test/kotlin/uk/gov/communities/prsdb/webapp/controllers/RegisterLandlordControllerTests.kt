@@ -11,7 +11,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
@@ -120,7 +121,7 @@ class RegisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `getConfirmation includes survey URL in model`() {
+    fun `getConfirmation includes individual survey URL in model for individual landlord`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
@@ -131,7 +132,26 @@ class RegisterLandlordControllerTests(
                 model {
                     attribute(
                         "landlordRegistrationSurveyUrl",
-                        LANDLORD_REGISTRATION_SURVEY_URL,
+                        INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL,
+                    )
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation includes org survey URL in model for org landlord`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "landlordRegistrationSurveyUrl",
+                        ORG_LANDLORD_REGISTRATION_SURVEY_URL,
                     )
                 }
             }

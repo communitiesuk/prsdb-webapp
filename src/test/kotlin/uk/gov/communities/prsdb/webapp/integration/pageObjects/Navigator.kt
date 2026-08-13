@@ -474,8 +474,10 @@ class Navigator(
         return createValidPage(page, OrgManualAddressFormPageLandlordRegistration::class)
     }
 
-    fun skipToOrgLandlordRegistrationMainContactPage(): OrgMainContactFormPageLandlordRegistration {
-        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgMainContact().build())
+    fun skipToOrgLandlordRegistrationMainContactPage(
+        stateBuilder: LandlordStateSessionBuilder = LandlordStateSessionBuilder.beforeOrgMainContact(),
+    ): OrgMainContactFormPageLandlordRegistration {
+        setJourneyStateInSession(stateBuilder.build())
         navigateToLandlordRegistrationJourneyStep(OrgMainContactStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgMainContactFormPageLandlordRegistration::class)
     }

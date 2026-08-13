@@ -11,8 +11,10 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
@@ -146,6 +148,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
         confirmationPage.goToDashboardLink.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
 
@@ -209,6 +212,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
@@ -264,6 +268,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL)
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
@@ -315,10 +320,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
         orgIsRegisteredCharityPage.submitYes()
 
-        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        val orgCharityRegisteredWithPage =
+            assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
 
-        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        val orgCharityNumberPage =
+            assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
 
         val orgIsRegisteredCompanyPage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
@@ -342,9 +349,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         checkAnswersPage.confirmAndSubmit()
 
         val createdOrgLandlord =
-            assertNotNull(organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull())
-                .organisationalLandlord
-        val createdOrgLandlordRegNum = RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
+            assertNotNull(
+                organisationalLandlordUserRepository.findByBaseUser_Id("urn:fdc:gov.uk:2022:UVWXY").singleOrNull(),
+            ).organisationalLandlord
+        val createdOrgLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdOrgLandlord.registrationNumber)
 
         verify(orgConfirmationEmailSender).sendEmail(
             "registrant@example.com",
@@ -359,6 +368,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdOrgLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         assertThat(confirmationPage.surveyLink).isVisible()
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", ORG_LANDLORD_REGISTRATION_SURVEY_URL)
         confirmationPage.goToDashboardLink.clickAndWait()
 
         val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
@@ -496,10 +506,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
         orgCharityPage.submitYes()
 
-        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        val orgCharityRegisteredWithPage =
+            assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
 
-        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        val orgCharityNumberPage =
+            assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
         orgCharityNumberPage.submitCharityNumber("1234567")
 
         val updatedCheckAnswersPage = assertPageIs(page, OrgCheckAnswersPageLandlordRegistration::class)
@@ -1053,6 +1065,54 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val updatedListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
         assertThat(updatedListPage.summaryList.getRowByIndex(0).value).containsText("Bob Jones")
+    }
+
+    @Test
+    fun `the back link on the org check answers page returns to the main contact page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the individual check answers page returns to the select address page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationCheckAnswersPage(
+            LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
+        )
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the main contact page returns to the governing body member list page when not a registered company`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `the back link on the main contact page returns to the company number page when a registered company`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationMainContactPage(
+            LandlordStateSessionBuilder.beforeOrgCompanyNumber().withOrgCompanyNumber(),
+        )
+
+        BackLink.default(page).clickAndWait()
+
+        assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
     }
 
     private fun createTestGovBodyMember(

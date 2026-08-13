@@ -97,13 +97,17 @@ const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/
 
 const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"
 
-const val LANDLORD_REGISTRATION_SURVEY_URL =
+const val INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
         "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUMFFDVVZKQU85N0oyRURSQ0dUNFpRRDRJSC4u"
 
-const val PROPERTY_REGISTRATION_SURVEY_URL =
+const val INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
         "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ0Y0UjA5SkdBTkdKSEo5R04yRk5XSFNYWS4u"
+
+const val ORG_LANDLORD_REGISTRATION_SURVEY_URL = "https://forms.cloud.microsoft/e/UHE5vuRprx"
+
+const val ORG_PROPERTY_REGISTRATION_SURVEY_URL = "https://forms.cloud.microsoft/e/w4hJvkL9XE"
 
 const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +

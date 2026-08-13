@@ -175,6 +175,15 @@ class LandlordRegistrationTask(
                         ),
                     )
                 }
+                backUrl {
+                    when (journey.landlordTypeStep.outcome) {
+                        LandlordTypeMode.ORGANISATION -> journey.orgLandlordRegistrationTask.exitStep.backUrl
+                        LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordLocationTask.exitStep.backUrl
+                        null -> throw IllegalStateException(
+                            "landlordTypeStep must have an outcome for the check your answers step to be reachable",
+                        )
+                    }
+                }
                 nextStep { exitStep }
             }
             exitStep {
