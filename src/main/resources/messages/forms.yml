@@ -19,10 +19,12 @@ buttons:
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
   continueAnyway: Continue anyway
+  continueWithChange: Continue with the change
 links:
   change: Change
   remove: Remove
   cancel: Cancel
+  goBack: Go back
 radios:
   dividerText: or
   option:
