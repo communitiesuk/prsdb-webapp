@@ -48,7 +48,6 @@ org:
   email: Organisation email
   phone: Organisation phone
   organisationType: Organisation type
-  organisationTypeOther: Other
   companyNumber: Companies House number
   registeredCharity: Registered charity
   charityCommission: Charity commission

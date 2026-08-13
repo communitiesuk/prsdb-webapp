@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
@@ -71,7 +70,7 @@ class OrgLandlordViewModel(
                 addRow(
                     "landlordDetails.org.organisationType",
                     landlord.organisationTypes.joinToString(", ") { orgType ->
-                        messageSource.getMessageForKey(getOrgTypeMessageKey(orgType))
+                        messageSource.getMessageForKey(MessageKeyConverter.convert(orgType))
                     },
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_TYPE_URL,
@@ -81,9 +80,7 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCharity),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_CHARITY_URL,
-                    // charityNumber and charityRegisteredWith are independently nullable, so the
-                    // charity row section can start with either of them present
-                    withoutBottomBorder = landlord.isRegisteredCharity || landlord.hasCharityNumber,
+                    withoutBottomBorder = landlord.isRegisteredCharity,
                 )
                 if (landlord.isRegisteredCharity) {
                     addRow(
@@ -108,15 +105,8 @@ class OrgLandlordViewModel(
                 }
             }.toList()
 
-    // The details page labels OrgType.NONE as "Other", unlike the registration form and its check
-    // answers page, which use the "None of these" checkbox text the landlord actually selected.
-    private fun getOrgTypeMessageKey(orgType: OrgType): String =
-        if (orgType == OrgType.NONE) ORG_TYPE_OTHER_MESSAGE_KEY else MessageKeyConverter.convert(orgType)
-
     companion object {
         private const val CHANGE_LINK_MESSAGE_KEY = "forms.links.change"
-
-        private const val ORG_TYPE_OTHER_MESSAGE_KEY = "landlordDetails.org.organisationTypeOther"
 
         private const val UPDATE_ORG_NAME_URL = "$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}"
 

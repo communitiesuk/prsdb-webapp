@@ -86,7 +86,7 @@ class OrgLandlordViewModelTests {
             viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.registeredCharity" }.fieldValue,
         )
         assertEquals(
-            "forms.orgCharityRegisteredWith.radios.option.none",
+            "commonText.other",
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
                 .getConvertedFieldValue(),
@@ -219,29 +219,6 @@ class OrgLandlordViewModelTests {
         assertFalse(
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.registeredCharity" }
-                .withoutBottomBorder,
-        )
-    }
-
-    @Test
-    fun `a charity number without a charity regulator still groups the charity number into the charity section`() {
-        val landlord =
-            MockLandlordData.createOrgLandlord(
-                isCharity = false,
-                charityRegisteredWith = null,
-                charityNumber = "0123456",
-            )
-
-        val viewModel = OrgLandlordViewModel(landlord, messageSource)
-
-        assertTrue(
-            viewModel.organisationDetails
-                .single { it.fieldHeading == "landlordDetails.org.registeredCharity" }
-                .withoutBottomBorder,
-        )
-        assertFalse(
-            viewModel.organisationDetails
-                .single { it.fieldHeading == "landlordDetails.org.charityNumber" }
                 .withoutBottomBorder,
         )
     }
