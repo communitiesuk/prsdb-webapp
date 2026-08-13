@@ -7,6 +7,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
 
 @WithOrgLandlordProfile
 class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -45,6 +50,107 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
             val interruptionPage = navigator.skipToUpdateOrgTypeTrustInterruptionPage(listOf(OrgType.COMPANY, OrgType.CHARITY))
 
             assertThat(interruptionPage.body).containsText("from a trust to company, charity")
+        }
+    }
+
+    @Nested
+    inner class ValidationErrors {
+        @Test
+        fun `Submitting an empty organisation name on update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.clickOrganisationNameChangeLinkAndWait()
+
+            val updateOrgNamePage = assertPageIs(page, OrgNameFormPageUpdateLandlordDetails::class)
+            updateOrgNamePage.submitName("")
+            assertThat(updateOrgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+        }
+
+        @Test
+        fun `Submitting an empty organisation email on update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
+
+            val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
+            updateOrgEmailPage.submitEmail("")
+            assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter a valid email address")
+        }
+
+        @Test
+        fun `Submitting a malformed organisation email on update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.clickOrganisationEmailChangeLinkAndWait()
+
+            val updateOrgEmailPage = assertPageIs(page, OrgEmailFormPageUpdateLandlordDetails::class)
+            updateOrgEmailPage.submitEmail("not-an-email")
+            assertThat(updateOrgEmailPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
+        }
+
+        @Test
+        fun `Submitting an empty main contact name on update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+
+            val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
+            updatePage.submit("", "valid@example.com", "07222222222")
+            assertThat(updatePage.form.getErrorMessage()).containsText("Enter a full name")
+        }
+
+        @Test
+        fun `Submitting an empty email on main contact update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+
+            val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
+            updatePage.submit("Valid Name", "", "07222222222")
+            assertThat(updatePage.form.getErrorMessage()).containsText("Enter an email address")
+        }
+
+        @Test
+        fun `Submitting an invalid email on main contact update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+
+            val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
+            updatePage.submit("Valid Name", "not-an-email", "07222222222")
+            assertThat(updatePage.form.getErrorMessage()).containsText("Enter an email address in the right format")
+        }
+
+        @Test
+        fun `Submitting an empty phone number on main contact update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+
+            val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
+            updatePage.submit("Valid Name", "valid@example.com", "")
+            assertThat(updatePage.form.getErrorMessage()).containsText("Enter a phone number")
+        }
+
+        @Test
+        fun `Submitting an invalid phone number on main contact update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.clickMainContactChangeLinkAndWait()
+
+            val updatePage = assertPageIs(page, OrgMainContactFormPageUpdateLandlordDetails::class)
+            updatePage.submit("Valid Name", "valid@example.com", "not-a-phone")
+            assertThat(
+                updatePage.form.getErrorMessage(),
+            ).containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `Submitting an empty organisation phone number on update shows a validation error`(page: Page) {
+            val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.clickOrganisationPhoneNumberChangeLinkAndWait()
+
+            val updatePhonePage = assertPageIs(page, OrgPhoneNumberFormPageUpdateLandlordDetails::class)
+            updatePhonePage.submitPhoneNumber("")
+            assertThat(updatePhonePage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
         }
     }
 }
