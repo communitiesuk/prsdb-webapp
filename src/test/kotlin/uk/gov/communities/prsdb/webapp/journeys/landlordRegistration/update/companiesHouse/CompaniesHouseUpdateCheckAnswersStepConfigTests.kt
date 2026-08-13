@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
@@ -65,7 +66,7 @@ class CompaniesHouseUpdateCheckAnswersStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompaniesHouseUpdateCheckAnswersStepConfig(mockLandlordService)
+        stepConfig = CompaniesHouseUpdateCheckAnswersStepConfig(mockLandlordService, OrgCompaniesHouseDetailsHelper())
 
         whenever(mockState.updateCompaniesHouseTask).thenReturn(mockTask)
         lenient().`when`(mockTask.orgIsRegisteredCompanyStep).thenReturn(mockIsRegisteredCompanyStep)
@@ -116,7 +117,7 @@ class CompaniesHouseUpdateCheckAnswersStepConfigTests {
     @Test
     fun `getStepSpecificContent renders the non-company variant with a card per governing body member`() {
         whenever(mockIsRegisteredCompanyFormModel.companiesHouse).thenReturn(false)
-        whenever(mockTask.governingBodyMembersMap).thenReturn(members)
+        whenever(mockGovBodyMembersTask.governingBodyMembersMap).thenReturn(members)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
