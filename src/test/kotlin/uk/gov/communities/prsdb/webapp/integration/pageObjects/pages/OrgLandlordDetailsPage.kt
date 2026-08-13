@@ -48,6 +48,7 @@ class OrgLandlordDetailsPage(
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
 
     fun clickOrganisationAddressChangeLinkAndWait() = organisationAddressChangeLink.clickAndWait()
+
     fun clickCompaniesHouseChangeLinkAndWait() = companiesHouseChangeLink.clickAndWait()
 
     fun clickOrganisationTypeChangeLinkAndWait() = organisationTypeChangeLink.clickAndWait()
