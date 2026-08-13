@@ -8,4 +8,4 @@ You can no longer access the service on behalf of your organisation.
 
 ---
 
-This is an automated email - do not reply.
+This is an automated email – do not reply.
