@@ -222,8 +222,8 @@ SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(i
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
-VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
+SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRSDB+landlord@softwire.com', null::varchar, true, '2025-02-25 16:17:18.075473+00'::timestamptz, 'PRSD Landlord',
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13'::date, 'England or Wales', false, true),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
         '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
@@ -289,7 +289,17 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
         '07777777777', 'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '1990-01-01', 'England or Wales', true, true),
        (36, 52, 1, '2026-07-21 00:00:00+00', 'sarah.warren@communities.gov.uk', null, true, null, 'Sarah Warren',
         '07777777777', 'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '1990-01-01', 'England or Wales', true,
-        true) ON CONFLICT DO NOTHING;
+        true)) AS v (
+           id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+           last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
+           individual_has_accepted_privacy_notice)
+-- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
+-- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
+WHERE NOT EXISTS (
+    SELECT 1 FROM organisational_landlord_user olu
+    WHERE olu.subject_identifier = v.individual_subject_identifier
+)
+ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
