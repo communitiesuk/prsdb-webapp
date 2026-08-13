@@ -34,6 +34,6 @@ interface LandlordRegistrationState :
     val orgCompaniesHouseChangeGovBodyTask: OrgCompaniesHouseChangeGovBodyTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
-    val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
+    override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
     val orgTypeTrustInterruptionStep: OrgTypeTrustInterruptionStep
 }

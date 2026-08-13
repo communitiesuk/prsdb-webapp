@@ -169,6 +169,7 @@ class OrgLandlordViewModelTests {
                 "landlordDetails.org.name",
                 "landlordDetails.org.email",
                 "landlordDetails.org.organisationType",
+                "landlordDetails.org.registeredCharity",
                 "landlordDetails.org.registeredWithCompaniesHouse",
             )
 
