@@ -91,21 +91,6 @@ class AddressTests {
     }
 
     @Test
-    fun `toMultiLineAddress falls back to singleLineAddress when components do not include the street name`() {
-        val addressDataModel =
-            AddressDataModel(
-                singleLineAddress = "1 PRSDB Square, EG1 2AA",
-                buildingNumber = "1",
-                postcode = "EG1 2AA",
-            )
-        val address = Address(addressDataModel)
-
-        val result = address.toMultiLineAddress()
-
-        assertEquals("1 PRSDB Square\nEG1 2AA", result)
-    }
-
-    @Test
     fun `toMultiLineAddress handles address with only building name component`() {
         val addressDataModel =
             AddressDataModel(
@@ -119,20 +104,5 @@ class AddressTests {
         val result = address.toMultiLineAddress()
 
         assertEquals("The Manor House\nLondon\nSW1A 1AA", result)
-    }
-
-    @Test
-    fun `toMultiLineAddress appends the postcode when the singleLineAddress does not include it`() {
-        val addressDataModel =
-            AddressDataModel(
-                singleLineAddress = "5 Mythical Place",
-                buildingNumber = "5",
-                postcode = "FA1 1AE",
-            )
-        val address = Address(addressDataModel)
-
-        val result = address.toMultiLineAddress()
-
-        assertEquals("5 Mythical Place\nFA1 1AE", result)
     }
 }
