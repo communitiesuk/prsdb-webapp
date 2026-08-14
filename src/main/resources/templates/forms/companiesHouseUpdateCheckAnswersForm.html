@@ -11,23 +11,23 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <span class="govuk-caption-l" th:text="#{landlordDetails.title}">Landlord record</span>
-        <h1 class="govuk-heading-l" th:text="#{forms.checkAnswers.heading}">Check your answers</h1>
+        <span class="govuk-caption-l" th:text="#{landlordDetails.title}">landlordDetails.title</span>
+        <h1 class="govuk-heading-l" th:text="#{forms.checkAnswers.heading}">forms.checkAnswers.heading</h1>
 
         <th:block th:if="${companyVariant}">
-            <h2 class="govuk-heading-m" th:text="#{landlordDetails.update.companiesHouse.cya.companyDetails.heading}">Company details</h2>
+            <h2 class="govuk-heading-m" th:text="#{landlordDetails.update.companiesHouse.cya.companyDetails.heading}">landlordDetails.update.companiesHouse.cya.companyDetails.heading</h2>
         </th:block>
         <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListData})}"></dl>
 
         <th:block th:unless="${companyVariant}">
-            <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">Governing body</h2>
+            <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">landlordDetails.org.governingBody.heading</h2>
             <th:block th:each="memberCard : ${governingBodyMemberCards}">
                 <div th:replace="~{fragments/summaryCard :: summaryCard(${memberCard.title}, ${memberCard.cardNumber}, ${memberCard.actions}, ${memberCard.summaryList})}"></div>
             </th:block>
         </th:block>
 
         <th:block th:if="${showWarning}">
-            <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.warning</div>
+            <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
         </th:block>
     </th:block>
     <th:block id="form-content">
