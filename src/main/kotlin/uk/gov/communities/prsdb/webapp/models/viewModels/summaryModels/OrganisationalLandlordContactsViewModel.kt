@@ -12,13 +12,18 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationalLandlord,
     governingBodyMembers: List<OrganisationGoverningBodyMember>,
+    withChangeLinks: Boolean = true,
 ) {
     val mainContactCard: SummaryCardViewModel =
         SummaryCardViewModel(
             title = "landlordDetails.org.mainContactHeading",
             actions =
                 SummaryCardActionViewModel.changeAction(
-                    "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}",
+                    if (withChangeLinks) {
+                        "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}"
+                    } else {
+                        null
+                    },
                 ),
             summaryList =
                 mutableListOf<SummaryListRowViewModel>()
@@ -37,7 +42,11 @@ class OrganisationalLandlordContactsViewModel(
                 title = "landlordDetails.org.leadTrusteeHeading",
                 actions =
                     SummaryCardActionViewModel.changeAction(
-                        "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
+                        if (withChangeLinks) {
+                            "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}"
+                        } else {
+                            null
+                        },
                     ),
                 summaryList =
                     mutableListOf<SummaryListRowViewModel>()
@@ -55,6 +64,8 @@ class OrganisationalLandlordContactsViewModel(
         }
 
     val showGoverningBody: Boolean = orgLandlord.hasGoverningBody
+
+    val showGoverningBodyMembersLink: Boolean = orgLandlord.hasGoverningBody && withChangeLinks
 
     // TODO: PDJB-1471: link the governing body members link to its update journey
     val governingBodyMembersLinkUrl: String = PLACEHOLDER_URL

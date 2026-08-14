@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordA
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
@@ -23,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 
 class OrgLandlordViewModel(
     landlord: OrganisationalLandlord,
+    messageSource: MessageSource,
+    withChangeLinks: Boolean = true,
 ) {
     val name: String = landlord.name
 
@@ -46,39 +50,53 @@ class OrgLandlordViewModel(
                     landlord.name,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_NAME_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.address",
                     landlord.address.toMultiLineAddress().split("\n"),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_ADDRESS_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.email",
                     landlord.wholeOrgEmail,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_EMAIL_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.phone",
                     landlord.phoneNumber,
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_PHONE_NUMBER_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.organisationType",
-                    landlord.organisationTypes,
+                    landlord.organisationTypes.joinToString(", ") { orgType ->
+                        messageSource.getMessageForKey(MessageKeyConverter.convert(orgType))
+                    },
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_TYPE_URL,
+                    withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.org.registeredCharity",
                     MessageKeyConverter.convert(landlord.isRegisteredCharity),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_CHARITY_URL,
+                    withActionLink = withChangeLinks,
+                    withoutBottomBorder = landlord.isRegisteredCharity,
                 )
                 if (landlord.isRegisteredCharity) {
-                    addRow("landlordDetails.org.charityCommission", landlord.charityRegisteredWith)
+                    addRow(
+                        key = "landlordDetails.org.charityCommission",
+                        value = landlord.charityRegisteredWith,
+                        withActionLink = false,
+                        withoutBottomBorder = landlord.hasCharityNumber,
+                    )
                 }
                 if (landlord.hasCharityNumber) {
                     addRow("landlordDetails.org.charityNumber", landlord.charityNumber)
@@ -88,6 +106,8 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCompany),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_COMPANIES_HOUSE_URL,
+                    withActionLink = withChangeLinks,
+                    withoutBottomBorder = landlord.isRegisteredCompany,
                 )
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
