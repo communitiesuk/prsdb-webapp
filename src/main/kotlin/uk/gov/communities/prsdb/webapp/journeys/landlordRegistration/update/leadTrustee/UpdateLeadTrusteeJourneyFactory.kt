@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import java.security.Principal
 
@@ -67,13 +68,29 @@ class UpdateLeadTrusteeJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
             }
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeDobStep, LeadTrusteeDobStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeEmailStep, LeadTrusteeEmailStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteePhoneStep, LeadTrusteePhoneStep.ROUTE_SEGMENT)
-            checkAnswerTask(journey.leadTrusteeTask.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT)
+            when (state.checkingAnswersFor) {
+                LeadTrusteeNameStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeDobStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeDobStep, LeadTrusteeDobStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeEmailStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeEmailStep, LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteePhoneStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteePhoneStep, LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                }
+
+                "${TrusteeAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}" -> {
+                    checkAnswerTask(journey.leadTrusteeTask.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT)
+                }
+            }
             step(journey.finishCyaStep) {
-                parents { journey.leadTrusteeTask.trusteeAddressTask.isComplete() }
+                initialStep()
                 nextDestination { Destination.Nowhere() }
             }
         }
