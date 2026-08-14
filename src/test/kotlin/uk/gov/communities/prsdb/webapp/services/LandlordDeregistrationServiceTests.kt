@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -11,6 +14,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
@@ -227,5 +231,40 @@ class LandlordDeregistrationServiceTests {
         whenever(mockHttpSession.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES)).thenReturn(true)
 
         assertTrue(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession())
+    }
+
+    @Test
+    fun `addDeregisteredOrganisationNameToSession adds the organisation name to the session`() {
+        landlordDeregistrationService.addDeregisteredOrganisationNameToSession("Some Organisation")
+
+        verify(mockHttpSession).setAttribute(DEREGISTERED_ORGANISATION_NAME, "Some Organisation")
+    }
+
+    @Test
+    fun `getDeregisteredOrganisationNameFromSession gets the organisation name from the session`() {
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_ORGANISATION_NAME)).thenReturn("Some Organisation")
+
+        assertEquals("Some Organisation", landlordDeregistrationService.getDeregisteredOrganisationNameFromSession())
+    }
+
+    @Test
+    fun `getDeregisteredOrganisationNameFromSession returns null when no organisation name is in the session`() {
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_ORGANISATION_NAME)).thenReturn(null)
+
+        assertNull(landlordDeregistrationService.getDeregisteredOrganisationNameFromSession())
+    }
+
+    @Test
+    fun `hasOrganisationDeregisteredInThisSession returns true when an organisation name is in the session`() {
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_ORGANISATION_NAME)).thenReturn("Some Organisation")
+
+        assertTrue(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
+    }
+
+    @Test
+    fun `hasOrganisationDeregisteredInThisSession returns false when no organisation name is in the session`() {
+        whenever(mockHttpSession.getAttribute(DEREGISTERED_ORGANISATION_NAME)).thenReturn(null)
+
+        assertFalse(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
     }
 }

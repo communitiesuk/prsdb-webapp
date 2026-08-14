@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -64,6 +65,13 @@ class LandlordDeregistrationService(
     fun getLandlordHadActivePropertiesFromSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) == true
 
     fun hasLandlordDeregisteredInThisSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) != null
+
+    fun addDeregisteredOrganisationNameToSession(organisationName: String) =
+        session.setAttribute(DEREGISTERED_ORGANISATION_NAME, organisationName)
+
+    fun getDeregisteredOrganisationNameFromSession(): String? = session.getAttribute(DEREGISTERED_ORGANISATION_NAME) as? String
+
+    fun hasOrganisationDeregisteredInThisSession(): Boolean = session.getAttribute(DEREGISTERED_ORGANISATION_NAME) != null
 
     private fun deregisterLandlordProperties(landlord: Landlord) {
         val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
