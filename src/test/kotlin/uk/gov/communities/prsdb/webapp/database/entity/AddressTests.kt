@@ -120,4 +120,19 @@ class AddressTests {
 
         assertEquals("The Manor House\nLondon\nSW1A 1AA", result)
     }
+
+    @Test
+    fun `toMultiLineAddress appends the postcode when the singleLineAddress does not include it`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "5 Mythical Place",
+                buildingNumber = "5",
+                postcode = "FA1 1AE",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("5 Mythical Place\nFA1 1AE", result)
+    }
 }

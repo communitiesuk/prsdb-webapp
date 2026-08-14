@@ -19,15 +19,30 @@ data class AddressDataModel(
 ) {
     fun toMultiLineAddress(): String {
         val multiLineFromComponents = buildMultiLineAddressFromComponents()
-        return if (significantCharacters(multiLineFromComponents) == significantCharacters(singleLineAddress)) {
-            multiLineFromComponents
+        val multiLineAddress =
+            if (significantCharacters(multiLineFromComponents) == significantCharacters(singleLineAddress)) {
+                multiLineFromComponents
+            } else {
+                // The stored components don't fully reconstruct the single-line address (e.g. a building number is
+                // stored but the street name isn't), so fall back to the single-line address to avoid dropping parts
+                // of the address.
+                singleLineAddress.replace(", ", "\n")
+            }
+        return appendPostcodeIfMissing(multiLineAddress)
+    }
+
+    private fun appendPostcodeIfMissing(multiLineAddress: String): String {
+        val postcode = postcode?.trim()?.ifBlank { null } ?: return multiLineAddress
+        // A postcode is always known separately, so make sure the multi-line address ends with it even when the
+        // single-line address it was built from doesn't include the postcode.
+        return if (comparableCharacters(multiLineAddress).contains(comparableCharacters(postcode))) {
+            multiLineAddress
         } else {
-            // The stored components don't fully reconstruct the single-line address (e.g. a building number is
-            // stored but the street name isn't), so fall back to the single-line address to avoid dropping parts
-            // of the address.
-            singleLineAddress.replace(", ", "\n")
+            "$multiLineAddress\n${postcode.trim()}"
         }
     }
+
+    private fun comparableCharacters(value: String): String = value.lowercase().filter { it.isLetterOrDigit() }
 
     private fun buildMultiLineAddressFromComponents(): String =
         listOfNotNull(
