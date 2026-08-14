@@ -63,7 +63,7 @@ class UpdateGoverningBodyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = "user")
-    fun `getUpdateStep returns 403 for a registered company organisation landlord`() {
+    fun `getUpdateStep returns 403 for a registered company organisation landlord as cannot have governing body`() {
         val registeredCompanyOrg = OrganisationalLandlord()
         registeredCompanyOrg.companyNumber = "12345678"
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(registeredCompanyOrg)
