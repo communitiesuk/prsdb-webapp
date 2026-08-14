@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{deregisterLandlord.areYouSure.heading}">
+                deregisterLandlord.areYouSure.heading
+            </h1>
+            <th:block th:if="${userHasRegisteredProperties}">
+                <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.one}">
+                    deregisterLandlord.areYouSure.paragraph.one
+                </p>
+                <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.two}">
+                    deregisterLandlord.areYouSure.paragraph.two
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.one}">bullet one</li>
+                    <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.two}">bullet two</li>
+                </ul>
+            </th:block>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{deregisterLandlord.areYouSure.confirmButton})}"></button>
+                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{deregisterLandlord.areYouSure.cancelLink}">
+                        deregisterLandlord.areYouSure.cancelLink
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</th:block>
+</html>
