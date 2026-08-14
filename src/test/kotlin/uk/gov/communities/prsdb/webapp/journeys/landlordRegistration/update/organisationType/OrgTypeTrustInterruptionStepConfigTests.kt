@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
@@ -43,14 +45,10 @@ class OrgTypeTrustInterruptionStepConfigTests {
         }
 
         @Test
-        @Suppress("UNCHECKED_CAST")
-        fun `filters out TRUST from selectedOrgTypeLabelKeys`() {
+        fun `throws when TRUST is in selectedOrgTypes during REMOVING_TRUST`() {
             val state = stateWith(OrgTypeUpdateRouteMode.REMOVING_TRUST, listOf(OrgType.COMPANY, OrgType.TRUST))
 
-            val content = stepConfig.getStepSpecificContent(state)
-
-            val labelKeys = content["selectedOrgTypeLabelKeys"] as List<String>
-            assertEquals(listOf("registerAsALandlord.orgTypeTrustInterruption.orgType.company"), labelKeys)
+            assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(state) }
         }
     }
 
