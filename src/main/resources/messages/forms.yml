@@ -623,6 +623,8 @@ update:
       fieldSetHeading: Update your monthly rent
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
+  checkCharity:
+    summaryName: Charity details
   checkLicensing:
     update:
       summaryName: You have updated the property licence
