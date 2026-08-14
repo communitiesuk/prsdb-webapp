@@ -5,4 +5,5 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 
 interface OrgCompaniesHouseUpdateState : JourneyState {
     val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep
+    val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
 }
