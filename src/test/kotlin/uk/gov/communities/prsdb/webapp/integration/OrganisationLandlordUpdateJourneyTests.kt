@@ -8,11 +8,19 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.GoverningBodyCyaPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberDobFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberListFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberNameFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGoverningBodyJourneyPages.OrgGovBodyWhoToProvideFormPageUpdateGoverningBody
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeAddressLookupPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeCyaPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeDobFormPageUpdateLeadTrustee
@@ -318,6 +326,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         orgTypePage.form.submit()
 
         val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
         cyaPage.submit()
 
         orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -359,6 +369,11 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Trust")
+        assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(LEAD_TRUSTEE_NAME)
+        assertThat(cyaPage.leadTrusteeCard.summaryList.emailRow.value).containsText(LEAD_TRUSTEE_EMAIL)
+        assertThat(cyaPage.leadTrusteeCard.summaryList.phoneRow.value).containsText(LEAD_TRUSTEE_PHONE)
         cyaPage.submit()
 
         orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -385,6 +400,72 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
     }
 
+    @Test
+    fun `Changing org type on CYA to add then remove trust shows interruption pages correctly`(page: Page) {
+        // Start: non-trust org
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationTypeChangeLinkAndWait()
+
+        var orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCharity()
+        orgTypePage.form.submit()
+
+        var cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
+
+        // CYA change: set type to include trust
+        cyaPage.summaryList.organisationTypeRow.clickFirstActionLinkAndWait()
+
+        orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCompany()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        var interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("You must provide trustee details")
+        interruptionPage.submit()
+
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateOrganisationType::class)
+        leadTrusteeNamePage.submitName(LEAD_TRUSTEE_NAME)
+
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageUpdateOrganisationType::class)
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
+
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageUpdateOrganisationType::class)
+        leadTrusteeEmailPage.submitEmail(LEAD_TRUSTEE_EMAIL)
+
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateOrganisationType::class)
+        leadTrusteePhonePage.submitPhoneNumber(LEAD_TRUSTEE_PHONE)
+
+        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
+        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageUpdateOrganisationType::class)
+        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Trust")
+        assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(LEAD_TRUSTEE_NAME)
+
+        // CYA change again: remove trust
+        cyaPage.summaryList.organisationTypeRow.clickFirstActionLinkAndWait()
+
+        orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.deselectTrust()
+        orgTypePage.form.submit()
+
+        interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+        interruptionPage.submit()
+
+        cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).not().containsText("Trust")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
+    }
+
     @Nested
     inner class RemovingTrustUpdates : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
         @BeforeEach
@@ -409,6 +490,8 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             interruptionPage.submit()
 
             val cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+            assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+            BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
             cyaPage.submit()
 
             orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -417,6 +500,64 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Trust")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Existing Lead Trustee")
             assertThat(orgLandlordDetailsPage.mainContent).not().containsText("Lead trustee")
+        }
+    }
+
+    @Nested
+    inner class GoverningBodyUpdateTests : NestedIntegrationTestWithMutableData("data-mockuser-org-landlord-trust.sql") {
+        @Test
+        fun `A trust org landlord can update governing body members`(page: Page) {
+            var orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            orgLandlordDetailsPage.governingBodyMembersLink.clickAndWait()
+
+            var memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(memberListPage.heading).containsText("added 2 people")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("David Director")
+            assertThat(memberListPage.summaryList.getRowByIndex(1).value).containsText("Omar Hassan")
+            BaseComponent.assertThat(memberListPage.getChangeActionLink(0)).isVisible()
+            BaseComponent.assertThat(memberListPage.getRemoveActionLink(0)).isVisible()
+
+            memberListPage.getChangeActionLink(0).clickAndWait()
+
+            val whoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageUpdateGoverningBody::class)
+            assertEquals("DIRECTOR", whoToProvidePage.form.radios.selectedValue)
+            whoToProvidePage.submitWhoToProvide(GoverningBodyMemberType.TRUSTEE)
+
+            val namePage = assertPageIs(page, OrgGovBodyMemberNameFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(namePage.form.nameInput).hasValue("David Director")
+            namePage.submitName("Updated Trustee Name")
+
+            val dobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(dobPage.form.dayInput).hasValue("18")
+            BaseComponent.assertThat(dobPage.form.monthInput).hasValue("3")
+            BaseComponent.assertThat(dobPage.form.yearInput).hasValue("1974")
+            dobPage.submitDate("19", "4", "1980")
+
+            val lookupAddressPage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody::class)
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+            val selectAddressPage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody::class)
+            selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+            memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(memberListPage.heading).containsText("added 2 people")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).key).containsText("Person 1")
+            assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("Updated Trustee Name")
+
+            memberListPage.form.submit()
+
+            val cyaPage = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
+            cyaPage.submit()
+
+            orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+            orgLandlordDetailsPage.tabs.goToOrganisationContacts()
+            assertEquals(2, orgLandlordDetailsPage.governingBodyMemberCardCount())
+            val updatedCard = orgLandlordDetailsPage.governingBodyMemberCard("1. Trustee")
+            assertThat(updatedCard.summaryList.roleRow.value).containsText("Trustee")
+            assertThat(updatedCard.summaryList.nameRow.value).containsText("Updated Trustee Name")
+            assertThat(updatedCard.summaryList.dateOfBirthRow.value).containsText("19 April 1980")
+            assertThat(updatedCard.summaryList.addressRow.value).containsText("1 PRSDB Square")
         }
     }
 
@@ -464,8 +605,12 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
             // CYA page
-            // TODO: PDJB-1470: Implement this
             val cyaPage = assertPageIs(page, LeadTrusteeCyaPageUpdateLeadTrustee::class)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(newName)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.dateOfBirthRow.value).containsText("15 June 1985")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.emailRow.value).containsText("updated.trustee@example.com")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.phoneRow.value).containsText("07999888777")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 PRSDB Square")
             cyaPage.submit()
 
             // Back to landlord details

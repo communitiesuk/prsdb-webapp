@@ -4,12 +4,14 @@ import com.microsoft.playwright.Page
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.number
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
 abstract class DateFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    open val heading = Heading(page.locator("h1"))
     val form = DateForm(page)
 
     fun submitDate(date: LocalDate) {

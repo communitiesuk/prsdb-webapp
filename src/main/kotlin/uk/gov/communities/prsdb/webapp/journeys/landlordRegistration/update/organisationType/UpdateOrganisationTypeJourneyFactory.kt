@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -8,15 +9,23 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Com
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LeadTrusteeTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 
@@ -28,7 +37,15 @@ class UpdateOrganisationTypeJourneyFactory(
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        return journey(state) {
+        return if (state.checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state)
+        }
+    }
+
+    private fun mainJourneyMap(state: UpdateOrganisationTypeJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
             configure {
                 withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
@@ -95,9 +112,6 @@ class UpdateOrganisationTypeJourneyFactory(
                     )
                 }
                 nextStep { journey.completeOrganisationTypeUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf("submitButtonText" to "forms.buttons.confirmAndSubmitUpdate")
-                }
             }
             step(journey.completeOrganisationTypeUpdateStep) {
                 parents { journey.orgTypeCyaStep.isComplete() }
@@ -110,13 +124,104 @@ class UpdateOrganisationTypeJourneyFactory(
                 }
             }
         }
-    }
+
+    private fun checkYourAnswersJourneyMap(state: UpdateOrganisationTypeJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
+            configure {
+                withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
+            }
+            when (state.checkingAnswersFor) {
+                OrgTypeStep.ROUTE_SEGMENT -> {
+                    step(journey.orgTypeStep) {
+                        initialStep()
+                        routeSegment(OrgTypeStep.ROUTE_SEGMENT)
+                        nextStep { journey.orgTypeUpdateRoutingStep }
+                        withAdditionalContentProperties {
+                            mapOf("submitButtonText" to "forms.buttons.continue")
+                        }
+                    }
+                    step<OrgTypeUpdateRouteMode, OrgTypeUpdateRoutingStepConfig>(journey.orgTypeUpdateRoutingStep) {
+                        stepSpecificInitialisation {
+                            usingPreviousIsTrust {
+                                getPreviousIsTrustFromBaseJourney(
+                                    state,
+                                    journey.orgTypeStep,
+                                )
+                            }
+                        }
+                        parents { journey.orgTypeStep.isComplete() }
+                        nextDestination { mode ->
+                            when (mode) {
+                                OrgTypeUpdateRouteMode.TRUST_UNCHANGED -> Destination(journey.finishCyaStep)
+                                OrgTypeUpdateRouteMode.ADDING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                                OrgTypeUpdateRouteMode.REMOVING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                            }
+                        }
+                    }
+                    step(journey.orgTypeTrustInterruptionStep) {
+                        routeSegment(OrgTypeTrustInterruptionStep.ROUTE_SEGMENT)
+                        parents {
+                            OrParents(
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.REMOVING_TRUST),
+                            )
+                        }
+                        nextStep {
+                            if (journey.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST) {
+                                journey.leadTrusteeTask.firstStep
+                            } else {
+                                journey.finishCyaStep
+                            }
+                        }
+                    }
+                    task(journey.leadTrusteeTask) {
+                        parents {
+                            AndParents(
+                                journey.orgTypeTrustInterruptionStep.isComplete(),
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                            )
+                        }
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+
+                LeadTrusteeNameStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeDobStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeDobStep, LeadTrusteeDobStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeEmailStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeEmailStep, LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteePhoneStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteePhoneStep, LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                }
+
+                TrusteeAddressTask.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.leadTrusteeTask.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT)
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: ${state.checkingAnswersFor}")
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeOrRestoreState(user)
 }
 
 interface UpdateOrganisationTypeJourneyState :
-    JourneyState,
+    CheckYourAnswersJourneyState,
     OrgTypeUpdateState {
     override val orgTypeStep: OrgTypeStep
     override val orgTypeUpdateRoutingStep: OrgTypeUpdateRoutingStep
@@ -134,10 +239,19 @@ class UpdateOrganisationTypeJourney(
     override val leadTrusteeTask: LeadTrusteeTask,
     override val orgTypeCyaStep: OrgTypeCyaStep,
     override val completeOrganisationTypeUpdateStep: CompleteOrganisationTypeUpdateStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
+    override val stateFactory: ObjectFactory<UpdateOrganisationTypeJourneyState>,
     journeyStateService: JourneyStateService,
     private val journeyName: String = "organisation-type",
 ) : AbstractJourneyState(journeyStateService),
     UpdateOrganisationTypeJourneyState {
+    override val cyaStep get() = orgTypeCyaStep
+
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
         return super<AbstractJourneyState>.generateJourneyId(

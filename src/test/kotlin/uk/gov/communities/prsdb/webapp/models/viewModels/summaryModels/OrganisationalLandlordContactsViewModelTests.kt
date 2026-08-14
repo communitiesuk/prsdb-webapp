@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGoverningBodyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody.InitialiseGovBodyMembersForGovBodyUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -29,7 +31,11 @@ class OrganisationalLandlordContactsViewModelTests {
             card.actions!!.single().url,
         )
         assertEquals(
-            listOf("landlordDetails.org.mainContactName", "landlordDetails.org.mainContactEmail", "landlordDetails.org.mainContactPhone"),
+            listOf(
+                "landlordDetails.org.mainContactName",
+                "landlordDetails.org.mainContactEmail",
+                "landlordDetails.org.mainContactPhone",
+            ),
             card.summaryList.map { it.fieldHeading },
         )
     }
@@ -66,6 +72,18 @@ class OrganisationalLandlordContactsViewModelTests {
                 "landlordDetails.org.leadTrusteeAddress",
             ),
             card.summaryList.map { it.fieldHeading },
+        )
+    }
+
+    @Test
+    fun `governingBodyMembersLinkUrl links to start step`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList())
+
+        assertEquals(
+            "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${InitialiseGovBodyMembersForGovBodyUpdateStep.ROUTE_SEGMENT}",
+            viewModel.governingBodyMembersLinkUrl,
         )
     }
 
@@ -160,7 +178,11 @@ class OrganisationalLandlordContactsViewModelTests {
 
     @Test
     fun `registration contact card has no action and the expected rows`() {
-        val card = OrganisationalLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList()).registrationContactCard
+        val card =
+            OrganisationalLandlordContactsViewModel(
+                MockLandlordData.createOrgLandlord(),
+                emptyList(),
+            ).registrationContactCard
         assertEquals("landlordDetails.org.registrationContactHeading", card.title)
         assertNull(card.actions)
         assertEquals(

@@ -24,7 +24,7 @@ class OrgTypeTrustInterruptionStepConfig(
             state.orgTypeStep.stepConfig
                 .getFormModelFromState(state)
                 .getSelectedOrgTypes()
-                .filter { it != OrgType.TRUST }
+
         return mapOf(
             "selectedOrgTypeLabels" to selectedOrgTypes.joinToString(", ") { messageSource.getMessageForKey(orgTypeToLabelKey(it)) },
         )
