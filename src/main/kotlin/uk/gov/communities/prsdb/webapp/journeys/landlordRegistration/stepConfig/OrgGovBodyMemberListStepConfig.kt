@@ -37,28 +37,36 @@ class OrgGovBodyMemberListStepConfig(
 
     private fun getMemberRows(state: OrgGovBodyMembersState): List<SummaryListRowViewModel> {
         val membersMap = state.governingBodyMembersMap ?: emptyMap()
+        val showRemove = membersMap.size > 1 || state.allowRemovingLastMember
         return membersMap
             .toList()
             .sortedBy { it.first }
             .mapIndexed { displayIndex, (internalIndex, member) ->
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    fieldHeading = "forms.orgGovBodyMemberList.memberName",
-                    fieldValue = member.name,
-                    actions =
-                        listOf(
+                val actions =
+                    buildList {
+                        add(
                             SummaryListRowActionsInputWithDestination(
                                 text = "forms.links.change",
                                 destination =
                                     Destination(state.setStateForGovBodyMemberEditStep)
                                         .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
-                            SummaryListRowActionsInputWithDestination(
-                                text = "forms.links.remove",
-                                destination =
-                                    Destination(state.removeGovBodyMemberStep)
-                                        .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
-                            ),
-                        ),
+                        )
+                        if (showRemove) {
+                            add(
+                                SummaryListRowActionsInputWithDestination(
+                                    text = "forms.links.remove",
+                                    destination =
+                                        Destination(state.removeGovBodyMemberStep)
+                                            .withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
+                                ),
+                            )
+                        }
+                    }
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    fieldHeading = "forms.orgGovBodyMemberList.memberName",
+                    fieldValue = member.name,
+                    actions = actions,
                     optionalFieldHeadingParam = displayIndex + 1,
                 )
             }
