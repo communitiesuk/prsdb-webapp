@@ -24,7 +24,7 @@ class InitialiseGovBodyMembersForGovBodyUpdateStepConfig(
 
     override fun mode(state: UpdateGoverningBodyJourneyState): Complete = Complete.COMPLETE
 
-    override fun beforeChoosingNextDestination(state: UpdateGoverningBodyJourneyState) {
+    override fun afterStepIsReached(state: UpdateGoverningBodyJourneyState) {
         if (state.governingBodyMembersInitialised == true) return
         val existingMembers = userToLandlordService.getCurrentOrganisationLandlordForUser().governingBodyMembers
         state.governingBodyMembersMap =
