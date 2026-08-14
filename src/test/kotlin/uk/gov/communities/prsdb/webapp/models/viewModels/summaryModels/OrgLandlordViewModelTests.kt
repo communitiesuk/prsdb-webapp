@@ -284,4 +284,39 @@ class OrgLandlordViewModelTests {
             }
         }
     }
+
+    @Test
+    fun `no rows have action links when change links are disabled`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCompany = true,
+                isCharity = true,
+                companyNumber = "01234567",
+                charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
+                charityNumber = "0123456",
+            )
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource, withChangeLinks = false)
+
+        viewModel.organisationDetails.forEach { row ->
+            assertTrue(row.actions.isEmpty(), "${row.fieldHeading} should not have an action link")
+        }
+    }
+
+    @Test
+    fun `all rows are still present when change links are disabled`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCompany = true,
+                isCharity = true,
+                companyNumber = "01234567",
+                charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
+                charityNumber = "0123456",
+            )
+
+        assertIterableEquals(
+            OrgLandlordViewModel(landlord, messageSource).organisationDetails.map { it.fieldHeading },
+            OrgLandlordViewModel(landlord, messageSource, withChangeLinks = false).organisationDetails.map { it.fieldHeading },
+        )
+    }
 }

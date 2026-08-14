@@ -42,6 +42,9 @@ class LandlordDetailsController(
     private val featureFlagManager: FeatureFlagManager,
     private val messageSource: MessageSource,
 ) {
+    private val orgLandlordsEnabled: Boolean
+        get() = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
@@ -49,7 +52,7 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                if (!orgLandlordsEnabled) {
                     throw ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Organisation landlords are not currently available",
@@ -72,7 +75,7 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val isOrgLandlordRegistrationEnabled = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+        val isOrgLandlordRegistrationEnabled = orgLandlordsEnabled
         val landlordViewModel =
             LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
 
@@ -96,6 +99,7 @@ class LandlordDetailsController(
             "orgLandlordContacts",
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers),
         )
+        model.addAttribute("isLandlordView", true)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
@@ -137,25 +141,69 @@ class LandlordDetailsController(
             landlordService.retrieveLandlordById(id)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord $id not found")
 
+        return when (landlord) {
+            is OrganisationalLandlord -> {
+                if (!orgLandlordsEnabled) {
+                    throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
+                }
+                getLocalCouncilOrgLandlordDetails(landlord, model)
+            }
+
+            is IndividualLandlord -> {
+                getLocalCouncilIndividualLandlordDetails(landlord, model)
+            }
+
+            else -> {
+                throw IllegalArgumentException("Unknown landlord type")
+            }
+        }
+    }
+
+    private fun getLocalCouncilIndividualLandlordDetails(
+        landlord: IndividualLandlord,
+        model: Model,
+    ): String {
         val lastModifiedDate = DateTimeHelper.getDateInUK(landlord.getMostRecentlyUpdated().toKotlinInstant())
 
-        val landlordViewModel = LandlordViewModel(landlord as IndividualLandlord, withChangeLinks = false)
-
         model.addAttribute("lastModifiedDate", lastModifiedDate)
-        model.addAttribute("landlord", landlordViewModel)
+        model.addAttribute("landlord", LandlordViewModel(landlord, withChangeLinks = false))
+
+        addLocalCouncilLandlordDetailsSharedAttributes(landlord.id, model)
+
+        return "localCouncilLandlordDetailsView"
+    }
+
+    private fun getLocalCouncilOrgLandlordDetails(
+        orgLandlord: OrganisationalLandlord,
+        model: Model,
+    ): String {
+        model.addAttribute("orgLandlord", OrgLandlordViewModel(orgLandlord, messageSource, withChangeLinks = false))
+        model.addAttribute(
+            "orgLandlordContacts",
+            OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers, withChangeLinks = false),
+        )
+        model.addAttribute("isLandlordView", false)
+
+        addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
+
+        return "orgLandlordDetailsView"
+    }
+
+    private fun addLocalCouncilLandlordDetailsSharedAttributes(
+        landlordId: Long,
+        model: Model,
+    ) {
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
 
         val registeredPropertiesList =
             propertyOwnershipService.getRegisteredPropertiesForLandlord(
-                id,
+                landlordId,
                 currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
             )
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
         model.addAttribute("backUrl", "/")
-
-        return "localCouncilLandlordDetailsView"
     }
 
     companion object {
