@@ -55,6 +55,16 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
+    fun `the registered properties tab shows the landlord properties table`(page: Page) {
+        val detailsPage = navigator.goToOrgLandlordDetails()
+
+        detailsPage.tabs.goToRegisteredProperties()
+
+        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
+        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
+    }
+
+    @Test
     fun `the organisation details tab shows the organisation's registration and organisation type details`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
         val summaryList = detailsPage.organisationDetailsSummaryList
