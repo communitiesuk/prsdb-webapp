@@ -548,7 +548,18 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             memberListPage.form.submit()
 
             val cyaPage = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
-            cyaPage.submit()
+            BaseComponent.assertThat(cyaPage.warning).isVisible()
+            val firstCard = cyaPage.governingBodyMemberCard(0)
+            BaseComponent.assertThat(firstCard.title).containsText("Trustee")
+            val secondCard = cyaPage.governingBodyMemberCard(1)
+            BaseComponent.assertThat(secondCard.title).containsText("Partner")
+
+            firstCard.getAction("Change").link.clickAndWait()
+            val changeMemberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            changeMemberListPage.form.submit()
+
+            val cyaPageAfterChange = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
+            cyaPageAfterChange.submit()
 
             orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
             orgLandlordDetailsPage.tabs.goToOrganisationContacts()
