@@ -1,4 +1,11 @@
 title: Deregister Landlord
+areYouSure:
+  heading: Are you sure you want to delete your account?
+  paragraph:
+    one: You’ll no longer be registered as a landlord in England.
+    two: 'This means we will:'
+  confirmButton: Yes, delete
+  cancelLink: Cancel and go back
 organisational:
   title: Deregister Organisational Landlord
   areYouSure:
@@ -19,19 +26,15 @@ organisational:
       body: No longer registered as a landlord
     paragraph:
       one: 'TODO: PDJB-1484 - Organisation deregistration confirmation content'
-noProperties:
-  confirmation:
-    banner:
-      heading: Account deleted
-      body: No longer registered as a landlord
-    paragraph:
-      one: We have sent you a confirmation email.
-      two: You’ll need to register a new account if you become a landlord again.
+confirmation:
+  banner:
+    heading: Account deleted
+    body: You’re no longer registered as a landlord in England.
+  paragraph:
+    one: You’re no longer registered as a landlord in England. We’ve sent you an email to confirm this.
+    two: You’ll need to register a new account if you become a landlord again.
 withProperties:
-  confirmation:
-    banner:
-      heading: Account deleted
-      body: No longer registered as a landlord
-    paragraph:
-      one: You have deleted your landlord information and all your properties. We have sent you an email confirming this.
-      two: You’ll need to register a new account if you become a landlord again.
+  areYouSure:
+    bulletList:
+      one: delete all property registrations where you’re the only landlord
+      two: remove you as a joint landlord from any properties

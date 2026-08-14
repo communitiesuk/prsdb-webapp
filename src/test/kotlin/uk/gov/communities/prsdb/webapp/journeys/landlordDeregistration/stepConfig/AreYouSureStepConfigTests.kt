@@ -2,84 +2,55 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConf
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
-@ExtendWith(MockitoExtension::class)
 class AreYouSureStepConfigTests {
-    @Mock
-    lateinit var mockState: LandlordDeregistrationJourneyState
+    private val stepConfig =
+        AreYouSureStepConfig().also {
+            it.urlPath = AreYouSureStep.ROUTE_SEGMENT
+            it.validator = AlwaysTrueValidator()
+        }
 
     @Test
     fun `mode returns null when form model is not present`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(null)
+        val mockState =
+            mock<LandlordDeregistrationJourneyState> {
+                on {
+                    getStepData(AreYouSureStep.ROUTE_SEGMENT)
+                } doReturn null
+            }
 
-        val result = stepConfig.mode(mockState)
-
-        assertNull(result)
+        assertNull(stepConfig.mode(mockState))
     }
 
     @Test
-    fun `mode returns null when wantsToProceed is null`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to null))
+    fun `mode returns COMPLETE when form is submitted`() {
+        val mockState =
+            mock<LandlordDeregistrationJourneyState> {
+                on {
+                    getStepData(AreYouSureStep.ROUTE_SEGMENT)
+                } doReturn emptyMap()
+            }
 
-        val result = stepConfig.mode(mockState)
-
-        assertNull(result)
+        assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
     }
 
     @Test
-    fun `mode returns WANTS_TO_PROCEED when wantsToProceed is true`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
+    fun `getStepSpecificContent includes userHasRegisteredProperties from state`() {
+        val mockState =
+            mock<LandlordDeregistrationJourneyState> {
+                on {
+                    userHasRegisteredProperties
+                } doReturn true
+            }
 
-        val result = stepConfig.mode(mockState)
+        val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals(AreYouSureMode.WANTS_TO_PROCEED, result)
-    }
-
-    @Test
-    fun `mode returns DOES_NOT_WANT_TO_PROCEED when wantsToProceed is false`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "false"))
-
-        val result = stepConfig.mode(mockState)
-
-        assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, result)
-    }
-
-    @Test
-    fun `enrichSubmittedDataBeforeValidation adds userHasRegisteredProperties from state`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.userHasRegisteredProperties).thenReturn(true)
-
-        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockState, mapOf("wantsToProceed" to "true"))
-
-        assertTrue(result["userHasRegisteredProperties"] as Boolean)
-    }
-
-    @Test
-    fun `enrichSubmittedDataBeforeValidation adds false when user has no registered properties`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.userHasRegisteredProperties).thenReturn(false)
-
-        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockState, mapOf("wantsToProceed" to "true"))
-
-        assertEquals(false, result["userHasRegisteredProperties"])
-    }
-
-    private fun setupStepConfig(): AreYouSureStepConfig {
-        val stepConfig = AreYouSureStepConfig()
-        stepConfig.urlPath = AreYouSureStep.ROUTE_SEGMENT
-        stepConfig.validator = AlwaysTrueValidator()
-        return stepConfig
+        assertEquals(true, content["userHasRegisteredProperties"])
     }
 }

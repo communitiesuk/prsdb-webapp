@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.DeregisterStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.ReasonStep
@@ -46,10 +45,8 @@ class LandlordDeregistrationJourneyFactory(
                 routeSegment(AreYouSureStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-                nextDestination { mode ->
-                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
-                        Destination.ExternalUrl(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-                    } else if (state.userHasRegisteredProperties) {
+                nextDestination { _ ->
+                    if (state.userHasRegisteredProperties) {
                         Destination(journey.reasonStep)
                     } else {
                         Destination(journey.deregisterStep)
@@ -58,14 +55,14 @@ class LandlordDeregistrationJourneyFactory(
             }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                parents { journey.areYouSureStep.hasOutcome(Complete.COMPLETE) }
                 nextDestination { Destination(journey.deregisterStep) }
                 withAdditionalContentProperties { mapOf("submitButton" to "transactionSubmitButton") }
             }
             step(journey.deregisterStep) {
                 parents {
                     OrParents(
-                        journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED),
+                        journey.areYouSureStep.hasOutcome(Complete.COMPLETE),
                         journey.reasonStep.hasOutcome(Complete.COMPLETE),
                     )
                 }
