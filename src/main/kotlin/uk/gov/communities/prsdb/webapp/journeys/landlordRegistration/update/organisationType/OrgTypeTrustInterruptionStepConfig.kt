@@ -1,15 +1,19 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType
 
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgTypeUpdateState>() {
+class OrgTypeTrustInterruptionStepConfig(
+    private val messageSource: MessageSource,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgTypeUpdateState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: OrgTypeUpdateState): Map<String, Any> {
@@ -21,7 +25,9 @@ class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complet
                 .getFormModelFromState(state)
                 .getSelectedOrgTypes()
                 .filter { it != OrgType.TRUST }
-        return mapOf("selectedOrgTypeLabelKeys" to selectedOrgTypes.map { orgTypeToLabelKey(it) })
+        return mapOf(
+            "selectedOrgTypeLabels" to selectedOrgTypes.joinToString(", ") { messageSource.getMessageForKey(orgTypeToLabelKey(it)) },
+        )
     }
 
     private fun orgTypeToLabelKey(orgType: OrgType): String =

@@ -11,6 +11,7 @@ abstract class InterruptionPage(
     val form = PostForm(page)
     val heading = page.locator(".moj-interruption-card__heading")
     val body = page.locator(".moj-interruption-card__body")
+    val submitButton = page.locator("button[type='submit']")
     val goBackLink = Link(page.locator(".govuk-link--inverse"))
 
     fun submit() = form.submit()

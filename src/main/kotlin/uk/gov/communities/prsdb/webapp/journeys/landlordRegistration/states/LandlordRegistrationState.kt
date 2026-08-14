@@ -30,7 +30,7 @@ interface LandlordRegistrationState :
     val landlordTypeChangeRedirectStep: LandlordTypeChangeRedirectStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
-    val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
+    override val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep
     val orgCompaniesHouseChangeGovBodyTask: OrgCompaniesHouseChangeGovBodyTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep

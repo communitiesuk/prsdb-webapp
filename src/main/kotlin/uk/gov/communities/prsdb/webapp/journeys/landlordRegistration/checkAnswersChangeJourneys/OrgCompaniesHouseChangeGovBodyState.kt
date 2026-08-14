@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgGovBodyMembersTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateState
 
 interface OrgCompaniesHouseChangeGovBodyState :
@@ -24,4 +25,5 @@ class OrgCompaniesHouseChangeGovBodyDependencies(
     val orgIsRegisteredCompanyStep: OrgIsRegisteredCompanyStep,
     val orgCompanyNumberStep: OrgCompanyNumberStep,
     val orgGovBodyState: OrgGovBodyState,
+    val orgCompaniesHouseUpdateRoutingStep: OrgCompaniesHouseUpdateRoutingStep,
 )
