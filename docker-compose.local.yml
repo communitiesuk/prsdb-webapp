@@ -15,3 +15,10 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     command: /bin/sh -c "redis-server --requirepass notarealpassword"
+  tbls:
+    image: ghcr.io/k1low/tbls:v1.95.0
+    profiles:
+      - tools
+    working_dir: /work
+    volumes:
+      - .:/work

@@ -1,0 +1,5 @@
+dsn: postgres://postgres:notarealpassword@postgres:5432/prsdblocal?sslmode=disable
+exclude:
+  - flyway_schema_history
+format:
+  sort: true

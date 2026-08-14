@@ -6,44 +6,30 @@ const {
     formatPsqlError,
     parseArguments,
     parseGitMigrationPaths,
-    renderMermaid,
 } = require('./generate_database_schema');
 const { insertHook } = require('./install_database_schema_hook');
 
-const metadata = {
-    tables: [
-        {
-            name: 'child',
-            columns: [
-                { name: 'parent_id', ordinal: 2, type: 'bigint', nullable: false, identity: false, generated: false, default: null },
-                { name: 'id', ordinal: 1, type: 'bigint', nullable: false, identity: true, generated: false, default: null },
-            ],
-        },
-        {
-            name: 'parent',
-            columns: [
-                { name: 'id', ordinal: 1, type: 'bigint', nullable: false, identity: true, generated: false, default: null },
-            ],
-        },
-    ],
-    constraints: [
-        { name: 'child_parent_fk', type: 'f', table: 'child', columns: ['parent_id'], referencedTable: 'parent', referencedColumns: ['id'] },
-        { name: 'parent_pkey', type: 'p', table: 'parent', columns: ['id'], referencedTable: null, referencedColumns: [] },
-        { name: 'child_pkey', type: 'p', table: 'child', columns: ['id'], referencedTable: null, referencedColumns: [] },
-    ],
-};
+test('parseArguments defaults include tbls options', () => {
+    const options = parseArguments([]);
 
-test('renderMermaid produces stable output regardless of metadata ordering', () => {
-    const reorderedMetadata = {
-        tables: [...metadata.tables].reverse().map(table => ({ ...table, columns: [...table.columns].reverse() })),
-        constraints: [...metadata.constraints].reverse(),
-    };
+    assert.equal(options.tblsConfig, '.tbls.yml');
+    assert.equal(options.tblsProfile, 'tools');
+    assert.equal(options.tblsService, 'tbls');
+});
 
-    assert.equal(
-        renderMermaid(metadata, 'public'),
-        renderMermaid(reorderedMetadata, 'public'),
-    );
-    assert.match(renderMermaid(metadata, 'public'), /parent \|\|--o\{ child : parent_id/);
+test('parseArguments accepts tbls option overrides', () => {
+    const options = parseArguments([
+        '--tbls-config',
+        'config/custom.tbls.yml',
+        '--tbls-profile',
+        'ci-tools',
+        '--tbls-service',
+        'diagrammer',
+    ]);
+
+    assert.equal(options.tblsConfig, 'config/custom.tbls.yml');
+    assert.equal(options.tblsProfile, 'ci-tools');
+    assert.equal(options.tblsService, 'diagrammer');
 });
 
 test('database schema hook is inserted before existing hooks and only once', () => {

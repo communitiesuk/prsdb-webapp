@@ -134,7 +134,7 @@ Utility scripts are in the `scripts/` directory.
 
 | Script                                         | Purpose                                                                                                                                                                                                                                                                            |
 |------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `generate_database_schema.js`                  | Generate `docs/database-schema.mmd` from the running local PostgreSQL database using `psql` inside the Docker Compose PostgreSQL container.                                                                                                                                           |
+| `generate_database_schema.js`                  | Validate local Flyway migration state and generate `docs/database-schema.mmd` from the running local PostgreSQL database using the pinned `tbls` Docker Compose tool service.                                                                                                   |
 | `install_database_schema_hook.js`              | Install the pre-commit hook that regenerates the database diagram when staged migrations change.                                                                                                                                                                                     |
 | `generate_passcodes.js`                        | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
 | `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV.                                                                                                                                                                                                                  |
@@ -147,9 +147,11 @@ node scripts/generate_database_schema.js
 ```
 
 The generator checks that the running database has successfully applied the same migration files, then regenerates and
-writes the diagram. Run `node scripts/generate_database_schema.js --help` for output, schema, Compose service, and
-database overrides. Pass `--host-psql` to use a `psql` installation from `PATH` instead of the Compose container;
-standard `PGHOST`, `PGPORT`, and `PGPASSWORD` environment variables are respected in that mode.
+writes the diagram. The repository `.tbls.yml` pins the DSN and excludes `flyway_schema_history` from the output.
+Run `node scripts/generate_database_schema.js --help` for output, Flyway database checks, Compose service/profile,
+and tbls config overrides. Pass `--host-psql` to use a `psql` installation from `PATH` for Flyway checks instead of
+the Compose PostgreSQL container; standard `PGHOST`, `PGPORT`, and `PGPASSWORD` environment variables are respected in
+that mode.
 
 ### Code structure
 
