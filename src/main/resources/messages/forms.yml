@@ -20,6 +20,7 @@ buttons:
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
   continueAnyway: Continue anyway
   continueWithChange: Continue with the change
+  continueToOtherSections: Continue to other sections
 links:
   change: Change
   remove: Remove

@@ -29,6 +29,7 @@ class OrgCompaniesHouseChangeGovBodyTask(
     override val taskState get() = this
 
     override val orgIsRegisteredCompanyStep get() = dependencies.orgIsRegisteredCompanyStep
+    override val orgCompaniesHouseUpdateRoutingStep get() = dependencies.orgCompaniesHouseUpdateRoutingStep
     override val orgCompanyNumberStep: OrgCompanyNumberStep get() = dependencies.orgCompanyNumberStep
     override val orgGovBodyMembersTask get() = dependencies.orgGovBodyState.orgGovBodyMembersTask
     override val govBodyDetailsModeState get() = dependencies.orgGovBodyState
