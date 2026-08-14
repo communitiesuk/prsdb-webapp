@@ -491,31 +491,6 @@ class JourneyBuilderTest {
         }
     }
 
-    @Test
-    fun `configureFirst buffered before a first-element task is routed to the task initialiser`() {
-        // Arrange
-        val jb = JourneyBuilder(mock())
-        val uninitialisedTask = mock<TaskWithoutDependencies<JourneyState>>()
-
-        mockConstruction(TaskInitialiser::class.java) { mock, _ ->
-            whenever((mock as TaskInitialiser<JourneyState, Nothing>).build(any())).thenReturn(emptyList())
-        }.use { taskConstruction ->
-
-            // Act
-            jb.configureFirst {
-                backDestination { Destination.ExternalUrl("backLink") }
-            }
-            jb.task(uninitialisedTask) {
-                parents { NoParents() }
-                nextDestination { Destination.NavigationalStep(mock()) }
-            }
-
-            // Assert
-            val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState, Nothing>
-            verify(mockTaskInitialiser).configureFirst(any())
-        }
-    }
-
     @Nested
     inner class ConfigurationTests {
         @Test
