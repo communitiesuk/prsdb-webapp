@@ -130,7 +130,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
         val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
-        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("None of these")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("Other")
         assertThat(detailsPage.mainContent).not().containsText("Charity number")
     }
 
@@ -152,7 +152,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
         val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
-        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("None of these")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("Other")
         assertThat(detailsPage.mainContent).not().containsText("Charity number")
     }
 

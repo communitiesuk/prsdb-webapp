@@ -142,6 +142,10 @@ leadTrusteePhone:
 orgType:
   fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
+  company: Company
+  charity: Charity
+  trust: Trust
+  none: Other
   checkbox:
     company: Company
     charity: Charity

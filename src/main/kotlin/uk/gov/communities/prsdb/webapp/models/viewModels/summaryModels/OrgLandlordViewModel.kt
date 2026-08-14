@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeControl
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 
 class OrgLandlordViewModel(
     landlord: OrganisationalLandlord,
+    messageSource: MessageSource,
 ) {
     val name: String = landlord.name
 
@@ -66,7 +69,9 @@ class OrgLandlordViewModel(
                 )
                 addRow(
                     "landlordDetails.org.organisationType",
-                    landlord.organisationTypes,
+                    landlord.organisationTypes.joinToString(", ") { orgType ->
+                        messageSource.getMessageForKey(MessageKeyConverter.convert(orgType))
+                    },
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_TYPE_URL,
                 )
@@ -75,9 +80,15 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCharity),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_ORG_CHARITY_URL,
+                    withoutBottomBorder = landlord.isRegisteredCharity,
                 )
                 if (landlord.isRegisteredCharity) {
-                    addRow("landlordDetails.org.charityCommission", landlord.charityRegisteredWith)
+                    addRow(
+                        key = "landlordDetails.org.charityCommission",
+                        value = landlord.charityRegisteredWith,
+                        withActionLink = false,
+                        withoutBottomBorder = landlord.hasCharityNumber,
+                    )
                 }
                 if (landlord.hasCharityNumber) {
                     addRow("landlordDetails.org.charityNumber", landlord.charityNumber)
@@ -87,6 +98,7 @@ class OrgLandlordViewModel(
                     MessageKeyConverter.convert(landlord.isRegisteredCompany),
                     CHANGE_LINK_MESSAGE_KEY,
                     UPDATE_COMPANIES_HOUSE_URL,
+                    withoutBottomBorder = landlord.isRegisteredCompany,
                 )
                 if (landlord.isRegisteredCompany) {
                     addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
