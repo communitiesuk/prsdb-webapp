@@ -267,6 +267,7 @@ class OrgLandlordViewModelTests {
         val changeableHeadings =
             listOf(
                 "landlordDetails.org.name",
+                "landlordDetails.org.address",
                 "landlordDetails.org.email",
                 "landlordDetails.org.phone",
                 "landlordDetails.org.organisationType",

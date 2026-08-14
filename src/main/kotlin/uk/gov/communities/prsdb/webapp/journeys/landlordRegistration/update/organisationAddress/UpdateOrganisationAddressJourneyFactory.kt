@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.address
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationAddress
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -12,12 +12,12 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 import java.security.Principal
 
 @PrsdbWebService
-class UpdateAddressJourneyFactory(
-    private val stateFactory: ObjectFactory<UpdateAddressJourney>,
+class UpdateOrganisationAddressJourneyFactory(
+    private val stateFactory: ObjectFactory<UpdateOrganisationAddressJourney>,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -30,7 +30,7 @@ class UpdateAddressJourneyFactory(
             }
             task(journey.addressTask) {
                 initialStep()
-                nextStep { journey.completeAddressUpdateStep }
+                nextStep { journey.completeOrganisationAddressUpdateStep }
                 configureStep(journey.addressTask.selectAddressStep) {
                     withAdditionalContentProperties {
                         mapOf(
@@ -48,7 +48,7 @@ class UpdateAddressJourneyFactory(
                     }
                 }
             }
-            step(journey.completeAddressUpdateStep) {
+            step(journey.completeOrganisationAddressUpdateStep) {
                 parents { journey.addressTask.isComplete() }
                 nextUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
             }
@@ -59,13 +59,13 @@ class UpdateAddressJourneyFactory(
 }
 
 @JourneyFrameworkComponent
-class UpdateAddressJourney(
-    override val addressTask: LandlordAddressTask,
-    override val completeAddressUpdateStep: CompleteAddressUpdateStep,
+class UpdateOrganisationAddressJourney(
+    override val addressTask: OrgAddressTask,
+    override val completeOrganisationAddressUpdateStep: CompleteOrganisationAddressUpdateStep,
     journeyStateService: JourneyStateService,
-    private val journeyName: String = "address",
+    private val journeyName: String = "organisation-address",
 ) : AbstractJourneyState(journeyStateService),
-    UpdateAddressJourneyState {
+    UpdateOrganisationAddressJourneyState {
     override fun generateJourneyId(seed: Any?): String {
         val user: Principal? = seed as? Principal
 
@@ -75,7 +75,7 @@ class UpdateAddressJourney(
     }
 }
 
-interface UpdateAddressJourneyState : JourneyState {
+interface UpdateOrganisationAddressJourneyState : JourneyState {
     val addressTask: AddressTask
-    val completeAddressUpdateStep: CompleteAddressUpdateStep
+    val completeOrganisationAddressUpdateStep: CompleteOrganisationAddressUpdateStep
 }
