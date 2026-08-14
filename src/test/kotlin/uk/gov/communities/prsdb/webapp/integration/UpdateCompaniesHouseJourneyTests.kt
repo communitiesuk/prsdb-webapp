@@ -53,6 +53,8 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         companyNumberPage.submitCompanyNumber("12345678")
 
         val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
+        assertThat(checkAnswersPage.companyDetails.registeredWithCompaniesHouseRow.value).containsText("Yes")
+        assertThat(checkAnswersPage.companyDetails.companiesHouseNumberRow.value).containsText("12345678")
         checkAnswersPage.confirmAndSubmit()
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -119,6 +121,27 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
         checkAnswersPage.confirmAndSubmit()
+
+        val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(updatedDetailsPage.mainContent).containsText("87654321")
+    }
+
+    @Test
+    fun `Changing the company number from the check answers page updates the record`(page: Page) {
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class).submitYes()
+        assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class).submitCompanyNumber("12345678")
+
+        val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
+        checkAnswersPage.companyDetails.companiesHouseNumberRow.clickFirstActionLinkAndWait()
+
+        val companyNumberChangePage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
+        companyNumberChangePage.submitCompanyNumber("87654321")
+
+        val updatedCheckAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
+        assertThat(updatedCheckAnswersPage.companyDetails.companiesHouseNumberRow.value).containsText("87654321")
+        updatedCheckAnswersPage.confirmAndSubmit()
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(updatedDetailsPage.mainContent).containsText("87654321")
