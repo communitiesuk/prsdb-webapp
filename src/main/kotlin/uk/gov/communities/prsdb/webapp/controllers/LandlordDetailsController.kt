@@ -42,6 +42,9 @@ class LandlordDetailsController(
     private val featureFlagManager: FeatureFlagManager,
     private val messageSource: MessageSource,
 ) {
+    private val orgLandlordsEnabled: Boolean
+        get() = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
     fun getUserLandlordDetails(model: Model): String {
@@ -49,7 +52,7 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                if (!orgLandlordsEnabled) {
                     throw ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Organisation landlords are not currently available",
@@ -72,7 +75,7 @@ class LandlordDetailsController(
         landlord: IndividualLandlord,
         model: Model,
     ): String {
-        val isOrgLandlordRegistrationEnabled = featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)
+        val isOrgLandlordRegistrationEnabled = orgLandlordsEnabled
         val landlordViewModel =
             LandlordViewModel(landlord, withChangeLinks = true, withLandlordTypeRow = isOrgLandlordRegistrationEnabled)
 
@@ -96,6 +99,7 @@ class LandlordDetailsController(
             "orgLandlordContacts",
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers),
         )
+        model.addAttribute("isLandlordView", true)
 
         addUserLandlordDetailsSharedAttributes(orgLandlord, model)
         model.addAttribute(
@@ -139,7 +143,7 @@ class LandlordDetailsController(
 
         return when (landlord) {
             is OrganisationalLandlord -> {
-                if (!featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                if (!orgLandlordsEnabled) {
                     throw ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation landlords are not currently available")
                 }
                 getLocalCouncilOrgLandlordDetails(landlord, model)
@@ -178,10 +182,11 @@ class LandlordDetailsController(
             "orgLandlordContacts",
             OrganisationalLandlordContactsViewModel(orgLandlord, orgLandlord.governingBodyMembers, withChangeLinks = false),
         )
+        model.addAttribute("isLandlordView", false)
 
         addLocalCouncilLandlordDetailsSharedAttributes(orgLandlord.id, model)
 
-        return "localCouncilOrgLandlordDetailsView"
+        return "orgLandlordDetailsView"
     }
 
     private fun addLocalCouncilLandlordDetailsSharedAttributes(

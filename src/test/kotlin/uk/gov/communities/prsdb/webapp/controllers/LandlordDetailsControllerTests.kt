@@ -132,6 +132,7 @@ class LandlordDetailsControllerTests(
                         DeregisterOrganisationalLandlordController.ORGANISATIONAL_LANDLORD_DEREGISTRATION_PATH,
                     )
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+                    attribute("isLandlordView", true)
                     attributeExists(
                         "orgLandlord",
                         "orgLandlordContacts",
@@ -227,9 +228,10 @@ class LandlordDetailsControllerTests(
 
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
                 status { isOk() }
-                view { name("localCouncilOrgLandlordDetailsView") }
+                view { name("orgLandlordDetailsView") }
                 model {
                     attribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
+                    attribute("isLandlordView", false)
                     attributeExists("orgLandlord", "orgLandlordContacts", "registeredPropertiesList", "backUrl")
                     attributeDoesNotExist("deleteLandlordRecordUrl", "lastModifiedDate")
                 }
@@ -243,7 +245,7 @@ class LandlordDetailsControllerTests(
 
             mvc.get(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlord.id)).andExpect {
                 status { isOk() }
-                view { name("localCouncilOrgLandlordDetailsView") }
+                view { name("orgLandlordDetailsView") }
             }
         }
 

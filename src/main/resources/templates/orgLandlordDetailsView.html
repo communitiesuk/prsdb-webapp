@@ -7,7 +7,7 @@
 
         <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">orgLandlord.name</h1>
 
-        <p class="govuk-body">
+        <p class="govuk-body" th:if="${isLandlordView}">
             <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
                th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>
         </p>
@@ -28,7 +28,12 @@
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
-                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+                <th:block th:if="${isLandlordView}">
+                    <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+                </th:block>
+                <th:block th:unless="${isLandlordView}">
+                    <th:block th:replace="~{fragments/tabs/localCouncilRegisteredPropertiesPanel :: localCouncilRegisteredPropertiesPanelContent}"></th:block>
+                </th:block>
             </div>
         </div>
     </main>
