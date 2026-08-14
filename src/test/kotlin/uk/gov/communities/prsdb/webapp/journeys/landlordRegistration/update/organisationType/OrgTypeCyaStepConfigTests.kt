@@ -134,7 +134,7 @@ class OrgTypeCyaStepConfigTests {
             val summaryList = content["summaryListData"] as List<SummaryListRowViewModel>
             val orgTypeValue = summaryList[0].fieldValue as String
             assertEquals(
-                "Message for registerAsALandlord.orgType.checkbox.company, Message for registerAsALandlord.orgType.checkbox.charity",
+                "Message for registerAsALandlord.orgType.company, Message for registerAsALandlord.orgType.charity",
                 orgTypeValue,
             )
         }
