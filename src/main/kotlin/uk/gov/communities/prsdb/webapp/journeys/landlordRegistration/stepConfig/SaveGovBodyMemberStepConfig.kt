@@ -53,8 +53,6 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
                 type = type,
                 dateOfBirth = dateOfBirth,
                 address = address,
-                databaseId = state.editingGovBodyMember?.databaseId,
-                lastUpdatedAt = state.editingGovBodyMember?.lastUpdatedAt,
                 addressSearchPostcode = lookupFormModel?.postcode,
                 addressSearchHouseNameOrNumber = lookupFormModel?.houseNameOrNumber,
                 selectedAddress = selectFormModel?.address,

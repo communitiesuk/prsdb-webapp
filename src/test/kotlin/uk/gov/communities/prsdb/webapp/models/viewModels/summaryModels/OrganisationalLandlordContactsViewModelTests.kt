@@ -9,8 +9,8 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody.InitialiseGovBodyMembersForGovBodyUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -75,13 +75,13 @@ class OrganisationalLandlordContactsViewModelTests {
     }
 
     @Test
-    fun `governingBodyMembersLinkUrl links to member list`() {
+    fun `governingBodyMembersLinkUrl links to start step`() {
         val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
 
         val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList())
 
         assertEquals(
-            "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${OrgGovBodyMemberListStep.ROUTE_SEGMENT}",
+            "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${InitialiseGovBodyMembersForGovBodyUpdateStep.ROUTE_SEGMENT}",
             viewModel.governingBodyMembersLinkUrl,
         )
     }

@@ -8,8 +8,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBody
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody.InitialiseGovBodyMembersForGovBodyUpdateStep
 
 class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationalLandlord,
@@ -59,7 +59,7 @@ class OrganisationalLandlordContactsViewModel(
     val showGoverningBody: Boolean = orgLandlord.hasGoverningBody
 
     val governingBodyMembersLinkUrl: String =
-        "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${OrgGovBodyMemberListStep.ROUTE_SEGMENT}"
+        "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${InitialiseGovBodyMembersForGovBodyUpdateStep.ROUTE_SEGMENT}"
 
     val governingBodyMemberCards: List<SummaryCardViewModel> =
         governingBodyMembers.mapIndexed { index, member ->

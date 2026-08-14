@@ -485,7 +485,8 @@ class LandlordService(
     @Transactional
     fun updateOrganisationLandlordGoverningBodyMembers(members: List<GoverningBodyMemberDataModel>) {
         val landlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
-        organisationGoverningBodyMemberService.updateGoverningBodyMembers(landlord, members)
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlord)
+        organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, members)
         sendOrgUpdateConfirmationEmail(landlord.email, "governing body members")
     }
 

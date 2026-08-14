@@ -28,8 +28,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
@@ -1137,7 +1137,7 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordGoverningBodyMembers delegates to service and sends confirmation email`() {
+    fun `updateOrganisationLandlordGoverningBodyMembers clears and recreates members and sends confirmation email`() {
         val orgLandlord = createOrgLandlord()
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
         val dashboardUrl = URI("example.com/landlord-dashboard")
@@ -1150,13 +1150,13 @@ class LandlordServiceTests {
                     type = GoverningBodyMemberType.DIRECTOR,
                     dateOfBirth = kotlinx.datetime.LocalDate(1985, 3, 15),
                     address = AddressDataModel("1 Director Lane, DL1 2AB"),
-                    databaseId = 1L,
                 ),
             )
 
         landlordService.updateOrganisationLandlordGoverningBodyMembers(members)
 
-        verify(mockOrganisationGoverningBodyMemberService).updateGoverningBodyMembers(orgLandlord, members)
+        verify(mockOrganisationGoverningBodyMemberService).clearGoverningBodyMembers(orgLandlord)
+        verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(orgLandlord, members)
         val expectedEmailModel =
             OrganisationalLandlordUpdateConfirmation(
                 dashboardUrl,

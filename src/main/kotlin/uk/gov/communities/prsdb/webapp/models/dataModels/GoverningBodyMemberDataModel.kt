@@ -20,8 +20,6 @@ data class GoverningBodyMemberDataModel(
     val manualTownOrCity: String? = null,
     val manualCounty: String? = null,
     val manualPostcode: String? = null,
-    val databaseId: Long? = null,
-    val lastUpdatedAt: String? = null,
 ) {
     companion object {
         fun fromEntity(member: OrganisationGoverningBodyMember) =
@@ -30,8 +28,6 @@ data class GoverningBodyMemberDataModel(
                 type = member.type,
                 dateOfBirth = member.dateOfBirth.toKotlinLocalDate(),
                 address = AddressDataModel.fromAddress(member.address),
-                databaseId = member.id,
-                lastUpdatedAt = member.getMostRecentlyUpdated().toString(),
             )
     }
 }

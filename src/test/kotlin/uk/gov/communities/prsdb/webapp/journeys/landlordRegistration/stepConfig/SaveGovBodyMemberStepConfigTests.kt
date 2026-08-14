@@ -52,26 +52,25 @@ class SaveGovBodyMemberStepConfigTests {
     lateinit var manualAddressStep: ManualAddressStep
 
     @Test
-    fun `afterStepIsReached preserves databaseId when editing an existing member`() {
-        val existingMember = createMember(name = "Existing member", databaseId = 42L)
+    fun `afterStepIsReached replaces existing member when editing`() {
+        val existingMember = createMember(name = "Existing member")
         val stepConfig = setupStepConfig()
         whenever(mockState.editingGovBodyMemberId).thenReturn(1)
-        whenever(mockState.editingGovBodyMember).thenReturn(existingMember)
+
         whenever(mockState.governingBodyMembersMap).thenReturn(mapOf(1 to existingMember))
 
         stepConfig.afterStepIsReached(mockState)
 
         val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
         verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
-        assertEquals(42L, updatedMapCaptor.firstValue[1]?.databaseId)
+        assertEquals(1, updatedMapCaptor.firstValue.size)
         verify(mockState).editingGovBodyMemberId = null
     }
 
     @Test
-    fun `afterStepIsReached leaves databaseId null when adding a new member`() {
+    fun `afterStepIsReached adds new member when not editing`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.editingGovBodyMemberId).thenReturn(null)
-        whenever(mockState.editingGovBodyMember).thenReturn(null)
         whenever(mockState.governingBodyMembersMap).thenReturn(emptyMap())
         whenever(mockState.nextGoverningBodyMemberId).thenReturn(3)
 
@@ -79,7 +78,8 @@ class SaveGovBodyMemberStepConfigTests {
 
         val updatedMapCaptor = argumentCaptor<Map<Int, GoverningBodyMemberDataModel>>()
         verify(mockState).governingBodyMembersMap = updatedMapCaptor.capture()
-        assertEquals(null, updatedMapCaptor.firstValue[3]?.databaseId)
+        assertEquals(1, updatedMapCaptor.firstValue.size)
+        assert(3 in updatedMapCaptor.firstValue)
         verify(mockState).nextGoverningBodyMemberId = 4
         verify(mockState).editingGovBodyMemberId = null
     }
@@ -129,14 +129,11 @@ class SaveGovBodyMemberStepConfigTests {
         return stepConfig
     }
 
-    private fun createMember(
-        name: String,
-        databaseId: Long? = null,
-    ) = GoverningBodyMemberDataModel(
-        name = name,
-        type = GoverningBodyMemberType.DIRECTOR,
-        dateOfBirth = LocalDate(1980, 1, 2),
-        address = AddressDataModel(singleLineAddress = "1 Test Street, Test Town, TT1 1TT", postcode = "TT1 1TT"),
-        databaseId = databaseId,
-    )
+    private fun createMember(name: String) =
+        GoverningBodyMemberDataModel(
+            name = name,
+            type = GoverningBodyMemberType.DIRECTOR,
+            dateOfBirth = LocalDate(1980, 1, 2),
+            address = AddressDataModel(singleLineAddress = "1 Test Street, Test Town, TT1 1TT", postcode = "TT1 1TT"),
+        )
 }
