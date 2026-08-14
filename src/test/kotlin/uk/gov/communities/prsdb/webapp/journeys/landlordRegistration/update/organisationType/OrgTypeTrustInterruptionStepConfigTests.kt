@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
@@ -56,6 +58,13 @@ class OrgTypeTrustInterruptionStepConfigTests {
             val content = stepConfig.getStepSpecificContent(state)
 
             assertEquals("company, charity", content["selectedOrgTypeLabels"])
+        }
+
+        @Test
+        fun `throws when TRUST is in selectedOrgTypes during REMOVING_TRUST`() {
+            val state = stateWith(OrgTypeUpdateRouteMode.REMOVING_TRUST, listOf(OrgType.COMPANY, OrgType.TRUST))
+
+            assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(state) }
         }
     }
 

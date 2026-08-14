@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgMainContactFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgNameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgPhoneNumberFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeFormPageUpdateOrganisationType
 
 @WithOrgLandlordProfile
 class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -152,5 +154,51 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
             assertThat(updatePhonePage.form.getErrorMessage())
                 .containsText("Enter a phone number including the country code for international numbers")
         }
+    }
+
+    @Nested
+    inner class TrustUnchangedCya {
+        @Test
+        fun `CYA page shows organisation type only when trust status is unchanged`(page: Page) {
+            val cyaPage = navigator.skipToUpdateOrgTypeCyaPageTrustUnchanged(listOf(OrgType.CHARITY))
+
+            assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
+            assertThat(cyaPage.leadTrusteeCard).isHidden()
+        }
+
+        @Test
+        fun `Clicking change link on organisation type row navigates to the organisation type page`(page: Page) {
+            val cyaPage = navigator.skipToUpdateOrgTypeCyaPageTrustUnchanged(listOf(OrgType.CHARITY))
+
+            cyaPage.summaryList.organisationTypeRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        }
+    }
+
+    @Nested
+    inner class AddingTrustCya {
+        @Test
+        fun `CYA page shows organisation type and lead trustee details when adding trust`(page: Page) {
+            val cyaPage =
+                navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
+                    trusteeName = LEAD_TRUSTEE_NAME,
+                    trusteeEmail = LEAD_TRUSTEE_EMAIL,
+                    trusteePhone = LEAD_TRUSTEE_PHONE,
+                )
+
+            assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+            assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Trust")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(LEAD_TRUSTEE_NAME)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.dateOfBirthRow.value).containsText("15 June 1980")
+            assertThat(cyaPage.leadTrusteeCard.summaryList.emailRow.value).containsText(LEAD_TRUSTEE_EMAIL)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.phoneRow.value).containsText(LEAD_TRUSTEE_PHONE)
+            assertThat(cyaPage.leadTrusteeCard.summaryList.addressRow.value).containsText("1 Example Street")
+        }
+    }
+
+    companion object {
+        private const val LEAD_TRUSTEE_NAME = "Test Lead Trustee Name"
+        private const val LEAD_TRUSTEE_EMAIL = "trustee@test.com"
+        private const val LEAD_TRUSTEE_PHONE = "07123456789"
     }
 }
