@@ -78,7 +78,25 @@ class Address() : ModifiableAuditableEntity() {
 
     fun getSelectedAddress(): String = if (uprn == null) MANUAL_ADDRESS_CHOSEN else singleLineAddress
 
-    fun toMultiLineAddress(): String = AddressDataModel.fromAddress(this).toMultiLineAddress()
+    fun toMultiLineAddress(): String =
+        if (hasAddressComponents()) {
+            buildMultiLineAddressFromComponents()
+        } else {
+            singleLineAddress.replace(", ", "\n")
+        }
+
+    private fun hasAddressComponents(): Boolean = streetName != null || buildingName != null || buildingNumber != null
+
+    private fun buildMultiLineAddressFromComponents(): String =
+        listOfNotNull(
+            organisation,
+            subBuilding,
+            listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
+            buildingName,
+            locality,
+            townName,
+            postcode,
+        ).joinToString("\n")
 
     companion object {
         const val SINGLE_LINE_ADDRESS_LENGTH = 1000
