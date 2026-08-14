@@ -21,8 +21,6 @@ class OrgTypeTrustInterruptionStepConfig : AbstractRequestableStepConfig<Complet
                 .getFormModelFromState(state)
                 .getSelectedOrgTypes()
 
-        if (selectedOrgTypes.contains(OrgType.TRUST)) throw PrsdbWebException("Attempting to show Trust on non-trust interruption page")
-
         return mapOf("selectedOrgTypeLabelKeys" to selectedOrgTypes.map { orgTypeToLabelKey(it) })
     }
 
