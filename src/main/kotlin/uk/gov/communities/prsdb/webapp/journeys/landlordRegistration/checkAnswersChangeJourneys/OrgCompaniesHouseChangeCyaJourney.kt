@@ -52,6 +52,7 @@ fun <T : LandlordRegistrationState> JourneyBuilder<T>.orgCompaniesHouseChangeCya
                 orgIsRegisteredCompanyStep = journey.orgLandlordRegistrationTask.companiesHouseTask.orgIsRegisteredCompanyStep,
                 orgCompanyNumberStep = journey.orgLandlordRegistrationTask.companiesHouseTask.orgCompanyNumberStep,
                 orgGovBodyState = journey.orgLandlordRegistrationTask.orgGovBodyTask,
+                orgCompaniesHouseUpdateRoutingStep = journey.orgCompaniesHouseUpdateRoutingStep,
             )
         }
     }

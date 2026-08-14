@@ -6,15 +6,39 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgTypeFormModel
+import java.util.Locale
 
 class OrgTypeTrustInterruptionStepConfigTests {
-    private val stepConfig = OrgTypeTrustInterruptionStepConfig()
+    private val mockMessageSource =
+        mock<MessageSource> {
+            on {
+                getMessage(
+                    eq("registerAsALandlord.orgTypeTrustInterruption.orgType.company"),
+                    eq(null),
+                    eq(Locale.getDefault()),
+                )
+            } doReturn
+                "company"
+            on {
+                getMessage(
+                    eq("registerAsALandlord.orgTypeTrustInterruption.orgType.charity"),
+                    eq(null),
+                    eq(Locale.getDefault()),
+                )
+            } doReturn
+                "charity"
+            on { getMessage(eq("registerAsALandlord.orgTypeTrustInterruption.orgType.none"), eq(null), eq(Locale.getDefault())) } doReturn
+                "none of these"
+        }
+    private val stepConfig = OrgTypeTrustInterruptionStepConfig(mockMessageSource)
 
     @Nested
     inner class GetStepSpecificContentTests {
@@ -28,20 +52,12 @@ class OrgTypeTrustInterruptionStepConfigTests {
         }
 
         @Test
-        @Suppress("UNCHECKED_CAST")
-        fun `includes selectedOrgTypeLabelKeys excluding trust when removing trust`() {
+        fun `includes selectedOrgTypeLabels excluding trust when removing trust`() {
             val state = stateWith(OrgTypeUpdateRouteMode.REMOVING_TRUST, listOf(OrgType.COMPANY, OrgType.CHARITY))
 
             val content = stepConfig.getStepSpecificContent(state)
 
-            val labelKeys = content["selectedOrgTypeLabelKeys"] as List<String>
-            assertEquals(
-                listOf(
-                    "registerAsALandlord.orgTypeTrustInterruption.orgType.company",
-                    "registerAsALandlord.orgTypeTrustInterruption.orgType.charity",
-                ),
-                labelKeys,
-            )
+            assertEquals("company, charity", content["selectedOrgTypeLabels"])
         }
 
         @Test

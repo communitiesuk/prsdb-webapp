@@ -24,8 +24,8 @@ class UpdateAddressJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
-            configureFirst { backDestination { Destination.ExternalUrl(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE) } }
             configure {
+                backDestination { Destination.ExternalUrl(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE) }
                 withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
             }
             task(journey.addressTask) {
