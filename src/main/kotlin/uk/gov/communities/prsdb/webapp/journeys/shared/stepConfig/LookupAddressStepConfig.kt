@@ -21,7 +21,7 @@ class LookupAddressStepConfig(
             "postcodeHint" to "addressForms.lookupAddress.postcode.hint",
             "houseNameOrNumberLabel" to "addressForms.lookupAddress.houseNameOrNumber.label",
             "houseNameOrNumberHint" to "addressForms.lookupAddress.houseNameOrNumber.hint",
-            "submitButtonText" to "forms.buttons.continue",
+            "submitButtonText" to "forms.buttons.findAddress",
         )
 
     override fun chooseTemplate(state: AddressSearchState) = "forms/lookupAddressForm"

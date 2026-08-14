@@ -743,6 +743,29 @@ class LandlordServiceTests {
     }
 
     @Test
+    fun `updateOrganisationLandlordAddress applies the new address and sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord(address = createAddress("original address"))
+        val newAddress = createAddress("new address")
+        val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
+        whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordAddress(newAddressDataModel)
+
+        assertEquals(newAddress, orgLandlord.address)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation address.",
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun `updateOrganisationLandlordForUser updates the organisation email`() {
         val orgLandlord = createOrgLandlord(email = "old@example.com")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
@@ -781,6 +804,22 @@ class LandlordServiceTests {
                 ),
             ),
         )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser does not send an email when no address is provided`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.name = "Old Org Name"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = "New Org Name"))
+
+        verify(orgUpdateConfirmationSender, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordAddress is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordAddress.hasAnnotation<Transactional>())
     }
 
     @Test

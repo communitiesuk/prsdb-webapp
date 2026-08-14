@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEma
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordPhoneNumberController.Companion.UPDATE_ORG_PHONE_NUMBER_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.OrgLandlordDetailsBasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
@@ -16,12 +17,15 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 class OrgLandlordDetailsPage(
     page: Page,
 ) : OrgLandlordDetailsBasePage(page, LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE) {
     private val organisationNameChangeLink =
         Link(page.locator("a[href='$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}']"))
+    private val organisationAddressChangeLink =
+        Link(page.locator("a[href='$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}']"))
     private val companiesHouseChangeLink =
         Link(page.locator("a[href='$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}']"))
     private val organisationTypeChangeLink =
@@ -34,6 +38,8 @@ class OrgLandlordDetailsPage(
         Link(page.locator("a[href='$UPDATE_ORG_PHONE_NUMBER_ROUTE/${OrgPhoneNumberStep.ROUTE_SEGMENT}']"))
 
     fun clickOrganisationNameChangeLinkAndWait() = organisationNameChangeLink.clickAndWait()
+
+    fun clickOrganisationAddressChangeLinkAndWait() = organisationAddressChangeLink.clickAndWait()
 
     fun clickCompaniesHouseChangeLinkAndWait() = companiesHouseChangeLink.clickAndWait()
 
