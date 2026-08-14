@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
@@ -98,6 +101,30 @@ class DeregisterStepConfigTests {
             ),
             emailCaptor.firstValue,
         )
+    }
+
+    @Test
+    fun `afterStepIsReached stores the organisation name in the session`() {
+        val stepConfig = setupStepConfig()
+        val organisationName = "Keystone Living Group"
+        val orgLandlord = MockLandlordData.createOrgLandlord(name = organisationName)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockLandlordDeregistrationService).addDeregisteredOrganisationNameToSession(organisationName)
+    }
+
+    @Test
+    fun `afterStepIsReached does not store the organisation name if deregistration fails`() {
+        val stepConfig = setupStepConfig()
+        val orgLandlord = setupMocks()
+        whenever(mockLandlordDeregistrationService.deregisterOrganisationalLandlord(orgLandlord))
+            .thenThrow(RuntimeException("deregistration failed"))
+
+        assertThrows<RuntimeException> { stepConfig.afterStepIsReached(mockState) }
+
+        verify(mockLandlordDeregistrationService, never()).addDeregisteredOrganisationNameToSession(any())
     }
 
     private fun setupMocks() =

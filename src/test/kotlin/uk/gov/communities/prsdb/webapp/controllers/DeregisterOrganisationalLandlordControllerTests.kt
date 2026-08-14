@@ -15,6 +15,8 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.OrganisationalLandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.organisationalLandlordDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @WebMvcTest(DeregisterOrganisationalLandlordController::class)
 class DeregisterOrganisationalLandlordControllerTests(
@@ -25,6 +27,12 @@ class DeregisterOrganisationalLandlordControllerTests(
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
+
+    @MockitoBean
+    private lateinit var landlordDeregistrationService: LandlordDeregistrationService
+
+    @MockitoBean
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @Test
     fun `getJourneyStep returns a redirect for an unauthenticated user`() {
@@ -96,10 +104,58 @@ class DeregisterOrganisationalLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation returns 200 for an authenticated user without the landlord role`() {
+        whenever(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
+            .thenReturn(true)
+        whenever(landlordDeregistrationService.getDeregisteredOrganisationNameFromSession())
+            .thenReturn("Keystone Living Group")
+
         mvc
             .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation returns the confirmation view with the organisation name`() {
+        whenever(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
+            .thenReturn(true)
+        whenever(landlordDeregistrationService.getDeregisteredOrganisationNameFromSession())
+            .thenReturn("Keystone Living Group")
+
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                view { name("deregisterOrganisationalLandlordConfirmation") }
+                model { attribute("organisationName", "Keystone Living Group") }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation returns 404 when no organisation was deregistered in this session`() {
+        whenever(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
+            .thenReturn(false)
+
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation returns 500 when the current user still has a landlord`() {
+        whenever(landlordDeregistrationService.hasOrganisationDeregisteredInThisSession())
+            .thenReturn(true)
+        whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(true)
+
+        mvc
+            .get("$ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isInternalServerError() }
             }
     }
 

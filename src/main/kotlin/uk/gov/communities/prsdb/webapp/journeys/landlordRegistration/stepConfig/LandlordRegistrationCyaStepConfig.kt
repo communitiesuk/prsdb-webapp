@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
-import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
@@ -44,6 +44,7 @@ class LandlordRegistrationCyaStepConfig(
     private val securityContextService: SecurityContextService,
     private val featureFlagManager: FeatureFlagManager,
     private val messageSource: MessageSource,
+    private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) =
         if (isOrgLandlord(state)) {
@@ -438,29 +439,13 @@ class LandlordRegistrationCyaStepConfig(
                 add(charityNumberRow(state, charityRegulator))
             }
 
-            val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
-            add(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "registerAsALandlord.orgCheckAnswers.landlordDetails.registeredWithCompaniesHouse",
-                    registeredWithCompaniesHouse,
-                    Destination.VisitableStep(
-                        org.companiesHouseTask.orgIsRegisteredCompanyStep,
-                        state.getCyaJourneyId(org.companiesHouseTask.orgIsRegisteredCompanyStep),
-                    ),
+            addAll(
+                orgCompaniesHouseDetailsHelper.getCompanyDetailsRows(
+                    state,
+                    org.companiesHouseTask.orgIsRegisteredCompanyStep,
+                    org.companiesHouseTask.orgCompanyNumberStep,
                 ),
             )
-            if (registeredWithCompaniesHouse) {
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "registerAsALandlord.orgCheckAnswers.landlordDetails.companiesHouseNumber",
-                        org.companiesHouseTask.orgCompanyNumberStep.formModel.notNullValue(OrgCompanyNumberFormModel::companyNumber),
-                        Destination.VisitableStep(
-                            org.companiesHouseTask.orgCompanyNumberStep,
-                            state.getCyaJourneyId(org.companiesHouseTask.orgCompanyNumberStep),
-                        ),
-                    ),
-                )
-            }
         }
     }
 
@@ -555,66 +540,11 @@ class LandlordRegistrationCyaStepConfig(
         )
     }
 
-    private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> {
-        val members = state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.governingBodyMembersMap ?: emptyMap()
-        return members
-            .toList()
-            .sortedBy { it.first }
-            .mapIndexed { displayIndex, (_, member) ->
-                SummaryCardViewModel(
-                    title = memberCardTitleKey(member.type),
-                    cardNumber = (displayIndex + 1).toString(),
-                    summaryList =
-                        listOf(
-                            SummaryListRowViewModel.forCheckYourAnswersPage(
-                                "registerAsALandlord.orgCheckAnswers.governingBody.role",
-                                memberRoleKey(member.type),
-                                Destination.Nowhere(),
-                            ),
-                            SummaryListRowViewModel.forCheckYourAnswersPage(
-                                "registerAsALandlord.orgCheckAnswers.governingBody.name",
-                                member.name,
-                                Destination.Nowhere(),
-                            ),
-                            SummaryListRowViewModel.forCheckYourAnswersPage(
-                                "registerAsALandlord.orgCheckAnswers.governingBody.dateOfBirth",
-                                member.dateOfBirth,
-                                Destination.Nowhere(),
-                            ),
-                            SummaryListRowViewModel.forCheckYourAnswersPage(
-                                "registerAsALandlord.orgCheckAnswers.governingBody.address",
-                                member.address.toMultiLineAddress().split("\n"),
-                                Destination.Nowhere(),
-                            ),
-                        ),
-                    actions =
-                        SummaryCardActionViewModel.changeAction(
-                            Destination.VisitableStep(
-                                state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
-                                state.getCyaJourneyId(
-                                    state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep,
-                                ),
-                            ),
-                        ),
-                )
-            }
-    }
-
-    private fun memberCardTitleKey(type: GoverningBodyMemberType) =
-        when (type) {
-            GoverningBodyMemberType.DIRECTOR -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.director"
-            GoverningBodyMemberType.TRUSTEE -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.trustee"
-            GoverningBodyMemberType.PARTNER -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.partner"
-            GoverningBodyMemberType.OTHER -> "registerAsALandlord.orgCheckAnswers.governingBody.memberCardTitle.other"
-        }
-
-    private fun memberRoleKey(type: GoverningBodyMemberType) =
-        when (type) {
-            GoverningBodyMemberType.DIRECTOR -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.director"
-            GoverningBodyMemberType.TRUSTEE -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.trustee"
-            GoverningBodyMemberType.PARTNER -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.partner"
-            GoverningBodyMemberType.OTHER -> "registerAsALandlord.orgGovBodyWhoToProvide.radios.otherMember"
-        }
+    private fun getGovBodyMemberCards(state: LandlordRegistrationState): List<SummaryCardViewModel> =
+        orgCompaniesHouseDetailsHelper.getGovBodyMemberCards(
+            state,
+            state.orgLandlordRegistrationTask.orgGovBodyTask.orgGovBodyMembersTask,
+        )
 
     private fun getMainContactCard(state: LandlordRegistrationState): SummaryCardViewModel {
         val org = state.orgLandlordRegistrationTask

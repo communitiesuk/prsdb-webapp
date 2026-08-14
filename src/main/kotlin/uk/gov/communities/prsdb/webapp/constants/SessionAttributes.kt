@@ -43,3 +43,5 @@ const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordI
 const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
 
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
+
+const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
