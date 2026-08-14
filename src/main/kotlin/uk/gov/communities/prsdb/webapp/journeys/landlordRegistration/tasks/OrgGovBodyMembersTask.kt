@@ -56,6 +56,7 @@ class OrgGovBodyMembersTask(
         set(value) {
             dependencies.listState.editingGovBodyMemberId = value
         }
+    override val allowRemovingLastMember: Boolean get() = dependencies.allowRemovingLastMember
 
     override fun makeSubJourney(state: OrgGovBodyMembersState) =
         subJourney(state) {

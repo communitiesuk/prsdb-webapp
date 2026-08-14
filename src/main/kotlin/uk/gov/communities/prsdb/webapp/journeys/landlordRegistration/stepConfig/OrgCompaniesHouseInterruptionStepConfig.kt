@@ -4,13 +4,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.GovBodyDetailsModeState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse.OrgCompaniesHouseUpdateState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 
-// TODO PDJB-1447: replace this placeholder with the real Companies House change interruption page(s).
 @JourneyFrameworkComponent
 class OrgCompaniesHouseInterruptionStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, OrgCompaniesHouseUpdateState>() {
@@ -26,13 +26,17 @@ class OrgCompaniesHouseInterruptionStepConfig :
         return this
     }
 
-    override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState) =
-        mapOf(
-            "title" to "registerAsALandlord.title",
-            "todoComment" to "TODO PDJB-1447: Companies House change interruption page",
-        )
+    override fun getStepSpecificContent(state: OrgCompaniesHouseUpdateState) = mapOf("title" to "registerAsALandlord.title")
 
-    override fun chooseTemplate(state: OrgCompaniesHouseUpdateState) = "forms/todo"
+    override fun chooseTemplate(state: OrgCompaniesHouseUpdateState): String {
+        val isChangingToCompany =
+            state.orgCompaniesHouseUpdateRoutingStep.outcome == OrgCompaniesHouseUpdateRouteMode.CHANGED_TO_COMPANY
+        return if (isChangingToCompany) {
+            "forms/orgCompaniesHouseChangingToCompanyInterruptionForm"
+        } else {
+            "forms/orgCompaniesHouseChangingToNonCompanyInterruptionForm"
+        }
+    }
 
     override fun afterStepDataIsAdded(state: OrgCompaniesHouseUpdateState) {
         // When changing to a non-company, this interruption replaces the outer governing body task's first step, so
