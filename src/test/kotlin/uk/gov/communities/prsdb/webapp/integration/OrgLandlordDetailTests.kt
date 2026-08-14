@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
@@ -54,6 +55,16 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
+    fun `the registered properties tab shows the landlord properties table`(page: Page) {
+        val detailsPage = navigator.goToOrgLandlordDetails()
+
+        detailsPage.tabs.goToRegisteredProperties()
+
+        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
+        assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
+    }
+
+    @Test
     fun `the organisation details tab shows the organisation's registration and organisation type details`(page: Page) {
         val detailsPage = navigator.goToOrgLandlordDetails()
         val summaryList = detailsPage.organisationDetailsSummaryList
@@ -64,9 +75,16 @@ class OrgLandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql"
         assertThat(summaryList.addressRow.value).containsText("FA1 1AE")
         assertThat(summaryList.emailRow.value).containsText("local-org-landlord@example.com")
         assertThat(summaryList.phoneRow.value).containsText("07111111111")
-        assertThat(summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(summaryList.organisationTypeRow.value).hasText("Company")
         assertThat(summaryList.registeredCharityRow.value).containsText("No")
         assertThat(summaryList.registeredWithCompaniesHouseRow.value).containsText("Yes")
         assertThat(summaryList.companyNumberRow.value).containsText("12345678")
+        // The Companies House rows form a single row section, so the first has no bottom divider
+        assertThat(summaryList.registeredWithCompaniesHouseRow)
+            .hasClass(Pattern.compile(".*govuk-summary-list__row--no-border.*"))
+        // The organisation is not a charity, so its charity section is closed by a divider
+        assertThat(summaryList.registeredCharityRow)
+            .not()
+            .hasClass(Pattern.compile(".*govuk-summary-list__row--no-border.*"))
     }
 }

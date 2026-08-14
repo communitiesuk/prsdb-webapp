@@ -14,13 +14,18 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.gove
 class OrganisationalLandlordContactsViewModel(
     orgLandlord: OrganisationalLandlord,
     governingBodyMembers: List<OrganisationGoverningBodyMember>,
+    withChangeLinks: Boolean = true,
 ) {
     val mainContactCard: SummaryCardViewModel =
         SummaryCardViewModel(
             title = "landlordDetails.org.mainContactHeading",
             actions =
                 SummaryCardActionViewModel.changeAction(
-                    "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}",
+                    if (withChangeLinks) {
+                        "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}"
+                    } else {
+                        null
+                    },
                 ),
             summaryList =
                 mutableListOf<SummaryListRowViewModel>()
@@ -39,7 +44,11 @@ class OrganisationalLandlordContactsViewModel(
                 title = "landlordDetails.org.leadTrusteeHeading",
                 actions =
                     SummaryCardActionViewModel.changeAction(
-                        "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
+                        if (withChangeLinks) {
+                            "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}"
+                        } else {
+                            null
+                        },
                     ),
                 summaryList =
                     mutableListOf<SummaryListRowViewModel>()
@@ -60,6 +69,8 @@ class OrganisationalLandlordContactsViewModel(
 
     val governingBodyMembersLinkUrl: String =
         "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${InitialiseGovBodyMembersForGovBodyUpdateStep.ROUTE_SEGMENT}"
+
+    val showGoverningBodyMembersLink: Boolean = orgLandlord.hasGoverningBody && withChangeLinks
 
     val governingBodyMemberCards: List<SummaryCardViewModel> =
         governingBodyMembers.mapIndexed { index, member ->

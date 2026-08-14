@@ -53,17 +53,9 @@ orgCheckAnswers:
     registeredCharity: Registered charity
     charityCommission: Charity commission
     charityNumber: Charity number
-    registeredWithCompaniesHouse: Registered with Companies House
-    companiesHouseNumber: Companies House number
   governingBody:
     heading: Members of the governing body
     leadTrusteeCardTitle: Lead trustee
-    memberCardTitle:
-      director: '{0}. Director'
-      trustee: '{0}. Trustee'
-      partner: '{0}. Partner'
-      other: '{0}. Other'
-    role: Role
     name: Name
     dateOfBirth: Date of birth
     email: Email
@@ -142,6 +134,10 @@ leadTrusteePhone:
 orgType:
   fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
+  company: Company
+  charity: Charity
+  trust: Trust
+  none: Other
   checkbox:
     company: Company
     charity: Charity

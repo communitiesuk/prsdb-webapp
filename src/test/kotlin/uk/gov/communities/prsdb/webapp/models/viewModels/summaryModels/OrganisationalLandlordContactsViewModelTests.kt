@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGoverningBodyController
@@ -135,6 +136,44 @@ class OrganisationalLandlordContactsViewModelTests {
             )
         assertEquals(false, viewModel.showGoverningBody)
         assertEquals(0, viewModel.governingBodyMemberCards.size)
+    }
+
+    @Test
+    fun `main contact and lead trustee cards have no actions when change links are disabled`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isTrust = true, leadTrusteeName = "Anita Locke")
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList(), withChangeLinks = false)
+
+        assertTrue(viewModel.mainContactCard.actions.isNullOrEmpty())
+        assertTrue(viewModel.leadTrusteeCard!!.actions.isNullOrEmpty())
+    }
+
+    @Test
+    fun `governing body members link is hidden when change links are disabled but member cards remain`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+        val members =
+            listOf(
+                OrganisationGoverningBodyMember(
+                    orgLandlord,
+                    GoverningBodyMemberType.DIRECTOR,
+                    "Anita Locke",
+                    LocalDate.of(1874, 3, 18),
+                    address,
+                ),
+            )
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, members, withChangeLinks = false)
+
+        assertEquals(false, viewModel.showGoverningBodyMembersLink)
+        assertEquals(true, viewModel.showGoverningBody)
+        assertEquals(1, viewModel.governingBodyMemberCards.size)
+    }
+
+    @Test
+    fun `governing body members link is shown by default for an org landlord with a governing body`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+
+        assertEquals(true, OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).showGoverningBodyMembersLink)
     }
 
     @Test

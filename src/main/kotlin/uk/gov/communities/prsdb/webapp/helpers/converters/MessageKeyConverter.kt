@@ -65,10 +65,10 @@ class MessageKeyConverter {
 
         private fun convertOrgType(orgType: OrgType): String =
             when (orgType) {
-                OrgType.COMPANY -> "registerAsALandlord.orgType.checkbox.company"
-                OrgType.CHARITY -> "registerAsALandlord.orgType.checkbox.charity"
-                OrgType.TRUST -> "registerAsALandlord.orgType.checkbox.trust"
-                OrgType.NONE -> "registerAsALandlord.orgType.checkbox.none"
+                OrgType.COMPANY -> "registerAsALandlord.orgType.company"
+                OrgType.CHARITY -> "registerAsALandlord.orgType.charity"
+                OrgType.TRUST -> "registerAsALandlord.orgType.trust"
+                OrgType.NONE -> "registerAsALandlord.orgType.none"
             }
 
         private fun convertCharityRegulator(charityRegulator: CharityRegulator): String =
@@ -76,7 +76,7 @@ class MessageKeyConverter {
                 CharityRegulator.ENGLAND_AND_WALES -> "forms.orgCharityRegisteredWith.radios.option.englandAndWales"
                 CharityRegulator.NORTHERN_IRELAND -> "forms.orgCharityRegisteredWith.radios.option.northernIreland"
                 CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
-                CharityRegulator.NONE -> "forms.orgCharityRegisteredWith.radios.option.none"
+                CharityRegulator.NONE -> "commonText.other"
             }
 
         private fun convertBillsIncluded(billsIncluded: BillsIncluded): String =

@@ -16,9 +16,13 @@ organisational:
   confirmation:
     banner:
       heading: Organisation deleted
-      body: No longer registered as a landlord
     paragraph:
-      one: 'TODO: PDJB-1484 - Organisation deregistration confirmation content'
+      one: We have sent a confirmation email to all team members.
+    whatHappensNext:
+      paragraph:
+        one: '{0,,organisationName} is no longer registered as a landlord.'
+        two: Your organisation and property information has been deleted.
+        three: You can no longer access the service on behalf of your organisation.
 noProperties:
   confirmation:
     banner:
