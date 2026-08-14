@@ -31,6 +31,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import uk.gov.service.notify.NotificationClient
+import java.net.URI
+import java.util.function.Predicate
 import kotlin.reflect.full.isSubclassOf
 
 @Import(TestcontainersConfiguration::class)
@@ -135,6 +137,27 @@ abstract class IntegrationTest {
         navigator = Navigator(page, port)
     }
 
+    /**
+     * Every page embeds an analytics script from an external host (see PLAUSIBLE_URL), which is the only
+     * external origin the content security policy allows. Playwright waits for the `load` event, and that
+     * does not fire until every subresource has settled, so a request that hangs rather than failing fast
+     * stalls whichever test is mid-navigation until it times out. Tests only ever talk to the application
+     * under test, so everything else is aborted to keep them independent of the network.
+     *
+     * The route is registered on the browser context so that pages created later, via
+     * [createPageAndNavigator], are covered too.
+     */
+    @BeforeEach
+    fun blockRequestsToExternalHosts(browserContext: BrowserContext) {
+        browserContext.route(Predicate { url: String -> isExternalUrl(url) }) { route -> route.abort() }
+    }
+
+    private fun isExternalUrl(url: String): Boolean {
+        // Anything that is not a network request, such as about:blank or a data: URI, has no host to compare
+        val host = runCatching { URI(url).host }.getOrNull() ?: return false
+        return host !in LOCAL_HOSTS
+    }
+
     @AfterEach
     fun resetFeatureFlags() {
         // Reset feature flags to their original configuration from application.yml
@@ -160,5 +183,9 @@ abstract class IntegrationTest {
         val page = browserContext.newPage()
         val navigator = Navigator(page, port)
         return Pair(page, navigator)
+    }
+
+    companion object {
+        private val LOCAL_HOSTS = setOf("localhost", "127.0.0.1")
     }
 }
