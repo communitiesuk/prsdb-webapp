@@ -743,21 +743,6 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordForUser applies the new address to the entity`() {
-        val orgLandlord = createOrgLandlord(address = createAddress("original address"))
-        val newAddress = createAddress("new address")
-        val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
-        whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
-        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
-
-        landlordService.updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(address = newAddressDataModel),
-        )
-
-        assertEquals(newAddress, orgLandlord.address)
-    }
-
-    @Test
     fun `updateOrganisationLandlordAddress applies the new address and sends a confirmation email`() {
         val orgLandlord = createOrgLandlord(address = createAddress("original address"))
         val newAddress = createAddress("new address")
