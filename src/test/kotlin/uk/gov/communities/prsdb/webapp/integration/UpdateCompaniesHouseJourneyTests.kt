@@ -53,6 +53,8 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         companyNumberPage.submitCompanyNumber("12345678")
 
         val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
+        assertThat(checkAnswersPage.companyDetails.registeredWithCompaniesHouseRow.value).containsText("Yes")
+        assertThat(checkAnswersPage.companyDetails.companiesHouseNumberRow.value).containsText("12345678")
         checkAnswersPage.confirmAndSubmit()
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
@@ -125,17 +127,13 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `The check answers page shows the company details rows with change links`(page: Page) {
-        val checkAnswersPage = navigateToCompanyCheckAnswers(page, companyNumber = "12345678")
-
-        assertThat(checkAnswersPage.companyDetails.registeredWithCompaniesHouseRow.value).containsText("Yes")
-        assertThat(checkAnswersPage.companyDetails.companiesHouseNumberRow.value).containsText("12345678")
-    }
-
-    @Test
     fun `Changing the company number from the check answers page updates the record`(page: Page) {
-        val checkAnswersPage = navigateToCompanyCheckAnswers(page, companyNumber = "12345678")
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
+        assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class).submitYes()
+        assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class).submitCompanyNumber("12345678")
 
+        val checkAnswersPage = assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
         checkAnswersPage.companyDetails.companiesHouseNumberRow.clickFirstActionLinkAndWait()
 
         val companyNumberChangePage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
@@ -147,27 +145,5 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val updatedDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(updatedDetailsPage.mainContent).containsText("87654321")
-    }
-
-    @Test
-    fun `Changing the registration answer from the check answers page re-runs the companies house questions`(page: Page) {
-        val checkAnswersPage = navigateToCompanyCheckAnswers(page, companyNumber = "12345678")
-
-        checkAnswersPage.companyDetails.registeredWithCompaniesHouseRow.clickFirstActionLinkAndWait()
-
-        assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class)
-    }
-
-    private fun navigateToCompanyCheckAnswers(
-        page: Page,
-        companyNumber: String,
-    ): CompaniesHouseUpdateCheckAnswersPage {
-        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
-        orgLandlordDetailsPage.clickCompaniesHouseChangeLinkAndWait()
-
-        assertPageIs(page, OrgIsRegisteredCompanyFormPageUpdateCompaniesHouse::class).submitYes()
-        assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class).submitCompanyNumber(companyNumber)
-
-        return assertPageIs(page, CompaniesHouseUpdateCheckAnswersPage::class)
     }
 }
