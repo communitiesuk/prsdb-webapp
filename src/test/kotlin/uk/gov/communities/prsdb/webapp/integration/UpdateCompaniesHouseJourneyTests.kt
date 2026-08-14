@@ -69,6 +69,8 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         isRegisteredCompanyPage.submitNo()
 
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
+        assertThat(interruptionPage.heading).containsText("Your new answer affects other sections of your landlord record")
+        assertThat(interruptionPage.submitButton).containsText("Continue to other sections")
         interruptionPage.submit()
 
         assertTrue(page.url().contains(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT))
@@ -112,6 +114,8 @@ class UpdateCompaniesHouseJourneyTests : IntegrationTestWithMutableData("data-lo
         isRegisteredCompanyPage.submitYes()
 
         val interruptionPage = assertPageIs(page, CompaniesHouseUpdateInterruptionPage::class)
+        assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+        assertThat(interruptionPage.submitButton).containsText("Continue with the change")
         interruptionPage.submit()
 
         val companyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageUpdateCompaniesHouse::class)
