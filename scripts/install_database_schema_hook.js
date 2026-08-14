@@ -6,24 +6,27 @@ const path = require('node:path');
 
 const repositoryRoot = path.resolve(__dirname, '..');
 const startMarker = '######## DATABASE-SCHEMA-HOOK START ########';
+const endMarker = '####### DATABASE-SCHEMA-HOOK END #######';
 const hookContent = `${startMarker}
 
-echo "Checking database schema diagram migration manifest"
-
-node scripts/generate_database_schema.js --check-manifest --staged
-DATABASE_SCHEMA_EXIT_CODE=$?
-
-if [ $DATABASE_SCHEMA_EXIT_CODE -ne 0 ]; then
-    exit $DATABASE_SCHEMA_EXIT_CODE
+if ! git diff --cached --quiet --diff-filter=ACMRD -- src/main/resources/db/migrations; then
+    echo "Staged database migrations changed; regenerating the database schema diagram"
+    node scripts/generate_database_schema.js --staged-migrations || exit $?
+    git add docs/database-schema.mmd
 fi
 
-echo "Completed database schema diagram migration manifest check"
-
-####### DATABASE-SCHEMA-HOOK END #######`;
+${endMarker}`;
 
 function insertHook(existingContent) {
     if (existingContent.includes(startMarker)) {
-        return existingContent;
+        const startIndex = existingContent.indexOf(startMarker);
+        const endIndex = existingContent.indexOf(endMarker, startIndex);
+        if (endIndex === -1) {
+            throw new Error(`Existing database schema hook is missing its end marker: ${endMarker}`);
+        }
+        return existingContent.slice(0, startIndex)
+            + hookContent
+            + existingContent.slice(endIndex + endMarker.length);
     }
     const shebangMatch = existingContent.match(/^#![^\n]*(?:\n|$)/);
     if (shebangMatch) {

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const childProcess = require('node:child_process');
-const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -10,25 +9,22 @@ const migrationsDirectory = path.join(repositoryRoot, 'src/main/resources/db/mig
 
 function parseArguments(argumentsList) {
     const options = {
-        checkManifest: false,
         composeFile: 'docker-compose.local.yml',
         database: 'prsdblocal',
         output: 'docs/database-schema.mmd',
         schema: 'public',
         service: 'postgres',
+        useStagedMigrations: false,
         user: 'postgres',
         useHostPsql: false,
-        useStagedFiles: false,
     };
 
     for (let index = 0; index < argumentsList.length; index += 1) {
         const argument = argumentsList[index];
         if (argument === '--host-psql') {
             options.useHostPsql = true;
-        } else if (argument === '--check-manifest') {
-            options.checkManifest = true;
-        } else if (argument === '--staged') {
-            options.useStagedFiles = true;
+        } else if (argument === '--staged-migrations') {
+            options.useStagedMigrations = true;
         } else if (argument === '--help' || argument === '-h') {
             options.help = true;
         } else {
@@ -50,10 +46,6 @@ function parseArguments(argumentsList) {
             }
             options[optionName] = argumentsList[index];
         }
-    }
-
-    if (options.useStagedFiles && !options.checkManifest) {
-        throw new Error('--staged can only be used with --check-manifest');
     }
 
     return options;
@@ -206,112 +198,26 @@ function listFilesystemMigrations(directory = migrationsDirectory) {
         .sort(compareNames);
 }
 
-function sha256File(filePath) {
-    return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+function parseGitMigrationPaths(output) {
+    return output.split('\0')
+        .filter(Boolean)
+        .filter(filePath => path.dirname(filePath) === 'src/main/resources/db/migrations')
+        .map(filePath => path.basename(filePath))
+        .filter(fileName => /^V[^/]*\.sql$/.test(fileName))
+        .sort(compareNames);
 }
 
-function sha256Content(content) {
-    return crypto.createHash('sha256').update(content).digest('hex');
-}
-
-function createMigrationFiles(directory = migrationsDirectory) {
-    return listFilesystemMigrations(directory).map(script => ({
-        script,
-        sha256: sha256File(path.join(directory, script)),
-    }));
-}
-
-function runGit(argumentsList, encoding = 'utf8') {
-    const result = childProcess.spawnSync('git', argumentsList, {
-        cwd: repositoryRoot,
-        encoding,
-        maxBuffer: 10 * 1024 * 1024,
-    });
-    if (result.error) {
-        throw new Error(`Could not run git: ${result.error.message}`);
+function listStagedMigrations() {
+    const result = childProcess.spawnSync(
+        'git',
+        ['ls-files', '--cached', '--null', '--', 'src/main/resources/db/migrations'],
+        { cwd: repositoryRoot, encoding: 'utf8' },
+    );
+    if (result.error || result.status !== 0) {
+        const message = result.error?.message || result.stderr.trim();
+        throw new Error(`Could not read staged migrations from Git: ${message}`);
     }
-    if (result.status !== 0) {
-        throw new Error(result.stderr.toString().trim() || `git exited with status ${result.status}`);
-    }
-    return result.stdout;
-}
-
-function readStagedFile(relativePath) {
-    return runGit(['show', `:${relativePath}`], null);
-}
-
-function createStagedMigrationFiles() {
-    const migrationPaths = runGit([
-        'ls-files',
-        '--cached',
-        '--',
-        'src/main/resources/db/migrations/V*.sql',
-    ]).trim().split('\n').filter(Boolean).sort(compareNames);
-    return migrationPaths.map(migrationPath => ({
-        script: path.posix.basename(migrationPath),
-        sha256: sha256Content(readStagedFile(migrationPath)),
-    }));
-}
-
-function createMigrationManifest(migrations, schema, generatorSha256) {
-    return {
-        formatVersion: 1,
-        schema,
-        generatorSha256,
-        migrations: [...migrations]
-            .map(migration => ({ script: migration.script, sha256: migration.sha256 }))
-            .sort((left, right) => compareNames(left.script, right.script)),
-    };
-}
-
-function migrationManifestComments(manifest) {
-    const header = {
-        formatVersion: manifest.formatVersion,
-        schema: manifest.schema,
-        generatorSha256: manifest.generatorSha256,
-    };
-    return [
-        `%% database-schema-manifest: ${JSON.stringify(header)}`,
-        ...manifest.migrations.map(migration =>
-            `%% database-schema-migration: ${JSON.stringify(migration)}`),
-    ];
-}
-
-function hasMatchingMigrationManifest(content, expectedManifest) {
-    const manifestPrefix = '%% database-schema-manifest: ';
-    const migrationPrefix = '%% database-schema-migration: ';
-    const lines = content.split('\n');
-
-    try {
-        const headerLines = lines.filter(line => line.startsWith(manifestPrefix));
-        if (headerLines.length !== 1) {
-            return false;
-        }
-        const header = JSON.parse(headerLines[0].slice(manifestPrefix.length));
-        const migrations = lines
-            .filter(line => line.startsWith(migrationPrefix))
-            .map(line => JSON.parse(line.slice(migrationPrefix.length)));
-        const actualManifest = createMigrationManifest(
-            migrations,
-            header.schema,
-            header.generatorSha256,
-        );
-        actualManifest.formatVersion = header.formatVersion;
-        return JSON.stringify(actualManifest) === JSON.stringify(expectedManifest);
-    } catch {
-        return false;
-    }
-}
-
-function assertMatchingMigrationManifest(content, expectedManifest) {
-    if (!hasMatchingMigrationManifest(content, expectedManifest)) {
-        throw new Error(
-            'The database schema diagram migration manifest is out of date. Commit blocked.\n\n'
-            + 'Start the local application, regenerate the diagram, and stage it:\n'
-            + '  node scripts/generate_database_schema.js\n'
-            + '  git add docs/database-schema.mmd',
-        );
-    }
+    return parseGitMigrationPaths(result.stdout);
 }
 
 function assertMigrationsAreCurrent(filesystemMigrations, databaseMigrations) {
@@ -336,10 +242,10 @@ function assertMigrationsAreCurrent(filesystemMigrations, databaseMigrations) {
         details.push(`Missing or unsuccessful database migrations:\n${missingMigrations.map(name => `  ${name}`).join('\n')}`);
     }
     if (unexpectedMigrations.length > 0) {
-        details.push(`Database migrations not present in the filesystem:\n${unexpectedMigrations.map(name => `  ${name}`).join('\n')}`);
+        details.push(`Database migrations not present in the expected migration set:\n${unexpectedMigrations.map(name => `  ${name}`).join('\n')}`);
     }
     throw new Error(
-        'The running database does not match the filesystem migrations. The Mermaid file was not changed.\n\n'
+        'The running database does not match the expected migrations. The Mermaid file was not changed.\n\n'
         + `${details.join('\n\n')}\n\n`
         + 'Update the schema by running the IntelliJ "local" configuration, or:\n'
         + '  ./gradlew flywayMigrate',
@@ -450,7 +356,7 @@ function validateIdentifier(identifier, description) {
     }
 }
 
-function renderMermaid(metadata, schema, migrationManifest) {
+function renderMermaid(metadata, schema) {
     const tables = [...metadata.tables]
         .map(table => ({
             ...table,
@@ -464,7 +370,6 @@ function renderMermaid(metadata, schema, migrationManifest) {
         '%% Generated by scripts/generate_database_schema.js. Do not edit manually.',
         `%% PostgreSQL schema: ${schema}`,
         '%% Views, indexes, functions, triggers, procedures, and extensions are omitted.',
-        ...migrationManifestComments(migrationManifest),
         'erDiagram',
     ];
 
@@ -554,8 +459,7 @@ Options:
   --database <name>       Database name (default: prsdblocal)
   --user <name>           Database user (default: postgres)
   --host-psql             Use psql from PATH instead of Docker Compose
-    --check-manifest        Check migration hashes without contacting PostgreSQL
-    --staged                With --check-manifest, check files staged for commit
+    --staged-migrations     Compare Flyway with migrations in the Git index
   -h, --help              Show this help
 `);
 }
@@ -568,37 +472,17 @@ function main() {
     }
 
     const outputPath = path.resolve(repositoryRoot, options.output);
-    const outputRelativePath = path.relative(repositoryRoot, outputPath).replaceAll(path.sep, '/');
-    const generatorRelativePath = path.relative(repositoryRoot, __filename).replaceAll(path.sep, '/');
-    const migrationFiles = options.useStagedFiles ? createStagedMigrationFiles() : createMigrationFiles();
-    const generatorSha256 = options.useStagedFiles
-        ? sha256Content(readStagedFile(generatorRelativePath))
-        : sha256File(__filename);
-    const migrationManifest = createMigrationManifest(
-        migrationFiles,
-        options.schema,
-        generatorSha256,
-    );
-    if (options.checkManifest) {
-        const outputContent = options.useStagedFiles
-            ? readStagedFile(outputRelativePath).toString('utf8')
-            : fs.readFileSync(outputPath, 'utf8');
-        assertMatchingMigrationManifest(outputContent, migrationManifest);
-        console.log(`${outputRelativePath} migration manifest is current`);
-        return;
-    }
-    if (fs.existsSync(outputPath) && hasMatchingMigrationManifest(fs.readFileSync(outputPath, 'utf8'), migrationManifest)) {
-        console.log(`No change detected in migration manifest. ${path.relative(repositoryRoot, outputPath)} is current, and has not been modified.`);
-        return;
-    }
+    const expectedMigrations = options.useStagedMigrations
+        ? listStagedMigrations()
+        : listFilesystemMigrations();
 
     const flywayHistoryExists = runPsql(options, buildFlywayHistoryExistsQuery(options.schema));
     const databaseMigrations = flywayHistoryExists
         ? runPsql(options, buildFlywayHistoryQuery(options.schema))
         : [];
-    assertMigrationsAreCurrent(migrationFiles.map(migration => migration.script), databaseMigrations);
+    assertMigrationsAreCurrent(expectedMigrations, databaseMigrations);
     const metadata = runPsql(options, buildMetadataQuery(options.schema));
-    writeOutputFile(outputPath, renderMermaid(metadata, options.schema, migrationManifest));
+    writeOutputFile(outputPath, renderMermaid(metadata, options.schema));
     console.log(`Wrote ${path.relative(repositoryRoot, outputPath)}`);
 }
 
@@ -612,18 +496,15 @@ if (require.main === module) {
 }
 
 module.exports = {
-    assertMatchingMigrationManifest,
     assertMigrationsAreCurrent,
     buildFlywayHistoryExistsQuery,
     buildFlywayHistoryQuery,
     buildMetadataQuery,
-    createMigrationFiles,
-    createMigrationManifest,
-    createStagedMigrationFiles,
     formatPsqlError,
-    hasMatchingMigrationManifest,
     listFilesystemMigrations,
+    listStagedMigrations,
     parseArguments,
+    parseGitMigrationPaths,
     renderMermaid,
     writeOutputFile,
 };

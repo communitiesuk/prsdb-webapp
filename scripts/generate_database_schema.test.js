@@ -2,20 +2,13 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 
 const {
-    assertMatchingMigrationManifest,
     assertMigrationsAreCurrent,
-    createMigrationManifest,
     formatPsqlError,
-    hasMatchingMigrationManifest,
+    parseArguments,
+    parseGitMigrationPaths,
     renderMermaid,
 } = require('./generate_database_schema');
 const { insertHook } = require('./install_database_schema_hook');
-
-const migrationFiles = [
-    { script: 'V1_1_0__add_users.sql', sha256: 'b'.repeat(64) },
-    { script: 'V1_0_0__initial.sql', sha256: 'a'.repeat(64) },
-];
-const migrationManifest = createMigrationManifest(migrationFiles, 'public', 'c'.repeat(64));
 
 const metadata = {
     tables: [
@@ -47,37 +40,10 @@ test('renderMermaid produces stable output regardless of metadata ordering', () 
     };
 
     assert.equal(
-        renderMermaid(metadata, 'public', migrationManifest),
-        renderMermaid(reorderedMetadata, 'public', migrationManifest),
+        renderMermaid(metadata, 'public'),
+        renderMermaid(reorderedMetadata, 'public'),
     );
-    assert.match(renderMermaid(metadata, 'public', migrationManifest), /parent \|\|--o\{ child : parent_id/);
-});
-
-test('migration manifest is stable and embedded as structured Mermaid comments', () => {
-    const reorderedManifest = createMigrationManifest([...migrationFiles].reverse(), 'public', 'c'.repeat(64));
-    const content = renderMermaid(metadata, 'public', migrationManifest);
-
-    assert.deepEqual(migrationManifest, reorderedManifest);
-    assert.match(content, /^%% database-schema-manifest: \{"formatVersion":1,"schema":"public","generatorSha256":"c{64}"\}$/m);
-    assert.match(content, /^%% database-schema-migration: \{"script":"V1_0_0__initial.sql","sha256":"a{64}"\}$/m);
-    assert.match(content, /^%% database-schema-migration: \{"script":"V1_1_0__add_users.sql","sha256":"b{64}"\}$/m);
-    assert.equal(hasMatchingMigrationManifest(content, reorderedManifest), true);
-});
-
-test('migration manifest mismatch is detected without querying the database', () => {
-    const content = renderMermaid(metadata, 'public', migrationManifest);
-    const changedMigrationManifest = createMigrationManifest(
-        [{ script: 'V1_0_0__initial.sql', sha256: 'd'.repeat(64) }],
-        'public',
-        'c'.repeat(64),
-    );
-
-    assert.equal(hasMatchingMigrationManifest(content, changedMigrationManifest), false);
-    assert.equal(hasMatchingMigrationManifest('erDiagram\n', migrationManifest), false);
-    assert.throws(
-        () => assertMatchingMigrationManifest('erDiagram\n', migrationManifest),
-        /migration manifest is out of date\. Commit blocked/,
-    );
+    assert.match(renderMermaid(metadata, 'public'), /parent \|\|--o\{ child : parent_id/);
 });
 
 test('database schema hook is inserted before existing hooks and only once', () => {
@@ -85,7 +51,18 @@ test('database schema hook is inserted before existing hooks and only once', () 
     const installedHook = insertHook(existingHook);
 
     assert.ok(installedHook.indexOf('DATABASE-SCHEMA-HOOK START') < installedHook.indexOf('KTLINT-GRADLE HOOK START'));
+    assert.match(installedHook, /git diff --cached --quiet --diff-filter=ACMRD -- src\/main\/resources\/db\/migrations/);
+    assert.match(installedHook, /node scripts\/generate_database_schema\.js --staged-migrations/);
     assert.equal(insertHook(installedHook), installedHook);
+});
+
+test('database schema hook replaces an older marked version', () => {
+    const existingHook = '#!/bin/sh\n######## DATABASE-SCHEMA-HOOK START ########\nold command\n'
+        + '####### DATABASE-SCHEMA-HOOK END #######\n';
+    const installedHook = insertHook(existingHook);
+
+    assert.doesNotMatch(installedHook, /old command/);
+    assert.match(installedHook, /git diff --cached --quiet/);
 });
 
 test('formatPsqlError includes database and schema initialization guidance', () => {
@@ -102,6 +79,19 @@ test('formatPsqlError includes database and schema initialization guidance', () 
         + '  docker compose --file docker-compose.local.yml up --detach postgres\n\n'
         + 'Then initialize its schema by running the IntelliJ "local" configuration, or:\n'
         + '  ./gradlew flywayMigrate',
+    );
+});
+
+test('staged migration mode reads migration names from Git index paths', () => {
+    assert.equal(parseArguments(['--staged-migrations']).useStagedMigrations, true);
+    assert.deepEqual(
+        parseGitMigrationPaths(
+            'src/main/resources/db/migrations/V1_2_0__second.sql\0'
+            + 'src/main/resources/db/migrations/V1_1_0__first.sql\0'
+            + 'src/main/resources/db/migrations/notes.txt\0'
+            + 'other/V1_0_0__ignored.sql\0',
+        ),
+        ['V1_1_0__first.sql', 'V1_2_0__second.sql'],
     );
 });
 
@@ -125,11 +115,11 @@ test('assertMigrationsAreCurrent reports missing, failed, and unexpected databas
             ],
         ),
         new Error(
-            'The running database does not match the filesystem migrations. The Mermaid file was not changed.\n\n'
+            'The running database does not match the expected migrations. The Mermaid file was not changed.\n\n'
             + 'Missing or unsuccessful database migrations:\n'
             + '  V1_0_0__initial.sql\n'
             + '  V1_1_0__add_users.sql\n\n'
-            + 'Database migrations not present in the filesystem:\n'
+            + 'Database migrations not present in the expected migration set:\n'
             + '  V0_9_0__removed.sql\n\n'
             + 'Update the schema by running the IntelliJ "local" configuration, or:\n'
             + '  ./gradlew flywayMigrate',
