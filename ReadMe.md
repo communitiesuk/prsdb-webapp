@@ -51,6 +51,16 @@ We are using Ktlint for linting, via the [ktlint-gradle plugin](https://github.c
 To ensure that your code meets the linting and formatting rules install these pre-commit hooks by running the
 `addKtlintCheckGitPreCommitHook` and `addKtlintFormatGitPreCommitHook` tasks from Gradle tab in Intellij.
 
+Install the database schema pre-commit hook after the ktlint hooks:
+
+```shell
+node scripts/install_database_schema_hook.js
+```
+
+The hook compares the migration and generator hashes staged for commit with the manifest staged in
+`docs/database-schema.mmd`. It blocks the commit when the manifest is stale, without starting or contacting Docker.
+Run the installer again if the ktlint hook installation tasks replace the pre-commit hook.
+
 To prevent you from accidentally committing secrets we are also using a precommit hook called `detect-secrets`. To install the pre-commit
 hook first ensure you have Python 3 and pip installed, then run the appropriate script from the `scripts` folder:
 
@@ -123,9 +133,24 @@ Utility scripts are in the `scripts/` directory.
 
 | Script                                         | Purpose                                                                                                                                                                                                                                                                            |
 |------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate_database_schema.js`                  | Generate `docs/database-schema.mmd` from the running local PostgreSQL database. Uses `psql` inside the Docker Compose PostgreSQL container and embeds a manifest of migration file hashes.                                                                                           |
+| `install_database_schema_hook.js`              | Install the blocking database schema manifest check in the Git pre-commit hook.                                                                                                                                                                                                     |
 | `generate_passcodes.js`                        | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
 | `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV.                                                                                                                                                                                                                  |
 | `install-detect-secrets.ps1` / `.sh`           | Install the detect-secrets pre-commit hook.                                                                                                                                                                                                                                        |
+
+To regenerate the database entity relationship diagram after the local application has started and run its migrations:
+
+```shell
+node scripts/generate_database_schema.js
+```
+
+The generated Mermaid file contains structured comments recording the schema, generator hash, and SHA-256 hash of every
+migration. If that manifest still matches the filesystem, the script exits before connecting to PostgreSQL. Otherwise,
+it checks that the running database has successfully applied the same migration files, regenerates the diagram, and writes
+the output. Run `node scripts/generate_database_schema.js --help` for output, schema, Compose service, and database
+overrides. Pass `--host-psql` to use a `psql` installation from `PATH` instead of the Compose container; standard
+`PGHOST`, `PGPORT`, and `PGPASSWORD` environment variables are respected in that mode.
 
 ### Code structure
 
