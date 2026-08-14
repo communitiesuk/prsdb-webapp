@@ -283,6 +283,72 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
     }
 
+    @Test
+    fun `Changing org type on CYA to add then remove trust shows interruption pages correctly`(page: Page) {
+        // Start: non-trust org
+        val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
+        orgLandlordDetailsPage.clickOrganisationTypeChangeLinkAndWait()
+
+        var orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCharity()
+        orgTypePage.form.submit()
+
+        var cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
+
+        // CYA change: set type to include trust
+        cyaPage.summaryList.organisationTypeRow.clickFirstActionLinkAndWait()
+
+        orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.selectCompany()
+        orgTypePage.selectTrust()
+        orgTypePage.form.submit()
+
+        var interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("You must provide trustee details")
+        interruptionPage.submit()
+
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageUpdateOrganisationType::class)
+        leadTrusteeNamePage.submitName(LEAD_TRUSTEE_NAME)
+
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageUpdateOrganisationType::class)
+        leadTrusteeDobPage.submitDate("15", "6", "1980")
+
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageUpdateOrganisationType::class)
+        leadTrusteeEmailPage.submitEmail(LEAD_TRUSTEE_EMAIL)
+
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageUpdateOrganisationType::class)
+        leadTrusteePhonePage.submitPhoneNumber(LEAD_TRUSTEE_PHONE)
+
+        val leadTrusteeLookupAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageUpdateOrganisationType::class)
+        leadTrusteeLookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageUpdateOrganisationType::class)
+        leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Trust")
+        assertThat(cyaPage.leadTrusteeCard.summaryList.nameRow.value).containsText(LEAD_TRUSTEE_NAME)
+
+        // CYA change again: remove trust
+        cyaPage.summaryList.organisationTypeRow.clickFirstActionLinkAndWait()
+
+        orgTypePage = assertPageIs(page, OrgTypeFormPageUpdateOrganisationType::class)
+        orgTypePage.deselectTrust()
+        orgTypePage.form.submit()
+
+        interruptionPage = assertPageIs(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+        assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+        interruptionPage.submit()
+
+        cyaPage = assertPageIs(page, OrgTypeCyaPageUpdateOrganisationType::class)
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Company")
+        assertThat(cyaPage.summaryList.organisationTypeRow.value).not().containsText("Trust")
+        BaseComponent.assertThat(cyaPage.leadTrusteeCard).isHidden()
+    }
+
     @Nested
     inner class RemovingTrustUpdates : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
         @BeforeEach

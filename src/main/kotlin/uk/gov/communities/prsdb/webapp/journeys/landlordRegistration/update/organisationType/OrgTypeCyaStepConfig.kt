@@ -22,7 +22,6 @@ class OrgTypeCyaStepConfig(
 
     override fun getStepSpecificContent(state: UpdateOrganisationTypeJourneyState): Map<String, Any?> =
         mapOf(
-            "title" to "landlordDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "summaryListData" to getOrgTypeRows(state),

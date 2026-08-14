@@ -112,9 +112,6 @@ class UpdateOrganisationTypeJourneyFactory(
                     )
                 }
                 nextStep { journey.completeOrganisationTypeUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf("submitButtonText" to "forms.buttons.confirmAndSubmitUpdate")
-                }
             }
             step(journey.completeOrganisationTypeUpdateStep) {
                 parents { journey.orgTypeCyaStep.isComplete() }
@@ -135,23 +132,87 @@ class UpdateOrganisationTypeJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "landlordDetails.update.title" }
             }
-            checkAnswerStep(journey.orgTypeStep, OrgTypeStep.ROUTE_SEGMENT) {
-                withAdditionalContentProperties {
-                    mapOf("submitButtonText" to "forms.buttons.continue")
+            when (state.checkingAnswersFor) {
+                OrgTypeStep.ROUTE_SEGMENT -> {
+                    step(journey.orgTypeStep) {
+                        initialStep()
+                        routeSegment(OrgTypeStep.ROUTE_SEGMENT)
+                        nextStep { journey.orgTypeUpdateRoutingStep }
+                        withAdditionalContentProperties {
+                            mapOf("submitButtonText" to "forms.buttons.continue")
+                        }
+                    }
+                    step<OrgTypeUpdateRouteMode, OrgTypeUpdateRoutingStepConfig>(journey.orgTypeUpdateRoutingStep) {
+                        stepSpecificInitialisation {
+                            usingPreviousIsTrust {
+                                getPreviousIsTrustFromBaseJourney(
+                                    state,
+                                    journey.orgTypeStep,
+                                )
+                            }
+                        }
+                        parents { journey.orgTypeStep.isComplete() }
+                        nextDestination { mode ->
+                            when (mode) {
+                                OrgTypeUpdateRouteMode.TRUST_UNCHANGED -> Destination(journey.finishCyaStep)
+                                OrgTypeUpdateRouteMode.ADDING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                                OrgTypeUpdateRouteMode.REMOVING_TRUST -> Destination(journey.orgTypeTrustInterruptionStep)
+                            }
+                        }
+                    }
+                    step(journey.orgTypeTrustInterruptionStep) {
+                        routeSegment(OrgTypeTrustInterruptionStep.ROUTE_SEGMENT)
+                        parents {
+                            OrParents(
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.REMOVING_TRUST),
+                            )
+                        }
+                        nextStep {
+                            if (journey.orgTypeUpdateRoutingStep.outcome == OrgTypeUpdateRouteMode.ADDING_TRUST) {
+                                journey.leadTrusteeTask.firstStep
+                            } else {
+                                journey.finishCyaStep
+                            }
+                        }
+                    }
+                    task(journey.leadTrusteeTask) {
+                        parents {
+                            AndParents(
+                                journey.orgTypeTrustInterruptionStep.isComplete(),
+                                journey.orgTypeUpdateRoutingStep.hasOutcome(OrgTypeUpdateRouteMode.ADDING_TRUST),
+                            )
+                        }
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+
+                LeadTrusteeNameStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeDobStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeDobStep, LeadTrusteeDobStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteeEmailStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteeEmailStep, LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                }
+
+                LeadTrusteePhoneStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.leadTrusteeTask.leadTrusteePhoneStep, LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                }
+
+                TrusteeAddressTask.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.leadTrusteeTask.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT)
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: ${state.checkingAnswersFor}")
                 }
             }
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeNameStep, LeadTrusteeNameStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeDobStep, LeadTrusteeDobStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteeEmailStep, LeadTrusteeEmailStep.ROUTE_SEGMENT)
-            checkAnswerStep(journey.leadTrusteeTask.leadTrusteePhoneStep, LeadTrusteePhoneStep.ROUTE_SEGMENT)
-            checkAnswerTask(journey.leadTrusteeTask.trusteeAddressTask, TrusteeAddressTask.ROUTE_SEGMENT)
             step(journey.finishCyaStep) {
-                parents {
-                    OrParents(
-                        journey.orgTypeStep.isComplete(),
-                        journey.leadTrusteeTask.trusteeAddressTask.isComplete(),
-                    )
-                }
+                initialStep()
                 nextDestination { Destination.Nowhere() }
             }
         }
