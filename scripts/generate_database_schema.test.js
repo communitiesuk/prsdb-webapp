@@ -7,7 +7,6 @@ const {
     parseArguments,
     parseGitMigrationPaths,
 } = require('./generate_database_schema');
-const { insertHook } = require('./install_database_schema_hook');
 
 test('parseArguments defaults include tbls options', () => {
     const options = parseArguments([]);
@@ -30,25 +29,6 @@ test('parseArguments accepts tbls option overrides', () => {
     assert.equal(options.tblsConfig, 'config/custom.tbls.yml');
     assert.equal(options.tblsProfile, 'ci-tools');
     assert.equal(options.tblsService, 'diagrammer');
-});
-
-test('database schema hook is inserted before existing hooks and only once', () => {
-    const existingHook = '#!/bin/sh\n######## KTLINT-GRADLE HOOK START ########\nexit 0\n';
-    const installedHook = insertHook(existingHook);
-
-    assert.ok(installedHook.indexOf('DATABASE-SCHEMA-HOOK START') < installedHook.indexOf('KTLINT-GRADLE HOOK START'));
-    assert.match(installedHook, /git diff --cached --quiet --diff-filter=ACMRD -- src\/main\/resources\/db\/migrations/);
-    assert.match(installedHook, /node scripts\/generate_database_schema\.js --staged-migrations/);
-    assert.equal(insertHook(installedHook), installedHook);
-});
-
-test('database schema hook replaces an older marked version', () => {
-    const existingHook = '#!/bin/sh\n######## DATABASE-SCHEMA-HOOK START ########\nold command\n'
-        + '####### DATABASE-SCHEMA-HOOK END #######\n';
-    const installedHook = insertHook(existingHook);
-
-    assert.doesNotMatch(installedHook, /old command/);
-    assert.match(installedHook, /git diff --cached --quiet/);
 });
 
 test('formatPsqlError includes database and schema initialization guidance', () => {

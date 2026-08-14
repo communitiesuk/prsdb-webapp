@@ -53,8 +53,16 @@ To ensure that your code meets the linting and formatting rules install these pr
 
 Install the database schema pre-commit hook after the ktlint hooks:
 
-```shell
-node scripts/install_database_schema_hook.js
+**PowerShell (Windows):**
+
+```powershell
+.\scripts\install-database-schema-hook.ps1
+```
+
+**Bash (Linux/macOS):**
+
+```bash
+./scripts/install-database-schema-hook.sh
 ```
 
 The hook only runs the database schema generator when the commit contains staged migration changes. It compares Flyway
@@ -135,7 +143,7 @@ Utility scripts are in the `scripts/` directory.
 | Script                                         | Purpose                                                                                                                                                                                                                                                                            |
 |------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `generate_database_schema.js`                  | Validate local Flyway migration state and generate `docs/database-schema.mmd` from the running local PostgreSQL database using the pinned `tbls` Docker Compose tool service.                                                                                                   |
-| `install_database_schema_hook.js`              | Install the pre-commit hook that regenerates the database diagram when staged migrations change.                                                                                                                                                                                     |
+| `install-database-schema-hook.ps1` / `.sh`     | Install the pre-commit hook that regenerates the database diagram when staged migrations change.                                                                                                                                                                                     |
 | `generate_passcodes.js`                        | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
 | `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV.                                                                                                                                                                                                                  |
 | `install-detect-secrets.ps1` / `.sh`           | Install the detect-secrets pre-commit hook.                                                                                                                                                                                                                                        |
