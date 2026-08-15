@@ -1,5 +1,14 @@
+# Config for tbls, which generates docs/database-schema.mmd from the local database.
+# Run via scripts/generate_database_schema.js, or automatically by the pre-commit hook
+# installed by scripts/install-database-schema-hook.sh (or .ps1) when migrations are staged.
+
+# Host "postgres" is the Compose service name, reachable from the tbls tool container.
 dsn: postgres://postgres:notarealpassword@postgres:5432/prsdblocal?sslmode=disable
 exclude:
   - flyway_schema_history
 format:
+  # Sort tables and columns so regenerated diagrams produce stable diffs.
   sort: true
+er:
+  # Hide relation definitions (i.e. generally foreign key constraints)
+  hideDef: true

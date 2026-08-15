@@ -43,7 +43,7 @@ test('formatPsqlError includes database and schema initialization guidance', () 
         'service "postgres" is not running\n\n'
         + 'Start the local database with:\n'
         + '  docker compose --file docker-compose.local.yml up --detach postgres\n\n'
-        + 'Then initialize its schema by running the IntelliJ "local" configuration, or:\n'
+        + 'Then update its schema by running the IntelliJ "local" configuration, or:\n'
         + '  ./gradlew flywayMigrate',
     );
 });
