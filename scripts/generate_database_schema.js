@@ -112,7 +112,7 @@ function formatPsqlError(options, standardError, status) {
         shellArgument(options.service),
     ].join(' ');
     return `${errorMessage}\n\nStart the local database with:\n  ${startCommand}`
-        + '\n\nThen initialize its schema by running the IntelliJ "local" configuration, or:'
+        + '\n\nThen update its schema by running the IntelliJ "local" configuration, or:'
         + '\n  ./gradlew flywayMigrate';
 }
 
@@ -135,7 +135,7 @@ function parseGitMigrationPaths(output) {
 function listStagedMigrations() {
     const result = childProcess.spawnSync(
         'git',
-        ['ls-files', '--cached', '--null', '--', 'src/main/resources/db/migrations'],
+        ['ls-files', '--cached', '-z', '--', 'src/main/resources/db/migrations'],
         { cwd: repositoryRoot, encoding: 'utf8' },
     );
     if (result.error || result.status !== 0) {
