@@ -3,7 +3,8 @@
 # installed by scripts/install-database-schema-hook.sh (or .ps1) when migrations are staged.
 
 # Host "postgres" is the Compose service name, reachable from the tbls tool container.
-dsn: postgres://postgres:notarealpassword@postgres:5432/prsdblocal?sslmode=disable
+# The password is local-only and matches docker-compose.local.yml.
+dsn: postgres://postgres:notarealpassword@postgres:5432/prsdblocal?sslmode=disable # pragma: allowlist secret
 exclude:
   - flyway_schema_history
 format:

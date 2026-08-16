@@ -3,49 +3,36 @@ const test = require('node:test');
 
 const {
     assertMigrationsAreCurrent,
+    assertStagedMigrationsHaveNoUnstagedChanges,
     formatPsqlError,
     parseArguments,
     parseGitMigrationPaths,
 } = require('./generate_database_schema');
 
-test('parseArguments defaults include tbls options', () => {
+test('parseArguments defaults to comparing filesystem migrations', () => {
     const options = parseArguments([]);
 
-    assert.equal(options.tblsConfig, '.tbls.yml');
-    assert.equal(options.tblsProfile, 'tools');
-    assert.equal(options.tblsService, 'tbls');
+    assert.equal(options.help, false);
+    assert.equal(options.useStagedMigrations, false);
 });
 
-test('parseArguments accepts tbls option overrides', () => {
-    const options = parseArguments([
-        '--tbls-config',
-        'config/custom.tbls.yml',
-        '--tbls-profile',
-        'ci-tools',
-        '--tbls-service',
-        'diagrammer',
-    ]);
-
-    assert.equal(options.tblsConfig, 'config/custom.tbls.yml');
-    assert.equal(options.tblsProfile, 'ci-tools');
-    assert.equal(options.tblsService, 'diagrammer');
+test('parseArguments rejects unknown arguments', () => {
+    assert.throws(() => parseArguments(['--output', 'elsewhere.mmd']), /Unknown argument: --output/);
 });
 
-test('formatPsqlError includes database and schema initialization guidance', () => {
-    const options = {
-        composeFile: 'docker-compose.local.yml',
-        service: 'postgres',
-        useHostPsql: false,
-    };
-
+test('formatPsqlError includes database and schema update guidance', () => {
     assert.equal(
-        formatPsqlError(options, 'service "postgres" is not running', 1),
+        formatPsqlError('service "postgres" is not running', 1),
         'service "postgres" is not running\n\n'
         + 'Start the local database with:\n'
         + '  docker compose --file docker-compose.local.yml up --detach postgres\n\n'
-        + 'Then update its schema by running the IntelliJ "local" configuration, or:\n'
+        + 'Update the schema by running the IntelliJ "local" configuration, or:\n'
         + '  ./gradlew flywayMigrate',
     );
+});
+
+test('formatPsqlError falls back to the exit status when stderr is empty', () => {
+    assert.match(formatPsqlError('   ', 137), /^docker exited with status 137\n/);
 });
 
 test('staged migration mode reads migration names from Git index paths', () => {
@@ -90,5 +77,22 @@ test('assertMigrationsAreCurrent reports missing, failed, and unexpected databas
             + 'Update the schema by running the IntelliJ "local" configuration, or:\n'
             + '  ./gradlew flywayMigrate',
         ),
+    );
+});
+
+test('assertStagedMigrationsHaveNoUnstagedChanges ignores unstaged changes to migrations outside the commit', () => {
+    assert.doesNotThrow(() => assertStagedMigrationsHaveNoUnstagedChanges(
+        ['V1_0_0__initial.sql'],
+        ['V1_1_0__not_in_this_commit.sql'],
+    ));
+});
+
+test('assertStagedMigrationsHaveNoUnstagedChanges rejects partially staged migrations', () => {
+    assert.throws(
+        () => assertStagedMigrationsHaveNoUnstagedChanges(
+            ['V1_0_0__initial.sql', 'V1_1_0__add_users.sql'],
+            ['V1_1_0__add_users.sql'],
+        ),
+        /Partially staged migrations:\n {2}V1_1_0__add_users\.sql/,
     );
 });

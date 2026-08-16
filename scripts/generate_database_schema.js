@@ -5,72 +5,30 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const repositoryRoot = path.resolve(__dirname, '..');
-const migrationsDirectory = path.join(repositoryRoot, 'src/main/resources/db/migrations');
+const migrationsPath = 'src/main/resources/db/migrations';
+const migrationsDirectory = path.join(repositoryRoot, migrationsPath);
 
-function parseArguments(argumentsList) {
-    const options = {
-        composeFile: 'docker-compose.local.yml',
-        database: 'prsdblocal',
-        output: 'docs/database-schema.mmd',
-        schema: 'public',
-        service: 'postgres',
-        tblsConfig: '.tbls.yml',
-        tblsProfile: 'tools',
-        tblsService: 'tbls',
-        useStagedMigrations: false,
-        user: 'postgres',
-        useHostPsql: false,
-    };
+// Only versioned migrations; the project does not use repeatable (R__) migrations.
+const migrationFileNamePattern = /^V.*\.sql$/;
 
-    for (let index = 0; index < argumentsList.length; index += 1) {
-        const argument = argumentsList[index];
-        if (argument === '--host-psql') {
-            options.useHostPsql = true;
-        } else if (argument === '--staged-migrations') {
-            options.useStagedMigrations = true;
-        } else if (argument === '--help' || argument === '-h') {
-            options.help = true;
-        } else {
-            const optionNames = {
-                '--compose-file': 'composeFile',
-                '--database': 'database',
-                '--output': 'output',
-                '--schema': 'schema',
-                '--service': 'service',
-                '--tbls-config': 'tblsConfig',
-                '--tbls-profile': 'tblsProfile',
-                '--tbls-service': 'tblsService',
-                '--user': 'user',
-            };
-            const optionName = optionNames[argument];
-            if (!optionName) {
-                throw new Error(`Unknown argument: ${argument}`);
-            }
-            index += 1;
-            if (index >= argumentsList.length) {
-                throw new Error(`Missing value for ${argument}`);
-            }
-            options[optionName] = argumentsList[index];
-        }
-    }
+const schemaUpdateGuidance = 'Update the schema by running the IntelliJ "local" configuration, or:\n'
+    + '  ./gradlew flywayMigrate';
 
-    return options;
-}
+// These must stay in sync with docker-compose.local.yml and .tbls.yml.
+const composeFile = 'docker-compose.local.yml';
+const postgresService = 'postgres';
+const databaseName = 'prsdblocal';
+const databaseUser = 'postgres';
+const databaseSchema = 'public';
+const tblsService = 'tbls';
+const tblsProfile = 'tools';
+const tblsConfigPath = '.tbls.yml';
+const schemaDiagramPath = 'docs/database-schema.mmd';
 
-function sqlString(value) {
-    return `'${value.replaceAll("'", "''")}'`;
-}
+const flywayHistoryExistsQuery =
+    `SELECT to_json(pg_catalog.to_regclass('${databaseSchema}.flyway_schema_history') IS NOT NULL)::text;`;
 
-function sqlIdentifier(value) {
-    return `"${value.replaceAll('"', '""')}"`;
-}
-
-function buildFlywayHistoryExistsQuery(schema) {
-    return `SELECT to_json(pg_catalog.to_regclass(${sqlString(`${schema}.flyway_schema_history`)}) IS NOT NULL)::text;`;
-}
-
-function buildFlywayHistoryQuery(schema) {
-    return `
+const flywayHistoryQuery = `
 SELECT COALESCE(
     json_agg(
         json_build_object(
@@ -80,45 +38,38 @@ SELECT COALESCE(
     ),
     '[]'::json
 )::text
-FROM ${sqlIdentifier(schema)}.${sqlIdentifier('flyway_schema_history')}
+FROM ${databaseSchema}.flyway_schema_history
 WHERE type = 'SQL';
 `.trim();
-}
 
-function shellArgument(value) {
-    if (/^[A-Za-z0-9_./:-]+$/.test(value)) {
-        return value;
+function parseArguments(argumentsList) {
+    const options = {
+        help: false,
+        useStagedMigrations: false,
+    };
+
+    for (const argument of argumentsList) {
+        if (argument === '--staged-migrations') {
+            options.useStagedMigrations = true;
+        } else if (argument === '--help' || argument === '-h') {
+            options.help = true;
+        } else {
+            throw new Error(`Unknown argument: ${argument}`);
+        }
     }
-    return `'${value.replaceAll("'", "'\\''")}'`;
+
+    return options;
 }
 
-function toPosixPath(value) {
-    return value.split(path.sep).join('/');
-}
-
-function formatPsqlError(options, standardError, status) {
+function formatPsqlError(standardError, status) {
     const errorMessage = standardError.trim() || `docker exited with status ${status}`;
-    if (options.useHostPsql) {
-        return errorMessage;
-    }
-
-    const startCommand = [
-        'docker',
-        'compose',
-        '--file',
-        shellArgument(options.composeFile),
-        'up',
-        '--detach',
-        shellArgument(options.service),
-    ].join(' ');
-    return `${errorMessage}\n\nStart the local database with:\n  ${startCommand}`
-        + '\n\nThen update its schema by running the IntelliJ "local" configuration, or:'
-        + '\n  ./gradlew flywayMigrate';
+    const startCommand = `docker compose --file ${composeFile} up --detach ${postgresService}`;
+    return `${errorMessage}\n\nStart the local database with:\n  ${startCommand}\n\n${schemaUpdateGuidance}`;
 }
 
 function listFilesystemMigrations(directory = migrationsDirectory) {
     return fs.readdirSync(directory, { withFileTypes: true })
-        .filter(entry => entry.isFile() && /^V[^/]*\.sql$/.test(entry.name))
+        .filter(entry => entry.isFile() && migrationFileNamePattern.test(entry.name))
         .map(entry => entry.name)
         .sort(compareNames);
 }
@@ -126,23 +77,48 @@ function listFilesystemMigrations(directory = migrationsDirectory) {
 function parseGitMigrationPaths(output) {
     return output.split('\0')
         .filter(Boolean)
-        .filter(filePath => path.dirname(filePath) === 'src/main/resources/db/migrations')
+        .filter(filePath => path.dirname(filePath) === migrationsPath)
         .map(filePath => path.basename(filePath))
-        .filter(fileName => /^V[^/]*\.sql$/.test(fileName))
+        .filter(fileName => migrationFileNamePattern.test(fileName))
         .sort(compareNames);
 }
 
-function listStagedMigrations() {
+function runGitMigrationQuery(gitArguments, description) {
     const result = childProcess.spawnSync(
         'git',
-        ['ls-files', '--cached', '-z', '--', 'src/main/resources/db/migrations'],
+        [...gitArguments, '-z', '--', migrationsPath],
         { cwd: repositoryRoot, encoding: 'utf8' },
     );
     if (result.error || result.status !== 0) {
         const message = result.error?.message || result.stderr.trim();
-        throw new Error(`Could not read staged migrations from Git: ${message}`);
+        throw new Error(`Could not read ${description} from Git: ${message}`);
     }
     return parseGitMigrationPaths(result.stdout);
+}
+
+function listStagedMigrations() {
+    return runGitMigrationQuery(['ls-files', '--cached'], 'staged migrations');
+}
+
+// Migrations changed in the working tree but not staged, so not part of this commit.
+function listUnstagedMigrations() {
+    return runGitMigrationQuery(['diff', '--name-only'], 'unstaged migrations');
+}
+
+function assertStagedMigrationsHaveNoUnstagedChanges(stagedMigrations, unstagedMigrations) {
+    const stagedMigrationSet = new Set(stagedMigrations);
+    const partiallyStagedMigrations = unstagedMigrations.filter(migration => stagedMigrationSet.has(migration));
+
+    if (partiallyStagedMigrations.length === 0) {
+        return;
+    }
+
+    throw new Error(
+        'Migrations in this commit also have unstaged changes. The Mermaid file was not changed.\n\n'
+        + `Partially staged migrations:\n${partiallyStagedMigrations.map(name => `  ${name}`).join('\n')}\n\n`
+        + 'The local database was migrated from the working tree, so the diagram would not necessarily\n'
+        + 'match the migrations being committed. Stage or stash the remaining changes, then commit again.',
+    );
 }
 
 function assertMigrationsAreCurrent(filesystemMigrations, databaseMigrations) {
@@ -172,13 +148,19 @@ function assertMigrationsAreCurrent(filesystemMigrations, databaseMigrations) {
     throw new Error(
         'The running database does not match the expected migrations. The Mermaid file was not changed.\n\n'
         + `${details.join('\n\n')}\n\n`
-        + 'Update the schema by running the IntelliJ "local" configuration, or:\n'
-        + '  ./gradlew flywayMigrate',
+        + schemaUpdateGuidance,
     );
 }
 
-function runPsql(options, query) {
-    const psqlArguments = [
+function runPsql(query) {
+    const commandArguments = [
+        'compose',
+        '--file',
+        composeFile,
+        'exec',
+        '-T',
+        postgresService,
+        'psql',
         '--no-psqlrc',
         '--quiet',
         '--tuples-only',
@@ -186,65 +168,56 @@ function runPsql(options, query) {
         '--set',
         'ON_ERROR_STOP=1',
         '--username',
-        options.user,
+        databaseUser,
         '--dbname',
-        options.database,
+        databaseName,
         '--command',
         query,
     ];
 
-    const command = options.useHostPsql ? 'psql' : 'docker';
-    const commandArguments = options.useHostPsql
-        ? psqlArguments
-        : ['compose', '--file', options.composeFile, 'exec', '-T', options.service, 'psql', ...psqlArguments];
-    const result = childProcess.spawnSync(command, commandArguments, {
+    const result = childProcess.spawnSync('docker', commandArguments, {
         cwd: repositoryRoot,
         encoding: 'utf8',
-        env: process.env,
-        maxBuffer: 10 * 1024 * 1024,
     });
 
     if (result.error) {
-        throw new Error(`Could not run ${command}: ${result.error.message}`);
+        throw new Error(`Could not run docker: ${result.error.message}`);
     }
     if (result.status !== 0) {
-        throw new Error(formatPsqlError(options, result.stderr, result.status));
+        throw new Error(formatPsqlError(result.stderr, result.status));
     }
 
     try {
         return JSON.parse(result.stdout.trim());
     } catch (error) {
-        throw new Error(`psql returned invalid schema metadata: ${error.message}`);
+        throw new Error(`psql returned unreadable Flyway history: ${error.message}`);
     }
 }
 
-function runTbls(options, outputPath) {
-    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+function runTbls() {
+    fs.mkdirSync(path.dirname(path.resolve(repositoryRoot, schemaDiagramPath)), { recursive: true });
 
-    const outputRelativePath = toPosixPath(path.relative(repositoryRoot, outputPath));
-    const configRelativePath = toPosixPath(path.relative(repositoryRoot, path.resolve(repositoryRoot, options.tblsConfig)));
     const commandArguments = [
         'compose',
         '--file',
-        options.composeFile,
+        composeFile,
         '--profile',
-        options.tblsProfile,
+        tblsProfile,
         'run',
         '--rm',
         '--no-deps',
-        options.tblsService,
+        tblsService,
         'out',
         '--config',
-        configRelativePath,
+        tblsConfigPath,
         '--format',
         'mermaid',
         '--out',
-        outputRelativePath,
+        schemaDiagramPath,
     ];
     const result = childProcess.spawnSync('docker', commandArguments, {
         cwd: repositoryRoot,
         encoding: 'utf8',
-        env: process.env,
     });
 
     if (result.error) {
@@ -258,32 +231,17 @@ function runTbls(options, outputPath) {
 }
 
 function compareNames(left, right) {
-    if (left < right) return -1;
-    if (left > right) return 1;
-    return 0;
+    return left.localeCompare(right, undefined, { numeric: true });
 }
 
 function printHelp() {
     console.log([
         'Usage: node scripts/generate_database_schema.js [options]',
         '',
-        'Generates a Mermaid ER diagram from the local PostgreSQL database using tbls.',
+        `Generates ${schemaDiagramPath} from the local PostgreSQL database using tbls.`,
+        'Connection and output settings come from docker-compose.local.yml and .tbls.yml.',
         '',
         'Options:',
-        '  --output <path>         Output path relative to the repository root',
-        '                          (default: docs/database-schema.mmd)',
-        '  --schema <name>         PostgreSQL schema to inspect (default: public)',
-        '  --compose-file <path>   Docker Compose file (default: docker-compose.local.yml)',
-        '  --service <name>        PostgreSQL Compose service (default: postgres)',
-        '  --database <name>       Database name (default: prsdblocal)',
-        '  --user <name>           Database user (default: postgres)',
-        '  --tbls-config <path>    tbls config path relative to repository root',
-        '                          (default: .tbls.yml)',
-        '  --tbls-profile <name>   Compose profile used for tbls service',
-        '                          (default: tools)',
-        '  --tbls-service <name>   tbls Compose service name',
-        '                          (default: tbls)',
-        '  --host-psql             Use psql from PATH instead of Docker Compose',
         '  --staged-migrations     Compare Flyway with migrations in the Git index',
         '  -h, --help              Show this help',
     ].join('\n'));
@@ -296,18 +254,19 @@ function main() {
         return;
     }
 
-    const outputPath = path.resolve(repositoryRoot, options.output);
-    const expectedMigrations = options.useStagedMigrations
-        ? listStagedMigrations()
-        : listFilesystemMigrations();
+    let expectedMigrations;
+    if (options.useStagedMigrations) {
+        expectedMigrations = listStagedMigrations();
+        assertStagedMigrationsHaveNoUnstagedChanges(expectedMigrations, listUnstagedMigrations());
+    } else {
+        expectedMigrations = listFilesystemMigrations();
+    }
 
-    const flywayHistoryExists = runPsql(options, buildFlywayHistoryExistsQuery(options.schema));
-    const databaseMigrations = flywayHistoryExists
-        ? runPsql(options, buildFlywayHistoryQuery(options.schema))
-        : [];
+    const flywayHistoryExists = runPsql(flywayHistoryExistsQuery);
+    const databaseMigrations = flywayHistoryExists ? runPsql(flywayHistoryQuery) : [];
     assertMigrationsAreCurrent(expectedMigrations, databaseMigrations);
-    runTbls(options, outputPath);
-    console.log(`Wrote ${path.relative(repositoryRoot, outputPath)}`);
+    runTbls();
+    console.log(`Wrote ${schemaDiagramPath}`);
 }
 
 if (require.main === module) {
@@ -321,12 +280,10 @@ if (require.main === module) {
 
 module.exports = {
     assertMigrationsAreCurrent,
-    buildFlywayHistoryExistsQuery,
-    buildFlywayHistoryQuery,
+    assertStagedMigrationsHaveNoUnstagedChanges,
     formatPsqlError,
     listFilesystemMigrations,
     listStagedMigrations,
     parseArguments,
     parseGitMigrationPaths,
-    runTbls,
 };

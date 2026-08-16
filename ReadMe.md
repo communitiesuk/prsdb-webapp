@@ -155,11 +155,9 @@ node scripts/generate_database_schema.js
 ```
 
 The generator checks that the running database has successfully applied the same migration files, then regenerates and
-writes the diagram. The repository `.tbls.yml` pins the DSN and excludes `flyway_schema_history` from the output.
-Run `node scripts/generate_database_schema.js --help` for output, Flyway database checks, Compose service/profile,
-and tbls config overrides. Pass `--host-psql` to use a `psql` installation from `PATH` for Flyway checks instead of
-the Compose PostgreSQL container; standard `PGHOST`, `PGPORT`, and `PGPASSWORD` environment variables are respected in
-that mode.
+writes the diagram. Connection and output settings come from `docker-compose.local.yml` and `.tbls.yml`, which pins the
+DSN and excludes `flyway_schema_history` from the output. The only options are `--staged-migrations`, used by the
+pre-commit hook to compare Flyway history against the Git index, and `--help`.
 
 ### Code structure
 
