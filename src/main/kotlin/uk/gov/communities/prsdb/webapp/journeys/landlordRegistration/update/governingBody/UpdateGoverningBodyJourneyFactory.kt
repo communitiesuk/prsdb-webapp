@@ -79,6 +79,10 @@ class UpdateGoverningBodyJourneyFactory(
                         backDestination { journey.returnToCyaPageDestination }
                     }
                 }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: ${state.checkingAnswersFor}")
+                }
             }
             step(journey.finishCyaStep) {
                 initialStep()
