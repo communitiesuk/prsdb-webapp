@@ -512,6 +512,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             orgLandlordDetailsPage.governingBodyMembersLink.clickAndWait()
 
             var memberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            BaseComponent.assertThat(BackLink.default(page)).isVisible()
             BaseComponent.assertThat(memberListPage.heading).containsText("added 2 people")
             assertThat(memberListPage.summaryList.getRowByIndex(0).value).containsText("David Director")
             assertThat(memberListPage.summaryList.getRowByIndex(1).value).containsText("Omar Hassan")
