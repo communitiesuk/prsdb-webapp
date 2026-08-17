@@ -45,10 +45,9 @@ PRSD-NONE: Fixes bug on windows, Updates test seed data
 ## Commands
 
 ```bash
-# Check commits to release
-git fetch origin
-git log origin/test..origin/main --oneline
-git log origin/nft..origin/main --oneline
+# Check commits to release (fetch and log in same command)
+git fetch origin && git log origin/test..origin/main --oneline
+git fetch origin && git log origin/nft..origin/main --oneline
 
 # Check for existing draft PRs
 gh pr list --repo communitiesuk/prsdb-webapp --state open --draft --search "Release main to test"
