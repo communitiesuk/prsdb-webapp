@@ -49,14 +49,6 @@ class UpdateOrganisationCharityCyaStepConfig(
         }
     }
 
-    override fun resolveNextDestination(
-        state: UpdateOrganisationCharityJourneyState,
-        defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
-
     private fun buildSummaryRows(state: UpdateOrganisationCharityJourneyState): List<SummaryListRowViewModel> =
         buildList {
             val task = state.charityTask
