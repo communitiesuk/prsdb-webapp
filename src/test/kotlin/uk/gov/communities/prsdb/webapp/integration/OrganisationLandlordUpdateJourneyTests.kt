@@ -554,11 +554,34 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             val secondCard = cyaPage.governingBodyMemberCard(1)
             BaseComponent.assertThat(secondCard.title).containsText("Partner")
 
+            // check that pressing Change on the CYA page can update the landlord
             firstCard.getAction("Change").link.clickAndWait()
             val changeMemberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
-            changeMemberListPage.form.submit()
+
+            changeMemberListPage.getChangeActionLink(1).clickAndWait()
+            val whoToProvideChangePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageUpdateGoverningBody::class)
+            whoToProvideChangePage.submitWhoToProvide(GoverningBodyMemberType.DIRECTOR)
+
+            val nameChangePage = assertPageIs(page, OrgGovBodyMemberNameFormPageUpdateGoverningBody::class)
+            nameChangePage.submitName("Renamed Partner")
+
+            val dobChangePage = assertPageIs(page, OrgGovBodyMemberDobFormPageUpdateGoverningBody::class)
+            dobChangePage.submitDate("1", "1", "1990")
+
+            val lookupAddressChangePage = assertPageIs(page, OrgGovBodyMemberLookupAddressFormPageUpdateGoverningBody::class)
+            lookupAddressChangePage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+            val selectAddressChangePage = assertPageIs(page, OrgGovBodyMemberSelectAddressFormPageUpdateGoverningBody::class)
+            selectAddressChangePage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+            val memberListAfterEdit = assertPageIs(page, OrgGovBodyMemberListFormPageUpdateGoverningBody::class)
+            assertThat(memberListAfterEdit.summaryList.getRowByIndex(1).value).containsText("Renamed Partner")
+            memberListAfterEdit.form.submit()
 
             val cyaPageAfterChange = assertPageIs(page, GoverningBodyCyaPageUpdateGoverningBody::class)
+            val updatedCyaCard = cyaPageAfterChange.governingBodyMemberCard(1)
+            BaseComponent.assertThat(updatedCyaCard.title).containsText("Director")
+            BaseComponent.assertThat(updatedCyaCard).containsText("Renamed Partner")
             cyaPageAfterChange.submit()
 
             orgLandlordDetailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
