@@ -45,3 +45,4 @@ After approval complete these before merging.
 
 - [ ] QA instructions have been added to the ticket (particularly if this is the last PR required to complete the ticket).
 - [ ] Any special release instructions (e.g. the database will need resetting, emails to be added/removed) have been to the relevant release ticket on the Jira board, referencing your ticket number.
+- [ ] Merge main into your branch locally and check that no TODOs have been added pointing to your ticket.
