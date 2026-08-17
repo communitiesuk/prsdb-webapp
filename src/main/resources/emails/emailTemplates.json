@@ -56,10 +56,10 @@
     "bodyLocation": "/emails/LandlordNoPropertiesDeregistrationConfirmation.md"
   },
   {
-    "test_id": "229479d2-e489-4ad4-a53c-d626b5b5811d",
-    "prod_id": "c37a04e3-f668-480b-a7bf-a4d19dd0edbc",
+    "test_id": "e89e7c12-6116-4a99-b7a5-b3cbb797b4cb",
+    "prod_id": "28d0cf62-6e1e-4731-bdac-eed169d30983",
     "enumName": "LANDLORD_WITH_PROPERTIES_DEREGISTRATION_CONFIRMATION",
-    "subject": "You have deleted your landlord record and rental properties",
+    "subject": "You’re no longer registered as a landlord",
     "bodyLocation": "/emails/LandlordWithPropertiesDeregistrationConfirmation.md"
   },
 
