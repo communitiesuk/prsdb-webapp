@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharit
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCharityFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
@@ -24,7 +23,6 @@ class UpdateOrganisationCharityCyaStepConfig(
     override fun getStepSpecificContent(state: UpdateOrganisationCharityJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "landlordDetails.update.title",
-            "sectionHeaderInfo" to SectionHeaderViewModel("landlordDetails.title", 0, 0, useNumbering = false),
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "summaryName" to "forms.update.checkCharity.summaryName",
