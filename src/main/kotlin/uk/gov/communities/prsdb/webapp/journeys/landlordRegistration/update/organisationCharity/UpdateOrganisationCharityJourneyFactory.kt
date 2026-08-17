@@ -63,10 +63,9 @@ class UpdateOrganisationCharityJourneyFactory(
             unreachableStepUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                OrgIsRegisteredCharityStep.ROUTE_SEGMENT ->
-                    checkAnswerTask(journey.charityTask)
-
-                OrgCharityRegisteredWithStep.ROUTE_SEGMENT ->
+                OrgIsRegisteredCharityStep.ROUTE_SEGMENT,
+                OrgCharityRegisteredWithStep.ROUTE_SEGMENT,
+                ->
                     checkAnswerTask(journey.charityTask)
 
                 OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT ->
