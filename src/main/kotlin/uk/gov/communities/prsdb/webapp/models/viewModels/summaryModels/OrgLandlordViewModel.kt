@@ -1,38 +1,134 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import kotlinx.datetime.toKotlinInstant
+import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.controllers.UpdateCompaniesHouseController.Companion.UPDATE_COMPANIES_HOUSE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordEmailController.Companion.UPDATE_ORG_EMAIL_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordNameController.Companion.UPDATE_ORG_NAME_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordPhoneNumberController.Companion.UPDATE_ORG_PHONE_NUMBER_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController.Companion.UPDATE_ORG_TYPE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationalLandlordAddressController.Companion.UPDATE_ORG_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgIsRegisteredCompanyStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
-// TODO: PDJB-1474 (details tab) & PDJB-1475 (contacts tab): Replace this skeleton view model with summary list rows
 class OrgLandlordViewModel(
-    orgLandlord: OrganisationalLandlord,
+    landlord: OrganisationalLandlord,
+    messageSource: MessageSource,
+    withChangeLinks: Boolean = true,
 ) {
-    val name: String = orgLandlord.name
+    val name: String = landlord.name
 
-    val singleLineAddress: String = orgLandlord.address.singleLineAddress
+    val organisationDetails: List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    "landlordDetails.org.registrationDate",
+                    DateTimeHelper.getDateInUK(landlord.createdDate.toKotlinInstant()),
+                )
+                addRow(
+                    "landlordDetails.org.lrn",
+                    RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                )
+                addRow(
+                    "landlordDetails.org.landlordType",
+                    "landlordDetails.org.landlordTypeValue",
+                )
+                addRow(
+                    "landlordDetails.org.name",
+                    landlord.name,
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_NAME_URL,
+                    withActionLink = withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.org.address",
+                    landlord.address.toMultiLineAddress().split("\n"),
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_ADDRESS_URL,
+                    withActionLink = withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.org.email",
+                    landlord.wholeOrgEmail,
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_EMAIL_URL,
+                    withActionLink = withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.org.phone",
+                    landlord.phoneNumber,
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_PHONE_NUMBER_URL,
+                    withActionLink = withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.org.organisationType",
+                    landlord.organisationTypes.joinToString(", ") { orgType ->
+                        messageSource.getMessageForKey(MessageKeyConverter.convert(orgType))
+                    },
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_TYPE_URL,
+                    withActionLink = withChangeLinks,
+                )
+                addRow(
+                    "landlordDetails.org.registeredCharity",
+                    MessageKeyConverter.convert(landlord.isRegisteredCharity),
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_ORG_CHARITY_URL,
+                    withActionLink = withChangeLinks,
+                    withoutBottomBorder = landlord.isRegisteredCharity,
+                )
+                if (landlord.isRegisteredCharity) {
+                    addRow(
+                        key = "landlordDetails.org.charityCommission",
+                        value = landlord.charityRegisteredWith,
+                        withActionLink = false,
+                        withoutBottomBorder = landlord.hasCharityNumber,
+                    )
+                }
+                if (landlord.hasCharityNumber) {
+                    addRow("landlordDetails.org.charityNumber", landlord.charityNumber)
+                }
+                addRow(
+                    "landlordDetails.org.registeredWithCompaniesHouse",
+                    MessageKeyConverter.convert(landlord.isRegisteredCompany),
+                    CHANGE_LINK_MESSAGE_KEY,
+                    UPDATE_COMPANIES_HOUSE_URL,
+                    withActionLink = withChangeLinks,
+                    withoutBottomBorder = landlord.isRegisteredCompany,
+                )
+                if (landlord.isRegisteredCompany) {
+                    addRow("landlordDetails.org.companyNumber", landlord.companyNumber)
+                }
+            }.toList()
 
-    val email: String = orgLandlord.wholeOrgEmail
+    companion object {
+        private const val CHANGE_LINK_MESSAGE_KEY = "forms.links.change"
 
-    val phoneNumber: String = orgLandlord.phoneNumber
+        private const val UPDATE_ORG_NAME_URL = "$UPDATE_ORG_NAME_ROUTE/${OrgNameStep.ROUTE_SEGMENT}"
 
-    val isCompany: Boolean = orgLandlord.isCompany
+        private const val UPDATE_ORG_ADDRESS_URL = "$UPDATE_ORG_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}"
 
-    val isCharity: Boolean = orgLandlord.isCharity
+        private const val UPDATE_ORG_EMAIL_URL = "$UPDATE_ORG_EMAIL_ROUTE/${OrgEmailStep.ROUTE_SEGMENT}"
 
-    val isTrust: Boolean = orgLandlord.isTrust
+        private const val UPDATE_ORG_PHONE_NUMBER_URL = "$UPDATE_ORG_PHONE_NUMBER_ROUTE/${OrgPhoneNumberStep.ROUTE_SEGMENT}"
 
-    val companyNumber: String? = orgLandlord.companyNumber
+        private const val UPDATE_ORG_TYPE_URL = "$UPDATE_ORG_TYPE_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}"
 
-    val charityNumber: String? = orgLandlord.charityNumber
+        private const val UPDATE_ORG_CHARITY_URL = "$UPDATE_ORG_CHARITY_ROUTE/${OrgIsRegisteredCharityStep.ROUTE_SEGMENT}"
 
-    val mainContactName: String = orgLandlord.mainContactName
-
-    val mainContactEmail: String = orgLandlord.mainContactEmail
-
-    val mainContactPhone: String = orgLandlord.mainContactPhone
-
-    val leadTrusteeName: String? = orgLandlord.leadTrusteeName
-
-    val leadTrusteeEmail: String? = orgLandlord.leadTrusteeEmail
-
-    val leadTrusteePhone: String? = orgLandlord.leadTrusteePhone
+        private const val UPDATE_COMPANIES_HOUSE_URL = "$UPDATE_COMPANIES_HOUSE_ROUTE/${OrgIsRegisteredCompanyStep.ROUTE_SEGMENT}"
+    }
 }

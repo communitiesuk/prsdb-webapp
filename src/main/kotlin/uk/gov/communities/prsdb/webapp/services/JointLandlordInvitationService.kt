@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -69,7 +68,6 @@ class JointLandlordInvitationService(
         // Re-check against the current state of the database when finishing the journey. The form-level checks happen
         // when an email is submitted, so without this a concurrent journey could invite the same email twice.
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
-        // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
         val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
@@ -103,6 +101,7 @@ class JointLandlordInvitationService(
 
         if (emailsToInvite.isNotEmpty()) {
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+            // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
             confirmationEmailSender.sendEmail(
                 invitingLandlord.email,
                 JointLandlordInvitationConfirmationEmail(
@@ -115,6 +114,7 @@ class JointLandlordInvitationService(
 
             val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
             existingJointLandlords.forEach { landlord ->
+                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
                 notifyExistingEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationNotifyExistingEmail(
@@ -134,8 +134,6 @@ class JointLandlordInvitationService(
         propertyOwnership: PropertyOwnership,
         invitingLandlord: Landlord,
     ): String {
-        // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
-        check(invitingLandlord is IndividualLandlord)
         val invitation =
             invitationRepository
                 .findById(invitationId)

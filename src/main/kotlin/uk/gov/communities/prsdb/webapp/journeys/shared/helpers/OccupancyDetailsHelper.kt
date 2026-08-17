@@ -19,6 +19,20 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 @PrsdbWebService
 class OccupancyDetailsHelper {
+    fun <T> getRestructuredOccupancySummaryList(
+        state: T,
+    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState {
+        val occupiedStep = state.occupied
+        val isOccupied = occupiedStep.formModel.occupied ?: false
+        return listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.occupancy.question",
+                isOccupied,
+                Destination.VisitableStep(occupiedStep, state.getCyaJourneyId(occupiedStep)),
+            ),
+        )
+    }
+
     fun <T> getCheckYourAnswersSummaryList(
         state: T,
         messageSource: MessageSource,

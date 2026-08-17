@@ -18,10 +18,12 @@ import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordR
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
 import kotlin.String
@@ -38,8 +40,10 @@ class LandlordService(
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>,
+    private val individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>,
+    private val orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val organisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService,
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
@@ -208,15 +212,213 @@ class LandlordService(
         val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
 
         orgLandlordUpdate.name?.let { landlordEntity.name = it }
+        orgLandlordUpdate.address?.let {
+            landlordEntity.address = addressService.findOrCreateAddress(it)
+        }
+        orgLandlordUpdate.email?.let { landlordEntity.wholeOrgEmail = it }
+        orgLandlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
+        orgLandlordUpdate.isCompany?.let { landlordEntity.isCompany = it }
+        orgLandlordUpdate.isCharity?.let { landlordEntity.isCharity = it }
+        orgLandlordUpdate.isTrust?.let { isTrust ->
+            landlordEntity.isTrust = isTrust
+            if (!isTrust) {
+                landlordEntity.leadTrusteeName = null
+                landlordEntity.leadTrusteeDateOfBirth = null
+                landlordEntity.leadTrusteeEmail = null
+                landlordEntity.leadTrusteePhone = null
+                landlordEntity.leadTrusteeAddress = null
+            }
+        }
+
+        // isRegisteredCharity is only a marker that the charity details are being updated - the details themselves are
+        // always assigned, so that switching to a regulator with no charity number clears any previously recorded one
+        orgLandlordUpdate.isRegisteredCharity?.let {
+            landlordEntity.charityRegisteredWith = orgLandlordUpdate.charityRegisteredWith
+            landlordEntity.charityNumber = orgLandlordUpdate.charityNumber
+        }
+
+        orgLandlordUpdate.leadTrusteeName?.let { landlordEntity.leadTrusteeName = it }
+        orgLandlordUpdate.leadTrusteeDateOfBirth?.let { landlordEntity.leadTrusteeDateOfBirth = it }
+        orgLandlordUpdate.leadTrusteeEmail?.let { landlordEntity.leadTrusteeEmail = it }
+        orgLandlordUpdate.leadTrusteePhone?.let { landlordEntity.leadTrusteePhone = it }
+        orgLandlordUpdate.leadTrusteeAddress?.let {
+            landlordEntity.leadTrusteeAddress = addressService.findOrCreateAddress(it)
+        }
+
+        orgLandlordUpdate.mainContactName?.let { landlordEntity.mainContactName = it }
+        orgLandlordUpdate.mainContactEmail?.let { landlordEntity.mainContactEmail = it }
+        orgLandlordUpdate.mainContactPhone?.let { landlordEntity.mainContactPhone = it }
 
         return landlordEntity
     }
 
     @Transactional
     fun updateOrganisationLandlordName(orgName: String) {
-        updateOrganisationLandlordForUser(
-            OrganisationLandlordUpdateModel(name = orgName),
-        )
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(name = orgName),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation name")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordEmail(email: String) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(email = email),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation email address")
+    }
+
+    @Transactional
+    fun updateOrganisationalLandlordToRegisteredCompany(companyNumber: String) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.companyNumber = companyNumber
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information")
+    }
+
+    @Transactional
+    fun updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers: List<GoverningBodyMemberDataModel>) {
+        val landlordEntity = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        landlordEntity.companyNumber = null
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlordEntity)
+        organisationGoverningBodyMemberService.createGoverningBodyMembers(landlordEntity, governingBodyMembers)
+        sendOrgUpdateConfirmationEmail(landlordEntity.email, "company registration information and governing body details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordMainContact(
+        name: String,
+        email: String,
+        phone: String,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    mainContactName = name,
+                    mainContactEmail = email,
+                    mainContactPhone = phone,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "main contact")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordPhoneNumber(phoneNumber: String) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(phoneNumber = phoneNumber),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation phone number")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordType(
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isCompany = isCompany,
+                    isCharity = isCharity,
+                    isTrust = isTrust,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordTypeAndLeadTrustee(
+        isCompany: Boolean,
+        isCharity: Boolean,
+        isTrust: Boolean,
+        leadTrusteeName: String? = null,
+        leadTrusteeDateOfBirth: LocalDate? = null,
+        leadTrusteeEmail: String? = null,
+        leadTrusteePhone: String? = null,
+        leadTrusteeAddress: AddressDataModel? = null,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isCompany = isCompany,
+                    isCharity = isCharity,
+                    isTrust = isTrust,
+                    leadTrusteeName = leadTrusteeName,
+                    leadTrusteeDateOfBirth = leadTrusteeDateOfBirth,
+                    leadTrusteeEmail = leadTrusteeEmail,
+                    leadTrusteePhone = leadTrusteePhone,
+                    leadTrusteeAddress = leadTrusteeAddress,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation type and lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordAsNotARegisteredCharity() = updateOrganisationLandlordCharityDetails(null, null)
+
+    @Transactional
+    fun updateOrganisationLandlordAsRegisteredCharityWithNoRegulator() =
+        updateOrganisationLandlordCharityDetails(CharityRegulator.NONE, null)
+
+    @Transactional
+    fun updateOrganisationLandlordCharityRegistration(
+        charityRegisteredWith: CharityRegulator,
+        charityNumber: String,
+    ) = updateOrganisationLandlordCharityDetails(charityRegisteredWith, charityNumber)
+
+    private fun updateOrganisationLandlordCharityDetails(
+        charityRegisteredWith: CharityRegulator?,
+        charityNumber: String?,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    isRegisteredCharity = charityRegisteredWith != null,
+                    charityRegisteredWith = charityRegisteredWith,
+                    charityNumber = charityNumber,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "charity registration details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordLeadTrustee(
+        name: String,
+        dateOfBirth: LocalDate,
+        email: String,
+        phone: String,
+        addressDataModel: AddressDataModel,
+    ) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(
+                    leadTrusteeName = name,
+                    leadTrusteeDateOfBirth = dateOfBirth,
+                    leadTrusteeEmail = email,
+                    leadTrusteePhone = phone,
+                    leadTrusteeAddress = addressDataModel,
+                ),
+            )
+
+        sendOrgUpdateConfirmationEmail(landlord.email, "lead trustee details")
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordAddress(address: AddressDataModel) {
+        val landlord =
+            updateOrganisationLandlordForUser(
+                OrganisationLandlordUpdateModel(address = address),
+            )
+        sendOrgUpdateConfirmationEmail(landlord.email, "organisation address")
     }
 
     fun searchForLandlords(
@@ -250,7 +452,12 @@ class LandlordService(
                 throw RepositoryQueryTimeoutException("Landlord search with query '$searchTerm' timed out")
             }
 
-        return landlordPage.map { LandlordSearchResultViewModel.fromDataModel(it, backLinkService.storeCurrentUrlReturningKey()) }
+        return landlordPage.map {
+            LandlordSearchResultViewModel.fromDataModel(
+                it,
+                backLinkService.storeCurrentUrlReturningKey(),
+            )
+        }
     }
 
     private fun sendUpdateConfirmationEmail(
@@ -272,9 +479,9 @@ class LandlordService(
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
-                updateConfirmationSender.sendEmail(
+                individualUpdateConfirmationSender.sendEmail(
                     email,
-                    LandlordUpdateConfirmation(
+                    IndividualLandlordUpdateConfirmation(
                         registrationNumber =
                             RegistrationNumberDataModel
                                 .fromRegistrationNumber(landlord.registrationNumber)
@@ -285,5 +492,26 @@ class LandlordService(
                 )
             }
         }
+    }
+
+    @Transactional
+    fun updateOrganisationLandlordGoverningBodyMembers(members: List<GoverningBodyMemberDataModel>) {
+        val landlord = userToLandlordService.getCurrentOrganisationLandlordForUser()
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(landlord)
+        organisationGoverningBodyMemberService.createGoverningBodyMembers(landlord, members)
+        sendOrgUpdateConfirmationEmail(landlord.email, "governing body members")
+    }
+
+    private fun sendOrgUpdateConfirmationEmail(
+        emailAddress: String,
+        updatedDetail: String,
+    ) {
+        orgUpdateConfirmationSender.sendEmail(
+            emailAddress,
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                updatedDetail = "The $updatedDetail.",
+            ),
+        )
     }
 }

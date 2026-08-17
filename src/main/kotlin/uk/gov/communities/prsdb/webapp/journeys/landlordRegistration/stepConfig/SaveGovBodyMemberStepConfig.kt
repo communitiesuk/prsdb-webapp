@@ -6,15 +6,15 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.OrgGovBodyMembersState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 
 @JourneyFrameworkComponent
-class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovBodyState>() {
-    override fun mode(state: OrgGovBodyState): Complete = Complete.COMPLETE
+class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovBodyMembersState>() {
+    override fun mode(state: OrgGovBodyMembersState): Complete = Complete.COMPLETE
 
-    override fun afterStepIsReached(state: OrgGovBodyState) {
+    override fun afterStepIsReached(state: OrgGovBodyMembersState) {
         val name =
             state.orgGovBodyMemberNameStep.formModelOrNull?.name
                 ?: throw PrsdbWebException("Governing body member name step data is missing")
@@ -34,7 +34,9 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
         val lookupFormModel = state.govBodyMemberAddressTask.lookupAddressStep.formModelOrNull
         val selectFormModel = state.govBodyMemberAddressTask.selectAddressStep.formModelOrNull
         val wentManual = selectFormModel?.address == MANUAL_ADDRESS_CHOSEN
-        val manualFormModel = state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull?.takeIf { wentManual }
+        val manualFormModel =
+            state.govBodyMemberAddressTask.manualAddressStep.formModelOrNull
+                ?.takeIf { wentManual }
 
         val currentMap = state.governingBodyMembersMap?.toMutableMap() ?: mutableMapOf()
 
@@ -76,4 +78,4 @@ class SaveGovBodyMemberStepConfig : AbstractInternalStepConfig<Complete, OrgGovB
 @JourneyFrameworkComponent
 final class SaveGovBodyMemberStep(
     stepConfig: SaveGovBodyMemberStepConfig,
-) : JourneyStep.InternalStep<Complete, OrgGovBodyState>(stepConfig)
+) : JourneyStep.InternalStep<Complete, OrgGovBodyMembersState>(stepConfig)

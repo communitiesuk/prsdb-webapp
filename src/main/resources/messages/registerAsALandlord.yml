@@ -53,17 +53,9 @@ orgCheckAnswers:
     registeredCharity: Registered charity
     charityCommission: Charity commission
     charityNumber: Charity number
-    registeredWithCompaniesHouse: Registered with Companies House
-    companiesHouseNumber: Companies House number
   governingBody:
     heading: Members of the governing body
     leadTrusteeCardTitle: Lead trustee
-    memberCardTitle:
-      director: '{0}. Director'
-      trustee: '{0}. Trustee'
-      partner: '{0}. Partner'
-      other: '{0}. Other'
-    role: Role
     name: Name
     dateOfBirth: Date of birth
     email: Email
@@ -140,8 +132,12 @@ leadTrusteePhone:
   error:
     missing: Enter a phone number including the country code for international numbers
 orgType:
-  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
+  company: Company
+  charity: Charity
+  trust: Trust
+  none: Other
   checkbox:
     company: Company
     charity: Charity
@@ -150,6 +146,42 @@ orgType:
   divider: or
   error:
     missing: Select the types of organisation that apply, or select ‘None of these’
+orgTypeTrustInterruption:
+  addingTrust:
+    heading: You must provide trustee details
+    paragraph:
+      one: You’ve selected that your organisation is a trust.
+      two: You must provide details including contact information for your organisation’s lead trustee.
+  removingTrust:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: "You’ve changed the type of your organisation from a trust to {0}."
+      two: This means that the lead trustee details will be removed.
+      three: If they are still part of your organisation’s governing body you must add them as a member of the governing body.
+  orgType:
+    company: company
+    charity: charity
+    none: none of these
+companiesHouseInterruption:
+  bulletList:
+    directors: directors
+    trustees: trustees
+    partners: partners
+    otherMembers: other members of the governing body
+  changedToNonCompany:
+    heading: Your new answer affects other sections of your landlord record
+    question: 'Question: Is your organisation registered with Companies House?'
+    previousAnswer: 'Previous answer: Yes'
+    newAnswer: 'New answer: No'
+    paragraph:
+      one: 'If you continue your company number will be removed and you will need to provide details for:'
+      two: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
+  changedToCompany:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve changed your organisation’s Companies House registration status from No to Yes.
+      two: 'This means we will remove the details you provided for:'
+      three: If your organisation is still registered you can go back to undo this change.
 orgGovBodyWhoToProvide:
   title: Who do you want to provide details for?
   fieldSetHeading: Who do you want to provide details for?

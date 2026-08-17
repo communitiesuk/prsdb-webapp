@@ -42,6 +42,9 @@ extra["jackson-bom.version"] = "2.21.5"
 extra["netty.version"] = "4.1.136.Final"
 // CVE-2026-54291 / GHSA-j92g-9f8w-j867: PostgreSQL JDBC silent channel-binding auth downgrade (fixed in 42.7.12).
 extra["postgresql.version"] = "42.7.12"
+// CVE-2026-49844 / GHSA-qv9r-c865-cp47: log4j-api improper encoding of non-finite floating-point values
+// during MapMessage JSON serialization (fixed in 2.25.5).
+extra["log4j2.version"] = "2.25.5"
 
 dependencies {
     // Spring Boot Web
@@ -300,6 +303,15 @@ buildscript {
             // extra["jackson-bom.version"] override above only applies to the project's dependency
             // management, not here, so GHSA-5gvw-p9qm-jgwh / GHSA-mhm7-754m-9p8w are reported against it.
             force("com.fasterxml.jackson:jackson-bom:2.21.5")
+            // spring-boot-buildpack-platform also pulls a vulnerable httpclient5 onto the build classpath.
+            // CVE-2026-64607 / GHSA-hjcp-jmpx-g3qm: connection leak on Content-Encoding decode error
+            // leading to pool exhaustion (fixed in 5.6.3).
+            force("org.apache.httpcomponents.client5:httpclient5:5.6.3")
+            // CVE-2026-54399 / GHSA-hf6x-8p5f-cgmf: httpcore5 HTTP/1 header parsing memory-exhaustion DoS
+            // (fixed in 5.4.3). Pulled transitively via spring-boot-buildpack-platform -> httpclient5 onto
+            // the build classpath, so it is reported even though it is build-time only.
+            force("org.apache.httpcomponents.core5:httpcore5:5.4.3")
+            force("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3")
         }
     }
 }

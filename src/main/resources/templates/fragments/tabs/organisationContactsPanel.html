@@ -1,0 +1,23 @@
+<th:block th:fragment="organisationContactsPanelContent" th:remove="tag">
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">landlordDetails.org.mainContactHeading</h2>
+    <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.mainContactCard.title}, ${orgLandlordContacts.mainContactCard.cardNumber}, ${orgLandlordContacts.mainContactCard.actions}, ${orgLandlordContacts.mainContactCard.summaryList})}"></div>
+
+    <th:block th:if="${orgLandlordContacts.leadTrusteeCard != null}">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">landlordDetails.org.leadTrusteeHeading</h2>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.leadTrusteeCard.title}, ${orgLandlordContacts.leadTrusteeCard.cardNumber}, ${orgLandlordContacts.leadTrusteeCard.actions}, ${orgLandlordContacts.leadTrusteeCard.summaryList})}"></div>
+    </th:block>
+
+    <th:block th:if="${orgLandlordContacts.showGoverningBody}">
+        <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">landlordDetails.org.governingBody.heading</h2>
+        <p class="govuk-body" th:if="${orgLandlordContacts.showGoverningBodyMembersLink}">
+            <a class="govuk-link" th:href="@{${orgLandlordContacts.governingBodyMembersLinkUrl}}"
+               th:text="#{landlordDetails.org.governingBody.membersLink}">landlordDetails.org.governingBody.membersLink</a>
+        </p>
+        <th:block th:each="card : ${orgLandlordContacts.governingBodyMemberCards}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
+        </th:block>
+    </th:block>
+
+    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.registrationContactHeading}">landlordDetails.org.registrationContactHeading</h2>
+    <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.registrationContactCard.title}, ${orgLandlordContacts.registrationContactCard.cardNumber}, ${orgLandlordContacts.registrationContactCard.actions}, ${orgLandlordContacts.registrationContactCard.summaryList})}"></div>
+</th:block>

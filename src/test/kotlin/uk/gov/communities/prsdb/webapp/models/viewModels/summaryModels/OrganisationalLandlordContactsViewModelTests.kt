@@ -2,9 +2,16 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGoverningBodyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLeadTrusteeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationMainContactController
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationGoverningBodyMember
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.governingBody.InitialiseGovBodyMembersForGovBodyUpdateStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -19,9 +26,16 @@ class OrganisationalLandlordContactsViewModelTests {
         val card = viewModel.mainContactCard
         assertEquals("landlordDetails.org.mainContactHeading", card.title)
         assertEquals("forms.links.change", card.actions!!.single().text)
-        assertEquals("#", card.actions!!.single().url)
         assertEquals(
-            listOf("landlordDetails.org.mainContactName", "landlordDetails.org.mainContactEmail", "landlordDetails.org.mainContactPhone"),
+            "${UpdateOrganisationMainContactController.UPDATE_ORG_MAIN_CONTACT_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}",
+            card.actions!!.single().url,
+        )
+        assertEquals(
+            listOf(
+                "landlordDetails.org.mainContactName",
+                "landlordDetails.org.mainContactEmail",
+                "landlordDetails.org.mainContactPhone",
+            ),
             card.summaryList.map { it.fieldHeading },
         )
     }
@@ -46,6 +60,10 @@ class OrganisationalLandlordContactsViewModelTests {
         val card = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).leadTrusteeCard!!
         assertEquals("landlordDetails.org.leadTrusteeHeading", card.title)
         assertEquals(
+            "${UpdateLeadTrusteeController.UPDATE_LEAD_TRUSTEE_ROUTE}/${LeadTrusteeNameStep.ROUTE_SEGMENT}",
+            card.actions!!.single().url,
+        )
+        assertEquals(
             listOf(
                 "landlordDetails.org.leadTrusteeName",
                 "landlordDetails.org.leadTrusteeDateOfBirth",
@@ -54,6 +72,18 @@ class OrganisationalLandlordContactsViewModelTests {
                 "landlordDetails.org.leadTrusteeAddress",
             ),
             card.summaryList.map { it.fieldHeading },
+        )
+    }
+
+    @Test
+    fun `governingBodyMembersLinkUrl links to start step`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList())
+
+        assertEquals(
+            "${UpdateGoverningBodyController.UPDATE_GOVERNING_BODY_ROUTE}/${InitialiseGovBodyMembersForGovBodyUpdateStep.ROUTE_SEGMENT}",
+            viewModel.governingBodyMembersLinkUrl,
         )
     }
 
@@ -109,8 +139,50 @@ class OrganisationalLandlordContactsViewModelTests {
     }
 
     @Test
+    fun `main contact and lead trustee cards have no actions when change links are disabled`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isTrust = true, leadTrusteeName = "Anita Locke")
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, emptyList(), withChangeLinks = false)
+
+        assertTrue(viewModel.mainContactCard.actions.isNullOrEmpty())
+        assertTrue(viewModel.leadTrusteeCard!!.actions.isNullOrEmpty())
+    }
+
+    @Test
+    fun `governing body members link is hidden when change links are disabled but member cards remain`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+        val members =
+            listOf(
+                OrganisationGoverningBodyMember(
+                    orgLandlord,
+                    GoverningBodyMemberType.DIRECTOR,
+                    "Anita Locke",
+                    LocalDate.of(1874, 3, 18),
+                    address,
+                ),
+            )
+
+        val viewModel = OrganisationalLandlordContactsViewModel(orgLandlord, members, withChangeLinks = false)
+
+        assertEquals(false, viewModel.showGoverningBodyMembersLink)
+        assertEquals(true, viewModel.showGoverningBody)
+        assertEquals(1, viewModel.governingBodyMemberCards.size)
+    }
+
+    @Test
+    fun `governing body members link is shown by default for an org landlord with a governing body`() {
+        val orgLandlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+
+        assertEquals(true, OrganisationalLandlordContactsViewModel(orgLandlord, emptyList()).showGoverningBodyMembersLink)
+    }
+
+    @Test
     fun `registration contact card has no action and the expected rows`() {
-        val card = OrganisationalLandlordContactsViewModel(MockLandlordData.createOrgLandlord(), emptyList()).registrationContactCard
+        val card =
+            OrganisationalLandlordContactsViewModel(
+                MockLandlordData.createOrgLandlord(),
+                emptyList(),
+            ).registrationContactCard
         assertEquals("landlordDetails.org.registrationContactHeading", card.title)
         assertNull(card.actions)
         assertEquals(
