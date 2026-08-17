@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.LeadTrusteeSelectAddressPageUpdateLeadTrustee
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityCyaPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityNumberScotlandFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgCharityRegisteredWithFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgEmailFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.OrgIsRegisteredCharityFormPageUpdateLandlordDetails
@@ -229,7 +230,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
             .submitCharityNumber(CHARITY_NUMBER)
 
-        submitCyaPage(page)
+        assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
         val summaryList = assertPageIs(page, OrgLandlordDetailsPage::class).organisationDetailsSummaryList
         assertThat(summaryList.registeredCharityRow.value).containsText("Yes")
@@ -243,7 +244,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
             .submitCharityRegisteredWith(CharityRegulator.NONE)
 
-        submitCyaPage(page)
+        assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
         val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
@@ -265,7 +266,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
             .submitCharityRegisteredWith(CharityRegulator.NONE)
 
-        submitCyaPage(page)
+        assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
         val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
@@ -280,15 +281,65 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
             .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
         assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
             .submitCharityNumber(CHARITY_NUMBER)
-        submitCyaPage(page)
+        assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
         startCharityUpdateJourney(page).submitNo()
-        submitCyaPage(page)
+        assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
         val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
         assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("No")
         assertThat(detailsPage.mainContent).not().containsText("Charity commission")
         assertThat(detailsPage.mainContent).not().containsText("Charity number")
+    }
+
+    @Test
+    fun `Changing charity details on the check your answers page updates correctly through multiple changes`(page: Page) {
+        startCharityUpdateJourney(page).submitNo()
+        val cyaPage = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class)
+        assertThat(cyaPage.summaryList.registeredCharityRow.value).containsText("No")
+        assertThat(cyaPage.mainContent).not().containsText("Charity commission")
+        assertThat(cyaPage.mainContent).not().containsText("Charity number")
+
+        // Change to yes on CYA
+        cyaPage.summaryList.registeredCharityRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, OrgIsRegisteredCharityFormPageUpdateLandlordDetails::class).submitYes()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.NONE)
+
+        val cyaAfterYesNone = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class)
+        assertThat(cyaAfterYesNone.summaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(cyaAfterYesNone.summaryList.charityCommissionRow.value).containsText("Other")
+        assertThat(cyaAfterYesNone.mainContent).not().containsText("Charity number")
+
+        // Change charity commission to E&W
+        cyaAfterYesNone.summaryList.charityCommissionRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+        assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber(CHARITY_NUMBER)
+
+        val cyaAfterEW = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class)
+        assertThat(cyaAfterEW.summaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(cyaAfterEW.summaryList.charityCommissionRow.value).containsText("Charities Commission of England and Wales")
+        assertThat(cyaAfterEW.summaryList.charityNumberRow.value).containsText(CHARITY_NUMBER)
+
+        // Change charity commission to Scotland
+        cyaAfterEW.summaryList.charityCommissionRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, OrgCharityRegisteredWithFormPageUpdateLandlordDetails::class)
+            .submitCharityRegisteredWith(CharityRegulator.SCOTLAND)
+        assertPageIs(page, OrgCharityNumberScotlandFormPageUpdateLandlordDetails::class)
+            .submitCharityNumber(SCOTLAND_CHARITY_NUMBER)
+
+        val cyaAfterScotland = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class)
+        assertThat(cyaAfterScotland.summaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(cyaAfterScotland.summaryList.charityCommissionRow.value).containsText("Scottish Charity Regulator")
+        assertThat(cyaAfterScotland.summaryList.charityNumberRow.value).containsText(SCOTLAND_CHARITY_NUMBER)
+
+        cyaAfterScotland.submit()
+        val detailsPage = assertPageIs(page, OrgLandlordDetailsPage::class)
+        assertThat(detailsPage.organisationDetailsSummaryList.registeredCharityRow.value).containsText("Yes")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityCommissionRow.value).containsText("Scottish Charity Regulator")
+        assertThat(detailsPage.organisationDetailsSummaryList.charityNumberRow.value).containsText(SCOTLAND_CHARITY_NUMBER)
     }
 
     // The is-registered-charity URL is a prefix of the registered-with URL, so the heading is asserted to confirm
@@ -300,9 +351,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         assertThat(charityPage.heading).containsText("Is your organisation a registered charity?")
         return charityPage
     }
-
-    // TODO: PDJB-1463: this page is a placeholder that does not yet list the submitted answers
-    private fun submitCyaPage(page: Page) = assertPageIs(page, OrgCharityCyaPageUpdateLandlordDetails::class).submit()
 
     @Test
     fun `An organisation landlord can update the organisation phone number and return to details page`(page: Page) {
@@ -601,6 +649,7 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
         private const val LEAD_TRUSTEE_EMAIL = "trustee@test.com"
         private const val LEAD_TRUSTEE_PHONE = "07123456789"
         private const val CHARITY_NUMBER = "1234567"
+        private const val SCOTLAND_CHARITY_NUMBER = "SC012345"
     }
 
     @Nested
