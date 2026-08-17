@@ -67,22 +67,23 @@ class UpdateOrganisationCharityCyaStepConfig(
             )
 
             if (isRegisteredCharity) {
-                val charityRegulator = task.orgCharityRegisteredWithStep.formModel.charityRegisteredWith
-                if (charityRegulator != null) {
-                    add(
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "landlordDetails.org.charityCommission",
-                            charityRegulator,
-                            Destination.VisitableStep(
-                                task.orgCharityRegisteredWithStep,
-                                state.getCyaJourneyId(task.orgCharityRegisteredWithStep),
-                            ),
-                        ),
+                val charityRegulator =
+                    task.orgCharityRegisteredWithStep.formModel.notNullValue(
+                        CharityRegisteredWithFormModel::charityRegisteredWith,
                     )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "landlordDetails.org.charityCommission",
+                        charityRegulator,
+                        Destination.VisitableStep(
+                            task.orgCharityRegisteredWithStep,
+                            state.getCyaJourneyId(task.orgCharityRegisteredWithStep),
+                        ),
+                    ),
+                )
 
-                    if (charityRegulator != CharityRegulator.NONE) {
-                        add(charityNumberRow(state, task, charityRegulator))
-                    }
+                if (charityRegulator != CharityRegulator.NONE) {
+                    add(charityNumberRow(state, task, charityRegulator))
                 }
             }
         }
