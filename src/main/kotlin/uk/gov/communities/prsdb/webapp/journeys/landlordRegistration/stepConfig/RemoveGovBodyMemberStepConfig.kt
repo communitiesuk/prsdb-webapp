@@ -24,7 +24,7 @@ class RemoveGovBodyMemberStepConfig(
     override fun beforeAttemptingToReachStep(state: OrgGovBodyMembersState): Boolean {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
         val currentMap = state.governingBodyMembersMap ?: emptyMap()
-        return keyToRemove != null && keyToRemove in currentMap.keys
+        return keyToRemove != null && keyToRemove in currentMap.keys && (currentMap.size > 1 || state.allowRemovingLastMember)
     }
 
     override fun afterStepIsReached(state: OrgGovBodyMembersState) {

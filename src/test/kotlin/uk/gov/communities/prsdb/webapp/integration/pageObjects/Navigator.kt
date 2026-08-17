@@ -68,6 +68,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPri
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewOrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
@@ -189,6 +190,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeCyaPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrganisationTypeJourneyPages.OrgTypeTrustInterruptionPageUpdateOrganisationType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
@@ -220,6 +222,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.organisationType.OrgTypeTrustInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -1244,6 +1247,11 @@ class Navigator(
         return createValidPage(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to id.toString()))
     }
 
+    fun goToOrgLandlordDetailsAsALocalCouncilUser(id: Long): LocalCouncilViewOrgLandlordDetailsPage {
+        navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(id))
+        return createValidPage(page, LocalCouncilViewOrgLandlordDetailsPage::class, mapOf("id" to id.toString()))
+    }
+
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
         navigate("${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
@@ -1279,6 +1287,43 @@ class Navigator(
             ),
         )
         return createValidPage(page, OrgTypeTrustInterruptionPageUpdateOrganisationType::class)
+    }
+
+    fun skipToUpdateOrgTypeCyaPageTrustUnchanged(orgTypes: List<OrgType>): OrgTypeCyaPageUpdateOrganisationType {
+        setJourneyStateInSession(
+            UpdateOrganisationTypeJourneyStateSessionBuilder.beforeCyaTrustUnchanged(orgTypes).build(),
+        )
+        navigate(
+            JourneyStateService.urlWithJourneyState(
+                "${UpdateOrganisationTypeController.UPDATE_ORG_TYPE_ROUTE}/${OrgTypeCyaStep.ROUTE_SEGMENT}",
+                TEST_JOURNEY_ID,
+            ),
+        )
+        return createValidPage(page, OrgTypeCyaPageUpdateOrganisationType::class)
+    }
+
+    fun skipToUpdateOrgTypeCyaPageAddingTrust(
+        orgTypes: List<OrgType> = listOf(OrgType.COMPANY, OrgType.TRUST),
+        trusteeName: String = "Lead Trustee",
+        trusteeEmail: String = "trustee@test.com",
+        trusteePhone: String = "07123456789",
+    ): OrgTypeCyaPageUpdateOrganisationType {
+        setJourneyStateInSession(
+            UpdateOrganisationTypeJourneyStateSessionBuilder
+                .beforeCyaAddingTrust(
+                    orgTypes,
+                    trusteeName,
+                    trusteeEmail,
+                    trusteePhone,
+                ).build(),
+        )
+        navigate(
+            JourneyStateService.urlWithJourneyState(
+                "${UpdateOrganisationTypeController.UPDATE_ORG_TYPE_ROUTE}/${OrgTypeCyaStep.ROUTE_SEGMENT}",
+                TEST_JOURNEY_ID,
+            ),
+        )
+        return createValidPage(page, OrgTypeCyaPageUpdateOrganisationType::class)
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {

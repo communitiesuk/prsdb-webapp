@@ -915,6 +915,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `the organisation type row shows Other when no organisation types are selected`(page: Page) {
+            val checkAnswersPage =
+                navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
+                    LandlordStateSessionBuilder.beforeOrgCheckAnswers().withOrgType(listOf(OrgType.NONE)),
+                )
+
+            assertThat(checkAnswersPage.landlordDetails.organisationTypeRow.value).hasText("Other")
+        }
+
+        @Test
         fun `the charity and companies house detail rows are hidden for a non-charity organisation not registered with companies house`(
             page: Page,
         ) {
@@ -953,7 +963,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 )
 
             assertThat(checkAnswersPage.landlordDetails.registeredCharityRow.value).containsText("Yes")
-            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).containsText("None of these")
+            assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).containsText("Other")
             assertThat(checkAnswersPage.landlordDetails.charityNumberRow.value).hasCount(0)
         }
 

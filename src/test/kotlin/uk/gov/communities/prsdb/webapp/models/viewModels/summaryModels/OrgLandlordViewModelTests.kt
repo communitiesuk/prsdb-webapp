@@ -1,15 +1,19 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class OrgLandlordViewModelTests {
+    private val messageSource = YamlMessageSource("classpath:messages")
+
     @Test
     fun `a registered charity and registered company shows all organisation detail rows in order`() {
         val landlord =
@@ -22,7 +26,7 @@ class OrgLandlordViewModelTests {
                 charityNumber = "0123456",
             )
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         assertIterableEquals(
             listOf(
@@ -53,7 +57,7 @@ class OrgLandlordViewModelTests {
                 charityNumber = null,
             )
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         val headings = viewModel.organisationDetails.map { it.fieldHeading }
         assertTrue("landlordDetails.org.charityCommission" !in headings)
@@ -73,7 +77,7 @@ class OrgLandlordViewModelTests {
                 charityNumber = null,
             )
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         val headings = viewModel.organisationDetails.map { it.fieldHeading }
         assertTrue("landlordDetails.org.charityNumber" !in headings)
@@ -82,7 +86,7 @@ class OrgLandlordViewModelTests {
             viewModel.organisationDetails.single { it.fieldHeading == "landlordDetails.org.registeredCharity" }.fieldValue,
         )
         assertEquals(
-            "forms.orgCharityRegisteredWith.radios.option.none",
+            "commonText.other",
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
                 .getConvertedFieldValue(),
@@ -93,7 +97,7 @@ class OrgLandlordViewModelTests {
     fun `an organisation without a company number omits the companies house number row`() {
         val landlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         val headings = viewModel.organisationDetails.map { it.fieldHeading }
         assertTrue("landlordDetails.org.companyNumber" !in headings)
@@ -112,7 +116,7 @@ class OrgLandlordViewModelTests {
                 address = Address(AddressDataModel("3rd Floor, 88 Kingsway Square, London, ZX1 4QP")),
             )
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         assertIterableEquals(
             listOf("3rd Floor", "88 Kingsway Square", "London", "ZX1 4QP"),
@@ -121,36 +125,132 @@ class OrgLandlordViewModelTests {
     }
 
     @Test
-    fun `the organisation type row maps each selected organisation type to its message key`() {
+    fun `the organisation type row joins the selected organisation types into a single comma separated value`() {
         val landlord =
             MockLandlordData.createOrgLandlord(isCompany = true, isCharity = true, isTrust = true)
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
-        assertIterableEquals(
-            listOf(
-                "registerAsALandlord.orgType.checkbox.company",
-                "registerAsALandlord.orgType.checkbox.charity",
-                "registerAsALandlord.orgType.checkbox.trust",
-            ),
+        assertEquals(
+            "Company, Charity, Trust",
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.organisationType" }
-                .getConvertedFieldValue() as List<*>,
+                .fieldValue,
         )
     }
 
     @Test
-    fun `an organisation with no selected organisation types shows none of these`() {
+    fun `an organisation with no selected organisation types shows Other`() {
         val landlord =
             MockLandlordData.createOrgLandlord(isCompany = false, isCharity = false, isTrust = false)
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
-        assertIterableEquals(
-            listOf("registerAsALandlord.orgType.checkbox.none"),
+        assertEquals(
+            "Other",
             viewModel.organisationDetails
                 .single { it.fieldHeading == "landlordDetails.org.organisationType" }
-                .getConvertedFieldValue() as List<*>,
+                .fieldValue,
+        )
+    }
+
+    @Test
+    fun `a registered charity with a charity number groups the charity rows into one bordered section`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCharity = true,
+                charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
+                charityNumber = "0123456",
+            )
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
+
+        assertTrue(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.registeredCharity" }
+                .withoutBottomBorder,
+        )
+        assertTrue(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
+                .withoutBottomBorder,
+        )
+        assertFalse(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.charityNumber" }
+                .withoutBottomBorder,
+        )
+    }
+
+    @Test
+    fun `a registered charity without a charity number closes the charity section after the charity commission row`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCharity = true,
+                charityRegisteredWith = CharityRegulator.NONE,
+                charityNumber = null,
+            )
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
+
+        assertTrue(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.registeredCharity" }
+                .withoutBottomBorder,
+        )
+        assertFalse(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.charityCommission" }
+                .withoutBottomBorder,
+        )
+    }
+
+    @Test
+    fun `an organisation that is not a registered charity keeps the border on the registered charity row`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCharity = false,
+                charityRegisteredWith = null,
+                charityNumber = null,
+            )
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
+
+        assertFalse(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.registeredCharity" }
+                .withoutBottomBorder,
+        )
+    }
+
+    @Test
+    fun `a registered company groups the companies house rows into one bordered section`() {
+        val landlord = MockLandlordData.createOrgLandlord(isCompany = true, companyNumber = "01234567")
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
+
+        assertTrue(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.registeredWithCompaniesHouse" }
+                .withoutBottomBorder,
+        )
+        assertFalse(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.companyNumber" }
+                .withoutBottomBorder,
+        )
+    }
+
+    @Test
+    fun `an organisation without a company number keeps the border on the registered with companies house row`() {
+        val landlord = MockLandlordData.createOrgLandlord(isCompany = false, companyNumber = null)
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
+
+        assertFalse(
+            viewModel.organisationDetails
+                .single { it.fieldHeading == "landlordDetails.org.registeredWithCompaniesHouse" }
+                .withoutBottomBorder,
         )
     }
 
@@ -167,6 +267,7 @@ class OrgLandlordViewModelTests {
         val changeableHeadings =
             listOf(
                 "landlordDetails.org.name",
+                "landlordDetails.org.address",
                 "landlordDetails.org.email",
                 "landlordDetails.org.phone",
                 "landlordDetails.org.organisationType",
@@ -174,7 +275,7 @@ class OrgLandlordViewModelTests {
                 "landlordDetails.org.registeredWithCompaniesHouse",
             )
 
-        val viewModel = OrgLandlordViewModel(landlord)
+        val viewModel = OrgLandlordViewModel(landlord, messageSource)
 
         viewModel.organisationDetails.forEach { row ->
             if (row.fieldHeading in changeableHeadings) {
@@ -183,5 +284,40 @@ class OrgLandlordViewModelTests {
                 assertTrue(row.actions.isEmpty(), "${row.fieldHeading} should not have an action link")
             }
         }
+    }
+
+    @Test
+    fun `no rows have action links when change links are disabled`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCompany = true,
+                isCharity = true,
+                companyNumber = "01234567",
+                charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
+                charityNumber = "0123456",
+            )
+
+        val viewModel = OrgLandlordViewModel(landlord, messageSource, withChangeLinks = false)
+
+        viewModel.organisationDetails.forEach { row ->
+            assertTrue(row.actions.isEmpty(), "${row.fieldHeading} should not have an action link")
+        }
+    }
+
+    @Test
+    fun `all rows are still present when change links are disabled`() {
+        val landlord =
+            MockLandlordData.createOrgLandlord(
+                isCompany = true,
+                isCharity = true,
+                companyNumber = "01234567",
+                charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES,
+                charityNumber = "0123456",
+            )
+
+        assertIterableEquals(
+            OrgLandlordViewModel(landlord, messageSource).organisationDetails.map { it.fieldHeading },
+            OrgLandlordViewModel(landlord, messageSource, withChangeLinks = false).organisationDetails.map { it.fieldHeading },
+        )
     }
 }

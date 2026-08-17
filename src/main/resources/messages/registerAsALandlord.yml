@@ -53,17 +53,9 @@ orgCheckAnswers:
     registeredCharity: Registered charity
     charityCommission: Charity commission
     charityNumber: Charity number
-    registeredWithCompaniesHouse: Registered with Companies House
-    companiesHouseNumber: Companies House number
   governingBody:
     heading: Members of the governing body
     leadTrusteeCardTitle: Lead trustee
-    memberCardTitle:
-      director: '{0}. Director'
-      trustee: '{0}. Trustee'
-      partner: '{0}. Partner'
-      other: '{0}. Other'
-    role: Role
     name: Name
     dateOfBirth: Date of birth
     email: Email
@@ -142,6 +134,10 @@ leadTrusteePhone:
 orgType:
   fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
+  company: Company
+  charity: Charity
+  trust: Trust
+  none: Other
   checkbox:
     company: Company
     charity: Charity
@@ -166,6 +162,26 @@ orgTypeTrustInterruption:
     company: company
     charity: charity
     none: none of these
+companiesHouseInterruption:
+  bulletList:
+    directors: directors
+    trustees: trustees
+    partners: partners
+    otherMembers: other members of the governing body
+  changedToNonCompany:
+    heading: Your new answer affects other sections of your landlord record
+    question: 'Question: Is your organisation registered with Companies House?'
+    previousAnswer: 'Previous answer: Yes'
+    newAnswer: 'New answer: No'
+    paragraph:
+      one: 'If you continue your company number will be removed and you will need to provide details for:'
+      two: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
+  changedToCompany:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve changed your organisation’s Companies House registration status from No to Yes.
+      two: 'This means we will remove the details you provided for:'
+      three: If your organisation is still registered you can go back to undo this change.
 orgGovBodyWhoToProvide:
   title: Who do you want to provide details for?
   fieldSetHeading: Who do you want to provide details for?

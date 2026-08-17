@@ -92,7 +92,9 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '2026-07-21 00:00:00+00'),          -- Mobin Ibrahim Patel
        ('a48e61f59b20cb7d65628f1a542ccf371de1339e37fccb7e874ccb1ddc91b0c2', '2026-07-21 00:00:00+00'),          -- Mobin Ibrahim Patel
        ('urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '2026-07-21 00:00:00+00'),          -- Sarah Warren
-       ('df30c357a444cf8eb89169eca7779e7857b35361abddac3b77a91847288daf54', '2026-07-21 00:00:00+00')           -- Sarah Warren
+       ('df30c357a444cf8eb89169eca7779e7857b35361abddac3b77a91847288daf54', '2026-07-21 00:00:00+00'),          -- Sarah Warren
+       ('urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY', '2026-08-13 00:00:00+00'),          -- Aimie Robinson
+       ('836eb184ab487b6d745de607ad4fbdad2de29d33c31168672073b75262194cf2', '2026-08-13 00:00:00+00')           -- Aimie Robinson
     ON CONFLICT DO NOTHING;
 
 
@@ -144,7 +146,9 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (40, '2026-07-21 00:00:00+00', null, 'a48e61f59b20cb7d65628f1a542ccf371de1339e37fccb7e874ccb1ddc91b0c2', true, 2,
         'mobin.patel@communities.gov.uk', 'Mobin Ibrahim Patel', true),
        (41, '2026-07-21 00:00:00+00', null, 'df30c357a444cf8eb89169eca7779e7857b35361abddac3b77a91847288daf54', true, 2,
-        'sarah.warren@communities.gov.uk', 'Sarah Warren', true) ON CONFLICT DO NOTHING;
+        'sarah.warren@communities.gov.uk', 'Sarah Warren', true),
+       (42, '2026-08-13 00:00:00+00', null, '836eb184ab487b6d745de607ad4fbdad2de29d33c31168672073b75262194cf2', true, 2,
+        'Aimie.Robinson@communities.gov.uk', 'Aimie Robinson', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -200,7 +204,8 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (49, '2026-07-21 00:00:00+00', 210000000049, 1), -- Andreea Popescu
        (50, '2026-07-21 00:00:00+00', 210000000050, 1), -- Yvonne Andrews
        (51, '2026-07-21 00:00:00+00', 210000000051, 1), -- Mobin Ibrahim Patel
-       (52, '2026-07-21 00:00:00+00', 210000000052, 1) ON CONFLICT DO NOTHING; -- Sarah Warren
+       (52, '2026-07-21 00:00:00+00', 210000000052, 1), -- Sarah Warren
+       (53, '2026-08-13 00:00:00+00', 210000000053, 1) ON CONFLICT DO NOTHING; -- Aimie Robinson
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -289,10 +294,13 @@ SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRS
         '07777777777', 'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8', '1990-01-01', 'England or Wales', true, true),
        (36, 52, 1, '2026-07-21 00:00:00+00', 'sarah.warren@communities.gov.uk', null, true, null, 'Sarah Warren',
         '07777777777', 'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow', '1990-01-01', 'England or Wales', true,
+        true),
+       (37, 53, 1, '2026-08-13 00:00:00+00', 'Aimie.Robinson@communities.gov.uk', null, true, null, 'Aimie Robinson',
+        '07777777777', 'urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY', '1990-01-01', 'England or Wales', true,
         true)) AS v (
-           id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
-           last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
-           individual_has_accepted_privacy_notice)
+                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+                                   last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
+                                   individual_has_accepted_privacy_notice)
 -- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
 -- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
 WHERE NOT EXISTS (
@@ -566,7 +574,9 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null,
        (31, '2026-07-21 00:00:00+00', null,
         'urn:fdc:gov.uk:2022:s-DPDuNmTwvQsptmEwWMTkPMiO2MmDRrE8HF7AcDmZ8'), -- Mobin Ibrahim Patel
        (32, '2026-07-21 00:00:00+00', null,
-        'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow')  -- Sarah Warren
+        'urn:fdc:gov.uk:2022:Xj9nvDG2yHvw53ZsIBKJH_U2UNfMK7nq2iel4cxc6Ow'),  -- Sarah Warren
+       (33, '2026-08-13 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY')  -- Aimie Robinson
     ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
@@ -601,5 +611,6 @@ VALUES ('PRSD22', current_date, null,
        ('PRSD56', current_date, null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- Shannon
        ('PRSD57', current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- Rebecca
        ('PRSD58', current_date, null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), -- Lewis
-       ('PRSD59', current_date, null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam
+       ('PRSD59', current_date, null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y'),  -- Adam
+       ('PRSD60', current_date, null, 'urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY') -- Aimie
     ON CONFLICT DO NOTHING;

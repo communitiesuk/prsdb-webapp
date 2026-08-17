@@ -2,39 +2,23 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="selectedOrgTypeLabelKeys" type="java.util.List"*/-->
+<!--/*@thymesVar id="selectedOrgTypeLabels" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
-    <div class="moj-interruption-card">
-        <div class="moj-interruption-card__content"
-             th:with="resolvedLabels=${selectedOrgTypeLabelKeys.![#messages.msg(#this)]}">
-            <h1 class="govuk-heading-l moj-interruption-card__heading"
-                th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.heading}">
-                registerAsALandlord.orgTypeTrustInterruption.removingTrust.heading
-            </h1>
-            <div class="govuk-body-l moj-interruption-card__body">
-                <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.one(${#strings.listJoin(resolvedLabels, ', ')})}">
-                    registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.one
-                </p>
-                <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.two}">
-                    registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.two
-                </p>
-                <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.three}">
-                    registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.three
-                </p>
-            </div>
-            <div class="govuk-button-group moj-interruption-card__actions">
-                <button type="submit" class="govuk-button govuk-button--inverse" data-module="govuk-button"
-                        th:text="#{forms.buttons.continueWithChange}">
-                    forms.buttons.continueWithChange
-                </button>
-                <a class="govuk-link govuk-link--inverse" th:href="@{${backUrl}}"
-                   th:text="#{forms.links.goBack}">
-                    forms.links.goBack
-                </a>
-            </div>
-        </div>
+    <div id="interruption-card"
+         th:replace="~{fragments/interruptionCard :: interruptionCard(#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.heading}, ~{::#interruption-card-body}, #{forms.buttons.continueWithChange}, ${backUrl})}">
+        <th:block id="interruption-card-body">
+            <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.one(${selectedOrgTypeLabels})}">
+                registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.one
+            </p>
+            <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.two}">
+                registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.two
+            </p>
+            <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.three}">
+                registerAsALandlord.orgTypeTrustInterruption.removingTrust.paragraph.three
+            </p>
+        </th:block>
     </div>
 </th:block>
 </html>
