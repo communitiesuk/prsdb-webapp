@@ -49,8 +49,8 @@
     "bodyLocation": "/emails/PropertyDeregistrationInviteeCancellation.md"
   },
   {
-    "test_id": "db2139cc-c89e-47e9-b2bf-d3e800420432",
-    "prod_id": "816dc1fb-1e56-4342-b2f7-1c5afdbba424",
+    "test_id": "6d516640-de68-4ec6-b6a9-a1ef85f4b67f",
+    "prod_id": "479dd5f3-1292-4565-ba22-a99f1c1a926d",
     "enumName": "LANDLORD_NO_PROPERTIES_DEREGISTRATION_CONFIRMATION",
     "subject": "You’re no longer registered as a landlord",
     "bodyLocation": "/emails/LandlordNoPropertiesDeregistrationConfirmation.md"

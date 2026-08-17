@@ -73,7 +73,7 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                    LandlordNoPropertiesDeregistrationConfirmationEmail("Alexander Smith"),
                     "/emails/LandlordNoPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(

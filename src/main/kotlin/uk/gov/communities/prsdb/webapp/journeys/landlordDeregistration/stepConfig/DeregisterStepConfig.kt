@@ -50,7 +50,7 @@ class DeregisterStepConfig(
         } else {
             confirmationWithNoPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
-                LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                LandlordNoPropertiesDeregistrationConfirmationEmail(landlord.name),
             )
         }
 
