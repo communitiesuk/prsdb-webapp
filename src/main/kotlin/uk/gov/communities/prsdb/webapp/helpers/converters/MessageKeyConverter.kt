@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -8,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -44,6 +46,10 @@ class MessageKeyConverter {
 
                 is FileUploadStatus -> convertUploadStatus(enum)
 
+                is OrgType -> convertOrgType(enum)
+
+                is CharityRegulator -> convertCharityRegulator(enum)
+
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
                 )
@@ -55,6 +61,22 @@ class MessageKeyConverter {
                 GoverningBodyMemberType.TRUSTEE -> "landlordDetails.org.governingBody.type.trustee"
                 GoverningBodyMemberType.PARTNER -> "landlordDetails.org.governingBody.type.partner"
                 GoverningBodyMemberType.OTHER -> "landlordDetails.org.governingBody.type.other"
+            }
+
+        private fun convertOrgType(orgType: OrgType): String =
+            when (orgType) {
+                OrgType.COMPANY -> "registerAsALandlord.orgType.company"
+                OrgType.CHARITY -> "registerAsALandlord.orgType.charity"
+                OrgType.TRUST -> "registerAsALandlord.orgType.trust"
+                OrgType.NONE -> "registerAsALandlord.orgType.none"
+            }
+
+        private fun convertCharityRegulator(charityRegulator: CharityRegulator): String =
+            when (charityRegulator) {
+                CharityRegulator.ENGLAND_AND_WALES -> "forms.orgCharityRegisteredWith.radios.option.englandAndWales"
+                CharityRegulator.NORTHERN_IRELAND -> "forms.orgCharityRegisteredWith.radios.option.northernIreland"
+                CharityRegulator.SCOTLAND -> "forms.orgCharityRegisteredWith.radios.option.scotland"
+                CharityRegulator.NONE -> "commonText.other"
             }
 
         private fun convertBillsIncluded(billsIncluded: BillsIncluded): String =

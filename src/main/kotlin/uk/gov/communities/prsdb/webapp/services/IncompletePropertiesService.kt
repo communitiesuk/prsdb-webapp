@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_INCOMPLETE_PROPERTIES_FROM_
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
@@ -17,7 +17,7 @@ import kotlin.math.ceil
 
 @PrsdbTaskService
 class IncompletePropertiesService(
-    private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
+    private val incompletePropertiesRepository: IncompletePropertiesRepository,
     private val reminderEmailSentRepository: ReminderEmailSentRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
 ) {
@@ -25,7 +25,7 @@ class IncompletePropertiesService(
         cutoffDate: Instant,
         page: Int = 0,
     ): List<LandlordIncompleteProperties> =
-        landlordIncompletePropertiesRepository
+        incompletePropertiesRepository
             .findBySavedJourneyState_CreatedDateBefore(
                 cutoffDate,
                 PageRequest.of(page, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
@@ -51,7 +51,7 @@ class IncompletePropertiesService(
         var totalDeleted = 0L
         do {
             val incompletePropertiesBatch =
-                landlordIncompletePropertiesRepository
+                incompletePropertiesRepository
                     .findBySavedJourneyState_CreatedDateBefore(
                         cutoffDate,
                         PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
@@ -72,7 +72,7 @@ class IncompletePropertiesService(
     }
 
     fun getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate: Instant): Int {
-        val totalProperties = landlordIncompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate).toDouble()
+        val totalProperties = incompletePropertiesRepository.countBySavedJourneyState_CreatedDateBefore(cutoffDate).toDouble()
         return ceil(totalProperties / MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE).toInt()
     }
 }

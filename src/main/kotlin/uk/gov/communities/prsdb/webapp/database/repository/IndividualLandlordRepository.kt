@@ -11,6 +11,8 @@ interface IndividualLandlordRepository :
     LandlordSearchRepository {
     fun findByBaseUser_Id(subjectId: String): IndividualLandlord?
 
+    fun findByBaseUser_IdIn(subjectIds: Collection<String>): List<IndividualLandlord>
+
     fun deleteByBaseUser_Id(subjectId: String)
 
     fun countByCreatedDateBetween(

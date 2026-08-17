@@ -110,4 +110,12 @@ class OrganisationGoverningBodyMemberServiceTests {
 
         verify(mockAddressService).findOrCreateAddress(eq(addressDataModel))
     }
+
+    @Test
+    fun `clearGoverningBodyMembers deletes existing members`() {
+        organisationGoverningBodyMemberService.clearGoverningBodyMembers(mockOrganisationLandlord)
+
+        verify(mockOrganisationGoverningBodyMemberRepository).deleteByOrganisationalLandlord(mockOrganisationLandlord)
+        verify(mockOrganisationGoverningBodyMemberRepository, never()).save(any())
+    }
 }

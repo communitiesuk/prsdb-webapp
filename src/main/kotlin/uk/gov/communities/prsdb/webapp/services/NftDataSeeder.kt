@@ -440,7 +440,7 @@ class NftDataSeeder(
     private fun addIncompletePropertyToBatch(
         reminderEmailSentStmt: PreparedStatement,
         savedJourneyStateStmt: PreparedStatement,
-        landlordIncompletePropertiesStmt: PreparedStatement,
+        incompletePropertiesStmt: PreparedStatement,
         reminderEmailSentIdIfSent: Long?,
         savedJourneyStateId: Long,
         landlordDetails: CoreLandlordDetails,
@@ -465,9 +465,9 @@ class NftDataSeeder(
         savedJourneyStateStmt.setLongOrNull(7, reminderEmailSentIdIfSent)
         savedJourneyStateStmt.addBatch()
 
-        landlordIncompletePropertiesStmt.setLong(1, landlordDetails.id)
-        landlordIncompletePropertiesStmt.setLong(2, savedJourneyStateId)
-        landlordIncompletePropertiesStmt.addBatch()
+        incompletePropertiesStmt.setString(1, landlordDetails.subjectId)
+        incompletePropertiesStmt.setLong(2, savedJourneyStateId)
+        incompletePropertiesStmt.addBatch()
     }
 
     private fun addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(

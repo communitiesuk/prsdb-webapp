@@ -26,10 +26,10 @@ class LandlordIncompleteProperties() {
     lateinit var id: LandlordIncompletePropertiesId
         private set
 
-    @MapsId("landlordId")
+    @MapsId("userId")
     @ManyToOne(optional = false)
-    @JoinColumn(name = "landlord_id", nullable = false)
-    lateinit var landlord: Landlord
+    @JoinColumn(name = "user_id", nullable = false)
+    lateinit var user: PrsdbUser
         private set
 
     @MapsId("savedJourneyStateId")
@@ -38,17 +38,17 @@ class LandlordIncompleteProperties() {
     lateinit var savedJourneyState: SavedJourneyState
         private set
 
-    constructor(landlord: Landlord, savedJourneyState: SavedJourneyState) : this() {
-        this.landlord = landlord
+    constructor(user: PrsdbUser, savedJourneyState: SavedJourneyState) : this() {
+        this.user = user
         this.savedJourneyState = savedJourneyState
-        this.id = LandlordIncompletePropertiesId(landlord.id, savedJourneyState.id)
+        this.id = LandlordIncompletePropertiesId(user.id, savedJourneyState.id)
     }
 }
 
 @Embeddable
 data class LandlordIncompletePropertiesId(
-    @Column(name = "landlord_id")
-    var landlordId: Long = 0L,
+    @Column(name = "user_id")
+    var userId: String = "",
     @Column(name = "saved_journey_state_id")
     var savedJourneyStateId: Long = 0L,
 ) : Serializable

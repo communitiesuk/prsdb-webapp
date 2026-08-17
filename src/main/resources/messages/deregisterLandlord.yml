@@ -1,12 +1,28 @@
 title: Deregister Landlord
 organisational:
   title: Deregister Organisational Landlord
+  areYouSure:
+    heading: Are you sure you want to delete your organisation?
+    paragraph:
+      one: By deleting your organisation, you are confirming that your organisation is no longer acting as a landlord.
+      two: 'Your organisation’s information will be deleted from the service including:'
+      three: We will send a confirmation email to all teams members.
+      four: You will no longer be able to access the service.
+    bulletList:
+      one: all properties where your organisation is the only landlord
+      two: team members
+    confirmButton: Yes, delete
+    cancelLink: Cancel and go back
   confirmation:
     banner:
       heading: Organisation deleted
-      body: No longer registered as a landlord
     paragraph:
-      one: 'TODO: PDJB-1484 - Organisation deregistration confirmation content'
+      one: We have sent a confirmation email to all team members.
+    whatHappensNext:
+      paragraph:
+        one: '{0,,organisationName} is no longer registered as a landlord.'
+        two: Your organisation and property information has been deleted.
+        three: You can no longer access the service on behalf of your organisation.
 noProperties:
   confirmation:
     banner:

@@ -1,0 +1,74 @@
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.companiesHouse
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCompanyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.LandlordService
+
+@JourneyFrameworkComponent
+class CompaniesHouseUpdateCheckAnswersStepConfig(
+    private val landlordService: LandlordService,
+    private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
+) : AbstractCheckYourAnswersStepConfig<UpdateCompaniesHouseJourneyState>() {
+    override fun chooseTemplate(state: UpdateCompaniesHouseJourneyState) = "forms/companiesHouseUpdateCheckAnswersForm"
+
+    override fun getStepSpecificContent(state: UpdateCompaniesHouseJourneyState): Map<String, Any?> {
+        val registeredWithCompaniesHouse = isRegisteredWithCompaniesHouse(state)
+        return mapOf(
+            "title" to "landlordDetails.update.title",
+            "showWarning" to true,
+            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+            "companyVariant" to registeredWithCompaniesHouse,
+            "summaryListData" to getCompanyDetailsRows(state),
+            "governingBodyMemberCards" to
+                if (registeredWithCompaniesHouse) emptyList() else getGovBodyMemberCards(state),
+        )
+    }
+
+    override fun afterStepDataIsAdded(state: UpdateCompaniesHouseJourneyState) {
+        if (isRegisteredWithCompaniesHouse(state)) {
+            val companyNumber =
+                state.updateCompaniesHouseTask.orgCompanyNumberStep.formModel
+                    .notNullValue(OrgCompanyNumberFormModel::companyNumber)
+            landlordService.updateOrganisationalLandlordToRegisteredCompany(companyNumber)
+        } else {
+            landlordService.updateOrganisationalLandlordToNonRegisteredCompany(
+                state.updateCompaniesHouseTask.governingBodyMembersMap?.values?.toList().orEmpty(),
+            )
+        }
+    }
+
+    private fun isRegisteredWithCompaniesHouse(state: UpdateCompaniesHouseJourneyState): Boolean =
+        state.updateCompaniesHouseTask.orgIsRegisteredCompanyStep.formModel
+            .notNullValue(OrgIsRegisteredCompanyFormModel::companiesHouse)
+
+    private fun getCompanyDetailsRows(state: UpdateCompaniesHouseJourneyState): List<SummaryListRowViewModel> {
+        val task = state.updateCompaniesHouseTask
+        return orgCompaniesHouseDetailsHelper.getCompanyDetailsRows(
+            state,
+            task.orgIsRegisteredCompanyStep,
+            task.orgCompanyNumberStep,
+        )
+    }
+
+    private fun getGovBodyMemberCards(state: UpdateCompaniesHouseJourneyState): List<SummaryCardViewModel> =
+        orgCompaniesHouseDetailsHelper.getGovBodyMemberCards(
+            state,
+            state.updateCompaniesHouseTask.orgGovBodyMembersTask,
+        )
+}
+
+@JourneyFrameworkComponent
+final class CompaniesHouseUpdateCheckAnswersStep(
+    stepConfig: CompaniesHouseUpdateCheckAnswersStepConfig,
+) : AbstractCheckYourAnswersStep<UpdateCompaniesHouseJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-answers"
+    }
+}

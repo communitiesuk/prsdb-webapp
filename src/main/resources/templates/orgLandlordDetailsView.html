@@ -7,7 +7,7 @@
 
         <h1 class="govuk-heading-l" th:text="${orgLandlord.name}">orgLandlord.name</h1>
 
-        <p class="govuk-body">
+        <p class="govuk-body" th:if="${isLandlordView}">
             <a id="delete-record-link" class="govuk-link" th:href="${deleteLandlordRecordUrl}"
                th:text="#{landlordDetails.org.removeRecord}">landlordDetails.org.removeRecord</a>
         </p>
@@ -20,89 +20,20 @@
             </ul>
 
             <div id="organisation-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-details', ~{::#organisation-details-panel/content()})}">
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.tabs.organisationDetails}">landlordDetails.org.tabs.organisationDetails</h2>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.name}">landlordDetails.org.name</strong><br/>
-                    <span th:text="${orgLandlord.name}">orgLandlord.name</span><br/>
-                    <a class="govuk-link" th:href="@{'/landlord/landlord-details/update-organisation-name/organisation-name'}">Change</a>
-                </p> <!-- TODO: PDJB-1474: Update links instead of using hrefs -->
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.address}">landlordDetails.org.address</strong><br/>
-                    <span th:text="${orgLandlord.singleLineAddress}">orgLandlord.singleLineAddress</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1444: Add update journey -->
-                </p>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.email}">landlordDetails.org.email</strong><br/>
-                    <span th:text="${orgLandlord.email}">orgLandlord.email</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1235: Add update journey -->
-                </p>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.phone}">landlordDetails.org.phone</strong><br/>
-                    <span th:text="${orgLandlord.phoneNumber}">orgLandlord.phoneNumber</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1236: Add update journey -->
-                </p>
-
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.organisationType}">landlordDetails.org.organisationType</h2>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.organisationType}">landlordDetails.org.organisationType</strong><br/>
-                    <span th:if="${orgLandlord.isCompany}" th:text="#{landlordDetails.org.isCompany}">landlordDetails.org.isCompany</span>
-                    <span th:if="${orgLandlord.isCharity}" th:text="#{landlordDetails.org.isCharity}">landlordDetails.org.isCharity</span>
-                    <span th:if="${orgLandlord.isTrust}" th:text="#{landlordDetails.org.isTrust}">landlordDetails.org.isTrust</span><br/>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1237: Add update journey -->
-                </p>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.isCompany}">landlordDetails.org.isCompany</strong><br/>
-                    <span th:text="${orgLandlord.isCompany}">orgLandlord.isCompany</span><br/>
-                    <th:block th:if="${orgLandlord.companyNumber != null}">
-                        <strong th:text="#{landlordDetails.org.companyNumber}">landlordDetails.org.companyNumber</strong><br/>
-                        <span th:text="${orgLandlord.companyNumber}">orgLandlord.companyNumber</span><br/>
-                    </th:block>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1238: Add update journey -->
-                </p>
-
-                <p class="govuk-body">
-                    <strong th:text="#{landlordDetails.org.isCharity}">landlordDetails.org.isCharity</strong><br/>
-                    <span th:text="${orgLandlord.isCharity}">orgLandlord.isCharity</span><br/>
-                    <th:block th:if="${orgLandlord.charityNumber != null}">
-                        <strong th:text="#{landlordDetails.org.charityNumber}">landlordDetails.org.charityNumber</strong><br/>
-                        <span th:text="${orgLandlord.charityNumber}">orgLandlord.charityNumber</span><br/>
-                    </th:block>
-                    <a class="govuk-link" href="#" th:text="#{forms.links.change}">forms.links.change</a> <!-- TODO: PDJB-1239: Add update journey -->
-                </p>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${orgLandlord.organisationDetails})}"></dl>
             </div>
 
             <div id="organisation-contacts-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('organisation-contacts', ~{::#organisation-contacts-panel/content()})}">
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.mainContactHeading}">landlordDetails.org.mainContactHeading</h2>
-                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.mainContactCard.title}, ${orgLandlordContacts.mainContactCard.cardNumber}, ${orgLandlordContacts.mainContactCard.actions}, ${orgLandlordContacts.mainContactCard.summaryList})}"></div>
-
-                <th:block th:if="${orgLandlordContacts.leadTrusteeCard != null}">
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.leadTrusteeHeading}">landlordDetails.org.leadTrusteeHeading</h2>
-                    <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.leadTrusteeCard.title}, ${orgLandlordContacts.leadTrusteeCard.cardNumber}, ${orgLandlordContacts.leadTrusteeCard.actions}, ${orgLandlordContacts.leadTrusteeCard.summaryList})}"></div>
-                </th:block>
-
-                <th:block th:if="${orgLandlordContacts.showGoverningBody}">
-                    <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.governingBody.heading}">landlordDetails.org.governingBody.heading</h2>
-                    <p class="govuk-body">
-                        <a class="govuk-link" th:href="@{${orgLandlordContacts.governingBodyMembersLinkUrl}}"
-                           th:text="#{landlordDetails.org.governingBody.membersLink}">landlordDetails.org.governingBody.membersLink</a>
-                    </p>
-                    <th:block th:each="card : ${orgLandlordContacts.governingBodyMemberCards}">
-                        <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
-                    </th:block>
-                </th:block>
-
-                <h2 class="govuk-heading-m" th:text="#{landlordDetails.org.registrationContactHeading}">landlordDetails.org.registrationContactHeading</h2>
-                <div th:replace="~{fragments/summaryCard :: summaryCard(${orgLandlordContacts.registrationContactCard.title}, ${orgLandlordContacts.registrationContactCard.cardNumber}, ${orgLandlordContacts.registrationContactCard.actions}, ${orgLandlordContacts.registrationContactCard.summaryList})}"></div>
+                <th:block th:replace="~{fragments/tabs/organisationContactsPanel :: organisationContactsPanelContent}"></th:block>
             </div>
 
             <div id="registered-properties-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${registeredPropertiesTabId}, ~{::#registered-properties-panel/content()})}">
-                <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+                <th:block th:if="${isLandlordView}">
+                    <th:block th:replace="~{fragments/tabs/registeredPropertiesPanel :: registeredPropertiesPanelContent}"></th:block>
+                </th:block>
+                <th:block th:unless="${isLandlordView}">
+                    <th:block th:replace="~{fragments/tabs/localCouncilRegisteredPropertiesPanel :: localCouncilRegisteredPropertiesPanelContent}"></th:block>
+                </th:block>
             </div>
         </div>
     </main>

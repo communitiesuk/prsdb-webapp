@@ -6,11 +6,11 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 
 @JourneyFrameworkComponent
 class AddToLandlordIncompletePropertiesStepConfig(
-    private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
+    private val usersIncompletePropertyService: UsersIncompletePropertyService,
 ) : AbstractInternalStepConfig<Complete, JourneyState>() {
     override fun mode(state: JourneyState) = Complete.COMPLETE
 
@@ -18,7 +18,7 @@ class AddToLandlordIncompletePropertiesStepConfig(
         state: JourneyState,
         saveStateId: SavedJourneyState,
     ) {
-        incompletePropertyForLandlordService.addIncompletePropertyToLandlord(saveStateId)
+        usersIncompletePropertyService.addIncompletePropertyForUser(saveStateId)
     }
 }
 

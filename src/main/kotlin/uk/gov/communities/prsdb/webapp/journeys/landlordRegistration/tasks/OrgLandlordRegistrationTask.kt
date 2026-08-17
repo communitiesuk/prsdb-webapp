@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.UpdateDetailsTodoStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
@@ -32,8 +31,6 @@ class OrgLandlordRegistrationTask(
     override val companiesHouseTask: OrgCompaniesHouseTask,
     override val orgGovBodyTask: OrgGovBodyTask,
     override val orgMainContactStep: OrgMainContactStep,
-    // TODO PDJB-1237 PDJB-1238: remove this placeholder once the org type and companies house update journeys exist.
-    override val updateDetailsTodoStep: UpdateDetailsTodoStep,
 ) : TaskWithoutDependencies<LandlordRegistrationOrgLandlordState>(journeyStateService),
     LandlordRegistrationOrgLandlordState {
     override val taskState get() = this
@@ -105,6 +102,15 @@ class OrgLandlordRegistrationTask(
                         ),
                         journey.orgGovBodyTask.isComplete(),
                     )
+                }
+                backStep {
+                    when (journey.companiesHouseTask.orgIsRegisteredCompanyStep.outcome) {
+                        YesOrNo.YES -> journey.companiesHouseTask.orgCompanyNumberStep
+                        YesOrNo.NO -> journey.orgGovBodyTask.orgGovBodyMembersTask.orgGovBodyMemberListStep
+                        else -> throw IllegalStateException(
+                            "orgIsRegisteredCompanyStep must have an outcome for orgMainContactStep to be reachable",
+                        )
+                    }
                 }
                 nextStep { exitStep }
             }

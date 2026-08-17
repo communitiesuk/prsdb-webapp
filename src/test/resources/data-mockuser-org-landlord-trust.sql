@@ -9,7 +9,10 @@ INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_add
 VALUES (1, '09/13/24', '09/13/24', 1, 'Keystone House, 1 Fictional Road, EG1 1EG', 2, 'EG1 1EG'),
        (2, '09/13/24', '09/13/24', 2, '3rd Floor, 88 Kingsway Square, London, ZX1 4GP', 2, 'ZX1 4GP'),
        (3, '09/13/24', '09/13/24', 3, '12 Director Avenue, EG2 2EG', 2, 'EG2 2EG'),
-       (4, '09/13/24', '09/13/24', 4, '34 Partner Lane, EG3 3EG', 2, 'EG3 3EG');
+       (4, '09/13/24', '09/13/24', 4, '34 Partner Lane, EG3 3EG', 2, 'EG3 3EG'),
+       (5, '09/13/24', '09/13/24', 1013, '1 PRSDB Square, EG1 2AA', 1, 'EG1 2AA'),
+       (6, '09/13/24', '09/13/24', 1014, '2 PRSDB Square, EG1 2AA', 1, 'EG1 2AA'),
+       (7, '09/13/24', '09/13/24', 1015, '3 PRSDB Square, EG1 2AA', 1, 'EG1 2AA');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, landlord_type, registration_number_id,

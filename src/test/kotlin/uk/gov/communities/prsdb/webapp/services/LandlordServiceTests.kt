@@ -10,6 +10,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.Mock
@@ -18,6 +19,7 @@ import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
@@ -26,6 +28,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
+import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
@@ -37,15 +41,18 @@ import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.IndividualLandlordUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.OrganisationLandlordUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualLandlordUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlordSearchResultDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.net.URI
 import java.time.LocalDate
 import java.util.Optional
@@ -76,10 +83,16 @@ class LandlordServiceTests {
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
     @Mock
-    private lateinit var updateConfirmationSender: EmailNotificationService<LandlordUpdateConfirmation>
+    private lateinit var individualUpdateConfirmationSender: EmailNotificationService<IndividualLandlordUpdateConfirmation>
+
+    @Mock
+    private lateinit var orgUpdateConfirmationSender: EmailNotificationService<OrganisationalLandlordUpdateConfirmation>
 
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockOrganisationGoverningBodyMemberService: OrganisationGoverningBodyMemberService
 
     private lateinit var landlordService: LandlordService
 
@@ -94,8 +107,10 @@ class LandlordServiceTests {
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
-                updateConfirmationSender,
+                individualUpdateConfirmationSender,
+                orgUpdateConfirmationSender,
                 absoluteUrlProvider,
+                mockOrganisationGoverningBodyMemberService,
             )
     }
 
@@ -111,7 +126,7 @@ class LandlordServiceTests {
 
     @Test
     fun `retrieveLandlordById returns an organisation landlord`() {
-        val landlord = OrganisationalLandlord()
+        val landlord = createOrgLandlord()
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
 
         val result = landlordService.retrieveLandlordById(landlord.id)
@@ -299,7 +314,11 @@ class LandlordServiceTests {
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
             val matchingLandlords =
-                listOf(createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel(), createLandlordSearchResultDataModel())
+                listOf(
+                    createLandlordSearchResultDataModel(),
+                    createLandlordSearchResultDataModel(),
+                    createLandlordSearchResultDataModel(),
+                )
             whenever(mockIndividualLandlordRepository.searchMatching(searchTerm, lcUserBaseId, pageable = pageRequest))
                 .thenReturn(PageImpl(matchingLandlords))
 
@@ -308,7 +327,12 @@ class LandlordServiceTests {
 
             // Act
             val searchResults =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = requestedPageNumber,
+                    pageSize = pageSize,
+                )
 
             // Assert
             val expectedSearchResults =
@@ -325,22 +349,33 @@ class LandlordServiceTests {
         fun `searchForLandlords returns a corresponding list of LandlordSearchResultViewModels (LRN searchTerm)`() {
             // Arrange
             val searchTerm = "L-CCCC-CCCC"
-            val searchLRN = RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)!!.number
+            val searchLRN =
+                RegistrationNumberDataModel.parseTypeOrNull(searchTerm, RegistrationNumberType.LANDLORD)!!.number
             val lcUserBaseId = "lcUserBaseId"
             val requestedPageNumber = 0
             val pageSize = 25
             val pageRequest = PageRequest.of(requestedPageNumber, pageSize)
 
             val matchingLandlord = listOf(createLandlordSearchResultDataModel())
-            whenever(mockIndividualLandlordRepository.searchMatchingLRN(searchLRN, lcUserBaseId, pageable = pageRequest))
-                .thenReturn(PageImpl(matchingLandlord))
+            whenever(
+                mockIndividualLandlordRepository.searchMatchingLRN(
+                    searchLRN,
+                    lcUserBaseId,
+                    pageable = pageRequest,
+                ),
+            ).thenReturn(PageImpl(matchingLandlord))
 
             val currentUrlKey = 79
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
             // Act
             val searchResults =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = requestedPageNumber,
+                    pageSize = pageSize,
+                )
 
             // Assert
             val expectedSearchResults =
@@ -367,7 +402,12 @@ class LandlordServiceTests {
 
             // Act
             val searchResults =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = requestedPageNumber,
+                    pageSize = pageSize,
+                )
 
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
@@ -389,7 +429,12 @@ class LandlordServiceTests {
 
             // Act
             val searchResults =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = requestedPageNumber,
+                    pageSize = pageSize,
+                )
 
             // Assert
             val expectedSearchResults = emptyList<LandlordSearchResultViewModel>()
@@ -424,14 +469,26 @@ class LandlordServiceTests {
                 .thenReturn(PageImpl(matchingLandlordsPage2))
 
             val currentUrlKey = 77
-            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey).thenReturn(currentUrlKey)
+            whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey())
+                .thenReturn(currentUrlKey)
+                .thenReturn(currentUrlKey)
 
             // Act
             val searchResults1 =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = pageNumber1, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = pageNumber1,
+                    pageSize = pageSize,
+                )
 
             val searchResults2 =
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = pageNumber2, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = pageNumber2,
+                    pageSize = pageSize,
+                )
 
             // Assert
             val expectedSearchResultsPage1 =
@@ -461,7 +518,12 @@ class LandlordServiceTests {
 
             // Act & Assert
             assertThrows<RepositoryQueryTimeoutException> {
-                landlordService.searchForLandlords(searchTerm, lcUserBaseId, requestedPageIndex = requestedPageNumber, pageSize = pageSize)
+                landlordService.searchForLandlords(
+                    searchTerm,
+                    lcUserBaseId,
+                    requestedPageIndex = requestedPageNumber,
+                    pageSize = pageSize,
+                )
             }
         }
     }
@@ -577,19 +639,19 @@ class LandlordServiceTests {
 
         // Assert
         val expectedEmailModel =
-            LandlordUpdateConfirmation(
+            IndividualLandlordUpdateConfirmation(
                 RegistrationNumberDataModel.fromRegistrationNumber(landlordEntity.registrationNumber).toString(),
                 dashboardUrl,
                 expectedDetail,
             )
 
-        verify(updateConfirmationSender).sendEmail(
+        verify(individualUpdateConfirmationSender).sendEmail(
             eq(originalEmailAddress),
             eq(expectedEmailModel),
         )
 
         updateModel.email?.let {
-            verify(updateConfirmationSender).sendEmail(
+            verify(individualUpdateConfirmationSender).sendEmail(
                 eq(it),
                 eq(expectedEmailModel),
             )
@@ -618,8 +680,8 @@ class LandlordServiceTests {
 
         // Assert
         assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
-        verify(updateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
-        verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
+        verify(individualUpdateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
+        verify(individualUpdateConfirmationSender, times(1)).sendEmail(any(), any())
     }
 
     @Test
@@ -667,8 +729,7 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordForUser updates the organisation name`() {
-        val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = "New Org Name"))
@@ -678,9 +739,20 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `updateOrganisationLandlordForUser skips null fields`() {
+    fun `updateOrganisationLandlordForUser updates the organisation phone number`() {
         val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        orgLandlord.phoneNumber = "01111111111"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(phoneNumber = "02222222222"))
+
+        assertEquals("02222222222", orgLandlord.phoneNumber)
+        verify(mockUserToLandlordService).getCurrentOrganisationLandlordForUser()
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser skips null fields`() {
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
 
         landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = null))
@@ -690,13 +762,22 @@ class LandlordServiceTests {
 
     @Test
     fun `updateOrganisationLandlordName updates the organisation name via updateOrganisationLandlordForUser`() {
-        val orgLandlord = OrganisationalLandlord()
-        orgLandlord.name = "Old Org Name"
+        val orgLandlord = createOrgLandlord(name = "Old Org Name")
         whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         landlordService.updateOrganisationLandlordName("New Org Name")
 
         assertEquals("New Org Name", orgLandlord.name)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation name.",
+                ),
+            ),
+        )
     }
 
     @Test
@@ -707,6 +788,425 @@ class LandlordServiceTests {
     @Test
     fun `updateOrganisationLandlordName is annotated with @Transactional`() {
         assertTrue(landlordService::updateOrganisationLandlordName.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordAddress applies the new address and sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord(address = createAddress("original address"))
+        val newAddress = createAddress("new address")
+        val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
+        whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordAddress(newAddressDataModel)
+
+        assertEquals(newAddress, orgLandlord.address)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation address.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser updates the organisation email`() {
+        val orgLandlord = createOrgLandlord(email = "old@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(email = "new@example.com"),
+        )
+
+        assertEquals("new@example.com", orgLandlord.wholeOrgEmail)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser skips null email field`() {
+        val orgLandlord = createOrgLandlord(email = "existing@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(email = null))
+
+        assertEquals("existing@example.com", orgLandlord.wholeOrgEmail)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordEmail sends confirmation to the account email`() {
+        val orgLandlord = createOrgLandlord(email = "old-contact@example.com")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordEmail("new-contact@example.com")
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation email address.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser does not send an email when no address is provided`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.name = "Old Org Name"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(OrganisationLandlordUpdateModel(name = "New Org Name"))
+
+        verify(orgUpdateConfirmationSender, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordAddress is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordAddress.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordEmail is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordEmail.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordForUser updates the main contact details`() {
+        val orgLandlord =
+            createOrgLandlord(
+                mainContactName = "Old Name",
+                mainContactEmail = "old@example.com",
+                mainContactPhoneNumber = "07111111111",
+            )
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+
+        landlordService.updateOrganisationLandlordForUser(
+            OrganisationLandlordUpdateModel(
+                mainContactName = "New Name",
+                mainContactEmail = "new@example.com",
+                mainContactPhone = "07222222222",
+            ),
+        )
+
+        assertEquals("New Name", orgLandlord.mainContactName)
+        assertEquals("new@example.com", orgLandlord.mainContactEmail)
+        assertEquals("07222222222", orgLandlord.mainContactPhone)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordMainContact sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordMainContact(
+            name = "New Name",
+            email = "new@example.com",
+            phone = "07222222222",
+        )
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The main contact.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordMainContact is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordMainContact.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordPhoneNumber updates the phone number and sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.phoneNumber = "01111111111"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordPhoneNumber("02222222222")
+
+        assertEquals("02222222222", orgLandlord.phoneNumber)
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The organisation phone number.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationLandlordPhoneNumber is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordPhoneNumber.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany sets the companyNumber and clears governing body members`() {
+        val orgLandlord = createOrgLandlord(isCompany = false, companyNumber = null)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        assertEquals("12345678", orgLandlord.companyNumber)
+        verify(mockOrganisationGoverningBodyMemberService).clearGoverningBodyMembers(orgLandlord)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany does not change the organisation type flag`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = null)
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        assertTrue(orgLandlord.isCompany)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToRegisteredCompany("12345678")
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The company registration information.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToRegisteredCompany is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationalLandlordToRegisteredCompany.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany clears the companyNumber and sets governing body members`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = "12345678")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+        val governingBodyMembers = listOf(mock<GoverningBodyMemberDataModel>())
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(governingBodyMembers)
+
+        assertNull(orgLandlord.companyNumber)
+        verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(orgLandlord, governingBodyMembers)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany does not change the organisation type flag`() {
+        val orgLandlord = createOrgLandlord(isCompany = true, companyNumber = "12345678")
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(emptyList())
+
+        assertTrue(orgLandlord.isCompany)
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationalLandlordToNonRegisteredCompany(emptyList())
+
+        verify(orgUpdateConfirmationSender).sendEmail(
+            eq(orgLandlord.email),
+            eq(
+                OrganisationalLandlordUpdateConfirmation(
+                    dashboardUrl = URI("example.com/landlord-dashboard"),
+                    updatedDetail = "The company registration information and governing body details.",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `updateOrganisationalLandlordToNonRegisteredCompany is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationalLandlordToNonRegisteredCompany.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordType sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordType(isCompany = false, isCharity = false, isTrust = false)
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The organisation type.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordType is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordType.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordTypeAndLeadTrustee sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordTypeAndLeadTrustee(
+            isCompany = false,
+            isCharity = false,
+            isTrust = true,
+        )
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The organisation type and lead trustee details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordTypeAndLeadTrustee is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordTypeAndLeadTrustee.hasAnnotation<Transactional>())
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CharityRegulator::class, names = ["ENGLAND_AND_WALES", "SCOTLAND", "NORTHERN_IRELAND"])
+    fun `updateOrganisationLandlordCharityRegistration sets the charity details and sends a confirmation email`(
+        charityRegulator: CharityRegulator,
+    ) {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordCharityRegistration(charityRegulator, "1234567")
+
+        assertEquals(charityRegulator, orgLandlord.charityRegisteredWith)
+        assertEquals("1234567", orgLandlord.charityNumber)
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The charity registration details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordAsNotARegisteredCharity clears the charity details`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES
+        orgLandlord.charityNumber = "1234567"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordAsNotARegisteredCharity()
+
+        assertNull(orgLandlord.charityRegisteredWith)
+        assertNull(orgLandlord.charityNumber)
+    }
+
+    @Test
+    fun `updateOrganisationLandlordAsRegisteredCharityWithNoRegulator clears the charity number`() {
+        val orgLandlord = createOrgLandlord()
+        orgLandlord.charityRegisteredWith = CharityRegulator.ENGLAND_AND_WALES
+        orgLandlord.charityNumber = "1234567"
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        landlordService.updateOrganisationLandlordAsRegisteredCharityWithNoRegulator()
+
+        assertEquals(CharityRegulator.NONE, orgLandlord.charityRegisteredWith)
+        assertNull(orgLandlord.charityNumber)
+    }
+
+    @Test
+    fun `the organisation landlord charity update methods are annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordAsNotARegisteredCharity.hasAnnotation<Transactional>())
+        assertTrue(landlordService::updateOrganisationLandlordAsRegisteredCharityWithNoRegulator.hasAnnotation<Transactional>())
+        assertTrue(landlordService::updateOrganisationLandlordCharityRegistration.hasAnnotation<Transactional>())
+    }
+
+    @Test
+    fun `updateOrganisationLandlordLeadTrustee sends a confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        landlordService.updateOrganisationLandlordLeadTrustee(
+            name = "New Trustee",
+            dateOfBirth = LocalDate.of(1990, 1, 1),
+            email = "trustee@example.com",
+            phone = "07123456789",
+            addressDataModel = AddressDataModel("2 Trustee Road, TR1 3CD"),
+        )
+
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The lead trustee details.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordGoverningBodyMembers clears and recreates members and sends confirmation email`() {
+        val orgLandlord = createOrgLandlord()
+        whenever(mockUserToLandlordService.getCurrentOrganisationLandlordForUser()).thenReturn(orgLandlord)
+        val dashboardUrl = URI("example.com/landlord-dashboard")
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
+
+        val members =
+            listOf(
+                GoverningBodyMemberDataModel(
+                    name = "Director Dave",
+                    type = GoverningBodyMemberType.DIRECTOR,
+                    dateOfBirth = kotlinx.datetime.LocalDate(1985, 3, 15),
+                    address = AddressDataModel("1 Director Lane, DL1 2AB"),
+                ),
+            )
+
+        landlordService.updateOrganisationLandlordGoverningBodyMembers(members)
+
+        verify(mockOrganisationGoverningBodyMemberService).clearGoverningBodyMembers(orgLandlord)
+        verify(mockOrganisationGoverningBodyMemberService).createGoverningBodyMembers(orgLandlord, members)
+        val expectedEmailModel =
+            OrganisationalLandlordUpdateConfirmation(
+                dashboardUrl,
+                "The governing body members.",
+            )
+        verify(orgUpdateConfirmationSender).sendEmail(eq(orgLandlord.email), eq(expectedEmailModel))
+    }
+
+    @Test
+    fun `updateOrganisationLandlordGoverningBodyMembers is annotated with @Transactional`() {
+        assertTrue(landlordService::updateOrganisationLandlordGoverningBodyMembers.hasAnnotation<Transactional>())
     }
 
     companion object {

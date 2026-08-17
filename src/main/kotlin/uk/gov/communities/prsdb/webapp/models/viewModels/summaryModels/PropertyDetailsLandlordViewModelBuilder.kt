@@ -70,27 +70,54 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlordDetailsUrlProvider: (Landlord) -> String,
         ): List<SummaryCardViewModel> =
             landlords
-                // TODO: PDJB-1277: Update landlord tab local authority view for org landlords
+                .sortedBy { it.name }
                 .map { landlord ->
-                    check(landlord is IndividualLandlord)
-                    landlord
-                }.sortedBy { it.name }
-                .map { landlord ->
-                    SummaryCardViewModel(
-                        title = landlord.name,
-                        summaryList = buildLocalCouncilCardRows(landlord),
-                        actions =
-                            listOf(
-                                SummaryCardActionViewModel(
-                                    text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
-                                    url = landlordDetailsUrlProvider(landlord),
-                                    opensInNewTab = true,
-                                ),
-                            ),
-                    )
+                    when (landlord) {
+                        is IndividualLandlord ->
+                            SummaryCardViewModel(
+                                title = landlord.name,
+                                summaryList = buildLocalCouncilIndividualCardRows(landlord),
+                                actions =
+                                    listOf(
+                                        SummaryCardActionViewModel(
+                                            text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                            url = landlordDetailsUrlProvider(landlord),
+                                            opensInNewTab = true,
+                                        ),
+                                    ),
+                            )
+
+                        is OrganisationalLandlord ->
+                            SummaryCardViewModel(
+                                title = landlord.name,
+                                summaryList = buildLocalCouncilOrgCardRows(landlord),
+                                actions =
+                                    listOf(
+                                        SummaryCardActionViewModel(
+                                            text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                            url = landlordDetailsUrlProvider(landlord),
+                                            opensInNewTab = true,
+                                        ),
+                                    ),
+                            )
+
+                        else -> throw IllegalArgumentException("Unknown landlord type")
+                    }
                 }
 
-        private fun buildLocalCouncilCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLocalCouncilOrgCardRows(landlord: OrganisationalLandlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.wholeOrgEmail,
+                ),
+            )
+
+        private fun buildLocalCouncilIndividualCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",

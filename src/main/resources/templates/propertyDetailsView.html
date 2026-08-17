@@ -69,12 +69,14 @@
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
                         </th:block>
                         <p th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.licensingProvideLaterParagraph}"></p>
+                        <hr th:if="${propertyDetails.licensingProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                         <th:block th:if="${propertyDetails.showTenancySection}">
                             <h3 class="govuk-heading-s" th:text="#{${propertyDetails.tenancyHeadingKey}}">propertyDetails.propertyRecord.tenancy.heading</h3>
                             <th:block th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}">
                                 <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
                             </th:block>
                             <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
+                            <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                         </th:block>
                     <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
                         <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">

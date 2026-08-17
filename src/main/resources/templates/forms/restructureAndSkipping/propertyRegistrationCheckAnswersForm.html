@@ -5,6 +5,7 @@
 <!--/*@thymesVar id="propertyName" type="java.lang.String"*/-->
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="occupancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="jointLandlordsDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
@@ -38,7 +39,12 @@
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
+        <h3 class="govuk-heading-s" th:text="#{registerProperty.taskList.rentedOut.licensing}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
+        <th:block th:if="${!#lists.isEmpty(occupancyDetails)}">
+            <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.occupancy.heading}"></h3>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${occupancyDetails})}"></dl>
+        </th:block>
         <th:block th:if="${jointLandlordsDetails != null}">
             <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
