@@ -19,9 +19,11 @@ class AreYouSureFormPageLandlordDeregistration(
     ) {
     val heading = Heading(page.locator("h1"))
     val yesDeleteButton = Button.byText(page, "Yes, delete")
+    val withPropertiesCancelLink = Link.byText(page, "Cancel and go back")
+    val continueButton = Button.byText(page, "Continue")
+    val noPropertiesCancelLink = Link.byText(page, "Cancel")
     val form = AreYouSureForm(page)
     val backLink = BackLink.default(page)
-    val cancelLink = Link.byText(page, "Cancel and go back")
 
     fun submitYesDelete() {
         form.submit()

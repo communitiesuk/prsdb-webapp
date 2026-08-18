@@ -16,7 +16,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         @Test
         fun `User is returned to the landlord details page if they click the cancel link`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.cancelLink.clickAndWait()
+            areYouSurePage.withPropertiesCancelLink.clickAndWait()
             BasePage.assertPageIs(page, LandlordDetailsPage::class)
         }
 
@@ -33,7 +33,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         @Test
         fun `User is returned to the landlord details page if they click the cancel link`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.cancelLink.clickAndWait()
+            areYouSurePage.noPropertiesCancelLink.clickAndWait()
             BasePage.assertPageIs(page, LandlordDetailsPage::class)
         }
 
@@ -44,17 +44,17 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
             BasePage.assertPageIs(page, LandlordDetailsPage::class)
         }
 
-        // TODO PDJB-1249: Waiting for designers to confirm if the content
-        // on this page for ind LL without properties should be updated
         @Test
-        fun `Are you sure page shows heading and actions without with-properties bullet content`() {
+        fun `Are you sure page shows radio buttons without with-properties bullet content`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             val content = areYouSurePage.page.content()
 
-            assertThat(areYouSurePage.heading).isVisible()
-            assertThat(areYouSurePage.yesDeleteButton).isVisible()
-            assertThat(areYouSurePage.cancelLink).isVisible()
-            assertFalse(content.contains("You’ll no longer be registered as a landlord in England."))
+            assertThat(areYouSurePage.form.fieldsetHeading).isVisible()
+            assertThat(areYouSurePage.continueButton).isVisible()
+            assertThat(areYouSurePage.noPropertiesCancelLink).isVisible()
+            assertThat(areYouSurePage.yesDeleteButton).isHidden()
+            assertThat(areYouSurePage.withPropertiesCancelLink).isHidden()
+            assertFalse(content.contains("You'll no longer be registered as a landlord in England."))
         }
     }
 }
