@@ -159,13 +159,6 @@ class PropertyRegistrationTaskListStepConfig(
             return null
         }
 
-        val delegationTaskTitle =
-            if (state.cachedOccupied == true) {
-                "registerProperty.taskList.whoWillProvideDetails.occupied"
-            } else {
-                "registerProperty.taskList.whoWillProvideDetails.unoccupied"
-            }
-
         val delegationTaskStatus =
             if (state.cachedOccupied == true) {
                 TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED)
@@ -181,7 +174,7 @@ class PropertyRegistrationTaskListStepConfig(
             }
 
         return TaskListItemViewModel(
-            nameKey = delegationTaskTitle,
+            nameKey = "registerProperty.taskList.whoWillProvideDetails.title",
             status = delegationTaskStatus,
             hintKey = delegationTaskHelperText,
             url = null,

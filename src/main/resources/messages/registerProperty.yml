@@ -67,8 +67,7 @@ taskList:
   electricalSafety: Electrical safety certificate
   epc: Energy performance certificate (EPC)
   whoWillProvideDetails:
-    occupied: Who will provide these details
-    unoccupied: Who will provide these details
+    title: Who will provide these details
     helperText:
       occupied: If you’re using a letting agent or property manager, they can provide the rest of this section
       unoccupied: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
