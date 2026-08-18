@@ -11,7 +11,6 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
-import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -24,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -68,6 +66,8 @@ class CancelLettingAgentDelegationController(
             startNewJourneyOn = { it is PropertyOwnershipMismatchException },
         )
 
+    // TODO PDJB-1413: add the session guard so the confirmation page cannot be reached out of context,
+    //  and build the real confirmation page content, including the onward link back to the property record.
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -75,21 +75,8 @@ class CancelLettingAgentDelegationController(
         model: Model,
     ): String {
         propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
-        // Reuses the generic placeholder page (forms/todo). Its continue button posts back to this URL,
-        // which is handled by postConfirmation below.
-        model.addAttribute("formModel", NoInputFormModel())
         model.addAttribute("todoComment", "TODO PDJB-1413: letting agent or property manager removal confirmation")
-        model.addAttribute(BACK_URL_ATTR_NAME, PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
-        return "forms/todo"
-    }
-
-    @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
-    @PostMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun postConfirmation(
-        @PathVariable propertyOwnershipId: Long,
-    ): String {
-        propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
-        return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}"
+        return "forms/todoConfirmation"
     }
 
     companion object {

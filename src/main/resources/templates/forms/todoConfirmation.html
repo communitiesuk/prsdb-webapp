@@ -1,0 +1,13 @@
+<!--/*@thymesVar id="todoComment" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout('TODO', ~{::main}, false)}">
+  <main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+      <div id="confirmation-banner"
+           th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner('TODO', null)}">
+      </div>
+      <p class="govuk-body" th:text="${todoComment}">todoComment</p>
+    </div>
+  </main>
+</html>
