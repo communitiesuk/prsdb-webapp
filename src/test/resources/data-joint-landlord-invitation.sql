@@ -1,6 +1,7 @@
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
-       ('urn:fdc:gov.uk:2022:ABCDE', '10/14/24');
+       ('urn:fdc:gov.uk:2022:ABCDE', '10/14/24'),
+       ('ia-mock-user-12345', '10/14/24');
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
@@ -26,19 +27,37 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status,
-                                rent_frequency, custom_rent_frequency, rent_amount, is_occupied)
+                                rent_frequency, custom_rent_frequency, rent_amount, is_occupied, last_occupied_date)
 
+-- Both properties are occupied with no licence, so under the new registration layout
+-- (PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) they render the licensing "provide later"
+-- deadline, which requires last_occupied_date to be set.
 -- property the default user is not yet invited to
 VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
-        1, null, null, 2, 1, null, 123.12, true),
+        1, null, null, 2, 1, null, 123.12, true, current_date - INTERVAL '7 days'),
 -- property the default user is primary landlord for
        (2, true, 1, 1, 4, 1, 3,  current_date, 1,
-        1, null, null, 2, 1, null, 200.00, true);
+        1, null, null, 2, 1, null, 200.00, true, current_date - INTERVAL '7 days');
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
+
+-- Every registered property has a compliance record (see PropertyDetailsController), so both
+-- property ownerships need one for their property details pages to load.
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+VALUES (1, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (2, 2, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (2, 1, '2025-01-15'),
        (1, 2, '2025-01-15');
+
+INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
+                                name, email, has_accepted_privacy_notice)
+VALUES ('ia-mock-user-12345', true, 2, '10/14/24', '10/14/24', 'Mock User IA', 'test@example.com', true);
+SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES

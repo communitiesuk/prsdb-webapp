@@ -7,11 +7,41 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.builders.SubJourneyBuilder
 
-abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
+/**
+ * Base class for all tasks in the journey framework
+ *
+ * All tasks inherit from this class either directly or via TaskWithoutDependencies. Add them to a journey
+ * DSL with the `task` function. Implementors must specify the `taskState`, usually by implementing their
+ * own state interface and returning `this`. They must also implement the `makeSubJourney(state)` function
+ * by calling `subJourney(state) { <DSL> }` and specifying the Task structure in DSL.
+ *
+ * @property dependencies External dependencies, normally the enclosing journey or task
+ */
+abstract class Task<TState : JourneyState, TDependencies : Any>(
+    journeyStateService: JourneyStateService,
+) : AbstractJourneyState(journeyStateService) {
     lateinit var subJourneyBuilder: SubJourneyBuilder<*>
         private set
     private lateinit var exitInit: StepInitialiser<SubjourneyExitStepConfig, *, SubjourneyComplete>.() -> Unit
     private var exitStepOverride: SubjourneyExitStep? = null
+
+    abstract val taskState: TState
+
+    open val requiresDependencies: Boolean = true
+
+    private var boundDependencies: TDependencies? = null
+
+    val areDependenciesBound: Boolean get() = boundDependencies != null
+
+    val dependencies: TDependencies
+        get() = boundDependencies ?: throw UninitializedPropertyAccessException("dependencies have not been bound")
+
+    fun bindDependencies(value: TDependencies) {
+        if (areDependenciesBound) {
+            throw JourneyInitialisationException("dependencies have already been bound")
+        }
+        boundDependencies = value
+    }
 
     fun getTaskSubJourneyBuilder(
         state: TState,
@@ -45,21 +75,11 @@ abstract class Task<in TState : JourneyState> : DelegateKeysOwner {
         this.exitStepOverride = step
     }
 
-    abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
+    protected abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
 
-    // A duplicable task (one that owns its own steps and acts as its own state) sources its
-    // JourneyState behaviour from its own journeyStateService; the only value it needs at
-    // build time is its route prefix, used to namespace its stored data keys. The TaskInitialiser
-    // calls this from build(). The default no-op keeps journey-stated tasks unaffected.
-    // End state: once every task is duplicable, this stops being open/no-op and the route becomes
-    // a plain field the TaskInitialiser always populates.
-    open fun bindRoute(routePrefix: String?) {}
-
-    // A task that owns delegate keys (a duplicable task) attaches its own provider to the journey-build-wide
-    // DelegateKeyRegistry here, so its route-scoped keys are checked for collisions against the journey state and
-    // every other task. The TaskInitialiser calls this from build(), AFTER bindRoute so keys resolve to their final
-    // route-scoped form. The default no-op keeps journey-stated tasks (which own no keys) unaffected.
-    override fun bindKeyRegistry(registry: DelegateKeyRegistry) {}
+    // Route-only late binding - the sole value the TaskInitialiser supplies at build time.
+    // Key-registry binding is inherited from AbstractJourneyState via `DelegateKeysOwner by delegateProvider`.
+    fun bindRoute(routePrefix: String?) = delegateProvider.bindRoutePrefix(routePrefix)
 
     fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
 

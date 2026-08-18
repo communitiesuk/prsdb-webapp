@@ -5,9 +5,10 @@ enum class LicensingType {
     HMO_MANDATORY_LICENCE,
     HMO_ADDITIONAL_LICENCE,
     NO_LICENSING,
+    PROVIDE_LATER,
     ;
 
     companion object {
-        val licencedEntries = entries.minus(NO_LICENSING)
+        val licencedEntries = entries.minus(NO_LICENSING).minus(PROVIDE_LATER)
     }
 }

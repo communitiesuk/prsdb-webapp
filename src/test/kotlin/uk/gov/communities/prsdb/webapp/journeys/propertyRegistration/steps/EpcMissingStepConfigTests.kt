@@ -7,13 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class EpcMissingStepConfigTests {
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     @Test
     fun `chooseTemplate returns occupied template when isOccupied is true`() {
@@ -53,7 +53,7 @@ class EpcMissingStepConfigTests {
 
     private fun setupStepConfig(): EpcMissingStepConfig {
         val stepConfig = EpcMissingStepConfig()
-        stepConfig.routeSegment = EpcMissingStep.ROUTE_SEGMENT
+        stepConfig.urlPath = EpcMissingStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

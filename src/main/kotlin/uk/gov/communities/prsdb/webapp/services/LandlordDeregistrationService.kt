@@ -3,15 +3,24 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.DEREGISTERED_ORGANISATION_NAME
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.OrganisationalLandlordUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
 @PrsdbWebService
 class LandlordDeregistrationService(
     private val individualLandlordRepository: IndividualLandlordRepository,
+    private val organisationLandlordRepository: OrganisationLandlordRepository,
+    private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
+    private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val prsdbUserRepository: PrsdbUserRepository,
@@ -23,21 +32,28 @@ class LandlordDeregistrationService(
      * This would be in case this action can lead a property marked as JL but without any active invitations.
      */
     @Transactional
-    fun deregisterLandlord(baseUserId: String) {
+    fun deregisterIndividualLandlord(baseUserId: String) {
         individualLandlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
-            val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
-
-            jointlyOwnedProperties.forEach {
-                propertyOwnershipService.removeLandlord(it, landlord)
-            }
-            propertyOwnershipRepository.deleteAll(solelyOwnedProperties)
+            deregisterLandlordProperties(landlord)
         }
 
         individualLandlordRepository.deleteByBaseUser_Id(baseUserId)
+        deleteBaseUserIfNoOtherRoles(baseUserId)
+    }
 
-        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_LANDLORD }) {
-            prsdbUserRepository.deleteById(baseUserId)
-        }
+    @Transactional
+    fun deregisterOrganisationalLandlord(orgLandlord: OrganisationalLandlord) {
+        deregisterLandlordProperties(orgLandlord)
+
+        organisationGoverningBodyMemberRepository.deleteByOrganisationalLandlord(orgLandlord)
+
+        val orgLandlordUsers = organisationalLandlordUserRepository.findByOrganisationalLandlord(orgLandlord)
+        val baseUserIds = orgLandlordUsers.map { it.baseUser.id }
+        organisationalLandlordUserRepository.deleteAll(orgLandlordUsers)
+
+        organisationLandlordRepository.delete(orgLandlord)
+
+        baseUserIds.forEach { deleteBaseUserIfNoOtherRoles(it) }
     }
 
     fun addLandlordHadActivePropertiesToSession(hadActiveProperties: Boolean) =
@@ -49,4 +65,26 @@ class LandlordDeregistrationService(
     fun getLandlordHadActivePropertiesFromSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) == true
 
     fun hasLandlordDeregisteredInThisSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) != null
+
+    fun addDeregisteredOrganisationNameToSession(organisationName: String) =
+        session.setAttribute(DEREGISTERED_ORGANISATION_NAME, organisationName)
+
+    fun getDeregisteredOrganisationNameFromSession(): String? = session.getAttribute(DEREGISTERED_ORGANISATION_NAME) as? String
+
+    fun hasOrganisationDeregisteredInThisSession(): Boolean = session.getAttribute(DEREGISTERED_ORGANISATION_NAME) != null
+
+    private fun deregisterLandlordProperties(landlord: Landlord) {
+        val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
+
+        jointlyOwnedProperties.forEach {
+            propertyOwnershipService.removeLandlord(it, landlord)
+        }
+        propertyOwnershipRepository.deleteAll(solelyOwnedProperties)
+    }
+
+    private fun deleteBaseUserIfNoOtherRoles(baseUserId: String) {
+        if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_LANDLORD }) {
+            prsdbUserRepository.deleteById(baseUserId)
+        }
+    }
 }

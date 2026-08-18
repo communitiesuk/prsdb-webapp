@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
@@ -9,7 +10,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
-class RentFrequencyAndAmountTask : Task<RentFrequencyAndAmountState>() {
+class RentFrequencyAndAmountTask(
+    journeyStateService: JourneyStateService,
+    override val rentFrequency: RentFrequencyStep,
+    override val rentAmount: RentAmountStep,
+) : TaskWithoutDependencies<RentFrequencyAndAmountState>(journeyStateService),
+    RentFrequencyAndAmountState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: RentFrequencyAndAmountState) =
         subJourney(state) {
             step(journey.rentFrequency) {

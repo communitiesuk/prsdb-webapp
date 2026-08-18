@@ -3,15 +3,14 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTask
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.builders.EmbedBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
+import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.urlPath
 
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
@@ -29,7 +28,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
             cyaUrlPath =
                 when (destination) {
                     is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
+                    is Destination.VisitableStep -> destination.step.urlPath
                     else -> null
                 }
         }
@@ -80,8 +79,9 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(
-            task: Task<T>,
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, *>,
             route: String? = null,
         ) {
             task(task) {
@@ -93,25 +93,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
         }
 
         @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTask<TTaskState>,
-            route: String? = null,
-        ) {
-            duplicableTask(task) {
-                route?.let { routeSegment(it) }
-                initialStep()
-                backDestination { journey.returnToCyaPageDestination }
-                nextStep { journey.finishCyaStep }
-            }
-        }
-
-        @Suppress("ktlint:standard:max-line-length")
-        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.duplicableCheckAnswerTask(
-            task: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState, TDependencies : Any> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, TDependencies>,
             dependencies: () -> TDependencies,
             route: String? = null,
         ) {
-            duplicableTask(task) {
+            task(task) {
                 route?.let { routeSegment(it) }
                 withDependencies(dependencies)
                 initialStep()
@@ -120,8 +107,34 @@ interface CheckYourAnswersJourneyState : JourneyState {
             }
         }
 
+        fun <TJourneyState : CheckYourAnswersJourneyState, TTaskState : JourneyState> JourneyBuilder<TJourneyState>.checkAnswerTask(
+            task: Task<TTaskState, *>,
+            route: String? = null,
+            configure: TaskInitialiser<TTaskState, *>.() -> Unit,
+        ) {
+            task(task) {
+                route?.let { routeSegment(it) }
+                initialStep()
+                backDestination { journey.returnToCyaPageDestination }
+                nextStep { journey.finishCyaStep }
+                this.configure()
+            }
+        }
+
         fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
             step: JourneyStep<TMode, *, T>,
+            route: String,
+        ) {
+            step(step) {
+                initialStep()
+                nextStep { journey.finishCyaStep }
+                routeSegment(route)
+            }
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        fun <TEmbeddedState : JourneyState, TOuterState : CheckYourAnswersJourneyState, TMode : Enum<TMode>> EmbedBuilder<TEmbeddedState, TOuterState>.checkAnswerStep(
+            step: JourneyStep<TMode, *, TEmbeddedState>,
             route: String,
         ) {
             step(step) {

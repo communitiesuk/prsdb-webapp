@@ -4,17 +4,14 @@ import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import java.time.Instant
 
-// TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
 // The underscore tells JPA to access fields relating to the referenced table
 @Suppress("ktlint:standard:function-naming")
 interface IndividualLandlordRepository :
     JpaRepository<IndividualLandlord?, Long?>,
     LandlordSearchRepository {
-    // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
-    fun findByRegistrationNumber_Number(registrationNumber: Long): IndividualLandlord?
-
-    // TODO: PDJB-1275: Update checks for landlord users to account for multiple users representing a landlord
     fun findByBaseUser_Id(subjectId: String): IndividualLandlord?
+
+    fun findByBaseUser_IdIn(subjectIds: Collection<String>): List<IndividualLandlord>
 
     fun deleteByBaseUser_Id(subjectId: String)
 

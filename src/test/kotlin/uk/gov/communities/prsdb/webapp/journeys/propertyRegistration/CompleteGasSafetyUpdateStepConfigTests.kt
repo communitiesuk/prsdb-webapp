@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.CompleteGasSafetyUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
@@ -52,9 +53,13 @@ class CompleteGasSafetyUpdateStepConfigTests {
 
     @Nested
     inner class AfterStepIsReached {
+        @Mock
+        private lateinit var mockDetailTask: GasSafetyDetailsTask
+
         @BeforeEach
         fun setUp() {
             whenever(mockState.propertyId).thenReturn(propertyId)
+            whenever(mockState.gasSafetyDetailsTask).thenReturn(mockDetailTask)
         }
 
         @Test
@@ -64,11 +69,11 @@ class CompleteGasSafetyUpdateStepConfigTests {
 
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
             whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(true)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(issueDate)
-            whenever(mockState.gasUploadIds).thenReturn(uploadIds)
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(issueDate)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(uploadIds)
 
             stepConfig.afterStepIsReached(mockState)
 
@@ -85,11 +90,11 @@ class CompleteGasSafetyUpdateStepConfigTests {
         fun `calls updateGasSafety with no gas supply and null issue date`() {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
             whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-            whenever(mockState.gasUploadIds).thenReturn(emptyList())
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 
@@ -105,7 +110,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
         @Test
         fun `throws NotNullFormModelValueIsNullException when hasGasSupply is null`() {
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
             whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(null)
 
@@ -118,7 +123,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
         fun `deletes the journey then rethrows when it gets an UpdateConflictException`() {
             // Arrange
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
             whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(false)
 
@@ -143,11 +148,11 @@ class CompleteGasSafetyUpdateStepConfigTests {
             whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
 
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
             whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-            whenever(mockState.gasUploadIds).thenReturn(emptyList())
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 

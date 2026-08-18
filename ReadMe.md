@@ -249,6 +249,11 @@ logging in.
 
 If anyone knows a better way to do this please add it here!
 
+### Testing Org Landlords
+
+If you need to instead log in as an org landlord to see their dashboard & other views locally, run the `local-org-landlord`
+run config or enable the `local-org-landlord` profile. You may need to log out & log in again after enabling this.
+
 ### Connecting to AWS
 
 When the service runs in AWS it has the profile of the ECS service it is running on.
@@ -306,6 +311,41 @@ There are 3 release pathways we manage:
 
 We release to integration by merging to `main`. There is no special process for this, just merge when the PR is approved.
 
+### Testing a branch in integration
+
+Use this process when a change needs to be tested in the deployed integration environment and cannot be adequately
+tested locally. Integration is a shared environment, so before temporarily deploying a branch, check that nobody else
+is using it and tell the team that the environment will be overwritten.
+
+If the branch contains database migrations, agree how to restore or reset the integration database before using this
+process. Deploying the branch applies its migrations to the shared database, and redeploying `main` does not reverse
+them.
+
+1. Temporarily add your branch to the `push.branches` list in
+   [`.github/workflows/build-and-deploy-integration.yml`](.github/workflows/build-and-deploy-integration.yml).
+   Make this change locally, but do not commit or push it yet:
+
+   ```yaml
+   branches:
+     - main
+     - <your-branch-name>
+   ```
+
+2. Open [Build and Deploy - Integration](https://github.com/communitiesuk/prsdb-webapp/actions/workflows/build-and-deploy-integration.yml)
+   in GitHub Actions and record the latest successful run from `main`. Commit the temporary workflow change to the
+   branch you want to test and push that branch. Wait for the branch's `Build and Deploy - Integration` run to finish,
+   then complete the required testing.
+3. After testing, or if the branch deployment fails or testing is abandoned, remove the temporary workflow change from
+   the branch and push the cleanup commit. Confirm that the feature PR no longer includes the workflow trigger change.
+4. Restore integration:
+    - If the branch deployment applied database migrations, follow the agreed recovery or reset plan to restore both the
+      database and the application to compatible versions from `main`. A `main` deployment alone does not reverse the
+      migrations, and a database reset alone does not replace the feature-branch application image.
+    - For a branch without migrations, integration is already restored if a newer successful deployment from `main`
+      completed after the branch deployment. Any testing after that deployment did not exercise the branch.
+    - If neither applies, open the recorded `main` run, select **Re-run jobs**, then **Re-run all jobs**.
+5. Confirm that integration has been restored successfully. If restoration fails, investigate, retry, or seek help.
+
 We also manage **feature releases** — config-only releases that change feature-flag values for a single environment
 without shipping any other code. These are built differently to the code releases above; see
 [Feature releases](#feature-releases).
@@ -328,17 +368,19 @@ same PR process below)
 The normal process is simply to raise a PR merging `main` into `test`, name the PR "Release main to test #n" for the nth release to `test`.
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
+Use the same release number between the webapp repo and infra repo.
 
-Go and find the release tracking Jira ticket (likely titled "Perform a release") and:
+Go and find the release tracking Jira ticket:
 
-- Make sure that you've followed the pre-release steps
+- Open this [filter](https://mhclgdigital.atlassian.net/issues/?filter=23406).
+- The tickets are sorted by created date so the release ticket you're looking for should be near the top.
+- If you can't find a release Jira ticket for the type of release you want to do (test/nft or prod), make one by cloning PDJB-1300
+
+Read the release ticket carefully! The template contains steps you should make sure to complete before, during and after the release.
+
+- Fill in the initial release details if needed (release number, type, date)
 - Add your PR to the list in ticket
-- Note in the PR description what steps you'll take post release
-
-If you can't find a release Jira ticket for this release, make one:
-
-- Clone PDJB-1061
-- Fill in necessary details
+- Make sure you're happy with all the ticket steps before returning to the PR.
 
 Note: You will probably see the message "This branch is out-of-date with the base branch" on your PR. This does not need to be resolved and
 can be ignored.
@@ -418,12 +460,9 @@ We need to ensure that any new behaviour on prod is auditably approved before co
 
 This is the standard release where we release new code to production.
 
-The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
+In the release PR, check the status of all tickets that will be released.
 
-- If it is feature flagged, ignore
-- If it is not feature flagged, ensure it has been approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
-
-If there is any ticket that'll be released that is not 'Done' and it not behind a feature flag, **stop** and check in with your tech lead.
+if there is any ticket that'll be released that is not 'Done' and is not behind a feature flag, **stop** and check in with your tech lead.
 
 Before merging, take a note of the last merged PR to `production`. You may need this later if you need to rollback.
 

@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -11,7 +12,14 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
-class RentIncludesBillsTask : Task<RentIncludesBillsState>() {
+class RentIncludesBillsTask(
+    journeyStateService: JourneyStateService,
+    override val rentIncludesBills: RentIncludesBillsStep,
+    override val billsIncluded: BillsIncludedStep,
+) : TaskWithoutDependencies<RentIncludesBillsState>(journeyStateService),
+    RentIncludesBillsState {
+    override val taskState get() = this
+
     override fun makeSubJourney(state: RentIncludesBillsState) =
         subJourney(state) {
             step(journey.rentIncludesBills) {

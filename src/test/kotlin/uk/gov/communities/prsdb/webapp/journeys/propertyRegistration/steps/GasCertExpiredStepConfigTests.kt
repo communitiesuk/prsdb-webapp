@@ -6,13 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class GasCertExpiredStepConfigTests {
     @Mock
-    lateinit var mockState: GasSafetyState
+    lateinit var mockState: GasSafetyDetailState
 
     @Test
     fun `chooseTemplate returns occupied template when isOccupied is true`() {
@@ -42,7 +42,7 @@ class GasCertExpiredStepConfigTests {
 
     private fun setupStepConfig(): GasCertExpiredStepConfig {
         val stepConfig = GasCertExpiredStepConfig()
-        stepConfig.routeSegment = GasCertExpiredStep.ROUTE_SEGMENT
+        stepConfig.urlPath = GasCertExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

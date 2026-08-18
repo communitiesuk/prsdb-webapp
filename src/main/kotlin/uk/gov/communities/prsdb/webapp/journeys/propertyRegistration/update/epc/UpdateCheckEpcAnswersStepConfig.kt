@@ -17,7 +17,7 @@ class UpdateCheckEpcAnswersStepConfig(
 
     override fun getStepSpecificContent(state: UpdateEpcJourneyState): Map<String, Any?> {
         val factory =
-            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state) { step ->
+            EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state.epcDetailsTask) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(

@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -17,13 +17,13 @@ class ConfirmEpcRetrievedByUprnStepConfigTests {
     lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     private val routeSegment = ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT
 
     private fun setupStepConfig(): ConfirmEpcRetrievedByUprnStepConfig {
         val stepConfig = ConfirmEpcRetrievedByUprnStepConfig(mockEpcCertificateUrlProvider)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

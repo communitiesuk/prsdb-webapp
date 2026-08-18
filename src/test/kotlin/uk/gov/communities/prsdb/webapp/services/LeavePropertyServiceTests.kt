@@ -24,9 +24,6 @@ class LeavePropertyServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockLandlordService: LandlordService
-
-    @Mock
     private lateinit var mockHttpSession: HttpSession
 
     @Mock
@@ -35,55 +32,62 @@ class LeavePropertyServiceTests {
     @Mock
     private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var leavePropertyService: LeavePropertyService
 
     @Test
     fun `getPropertyOwnershipIfUserCanLeave throws NOT_FOUND when the user is not a landlord on the property`() {
         val propertyOwnershipId = 1L
-        val landlordOne = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
-        val landlordTwo = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+        val currentLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("current-user"))
+        val landlordOne = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val landlordTwo = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
                 landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(currentLandlord)
 
         assertThrows<ResponseStatusException> {
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "not-a-landlord")
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
         }
     }
 
     @Test
     fun `getPropertyOwnershipIfUserCanLeave throws NOT_FOUND when the property has fewer than two landlords`() {
         val propertyOwnershipId = 1L
-        val soleLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val soleLandlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
                 landlords = mutableSetOf(soleLandlord),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(soleLandlord)
 
         assertThrows<ResponseStatusException> {
-            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
         }
     }
 
     @Test
     fun `getPropertyOwnershipIfUserCanLeave returns the property when the user is one of two or more landlords`() {
         val propertyOwnershipId = 1L
-        val landlordOne = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
-        val landlordTwo = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+        val landlordOne = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val landlordTwo = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
                 landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlordOne)
 
-        val result = leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+        val result = leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId)
 
         assertEquals(propertyOwnership, result)
     }
@@ -91,10 +95,10 @@ class LeavePropertyServiceTests {
     @Test
     fun `leavePropertyOwnership removes the landlord and sends them a confirmation email`() {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
-        val landlord = MockLandlordData.createLandlord(name = "Alice", email = "alice@example.com")
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord, MockLandlordData.createLandlord(name = "Bob")),
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
                 address = address,
             )
 
@@ -110,11 +114,35 @@ class LeavePropertyServiceTests {
     }
 
     @Test
-    fun `leavePropertyOwnership sends swap to individual nudge email`() {
-        val landlord = MockLandlordData.createLandlord(name = "Alice", email = "alice@example.com")
+    fun `leavePropertyOwnership removes an organisation landlord and sends them a confirmation email`() {
+        // Arrange
+        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val orgLandlord = MockLandlordData.createOrgLandlord(name = "Org Landlord", registrantEmail = "org.user@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord, MockLandlordData.createLandlord(name = "Bob")),
+                landlords = mutableSetOf(orgLandlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
+                address = address,
+            )
+
+        // Act
+        leavePropertyService.leavePropertyOwnership(orgLandlord, propertyOwnership)
+
+        // Assert
+        verify(mockPropertyOwnershipService).removeLandlord(propertyOwnership, orgLandlord)
+
+        val emailCaptor = argumentCaptor<JointLandlordYouLeftConfirmation>()
+        verify(emailSender).sendEmail(eq("org.user@example.com"), emailCaptor.capture())
+        val sentEmail = emailCaptor.firstValue
+        assertEquals("Org Landlord", sentEmail.recipientName)
+        assertEquals(address.toMultiLineAddress(), sentEmail.propertyAddress)
+    }
+
+    @Test
+    fun `leavePropertyOwnership sends swap to individual nudge email`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createIndividualLandlord(name = "Bob")),
             )
 
         leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)

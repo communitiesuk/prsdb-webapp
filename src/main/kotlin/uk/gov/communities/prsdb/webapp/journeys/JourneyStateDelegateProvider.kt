@@ -14,12 +14,9 @@ class JourneyStateDelegateProvider(
 
     private var registry: DelegateKeyRegistry? = null
 
-    // registerKey guarantees that, within this provider, no two delegates share a key. Once bindKeyRegistry attaches
-    // this provider to a journey-build-wide DelegateKeyRegistry, each key is ALSO registered there in its final
-    // route-scoped form, so collisions across the journey state and every task are detected at build time.
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
-            throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
+            throw JourneyInitialisationException("Delegate key '$propertyKey' is already in use in this journey")
         } else {
             keysInUse.add(propertyKey)
         }
@@ -32,8 +29,6 @@ class JourneyStateDelegateProvider(
         this.routePrefix = routePrefix
     }
 
-    // Attach this provider to the shared registry, flushing its already-collected keys in their final route-scoped
-    // form. Must be called AFTER bindRoutePrefix so scopedKey resolves correctly; keys registered later forward live.
     override fun bindKeyRegistry(registry: DelegateKeyRegistry) {
         this.registry = registry
         keysInUse.forEach { registry.register(scopedKey(it)) }

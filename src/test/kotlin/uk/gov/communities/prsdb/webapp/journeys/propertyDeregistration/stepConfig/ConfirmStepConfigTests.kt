@@ -72,27 +72,33 @@ class ConfirmStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId, propertyAddress)
+        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(
+            propertyOwnershipId,
+            propertyAddress,
+        )
     }
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email to the landlord`() {
         val stepConfig = setupStepConfig()
-        val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
+        val james = MockLandlordData.createIndividualLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(james)))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmail>())
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq("james@example.com"),
+            any<PropertyDeregistrationConfirmationEmail>(),
+        )
     }
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with correct landlord name and address`() {
         val stepConfig = setupStepConfig()
         val multiLineAddress = "123 Test Street\nAB1 2CD"
-        val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
+        val james = MockLandlordData.createIndividualLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(
@@ -170,7 +176,7 @@ class ConfirmStepConfigTests {
                 mockConfirmationEmailSender,
                 mockInviteeCancellationEmailSender,
             )
-        stepConfig.routeSegment = ConfirmStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ConfirmStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

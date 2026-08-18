@@ -99,13 +99,13 @@ class InviteJointLandlordStepConfigTests {
     @Test
     fun `enrichSubmittedDataBeforeValidation includes both session and existing invited emails`() {
         val stepConfig = InviteJointLandlordStepConfig(urlParameterService)
-        stepConfig.routeSegment = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
+        stepConfig.urlPath = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("session@example.com"))
         whenever(mockJourneyState.dependencies).thenReturn(mockDependencies)
         whenever(mockDependencies.existingInvitedEmails).thenReturn(listOf("existing@example.com"))
-        whenever(mockDependencies.existingLandlordEmails).thenReturn(listOf("landlord@example.com"))
-        whenever(mockDependencies.loggedInLandlordEmail).thenReturn("me@example.com")
+        whenever(mockDependencies.existingLandlordEmails).thenReturn(listOf("sole-user@example.com"))
+        whenever(mockDependencies.loggedInLandlordEmail).thenReturn("sole-user@example.com")
         whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
 
         val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
@@ -115,13 +115,13 @@ class InviteJointLandlordStepConfigTests {
         assertEquals(listOf("session@example.com", "existing@example.com"), invitedAddresses)
         @Suppress("UNCHECKED_CAST")
         val landlordEmails = result["existingLandlordEmails"] as List<String>
-        assertEquals(listOf("landlord@example.com"), landlordEmails)
-        assertEquals("me@example.com", result["loggedInLandlordEmail"])
+        assertEquals(listOf("sole-user@example.com"), landlordEmails)
+        assertEquals("sole-user@example.com", result["loggedInLandlordEmail"])
     }
 
     private fun setupStepConfig(): InviteJointLandlordStepConfig {
         val stepConfig = InviteJointLandlordStepConfig(urlParameterService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
 
         whenever(mockJourneyState.inviteJointLandlordStep).thenReturn(inviteJointLandlordStep)

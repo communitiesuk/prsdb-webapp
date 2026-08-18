@@ -196,54 +196,136 @@ step(journey.slowSwallowStep) {
 > **Note:** `nextStep` and `parents` are independent concepts. `nextStep` defines where a user is redirected; `parents` defines when a user can visit a step. It's possible to redirect to an unreachable step.
 
 ## Define a task
-Create a subclass of `Task` and override `makeSubJourney` with the internal structure:
+
+A task is a reusable group of steps with its own state. To create one:
+
+1. Pick a base class:
+    - `TaskWithoutDependencies<TState>` — if the task's logic depends only on answers collected inside
+      the task itself.
+    - `Task<TState, TDependencies>` — if the task needs values from the enclosing journey (e.g. "is the
+      property occupied?"). Declare a small interface for what you need and take it as the second type
+      parameter; the journey that mounts the task will supply the values.
+2. Define a state interface for the task listing the steps and any extra persisted values it owns, and
+   have the task implement it. Override `taskState` to return `this`.
+3. Inject the task's steps (and any inner tasks) as constructor properties.
+4. Implement `makeSubJourney(state)` using `subJourney(state) { … }` and the same DSL you use for
+   journeys.
+5. Register the class with `@JourneyFrameworkComponent` so it can be injected into whatever journey uses
+   it.
+
+When another element needs data from the task, read it through the task reference on the outer state
+(e.g. `state.personalDetailsTask.nameStep`). Tasks don't share a common state interface with the journey
+that hosts them.
+
+### A `TaskWithoutDependencies` example
 
 ```kotlin
-override fun makeSubJourney(state: OccupationState) =
-    subJourney(state) {
-        step(journey.nameStep) {
-            nextStep { journey.dateOfBirthStep }
-            routeSegment("name")
-        }
-        step(journey.dateOfBirthStep) {
-            nextStep {
-                when (it) {
-                    AgeCategory.MINOR -> journey.parentalConsentStep
-                    AgeCategory.ADULT -> journey.addressStep
+@JourneyFrameworkComponent
+class PersonalDetailsTask(
+    journeyStateService: JourneyStateService,
+    override val nameStep: NameStep,
+    override val dateOfBirthStep: DateOfBirthStep,
+    override val parentalConsentStep: ParentalConsentStep,
+    override val addressStep: AddressStep,
+) : TaskWithoutDependencies<PersonalDetailsState>(journeyStateService),
+    PersonalDetailsState {
+
+    override val taskState get() = this
+
+    override fun makeSubJourney(state: PersonalDetailsState) =
+        subJourney(state) {
+            step(journey.nameStep) {
+                nextStep { journey.dateOfBirthStep }
+                routeSegment("name")
+            }
+            step(journey.dateOfBirthStep) {
+                nextStep {
+                    when (it) {
+                        AgeCategory.MINOR -> journey.parentalConsentStep
+                        AgeCategory.ADULT -> journey.addressStep
+                    }
+                }
+                routeSegment("date-of-birth")
+                parents { journey.nameStep.isComplete() }
+            }
+            step(journey.parentalConsentStep) {
+                nextStep { journey.addressStep }
+                routeSegment("parental-consent")
+                parents { journey.dateOfBirthStep.hasOutcome(AgeCategory.MINOR) }
+            }
+            step(journey.addressStep) {
+                nextStep { exitStep }
+                routeSegment("address")
+                parents {
+                    OrParents(
+                        journey.dateOfBirthStep.hasOutcome(AgeCategory.ADULT),
+                        journey.parentalConsentStep.isComplete(),
+                    )
                 }
             }
-            routeSegment("date-of-birth")
-            parents { journey.nameStep.isComplete() }
-        }
-        step(journey.parentalConsentStep) {
-            nextStep { journey.addressStep }
-            routeSegment("parental-consent")
-            parents { journey.dateOfBirthStep.hasOutcome(AgeCategory.MINOR) }
-        }
-        step(journey.addressStep) {
-            nextStep { exitStep }
-            routeSegment("address")
-            parents {
-                OrParents(
-                    journey.dateOfBirthStep.hasOutcome(AgeCategory.ADULT),
-                    journey.parentalConsentStep.isComplete()
-                )
+            exitStep {
+                parents { journey.addressStep.isComplete() }
             }
         }
-        exitStep {
-            parents { journey.addressStep.isComplete() }
-        }
-    }
+}
 ```
 
-The first step listed in the task must be the "entry point" step, which users will be directed to when they start the task.
+The first step listed inside `subJourney` is the entry point users are sent to when they start the task,
+and the `exitStep` — an internal step with no page — defines when the task counts as complete and where
+the outer journey should continue from.
 
-The `exitStep` is an internal step without an associated page.
-It defines the requirements for completing the task and where to go next.
+Extra values the task needs to persist (flags, IDs, working data) live on the task itself, using
+`delegateProvider.nullableDelegate(...)` in the same way as on a journey state class.
+
+### A `Task` with dependencies
+
+If the task needs data owned by the enclosing scope (a journey or an outer task), declare a dependencies
+interface and take it as the second type parameter. Inside the task's DSL you can read from it via
+`dependencies`. The block that mounts the task supplies the values with `withDependencies { ... }`, so
+the same task can be reused from different journeys with different sources.
+
+```kotlin
+interface GasSafetyDependencies {
+    val isOccupied: Boolean
+    val allowProvideCertificateLaterRoute: Boolean
+}
+
+@JourneyFrameworkComponent
+class GasSafetyTask(
+    journeyStateService: JourneyStateService,
+    override val gasSafetyDetailsTask: GasSafetyDetailsTask,
+    override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
+) : Task<GasSafetyState, GasSafetyDependencies>(journeyStateService),
+    GasSafetyState {
+
+    override val taskState get() = this
+
+    override fun makeSubJourney(state: GasSafetyState) =
+        subJourney(state) {
+            task(journey.gasSafetyDetailsTask) {
+                withDependencies { dependencies }   // forwarded to the inner task
+                nextStep { journey.checkGasSafetyAnswersStep }
+            }
+            step(journey.checkGasSafetyAnswersStep) {
+                routeSegment(CheckGasSafetyAnswersStep.ROUTE_SEGMENT)
+                parents { journey.gasSafetyDetailsTask.isComplete() }
+                nextStep { exitStep }
+            }
+            exitStep {
+                parents { journey.checkGasSafetyAnswersStep.isComplete() }
+            }
+        }
+}
+```
+
+If a task declares dependencies but `withDependencies { ... }` is missing at a mount site, the journey
+factory throws `JourneyInitialisationException` at build time.
 
 ### Journey structure including a task
-When adding a task to a journey, it can be configured just like a step except that you do not specify a route segment (tasks do not have their own URL).
-When specifying a task as the destination following another step use `task.firstStep` to direct users to the entry point of the task.
+
+Tasks are added with the same `task { ... }` DSL block whether they have dependencies or not. Configure
+them just like a step — `parents { }`, `nextStep { }` / `nextUrl { }` — and use `task.firstStep` to
+redirect into the task from another element.
 
 ```kotlin
 val state = stateFactory.getObject()
@@ -276,67 +358,192 @@ val simpleJourney = journey(state) {
 }
 ```
 
+### Task route prefixes
+
+A task can optionally carry its own URL segment, which is prepended to every requestable step inside it:
+
+```kotlin
+task(journey.exampleTask, routeSegment = "example") {
+    parents { journey.colourStep.isComplete() }
+    nextStep { journey.checkAnswersStep }
+}
+```
+
+With this, a step whose `routeSegment("name")` is set inside the task is served at `example/name`, not
+`name`. Nested tasks compose — mounting an inner task inside an outer task-with-route yields URLs like
+`<outerTask>/<innerTask>/<stepRoute>` — and a landing redirect is registered at `/example` that
+redirects to `task.firstStep`.
+
+Delegate storage keys for values persisted on the task are prefixed with the same route, so two mounts
+of the same reusable task under different routes have isolated state.
+
+### Passing dependencies at the mount site
+
+Tasks that declare a `TDependencies` type parameter must be given a provider inside the mount block:
+
+```kotlin
+task(journey.gasSafetyTask) {
+    withDependencies { journey }                // typically the enclosing state, or an object built from it
+    parents { journey.someEarlierStep.isComplete() }
+    nextStep { journey.nextStep }
+}
+```
+
+The provider is called once at build time. If the enclosing state already satisfies the dependencies
+interface, pass it directly; otherwise, construct an inline object.
+
+### Savable elements
+
+Add `savable()` inside a `step { }` or `task { }` mount to mark it as a save-progress point. The
+framework persists journey state to the database on completion of any savable element.
+
+```kotlin
+task(journey.gasSafetyDetailsTask) {
+    withDependencies { dependencies }
+    nextStep { journey.checkAnswersStep }
+    savable()
+}
+```
+
+## Embedding a task's steps directly with `fromTask`
+
+Most of the time a task is added as a single block via `task(journey.someTask) { ... }`, and its
+internal structure is fully defined by the task itself. Sometimes, though, you need to place individual
+steps from a task directly into the outer journey — either wiring them up differently, or mounting only
+one of them.
+
+`fromTask(task) { ... }` opens an inner DSL block that has visibility of both scopes:
+
+- `journey` — the outer journey's state (unchanged from the enclosing scope).
+- `task` — the embedded task's state (its steps and members).
+
+Inside the block you use the normal `step { }` / `task { }` DSL, but you reference the embedded task's
+steps as `task.someStep` and can freely mix in references to the outer state as `journey.someStep`.
+Steps added this way are registered on the outer routing map alongside everything else.
+
+```kotlin
+journey(state) {
+    // ...
+    fromTask(journey.ownershipAndLandlordsTask) {
+        step(task.ownershipTypeStep) {
+            routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
+            parents { journey.propertyDetailsTask.propertyTypeStep.isComplete() }
+            nextStep { journey.licensingTask.firstStep }
+        }
+    }
+    // ...
+}
+```
+
+If the embedded task declares dependencies, there is a second overload that binds them at the mount
+site: `fromTask(task, dependencies) { ... }`.
+
+## Check-your-answers sub-journeys
+
+Journeys that let users change individual answers from a CYA page use a **second routing map** built
+from the same journey state. This map contains only the step(s) relevant to the answer being changed and
+finishes on a `finishCyaStep` that redirects back to the CYA page.
+
+When the step being changed lives inside a task, `fromTask` gives access to that step so it can be
+mounted on its own rather than by running through the whole task:
+
+```kotlin
+fromTask(journey.personalDetailsTask) {
+    checkAnswerStep(task.nameStep, NameStep.ROUTE_SEGMENT)
+}
+```
+
+For CYA journeys extending `CheckYourAnswersJourneyState`, the following extension helpers on
+`JourneyBuilder` / `EmbedBuilder` wrap the boilerplate:
+
+- `checkAnswerStep(step, route)` — mounts a single step as an initial step whose `nextStep` is
+  `finishCyaStep`.
+- `checkAnswerTask(task, route? = null)` and `checkAnswerTask(task, dependencies, route? = null)` —
+  mounts a whole task as an initial task whose `nextStep` is `finishCyaStep`.
+
+A typical CYA routing map dispatches on the answer being changed:
+
+```kotlin
+companion object {
+    fun <T : PersonalDetailsState> checkYourAnswersJourneyMap(
+        state: T,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+
+            when (checkingAnswersFor) {
+                NameStep.ROUTE_SEGMENT ->
+                    fromTask(journey.personalDetailsTask) {
+                        checkAnswerStep(task.nameStep, NameStep.ROUTE_SEGMENT)
+                    }
+
+                LookupAddressStep.ROUTE_SEGMENT ->
+                    checkAnswerTask(journey.addressTask)
+            }
+
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+}
+```
+
+The journey factory picks which routing map to serve based on `state.someTask.checkingAnswersFor`.
+
 ## Define the Journey State
 
 Each journey has an associated `JourneyState` interface and implementing class that specifies:
-- The possible steps and tasks in the journey
+- The steps and tasks that make up the journey
 - Any additional data to persist between steps
 
 Because each page is a separate HTTP request, the `JourneyState` is stored in the user's session between requests.
 
 ### State Interfaces
 
-Define interfaces for tasks and journeys that specify the required steps and data:
-
-```kotlin
-interface PersonalDetailsState : JourneyState {
-    val nameStep: NameStep
-    val dateOfBirthStep: DateOfBirthStep
-    // ... other steps and data
-}
-```
-It is generally a good idea to define smaller interfaces for tasks that can be composed into larger interfaces for journeys.
-
-```kotlin
-interface OtherDetailsState : JourneyState {
-    val favouriteColourStep: ColourStep
-    val favouriteQuestStep: QuestStep
-    // ... other steps and data
-}
-
-interface CombinedJourneyState : PersonalDetailsState, OtherDetailsState {
-    val additionalStep: AdditionalStep
-}
-```
-
-Journey state classes implement these interfaces, ensuring all required data is available.
-
-### AbstractJourneyState and the JourneyStateDelegateProvider
-
-To create the journey state class, extend `AbstractJourneyState` and use the `JourneyStateDelegateProvider` to automatically persist additional properties to the session:
-Add all the necessary steps and tasks as `val` properties in the class constructor.
-Register the class as a `@JourneyFrameworkComponent` to ensure they are all injected.
+Define an interface listing every step and task the journey holds directly, plus any extra persisted
+values:
 
 ```kotlin
 interface SimpleJourneyState : JourneyState {
     val nameStep: NameStep
     val questStep: QuestStep
     val colourStep: ColourStep
+    val personalDetailsTask: PersonalDetailsTask
     val changedMindAboutColour: Boolean?
-}
-
-@JourneyFrameworkComponent
-class SimpleJourney(
-    override val delegateProvider: JourneyStateDelegateProvider,
-    override val nameStep: NameStep,
-    override val questStep: QuestStep,
-    override val colourStep: ColourStep,
-) : AbstractJourneyState, SimpleJourneyState {
-    var changedMindAboutColour: Boolean? by delegateProvider.nullableDelegate("changedMind")
 }
 ```
 
-The `changedMindAboutColour` property is automatically persisted to the session using the key `"changedMind"`.
+Tasks are held by reference. When other code needs a value from a task, it reads it through the task
+reference, e.g. `state.personalDetailsTask.nameStep`. This keeps each task independent and reusable
+across journeys.
+
+### AbstractJourneyState and the JourneyStateDelegateProvider
+
+To create the journey state class, extend `AbstractJourneyState` and use the `delegateProvider` it
+provides to persist additional properties to the session. Take every step and task as a constructor
+property, and register the class as a `@JourneyFrameworkComponent` so Spring can inject them.
+
+```kotlin
+@JourneyFrameworkComponent
+class SimpleJourney(
+    override val nameStep: NameStep,
+    override val questStep: QuestStep,
+    override val colourStep: ColourStep,
+    override val personalDetailsTask: PersonalDetailsTask,
+    journeyStateService: JourneyStateService,
+) : AbstractJourneyState(journeyStateService),
+    SimpleJourneyState {
+
+    override var changedMindAboutColour: Boolean? by delegateProvider.nullableDelegate("changedMind")
+}
+```
+
+The `changedMindAboutColour` property is automatically persisted to the session using the key
+`"changedMind"`. Anything the composed tasks persist lives on the task instances themselves and is
+persisted independently.
 
 ## Initialising Journey State
 
@@ -394,47 +601,82 @@ Define at least two controller methods for each journey:
 - **GET**: Render pages
 - **POST**: Handle form submissions
 
-Capture the route segment as a path variable to identify the step being requested.
+Because tasks can carry route prefixes, the step being requested may be several path segments long
+(e.g. `personal-details/name`). Capture the whole thing as a wildcard path variable — `{*stepPath}` —
+rather than a single `{stepName}` segment.
 
-Each method calls a journey factory to create a map of route segments to [`StepLifecycleOrchestrator`](JourneyFrameworkReadMe.md#glossary-of-terms) instances, which wrap steps and handle the request lifecycle.
+Controllers delegate all the routing-map lookup, journey initialisation, and base-path handling to
+`JourneyStepDispatcher`, which:
 
-You must catch `NoSuchJourneyException` to handle the case where the user has not yet initialised a journey.
-You should then call your initialisation method to create a new journey state and redirect the user to the same step with the new journey ID.
+- Looks the step up in the routing map returned by the journey factory.
+- If the map lookup throws `NoSuchJourneyException`, initialises a new journey and redirects to the same
+  step with the new journey ID.
+- Records the journey's base path on the request so any URLs generated during the request are absolute.
 
 ```kotlin
-
-    @GetMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
+@PrsdbController
+@RequestMapping(REGISTER_PROPERTY_JOURNEY_ROUTE)
+class RegisterPropertyController(
+    private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
+) {
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         principal: Principal,
     ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
 
-    @PostMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_REGISTRATION)
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
-        @RequestParam formData: PageData,
+        @PathVariable stepPath: String,
+        @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
+
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            stepPath,
+            createRoutingMap = { propertyRegistrationJourneyFactory.createJourneySteps() },
+            initialiseJourney = { propertyRegistrationJourneyFactory.initializeJourneyState(principal) },
+            dispatch = dispatch,
+        )
+}
+```
+
+### Triggering re-initialisation on other exceptions
+
+Some journeys need to fall back to a fresh state for exceptions other than `NoSuchJourneyException` —
+for example, when an ID in the URL no longer matches the stored state. Pass `startNewJourneyOn` to opt
+those exceptions in:
+
+```kotlin
+JourneyStepDispatcher.handleInitialisableRequest(
+    stepPath,
+    createRoutingMap = { factory.createJourneySteps() },
+    initialiseJourney = { factory.initializeJourneyState(principal, propertyOwnershipId) },
+    dispatch = dispatch,
+    startNewJourneyOn = { it is PropertyOwnershipMismatchException },
+)
+```
+
+### Journeys that cannot self-initialise
+
+Some journeys (e.g. accepting an invitation) require an external trigger to create state and should
+redirect to a well-known URL rather than silently re-initialising. Use `handleUninitialisableRequest`:
+
+```kotlin
+JourneyStepDispatcher.handleUninitialisableRequest(
+    stepPath,
+    createRoutingMap = { factory.createJourneySteps() },
+    dispatch = dispatch,
+    redirectOn = { it is InvalidInvitationException },
+    getRedirect = { ModelAndView("redirect:$INVALID_INVITATION_ROUTE") },
+)
 ```
 
 ## Testing

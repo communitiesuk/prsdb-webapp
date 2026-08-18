@@ -6,13 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class ElectricalCertExpiredStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyState
+    lateinit var mockState: ElectricalSafetyDetailState
 
     @Test
     fun `chooseTemplate returns occupied template when isOccupied is true`() {
@@ -42,7 +42,7 @@ class ElectricalCertExpiredStepConfigTests {
 
     private fun setupStepConfig(): ElectricalCertExpiredStepConfig {
         val stepConfig = ElectricalCertExpiredStepConfig()
-        stepConfig.routeSegment = ElectricalCertExpiredStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ElectricalCertExpiredStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

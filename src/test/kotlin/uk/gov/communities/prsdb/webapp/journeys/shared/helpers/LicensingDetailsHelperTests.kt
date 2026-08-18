@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
@@ -13,14 +12,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import kotlin.test.assertEquals
 
 class LicensingDetailsHelperTests {
-    private val featureFlagManager = mock<FeatureFlagManager>()
-
-    private val licensingDetailsHelper = LicensingDetailsHelper(featureFlagManager)
+    private val licensingDetailsHelper = LicensingDetailsHelper()
 
     private val childJourneyId = "childJourneyId"
 
@@ -30,7 +26,7 @@ class LicensingDetailsHelperTests {
         val state = createMockLicensingState(LicensingType.NO_LICENSING, null)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
 
         // Assert
         summaryList.single().let { row ->
@@ -50,7 +46,7 @@ class LicensingDetailsHelperTests {
         val state = createMockLicensingState(LicensingType.HMO_MANDATORY_LICENCE, licenceNumber)
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
 
         // Assert
         assertEquals(2, summaryList.size)
@@ -74,6 +70,25 @@ class LicensingDetailsHelperTests {
         }
     }
 
+    @Test
+    fun `When licensing is to be provided later, getCheckYourAnswersSummaryList returns a single provide-this-later row`() {
+        // Arrange
+        val state = createMockLicensingStateWithSkip()
+
+        // Act
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, state)
+
+        // Assert
+        summaryList.single().let { row ->
+            assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
+            assertEquals(LicensingType.PROVIDE_LATER, row.fieldValue)
+            assertEquals(
+                listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
+                row.actions,
+            )
+        }
+    }
+
     interface TestableLicensingState :
         CheckYourAnswersJourneyState,
         LicensingState,
@@ -87,15 +102,11 @@ class LicensingDetailsHelperTests {
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {
-                whenever(this.formModel).thenReturn(
-                    LicensingTypeFormModel().apply {
-                        licensingType = licenseType
-                    },
-                )
-                whenever(this.routeSegment).thenReturn("licensing-type")
+                whenever(this.urlPath).thenReturn("licensing-type")
                 whenever(this.isStepReachable).thenReturn(true)
             }
         whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)
+        whenever(stateMock.getLicensingType()).thenReturn(licenseType)
         whenever(stateMock.getLicenceNumber()).thenReturn(licenceNumber)
         whenever(stateMock.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
 
@@ -125,7 +136,22 @@ class LicensingDetailsHelperTests {
             }
 
         whenever(licenceNumberStepMock.isStepReachable).thenReturn(true)
-        whenever(licenceNumberStepMock.routeSegment).thenReturn("licence-number")
+        whenever(licenceNumberStepMock.urlPath).thenReturn("licence-number")
+
+        return stateMock
+    }
+
+    fun createMockLicensingStateWithSkip(): TestableLicensingState {
+        val stateMock = mock<TestableLicensingState>()
+
+        val typeStepMock =
+            mock<LicensingTypeStep>().apply {
+                whenever(this.urlPath).thenReturn("licensing-type")
+                whenever(this.isStepReachable).thenReturn(true)
+            }
+        whenever(stateMock.licensingTypeStep).thenReturn(typeStepMock)
+        whenever(stateMock.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
+        whenever(stateMock.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
 
         return stateMock
     }

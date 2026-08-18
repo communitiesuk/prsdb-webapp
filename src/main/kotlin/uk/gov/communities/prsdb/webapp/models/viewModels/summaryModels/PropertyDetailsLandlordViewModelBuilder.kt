@@ -1,25 +1,30 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
+        private fun landlordEmail(landlord: Landlord): String =
+            when (landlord) {
+                is IndividualLandlord -> landlord.email
+                is OrganisationalLandlord -> landlord.wholeOrgEmail
+                else -> throw IllegalArgumentException("Unknown landlord type")
+            }
+
         fun buildSummaryCards(
             landlords: Set<Landlord>,
-            currentUserId: String,
+            currentLandlord: Landlord,
             propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
-                // TODO: PDJB-1276: Update landlord tab landlord view for org landlords
+                .sortedWith(compareByDescending<Landlord> { it.id == currentLandlord.id }.thenBy { it.name })
                 .map { landlord ->
-                    check(landlord is IndividualLandlord)
-                    landlord
-                }.sortedWith(compareByDescending<IndividualLandlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
-                .map { landlord ->
-                    val isCurrentUser = landlord.baseUser.id == currentUserId
+                    val isCurrentUser = landlord.id == currentLandlord.id
                     if (isCurrentUser) {
                         val removeMeAction =
                             SummaryCardActionViewModel(
@@ -27,9 +32,15 @@ class PropertyDetailsLandlordViewModelBuilder {
                                 LeavePropertyController.getLeavePropertyPath(propertyOwnershipId),
                             )
 
+                        val titleKey =
+                            if (landlord.landlordType == LandlordType.ORGANISATION) {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentOrgCardTitle"
+                            } else {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
+                            }
+
                         SummaryCardViewModel(
-                            title =
-                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle",
+                            title = titleKey,
                             cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
                             actions = if (landlords.size > 1) listOf(removeMeAction) else null,
@@ -42,7 +53,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                     }
                 }
 
-        private fun buildLandlordCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",
@@ -50,7 +61,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.emailAddress",
-                    fieldValue = landlord.email,
+                    fieldValue = landlordEmail(landlord),
                 ),
             )
 
@@ -59,27 +70,54 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlordDetailsUrlProvider: (Landlord) -> String,
         ): List<SummaryCardViewModel> =
             landlords
-                // TODO: PDJB-1277: Update landlord tab local authority view for org landlords
+                .sortedBy { it.name }
                 .map { landlord ->
-                    check(landlord is IndividualLandlord)
-                    landlord
-                }.sortedBy { it.name }
-                .map { landlord ->
-                    SummaryCardViewModel(
-                        title = landlord.name,
-                        summaryList = buildLocalCouncilCardRows(landlord),
-                        actions =
-                            listOf(
-                                SummaryCardActionViewModel(
-                                    text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
-                                    url = landlordDetailsUrlProvider(landlord),
-                                    opensInNewTab = true,
-                                ),
-                            ),
-                    )
+                    when (landlord) {
+                        is IndividualLandlord ->
+                            SummaryCardViewModel(
+                                title = landlord.name,
+                                summaryList = buildLocalCouncilIndividualCardRows(landlord),
+                                actions =
+                                    listOf(
+                                        SummaryCardActionViewModel(
+                                            text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                            url = landlordDetailsUrlProvider(landlord),
+                                            opensInNewTab = true,
+                                        ),
+                                    ),
+                            )
+
+                        is OrganisationalLandlord ->
+                            SummaryCardViewModel(
+                                title = landlord.name,
+                                summaryList = buildLocalCouncilOrgCardRows(landlord),
+                                actions =
+                                    listOf(
+                                        SummaryCardActionViewModel(
+                                            text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                            url = landlordDetailsUrlProvider(landlord),
+                                            opensInNewTab = true,
+                                        ),
+                                    ),
+                            )
+
+                        else -> throw IllegalArgumentException("Unknown landlord type")
+                    }
                 }
 
-        private fun buildLocalCouncilCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
+        private fun buildLocalCouncilOrgCardRows(landlord: OrganisationalLandlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.wholeOrgEmail,
+                ),
+            )
+
+        private fun buildLocalCouncilIndividualCardRows(landlord: IndividualLandlord): List<SummaryListRowViewModel> =
             listOf(
                 SummaryListRowViewModel(
                     fieldHeading = "landlordDetails.personalDetails.lrn",

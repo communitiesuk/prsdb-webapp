@@ -35,6 +35,22 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
+                    OrganisationalLandlordRegistrationConfirmationEmail(
+                        registrantName = "Jill Jones",
+                        organisationName = "Test Organisation Name",
+                        lrn = "L-CCCC-CCCC",
+                        prsdURL = "prsdUrl",
+                    ),
+                    "/emails/OrganisationalLandlordRegistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    OrganisationalLandlordDeregistrationConfirmationEmail(
+                        registrantName = "Sam Smith",
+                        organisationName = "Example Housing Association",
+                    ),
+                    "/emails/OrganisationalLandlordDeregistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
                         "1 Street Name, AB1 2CD",
@@ -63,19 +79,23 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     LandlordWithPropertiesDeregistrationConfirmationEmail(
                         PropertyDetailsEmailSectionList(
-                            listOf(PropertyDetailsEmailSection(propertyNumber = 1, "P-WWW-XXX", "1 Fake Street, Mirageville")),
+                            listOf(
+                                PropertyDetailsEmailSection(
+                                    propertyNumber = 1,
+                                    "P-WWW-XXX",
+                                    "1 Fake Street, Mirageville",
+                                ),
+                            ),
                         ),
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
-                        "Subject for certificate",
-                        "Heading for certificate",
-                        "Body for certificate",
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        "P-XXXX-XXXX",
-                        URI("propertyUrl"),
+                        certificateType = "gas safety certificate",
+                        recipientName = "Jane Smith",
+                        propertyAddress = "1 Street Name, Town, Country, AB1 2CD",
+                        landlordDashboardUrl = URI("dashboardUrl"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
                 ),
@@ -89,8 +109,8 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
-                    "/emails/LandlordUpdateConfirmation.md",
+                    IndividualLandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
+                    "/emails/IndividualLandlordUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     BetaFeedbackEmail("feedback", "email@test.com", "referrer"),
@@ -100,7 +120,11 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
-                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        registrationNumber =
+                            RegistrationNumberDataModel(
+                                type = RegistrationNumberType.PROPERTY,
+                                number = 123456L,
+                            ),
                         dashboardUrl = URI("dashboardUrl"),
                         newCertificateUrl = URI("newCertificateUrl"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
@@ -115,7 +139,11 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
-                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        registrationNumber =
+                            RegistrationNumberDataModel(
+                                type = RegistrationNumberType.PROPERTY,
+                                number = 123456L,
+                            ),
                         dashboardUrl = URI("dashboardUrl"),
                         newCertificateUrl = URI("newCertificateUrl"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
@@ -130,7 +158,11 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
-                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        registrationNumber =
+                            RegistrationNumberDataModel(
+                                type = RegistrationNumberType.PROPERTY,
+                                number = 123456L,
+                            ),
                         dashboardUrl = URI("dashboardUrl"),
                         newCertificateUrl = URI("newCertificateUrl"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -144,7 +176,11 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
-                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        registrationNumber =
+                            RegistrationNumberDataModel(
+                                type = RegistrationNumberType.PROPERTY,
+                                number = 123456L,
+                            ),
                         dashboardUrl = URI("dashboardUrl"),
                         newCertificateUrl = URI("newCertificateUrl"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
@@ -158,7 +194,11 @@ class EmailTemplateModelsTests {
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
-                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        registrationNumber =
+                            RegistrationNumberDataModel(
+                                type = RegistrationNumberType.PROPERTY,
+                                number = 123456L,
+                            ),
                         dashboardUrl = URI("dashboardUrl"),
                         newCertificateUrl = URI("newCertificateUrl"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,

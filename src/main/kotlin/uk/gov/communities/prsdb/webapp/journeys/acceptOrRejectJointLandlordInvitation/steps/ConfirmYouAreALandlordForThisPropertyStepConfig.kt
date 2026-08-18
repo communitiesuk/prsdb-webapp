@@ -1,10 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
@@ -16,13 +14,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class ConfirmYouAreALandlordForThisPropertyStepConfig(
     private val invitationService: JointLandlordInvitationService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val acceptedEmailSender: EmailNotificationService<JointLandlordInvitationAcceptedEmail>,
@@ -63,7 +61,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         if (tokenIsValid) {
             val invitation = invitationService.getInvitationForJourney(state.journeyId)
             val propertyOwnership = invitation.registeredOwnership
-            val landlord = getLoggedInLandlord()
+            val landlord = userToLandlordService.getCurrentLandlordForUser()
 
             propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, landlord)
 
@@ -76,25 +74,16 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         }
     }
 
-    private fun getLoggedInLandlord(): IndividualLandlord {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val landlord =
-            landlordService.retrieveLandlordByBaseUserId(baseUserId)
-                ?: throw PrsdbWebException(
-                    "Landlord record not found for user with baseUserId $baseUserId after they completed landlord registration",
-                )
-        return landlord
-    }
-
     private fun sendAcceptanceEmails(
         propertyOwnership: PropertyOwnership,
-        acceptingLandlord: IndividualLandlord,
+        acceptingLandlord: Landlord,
     ) {
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
         val propertyRegistrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
+        // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         acceptedEmailSender.sendEmail(
             acceptingLandlord.email,
             JointLandlordInvitationAcceptedEmail(
@@ -109,7 +98,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             .filter { it.id != acceptingLandlord.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
-                check(landlord is IndividualLandlord)
+                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
                 otherLandlordEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(

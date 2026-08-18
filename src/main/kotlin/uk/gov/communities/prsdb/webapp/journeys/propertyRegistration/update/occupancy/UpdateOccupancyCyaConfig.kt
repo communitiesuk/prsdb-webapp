@@ -16,6 +16,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
+// TODO(PDJB-1340): delete this old (flag-off) check-your-answers step when
+// PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. The redesigned occupancy update is a single-page
+// update (see UpdateOccupancyJourneyFactory.redesignedJourneyMap) and does not use this step.
 @JourneyFrameworkComponent
 class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
@@ -40,16 +43,14 @@ class UpdateOccupancyCyaConfig(
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         try {
             propertyOwnershipService.updateOccupancy(
                 id = state.propertyId,
                 isOccupied = isOccupied,
-                // TODO PDJB-1304 - check which of these fields should still be updated when occupancy is updated.
-                //   For example, numBedrooms should no longer be set to null as that will be in the property details section
                 numberOfHouseholds =
                     if (isOccupied) {
-                        state.households.formModel
+                        state.householdsAndTenantsTask.households.formModel
                             .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                             .toInt()
                     } else {
@@ -57,7 +58,7 @@ class UpdateOccupancyCyaConfig(
                     },
                 numberOfPeople =
                     if (isOccupied) {
-                        state.tenants.formModel
+                        state.householdsAndTenantsTask.tenants.formModel
                             .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                             .toInt()
                     } else {
@@ -74,11 +75,11 @@ class UpdateOccupancyCyaConfig(
                 billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
                 customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
                 furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected() else null,
                 rentAmount =
                     if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
+                        state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                             .toBigDecimal()
                     } else {
                         null

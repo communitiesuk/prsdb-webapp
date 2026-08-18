@@ -17,7 +17,7 @@ class UpdateCheckGasSafetyAnswersStepConfig(
 
     override fun getStepSpecificContent(state: UpdateGasSafetyJourneyState): Map<String, Any?> {
         val factory =
-            GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
+            GasSafetyRegistrationCyaSummaryRowsFactory(state.gasSafetyDetailsTask, uploadService) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(

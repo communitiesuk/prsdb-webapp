@@ -12,10 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -69,14 +66,14 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            configureStep(journey.rentFrequency) {
+            configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
                 withAdditionalContentProperty {
                     "heading" to "forms.update.rentFrequency.heading"
                 }
             }
-            configureStep(journey.rentAmount) {
+            configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to state.getUpdateRentAmountHeading()
+                    "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
                 }
             }
         }
@@ -99,14 +96,14 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.rentFrequency) {
+            configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
                 withAdditionalContentProperty {
                     "heading" to "forms.update.rentFrequency.heading"
                 }
             }
-            configureStep(journey.rentAmount) {
+            configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to state.getUpdateRentAmountHeading()
+                    "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
                 }
             }
         }
@@ -122,8 +119,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 class UpdateRentFrequencyAndAmountJourney(
     // RentFrequencyAndAmount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    override val rentFrequency: RentFrequencyStep,
-    override val rentAmount: RentAmountStep,
     // Check your answers step
     override val cyaStep: UpdateRentFrequencyAndAmountCyaStep,
     journeyStateService: JourneyStateService,
@@ -141,7 +136,6 @@ class UpdateRentFrequencyAndAmountJourney(
 }
 
 interface UpdateRentFrequencyAndAmountJourneyState :
-    RentFrequencyAndAmountState,
     CheckYourAnswersJourneyState {
     val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask
     override val cyaStep: UpdateRentFrequencyAndAmountCyaStep

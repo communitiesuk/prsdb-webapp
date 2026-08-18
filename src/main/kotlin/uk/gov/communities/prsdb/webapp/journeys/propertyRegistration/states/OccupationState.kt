@@ -2,20 +2,13 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 
 interface OccupationState :
     JourneyState,
-    HouseholdsAndTenantsState,
     BedroomsState,
-    RentIncludesBillsState,
-    FurnishedStatusState,
-    RentFrequencyAndAmountState {
+    TenancyDetailsState {
     val occupied: OccupiedStep
-    val householdsAndTenantsTask: HouseholdsAndTenantsTask
-    val rentIncludesBillsTask: RentIncludesBillsTask
-    val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask
     var cachedOccupied: Boolean?
+    val householdsAndTenantsDependencies: HouseHoldsAndTenantsDependencies
 }

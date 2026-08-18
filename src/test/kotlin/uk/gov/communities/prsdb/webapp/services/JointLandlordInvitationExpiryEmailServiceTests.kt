@@ -49,9 +49,10 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
     @Test
     fun `sendExpiryEmailsForExpiredInvitations sends expiry email to the primary landlord for each expired invitation`() {
-        val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
+        val primaryLandlord = MockLandlordData.createIndividualLandlord(name = "Lois", email = "lois@example.com")
         val address = MockLandlordData.createAddress(singleLineAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK")
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord), address = address)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord), address = address)
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 email = "very-real-email@example.com",
@@ -82,9 +83,21 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     fun `sendExpiryEmailsForExpiredInvitations sends one email per expired invitation`() {
         val invitations =
             listOf(
-                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com", createdDate = expiredCreatedDate),
-                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com", createdDate = expiredCreatedDate),
-                MockJointLandlordData.createJointLandlordInvitation(id = 3, email = "third@example.com", createdDate = expiredCreatedDate),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1,
+                    email = "first@example.com",
+                    createdDate = expiredCreatedDate,
+                ),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 2,
+                    email = "second@example.com",
+                    createdDate = expiredCreatedDate,
+                ),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 3,
+                    email = "third@example.com",
+                    createdDate = expiredCreatedDate,
+                ),
             )
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
@@ -101,8 +114,16 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     fun `sendExpiryEmailsForExpiredInvitations marks when expiry email is sent and saves it after sending the email`() {
         val invitations =
             listOf(
-                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com", createdDate = expiredCreatedDate),
-                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com", createdDate = expiredCreatedDate),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1,
+                    email = "first@example.com",
+                    createdDate = expiredCreatedDate,
+                ),
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 2,
+                    email = "second@example.com",
+                    createdDate = expiredCreatedDate,
+                ),
             )
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
@@ -162,7 +183,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
     @Test
     fun `sendExpiryEmailsForExpiredInvitations calls swap to individual nudge service after processing each invitation`() {
-        val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
+        val primaryLandlord = MockLandlordData.createIndividualLandlord(name = "Lois", email = "lois@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(

@@ -382,6 +382,16 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersWithProvideTenancyDetailsLater() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(true)
+                .withProvideTenancyDetailsLater()
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withCompliantEpc()
+
         fun beforePropertyRegistrationCheckAnswersWithJointLandlords(
             invitedEmails: MutableList<String> = mutableListOf("email@address.com"),
         ) = beforePropertyRegistrationOccupancy()
@@ -405,9 +415,15 @@ class PropertyStateSessionBuilder(
             people: Int = 4,
             bedrooms: Int = 3,
             rentAmount: String = "400",
+            billsIncluded: Boolean = true,
         ) = beforePropertyRegistrationOccupancy()
-            .withTenants(households = households, people = people, bedrooms = bedrooms, rentAmount = rentAmount)
-            .withHasNoJointLandlords()
+            .withTenants(
+                households = households,
+                people = people,
+                bedrooms = bedrooms,
+                rentAmount = rentAmount,
+                includesBills = billsIncluded,
+            ).withHasNoJointLandlords()
             .withGasSafetyTaskCompletedWithNoGasSupply()
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()

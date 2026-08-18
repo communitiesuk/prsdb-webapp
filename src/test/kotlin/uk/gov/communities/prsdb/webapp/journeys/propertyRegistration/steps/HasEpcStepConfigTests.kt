@@ -11,13 +11,13 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class HasEpcStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: EpcState
+    lateinit var mockJourneyState: EpcDetailState
 
     val routeSegment = HasEpcStep.ROUTE_SEGMENT
 
@@ -124,7 +124,7 @@ class HasEpcStepConfigTests {
 
     private fun setupStepConfig(): HasEpcStepConfig {
         val stepConfig = HasEpcStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

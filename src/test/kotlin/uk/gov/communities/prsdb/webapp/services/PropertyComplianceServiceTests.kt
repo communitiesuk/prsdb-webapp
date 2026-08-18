@@ -20,12 +20,9 @@ import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -36,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -76,14 +74,21 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
     private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
     private val loggedInBaseUserId = "logged-in-base-user-id"
-    private val mockLoggedInLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId))
-    private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+    private val mockLoggedInLandlord =
+        MockLandlordData.createIndividualLandlord(
+            baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId),
+        )
+    private val mockPropertyOwnership =
+        MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
     private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
@@ -95,7 +100,9 @@ class PropertyComplianceServiceTests {
 
     @BeforeEach
     fun setup() {
-        lenient().`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://test.example.com"))
+        lenient()
+            .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
+            .thenReturn(URI("https://test.example.com"))
         lenient()
             .`when`(
                 mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
@@ -107,12 +114,8 @@ class PropertyComplianceServiceTests {
         SecurityContextHolder.clearContext()
     }
 
-    private fun setMockPrincipal() {
-        val authentication = mock<Authentication>()
-        whenever(authentication.name).thenReturn(loggedInBaseUserId)
-        val context = mock<SecurityContext>()
-        whenever(context.authentication).thenReturn(authentication)
-        SecurityContextHolder.setContext(context)
+    private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
     }
 
     @Test
@@ -140,7 +143,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant occupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true),
@@ -155,11 +158,13 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         // Assert
         assertEquals(nonCompliantProperties.size, returnedCount)
@@ -168,7 +173,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNumberOfNonCompliantPropertiesForLandlord only includes non-compliant unoccupied properties if they are expired`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = false),
@@ -183,11 +188,13 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlord)
 
         // Assert
         assertEquals(1, returnedCount)
@@ -196,7 +203,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true),
@@ -211,7 +218,9 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -222,7 +231,7 @@ class PropertyComplianceServiceTests {
         // Act
         val returnedNonCompliantProperties =
             propertyComplianceService.getNonCompliantPropertiesForLandlord(
-                landlordBaseUserId,
+                landlord,
                 0,
             )
 
@@ -233,7 +242,7 @@ class PropertyComplianceServiceTests {
     @Test
     fun `getNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
         // Arrange
-        val landlordBaseUserId = "baseUserId"
+        val landlord = MockLandlordData.createIndividualLandlord()
         val nonCompliantProperties =
             listOf(
                 PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = false),
@@ -248,7 +257,9 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -257,7 +268,7 @@ class PropertyComplianceServiceTests {
         // Act
         val returnedNonCompliantProperties =
             propertyComplianceService.getNonCompliantPropertiesForLandlord(
-                landlordBaseUserId,
+                landlord,
                 0,
             )
 
@@ -456,8 +467,16 @@ class PropertyComplianceServiceTests {
                 electricalCertType = CertificateType.Eicr,
             )
 
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, mockPropertyOwnership.id, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(20L, mockPropertyOwnership.id, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                10L,
+                mockPropertyOwnership.id,
+                CertificateType.GasSafetyCert,
+            )
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                20L,
+                mockPropertyOwnership.id,
+                CertificateType.Eicr,
+            )
         }
 
         @Test
@@ -616,7 +635,11 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(
+                10L,
+                propertyOwnershipId,
+                CertificateType.GasSafetyCert,
+            )
         }
 
         @Test
@@ -639,7 +662,11 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
+                any<Long>(),
+                any(),
+                eq(CertificateType.Eicr),
+            )
         }
 
         @Test
@@ -734,7 +761,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `notifies other landlords with joint landlord email and does not send them the confirmation email`() {
             val otherLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
                     name = "Other Landlord",
                     email = "other@example.com",
@@ -784,7 +811,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `notifies other landlords with the expiry joint landlord email when an updated certificate is expired`() {
             val otherLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
                     name = "Other Landlord",
                     email = "other@example.com",
@@ -908,7 +935,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -988,7 +1019,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -1112,7 +1147,11 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(
+                any<Long>(),
+                any(),
+                eq(CertificateType.GasSafetyCert),
+            )
         }
 
         @Test
@@ -1306,7 +1345,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )
@@ -1386,7 +1429,11 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
+                        deadlineDate =
+                            LocalDate
+                                .now()
+                                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                .format(dateFormatter),
                     ),
                 ),
             )

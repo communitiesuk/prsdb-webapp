@@ -22,11 +22,13 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
@@ -35,7 +37,8 @@ import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -44,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companio
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import java.security.Principal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -58,6 +62,7 @@ class RegisterPropertyController(
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -118,48 +123,46 @@ class RegisterPropertyController(
             model.addAttribute("completeByDate", formattedDate)
         }
 
-        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(principal.name)
+        val landlord = userToLandlordService.getCurrentLandlordForUser()
+        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(landlord)
         if (propertyCount == 0L) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Landlord ${principal.name} has no property ownerships at confirmation",
             )
         }
-        model.addAttribute("propertyRegistrationSurveyUrl", PROPERTY_REGISTRATION_SURVEY_URL)
+        val surveyUrl =
+            if (landlord.landlordType == LandlordType.ORGANISATION) {
+                ORG_PROPERTY_REGISTRATION_SURVEY_URL
+            } else {
+                INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
+            }
+        model.addAttribute("propertyRegistrationSurveyUrl", surveyUrl)
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
     }
 
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         principal: Principal,
-    ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath, principal) { getStepModelAndView() }
 
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView {
         val annotatedFormData = CertificateUploadHelper.annotateFormDataForMetadataOnlyFileUpload(formData)
 
-        return postProcessedJourneyData(stepName, annotatedFormData, principal)
+        return dispatchJourneyStep(stepPath, principal) { postStepModelAndView(annotatedFormData) }
     }
 
-    @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
         @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
@@ -167,6 +170,7 @@ class RegisterPropertyController(
         principal: Principal,
         request: HttpServletRequest,
     ): ModelAndView {
+        val stepName = stepPath.trimStart('/')
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
                 CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
@@ -175,23 +179,20 @@ class RegisterPropertyController(
                 request,
             )
 
-        return postProcessedJourneyData(stepName, formData, principal)
+        return dispatchJourneyStep(stepPath, principal) { postStepModelAndView(formData) }
     }
 
-    private fun postProcessedJourneyData(
-        stepName: String,
-        formData: FormData,
+    private fun dispatchJourneyStep(
+        stepPath: String,
         principal: Principal,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
-        try {
-            val journeyMap = propertyRegistrationJourneyFactory.createJourneySteps()
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = propertyRegistrationJourneyFactory.initializeJourneyState(principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { propertyRegistrationJourneyFactory.createJourneySteps() },
+            initialiseJourney = { propertyRegistrationJourneyFactory.initializeJourneyState(principal) },
+            dispatch = dispatch,
+        )
 
     companion object {
         const val PROPERTY_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_PROPERTY_JOURNEY_URL"

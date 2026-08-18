@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordPhoneNumberController.Companion.UPDATE_PHONE_NUMBER_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -19,12 +18,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class LandlordViewModel(
-    baseLandlord: Landlord,
+    private val landlord: IndividualLandlord,
     private val withChangeLinks: Boolean = true,
+    // TODO: PDJB-1492: Delete this (landlord type row will always be visible)
+    private val withLandlordTypeRow: Boolean = false,
 ) {
-    // TODO: PDJB-1251: Update landlord details view for org landlord
-    private val landlord = baseLandlord as IndividualLandlord
-
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
     private val changeLinkMessageKey = "forms.links.change"
@@ -46,6 +44,12 @@ class LandlordViewModel(
                     null,
                     withActionLink = withChangeLinks,
                 )
+                if (withLandlordTypeRow) {
+                    addRow(
+                        "landlordDetails.personalDetails.landlordType",
+                        "landlordDetails.personalDetails.landlordTypeValue",
+                    )
+                }
                 addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,

@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -155,6 +156,16 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.licenseProvideLater = licenseProvideLater
         this.tenancyProvideLater = tenancyProvideLater
     }
+
+    val licenseType: LicensingType
+        get() {
+            val storedLicense = license
+            return when {
+                licenseProvideLater == true -> LicensingType.PROVIDE_LATER
+                storedLicense != null -> storedLicense.licenseType
+                else -> LicensingType.NO_LICENSING
+            }
+        }
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null

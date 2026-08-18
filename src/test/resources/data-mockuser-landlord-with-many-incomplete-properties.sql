@@ -26,15 +26,15 @@ VALUES (1, current_date-4, current_date-4, '1', '{"journeyData":{"lookup-address
        (10, current_date-10, current_date-10, '10', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"10","postcode":"NW51tl"},"select-address":{"address":"10, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}},"cachedAddresses":"[{\"singleLineAddress\":\"10, Example Road, EG\",\"localCouncilId\":2,\"uprn\":10123456,\"buildingNumber\":\"10\",\"postcode\":\"EG\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY'),
        (11, current_date-11, current_date-11, '11', '{"journeyData":{"lookup-address":{"houseNameOrNumber":"11","postcode":"NW51tl"},"select-address":{"address":"11, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}},"cachedAddresses":"[{\"singleLineAddress\":\"11, Example Road, EG\",\"localCouncilId\":2,\"uprn\":11123456,\"buildingNumber\":\"11\",\"postcode\":\"EG\"}]","isAddressAlreadyRegistered":"false"}', 'urn:fdc:gov.uk:2022:UVWXY');
 
-INSERT INTO landlord_incomplete_properties (landlord_id, saved_journey_state_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11);
+INSERT INTO landlord_incomplete_properties (user_id, saved_journey_state_id)
+VALUES ('urn:fdc:gov.uk:2022:UVWXY', 1),
+       ('urn:fdc:gov.uk:2022:UVWXY', 2),
+       ('urn:fdc:gov.uk:2022:UVWXY', 3),
+       ('urn:fdc:gov.uk:2022:UVWXY', 4),
+       ('urn:fdc:gov.uk:2022:UVWXY', 5),
+       ('urn:fdc:gov.uk:2022:UVWXY', 6),
+       ('urn:fdc:gov.uk:2022:UVWXY', 7),
+       ('urn:fdc:gov.uk:2022:UVWXY', 8),
+       ('urn:fdc:gov.uk:2022:UVWXY', 9),
+       ('urn:fdc:gov.uk:2022:UVWXY', 10),
+       ('urn:fdc:gov.uk:2022:UVWXY', 11);

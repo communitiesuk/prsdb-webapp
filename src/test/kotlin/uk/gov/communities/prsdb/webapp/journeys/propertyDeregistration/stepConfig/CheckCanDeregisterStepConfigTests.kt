@@ -41,8 +41,8 @@ class CheckCanDeregisterStepConfigTests {
                 id = propertyOwnershipId,
                 landlords =
                     mutableSetOf(
-                        MockLandlordData.createLandlord(name = "Landlord 1"),
-                        MockLandlordData.createLandlord(name = "Landlord 2"),
+                        MockLandlordData.createIndividualLandlord(name = "Landlord 1"),
+                        MockLandlordData.createIndividualLandlord(name = "Landlord 2"),
                     ),
             )
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
@@ -55,7 +55,7 @@ class CheckCanDeregisterStepConfigTests {
 
     private fun setupStepConfig(): CheckCanDeregisterStepConfig {
         val stepConfig = CheckCanDeregisterStepConfig(mockPropertyOwnershipService)
-        stepConfig.routeSegment = CheckCanDeregisterStep.ROUTE_SEGMENT
+        stepConfig.urlPath = CheckCanDeregisterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

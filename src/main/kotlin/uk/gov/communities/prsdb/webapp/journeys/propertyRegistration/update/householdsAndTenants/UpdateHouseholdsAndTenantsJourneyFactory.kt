@@ -12,10 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -59,6 +57,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
+                withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
@@ -68,12 +67,12 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            configureStep(journey.households) {
+            configureStep(journey.householdsAndTenantsTask.households) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
                 }
             }
-            configureStep(journey.tenants) {
+            configureStep(journey.householdsAndTenantsTask.tenants) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
                 }
@@ -99,12 +98,12 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.households) {
+            configureStep(journey.householdsAndTenantsTask.households) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
                 }
             }
-            configureStep(journey.tenants) {
+            configureStep(journey.householdsAndTenantsTask.tenants) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
                 }
@@ -122,8 +121,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 class UpdateHouseholdsAndTenantsJourney(
     // HouseholdsAndTenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    override val households: HouseholdStep,
-    override val tenants: TenantsStep,
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
     journeyStateService: JourneyStateService,
@@ -141,9 +138,7 @@ class UpdateHouseholdsAndTenantsJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
-interface UpdateHouseholdsAndTenantsJourneyState :
-    HouseholdsAndTenantsState,
-    CheckYourAnswersJourneyState {
+interface UpdateHouseholdsAndTenantsJourneyState : CheckYourAnswersJourneyState {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep
     val propertyId: Long

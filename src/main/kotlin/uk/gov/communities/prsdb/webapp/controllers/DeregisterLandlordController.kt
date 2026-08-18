@@ -15,56 +15,46 @@ import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.security.Principal
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @PrsdbController
 @RequestMapping(LANDLORD_DEREGISTRATION_ROUTE)
 class DeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: LandlordDeregistrationJourneyFactory,
-    private val landlordService: LandlordService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("/{stepName}")
+    @GetMapping("/{*stepPath}")
     fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
-        principal: Principal,
-    ): ModelAndView =
-        try {
-            landlordDeregistrationJourneyFactory.createJourneySteps(principal.name)[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(stepName)
-        }
+        @PathVariable stepPath: String,
+    ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("/{stepName}")
+    @PostMapping("/{*stepPath}")
     fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-        principal: Principal,
-    ): ModelAndView =
-        try {
-            landlordDeregistrationJourneyFactory.createJourneySteps(principal.name)[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(stepName)
-        }
+    ): ModelAndView = dispatchJourneyStep(stepPath) { postStepModelAndView(formData) }
 
-    private fun initializeAndRedirect(stepName: String): ModelAndView {
-        val journeyId = landlordDeregistrationJourneyFactory.initializeJourneyState()
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-        return ModelAndView("redirect:$redirectUrl")
-    }
+    private fun dispatchJourneyStep(
+        stepPath: String,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+    ): ModelAndView =
+        JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { landlordDeregistrationJourneyFactory.createJourneySteps() },
+            initialiseJourney = { landlordDeregistrationJourneyFactory.initializeJourneyState() },
+            dispatch = dispatch,
+        )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(principal: Principal): String {
+    fun getConfirmation(): String {
         if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -72,10 +62,10 @@ class DeregisterLandlordController(
             )
         }
 
-        if (landlordService.retrieveLandlordByBaseUserId(principal.name) != null) {
+        if (userToLandlordService.doesCurrentUserHaveLandlord()) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Landlord with one-login id ${principal.name} was found in the database",
+                "Landlord deregistration did not complete successfully",
             )
         }
 

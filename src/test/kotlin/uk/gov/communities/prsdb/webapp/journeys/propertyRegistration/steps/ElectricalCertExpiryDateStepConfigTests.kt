@@ -7,13 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class ElectricalCertExpiryDateStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyState
+    lateinit var mockState: ElectricalSafetyDetailState
 
     @Test
     fun `mode returns null when getElectricalCertificateIsOutdated returns null`() {
@@ -56,7 +56,7 @@ class ElectricalCertExpiryDateStepConfigTests {
 
     private fun setupStepConfig(): ElectricalCertExpiryDateStepConfig {
         val stepConfig = ElectricalCertExpiryDateStepConfig()
-        stepConfig.routeSegment = ElectricalCertExpiryDateStep.ROUTE_SEGMENT
+        stepConfig.urlPath = ElectricalCertExpiryDateStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

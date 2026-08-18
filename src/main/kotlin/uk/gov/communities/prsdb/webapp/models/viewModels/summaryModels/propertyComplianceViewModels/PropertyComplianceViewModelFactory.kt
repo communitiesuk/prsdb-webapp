@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -16,7 +17,6 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val epcViewModelFactory: EpcViewModelFactory,
-    private val notificationBannerViewModelFactory: NotificationBannerViewModelService,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
@@ -25,11 +25,8 @@ class PropertyComplianceViewModelFactory(
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
                 )
             } else {
                 null
@@ -37,11 +34,8 @@ class PropertyComplianceViewModelFactory(
 
         val electricalSafetyChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
                 )
             } else {
                 null
@@ -49,11 +43,8 @@ class PropertyComplianceViewModelFactory(
 
         val gasSafetyChangeActions =
             if (landlordView) {
-                listOf(
-                    SummaryCardActionViewModel(
-                        "forms.links.change",
-                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
-                    ),
+                SummaryCardActionViewModel.changeAction(
+                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                 )
             } else {
                 null
@@ -101,14 +92,7 @@ class PropertyComplianceViewModelFactory(
 
         val epcExpiredInsetViewModel = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        val notificationMessages =
-            if (landlordView) {
-                notificationBannerViewModelFactory.getNotificationMessageKeys(propertyCompliance)
-            } else {
-                emptyList()
-            }
-
-        val isAllValid = notificationBannerViewModelFactory.getIsAllValid(propertyCompliance)
+        val isAllValid = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
@@ -116,7 +100,6 @@ class PropertyComplianceViewModelFactory(
             epcSummaryCard = epcSummaryCard,
             epcSupplementarySections = epcSupplementarySections,
             epcExpiredInsetViewModel = epcExpiredInsetViewModel,
-            notificationMessages = notificationMessages,
             isAllValid = isAllValid,
         )
     }

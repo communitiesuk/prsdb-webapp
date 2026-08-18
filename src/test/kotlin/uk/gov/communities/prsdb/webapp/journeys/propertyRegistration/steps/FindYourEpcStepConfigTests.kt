@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -20,13 +20,13 @@ class FindYourEpcStepConfigTests {
     lateinit var mockEpcLookupService: EpcLookupService
 
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     val routeSegment = FindYourEpcStep.ROUTE_SEGMENT
 
     private fun setupStepConfig(): FindYourEpcStepConfig {
         val stepConfig = FindYourEpcStepConfig(mockEpcLookupService)
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

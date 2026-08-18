@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -31,6 +30,7 @@ class JointLandlordInvitationService(
     private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
         invitationRepository
@@ -62,20 +62,13 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(invitingLandlord is IndividualLandlord)
         val senderName = invitingLandlord.name
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
         // Re-check against the current state of the database when finishing the journey. The form-level checks happen
         // when an email is submitted, so without this a concurrent journey could invite the same email twice.
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
-        // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
-        val registeredLandlords =
-            propertyOwnership.landlords.map { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord
-            }
-        val existingLandlordEmails = registeredLandlords.map { it.email }
+        val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
                 !alreadyInvitedEmails.containsEmail(candidateEmail) &&
@@ -88,7 +81,7 @@ class JointLandlordInvitationService(
 
             // Save the invitation before sending the email so the link in the email always resolves to a real token.
             // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
-            val invitation = JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name)
+            val invitation = JointLandlordInvitation(token, email, propertyOwnership, senderName)
             invitationRepository.save(invitation)
 
             try {
@@ -108,6 +101,7 @@ class JointLandlordInvitationService(
 
         if (emailsToInvite.isNotEmpty()) {
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+            // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
             confirmationEmailSender.sendEmail(
                 invitingLandlord.email,
                 JointLandlordInvitationConfirmationEmail(
@@ -118,8 +112,9 @@ class JointLandlordInvitationService(
                 ),
             )
 
-            val existingJointLandlords = registeredLandlords.filter { it.id != invitingLandlord.id }
+            val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
             existingJointLandlords.forEach { landlord ->
+                // TODO: PDJB-1274: Check which org landlord email address should be used here (currently the registrant email)
                 notifyExistingEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationNotifyExistingEmail(
@@ -139,8 +134,6 @@ class JointLandlordInvitationService(
         propertyOwnership: PropertyOwnership,
         invitingLandlord: Landlord,
     ): String {
-        // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
-        check(invitingLandlord is IndividualLandlord)
         val invitation =
             invitationRepository
                 .findById(invitationId)
@@ -212,22 +205,13 @@ class JointLandlordInvitationService(
     }
 
     @Transactional
-    fun hideExpiredInvitation(
-        invitationId: Long,
-        baseUserId: String,
-    ) {
+    fun hideExpiredInvitation(invitationId: Long) {
         val invitation =
             invitationRepository.findById(invitationId).orElseThrow {
                 ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
             }
 
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        if (
-            invitation.registeredOwnership.landlords.none { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == baseUserId
-            }
-        ) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(invitation.registeredOwnership.id)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
         }
 
@@ -244,22 +228,12 @@ class JointLandlordInvitationService(
             ResponseStatusException(HttpStatus.NOT_FOUND, "Joint landlord invitation not found")
         }
 
-    fun getPendingInvitationIfAuthorizedLandlord(
-        invitationId: Long,
-        baseUserId: String,
-    ): JointLandlordInvitation {
+    fun getPendingInvitationIfAuthorizedLandlord(invitationId: Long): JointLandlordInvitation {
         val invitation = getInvitationById(invitationId)
         if (invitation.status != JointLandlordInvitationStatus.PENDING) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is not pending")
         }
-        val propertyOwnership = invitation.registeredOwnership
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        if (
-            propertyOwnership.landlords.none { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == baseUserId
-            }
-        ) {
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(invitation.registeredOwnership.id)) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to cancel this invitation")
         }
         return invitation

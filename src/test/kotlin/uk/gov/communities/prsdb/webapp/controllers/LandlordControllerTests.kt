@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -20,18 +18,22 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
+import kotlin.test.assertEquals
 
 @WebMvcTest(LandlordController::class)
 class LandlordControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @MockitoBean
     private lateinit var localCouncilService: LocalCouncilService
@@ -41,6 +43,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -93,8 +98,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard returns 200 for authorised landlord user`() {
-        val landlord = createLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
@@ -104,9 +109,62 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard returns 200 for an org landlord user`() {
+        val landlord = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("landlordName", landlord.name) }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user-123")
+    fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an individual landlord`() {
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(3)
+
+        val result =
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect { status { isOk() } }
+                .andReturn()
+
+        val bannerViewModel =
+            result.modelAndView
+                ?.model
+                ?.get("landlordDashboardNotificationBannerViewModel") as LandlordDashboardNotificationBannerViewModel
+        assertEquals(3, bannerViewModel.numberOfIncompleteProperties)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "org-user-123")
+    fun `landlordDashboard shows the number of incomplete properties for the requesting user, for an org landlord`() {
+        val landlord = createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()).thenReturn(2)
+
+        val result =
+            mvc
+                .get(LANDLORD_DASHBOARD_URL)
+                .andExpect { status { isOk() } }
+                .andReturn()
+
+        val bannerViewModel =
+            result.modelAndView
+                ?.model
+                ?.get("landlordDashboardNotificationBannerViewModel") as LandlordDashboardNotificationBannerViewModel
+        assertEquals(2, bannerViewModel.numberOfIncompleteProperties)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
-        val landlord = createLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
         mvc
             .get(LANDLORD_DASHBOARD_URL)
@@ -149,7 +207,8 @@ class LandlordControllerTests(
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(listOf(nonCompliantDataModel)),
         )
 
@@ -177,7 +236,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList()),
         )
 
@@ -192,7 +252,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions redirects to first page when requested page exceeds total pages`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(5, 10), 10),
         )
 
@@ -206,7 +267,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions includes paginationViewModel`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord(any(), any())).thenReturn(
             PageImpl(emptyList(), PageRequest.of(0, 10), 20),
         )
 

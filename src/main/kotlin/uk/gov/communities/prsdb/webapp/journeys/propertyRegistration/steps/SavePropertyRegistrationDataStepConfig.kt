@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
@@ -14,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -36,7 +34,7 @@ class SavePropertyRegistrationDataStepConfig(
         try {
             registerProperty(state)
         } catch (_: EntityExistsException) {
-            state.isAddressAlreadyRegistered = true
+            state.propertyDetailsTask.addressTask.isAddressAlreadyRegistered = true
             return
         }
     }
@@ -45,8 +43,8 @@ class SavePropertyRegistrationDataStepConfig(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination(state.alreadyRegisteredStep)
+        if (state.propertyDetailsTask.addressTask.isAddressAlreadyRegistered == true) {
+            Destination(state.propertyDetailsTask.addressTask.alreadyRegisteredStep)
         } else {
             state.deleteJourney()
             defaultDestination
@@ -55,92 +53,120 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater
+        val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
+        val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
-            state.jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
+            jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlordEmailsMap
                 ?.values
                 ?.toList()
-        val markedJointLandlord = state.jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
+        val markedJointLandlord = jointLandlordsTask.hasJointLandlordsStep.formModel.hasJointLandlords == true
 
         propertyRegistrationService.registerProperty(
-            addressModel = state.getAddress(),
-            propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+            addressModel = state.propertyDetailsTask.addressTask.getAddress(),
+            propertyType =
+                state.propertyDetailsTask.propertyTypeStep.formModel
+                    .notNullValue(PropertyTypeFormModel::propertyType),
             customPropertyType =
-                if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
-                    state.propertyTypeStep.formModel.customPropertyType
+                if (state.propertyDetailsTask.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                    state.propertyDetailsTask.propertyTypeStep.formModel.customPropertyType
                 } else {
                     null
                 },
-            licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-            licenceNumber = state.getLicenceNumberOrNull() ?: "",
-            ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+            licenseType = state.licensingTask.getLicensingType(),
+            licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
+            ownershipType =
+                state.ownershipAndLandlordsTask.ownershipTypeStep.formModel
+                    .notNullValue(OwnershipTypeFormModel::ownershipType),
             isOccupied = isOccupied,
             numberOfHouseholds =
-                if (isOccupied) {
-                    state.households.formModel
+                if (shouldRequireTenancyDetails) {
+                    state.householdsAndTenantsTask.households.formModel
                         .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
                         .toInt()
                 } else {
                     0
                 },
             numberOfPeople =
-                if (isOccupied) {
-                    state.tenants.formModel
+                if (shouldRequireTenancyDetails) {
+                    state.householdsAndTenantsTask.tenants.formModel
                         .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                         .toInt()
                 } else {
                     0
                 },
             numBedrooms =
-                if (isOccupied || isRestructured) {
+                if (isRestructured || shouldRequireTenancyDetails) {
                     state.bedrooms.formModel
                         .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         .toInt()
                 } else {
                     null
                 },
-            billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-            customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-            furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-            rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-            customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+            billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
+            customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
+            furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,
+            rentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.rentFrequency.formModel.rentFrequency
+                } else {
+                    null
+                },
+            customRentFrequency =
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.getCustomRentFrequencyIfSelected()
+                } else {
+                    null
+                },
             rentAmount =
-                if (isOccupied) {
-                    state.rentAmount.formModel.rentAmount
+                if (shouldRequireTenancyDetails) {
+                    state.rentFrequencyAndAmountTask.rentAmount.formModel.rentAmount
                         .toBigDecimal()
                 } else {
                     null
                 },
-            baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
             markedJointLandlord = markedJointLandlord,
-            hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
-            gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploadIds = state.gasUploadIds,
-            gasSafetyCertProvideLater = state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
-            electricalSafetyFileUploadIds = state.electricalUploadIds,
-            electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
-            electricalSafetyCertProvideLater = state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
+            hasGasSupply = state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,
+            gasSafetyCertIssueDate =
+                state.gasSafetyTask.gasSafetyDetailsTask
+                    .getGasSafetyCertificateIssueDateIfReachable()
+                    ?.toJavaLocalDate(),
+            gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
+            gasSafetyCertProvideLater =
+                state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
+            electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
+            electricalSafetyExpiryDate =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .getElectricalCertificateExpiryDateIfReachable()
+                    ?.toJavaLocalDate(),
+            electricalCertType =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .mapElectricalCertificateTypeToGlobalCertificateType(),
+            electricalSafetyCertProvideLater =
+                state.electricalSafetyTask.electricalSafetyDetailsTask
+                    .hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
-                state.acceptedEpcIfStillAccepted?.let {
+                state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.acceptedEpcIfStillAccepted?.energyRating,
+            epcExpiryDate = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
+            epcEnergyRating = state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.energyRating,
             tenancyStartedBeforeEpcExpiry =
-                state.epcInDateAtStartOfTenancyCheckStep
+                state.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
                     ?.tenancyStartedBeforeExpiry,
             epcExemptionReason =
-                state.epcExemptionStep
+                state.epcTask.epcDetailsTask.epcExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
             epcMeesExemptionReason =
-                state.meesExemptionStep
+                state.epcTask.epcDetailsTask.meesExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
-            epcProvideLater = state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            epcProvideLater = state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            licenseProvideLater = state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
+            tenancyProvideLater = state.provideTenancyDetailsLater,
         )
     }
 }

@@ -5,6 +5,8 @@ personalDetails:
   heading: Personal details
   lrn: Landlord Registration Number
   registrationDate: Registration date
+  landlordType: Landlord type
+  landlordTypeValue: Individual
   name: Name
   dateOfBirth: Date of birth
   oneLoginVerified: Verified by GOV.UK One Login
@@ -31,3 +33,59 @@ registeredProperties:
     link: Register a property
 update:
   title: Update Landlord record
+  companiesHouse:
+    cya:
+      companyDetails:
+        heading: Company details
+org:
+  title: Organisation landlord record
+  removeRecord: Delete organisation
+  tabs:
+    organisationDetails: Organisation details
+    organisationContacts: Organisation contacts
+  registrationDate: Registration date
+  lrn: Landlord Registration Number
+  landlordType: Landlord type
+  landlordTypeValue: Organisation
+  name: Organisation name
+  address: Organisation address
+  email: Organisation email
+  phone: Organisation phone
+  organisationType: Organisation type
+  companyNumber: Companies House number
+  registeredCharity: Registered charity
+  charityCommission: Charity commission
+  charityNumber: Charity number
+  registeredWithCompaniesHouse: Registered with Companies House
+  mainContactHeading: Main contact
+  mainContactName: Name
+  mainContactEmail: Email
+  mainContactPhone: Phone number
+  leadTrusteeHeading: Lead trustee
+  leadTrusteeName: Name
+  leadTrusteeEmail: Email
+  leadTrusteePhone: Phone number
+  leadTrusteeDateOfBirth: Date of birth
+  leadTrusteeAddress: Address
+  governingBody:
+    heading: Governing body
+    membersLink: Add, change or remove members of your governing body
+    role: Role
+    memberName: Name
+    memberDateOfBirth: Date of birth
+    memberAddress: Address
+    type:
+      director: Director
+      trustee: Trustee
+      partner: Partner
+      other: Other
+    memberCardTitle:
+      director: "{0}. Director"
+      trustee: "{0}. Trustee"
+      partner: "{0}. Partner"
+      other: "{0}. Other"
+  registrationContactHeading: Registration contact
+  registrationContactName: Name
+  registrationContactDateOfBirth: Date of birth
+  registrationContactEmail: Email
+  registrationContactPhone: Phone number

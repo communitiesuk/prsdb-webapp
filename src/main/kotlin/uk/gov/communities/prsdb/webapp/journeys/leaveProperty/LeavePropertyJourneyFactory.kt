@@ -18,11 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.Confirm
 class LeavePropertyJourneyFactory(
     private val stateFactory: ObjectFactory<LeavePropertyJourney>,
 ) {
-    fun createJourneySteps(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val state = getInitializedState(propertyOwnershipId, baseUserId)
+    fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
+        val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
             unreachableStepStep { journey.confirmStep }
@@ -44,15 +41,11 @@ class LeavePropertyJourneyFactory(
         }
     }
 
-    private fun getInitializedState(
-        propertyOwnershipId: Long,
-        baseUserId: String,
-    ): LeavePropertyJourney {
+    private fun getInitializedState(propertyOwnershipId: Long): LeavePropertyJourney {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyOwnershipId = propertyOwnershipId
-            state.baseUserId = baseUserId
             state.isStateInitialized = true
         }
 
@@ -77,7 +70,6 @@ class LeavePropertyJourney(
     LeavePropertyJourneyState {
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyOwnershipId: Long by delegateProvider.requiredImmutableDelegate("propertyOwnershipId")
-    override var baseUserId: String by delegateProvider.requiredDelegate("baseUserId")
 
     override fun generateJourneyId(seed: Any?): String {
         val propertyOwnershipId = seed as? Long
@@ -95,5 +87,4 @@ class LeavePropertyJourney(
 interface LeavePropertyJourneyState : JourneyState {
     val confirmStep: ConfirmStep
     var propertyOwnershipId: Long
-    var baseUserId: String
 }

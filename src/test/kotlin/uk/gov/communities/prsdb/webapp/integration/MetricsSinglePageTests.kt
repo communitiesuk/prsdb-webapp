@@ -124,9 +124,9 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.metricsList.rowValue(1)).containsText("72")
         assertThat(reloadedPage.metricsList.rowValue(2)).containsText("100")
         assertThat(reloadedPage.metricsList.rowValue(3)).containsText("100")
-        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("22 minutes")
-        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("1 day, 6 hours, 21 minutes")
-        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("2 days, 43 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(4)).hasText("22 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(5)).hasText("1 day, 6 hours, 21 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(6)).hasText("2 days, 43 minutes")
     }
 
     @Test
@@ -177,5 +177,16 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-lo
         assertThat(reloadedPage.metricsList.rowValue(8)).containsText("25.00%")
         assertThat(reloadedPage.metricsList.rowValue(9)).containsText("33.33%")
         assertThat(reloadedPage.metricsList.rowValue(16)).containsText("753")
+    }
+
+    @Test
+    fun `submitting a valid date range renders estimated cost metrics from the local stub`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("1", "9", "2024", "30", "6", "2025")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.metricsList.rowValue(17)).containsText("123.45 USD (estimated)")
+        assertThat(reloadedPage.metricsList.rowValue(18)).containsText("0.16 USD (estimated)")
     }
 }

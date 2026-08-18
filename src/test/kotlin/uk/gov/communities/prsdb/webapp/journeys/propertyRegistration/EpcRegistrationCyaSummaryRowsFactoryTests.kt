@@ -7,7 +7,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckMode
@@ -48,7 +48,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     private val mockIsEpcRequiredStep: IsEpcRequiredStep = mock()
     private val mockEpcExemptionStep: EpcExemptionStep = mock()
     private val mockStartEpcStep: StartEpcStep = mock()
-    private val mockState: EpcState = mock()
+    private val mockState: EpcDetailState = mock()
 
     private val epcUrl = "https://find-energy-certificate.service.gov.uk/energy-certificate/0000-0000-0000-0892-1563"
     private val validEpc = MockEpcData.createEpcDataModel(energyRating = "C")
@@ -66,13 +66,13 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockState.isEpcRequiredStep).thenReturn(mockIsEpcRequiredStep)
         whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-        whenever(mockStartEpcStep.routeSegment).thenReturn(StartEpcStep.ROUTE_SEGMENT)
-        whenever(mockHasEpcStep.routeSegment).thenReturn(HasEpcStep.ROUTE_SEGMENT)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.routeSegment).thenReturn(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
-        whenever(mockHasMeesExemptionStep.routeSegment).thenReturn(HasMeesExemptionStep.ROUTE_SEGMENT)
-        whenever(mockMeesExemptionStep.routeSegment).thenReturn(MeesExemptionStep.ROUTE_SEGMENT)
-        whenever(mockIsEpcRequiredStep.routeSegment).thenReturn(IsEpcRequiredStep.ROUTE_SEGMENT)
-        whenever(mockEpcExemptionStep.routeSegment).thenReturn(EpcExemptionStep.ROUTE_SEGMENT)
+        whenever(mockStartEpcStep.urlPath).thenReturn(StartEpcStep.ROUTE_SEGMENT)
+        whenever(mockHasEpcStep.urlPath).thenReturn(HasEpcStep.ROUTE_SEGMENT)
+        whenever(mockEpcInDateAtStartOfTenancyCheckStep.urlPath).thenReturn(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
+        whenever(mockHasMeesExemptionStep.urlPath).thenReturn(HasMeesExemptionStep.ROUTE_SEGMENT)
+        whenever(mockMeesExemptionStep.urlPath).thenReturn(MeesExemptionStep.ROUTE_SEGMENT)
+        whenever(mockIsEpcRequiredStep.urlPath).thenReturn(IsEpcRequiredStep.ROUTE_SEGMENT)
+        whenever(mockEpcExemptionStep.urlPath).thenReturn(EpcExemptionStep.ROUTE_SEGMENT)
         whenever(mockState.journeyId).thenReturn("")
 
         whenever(mockStartEpcStep.currentJourneyId).thenReturn("")

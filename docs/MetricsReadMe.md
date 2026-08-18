@@ -8,10 +8,12 @@ The system operator metrics page (`/system-operator/metrics`) shows a single sum
   [AnalyticsReadMe](AnalyticsReadMe.md)).
 - **Transaction counts** — completed transactions from the Plausible `Transaction` custom event
   (`PlausibleMetricsService`), described below.
+- **Cost metrics** — account-wide AWS costs from Cost Explorer (`CostExplorerMetricsService`), described
+  below. Cost per transaction combines the Cost Explorer cost with the Plausible transaction count.
 - **Infrastructure metrics** — from Amazon CloudWatch (`CloudWatchMetricsService`), described below.
 
 The page (`MetricsController`) shows no rows until the operator submits a **reporting period** (From/To
-dates); on submit, the four services are queried for that period and their results are rendered as one
+dates); on submit, five metric queries are run for that period and their results are rendered as one
 combined summary list (`getMetricRows`). Counts are formatted as integers, durations via
 `MetricsDurationHelper`, and rates/utilisations as `0.00%`. Any value that is missing — or whose upstream
 call failed — renders as **"No data"** rather than erroring the page. Row labels come from
@@ -19,7 +21,7 @@ call failed — renders as **"No data"** rather than erroring the page. Row labe
 
 ## Dashboard rows
 
-The summary list contains the following rows, in display order:
+The summary list contains 19 rows, in display order:
 
 | # | Dashboard label | Source | Derivation |
 |---|-----------------|--------|------------|
@@ -40,6 +42,8 @@ The summary list contains the following rows, in display order:
 | 15 | Client error rate (HTTP 4xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 16 | Server error rate (HTTP 5xx) | CloudWatch (`CloudWatchMetricsService`) | See below. |
 | 17 | Total number of transactions | Plausible (`PlausibleMetricsService.getTransactionCounts`) | See [Transaction counts](#transaction-counts). |
+| 18 | Total AWS cost | Cost Explorer (`CostExplorerMetricsService`) | Account-wide daily `UnblendedCost` summed for the selected period. |
+| 19 | Cost per transaction | Cost Explorer and Plausible (`CostExplorerMetricsService`, `PlausibleMetricsService.getTransactionCounts`) | Total AWS cost ÷ total transactions; **No data** when the transaction count is zero. |
 
 > **Completion rates** use visitors for landlord and local council user registration but page views for
 > property registration, because a single landlord may register multiple properties. This is surfaced on
@@ -47,15 +51,22 @@ The summary list contains the following rows, in display order:
 
 ## Transaction counts
 
-Completed transactions — registrations, deregistrations, updates, switch-to-individual, and accepting a
-joint landlord invitation — are counted from a dedicated Plausible `Transaction` custom event. The event
+Completed transactions — registrations, deregistrations, updates, switch-to-individual, accepting a
+joint landlord invitation, and leaving a property as a joint landlord — are counted from a dedicated
+Plausible `Transaction` custom event. The event
 is fired by a button press on each journey's final commit step: the commit button is rendered from a
 fragment tagged `data-plausible-event="Transaction"` (`transactionSubmitButton` / `transactionWarningButton`).
 For reporting periods before the configured cutover date (`plausible.transaction-event-start-date`) the
 legacy Flow event is used instead. See [AnalyticsReadMe](AnalyticsReadMe.md) and `PlausibleMetricsService`
 for details.
 
-### Known coverage gap: landlord deregistration with no registered properties
+### Known coverage gaps
+
+Three journeys are intentionally not counted. In each case there is no place to fire the event
+exactly once per completion, and the project's standing preference is to **under-count rather than
+over-count**.
+
+#### Landlord deregistration with no registered properties
 
 A landlord who has **no registered properties** deregisters via the `are-you-sure` page, which goes
 straight to the internal deregistration step and skips the `reason` page that carries the `Transaction`
@@ -67,6 +78,66 @@ deregistration step itself has no button to tag.
 minimal (a landlord with no properties leaving the service) and there is no clean solution that avoids
 over-counting. Landlord deregistrations where the landlord *does* have properties, and all property
 deregistrations, are counted as normal.
+
+#### Cancelling a joint landlord invitation
+
+The `cancelJointLandlordInvitation` journey's only button is on its `are-you-sure` page, and the
+following `cancelInvitationStep` is internal with no button.
+
+**Decision:** cancelled invitations are intentionally **not counted**, for the same reason as above —
+there is no place to fire the event that does not also fire it when the user answers "no".
+
+#### Landlord address updates
+
+The landlord address update journey commits on either `select-address` (a looked-up address was
+chosen) or `manual-address` (reached by choosing "Add address manually" on the select-address page,
+or when the lookup found no addresses). Tagging a step's button is a render-time decision, taken
+before the user's radio selection is known, so tagging both steps would fire `Transaction` twice for
+a single update whenever the user reaches `manual-address` *via* `select-address`.
+
+**Decision:** address updates are intentionally **not counted**. Tagging only `manual-address` would
+count an arbitrary subset (missing the common "pick an address from the list" route), and suppressing
+the event with JavaScript keyed on the selected radio would introduce a new tagging mechanism for a
+single path. Under-counting was preferred to double-counting. The other four landlord detail updates
+(name, email, phone number and date of birth) are counted as normal.
+
+Note that `forms/selectAddressForm.html` and `forms/manualAddressForm.html` are shared with the
+landlord registration, property registration, governing body member address and trustee address
+journeys, so any future fix must tag the update journey without affecting those.
+
+## Cost and cost per transaction
+
+The deployed `AwsCostExplorerMetricsClient` calls Cost Explorer's `GetCostAndUsage` operation in
+`us-east-1`. Its query is account-wide: it has no tag, service, or resource filter and no grouping. It
+uses `DAILY` granularity and the `UnblendedCost` metric.
+
+The request intentionally omits `BillingViewArn`. Cost Explorer therefore returns the costs available
+to the hosting AWS account, which is the dashboard's required scope.
+
+The dashboard reporting range is inclusive in UK time. Cost Explorer's end date is exclusive, so the
+client sends the selected end date plus one day. It follows all pagination tokens, sums the returned daily
+cost strings with `BigDecimal`, and returns one consistent currency unit. Valid zero and negative costs
+are preserved.
+
+Costs are displayed to two decimal places as `amount CURRENCY`. If any returned daily result is estimated,
+both the total-cost and cost-per-transaction rows are marked `(estimated)`. A cost-source failure or an
+invalid response makes both rows **"No data"** without hiding the other metrics. When the transaction
+count is zero, the total AWS cost still displays, while cost per transaction is **"No data"**.
+
+### Operational prerequisites
+
+Cost Explorer must be enabled manually in AWS Billing and Cost Management; it cannot be enabled by API.
+Current-month data usually takes about 24 hours to appear and refreshes at least daily. Recent and
+current-month values may remain estimated until AWS completes billing reconciliation after month end. A
+management account can also restrict a member account's access.
+
+Live integration testing showed that, when `BillingViewArn` is omitted, AWS authorizes
+`ce:GetCostAndUsage` against `arn:aws:ce:us-east-1:<account-id>:/GetCostAndUsage`. Infrastructure PR
+[`communitiesuk/prsdb-infra#309`](https://github.com/communitiesuk/prsdb-infra/pull/309) must therefore
+grant only the `ce:GetCostAndUsage` action with `Resource = "*"`. The wildcard resource applies only to
+that action; it does not grant any other Cost Explorer or billing actions. The application does not
+enumerate or inspect billing views and does not use the billing console, so it does not require
+`billing:ListBillingViews`, `billing:GetBillingView`, or legacy `aws-portal:ViewBilling`.
 
 ## CloudWatch infrastructure metrics
 
@@ -135,3 +206,14 @@ exactly one bean is active at a time:
 
 So when you run locally you always get the stub, and **no AWS credentials are required**. Real
 CloudWatch is only called in deployed (non-`local`) environments.
+
+There are also two implementations of `CostExplorerMetricsClient`, selected by Spring profile so that
+exactly one bean is active at a time:
+
+| Implementation                   | Profile expression | Behaviour                                                   |
+|----------------------------------|--------------------|-------------------------------------------------------------|
+| `StubCostExplorerMetricsClient`  | `local`            | Returns `123.45 USD` marked as estimated.                   |
+| `AwsCostExplorerMetricsClient`   | `!local`           | Calls Cost Explorer through the AWS SDK.                     |
+
+The local stub does not confirm that Cost Explorer is enabled or populated in any environment; the AWS
+client is used only in deployed (non-`local`) environments.

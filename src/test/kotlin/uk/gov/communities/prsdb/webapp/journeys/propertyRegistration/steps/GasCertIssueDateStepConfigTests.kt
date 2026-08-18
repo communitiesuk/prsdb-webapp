@@ -7,13 +7,13 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class GasCertIssueDateStepConfigTests {
     @Mock
-    lateinit var mockState: GasSafetyState
+    lateinit var mockState: GasSafetyDetailState
 
     @Test
     fun `mode returns null when getGasSafetyCertificateIsOutdated returns null`() {
@@ -56,7 +56,7 @@ class GasCertIssueDateStepConfigTests {
 
     private fun setupStepConfig(): GasCertIssueDateStepConfig {
         val stepConfig = GasCertIssueDateStepConfig()
-        stepConfig.routeSegment = GasCertIssueDateStep.ROUTE_SEGMENT
+        stepConfig.urlPath = GasCertIssueDateStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

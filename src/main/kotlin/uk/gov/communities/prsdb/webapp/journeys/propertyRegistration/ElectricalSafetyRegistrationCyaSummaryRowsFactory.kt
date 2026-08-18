@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
-    private val state: ElectricalSafetyState,
+    private val state: ElectricalSafetyDetailState,
     private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
@@ -112,7 +112,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             destination = destinationProvider(state.hasElectricalCertStep),
         )
 
-    private fun determineScenario(state: ElectricalSafetyState): ElectricalSafetyScenario =
+    private fun determineScenario(state: ElectricalSafetyDetailState): ElectricalSafetyScenario =
         when (state.hasElectricalCertStep.outcome) {
             HasElectricalCertMode.PROVIDE_THIS_LATER -> {
                 ElectricalSafetyScenario.PROVIDE_LATER

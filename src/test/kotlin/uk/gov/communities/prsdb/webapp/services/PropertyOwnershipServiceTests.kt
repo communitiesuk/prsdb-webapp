@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -24,6 +25,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
@@ -76,6 +80,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockEmailService: JointLandlordOtherLandlordLeftEmailService
 
+    @Mock
+    private lateinit var mockUserToLandlordService: UserToLandlordService
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -87,7 +94,7 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
@@ -163,7 +170,7 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
@@ -231,7 +238,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership sets lastOccupiedDate when property is occupied`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
 
@@ -268,7 +275,7 @@ class PropertyOwnershipServiceTests {
     @Test
     fun `createPropertyOwnership does not set lastOccupiedDate when property is unoccupied`() {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createLandlord()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyBuildType = PropertyType.OTHER
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
 
@@ -304,7 +311,7 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetLandlordRegisteredPropertiesDetails {
-        private val currentLandlord = MockLandlordData.createLandlord()
+        private val currentLandlord = MockLandlordData.createIndividualLandlord()
         private val registeredLandlords: MutableSet<Landlord> = mutableSetOf(currentLandlord)
         private val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
         private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
@@ -334,7 +341,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(currentLandlord.baseUser.id),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(currentLandlord.id),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -368,7 +375,7 @@ class PropertyOwnershipServiceTests {
 
             val result =
                 propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
-                    currentLandlord.baseUser.id,
+                    currentLandlord,
                     currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
                 )
 
@@ -429,16 +436,23 @@ class PropertyOwnershipServiceTests {
     }
 
     @Nested
-    inner class GetPropertyOwnershipIfAuthorizedUser {
+    inner class GetPropertyOwnershipIfCurrentUserAuthorized {
+        private fun setMockPrincipal(name: String) {
+            val authentication = mock<Authentication>()
+            whenever(authentication.name).thenReturn(name)
+            val context = mock<SecurityContext>()
+            whenever(context.authentication).thenReturn(authentication)
+            SecurityContextHolder.setContext(context)
+        }
+
         @Test
         fun `throws not found error if an active property ownership does not exist`() {
             val invalidId: Long = 1
-            val principalName = "landlord"
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(invalidId)).thenReturn(null)
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(invalidId, principalName)
+                    propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(invalidId)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
@@ -447,13 +461,16 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if user is not a landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
+            setMockPrincipal(principalName)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
+            whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                    propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
@@ -467,15 +484,15 @@ class PropertyOwnershipServiceTests {
                     MockLocalCouncilData.createLocalCouncil(),
                 )
             val principalName = localCouncilUser.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(true)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
@@ -483,22 +500,18 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is only landlord`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val principalName =
-                (
-                    propertyOwnership
-                        .landlords
-                        .first() as IndividualLandlord
-                ).baseUser
-                    .id
+            val landlord = propertyOwnership.landlords.first() as IndividualLandlord
+            val principalName = landlord.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
@@ -506,112 +519,119 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is a joint landlord`() {
             val jointLandlord =
-                MockLandlordData.createLandlord(
+                MockLandlordData.createIndividualLandlord(
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             propertyOwnership.addLandlord(jointLandlord)
             val principalName = jointLandlord.baseUser.id
+            setMockPrincipal(principalName)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
-
             whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(jointLandlord)
 
             val result =
-                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+                propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnership.id)
 
             assertEquals(result, propertyOwnership)
         }
     }
 
     @Nested
-    inner class GetIsAuthorizedToEditRecord {
+    inner class GetCurrentUserIsAuthorizedToEditRecord {
         @Test
-        fun `returns true if getIsLandlord returns true`() {
-            // Arrange
-            val baseUserId = "baseUserId"
+        fun `returns true if isCurrentUserLandlord returns true`() {
             val propertyOwnershipId = 1L
             val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(true).whenever(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+            doReturn(true).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
 
-            // Act
-            val result = propertyOwnershipServiceSpy.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)
+            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
-            // Assert
             assertTrue(result)
-            verify(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+            verify(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
         }
     }
 
     @Nested
-    inner class GetIsLandlord {
+    inner class IsCurrentUserLandlord {
         @Test
-        fun `returns true when the user is the only landlord`() {
-            val baseUserId = "baseUserId"
+        fun `returns true when the current user is the only landlord`() {
+            val landlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
+                )
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
-                    landlords =
-                        mutableSetOf(
-                            MockLandlordData.createLandlord(
-                                baseUser = MockLandlordData.createPrsdbUser(baseUserId),
-                            ),
-                        ),
+                    landlords = mutableSetOf(landlord),
                 )
-
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsLandlord(propertyOwnership.id, baseUserId)
-
-            assertTrue(returnedIsPrimaryLandlord)
-        }
-
-        @Test
-        fun `returns true when the user is a joint landlord`() {
-            val jointLandlord =
-                MockLandlordData.createLandlord(
-                    baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
-                )
-            val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            propertyOwnership.addLandlord(jointLandlord)
-
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
-
-            val result =
-                propertyOwnershipService.getIsLandlord(propertyOwnership.id, jointLandlord.baseUser.id)
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
 
             assertTrue(result)
         }
 
         @Test
-        fun `returns false when the user is not a landlord of the property`() {
+        fun `returns true when the current user is a joint landlord`() {
+            val jointLandlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
+                )
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            propertyOwnership.addLandlord(jointLandlord)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(jointLandlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `returns false when the current user is not a landlord of the property`() {
+            val otherLandlord =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                )
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     landlords =
                         mutableSetOf(
-                            MockLandlordData.createLandlord(
+                            MockLandlordData.createIndividualLandlord(
                                 baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
                             ),
                         ),
                 )
-
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(otherLandlord)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val result =
-                propertyOwnershipService.getIsLandlord(
-                    propertyOwnership.id,
-                    "differentBaseUserId",
-                )
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `returns false when current user has no landlord record`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+
+            val result = propertyOwnershipService.isCurrentUserLandlord(propertyOwnership.id)
 
             assertFalse(result)
         }
 
         @Test
         fun `throws not found error if the property ownership does not exist`() {
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getIsLandlord(1, "anyBaseUserId")
+                    propertyOwnershipService.isCurrentUserLandlord(1)
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }
@@ -651,7 +671,11 @@ class PropertyOwnershipServiceTests {
         val pageRequest = PageRequest.of(1, 10)
 
         whenever(
-            mockPropertyOwnershipRepository.searchMatching(nonPropertyRegNum.toString(), lcBaseUserId, pageable = pageRequest),
+            mockPropertyOwnershipRepository.searchMatching(
+                nonPropertyRegNum.toString(),
+                lcBaseUserId,
+                pageable = pageRequest,
+            ),
         ).thenReturn(Page.empty())
 
         val searchResults =
@@ -683,7 +707,11 @@ class PropertyOwnershipServiceTests {
             uprnMatchingPropertyOwnership.map { PropertySearchResultViewModel.fromPropertyOwnership(it, currentUrlKey) }
 
         whenever(
-            mockPropertyOwnershipRepository.searchMatchingUPRN(searchUPRN.toLong(), lcBaseUserId, pageable = pageRequest),
+            mockPropertyOwnershipRepository.searchMatchingUPRN(
+                searchUPRN.toLong(),
+                lcBaseUserId,
+                pageable = pageRequest,
+            ),
         ).thenReturn(PageImpl(uprnMatchingPropertyOwnership))
         whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(currentUrlKey)
 
@@ -737,13 +765,15 @@ class PropertyOwnershipServiceTests {
         val urlKey1 = 37
         val pageRequest1 = PageRequest.of(pageIndex1, pageSize)
         val matchingPropertiesPage1 = matchingProperties.subList(0, pageSize)
-        val expectedPage1SearchResults = matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey1) }
+        val expectedPage1SearchResults =
+            matchingPropertiesPage1.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey1) }
 
         val pageIndex2 = 1
         val urlKey2 = 41
         val pageRequest2 = PageRequest.of(pageIndex2, pageSize)
         val matchingPropertiesPage2 = matchingProperties.subList(pageSize, matchingProperties.size)
-        val expectedPage2SearchResults = matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
+        val expectedPage2SearchResults =
+            matchingPropertiesPage2.map { PropertySearchResultViewModel.fromPropertyOwnership(it, urlKey2) }
 
         whenever(mockPropertyOwnershipRepository.searchMatching(searchTerm, lcBaseUserId, pageable = pageRequest1))
             .thenReturn(PageImpl(matchingPropertiesPage1))
@@ -813,6 +843,38 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(updatedLicence, propertyOwnership.license)
+    }
+
+    @Test
+    fun `updateLicensing clears the licenseProvideLater flag`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                license = null,
+                licenseProvideLater = true,
+            )
+        val newLicensingType = LicensingType.HMO_MANDATORY_LICENCE
+        val newLicenceNumber = "newLicenceNumber"
+        val updatedLicence = License(newLicensingType, newLicenceNumber)
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        whenever(
+            mockLicenseService.updateLicence(propertyOwnership.license, newLicensingType, newLicenceNumber),
+        ).thenReturn(updatedLicence)
+
+        // Act
+        propertyOwnershipService.updateLicensing(
+            propertyOwnership.id,
+            newLicensingType,
+            newLicenceNumber,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        assertEquals(false, propertyOwnership.licenseProvideLater)
     }
 
     @Test
@@ -1028,7 +1090,8 @@ class PropertyOwnershipServiceTests {
         fun `updateOccupancy nulls tenancyStartedBeforeEpcExpiry when property transitions to unoccupied`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
-            val propertyCompliance = PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
+            val propertyCompliance =
+                PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
             ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
@@ -1058,7 +1121,8 @@ class PropertyOwnershipServiceTests {
         fun `updateOccupancy does not null tenancyStartedBeforeEpcExpiry when property remains occupied`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
-            val propertyCompliance = PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
+            val propertyCompliance =
+                PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
             ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
@@ -1108,7 +1172,117 @@ class PropertyOwnershipServiceTests {
                         rentFrequency = propertyOwnership.rentFrequency,
                         customRentFrequency = propertyOwnership.customRentFrequency,
                         rentAmount = propertyOwnership.rentAmount,
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateIsOccupied {
+        @Test
+        fun `updateIsOccupied clears stale tenancy details when a property becomes unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val originalNumBedrooms = propertyOwnership.numBedrooms
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = false,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(false, propertyOwnership.isOccupied)
+            assertEquals(0, propertyOwnership.currentNumHouseholds)
+            assertEquals(0, propertyOwnership.currentNumTenants)
+            assertEquals(originalNumBedrooms, propertyOwnership.numBedrooms)
+            assertNull(propertyOwnership.billsIncludedList)
+            assertNull(propertyOwnership.customBillsIncluded)
+            assertNull(propertyOwnership.furnishedStatus)
+            assertNull(propertyOwnership.rentFrequency)
+            assertNull(propertyOwnership.customRentFrequency)
+            assertNull(propertyOwnership.rentAmount)
+            assertNull(propertyOwnership.tenancyProvideLater)
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `updateIsOccupied sets lastOccupiedDate and defaults to provide-later when a property becomes occupied`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(id = 1).apply {
+                    isOccupied = false
+                }
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = true,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
+            assertEquals(true, propertyOwnership.tenancyProvideLater)
+        }
+
+        @Test
+        fun `updateIsOccupied nulls tenancyStartedBeforeEpcExpiry when property transitions to unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val propertyCompliance =
+                PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateIsOccupied(
+                propertyOwnership.id,
+                isOccupied = false,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(null, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        }
+
+        @Test
+        fun `updateIsOccupied throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateIsOccupied(
+                        propertyOwnership.id,
+                        isOccupied = true,
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1165,7 +1339,10 @@ class PropertyOwnershipServiceTests {
                         propertyOwnership.id,
                         numberOfPeople = 6,
                         numberOfHouseholds = 6,
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1217,7 +1394,10 @@ class PropertyOwnershipServiceTests {
                     propertyOwnershipService.updateBedrooms(
                         propertyOwnership.id,
                         numberOfBedrooms = 4,
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1302,7 +1482,10 @@ class PropertyOwnershipServiceTests {
                         propertyOwnership.id,
                         billsIncludedList = "GAS,BROADBAND,SOMETHING_ELSE",
                         customBillsIncluded = "Dog sitting",
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1354,7 +1537,10 @@ class PropertyOwnershipServiceTests {
                     propertyOwnershipService.updateFurnishedStatus(
                         propertyOwnership.id,
                         furnishedStatus = FurnishedStatus.UNFURNISHED,
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1416,7 +1602,10 @@ class PropertyOwnershipServiceTests {
                         rentFrequency = RentFrequency.WEEKLY,
                         customRentFrequency = null,
                         rentAmount = BigDecimal(120),
-                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                        initialLastModifiedDate =
+                            propertyOwnership
+                                .getMostRecentlyUpdated()
+                                .minus(1, ChronoUnit.MINUTES),
                     )
                 }
 
@@ -1438,7 +1627,8 @@ class PropertyOwnershipServiceTests {
 
     @Test
     fun `deletePropertyOwnerships deletes a list from the propertyOwnershipRepository`() {
-        val propertyOwnerships = listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
+        val propertyOwnerships =
+            listOf(MockLandlordData.createPropertyOwnership(), MockLandlordData.createPropertyOwnership())
 
         propertyOwnershipService.deletePropertyOwnerships(propertyOwnerships)
 
@@ -1447,7 +1637,7 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetNumberOfIncompleteCompliancesForLandlord {
-        val principalName = "principalName"
+        val landlord = MockLandlordData.createIndividualLandlord()
 
         @Test
         fun `returns the number of occupied properties without completed compliance`() {
@@ -1464,11 +1654,11 @@ class PropertyOwnershipServiceTests {
             val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
             ).thenReturn(listOf(unoccupiedProperty, occupiedPropertyWithCompliance, occupiedPropertyWithoutCompliance))
 
             // Act
-            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord)
 
             // Assert
             assertEquals(1, numberOfIncompleteCompliances)
@@ -1478,11 +1668,11 @@ class PropertyOwnershipServiceTests {
         fun `returns 0 if there are no incomplete compliances for a landlord`() {
             // Arrange
             whenever(
-                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
             ).thenReturn(emptyList())
 
             // Act
-            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
+            val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(landlord)
 
             // Assert
             assertEquals(0, numberOfIncompleteCompliances)
@@ -1491,13 +1681,12 @@ class PropertyOwnershipServiceTests {
 
     @Nested
     inner class GetPropertyCountForLandlord {
-        val baseUserId = "test-user-id"
-
         @Test
         fun `returns the count from the repository`() {
-            whenever(mockPropertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)).thenReturn(3)
+            val landlord = MockLandlordData.createIndividualLandlord()
+            whenever(mockPropertyOwnershipRepository.countByOwnershipLinks_Landlord_Id(landlord.id)).thenReturn(3)
 
-            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
+            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(landlord))
         }
     }
 
@@ -1507,7 +1696,7 @@ class PropertyOwnershipServiceTests {
         fun `addLandlordToPropertyOwnership adds the landlord to the property ownership`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-            val newLandlord = MockLandlordData.createLandlord()
+            val newLandlord = MockLandlordData.createIndividualLandlord()
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
@@ -1525,8 +1714,8 @@ class PropertyOwnershipServiceTests {
     inner class RemoveLandlord {
         @Test
         fun `removeLandlord removes the landlord from the property ownership`() {
-            val landlord = MockLandlordData.createLandlord()
-            val otherLandlord = MockLandlordData.createLandlord(name = "Other")
+            val landlord = MockLandlordData.createIndividualLandlord()
+            val otherLandlord = MockLandlordData.createIndividualLandlord(name = "Other")
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     landlords = mutableSetOf(landlord, otherLandlord),

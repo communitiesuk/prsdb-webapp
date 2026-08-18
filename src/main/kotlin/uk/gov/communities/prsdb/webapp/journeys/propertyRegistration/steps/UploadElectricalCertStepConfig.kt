@@ -8,11 +8,12 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ElectricalUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -22,10 +23,11 @@ class UploadElectricalCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyState>() {
+    private val userToLandlordService: UserToLandlordService,
+) : AbstractRequestableStepConfig<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyDetailState>() {
     override val formModelClass = ElectricalUploadCertificateFormModel::class
 
-    override fun getStepSpecificContent(state: ElectricalSafetyState): Map<String, Any?> {
+    override fun getStepSpecificContent(state: ElectricalSafetyDetailState): Map<String, Any?> {
         fileUploadCookieService.addFileUploadCookieToResponse()
 
         val fieldSetHeading =
@@ -45,21 +47,27 @@ class UploadElectricalCertStepConfig(
         )
     }
 
-    override fun chooseTemplate(state: ElectricalSafetyState): String = "forms/registrationCertificateForm"
+    override fun chooseTemplate(state: ElectricalSafetyDetailState): String = "forms/registrationCertificateForm"
 
-    override fun mode(state: ElectricalSafetyState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
+    override fun mode(state: ElectricalSafetyDetailState) = if (state.electricalUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
-    override fun afterStepDataIsAdded(state: ElectricalSafetyState) {
+    override fun afterStepDataIsAdded(state: ElectricalSafetyDetailState) {
+        val certificateType: CertificateType =
+            state.getElectricalCertificateTypeAsCertificateType()
+                ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
-                CertificateType.Eicr,
+                certificateType,
+                landlordId,
             )
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
-                CertificateType.Eicr,
+                certificateType,
+                landlordId,
             )
 
             val formModel = getFormModelFromState(state)
@@ -81,7 +89,7 @@ class UploadElectricalCertStepConfig(
 @JourneyFrameworkComponent
 final class UploadElectricalCertStep(
     stepConfig: UploadElectricalCertStepConfig,
-) : RequestableStep<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyState>(stepConfig) {
+) : RequestableStep<Complete, ElectricalUploadCertificateFormModel, ElectricalSafetyDetailState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "electrical-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING"
     }

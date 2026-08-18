@@ -5,7 +5,6 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
@@ -25,10 +24,10 @@ class IndividualLandlord() : Landlord() {
         private set
 
     @Column(name = "individual_name")
-    lateinit var name: String
+    override lateinit var name: String
 
     @Column(name = "individual_email")
-    lateinit var email: String
+    override lateinit var email: String
 
     @Column(name = "individual_phone_number")
     lateinit var phoneNumber: String
@@ -60,19 +59,6 @@ class IndividualLandlord() : Landlord() {
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
 
-    // TODO: PDJB-1294: Remove this
-    @Column(name = "individual_has_responded_to_feedback")
-    var hasRespondedToFeedback: Boolean = false
-
-    @OneToMany(
-        mappedBy = "landlord",
-        orphanRemoval = true,
-    )
-    private lateinit var landlordIncompleteProperties: MutableSet<LandlordIncompleteProperties>
-
-    val incompleteProperties: List<SavedJourneyState>
-        get() = landlordIncompleteProperties.map { it.savedJourneyState }.toList()
-
     constructor(
         baseUser: PrsdbUser,
         name: String,
@@ -101,7 +87,4 @@ class IndividualLandlord() : Landlord() {
     }
 
     fun isEnglandOrWalesResident(): Boolean = countryOfResidence == ENGLAND_OR_WALES
-
-    val shouldSeeFeedback: Boolean
-        get() = !hasRespondedToFeedback
 }

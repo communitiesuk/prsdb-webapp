@@ -5,14 +5,13 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
@@ -35,6 +34,7 @@ class PropertyComplianceService(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -178,22 +178,25 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getAllNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getNumberOfNonCompliantPropertiesForLandlord(landlord: Landlord) = getAllNonCompliantPropertiesForLandlord(landlord).size
 
     fun getNonCompliantPropertiesForLandlord(
-        landlordBaseUserId: String,
+        landlord: Landlord,
         requestedPageIndex: Int,
     ): Page<ComplianceStatusDataModel> {
-        val allNonCompliant = getAllNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val allNonCompliant = getAllNonCompliantPropertiesForLandlord(landlord)
         val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE)
         val fromIndex = pageRequest.offset.toInt().coerceAtMost(allNonCompliant.size)
         val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allNonCompliant.size)
         return PageImpl(allNonCompliant.subList(fromIndex, toIndex), pageRequest, allNonCompliant.size.toLong())
     }
 
-    private fun getAllNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
+    private fun getAllNonCompliantPropertiesForLandlord(landlord: Landlord): List<ComplianceStatusDataModel> {
+        val compliances =
+            propertyComplianceRepository
+                .findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                    landlord.id,
+                )
 
         return compliances
             .map {
@@ -354,24 +357,15 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        val loggedInBaseUserId = SecurityContextHolder.getContext().authentication.name
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
-        val landlords =
-            propertyOwnership.landlords
-                .map {
-                    check(it is IndividualLandlord)
-                    it
-                }
+        val currentLandlord = userToLandlordService.getCurrentLandlordForUser()
         val landlord =
-            landlords
-                .singleOrNull { landlord ->
-                    landlord.baseUser.id == loggedInBaseUserId
-                }
+            propertyOwnership.landlords
+                .singleOrNull { it.id == currentLandlord.id }
                 ?: throw PrsdbWebException(
-                    "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
+                    "Current landlord ${currentLandlord.id} is not a landlord of property ${propertyOwnership.id}",
                 )
-        // TODO: PDJB-1274: Update emails to account for org landlord
 
+        // TODO: PDJB-1274: Update emails to account for org landlord
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
             ComplianceUpdateConfirmationEmail(
@@ -388,11 +382,8 @@ class PropertyComplianceService(
             ),
         )
 
-        // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         val otherLandlords =
-            landlords.filter { otherLandlord ->
-                otherLandlord.baseUser.id != loggedInBaseUserId
-            }
+            propertyOwnership.landlords.filter { it.id != currentLandlord.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
             complianceUpdateConfirmationSender.sendEmail(

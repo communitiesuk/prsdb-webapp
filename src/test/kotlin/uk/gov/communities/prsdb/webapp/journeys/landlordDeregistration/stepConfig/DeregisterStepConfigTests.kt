@@ -18,9 +18,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoP
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -30,7 +30,7 @@ class DeregisterStepConfigTests {
     lateinit var mockLandlordDeregistrationService: LandlordDeregistrationService
 
     @Mock
-    lateinit var mockLandlordService: LandlordService
+    lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
     lateinit var mockSecurityContextService: SecurityContextService
@@ -64,7 +64,7 @@ class DeregisterStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockLandlordDeregistrationService).deregisterLandlord(baseUserId)
+        verify(mockLandlordDeregistrationService).deregisterIndividualLandlord(baseUserId)
     }
 
     @Test
@@ -162,13 +162,13 @@ class DeregisterStepConfigTests {
     fun `afterStepIsReached calls nudge email service for jointly owned properties`() {
         val stepConfig = setupStepConfig()
         JourneyTestHelper.setMockUser(baseUserId)
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val landlord = MockLandlordData.createIndividualLandlord(email = landlordEmail)
         ReflectionTestUtils.setField(landlord, "id", 1L)
-        val coLandlord = MockLandlordData.createLandlord()
+        val coLandlord = MockLandlordData.createIndividualLandlord()
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val jointProperty =
             MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -178,20 +178,21 @@ class DeregisterStepConfigTests {
     private fun setupMocksForWithProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
         val property = MockLandlordData.createPropertyOwnership()
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail, propertyOwnerships = setOf(property))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
+        val landlord =
+            MockLandlordData.createIndividualLandlord(email = landlordEmail, propertyOwnerships = setOf(property))
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
     }
 
     private fun setupMocksForNoProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail, propertyOwnerships = emptySet())
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
+        val landlord = MockLandlordData.createIndividualLandlord(email = landlordEmail, propertyOwnerships = emptySet())
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
     }
 
     private fun setupStepConfig(): DeregisterStepConfig =
         DeregisterStepConfig(
             mockLandlordDeregistrationService,
-            mockLandlordService,
+            mockUserToLandlordService,
             mockSecurityContextService,
             mockConfirmationWithPropertiesEmailSender,
             mockConfirmationWithNoPropertiesEmailSender,

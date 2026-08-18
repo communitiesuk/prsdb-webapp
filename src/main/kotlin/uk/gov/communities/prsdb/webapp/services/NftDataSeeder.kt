@@ -202,25 +202,21 @@ class NftDataSeeder(
                                     propertyOwnershipId,
                                     landlord,
                                     licenseProvideLater = if (!hasLicence) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
-                                    // TODO PDJB-1048: May need to check another property like licenseProvideLater does (e.g. if isOccupied otherwise null)
-                                    tenancyProvideLater = NftDataFaker.generateBoolean(probabilityTrue = 0.4),
+                                    tenancyProvideLater = if (isOccupied) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
                                 )
 
-                            val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
-                            if (NftDataFaker.generateBoolean(probabilityTrue = probabilityOfComplianceRecord)) {
-                                val complianceId = (++complianceRecordsAdded).toLong()
-                                fileUploadsAdded =
-                                    addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
-                                        fileUploadStmt,
-                                        gasSafetyFileUploadsStmt,
-                                        electricalSafetyFileUploadsStmt,
-                                        propertyComplianceStmt,
-                                        complianceId,
-                                        propertyOwnershipId,
-                                        propertyOwnershipCreatedDate,
-                                        fileUploadsAdded,
-                                    )
-                            }
+                            val complianceId = (++complianceRecordsAdded).toLong()
+                            fileUploadsAdded =
+                                addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
+                                    fileUploadStmt,
+                                    gasSafetyFileUploadsStmt,
+                                    electricalSafetyFileUploadsStmt,
+                                    propertyComplianceStmt,
+                                    complianceId,
+                                    propertyOwnershipId,
+                                    propertyOwnershipCreatedDate,
+                                    fileUploadsAdded,
+                                )
                         } else {
                             val hasReminderEmailBeenSent = NftDataFaker.generateBoolean(probabilityTrue = 0.25)
                             addIncompletePropertyToBatch(
@@ -355,7 +351,6 @@ class NftDataSeeder(
 
         val name = NftDataFaker.generateName()
         val isVerified = NftDataFaker.generateBoolean(probabilityTrue = 0.8)
-        val hasRespondedToFeedback = NftDataFaker.generateBoolean(probabilityTrue = 0.4)
 
         landlordStmt.setLong(1, coreDetails.id)
         landlordStmt.setTimestamp(2, coreDetails.createdDate)
@@ -367,8 +362,7 @@ class NftDataSeeder(
         landlordStmt.setLong(8, landlordAddressGenerator.next().id)
         landlordStmt.setDate(9, NftDataFaker.generateDateOfBirth())
         landlordStmt.setLong(10, registrationNumberId)
-        landlordStmt.setBoolean(11, hasRespondedToFeedback)
-        landlordStmt.setBoolean(12, isVerified)
+        landlordStmt.setBoolean(11, isVerified)
         landlordStmt.addBatch()
     }
 
@@ -404,11 +398,14 @@ class NftDataSeeder(
             licenceStmt.addBatch()
         }
 
-        val numHouseholdsAndTenants = if (isOccupied) NftDataFaker.generateNumHouseholdsAndTenants() else Pair(0, 0)
+        // A "provide tenancy details later" property has no tenancy details yet, mirroring the real app where the details
+        // are cleared/absent until the landlord provides them. Only generate details when occupied and not provide-later.
+        val hasTenancyDetails = isOccupied && tenancyProvideLater != true
+        val numHouseholdsAndTenants = if (hasTenancyDetails) NftDataFaker.generateNumHouseholdsAndTenants() else Pair(0, 0)
         val numBedrooms = if (isOccupied) NftDataFaker.generateNumBedrooms() else null
-        val standardAndCustomBillsIncluded = if (isOccupied) NftDataFaker.generateStandardAndCustomBillsIncluded() else null
-        val furnishedStatus = if (isOccupied) NftDataFaker.generateFurnishedStatus() else null
-        val rentDetails = if (isOccupied) NftDataFaker.generateRentDetails() else null
+        val standardAndCustomBillsIncluded = if (hasTenancyDetails) NftDataFaker.generateStandardAndCustomBillsIncluded() else null
+        val furnishedStatus = if (hasTenancyDetails) NftDataFaker.generateFurnishedStatus() else null
+        val rentDetails = if (hasTenancyDetails) NftDataFaker.generateRentDetails() else null
 
         propertyOwnershipStmt.setLong(1, propertyOwnershipId)
         propertyOwnershipStmt.setTimestamp(2, createdDate)
@@ -443,7 +440,7 @@ class NftDataSeeder(
     private fun addIncompletePropertyToBatch(
         reminderEmailSentStmt: PreparedStatement,
         savedJourneyStateStmt: PreparedStatement,
-        landlordIncompletePropertiesStmt: PreparedStatement,
+        incompletePropertiesStmt: PreparedStatement,
         reminderEmailSentIdIfSent: Long?,
         savedJourneyStateId: Long,
         landlordDetails: CoreLandlordDetails,
@@ -468,9 +465,9 @@ class NftDataSeeder(
         savedJourneyStateStmt.setLongOrNull(7, reminderEmailSentIdIfSent)
         savedJourneyStateStmt.addBatch()
 
-        landlordIncompletePropertiesStmt.setLong(1, landlordDetails.id)
-        landlordIncompletePropertiesStmt.setLong(2, savedJourneyStateId)
-        landlordIncompletePropertiesStmt.addBatch()
+        incompletePropertiesStmt.setString(1, landlordDetails.subjectId)
+        incompletePropertiesStmt.setLong(2, savedJourneyStateId)
+        incompletePropertiesStmt.addBatch()
     }
 
     private fun addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(

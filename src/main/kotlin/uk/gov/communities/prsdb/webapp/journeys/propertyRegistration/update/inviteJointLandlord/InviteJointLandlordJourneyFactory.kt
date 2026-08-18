@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -77,7 +76,7 @@ class InviteJointLandlordJourneyFactory(
                 initialStep()
                 nextStep { journey.inviteJointLandlordsTask.firstStep }
             }
-            duplicableTask(journey.inviteJointLandlordsTask) {
+            task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.startInviteJointLandlordStep.isComplete() }
                 backUrl { propertyDetailsLandlordTab }
@@ -126,7 +125,7 @@ class InviteJointLandlordJourneyFactory(
                     }
                 }
             }
-            duplicableTask(journey.inviteJointLandlordsTask) {
+            task(journey.inviteJointLandlordsTask) {
                 withDependencies { journey }
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 backUrl { propertyDetailsLandlordTab }
@@ -186,7 +185,7 @@ class InviteJointLandlordJourney(
 
     // TODO: PDJB-1274: Update emails to account for org landlord
     override val existingLandlordEmails: List<String>
-        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { (it as IndividualLandlord).email }
+        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { it.email }
 }
 
 interface InviteJointLandlordJourneyState :

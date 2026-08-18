@@ -28,8 +28,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
-import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
+import uk.gov.communities.prsdb.webapp.services.UsersIncompletePropertyService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
@@ -37,18 +37,17 @@ import java.security.Principal
 @RequestMapping(LandlordController.LANDLORD_BASE_URL, "/")
 class IncompletePropertiesController(
     private val propertyRegistrationService: PropertyRegistrationConfirmationService,
-    private val incompletePropertyForLandlordService: IncompletePropertyForLandlordService,
+    private val usersIncompletePropertyService: UsersIncompletePropertyService,
     private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping("/${INCOMPLETE_PROPERTIES_PATH_SEGMENT}")
     fun landlordIncompleteProperties(
         model: Model,
-        principal: Principal,
         @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
         request: HttpServletRequest,
     ): String {
         val pagedIncompleteProperties =
-            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(principal.name, page - 1)
+            usersIncompletePropertyService.getCurrentUsersIncompleteProperties(page - 1)
 
         if (pagedIncompleteProperties.totalPages != 0 && pagedIncompleteProperties.totalPages < page) {
             return "redirect:${LandlordController.INCOMPLETE_PROPERTIES_URL}"
@@ -114,7 +113,7 @@ class IncompletePropertiesController(
         }
 
         if (formModel.wantsToProceed == true) {
-            incompletePropertyForLandlordService.deleteIncompleteProperty(contextId, principal.name)
+            usersIncompletePropertyService.deleteIncompleteProperty(contextId, principal.name)
             propertyRegistrationService.addIncompletePropertyFormContextsDeletedThisSession(contextId)
             return "redirect:${getDeleteIncompletePropertyConfirmationPath(contextId)}"
         }
@@ -135,7 +134,7 @@ class IncompletePropertiesController(
             )
         }
 
-        if (incompletePropertyForLandlordService.isIncompletePropertyAvailable(journeyId, principal.name)) {
+        if (usersIncompletePropertyService.isIncompletePropertyAvailable(journeyId, principal.name)) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Incomplete property registration with id $journeyId is still in the database",
@@ -152,7 +151,7 @@ class IncompletePropertiesController(
         journeyId: String,
         principalName: String,
     ) {
-        val singleLineAddress = incompletePropertyForLandlordService.getAddressData(journeyId, principalName)
+        val singleLineAddress = usersIncompletePropertyService.getAddressData(journeyId, principalName)
 
         model.addAttribute("radioOptions", RadiosViewModel.yesOrNoRadios())
         model.addAttribute("singleLineAddress", singleLineAddress)

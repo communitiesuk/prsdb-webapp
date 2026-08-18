@@ -5,11 +5,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
+import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
@@ -17,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(RegisterLandlordController::class)
@@ -28,7 +31,7 @@ class RegisterLandlordControllerTests(
     private lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
 
     @MockitoBean
-    private lateinit var landlordService: LandlordService
+    private lateinit var userToLandlordService: UserToLandlordService
 
     @Test
     fun `index redirects to start page for unauthenticated user`() {
@@ -92,8 +95,8 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation returns 200 for user registered as landlord`() {
-        val landlord = MockLandlordData.createLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
@@ -105,20 +108,22 @@ class RegisterLandlordControllerTests(
     @Test
     @WithMockUser
     fun `getConfirmation returns 400 for user not registered as landlord`() {
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(null)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "Landlord not found"),
+        )
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
             .andExpect {
-                status { is4xxClientError() }
+                status { isBadRequest() }
             }
     }
 
     @Test
     @WithMockUser
-    fun `getConfirmation includes survey URL in model`() {
-        val landlord = MockLandlordData.createLandlord()
-        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
+    fun `getConfirmation includes individual survey URL in model for individual landlord`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         mvc
             .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
@@ -127,7 +132,26 @@ class RegisterLandlordControllerTests(
                 model {
                     attribute(
                         "landlordRegistrationSurveyUrl",
-                        LANDLORD_REGISTRATION_SURVEY_URL,
+                        INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL,
+                    )
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation includes org survey URL in model for org landlord`() {
+        val landlord = MockLandlordData.createOrgLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "landlordRegistrationSurveyUrl",
+                        ORG_LANDLORD_REGISTRATION_SURVEY_URL,
                     )
                 }
             }

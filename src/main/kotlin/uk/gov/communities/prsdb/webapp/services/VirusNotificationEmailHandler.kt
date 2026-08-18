@@ -4,11 +4,13 @@ import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.IncompletePropertyEmailNotification
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification
@@ -16,9 +18,11 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.VirusMonit
 
 @PrsdbTaskService
 class VirusNotificationEmailHandler(
-    private val emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>,
+    private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
+    private val savedJourneyStateRepository: SavedJourneyStateRepository,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
     fun handleCallback(callback: VirusScanCallback) =
@@ -27,27 +31,51 @@ class VirusNotificationEmailHandler(
 
             is VirusMonitoringEmailNotification -> sendAlertToMonitoringTeam(callbackData)
 
-            // TODO PDJB-717: Handle notifying the user and the monitoring team for incomplete journeys
-            is IncompletePropertyEmailNotification -> TODO("PDJB-717")
+            is IncompletePropertyEmailNotification -> sendAlertForIncompleteProperty(callbackData)
         }
 
     private fun sendAlertToOwners(
         notification: OwnerEmailNotification,
-        emailAddress: String? = null,
+        monitoringEmailAddress: String? = null,
     ) {
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
-        val email = buildAlertEmail(ownership, notification.certificateType)
-
-        if (emailAddress != null) {
-            emailNotificationService.sendEmail(emailAddress, email)
+        if (monitoringEmailAddress != null) {
+            emailNotificationService.sendEmail(
+                monitoringEmailAddress,
+                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.singleLineAddress),
+            )
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
-                check(landlord is IndividualLandlord)
-                emailNotificationService.sendEmail(landlord.email, email)
+                emailNotificationService.sendEmail(
+                    landlord.email,
+                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.singleLineAddress),
+                )
             }
         }
+    }
+
+    private fun sendAlertForIncompleteProperty(
+        notification: IncompletePropertyEmailNotification,
+        monitoringEmailAddress: String? = null,
+    ) {
+        val landlord =
+            individualLandlordRepository.findById(notification.landlordId).orElse(null)
+                ?: throw IllegalStateException("No individual landlord found for id: ${notification.landlordId}")
+        val savedJourneyState =
+            savedJourneyStateRepository.findByJourneyIdAndUser_Id(notification.journeyId, landlord.baseUser.id)
+                ?: throw IllegalStateException("No saved journey state found for journeyId: ${notification.journeyId}")
+
+        // TODO: PDJB-1274: update to account for org landlords
+        emailNotificationService.sendEmail(
+            monitoringEmailAddress ?: landlord.email,
+            buildAlertEmail(
+                notification.certificateType,
+                if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
+                savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+            ),
+        )
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
@@ -57,7 +85,7 @@ class VirusNotificationEmailHandler(
             }
 
             is IncompletePropertyEmailNotification -> {
-                TODO("PDJB-717")
+                sendAlertForIncompleteProperty(internalNotification, virusMonitoringEmail)
             }
 
             is VirusMonitoringEmailNotification -> {
@@ -70,31 +98,16 @@ class VirusNotificationEmailHandler(
             ?: throw IllegalStateException("No active property ownership found for id: $id")
 
     private fun buildAlertEmail(
-        propertyOwnership: PropertyOwnership,
         certificateType: CertificateType,
+        recipientName: String,
+        singleLineAddress: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
-            certificateDescriptionForSubject(certificateType),
-            certificateDescriptionForHeading(certificateType),
-            certificateDescriptionForBody(certificateType),
-            propertyOwnership.address.singleLineAddress,
-            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-            absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            certificateType = certificateDescriptionForBody(certificateType),
+            recipientName = recipientName,
+            propertyAddress = singleLineAddress,
+            landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
-
-    private fun certificateDescriptionForSubject(certificateType: CertificateType): String =
-        when (certificateType) {
-            CertificateType.GasSafetyCert -> "A gas safety certificate"
-            CertificateType.Eicr -> "An EICR"
-            CertificateType.Eic -> "An EIC"
-        }
-
-    private fun certificateDescriptionForHeading(certificateType: CertificateType): String =
-        when (certificateType) {
-            CertificateType.GasSafetyCert -> "gas safety certificate"
-            CertificateType.Eicr -> "Electrical Installation Condition Report (EICR)"
-            CertificateType.Eic -> "Electrical Installation Certificate (EIC)"
-        }
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
         when (category) {
@@ -102,4 +115,8 @@ class VirusNotificationEmailHandler(
             CertificateType.Eicr -> "EICR"
             CertificateType.Eic -> "EIC"
         }
+
+    companion object {
+        private const val MONITORING_TEAM_RECIPIENT_NAME = "Monitoring Team"
+    }
 }

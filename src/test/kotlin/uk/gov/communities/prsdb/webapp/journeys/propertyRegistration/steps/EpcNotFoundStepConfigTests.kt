@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class EpcNotFoundStepConfigTests {
     @Mock
-    lateinit var mockState: EpcState
+    lateinit var mockState: EpcDetailState
 
     @Mock
     lateinit var mockFindYourEpcStep: FindYourEpcStep
@@ -24,7 +24,7 @@ class EpcNotFoundStepConfigTests {
 
     private fun setupStepConfig(): EpcNotFoundStepConfig {
         val stepConfig = EpcNotFoundStepConfig()
-        stepConfig.routeSegment = routeSegment
+        stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }
@@ -68,7 +68,7 @@ class EpcNotFoundStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(formModel)
         whenever(mockFindYourEpcStep.isStepReachable).thenReturn(true)
-        whenever(mockFindYourEpcStep.routeSegment).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
+        whenever(mockFindYourEpcStep.urlPath).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)
@@ -86,7 +86,7 @@ class EpcNotFoundStepConfigTests {
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(null)
         whenever(mockFindYourEpcStep.isStepReachable).thenReturn(true)
-        whenever(mockFindYourEpcStep.routeSegment).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
+        whenever(mockFindYourEpcStep.urlPath).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)

@@ -24,11 +24,8 @@ class CancelJointLandlordInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<CancelJointLandlordInvitationJourney>,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
-    fun createJourneySteps(
-        invitationId: Long,
-        baseUserId: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId, baseUserId)
+    fun createJourneySteps(invitationId: Long): Map<String, StepLifecycleOrchestrator> {
+        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(invitationId)
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {

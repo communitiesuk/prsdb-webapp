@@ -1,7 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -11,13 +15,19 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
@@ -35,13 +45,35 @@ class PropertyDetailsControllerTests(
     private lateinit var viewModelFactory: PropertyComplianceViewModelFactory
 
     @MockitoBean
+    private lateinit var notificationBannerViewModelService: NotificationBannerViewModelService
+
+    @MockitoBean
     private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
+
+    @BeforeEach
+    fun setUp() {
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
+            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        whenever(notificationBannerViewModelService.getPropertyDetailsNotificationBanner(anyOrNull(), any(), any(), any(), any()))
+            .thenReturn(PropertyDetailsNotificationBannerViewModel.fromState(true, false, false, false, emptyList()))
+        whenever(notificationBannerViewModelService.getBeforePdjb939NotificationBanner(anyOrNull(), any()))
+            .thenReturn(emptyList())
+    }
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
+        @BeforeEach
+        fun setUpLandlord() {
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        }
+
         @Test
         fun `getPropertyDetails returns a redirect for an unauthenticated user`() {
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = false)).andExpect {
@@ -78,7 +110,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails returns 200 for a valid request from a landlord`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(
                     propertyOwnership,
                 )
@@ -95,7 +127,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails fetches invitations`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -109,12 +141,37 @@ class PropertyDetailsControllerTests(
             verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
 
+        @ParameterizedTest(name = "when the provide later feature is {0}")
+        @ValueSource(booleans = [true, false])
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(isFeatureEnabled)
+
+            val expectedView =
+                if (isFeatureEnabled) {
+                    PropertyDetailsController.PROPERTY_DETAILS_VIEW
+                } else {
+                    PropertyDetailsController.PROPERTY_DETAILS_BEFORE_PDJB939_VIEW
+                }
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                view { name(expectedView) }
+            }
+        }
+
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails shows invite joint landlord button`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -130,7 +187,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails passes markedJointLandlord false when property is individual`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -146,7 +203,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails passes markedJointLandlord true when property is joint`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -162,7 +219,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails shows switch to individual inset if the property is marked as JL and there is only one landlord`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -183,7 +240,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails does not show switch to individual inset when property is not marked as joint landlord`() {
             val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -200,10 +257,10 @@ class PropertyDetailsControllerTests(
             val propertyOwnership =
                 createPropertyOwnership(
                     markedJointLandlord = true,
-                    landlords = mutableSetOf(createLandlord(name = "Landlord 1"), createLandlord(name = "Landlord 2")),
+                    landlords = mutableSetOf(createIndividualLandlord(name = "Landlord 1"), createIndividualLandlord(name = "Landlord 2")),
                 )
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -219,7 +276,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails adds landlordSummaryCards to model`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -234,11 +291,11 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails includes correct landlord count`() {
-            val landlord1 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
-            val landlord2 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+            val landlord1 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+            val landlord2 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
             val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord1, landlord2))
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
@@ -246,6 +303,43 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
                 model { attribute("landlordCount", 2) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails returns 200 for an org landlord`() {
+            val orgLandlord = createOrgLandlord()
+            val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(orgLandlord))
+
+            whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(orgLandlord)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeExists("landlordSummaryCards") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails returns 200 for a property with mixed individual and org landlords`() {
+            val individualLandlord = createIndividualLandlord()
+            val orgLandlord = createOrgLandlord()
+            val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(individualLandlord, orgLandlord))
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("landlordCount", 2) }
+                model { attributeExists("landlordSummaryCards") }
             }
         }
     }
@@ -280,10 +374,12 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil user`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
                 .thenReturn(
                     propertyOwnership,
                 )
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
@@ -295,14 +391,35 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetailsLocalCouncilView returns 200 for a valid request from an LocalCouncil admin`() {
             val propertyOwnership = createPropertyOwnership()
 
-            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
                 .thenReturn(
                     propertyOwnership,
                 )
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView fetches invitations`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { isOk() }
+                model { attributeExists("pendingInvitations") }
+                model { attributeExists("expiredInvitations") }
+            }
+
+            verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
     }
 
@@ -331,7 +448,7 @@ class PropertyDetailsControllerTests(
                 flash { attribute("inviteRemoved", true) }
             }
 
-            verify(jointLandlordInvitationService).hideExpiredInvitation(eq(1L), any())
+            verify(jointLandlordInvitationService).hideExpiredInvitation(eq(1L))
         }
     }
 }

@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.DelegateKeyRegistry
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.DuplicableTaskWithDependencies
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -14,8 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 
 interface BuildableElement {
-    // A single DelegateKeyRegistry is threaded through the whole build so the journey state and every task register
-    // their route-scoped delegate keys into it, letting cross-element key collisions be detected at build time.
     fun build(registry: DelegateKeyRegistry = DelegateKeyRegistry()): List<JourneyStep<*, *, *>>
 
     fun configure(configuration: ConfigurableElement<*>.() -> Unit)
@@ -28,10 +25,12 @@ interface BuildableElement {
     )
 }
 
-abstract class AbstractJourneyBuilder<TState : JourneyState>(
-    val journey: TState,
+abstract class AbstractJourneyBuilder<TInternalState : JourneyState, TJourneyState : JourneyState>(
+    private val privateJourney: TInternalState,
 ) : BuildableElement,
-    JourneyBuilderDsl<TState> {
+    JourneyBuilderDsl<TInternalState> {
+    abstract val journey: TJourneyState
+
     private val journeyElements: MutableList<BuildableElement> = mutableListOf()
 
     private var defaultUnreachableStepDestination: (() -> Destination)? = null
@@ -51,10 +50,13 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         return build(registry)
     }
 
+    private val additionalElements: MutableList<BuildableElement> = mutableListOf()
+    protected val ownedElements get() = journeyElements + additionalElements
+
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) {
         additionalConfiguration.add(
             ConditionalElementConfiguration(
-                { journeyElements.any { this === it } },
+                { ownedElements.any { this === it } },
                 configuration,
             ),
         )
@@ -69,11 +71,11 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         }
     }
 
-    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
-        uninitialisedStep: JourneyStep<TMode, *, TState>,
-        init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
+    override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TInternalState>> step(
+        uninitialisedStep: JourneyStep<TMode, *, TInternalState>,
+        init: StepInitialiser<TStep, TInternalState, TMode>.() -> Unit,
     ) {
-        val stepInitialiser = StepInitialiser<TStep, TState, TMode>(uninitialisedStep, journey)
+        val stepInitialiser = StepInitialiser<TStep, TInternalState, TMode>(uninitialisedStep, privateJourney)
         stepInitialiser.init()
         if (journeyElements.isEmpty()) {
             stepInitialiser.configureFirst {
@@ -83,27 +85,43 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(stepInitialiser)
     }
 
-    override fun task(
-        uninitialisedTask: Task<TState>,
+    override fun <TTaskState : JourneyState, TDependencies : Any> task(
+        uninitialisedTask: Task<TTaskState, TDependencies>,
         routeSegment: String?,
-        init: TaskInitialiser<TState, Nothing>.() -> Unit,
+        init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
     ) {
-        val taskInitialiser = TaskInitialiser<TState, Nothing>(uninitialisedTask, journey)
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, uninitialisedTask.taskState)
         routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState : JourneyState, TDependencies : Any> duplicableTask(
-        uninitialisedTask: DuplicableTaskWithDependencies<TTaskState, TDependencies>,
-        routeSegment: String?,
-        init: TaskInitialiser<TTaskState, TDependencies>.() -> Unit,
+    fun <TEmbeddedState : JourneyState> fromTask(
+        task: TEmbeddedState,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
     ) {
-        // The task provides its own state, so build its sub-journey against that.
-        val taskInitialiser = TaskInitialiser<TTaskState, TDependencies>(uninitialisedTask, uninitialisedTask.taskState)
-        routeSegment?.let { taskInitialiser.routeSegment(it) }
-        taskInitialiser.init()
-        journeyElements.add(taskInitialiser)
+        val builder = EmbedBuilder(task, privateJourney)
+        builder.init()
+        registerTransparentBuilder(builder)
+    }
+
+    fun <TEmbeddedState, TDependencies : Any> fromTask(
+        task: TEmbeddedState,
+        dependencies: TDependencies,
+        init: EmbedBuilder<TEmbeddedState, TInternalState>.() -> Unit,
+    ) where TEmbeddedState : JourneyState, TEmbeddedState : Task<*, TDependencies> {
+        val builder = EmbedBuilder(task, privateJourney)
+        task.bindDependencies(dependencies)
+        builder.init()
+        registerTransparentBuilder(builder)
+    }
+
+    protected fun registerTransparentBuilder(builder: AbstractJourneyBuilder<*, *>) {
+        if (journeyElements.isEmpty()) {
+            builder.configureFirst { additionalFirstElementConfiguration.forEach { it() } }
+        }
+        journeyElements.add(builder)
+        additionalElements.addAll(builder.ownedElements)
     }
 
     override fun conditionallyConfigure(
@@ -155,9 +173,9 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 }
 
 open class SubJourneyBuilder<TState : JourneyState>(
-    journey: TState,
+    override val journey: TState,
     exitStepOverride: SubjourneyExitStep? = null,
-) : AbstractJourneyBuilder<TState>(journey) {
+) : AbstractJourneyBuilder<TState, TState>(journey) {
     var exitInits: MutableList<StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit> =
         mutableListOf()
         private set

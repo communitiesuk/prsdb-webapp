@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{deregisterLandlord.organisational.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deregisterLandlord.organisational.confirmation.banner.heading}, null)}">
+        </div>
+        <p class="govuk-body" th:text="#{deregisterLandlord.organisational.confirmation.paragraph.one}">
+            deregisterLandlord.organisational.confirmation.paragraph.one
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
+        <p class="govuk-body" th:text="#{deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.one(${organisationName})}">
+            deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.two}">
+            deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.two
+        </p>
+        <p class="govuk-body" th:text="#{deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.three}">
+            deregisterLandlord.organisational.confirmation.whatHappensNext.paragraph.three
+        </p>
+    </div>
+</main>
+</html>

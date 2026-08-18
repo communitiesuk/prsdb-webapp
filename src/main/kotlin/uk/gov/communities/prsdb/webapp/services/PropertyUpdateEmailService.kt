@@ -1,9 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
@@ -11,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpd
 @PrsdbWebService
 class PropertyUpdateEmailService(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
     private val notificationEmailService: EmailNotificationService<JointLandlordPropertyUpdateNotificationEmail>,
@@ -21,10 +18,11 @@ class PropertyUpdateEmailService(
         updatedBullets: List<String>,
     ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
-        val actingLandlord = getActingLandlord()
+        val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val registrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 
+        // TODO: PDJB-1274: Update emails to account for org landlord
         confirmationEmailService.sendEmail(
             actingLandlord.email,
             PropertyUpdateConfirmation(
@@ -40,7 +38,6 @@ class PropertyUpdateEmailService(
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
             // TODO: PDJB-1274: Update emails to account for org landlord
             otherLandlords.forEach { landlord ->
-                check(landlord is IndividualLandlord)
                 notificationEmailService.sendEmail(
                     landlord.email,
                     JointLandlordPropertyUpdateNotificationEmail(
@@ -52,12 +49,5 @@ class PropertyUpdateEmailService(
                 )
             }
         }
-    }
-
-    private fun getActingLandlord(): IndividualLandlord {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        return landlordService.retrieveLandlordByBaseUserId(baseUserId)
-            ?: throw PrsdbWebException("Landlord record not found for logged in user with baseUserId $baseUserId")
     }
 }

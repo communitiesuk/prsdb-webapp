@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelJointLandlordInvitation.stepConfig
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -14,14 +12,14 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
 class CancelInvitationStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
-    private val landlordService: LandlordService,
+    private val userToLandlordService: UserToLandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val inviteeEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
     private val cancellerEmailSender: EmailNotificationService<JointLandlordInvitationCancellationCancellerEmail>,
@@ -30,13 +28,12 @@ class CancelInvitationStepConfig(
     override fun mode(state: CancelJointLandlordInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: CancelJointLandlordInvitationJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(state.invitationId, baseUserId)
+        val invitation = jointLandlordInvitationService.getPendingInvitationIfAuthorizedLandlord(state.invitationId)
         val propertyOwnership = invitation.registeredOwnership
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl =
             absoluteUrlProvider.buildPropertyDetailsUri(state.propertyOwnershipId).toString()
-        val cancellerLandlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!
+        val cancellerLandlord = userToLandlordService.getCurrentLandlordForUser()
 
         // Cancel the invitation
         jointLandlordInvitationService.removeInvitation(invitation)
@@ -52,6 +49,7 @@ class CancelInvitationStepConfig(
         )
 
         // Email the canceller
+        // TODO: PDJB-1274: Update emails to account for org landlord
         cancellerEmailSender.sendEmail(
             cancellerLandlord.email,
             JointLandlordInvitationCancellationCancellerEmail(
@@ -67,7 +65,6 @@ class CancelInvitationStepConfig(
             .filterNot { cancellerLandlord.id == it.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach {
-                check(it is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     it.email,
                     JointLandlordInvitationCancellationOtherLandlordEmail(

@@ -23,6 +23,7 @@ testTheService:
     three: Parts of the service may change during the private beta period.
 checkAnswers:
   summaryName: Your details
+  landlordTypeValue: Individual
   rowHeading:
     name: Name
     dateOfBirth: Date of birth
@@ -31,6 +32,42 @@ checkAnswers:
     englandOrWalesResident: Resident in England or Wales
     contactAddress: Contact address
     localCouncil: Local Council
+    landlordType: Landlord type
+orgCheckAnswers:
+  heading: Check your answers
+  yourDetails:
+    cardTitle: Your details
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email
+    phoneNumber: Phone number
+  landlordDetails:
+    heading: Landlord details
+    landlordType: Landlord type
+    landlordTypeValue: Organisation
+    organisationName: Organisation name
+    organisationAddress: Organisation address
+    organisationEmail: Organisation email
+    organisationPhone: Organisation phone number
+    organisationType: Organisation type
+    registeredCharity: Registered charity
+    charityCommission: Charity commission
+    charityNumber: Charity number
+  governingBody:
+    heading: Members of the governing body
+    leadTrusteeCardTitle: Lead trustee
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email
+    phoneNumber: Phone number
+    address: Address
+  mainContact:
+    heading: Main contact details
+    cardTitle: Main contact
+    name: Name
+    email: Email
+    phoneNumber: Phone number
+  submitButton: Confirm and submit
 confirmation:
   banner:
     heading: Registered as a landlord
@@ -95,8 +132,12 @@ leadTrusteePhone:
   error:
     missing: Enter a phone number including the country code for international numbers
 orgType:
-  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHeading: Select your organisation’s type
   fieldSetHint: Select all options that describe your organisation’s legal structure
+  company: Company
+  charity: Charity
+  trust: Trust
+  none: Other
   checkbox:
     company: Company
     charity: Charity
@@ -105,6 +146,42 @@ orgType:
   divider: or
   error:
     missing: Select the types of organisation that apply, or select ‘None of these’
+orgTypeTrustInterruption:
+  addingTrust:
+    heading: You must provide trustee details
+    paragraph:
+      one: You’ve selected that your organisation is a trust.
+      two: You must provide details including contact information for your organisation’s lead trustee.
+  removingTrust:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: "You’ve changed the type of your organisation from a trust to {0}."
+      two: This means that the lead trustee details will be removed.
+      three: If they are still part of your organisation’s governing body you must add them as a member of the governing body.
+  orgType:
+    company: company
+    charity: charity
+    none: none of these
+companiesHouseInterruption:
+  bulletList:
+    directors: directors
+    trustees: trustees
+    partners: partners
+    otherMembers: other members of the governing body
+  changedToNonCompany:
+    heading: Your new answer affects other sections of your landlord record
+    question: 'Question: Is your organisation registered with Companies House?'
+    previousAnswer: 'Previous answer: Yes'
+    newAnswer: 'New answer: No'
+    paragraph:
+      one: 'If you continue your company number will be removed and you will need to provide details for:'
+      two: You must provide details for all members of your organisation’s governing body. It is an offence to provide false or misleading information.
+  changedToCompany:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve changed your organisation’s Companies House registration status from No to Yes.
+      two: 'This means we will remove the details you provided for:'
+      three: If your organisation is still registered you can go back to undo this change.
 orgGovBodyWhoToProvide:
   title: Who do you want to provide details for?
   fieldSetHeading: Who do you want to provide details for?
@@ -125,4 +202,19 @@ orgGovBodyMemberDob:
   fieldSetHint: 'For example, 27 03 1968'
   error:
     invalidAge: The minimum age is 16
-
+orgIsRegisteredCharity:
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
+orgIsRegisteredCompany:
+  fieldSetHeading: Is your organisation registered with Companies House?
+  error:
+    missing: Select yes if your organisation is registered with Companies House
+phoneNumber:
+  fieldSetHeading: What is your phone number?
+  hint: For international numbers include the country code
+  error:
+    missing: Enter a phone number
+    invalidFormat: Enter a phone number including the country code for international numbers

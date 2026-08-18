@@ -12,12 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -60,8 +56,8 @@ class UpdateLicensingJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(journey.licensingTask)
-            configureStep(journey.licensingTypeStep) {
+            checkAnswerTask(journey.licensingTask, { journey })
+            configureStep(journey.licensingTask.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                 }
@@ -77,6 +73,7 @@ class UpdateLicensingJourneyFactory(
             val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(journey.propertyId)
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.licensingTask) {
+                withDependencies { journey }
                 initialStep()
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
@@ -89,7 +86,7 @@ class UpdateLicensingJourneyFactory(
                 parents { journey.licensingTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            configureStep(journey.licensingTypeStep) {
+            configureStep(journey.licensingTask.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                 }
@@ -106,10 +103,6 @@ class UpdateLicensingJourneyFactory(
 class UpdateLicensingJourney(
     // Licensing task
     override val licensingTask: LicensingTask,
-    override val licensingTypeStep: LicensingTypeStep,
-    override val selectiveLicenceStep: SelectiveLicenceStep,
-    override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
-    override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -126,10 +119,13 @@ class UpdateLicensingJourney(
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val allowProvideLicensingLaterRoute: Boolean = false
+    override val isOccupied: Boolean? = null
 }
 
 interface UpdateLicensingJourneyState :
-    LicensingState,
+    LicensingDependencies,
     CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
     override val finishCyaStep: FinishCyaJourneyStep

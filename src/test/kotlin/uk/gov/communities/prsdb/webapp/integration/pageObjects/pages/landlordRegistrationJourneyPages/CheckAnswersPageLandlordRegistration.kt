@@ -25,6 +25,7 @@ class CheckAnswersPageLandlordRegistration(
     class CheckAnswersLandlordRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
+        val landlordTypeRow = getRow("Landlord type")
         val emailRow = getRow("Email address")
     }
 }

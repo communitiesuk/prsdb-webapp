@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
-import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TrackEmailSentException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -21,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IncompleteP
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
+import uk.gov.communities.prsdb.webapp.services.LandlordUserEmailService
 import java.time.LocalDate
 import kotlin.system.exitProcess
 
@@ -47,6 +47,7 @@ class IncompletePropertiesReminderTaskLogic(
     private val emailSender: EmailNotificationService<IncompletePropertyReminderEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val incompletePropertiesService: IncompletePropertiesService,
+    private val landlordUserEmailService: LandlordUserEmailService,
 ) {
     @Transactional
     fun sendIncompletePropertyReminders() {
@@ -56,17 +57,26 @@ class IncompletePropertiesReminderTaskLogic(
                 LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
             )
 
-        val pagesOfProperties = incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+        val pagesOfProperties =
+            incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
 
         for (page in 0..<pagesOfProperties) {
-            val incompleteProperties = incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
+            val incompleteProperties =
+                incompletePropertiesService.getIncompletePropertiesDueReminderPage(cutoffDate, page)
+            val emailsByUserId =
+                landlordUserEmailService.getEmailsByBaseUserId(incompleteProperties.map { it.user.id }.distinct())
             incompleteProperties.forEach { property ->
-                // TODO: PDJB-1274: Update emails to account for org landlord
-                val landlord = property.landlord
-                check(landlord is IndividualLandlord)
+                val recipientEmail = emailsByUserId[property.user.id]
+                if (recipientEmail == null) {
+                    println(
+                        "No email address found for the user who started incomplete property with savedJourneyStateId: " +
+                            property.savedJourneyState.id,
+                    )
+                    return@forEach
+                }
                 try {
                     emailSender.sendEmail(
-                        landlord.email,
+                        recipientEmail,
                         IncompletePropertyReminderEmail(
                             singleLineAddress =
                                 property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),

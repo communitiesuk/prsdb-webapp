@@ -3,6 +3,7 @@
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -10,6 +11,9 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'occupied', #{${fieldSetHeading}},  #{${fieldSetHint}})}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'occupied',null, ${radioOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.warning</div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </th:block>
 </html>
