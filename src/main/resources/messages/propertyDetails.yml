@@ -3,10 +3,6 @@ heading: Property record
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied
-lettingAgentPanel:
-  heading: Letting agent or property manager
-  body: A letting agent or property manager can manage this property on your behalf.
-  removeButton: Remove your letting agent or property manager
 landlordDetails:
   heading: Landlords
   registeredLandlords:

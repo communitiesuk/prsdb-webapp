@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
@@ -121,12 +120,6 @@ class PropertyDetailsController(
         modelAndView.addObject("pendingInvitations", pendingInvitations)
         modelAndView.addObject("expiredInvitations", expiredInvitations)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
-
-        modelAndView.addObject("lettingAgentEnabled", featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT))
-        modelAndView.addObject(
-            "removeLettingAgentUrl",
-            CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
-        )
 
         return modelAndView
     }

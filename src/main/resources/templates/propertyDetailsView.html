@@ -48,14 +48,9 @@
             <p class="govuk-body">
                 <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
-            <article th:if="${lettingAgentEnabled}" id="letting-agent-panel"
-                     th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.heading', ~{::#letting-agent-panel/content()}, null)}">
-                <!-- TODO PDJB-1412: populate the panel with the real letting agent / property manager details -->
-                <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.body}">propertyDetails.lettingAgentPanel.body</p>
-                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${removeLettingAgentUrl}}, #{propertyDetails.lettingAgentPanel.removeButton})}">
-                    propertyDetails.lettingAgentPanel.removeButton
-                </a>
-            </article>
+            <!-- TODO PDJB-1412: add the letting agent / property manager MOJ ticket panel here (flag-gated on
+                 DELEGATE_TO_LETTING_AGENT), including the "Remove your letting agent or property manager" button
+                 linking to CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId) -->
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
