@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
@@ -136,12 +137,13 @@ class PropertyRegistrationTaskListStepConfig(
                 "registerProperty.taskList.rentedOut.heading",
                 "rented-out",
                 listOf(
+                    delegationToLettingAgentItem(state),
                     TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.licensing", state.licensingTask),
                     TaskListItemViewModel.fromTask("registerProperty.taskList.gasSafety", state.gasSafetyTask),
                     TaskListItemViewModel.fromTask("registerProperty.taskList.electricalSafety", state.electricalSafetyTask),
                     TaskListItemViewModel.fromTask("registerProperty.taskList.epc", state.epcTask),
                     tenancyDetailsItem(state),
-                ),
+                ).filterNotNull(),
             ),
             TaskSectionViewModel(
                 "registerProperty.taskList.submitYourRegistration.heading",
@@ -151,6 +153,40 @@ class PropertyRegistrationTaskListStepConfig(
                 ),
             ),
         )
+
+    private fun delegationToLettingAgentItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel? {
+        if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) || state.cachedOccupied == null) {
+            return null
+        }
+
+        val delegationTaskTitle =
+            if (state.cachedOccupied == true) {
+                "registerProperty.taskList.whoWillProvideDetails.occupied"
+            } else {
+                "registerProperty.taskList.whoWillProvideDetails.unoccupied"
+            }
+
+        val delegationTaskStatus =
+            if (state.cachedOccupied == true) {
+                TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED)
+            } else {
+                TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET)
+            }
+
+        val delegationTaskHelperText =
+            if (state.cachedOccupied == true) {
+                "registerProperty.taskList.whoWillProvideDetails.helperText.occupied"
+            } else {
+                "registerProperty.taskList.whoWillProvideDetails.helperText.unoccupied"
+            }
+
+        return TaskListItemViewModel(
+            nameKey = delegationTaskTitle,
+            status = delegationTaskStatus,
+            hintKey = delegationTaskHelperText,
+            url = null,
+        )
+    }
 
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {

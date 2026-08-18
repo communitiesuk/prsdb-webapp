@@ -1673,7 +1673,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -1682,7 +1682,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
@@ -1816,7 +1816,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
             val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
-            assertEquals("Not started", propertyDetailsTask.statusText.trim())
+            assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
             assertTrue(propertyDetailsTask.hasLink)
 
             val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
@@ -1881,7 +1881,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
