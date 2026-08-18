@@ -48,6 +48,7 @@ class UpdateGoverningBodyJourneyFactory(
             }
             task(journey.orgGovBodyMembersTask) {
                 parents { journey.initialiseGovBodyMembersStep.isComplete() }
+                backUrl { "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE#$ORGANISATION_CONTACTS_FRAGMENT" }
                 nextStep { journey.cyaStep }
                 withDependencies {
                     OrgGovBodyMembersDependencies(
