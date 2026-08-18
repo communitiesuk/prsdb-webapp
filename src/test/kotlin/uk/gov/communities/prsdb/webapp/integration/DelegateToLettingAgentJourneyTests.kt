@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
@@ -18,6 +19,11 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
     companion object {
         const val PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER = 4L
         const val PROPERTY_OWNERSHIP_ID_OWNED_BY_ANOTHER_LANDLORD = 3L
+    }
+
+    @BeforeEach
+    fun enableDelegateToLettingAgentFlag() {
+        featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
     @Test
