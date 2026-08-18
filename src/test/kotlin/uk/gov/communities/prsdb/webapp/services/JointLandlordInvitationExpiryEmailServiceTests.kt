@@ -211,6 +211,30 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     }
 
     @Test
+    fun `sendExpiryEmailsForExpiredInvitations counts an invitation as failed and not sent when the nudge email fails`() {
+        val primaryLandlord = MockLandlordData.createIndividualLandlord(name = "Lois", email = "lois@example.com")
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
+        val invitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                id = 1,
+                propertyOwnership = propertyOwnership,
+                createdDate = expiredCreatedDate,
+            )
+
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
+            .thenReturn(listOf(invitation))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
+            .thenReturn(URI("https://example.com/landlord/property/1"))
+        whenever(mockSwapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(any()))
+            .thenThrow(PersistentEmailSendException("boom"))
+
+        val result = expiryService.sendExpiryEmailsForExpiredInvitations()
+
+        assertEquals(emptyList<Long>(), result.sentIds)
+        assertEquals(listOf(1L), result.failedIds)
+    }
+
+    @Test
     fun `sendExpiryEmailsForExpiredInvitations calls swap to individual nudge service after processing each invitation`() {
         val primaryLandlord = MockLandlordData.createIndividualLandlord(name = "Lois", email = "lois@example.com")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))

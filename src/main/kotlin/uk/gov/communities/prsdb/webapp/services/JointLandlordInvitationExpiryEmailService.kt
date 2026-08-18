@@ -34,8 +34,8 @@ class JointLandlordInvitationExpiryEmailService(
                 sendExpiryEmailsForInvitation(invitation)
                 invitation.markAsExpiredEmailSent()
                 invitationRepository.save(invitation)
-                sentIds.add(invitation.id)
                 swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(invitation.registeredOwnership)
+                sentIds.add(invitation.id)
             } catch (ex: PersistentEmailSendException) {
                 printFailureMessage(ex, invitation)
                 failedIds.add(invitation.id)
