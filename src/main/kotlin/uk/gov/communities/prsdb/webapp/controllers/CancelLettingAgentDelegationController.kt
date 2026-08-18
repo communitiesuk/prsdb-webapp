@@ -76,6 +76,7 @@ class CancelLettingAgentDelegationController(
     ): String {
         propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
         model.addAttribute("todoComment", "TODO PDJB-1413: letting agent or property manager removal confirmation")
+        model.addAttribute("continueUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
         return "forms/todoConfirmation"
     }
 

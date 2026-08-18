@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.ConfirmationPageCancelLettingAgentDelegation
 import kotlin.test.assertEquals
@@ -24,10 +25,18 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
         // TODO PDJB-1413: assert the real "are you sure" page content and the yes/no decision
         areYouSurePage.continueButton.clickAndWait()
 
-        // Confirmation page (terminal)
+        // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
-        // TODO PDJB-1413: assert the real confirmation page content and add the onward link back to the property record
+        // TODO PDJB-1413: assert the real confirmation page content
         BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("TODO")
+        confirmationPage.continueButton.clickAndWait()
+
+        // Back to the property record page
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
     }
 
     @Test

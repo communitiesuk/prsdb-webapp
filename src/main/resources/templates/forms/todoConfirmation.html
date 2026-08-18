@@ -8,6 +8,10 @@
            th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner('TODO', null)}">
       </div>
       <p class="govuk-body" th:text="${todoComment}">todoComment</p>
+      <a th:if="${continueUrl != null}"
+         th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${continueUrl}, #{forms.buttons.continue})}">
+        Continue
+      </a>
     </div>
   </main>
 </html>
