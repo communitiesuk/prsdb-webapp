@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -163,6 +164,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
         }
 
         @Test
@@ -2020,6 +2022,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun disableRestructureAndSkippingFlag() {
             featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
         }
 
         @Test

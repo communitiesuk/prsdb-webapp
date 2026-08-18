@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
@@ -62,6 +63,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveP
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -75,6 +77,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTaskDependencies
@@ -114,6 +117,13 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
+                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
+                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
+                // TODO PDJB-1401: add occupancy-change CYA change journey + occupancy-change interruption
+                //  (occupied -> unoccupied) for the delegate-to-letting-agent flow.
+                // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
+                // TODO PDJB-1403: add who-provides-details CYA change journey + self -> agent interruption
+                //  for the delegate-to-letting-agent flow.
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
                 }
@@ -436,13 +446,50 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
             }
+            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
                     parents { journey.ownershipAndLandlordsTask.isComplete() }
-                    nextStep { journey.licensingTask.firstStep }
+                    nextStep { occupancy ->
+                        if (delegateEnabled) {
+                            // Only occupied properties are asked who provides the rented-out details. An unoccupied
+                            // property has none, so return to the task list (licensing etc. remain reachable there).
+                            when (occupancy) {
+                                YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
+                                YesOrNo.NO -> journey.taskListStep
+                            }
+                        } else {
+                            journey.licensingTask.firstStep
+                        }
+                    }
                     saveProgress()
+                }
+            }
+            if (delegateEnabled) {
+                section {
+                    withHeadingMessageKey("registerProperty.taskList.rentedOut.whoProvidesDetails", shouldUseNumbering = false)
+                    task(journey.whoProvidesDetailsTask) {
+                        // Only reachable for occupied properties; an unoccupied property has no rented-out details
+                        // to provide, so this task is skipped.
+                        parents { journey.occupied.hasOutcome(YesOrNo.YES) }
+                        // On completion, continue through the journey rather than returning to the task list:
+                        //  - Landlord provides the details -> carry on to the licensing task (and the rest of the
+                        //    rented-out compliance tasks).
+                        //  - Letting agent provides the details -> the landlord provides none of the rented-out
+                        //    compliance details, so skip straight to the check-your-answers step.
+                        nextStep {
+                            if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
+                                WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+                            ) {
+                                journey.cyaStep
+                            } else {
+                                journey.licensingTask.firstStep
+                            }
+                        }
+                        saveProgress()
+                    }
                 }
             }
             section {
@@ -450,10 +497,26 @@ class PropertyRegistrationJourneyFactory(
                 task(journey.licensingTask) {
                     withDependencies { journey }
                     parents {
-                        OrParents(
-                            journey.occupied.hasOutcome(YesOrNo.YES),
-                            journey.occupied.hasOutcome(YesOrNo.NO),
-                        )
+                        if (delegateEnabled) {
+                            // Licensing (and, transitively, gas/electrical/EPC/tenancy) is reachable when the property
+                            // is unoccupied (the who-provides question is skipped) or when the landlord provides the
+                            // rented-out details. When a letting agent provides them the whole compliance chain is
+                            // skipped and the journey jumps to check-your-answers.
+                            OrParents(
+                                journey.occupied.hasOutcome(YesOrNo.NO),
+                                AndParents(
+                                    journey.whoProvidesDetailsTask.isComplete(),
+                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                        WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES,
+                                    ),
+                                ),
+                            )
+                        } else {
+                            OrParents(
+                                journey.occupied.hasOutcome(YesOrNo.YES),
+                                journey.occupied.hasOutcome(YesOrNo.NO),
+                            )
+                        }
                     }
                     nextStep { journey.gasSafetyTask.firstStep }
                     saveProgress()
@@ -508,13 +571,29 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
-                        AndParents(
-                            journey.epcTask.isComplete(),
+                        val landlordProvidesPath =
+                            AndParents(
+                                journey.epcTask.isComplete(),
+                                OrParents(
+                                    journey.tenancyDetailsTask.isComplete(),
+                                    journey.occupied.hasOutcome(YesOrNo.NO),
+                                ),
+                            )
+                        if (delegateEnabled) {
+                            // The letting-agent path skips the rented-out compliance tasks, so check-your-answers
+                            // must also be reachable once the who-provides task is complete with that outcome.
                             OrParents(
-                                journey.tenancyDetailsTask.isComplete(),
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                            ),
-                        )
+                                landlordProvidesPath,
+                                AndParents(
+                                    journey.whoProvidesDetailsTask.isComplete(),
+                                    journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
+                                        WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES,
+                                    ),
+                                ),
+                            )
+                        } else {
+                            landlordProvidesPath
+                        }
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
@@ -584,6 +663,8 @@ class PropertyRegistrationJourney(
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
+    // Delegate to letting agent task (flag-on: DELEGATE_TO_LETTING_AGENT) — skeleton, see PDJB-1397
+    override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
     // Electrical safety task
@@ -683,6 +764,7 @@ interface PropertyRegistrationJourneyState :
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
     val tenancyDetailsTask: TenancyDetailsTask
+    val whoProvidesDetailsTask: WhoProvidesDetailsTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val gasSafetyTask: GasSafetyTask
     override val electricalSafetyTask: ElectricalSafetyTask

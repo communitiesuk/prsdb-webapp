@@ -36,6 +36,17 @@
         <th:block th:if="${insetText == true}">
             <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
+        <!--/* TODO PDJB-1391: placeholder banner shown while the letting-agent path reuses this CYA page with mocked
+               "provide later" values for the skipped licensing and tenancy sections. Remove when the real
+               delegated-details display is implemented. */-->
+        <div th:if="${lettingAgentDelegationTodo == true}" class="govuk-warning-text">
+            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+            <strong class="govuk-warning-text__text">
+                <span class="govuk-visually-hidden">Warning</span>
+                TODO PDJB-1391: a letting agent is providing the rented-out details. Licensing and tenancy details below
+                are placeholder &quot;provide later&quot; values and are not yet implemented.
+            </strong>
+        </div>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>

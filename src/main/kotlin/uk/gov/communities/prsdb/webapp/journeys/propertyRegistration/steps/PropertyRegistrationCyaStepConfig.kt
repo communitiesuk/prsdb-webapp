@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.isDelegatedToLettingAgent
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
@@ -35,11 +36,15 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
+                // TODO PDJB-1391: shows a placeholder banner while the letting-agent path reuses this CYA page with
+                //  mocked "provide later" values. Replace with the real delegated-details display.
+                "lettingAgentDelegationTodo" to isDelegatedToLettingAgent,
                 "propertyName" to
                     state.propertyDetailsTask.addressTask
                         .getAddress()
@@ -50,7 +55,14 @@ class PropertyRegistrationCyaStepConfig(
                     } else {
                         getPropertyDetailsSummaryList(state)
                     },
-                "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask),
+                "licensingDetails" to
+                    if (isDelegatedToLettingAgent) {
+                        // TODO PDJB-1391: licensing is skipped when a letting agent provides the details, so no real
+                        //  answer exists yet. Substitute a placeholder "provide later" row so the page can render.
+                        getMockProvideLaterSummaryList("forms.checkPropertyAnswers.propertyDetails.licensingType")
+                    } else {
+                        licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask)
+                    },
                 "occupancyDetails" to
                     if (isRestructured) {
                         occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
@@ -60,7 +72,12 @@ class PropertyRegistrationCyaStepConfig(
             )
 
         content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
-        if (isRestructured) {
+        if (isDelegatedToLettingAgent) {
+            // TODO PDJB-1391: tenancy details are skipped when a letting agent provides the details, so no real
+            //  answer exists yet. Substitute a placeholder "provide later" row so the page can render.
+            content["tenancyDetails"] =
+                getMockProvideLaterSummaryList("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow")
+        } else if (isRestructured) {
             content["tenancyDetails"] =
                 occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
                     state,
@@ -74,8 +91,16 @@ class PropertyRegistrationCyaStepConfig(
             content["tenancyDetails"] = occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
         }
 
-        content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
-        content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+        if (isDelegatedToLettingAgent) {
+            // TODO PDJB-1391: the gas and electrical safety tasks are skipped when a letting agent provides the
+            //  details. Their CYA row factories throw when the task was never reached, so substitute placeholder
+            //  "provide later" rows. (The EPC factory degrades gracefully to a "no EPC provided" summary.)
+            content += getMockDelegatedGasContent()
+            content += getMockDelegatedElectricalContent()
+        } else {
+            content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
+            content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+        }
         content += complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
 
         return content
@@ -112,6 +137,34 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
     }
+
+    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
+    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
+    private fun getMockProvideLaterSummaryList(fieldHeading: String): List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                fieldHeading,
+                "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+                actionUrl = null,
+            ),
+        )
+
+    // TODO PDJB-1391: placeholder gas safety content for the skipped letting-agent path (matches the keys the real
+    //  ComplianceDetailsHelper.getGasSafetyCyaContent produces, so the template renders unchanged).
+    private fun getMockDelegatedGasContent(): Map<String, Any?> =
+        mapOf(
+            "gasSupplyRows" to getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading"),
+            "gasCertRows" to emptyList<SummaryListRowViewModel>(),
+            "gasInsetTextKey" to null,
+        )
+
+    // TODO PDJB-1391: placeholder electrical safety content for the skipped letting-agent path (matches the keys the
+    //  real ComplianceDetailsHelper.getElectricalSafetyCyaContent produces, so the template renders unchanged).
+    private fun getMockDelegatedElectricalContent(): Map<String, Any?> =
+        mapOf(
+            "electricalRows" to getMockProvideLaterSummaryList("checkElectricalSafety.electricalCert.fieldHeading"),
+            "electricalInsetTextKey" to null,
+        )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state) +
