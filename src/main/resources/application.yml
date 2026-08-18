@@ -124,7 +124,7 @@ features:
       enabled: true
       expiry-date: "2027-03-30"
     - name: "pdjb-1097-organisation-landlord-registration"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
