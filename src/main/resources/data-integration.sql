@@ -236,14 +236,28 @@ INSERT INTO landlord (id, registration_number_id, landlord_type, created_date,
                       organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
                       organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
                       organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
-VALUES (11, 900, 1, '2026-07-30 00:00:00+00',
+SELECT * FROM (VALUES (11, 900, 1, '2026-07-30 00:00:00+00'::timestamptz,
         'Test Organisation Landlord', 1, 'Team-PRSDB+orglandlord@softwire.com', '07777777777',
-        'Test Registrant', '1980-01-01', 'registrant@example.com', '07777777778',
+        'Test Registrant', '1980-01-01'::date, 'registrant@example.com', '07777777778',
         true, true, true,
         '12345678', 0, '1234567',
-        'Lead Trustee Name', '1975-06-15', 'lead.trustee@example.com',
+        'Lead Trustee Name', '1975-06-15'::date, 'lead.trustee@example.com',
         '07777777779', 1,
-        'Main Contact Name', 'main.contact@example.com', '07777777780') ON CONFLICT DO NOTHING;
+        'Main Contact Name', 'main.contact@example.com', '07777777780')) AS v (
+           id, registration_number_id, landlord_type, created_date,
+           organisation_landlord_name, organisation_address_id, organisation_email, organisation_phone_number,
+           organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email, organisation_registrant_phone_number,
+           organisation_is_company, organisation_is_charity, organisation_is_trust,
+           organisation_company_number, organisation_charity_registered_with, organisation_charity_number,
+           organisation_lead_trustee_name, organisation_lead_trustee_date_of_birth, organisation_lead_trustee_email,
+           organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
+           organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone)
+-- Skip creating this organisation landlord if its user is already registered as an individual landlord: the user link
+-- below would be skipped for the same reason, so creating the landlord would leave an organisation landlord with no users.
+WHERE NOT EXISTS (
+    SELECT 1 FROM landlord l WHERE l.individual_subject_identifier = 'urn:fdc:gov.uk:2022:OJhyoHBpqAWPIqCCe_n9eVA4HGvFfgXCQMHSAsKSiRw'
+)
+ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -259,7 +273,10 @@ ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('organisational_landlord_user', 'id'), (SELECT MAX(id) FROM organisational_landlord_user));
 
 INSERT INTO organisation_governing_body_member (id, organisation_landlord_id, type, name, date_of_birth, address_id, created_date)
-VALUES (1, 11, 1, 'Governing Body Trustee', '1985-03-20', 1, '2026-07-30 00:00:00+00') ON CONFLICT DO NOTHING;
+SELECT * FROM (VALUES (1, 11, 1, 'Governing Body Trustee', '1985-03-20'::date, 1, '2026-07-30 00:00:00+00'::timestamptz)) AS v (id, organisation_landlord_id, type, name, date_of_birth, address_id, created_date)
+-- Only create the governing body member if its organisation landlord was created above.
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.organisation_landlord_id)
+ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('organisation_governing_body_member', 'id'), (SELECT MAX(id) FROM organisation_governing_body_member));
 
@@ -423,7 +440,7 @@ ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 1, '2025-01-15'),
+SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
        (1, 2, '2025-01-15'),
        (1, 3, '2025-01-15'),
        (1, 4, '2025-01-15'),
@@ -472,11 +489,16 @@ VALUES (1, 1, '2025-01-15'),
        (1, 47, '2025-01-15'),
        (1, 48, '2025-01-15'),
        (6, 1, '2025-01-15'),
-       (7, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+       (7, 1, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded, so that a landlord skipped above
+-- (because the user is now an organisation landlord) drops only its own links rather than aborting
+-- the whole statement with a foreign key violation.
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 -- PDJB-1048 / PDJB-1305 QA (landlord 1): ownership links for property_ownership 49-57
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 49, '2025-01-15'),
+SELECT * FROM (VALUES (1, 49, '2025-01-15'::timestamp),
        (1, 50, '2025-01-15'),
        (1, 51, '2025-01-15'),
        (1, 52, '2025-01-15'),
@@ -484,7 +506,10 @@ VALUES (1, 49, '2025-01-15'),
        (1, 54, '2025-01-15'),
        (1, 55, '2025-01-15'),
        (1, 56, '2025-01-15'),
-       (1, 57, '2025-01-15') ON CONFLICT DO NOTHING;
+       (1, 57, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded (see note above).
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),

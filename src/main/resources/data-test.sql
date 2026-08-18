@@ -410,7 +410,7 @@ ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 1, '2025-01-15'),
+SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
        (1, 2, '2025-01-15'),
        (1, 3, '2025-01-15'),
        (1, 4, '2025-01-15'),
@@ -428,11 +428,16 @@ VALUES (1, 1, '2025-01-15'),
        (1, 16, '2025-01-15'),
        (1, 17, '2025-01-15'),
        (10, 1, '2025-01-15'),
-       (11, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+       (11, 1, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded, so that a landlord skipped above
+-- (because the user is now an organisation landlord) drops only its own links rather than aborting
+-- the whole statement with a foreign key violation.
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 -- PDJB-1048 / PDJB-1305 QA (landlord 1): ownership links for property_ownership 18-26
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 18, '2025-01-15'),
+SELECT * FROM (VALUES (1, 18, '2025-01-15'::timestamp),
        (1, 19, '2025-01-15'),
        (1, 20, '2025-01-15'),
        (1, 21, '2025-01-15'),
@@ -440,7 +445,10 @@ VALUES (1, 18, '2025-01-15'),
        (1, 23, '2025-01-15'),
        (1, 24, '2025-01-15'),
        (1, 25, '2025-01-15'),
-       (1, 26, '2025-01-15') ON CONFLICT DO NOTHING;
+       (1, 26, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded (see note above).
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
