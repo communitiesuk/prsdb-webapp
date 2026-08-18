@@ -1,0 +1,6 @@
+title: Allow your letting agent or property manager to provide details
+confirmation:
+  banner:
+    heading: Letting agent or property manager can make updates
+  paragraph:
+    one: "TODO: PDJB-1410 - Build the real confirmation page content"
