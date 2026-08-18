@@ -73,22 +73,25 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                    LandlordNoPropertiesDeregistrationConfirmationEmail("Alexander Smith"),
                     "/emails/LandlordNoPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordWithPropertiesDeregistrationConfirmationEmail(
-                        PropertyDetailsEmailSectionList(
-                            listOf(
-                                PropertyDetailsEmailSection(
-                                    propertyNumber = 1,
-                                    "P-WWW-XXX",
-                                    "1 Fake Street, Mirageville",
+                        fullName = "Alexander Smith",
+                        propertyListMarkdown =
+                            PropertyDetailsEmailSectionList(
+                                listOf(
+                                    PropertyDetailsEmailSection(
+                                        propertyNumber = 1,
+                                        "P-WWW-XXX",
+                                        "1 Fake Street, Mirageville",
+                                    ),
                                 ),
                             ),
-                        ),
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
