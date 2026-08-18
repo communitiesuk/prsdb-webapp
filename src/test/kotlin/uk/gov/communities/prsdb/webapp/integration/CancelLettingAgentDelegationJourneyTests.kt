@@ -27,7 +27,7 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
-        // TODO PDJB-1413: assert the real confirmation page content
+        // TODO PDJB-1414: assert the real confirmation page content
         BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("TODO")
         confirmationPage.continueButton.clickAndWait()
 
@@ -49,6 +49,6 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
             )
 
         assertEquals(404, response?.status())
-        // TODO PDJB-1413: also assert the confirmation endpoint returns 404 when the flag is disabled
+        // TODO PDJB-1414: also assert the confirmation endpoint returns 404 when the flag is disabled
     }
 }
