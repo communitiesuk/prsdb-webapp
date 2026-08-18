@@ -38,7 +38,7 @@ class CancelLettingAgentDelegationController(
         @PathVariable stepPath: String,
         @PathVariable propertyOwnershipId: Long,
     ): ModelAndView {
-        propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { getStepModelAndView() }
     }
 
@@ -49,7 +49,7 @@ class CancelLettingAgentDelegationController(
         @PathVariable propertyOwnershipId: Long,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         return dispatchJourneyStep(stepPath, propertyOwnershipId) { postStepModelAndView(formData) }
     }
 
@@ -74,7 +74,7 @@ class CancelLettingAgentDelegationController(
         @PathVariable propertyOwnershipId: Long,
         model: Model,
     ): String {
-        propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         model.addAttribute("todoComment", "TODO PDJB-1414: letting agent or property manager removal confirmation")
         model.addAttribute("continueUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
         return "forms/todoConfirmation"

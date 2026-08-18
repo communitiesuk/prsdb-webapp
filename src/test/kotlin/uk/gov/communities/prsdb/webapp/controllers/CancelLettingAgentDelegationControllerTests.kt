@@ -2,10 +2,9 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -24,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController.Companion.getRemoveLettingAgentBasePath
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController.Companion.getRemoveLettingAgentPath
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -49,15 +47,15 @@ class CancelLettingAgentDelegationControllerTests(
     private val testPropertyOwnershipId = 1L
 
     private fun mockAuthorizedProperty() {
-        doReturn(mock<PropertyOwnership>())
+        doNothing()
             .whenever(propertyOwnershipService)
-            .getPropertyOwnershipIfCurrentUserAuthorized(eq(testPropertyOwnershipId))
+            .throwIfCurrentUserNotAuthorizedToEdit(eq(testPropertyOwnershipId))
     }
 
     private fun mockUnauthorizedProperty() {
         doThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "not authorised"))
             .whenever(propertyOwnershipService)
-            .getPropertyOwnershipIfCurrentUserAuthorized(eq(testPropertyOwnershipId))
+            .throwIfCurrentUserNotAuthorizedToEdit(eq(testPropertyOwnershipId))
     }
 
     private fun mockJourneySteps() {
