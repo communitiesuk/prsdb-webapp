@@ -92,13 +92,13 @@ whatHappensNext:
 
 ```html
 <!-- Simple message lookup -->
-<h2 th:text="#{common.confirmationPage.whatHappensNext}">Fallback</h2>
+<h2 th:text="#{common.confirmationPage.whatHappensNext}">common.confirmationPage.whatHappensNext</h2>
 
 <!-- With parameters -->
-<h1 th:text="${#messages.msgWithParams(contentHeader, contentHeaderParams)}">Fallback</h1>
+<h1 th:text="${#messages.msgWithParams(contentHeader, contentHeaderParams)}">contentHeader</h1>
 
 <!-- Safe lookup with fallback -->
-<td th:text="${#messages.msgOrNull(column.fieldValue)} ?: ${{fieldValue}}">Fallback</td>
+<td th:text="${#messages.msgOrNull(column.fieldValue)} ?: ${{fieldValue}}">fieldValue</td>
 ```
 
 ## Apostrophes

@@ -78,6 +78,10 @@
                             <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
                             <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                         </th:block>
+                    <!--/* TODO: PDJB-1411 - Add the letting agent / property manager inset panel card here, linking to
+                         DelegateToLettingAgentController.getDelegateToLettingAgentPath(propertyOwnershipId).
+                         Show it only in the landlord view and only when the pdjb-1022-delegate-to-letting-agent
+                         feature flag is enabled. */-->
                     <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
                         <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
                             propertyDetails.deregisterPropertyLink.text

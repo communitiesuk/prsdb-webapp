@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordIn
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
@@ -87,6 +88,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
@@ -1412,6 +1414,15 @@ class Navigator(
         return createValidPage(
             page,
             CannotDeregisterPropertyJointLandlordsPage::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId: Long): AllowLettingAgentPageDelegateToLettingAgent {
+        navigate(DelegateToLettingAgentController.getDelegateToLettingAgentPath(propertyOwnershipId))
+        return createValidPage(
+            page,
+            AllowLettingAgentPageDelegateToLettingAgent::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
