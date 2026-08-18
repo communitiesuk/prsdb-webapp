@@ -54,7 +54,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLettingAgentDelegationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
@@ -90,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.AreYouSurePageCancelLettingAgentDelegation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.AllowLettingAgentPageDelegateToLettingAgent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
@@ -1651,9 +1651,9 @@ class Navigator(
         return createValidPage(page, AreYouSurePageCancelJointLandlordInvitation::class)
     }
 
-    fun goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId: Long): CancelLettingAgentDelegationAreYouSurePage {
+    fun goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId: Long): AreYouSurePageCancelLettingAgentDelegation {
         navigate(CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId))
-        return createValidPage(page, CancelLettingAgentDelegationAreYouSurePage::class)
+        return createValidPage(page, AreYouSurePageCancelLettingAgentDelegation::class)
     }
 
     fun goToInviteJointLandlordPage(propertyOwnershipId: Long): InviteJointLandlordFormPageInviteJointLandlord {

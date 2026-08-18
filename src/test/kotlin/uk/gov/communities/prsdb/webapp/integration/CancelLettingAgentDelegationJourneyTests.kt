@@ -3,13 +3,14 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLettingAgentDelegationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.ConfirmationPageCancelLettingAgentDelegation
+import kotlin.test.assertEquals
 
 class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
-    private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
     @Test
     fun `a landlord can walk the remove letting agent journey and reach the confirmation page`(page: Page) {
@@ -24,7 +25,7 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
         areYouSurePage.continueButton.clickAndWait()
 
         // Confirmation page (terminal)
-        val confirmationPage = assertPageIs(page, CancelLettingAgentDelegationConfirmationPage::class, urlArguments)
+        val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
         // TODO PDJB-1413: assert the real confirmation page content and add the onward link back to the property record
         BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("TODO")
     }
@@ -32,6 +33,13 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
     @Test
     fun `the remove letting agent journey is unavailable when the flag is disabled`() {
         featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
-        // TODO PDJB-1413: assert the are-you-sure and confirmation endpoints return 404 when the flag is disabled
+
+        val response =
+            navigator.navigate(
+                CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+            )
+
+        assertEquals(404, response?.status())
+        // TODO PDJB-1413: also assert the confirmation endpoint returns 404 when the flag is disabled
     }
 }
