@@ -1,11 +1,4 @@
 title: Deregister Landlord
-areYouSure:
-  heading: Are you sure you want to delete your account?
-  paragraph:
-    one: You’ll no longer be registered as a landlord in England.
-    two: 'This means we will:'
-  confirmButton: Yes, delete
-  cancelLink: Cancel and go back
 organisational:
   title: Deregister Organisational Landlord
   areYouSure:
@@ -40,8 +33,14 @@ confirmation:
     two: You’ll need to register a new account if you become a landlord again.
 withProperties:
   areYouSure:
+    heading: Are you sure you want to delete your account?
+    paragraph:
+      one: You'll no longer be registered as a landlord in England.
+      two: 'This means we will:'
+    confirmButton: Yes, delete
+    cancelLink: Cancel and go back
     bulletList:
-      one: delete all property registrations where you’re the only landlord
+      one: delete all property registrations where you're the only landlord
       two: remove you as a joint landlord from any properties
     radios:
       error:
