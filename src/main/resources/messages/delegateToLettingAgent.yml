@@ -1,4 +1,25 @@
 title: Allow your letting agent or property manager to provide details
+allowLettingAgent:
+  heading: Allow your letting agent or property manager to provide details
+  body:
+    canProvide: "Your letting agent or property manager can provide details about:"
+    alsoKeepUpdated: They can also keep these details updated for you.
+    checkCorrect: "You should always check that your registration is correct. We’ll email you whenever your letting agent or property manager makes an update."
+    canRemove: You can remove your letting agent or property manager at any time.
+  bulletList:
+    license: if your property needs a license
+    compliance: compliance certificates
+    tenancy: the current tenancy
+  subheading:
+    responsible: You remain responsible for this registration
+  insetText: You must check that all your property's details are provided within 28 days of it being occupied.
+  emailLabel: What is your letting agent or property manager's email address?
+  emailHint: "We’ll email them a link to update this property’s details"
+  submitButton: Confirm and send
+  error:
+    missing: Enter an email address
+    invalidFormat: Enter an email address in the right format
+    cannotUseLandlordEmail: You cannot enter yourself as the letting agent or property manager
 confirmation:
   banner:
     heading: Letting agent or property manager can make updates

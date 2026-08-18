@@ -18,10 +18,14 @@ class AllowLettingAgentPageDelegateToLettingAgent(
     val heading
         get() = page.locator("h1")
 
-    val continueButton = Button.byText(page, "Continue")
+    val submitButton = Button.byText(page, "Confirm and send")
     val backLink = BackLink.default(page)
 
-    fun submitContinue() {
-        continueButton.clickAndWait()
+    fun fillInEmail(email: String) {
+        page.locator("#emailAddress").fill(email)
+    }
+
+    fun submitForm() {
+        submitButton.clickAndWait()
     }
 }
