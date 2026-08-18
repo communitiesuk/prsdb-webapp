@@ -62,8 +62,8 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             val landlordDetailsPage = navigator.goToLandlordDetails()
             landlordDetailsPage.deleteAccountLink.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
-            assertThat(areYouSurePage.heading).containsText("Are you sure you want to delete your account?")
-            areYouSurePage.submitYesDelete()
+            assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account?")
+            areYouSurePage.submitWantsToProceed()
 
             val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
             assertThat(confirmationPage.confirmationBanner).containsText("Account deleted")

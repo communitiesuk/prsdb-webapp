@@ -9,18 +9,16 @@
             <h1 class="govuk-heading-l" th:text="#{deregisterLandlord.areYouSure.heading}">
                 deregisterLandlord.areYouSure.heading
             </h1>
-            <th:block th:if="${userHasRegisteredProperties}">
-                <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.one}">
-                    deregisterLandlord.areYouSure.paragraph.one
-                </p>
-                <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.two}">
-                    deregisterLandlord.areYouSure.paragraph.two
-                </p>
-                <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.one}">bullet one</li>
-                    <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.two}">bullet two</li>
-                </ul>
-            </th:block>
+            <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.one}">
+                deregisterLandlord.areYouSure.paragraph.one
+            </p>
+            <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.paragraph.two}">
+                deregisterLandlord.areYouSure.paragraph.two
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.one}">bullet one</li>
+                <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.two}">bullet two</li>
+            </ul>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
                     <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{deregisterLandlord.areYouSure.confirmButton})}"></button>

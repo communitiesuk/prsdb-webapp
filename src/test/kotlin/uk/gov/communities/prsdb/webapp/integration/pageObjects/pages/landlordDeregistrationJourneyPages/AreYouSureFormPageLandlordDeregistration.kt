@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 
@@ -18,11 +19,27 @@ class AreYouSureFormPageLandlordDeregistration(
     ) {
     val heading = Heading(page.locator("h1"))
     val yesDeleteButton = Button.byText(page, "Yes, delete")
-    val form = PostForm(page)
+    val form = AreYouSureForm(page)
     val backLink = BackLink.default(page)
     val cancelLink = Link.byText(page, "Cancel and go back")
 
     fun submitYesDelete() {
         form.submit()
+    }
+
+    fun submitWantsToProceed() {
+        form.areYouSureRadios.selectValue("true")
+        form.submit()
+    }
+
+    fun submitDoesNotWantToProceed() {
+        form.areYouSureRadios.selectValue("false")
+        form.submit()
+    }
+
+    class AreYouSureForm(
+        page: Page,
+    ) : PostForm(page) {
+        val areYouSureRadios = Radios(locator)
     }
 }

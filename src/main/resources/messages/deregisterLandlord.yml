@@ -43,3 +43,12 @@ withProperties:
     bulletList:
       one: delete all property registrations where you’re the only landlord
       two: remove you as a joint landlord from any properties
+    radios:
+      error:
+        missing: Select whether you want to delete your landlord record and properties
+noProperties:
+  areYouSure:
+    fieldSetHeading: Are you sure you want to delete your account?
+    radios:
+      error:
+        missing: Select whether you want to delete your account
