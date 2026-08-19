@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 // LENIENT is required because currentJourneyId stubs on mockOccupiedStep and mockCyaStep are set
@@ -63,7 +64,7 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Nested
-    inner class DelegationToLettingAgentTaskListItemTests {
+    inner class WhoProvidesDetailsTaskListItemTests {
         @BeforeEach
         fun enableRestructureAndStubState() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
@@ -71,7 +72,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel excludes the letting agent task when DELEGATE_TO_LETTING_AGENT is disabled`() {
+        fun `getTaskListViewModel excludes the who provides details task when DELEGATE_TO_LETTING_AGENT is disabled`() {
             // Arrange
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
             whenever(mockState.cachedOccupied).thenReturn(true)
@@ -81,44 +82,11 @@ class PropertyRegistrationTaskListStepConfigTests {
 
             // Assert
             val rentedOutNames = taskListViewModel.taskSections[1].tasks.map { it.nameKey }
-            assert("registerProperty.taskList.whoWillProvideDetails.title" !in rentedOutNames)
+            assert("registerProperty.taskList.rentedOut.whoProvidesDetails" !in rentedOutNames)
         }
 
         @Test
-        fun `getTaskListViewModel excludes the letting agent task when occupancy has not been set`() {
-            // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(mockState.cachedOccupied).thenReturn(null)
-
-            // Act
-            val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
-
-            // Assert
-            val rentedOutNames = taskListViewModel.taskSections[1].tasks.map { it.nameKey }
-            assert("registerProperty.taskList.whoWillProvideDetails.title" !in rentedOutNames)
-        }
-
-        @Test
-        fun `getTaskListViewModel shows the letting agent task as NOT_STARTED for an occupied property`() {
-            // Arrange
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(mockState.cachedOccupied).thenReturn(true)
-
-            // Act
-            val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
-
-            // Assert
-            val delegationItem =
-                taskListViewModel.taskSections[1].tasks.find {
-                    it.nameKey == "registerProperty.taskList.whoWillProvideDetails.title"
-                }
-            assertEquals("taskList.status.notStarted", delegationItem?.status?.textKey)
-            assertEquals("registerProperty.taskList.whoWillProvideDetails.helperText.occupied", delegationItem?.hintKey)
-            assertNull(delegationItem?.url)
-        }
-
-        @Test
-        fun `getTaskListViewModel shows the letting agent task as NOT_NEEDED_YET for an unoccupied property`() {
+        fun `getTaskListViewModel shows who provides details as NOT_NEEDED_YET for an unoccupied property`() {
             // Arrange
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.cachedOccupied).thenReturn(false)
@@ -127,13 +95,30 @@ class PropertyRegistrationTaskListStepConfigTests {
             val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
 
             // Assert
-            val delegationItem =
+            val whoProvidesItem =
                 taskListViewModel.taskSections[1].tasks.find {
-                    it.nameKey == "registerProperty.taskList.whoWillProvideDetails.title"
+                    it.nameKey == "registerProperty.taskList.rentedOut.whoProvidesDetails"
                 }
-            assertEquals("taskList.status.notNeededYet", delegationItem?.status?.textKey)
-            assertEquals("registerProperty.taskList.whoWillProvideDetails.helperText.unoccupied", delegationItem?.hintKey)
-            assertNull(delegationItem?.url)
+            assertEquals("taskList.status.notNeededYet", whoProvidesItem?.status?.textKey)
+            assertEquals("registerProperty.taskList.rentedOut.whoProvidesDetailsNotRequiredHint", whoProvidesItem?.hintKey)
+            assertNull(whoProvidesItem?.url)
+        }
+
+        @Test
+        fun `getTaskListViewModel shows who provides details as a task for an occupied property`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(mockState.cachedOccupied).thenReturn(true)
+
+            // Act
+            val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
+
+            // Assert
+            val whoProvidesItem =
+                taskListViewModel.taskSections[1].tasks.find {
+                    it.nameKey == "registerProperty.taskList.rentedOut.whoProvidesDetails"
+                }
+            assertEquals("taskList.status.cannotStart", whoProvidesItem?.status?.textKey)
         }
     }
 
@@ -183,6 +168,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
         val mockLicensingTask = mock<LicensingTask>()
         val mockTenancyDetailsTask = mock<TenancyDetailsTask>()
+        val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
         val mockGasSafetyTask = mock<GasSafetyTask>()
         val mockElectricalSafetyTask = mock<ElectricalSafetyTask>()
         val mockEpcTask = mock<EpcTask>()
@@ -191,6 +177,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         whenever(mockOwnershipAndLandlordsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockLicensingTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockTenancyDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
+        whenever(mockWhoProvidesDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockGasSafetyTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockElectricalSafetyTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockEpcTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
@@ -202,6 +189,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
         whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
+        whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         whenever(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
         whenever(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
         whenever(mockState.epcTask).thenReturn(mockEpcTask)
