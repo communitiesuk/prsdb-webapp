@@ -37,15 +37,4 @@ class LettingAgentAccess(
         this.invitedEmail = invitedEmail
         this.propertyOwnership = propertyOwnership
     }
-
-    constructor(
-        id: Long,
-        token: UUID,
-        invitedEmail: String,
-        propertyOwnership: PropertyOwnership,
-    ) : this(id) {
-        this.token = token
-        this.invitedEmail = invitedEmail
-        this.propertyOwnership = propertyOwnership
-    }
 }

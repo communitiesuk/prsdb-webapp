@@ -19,12 +19,12 @@ class MockLettingAgentData {
         ): LettingAgentAccess {
             val lettingAgentAccess =
                 LettingAgentAccess(
-                    id = id,
                     token = token,
                     invitedEmail = invitedEmail,
                     propertyOwnership = propertyOwnership,
                 )
 
+            ReflectionTestUtils.setField(lettingAgentAccess, "id", id)
             ReflectionTestUtils.setField(lettingAgentAccess, "createdDate", createdDate)
 
             return lettingAgentAccess

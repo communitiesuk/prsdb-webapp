@@ -698,7 +698,9 @@ interface PropertyRegistrationJourneyState :
 
     // When true, all details the letting agent is responsible for (licensing, tenancy, and the gas, electrical
     // and EPC certificates) are saved as "provide this later". See SavePropertyRegistrationDataStepConfig.
-    // TODO: PDJB-1397: Set this to true from the delegate-to-letting-agent step within the registration journey,
-    //  and skip the licensing, tenancy and compliance steps so their values are not required at save time.
+    // TODO: PDJB-1397: When the "do you have a letting agent" question is added to the registration journey,
+    //  replace this stored flag with a getter that derives its value from that question's outcome (single source
+    //  of truth), mirroring how provideTenancyDetailsLater derives from the households step. That ticket should
+    //  also skip the licensing, tenancy and compliance steps so their values are not required at save time.
     var isDelegatingToLettingAgent: Boolean
 }
