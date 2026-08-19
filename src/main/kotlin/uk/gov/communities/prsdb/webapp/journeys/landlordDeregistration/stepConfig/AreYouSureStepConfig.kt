@@ -19,7 +19,7 @@ class AreYouSureStepConfig :
 
         if (!state.userHasRegisteredProperties) {
             content["radioOptions"] = RadiosViewModel.yesOrNoRadios()
-            content["fieldSetHeading"] = "deregisterLandlord.noProperties.areYouSure.fieldSetHeading"
+            content["fieldSetHeading"] = "deregisterLandlord.areYouSure.noProperties.fieldSetHeading"
         } else {
             content["cancelLinkUrl"] = LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
         }

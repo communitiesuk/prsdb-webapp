@@ -11,7 +11,7 @@ class LandlordDeregistrationAreYouSureFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "deregisterLandlord.noProperties.areYouSure.radios.error.missing",
+                messageKey = "deregisterLandlord.areYouSure.noProperties.radios.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isNotNullWhenLandlordHasNoProperties",
             ),

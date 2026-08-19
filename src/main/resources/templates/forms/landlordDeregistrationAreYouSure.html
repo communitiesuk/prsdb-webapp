@@ -6,24 +6,24 @@
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-            <h1 class="govuk-heading-l" th:text="#{deregisterLandlord.withProperties.areYouSure.heading}">
-                deregisterLandlord.withProperties.areYouSure.heading
+            <h1 class="govuk-heading-l" th:text="#{deregisterLandlord.areYouSure.withProperties.heading}">
+                deregisterLandlord.areYouSure.withProperties.heading
             </h1>
-            <p class="govuk-body" th:text="#{deregisterLandlord.withProperties.areYouSure.paragraph.one}">
-                deregisterLandlord.withProperties.areYouSure.paragraph.one
+            <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.withProperties.paragraph.one}">
+                deregisterLandlord.areYouSure.withProperties.paragraph.one
             </p>
-            <p class="govuk-body" th:text="#{deregisterLandlord.withProperties.areYouSure.paragraph.two}">
-                deregisterLandlord.withProperties.areYouSure.paragraph.two
+            <p class="govuk-body" th:text="#{deregisterLandlord.areYouSure.withProperties.paragraph.two}">
+                deregisterLandlord.areYouSure.withProperties.paragraph.two
             </p>
             <ul class="govuk-list govuk-list--bullet">
-                <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.one}">bullet one</li>
-                <li th:text="#{deregisterLandlord.withProperties.areYouSure.bulletList.two}">bullet two</li>
+                <li th:text="#{deregisterLandlord.areYouSure.withProperties.bulletList.one}">bullet one</li>
+                <li th:text="#{deregisterLandlord.areYouSure.withProperties.bulletList.two}">bullet two</li>
             </ul>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
-                    <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{deregisterLandlord.withProperties.areYouSure.confirmButton})}"></button>
-                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{deregisterLandlord.withProperties.areYouSure.cancelLink}">
-                        deregisterLandlord.withProperties.areYouSure.cancelLink
+                    <button th:replace="~{fragments/buttons/transactionWarningButton :: transactionWarningButton(#{deregisterLandlord.areYouSure.withProperties.confirmButton})}"></button>
+                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{deregisterLandlord.areYouSure.withProperties.cancelLink}">
+                        deregisterLandlord.areYouSure.withProperties.cancelLink
                     </a>
                 </div>
             </form>

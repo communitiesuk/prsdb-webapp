@@ -29,8 +29,8 @@ confirmation:
   paragraph:
     one: You’re no longer registered as a landlord in England. We’ve sent you an email to confirm this.
     two: You’ll need to register a new account if you become a landlord again.
-withProperties:
-  areYouSure:
+areYouSure:
+  withProperties:
     heading: Are you sure you want to delete your account?
     paragraph:
       one: You’ll no longer be registered as a landlord in England.
@@ -40,9 +40,11 @@ withProperties:
     bulletList:
       one: delete all property registrations where you’re the only landlord
       two: remove you as a joint landlord from any properties
-noProperties:
-  areYouSure:
+  noProperties:
     fieldSetHeading: Are you sure you want to delete your account?
     radios:
       error:
         missing: Select whether you want to delete your account
+  hasProperties:
+    fieldSetHeading: Are you sure you want to delete your account and all your properties?
+    fieldSetHint: 'By deleting your account, you are also deleting your properties.'
