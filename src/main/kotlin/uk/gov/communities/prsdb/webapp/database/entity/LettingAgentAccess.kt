@@ -28,26 +28,14 @@ class LettingAgentAccess(
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @Column(name = "hashed_password")
-    var hashedPassword: String? = null
-        private set
-
-    @Column(name = "access_link", unique = true)
-    var accessLink: String? = null
-        private set
-
     constructor(
         token: UUID,
         invitedEmail: String,
         propertyOwnership: PropertyOwnership,
-        hashedPassword: String? = null,
-        accessLink: String? = null,
     ) : this() {
         this.token = token
         this.invitedEmail = invitedEmail
         this.propertyOwnership = propertyOwnership
-        this.hashedPassword = hashedPassword
-        this.accessLink = accessLink
     }
 
     constructor(
@@ -55,13 +43,9 @@ class LettingAgentAccess(
         token: UUID,
         invitedEmail: String,
         propertyOwnership: PropertyOwnership,
-        hashedPassword: String? = null,
-        accessLink: String? = null,
     ) : this(id) {
         this.token = token
         this.invitedEmail = invitedEmail
         this.propertyOwnership = propertyOwnership
-        this.hashedPassword = hashedPassword
-        this.accessLink = accessLink
     }
 }

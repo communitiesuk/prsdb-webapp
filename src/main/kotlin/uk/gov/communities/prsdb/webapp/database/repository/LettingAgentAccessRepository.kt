@@ -7,7 +7,5 @@ import java.util.UUID
 interface LettingAgentAccessRepository : JpaRepository<LettingAgentAccess, Long> {
     fun findByToken(token: UUID): LettingAgentAccess?
 
-    fun findByAccessLink(accessLink: String): LettingAgentAccess?
-
     fun findByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess?
 }

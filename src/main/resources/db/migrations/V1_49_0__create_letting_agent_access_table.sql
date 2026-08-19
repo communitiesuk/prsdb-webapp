@@ -5,7 +5,5 @@ CREATE TABLE letting_agent_access (
     token                 UUID           NOT NULL UNIQUE,
     invited_email         VARCHAR(255)   NOT NULL,
     property_ownership_id BIGINT         NOT NULL UNIQUE,
-    hashed_password       VARCHAR(255),
-    access_link           VARCHAR(255)   UNIQUE,
     FOREIGN KEY (property_ownership_id) REFERENCES property_ownership(id)
 );

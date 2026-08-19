@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -23,13 +22,5 @@ class LettingAgentAccessTests {
         assertEquals(token, access.token)
         assertEquals("agent@example.com", access.invitedEmail)
         assertEquals(propertyOwnership, access.propertyOwnership)
-    }
-
-    @Test
-    fun `hashedPassword and accessLink default to null`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
-
-        assertNull(access.hashedPassword)
-        assertNull(access.accessLink)
     }
 }

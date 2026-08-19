@@ -15,8 +15,6 @@ class MockLettingAgentData {
             token: UUID = UUID.randomUUID(),
             invitedEmail: String = "letting.agent@example.com",
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
-            hashedPassword: String? = null,
-            accessLink: String? = null,
             createdDate: Instant = Instant.now(),
         ): LettingAgentAccess {
             val lettingAgentAccess =
@@ -25,8 +23,6 @@ class MockLettingAgentData {
                     token = token,
                     invitedEmail = invitedEmail,
                     propertyOwnership = propertyOwnership,
-                    hashedPassword = hashedPassword,
-                    accessLink = accessLink,
                 )
 
             ReflectionTestUtils.setField(lettingAgentAccess, "createdDate", createdDate)
