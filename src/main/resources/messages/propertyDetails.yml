@@ -3,6 +3,10 @@ heading: Property record
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied
+delegateToLettingAgent:
+  heading: If you’re using a letting agent or property manager
+  body: They can provide this property’s licensing, compliance certificates and tenancy details.
+  link: Allow your letting agent or property manager to update details
 landlordDetails:
   heading: Landlords
   registeredLandlords:

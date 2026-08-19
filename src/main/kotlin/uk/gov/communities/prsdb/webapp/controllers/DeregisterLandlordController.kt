@@ -69,13 +69,7 @@ class DeregisterLandlordController(
             )
         }
 
-        val landlordHadRegisteredProperties = landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()
-
-        return if (landlordHadRegisteredProperties) {
-            "deregisterLandlordWithRegisteredPropertiesConfirmation"
-        } else {
-            "deregisterLandlordWithNoPropertiesConfirmation"
-        }
+        return "deregisterLandlordConfirmation"
     }
 
     companion object {
