@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
@@ -9,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import kotlin.test.assertFalse
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 
 class LandlordDeregistrationSinglePageTests : IntegrationTest() {
     @Nested
@@ -59,7 +59,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
             playwrightAssertThat(areYouSurePage.noPropertiesForm.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete your account")
         }
-        
+
         @Test
         fun `Are you sure page shows radio buttons without with-properties bullet content`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
