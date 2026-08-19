@@ -1,4 +1,5 @@
 <!--/*@thymesVar id="complianceInfoTabId" type="java.lang.String"*/-->
+<!--/*@thymesVar id="delegateToLettingAgentLink" type="uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel"*/-->
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
@@ -48,6 +49,16 @@
             <p class="govuk-body">
                 <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
+            <div th:if="${delegateToLettingAgentLink != null}" class="govuk-!-width-two-thirds">
+                <article id="delegate-to-letting-agent-ticket-panel"
+                         th:replace="~{fragments/ticketPanel ::
+                         ticketPanel('propertyDetails.delegateToLettingAgent.heading',
+                         ~{::#delegate-to-letting-agent-ticket-panel/content()}, ${delegateToLettingAgentLink})}">
+                    <p class="govuk-body" th:text="#{propertyDetails.delegateToLettingAgent.body}">
+                        propertyDetails.delegateToLettingAgent.body
+                    </p>
+                </article>
+            </div>
             <!-- TODO PDJB-1412: add the letting agent / property manager MOJ ticket panel here (flag-gated on
                  DELEGATE_TO_LETTING_AGENT), including the "Remove your letting agent or property manager" button
                  linking to CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId) -->
@@ -81,10 +92,6 @@
                             <p th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-body" th:utext="${propertyDetails.tenancyProvideLaterParagraph}"></p>
                             <hr th:if="${propertyDetails.tenancyProvideLaterParagraph != null}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                         </th:block>
-                    <!--/* TODO: PDJB-1411 - Add the letting agent / property manager inset panel card here, linking to
-                         DelegateToLettingAgentController.getDelegateToLettingAgentPath(propertyOwnershipId).
-                         Show it only in the landlord view and only when the pdjb-1022-delegate-to-letting-agent
-                         feature flag is enabled. */-->
                     <p th:if="${isLandlordView}" class="govuk-body prsd-deregister-link" >
                         <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
                             propertyDetails.deregisterPropertyLink.text

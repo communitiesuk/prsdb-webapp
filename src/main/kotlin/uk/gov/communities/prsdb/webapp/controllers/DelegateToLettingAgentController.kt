@@ -83,7 +83,6 @@ class DelegateToLettingAgentController(
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 
-        // TODO: PDJB-1411 - Currently only used by tests; the property record entry point will call this.
         fun getDelegateToLettingAgentPath(propertyOwnershipId: Long): String =
             "${getDelegateToLettingAgentBasePath(propertyOwnershipId)}/${AllowLettingAgentStep.ROUTE_SEGMENT}"
     }
