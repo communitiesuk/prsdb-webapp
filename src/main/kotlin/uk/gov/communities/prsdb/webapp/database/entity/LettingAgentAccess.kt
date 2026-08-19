@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
 import java.util.UUID
 
 @Entity
@@ -23,8 +23,8 @@ class LettingAgentAccess(
     lateinit var invitedEmail: String
         private set
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "property_ownership_id", nullable = false)
+    @OneToOne(optional = false)
+    @JoinColumn(name = "property_ownership_id", nullable = false, unique = true)
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
