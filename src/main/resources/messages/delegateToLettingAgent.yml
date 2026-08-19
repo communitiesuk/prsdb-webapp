@@ -17,7 +17,7 @@ allowLettingAgent:
   emailHint: "We’ll email them a link to update this property’s details"
   submitButton: Confirm and send
   error:
-    missing: Enter an email address
+    missing: Enter your letting agent or property manager’s email address
     invalidFormat: Enter an email address in the correct format, like name@example.com
     cannotUseLandlordEmail: You cannot enter yourself as the letting agent or property manager
 confirmation:
