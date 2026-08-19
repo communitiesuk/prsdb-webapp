@@ -292,8 +292,8 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails includes correct landlord count`() {
-            val landlord1 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
-            val landlord2 = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+            val landlord1 = createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+            val landlord2 = createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
             val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord1, landlord2))
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
