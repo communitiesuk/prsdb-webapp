@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.scheduledTaskRunners
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -260,6 +261,86 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         verify(emailSender).sendEmail(emailAddress2, reminderEmail2)
         verify(incompletePropertiesService, never()).recordReminderEmailSent(savedJourneyState1)
         verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState2)
+    }
+
+    @Test
+    fun `sendIncompletePropertyReminders returns zero failures when all emails are sent`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        setupTwoEntriesOnOneDatabasePage()
+
+        // Act
+        val failureCount = taskLogic.sendIncompletePropertyReminders()
+
+        // Assert
+        assertEquals(0, failureCount)
+    }
+
+    @Test
+    fun `sendIncompletePropertyReminders returns a non-zero failure count when an email send fails`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        setupTwoEntriesOnOneDatabasePage()
+
+        whenever(emailSender.sendEmail(emailAddress1, reminderEmail1))
+            .doThrow(PersistentEmailSendException("Persistent email failure"))
+
+        // Act
+        val failureCount = taskLogic.sendIncompletePropertyReminders()
+
+        // Assert
+        assertEquals(1, failureCount)
+    }
+
+    @Test
+    fun `sendIncompletePropertyReminders returns a non-zero failure count when recording email sent fails`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        setupTwoEntriesOnOneDatabasePage()
+
+        whenever(incompletePropertiesService.recordReminderEmailSent(savedJourneyState1))
+            .doThrow(TrackEmailSentException("Database error"))
+
+        // Act
+        val failureCount = taskLogic.sendIncompletePropertyReminders()
+
+        // Assert
+        assertEquals(1, failureCount)
+    }
+
+    @Test
+    fun `sendIncompletePropertyReminders returns a non-zero failure count when no email is found for the user`() {
+        // Arrange
+        setupTwoEmailsToSend()
+        val reminderCutoffDate =
+            DateTimeHelper.getJavaInstantFromLocalDate(
+                LocalDate.now().minusDays(INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS.toLong()),
+            )
+        val userWithoutEmail = MockLandlordData.createPrsdbUser("user-without-email")
+        val user2 = MockLandlordData.createPrsdbUser("user-2")
+
+        whenever(incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(reminderCutoffDate)).thenReturn(1)
+        whenever(incompletePropertiesService.getIncompletePropertiesDueReminderPage(reminderCutoffDate))
+            .thenReturn(
+                listOf(
+                    LandlordIncompleteProperties(
+                        user = userWithoutEmail,
+                        savedJourneyState = savedJourneyState1,
+                    ),
+                    LandlordIncompleteProperties(
+                        user = user2,
+                        savedJourneyState = savedJourneyState2,
+                    ),
+                ),
+            )
+        whenever(landlordUserEmailService.getEmailsByBaseUserId(listOf(userWithoutEmail.id, user2.id)))
+            .thenReturn(mapOf(user2.id to emailAddress2))
+
+        // Act
+        val failureCount = taskLogic.sendIncompletePropertyReminders()
+
+        // Assert
+        assertEquals(1, failureCount)
     }
 
     private fun setupTwoEmailsToSend() {
