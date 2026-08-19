@@ -18,10 +18,11 @@ class JointLandlordInvitationExpiryEmailTaskApplicationRunner(
     override fun run(args: ApplicationArguments?) {
         println("Executing joint landlord invitation expiry email scheduled task")
 
-        taskLogic.sendJointLandlordInvitationExpiryEmails()
+        val failureCount = taskLogic.sendJointLandlordInvitationExpiryEmails()
 
+        val exitCode = if (failureCount > 0) 1 else 0
         val code =
-            SpringApplication.exit(context, { 0 }).also {
+            SpringApplication.exit(context, { exitCode }).also {
                 println("Scheduled task executed. Application will exit now.")
             }
         exitProcess(code)
@@ -33,13 +34,17 @@ class JointLandlordInvitationExpiryEmailTaskLogic(
     private val jointLandlordInvitationExpiryEmailService: JointLandlordInvitationExpiryEmailService,
 ) {
     @Transactional
-    fun sendJointLandlordInvitationExpiryEmails() {
-        val processedIds = jointLandlordInvitationExpiryEmailService.sendExpiryEmailsForExpiredInvitations()
+    fun sendJointLandlordInvitationExpiryEmails(): Int {
+        val result = jointLandlordInvitationExpiryEmailService.sendExpiryEmailsForExpiredInvitations()
 
-        processedIds.forEach { id ->
+        result.sentIds.forEach { id ->
             println("Sent expiry email for joint landlord invitation with id: $id")
         }
 
-        println("Sent expiry emails for ${processedIds.size} joint landlord invitations.")
+        println(
+            "Sent expiry emails for ${result.sentIds.size} joint landlord invitations. ${result.failedIds.size} failed.",
+        )
+
+        return result.failedIds.size
     }
 }
