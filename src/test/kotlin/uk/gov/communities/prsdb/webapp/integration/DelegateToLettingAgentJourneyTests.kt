@@ -37,8 +37,7 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
                 AllowLettingAgentPageDelegateToLettingAgent::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-            
-        val allowLettingAgentPage = navigator.goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId)
+
         assertThat(allowLettingAgentPage.heading).containsText("Allow your letting agent or property manager to provide details")
 
         allowLettingAgentPage.submitEmail("agent@example.com")
