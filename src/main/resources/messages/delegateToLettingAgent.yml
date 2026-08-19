@@ -13,7 +13,7 @@ allowLettingAgent:
   subheading:
     responsible: You remain responsible for this registration
   insetText: You must check that all your property's details are provided within 28 days of it being occupied.
-  emailLabel: What is your letting agent or property manager's email address?
+  emailLabel: What is your letting agent or property manager’s email address?
   emailHint: "We’ll email them a link to update this property’s details"
   submitButton: Confirm and send
   error:
