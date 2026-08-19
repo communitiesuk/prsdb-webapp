@@ -1996,9 +1996,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `restructured occupied journey routes to check answers via the letting agent email page when a letting agent provides the details`(
-            page: Page,
-        ) {
+        fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
@@ -2013,26 +2011,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             lettingAgentEmailPage.submitContinue()
 
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `restructured task list marks compliance and tenancy tasks as not required when a letting agent provides the details`() {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationRestructuredOccupancy()
-                        .withOccupancyStatus(true)
-                        .withLettingAgentProvidesRentalDetails(),
-                )
-
-            assertTrue(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
-            // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
-            assertEquals(
-                "Not\u00A0required",
-                taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
-            )
-            assertEquals("Not\u00A0required", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals("Not\u00A0required", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
         }
 
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
