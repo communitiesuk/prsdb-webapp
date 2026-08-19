@@ -456,7 +456,7 @@ class PropertyRegistrationJourneyFactory(
                         if (delegateEnabled) {
                             when (occupancy) {
                                 YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
-                                YesOrNo.NO -> journey.taskListStep
+                                YesOrNo.NO -> journey.licensingTask.firstStep
                             }
                         } else {
                             journey.licensingTask.firstStep
