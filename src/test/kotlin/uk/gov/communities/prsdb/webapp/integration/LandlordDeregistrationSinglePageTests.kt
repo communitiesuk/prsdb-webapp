@@ -32,6 +32,14 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
     @Nested
     inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-unverified-landlord.sql") {
         @Test
+        fun `Submitting with no option selected returns an error`() {
+            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
+            areYouSurePage.noPropertiesForm.submit()
+            playwrightAssertThat(areYouSurePage.noPropertiesForm.getErrorMessage("wantsToProceed"))
+                .containsText("Select whether you want to delete your account")
+        }
+            
+        @Test
         fun `User is returned to the landlord details page if they submit No`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.submitDoesNotWantToProceed()
@@ -53,14 +61,6 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         }
 
         @Test
-        fun `Submitting with no option selected returns an error`() {
-            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.noPropertiesForm.submit()
-            playwrightAssertThat(areYouSurePage.noPropertiesForm.getErrorMessage("wantsToProceed"))
-                .containsText("Select whether you want to delete your account")
-        }
-
-        @Test
         fun `Are you sure page shows radio buttons without with-properties bullet content`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             val content = areYouSurePage.page.content()
@@ -70,7 +70,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
             assertThat(areYouSurePage.noPropertiesCancelLink).isVisible()
             assertThat(areYouSurePage.withPropertiesYesDeleteButton).isHidden()
             assertThat(areYouSurePage.withPropertiesCancelLink).isHidden()
-            assertFalse(content.contains("You'll no longer be registered as a landlord in England."))
+            assertFalse(content.contains("You’ll no longer be registered as a landlord in England."))
         }
     }
 }
