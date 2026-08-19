@@ -648,6 +648,8 @@ class PropertyRegistrationJourney(
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true
 
+    override var isDelegatingToLettingAgent: Boolean by delegateProvider.requiredDelegate("isDelegatingToLettingAgent", false)
+
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
@@ -693,4 +695,10 @@ interface PropertyRegistrationJourneyState :
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
+
+    // When true, all details the letting agent is responsible for (licensing, tenancy, and the gas, electrical
+    // and EPC certificates) are saved as "provide this later". See SavePropertyRegistrationDataStepConfig.
+    // TODO: PDJB-1397: Set this to true from the delegate-to-letting-agent step within the registration journey,
+    //  and skip the licensing, tenancy and compliance steps so their values are not required at save time.
+    var isDelegatingToLettingAgent: Boolean
 }
