@@ -28,9 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
-// LENIENT is required because currentJourneyId stubs on mockOccupiedStep and mockCyaStep are set
-// in stubRestructuredState() to prevent an NPE in Destination's VisitableStep constructor, but
-// some tests don't exercise the code path that reads journeyId, so Mockito would otherwise flag them.
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class PropertyRegistrationTaskListStepConfigTests {
