@@ -54,9 +54,9 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        // TODO PDJB-1391: when a letting agent provides the rented-out details the landlord provides no licensing or
-        //  tenancy details, so those tasks are skipped. Persist placeholder "provide later" values until the real
-        //  delegated-details flow is implemented.
+        // TODO PDJB-1391: when a letting agent provides the rented-out details the landlord provides no licensing,
+        //  tenancy or compliance details, so those tasks are skipped. Persist placeholder "provide later" values
+        //  until the real delegated-details flow is implemented.
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatedToLettingAgent
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
@@ -139,7 +139,8 @@ class SavePropertyRegistrationDataStepConfig(
                     ?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater =
-                state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
+                isDelegatedToLettingAgent ||
+                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
             electricalSafetyExpiryDate =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
@@ -149,8 +150,9 @@ class SavePropertyRegistrationDataStepConfig(
                 state.electricalSafetyTask.electricalSafetyDetailsTask
                     .mapElectricalCertificateTypeToGlobalCertificateType(),
             electricalSafetyCertProvideLater =
-                state.electricalSafetyTask.electricalSafetyDetailsTask
-                    .hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
+                isDelegatedToLettingAgent ||
+                    state.electricalSafetyTask.electricalSafetyDetailsTask
+                        .hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
                 state.epcTask.epcDetailsTask.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
@@ -169,9 +171,11 @@ class SavePropertyRegistrationDataStepConfig(
                 state.epcTask.epcDetailsTask.meesExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
-            epcProvideLater = state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+            epcProvideLater =
+                isDelegatedToLettingAgent || state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
             licenseProvideLater =
-                isDelegatedToLettingAgent || state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
+                isDelegatedToLettingAgent ||
+                    state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
             tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
         )
     }

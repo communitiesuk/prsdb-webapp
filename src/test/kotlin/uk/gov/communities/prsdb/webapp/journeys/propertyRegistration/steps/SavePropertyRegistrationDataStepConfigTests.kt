@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doThrow
@@ -19,6 +20,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -239,6 +241,57 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = eq(true),
             tenancyProvideLater = eq(false),
+        )
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `afterStepIsReached passes all provide-later fields as true when delegating to a letting agent`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = anyOrNull(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = eq(true),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = eq(true),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = eq(true),
+            licenseProvideLater = eq(true),
+            tenancyProvideLater = eq(true),
         )
     }
 
