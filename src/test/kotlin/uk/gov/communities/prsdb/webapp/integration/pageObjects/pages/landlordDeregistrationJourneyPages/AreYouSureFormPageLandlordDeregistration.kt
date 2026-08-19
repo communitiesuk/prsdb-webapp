@@ -17,26 +17,26 @@ class AreYouSureFormPageLandlordDeregistration(
         page,
         "${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${AreYouSureStep.ROUTE_SEGMENT}",
     ) {
-    val heading = Heading(page.locator("h1"))
-    val yesDeleteButton = Button.byText(page, "Yes, delete")
+    val withPropertiesHeading = Heading(page.locator("h1"))
+    val withPropertiesYesDeleteButton = Button.byText(page, "Yes, delete")
     val withPropertiesCancelLink = Link.byText(page, "Cancel and go back")
-    val continueButton = Button.byText(page, "Continue")
+    val noPropertiesContinueButton = Button.byText(page, "Continue")
     val noPropertiesCancelLink = Link.byText(page, "Cancel")
-    val form = AreYouSureForm(page)
+    val noPropertiesForm = AreYouSureForm(page)
     val backLink = BackLink.default(page)
 
     fun submitYesDelete() {
-        form.submit()
+        withPropertiesYesDeleteButton.clickAndWait()
     }
 
     fun submitWantsToProceed() {
-        form.areYouSureRadios.selectValue("true")
-        form.submit()
+        noPropertiesForm.areYouSureRadios.selectValue("true")
+        noPropertiesForm.submit()
     }
 
     fun submitDoesNotWantToProceed() {
-        form.areYouSureRadios.selectValue("false")
-        form.submit()
+        noPropertiesForm.areYouSureRadios.selectValue("false")
+        noPropertiesForm.submit()
     }
 
     class AreYouSureForm(

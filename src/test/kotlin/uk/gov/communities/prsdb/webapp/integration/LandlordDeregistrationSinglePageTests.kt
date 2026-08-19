@@ -55,8 +55,8 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
         @Test
         fun `Submitting with no option selected returns an error`() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
-            areYouSurePage.form.submit()
-            playwrightAssertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
+            areYouSurePage.noPropertiesForm.submit()
+            playwrightAssertThat(areYouSurePage.noPropertiesForm.getErrorMessage("wantsToProceed"))
                 .containsText("Select whether you want to delete your account")
         }
 
@@ -65,10 +65,10 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             val content = areYouSurePage.page.content()
 
-            assertThat(areYouSurePage.form.fieldsetHeading).isVisible()
-            assertThat(areYouSurePage.continueButton).isVisible()
+            assertThat(areYouSurePage.noPropertiesForm.fieldsetHeading).isVisible()
+            assertThat(areYouSurePage.noPropertiesContinueButton).isVisible()
             assertThat(areYouSurePage.noPropertiesCancelLink).isVisible()
-            assertThat(areYouSurePage.yesDeleteButton).isHidden()
+            assertThat(areYouSurePage.withPropertiesYesDeleteButton).isHidden()
             assertThat(areYouSurePage.withPropertiesCancelLink).isHidden()
             assertFalse(content.contains("You'll no longer be registered as a landlord in England."))
         }
