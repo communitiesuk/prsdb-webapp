@@ -26,7 +26,6 @@ organisational:
 confirmation:
   banner:
     heading: Account deleted
-    body: You’re no longer registered as a landlord in England.
   paragraph:
     one: You’re no longer registered as a landlord in England. We’ve sent you an email to confirm this.
     two: You’ll need to register a new account if you become a landlord again.
@@ -41,9 +40,6 @@ withProperties:
     bulletList:
       one: delete all property registrations where you’re the only landlord
       two: remove you as a joint landlord from any properties
-    radios:
-      error:
-        missing: Select whether you want to delete your landlord record and properties
 noProperties:
   areYouSure:
     fieldSetHeading: Are you sure you want to delete your account?

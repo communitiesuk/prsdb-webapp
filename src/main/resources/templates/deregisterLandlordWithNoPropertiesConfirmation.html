@@ -5,7 +5,6 @@
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deregisterLandlord.confirmation.banner.heading}, null)}">
-            <span th:text="#{deregisterLandlord.confirmation.banner.body}">Body</span>
         </div>
         <p class="govuk-body" th:text="#{deregisterLandlord.confirmation.paragraph.one}">
             deregisterLandlord.confirmation.paragraph.one

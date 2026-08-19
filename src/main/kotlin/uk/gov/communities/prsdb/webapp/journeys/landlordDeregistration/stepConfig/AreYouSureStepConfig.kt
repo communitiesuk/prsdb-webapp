@@ -15,12 +15,10 @@ class AreYouSureStepConfig :
     override val formModelClass = LandlordDeregistrationAreYouSureFormModel::class
 
     override fun getStepSpecificContent(state: LandlordDeregistrationJourneyState): Map<String, Any?> {
-        val content =
-            mutableMapOf<String, Any?>(
-                "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            )
+        val content = mutableMapOf<String, Any?>()
 
         if (!state.userHasRegisteredProperties) {
+            content["radioOptions"] = RadiosViewModel.yesOrNoRadios()
             content["fieldSetHeading"] = "deregisterLandlord.noProperties.areYouSure.fieldSetHeading"
         } else {
             content["cancelLinkUrl"] = LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
