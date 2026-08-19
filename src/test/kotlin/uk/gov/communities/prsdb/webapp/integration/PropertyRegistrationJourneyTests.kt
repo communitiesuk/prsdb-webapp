@@ -2022,7 +2022,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun disableRestructureAndSkippingFlag() {
             featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
         }
 
         @Test
