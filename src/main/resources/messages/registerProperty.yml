@@ -73,13 +73,12 @@ taskList:
     occupied: Tell us if your property’s occupied
   rentedOut:
     heading: How your property’s rented out
-    whoProvidesDetails: 'TODO PDJB-1388: Who will provide these details'
-    whoProvidesDetailsNotRequiredHint: 'TODO PDJB-1388: Only occupied properties need this'
+    whoProvidesDetails: Who will provide these details
+    whoProvidesDetailsNotRequiredHint: Only occupied properties need this
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
     tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
-    # TODO PDJB-1388/1361: finalise copy for tasks the letting agent provides
-    lettingAgentProvidesHint: 'TODO PDJB-1388: The letting agent will provide these details'
+    lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
   checkAndSubmit:
@@ -165,7 +164,7 @@ provideLicensingLater:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
 whoProvidesRentalDetails:
-  fieldSetHeading: 'TODO PDJB-1388: Who will provide these details?'
+  fieldSetHeading: Who will provide these details?
   radios:
     error:
       missing: Select who will provide these details

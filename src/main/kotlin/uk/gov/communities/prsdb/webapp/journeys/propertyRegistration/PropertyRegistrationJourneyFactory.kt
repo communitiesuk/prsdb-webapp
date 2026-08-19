@@ -454,8 +454,6 @@ class PropertyRegistrationJourneyFactory(
                     parents { journey.ownershipAndLandlordsTask.isComplete() }
                     nextStep { occupancy ->
                         if (delegateEnabled) {
-                            // Only occupied properties are asked who provides the rented-out details. An unoccupied
-                            // property has none, so return to the task list (licensing etc. remain reachable there).
                             when (occupancy) {
                                 YesOrNo.YES -> journey.whoProvidesDetailsTask.firstStep
                                 YesOrNo.NO -> journey.taskListStep
@@ -471,14 +469,7 @@ class PropertyRegistrationJourneyFactory(
                 section {
                     withHeadingMessageKey("registerProperty.taskList.rentedOut.whoProvidesDetails", shouldUseNumbering = false)
                     task(journey.whoProvidesDetailsTask) {
-                        // Only reachable for occupied properties; an unoccupied property has no rented-out details
-                        // to provide, so this task is skipped.
                         parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                        // On completion, continue through the journey rather than returning to the task list:
-                        //  - Landlord provides the details -> carry on to the licensing task (and the rest of the
-                        //    rented-out compliance tasks).
-                        //  - Letting agent provides the details -> the landlord provides none of the rented-out
-                        //    compliance details, so skip straight to the check-your-answers step.
                         nextStep {
                             if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
                                 WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
@@ -498,10 +489,6 @@ class PropertyRegistrationJourneyFactory(
                     withDependencies { journey }
                     parents {
                         if (delegateEnabled) {
-                            // Licensing (and, transitively, gas/electrical/EPC/tenancy) is reachable when the property
-                            // is unoccupied (the who-provides question is skipped) or when the landlord provides the
-                            // rented-out details. When a letting agent provides them the whole compliance chain is
-                            // skipped and the journey jumps to check-your-answers.
                             OrParents(
                                 journey.occupied.hasOutcome(YesOrNo.NO),
                                 AndParents(
@@ -580,8 +567,6 @@ class PropertyRegistrationJourneyFactory(
                                 ),
                             )
                         if (delegateEnabled) {
-                            // The letting-agent path skips the rented-out compliance tasks, so check-your-answers
-                            // must also be reachable once the who-provides task is complete with that outcome.
                             OrParents(
                                 landlordProvidesPath,
                                 AndParents(
@@ -663,7 +648,6 @@ class PropertyRegistrationJourney(
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
-    // Delegate to letting agent task (flag-on: DELEGATE_TO_LETTING_AGENT) — skeleton, see PDJB-1397
     override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
@@ -775,4 +759,13 @@ interface PropertyRegistrationJourneyState :
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
+
+    // TODO PDJB-1391: replace the placeholder "provide later" handling in the CYA/save steps with the real
+    //  delegated-details flow.
+    // Both flags must be checked before reading the step outcome: the who-provides step is only wired into the
+    // graph when restructure is also on, so reading its outcome in the legacy journey would throw.
+    fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
+        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
+            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+            whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
 }

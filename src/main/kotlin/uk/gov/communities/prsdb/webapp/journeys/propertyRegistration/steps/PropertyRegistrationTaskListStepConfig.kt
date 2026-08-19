@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.isDelegatedToLettingAgent
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
@@ -172,9 +171,9 @@ class PropertyRegistrationTaskListStepConfig(
             TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
         }
 
+    // TODO PDJB-1361: check that this and the methods below are what we want on the task list
     private fun whoProvidesDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
-            // An unoccupied property has no rented-out details to provide, so the task is skipped.
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.whoProvidesDetails",
                 status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
@@ -185,8 +184,6 @@ class PropertyRegistrationTaskListStepConfig(
             TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.whoProvidesDetails", state.whoProvidesDetailsTask)
         }
 
-    // When a letting agent provides the rented-out details, the landlord provides none of the compliance
-    // details, so those tasks are skipped in the journey and shown as "not required" on the task list.
     private fun rentedOutComplianceItem(
         nameKey: String,
         task: Task<*, *>,
