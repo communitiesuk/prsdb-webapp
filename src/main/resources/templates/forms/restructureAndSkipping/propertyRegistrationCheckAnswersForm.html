@@ -25,6 +25,8 @@
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="lettingAgentDelegationTodo" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="lettingAgentDelegationTodoText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
@@ -43,8 +45,7 @@
             <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
             <strong class="govuk-warning-text__text">
                 <span class="govuk-visually-hidden">Warning</span>
-                TODO PDJB-1391: a letting agent is providing the rented-out details. Licensing and tenancy details below
-                are placeholder &quot;provide later&quot; values and are not yet implemented.
+                <span th:text="${lettingAgentDelegationTodoText}"></span>
             </strong>
         </div>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>

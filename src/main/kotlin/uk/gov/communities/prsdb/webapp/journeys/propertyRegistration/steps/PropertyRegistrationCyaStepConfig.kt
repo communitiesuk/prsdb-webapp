@@ -44,6 +44,9 @@ class PropertyRegistrationCyaStepConfig(
                 // TODO PDJB-1391: shows a placeholder banner while the letting-agent path reuses this CYA page with
                 //  mocked "provide later" values. Replace with the real delegated-details display.
                 "lettingAgentDelegationTodo" to isDelegatedToLettingAgent,
+                "lettingAgentDelegationTodoText" to
+                    "TODO PDJB-1391: a letting agent is providing the rented-out details. Licensing and tenancy " +
+                    "details below are placeholder \"provide later\" values and are not yet implemented.",
                 "propertyName" to
                     state.propertyDetailsTask.addressTask
                         .getAddress()
@@ -68,27 +71,27 @@ class PropertyRegistrationCyaStepConfig(
                     } else {
                         null
                     },
+                "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
+                "tenancyDetails" to
+                    if (isDelegatedToLettingAgent) {
+                        // TODO PDJB-1391: tenancy details are skipped when a letting agent provides the details, so no
+                        //  real answer exists yet. Substitute a placeholder "provide later" row so the page can render.
+                        getMockProvideLaterSummaryList(
+                            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
+                        )
+                    } else if (isRestructured) {
+                        occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
+                            state,
+                            messageSource,
+                            Destination.VisitableStep(
+                                state.tenancyDetailsTask.householdsAndTenantsTask.households,
+                                state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
+                            ),
+                        )
+                    } else {
+                        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+                    },
             )
-
-        content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
-        if (isDelegatedToLettingAgent) {
-            // TODO PDJB-1391: tenancy details are skipped when a letting agent provides the details, so no real
-            //  answer exists yet. Substitute a placeholder "provide later" row so the page can render.
-            content["tenancyDetails"] =
-                getMockProvideLaterSummaryList("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow")
-        } else if (isRestructured) {
-            content["tenancyDetails"] =
-                occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
-                    state,
-                    messageSource,
-                    Destination.VisitableStep(
-                        state.tenancyDetailsTask.householdsAndTenantsTask.households,
-                        state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
-                    ),
-                )
-        } else {
-            content["tenancyDetails"] = occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
-        }
 
         if (isDelegatedToLettingAgent) {
             // TODO PDJB-1391: the gas and electrical safety tasks are skipped when a letting agent provides the

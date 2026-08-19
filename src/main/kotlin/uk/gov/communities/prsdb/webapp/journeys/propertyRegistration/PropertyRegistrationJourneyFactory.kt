@@ -505,6 +505,13 @@ class PropertyRegistrationJourneyFactory(
                             )
                         }
                     }
+                    backStep {
+                        if (delegateEnabled && journey.occupied.outcome == YesOrNo.YES) {
+                            journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep
+                        } else {
+                            journey.occupied
+                        }
+                    }
                     nextStep { journey.gasSafetyTask.firstStep }
                     saveProgress()
                 }
