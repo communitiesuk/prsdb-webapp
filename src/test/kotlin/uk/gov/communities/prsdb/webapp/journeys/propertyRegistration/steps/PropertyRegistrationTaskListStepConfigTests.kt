@@ -138,7 +138,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Test
-    fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property`() {        // Arrange
+    fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property`() {
+        // Arrange
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(false)
@@ -154,6 +155,26 @@ class PropertyRegistrationTaskListStepConfigTests {
             }
         assertEquals("taskList.status.notRequired", tenancyItem?.status?.textKey)
         assertEquals("registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint", tenancyItem?.hintKey)
+        assertNull(tenancyItem?.url)
+    }
+
+    @Test
+    fun `getTaskListViewModel shows tenancy details task for an occupied property`() {
+        // Arrange
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(mockState.cachedOccupied).thenReturn(true)
+        stubRestructuredState()
+
+        // Act
+        val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
+
+        // Assert
+        val tenancyItem =
+            taskListViewModel.taskSections[1].tasks.find {
+                it.nameKey == "registerProperty.taskList.rentedOut.tenancyDetails"
+            }
+        assertEquals("taskList.status.cannotStart", tenancyItem?.status?.textKey)
         assertNull(tenancyItem?.url)
     }
 
