@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -69,6 +70,15 @@ class LettingAgentAccessServiceTests {
         val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
 
         assertEquals(invitation, result)
+    }
+
+    @Test
+    fun `getInvitationByPropertyOwnershipId returns null when no invitation exists`() {
+        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
+
+        val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
+
+        assertNull(result)
     }
 
     @Test
