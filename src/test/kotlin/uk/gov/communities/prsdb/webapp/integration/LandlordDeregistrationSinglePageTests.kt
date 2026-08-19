@@ -30,7 +30,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-unverified-landlord.sql") {
+    inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-no-properties.sql") {
         @Test
         fun `User is returned to the landlord details page if they submit No`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()

@@ -56,7 +56,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordWithoutProperties : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
+    inner class LandlordWithoutProperties : NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-no-properties.sql") {
         @Test
         fun `User with no properties can navigate the whole journey`(page: Page) {
             val landlordDetailsPage = navigator.goToLandlordDetails()
