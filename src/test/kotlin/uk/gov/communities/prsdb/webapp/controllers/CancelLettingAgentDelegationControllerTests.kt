@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.assertEquals
 
 @WebMvcTest(CancelLettingAgentDelegationController::class)
@@ -211,6 +212,9 @@ class CancelLettingAgentDelegationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getConfirmation returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
+        val propertyOwnership = createPropertyOwnership()
+        whenever(propertyOwnershipService.getPropertyOwnership(eq(testPropertyOwnershipId)))
+            .thenReturn(propertyOwnership)
 
         mvc.get("${getRemoveLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isOk() }
