@@ -24,7 +24,9 @@ class DelegateToLettingAgentSinglePageTests : IntegrationTestWithMutableData("da
 
             allowLettingAgentPage.submitEmail("")
 
-            assertThat(allowLettingAgentPage.form.getErrorMessage()).containsText("Enter an email address")
+            assertThat(
+                allowLettingAgentPage.form.getErrorMessage(),
+            ).containsText("Enter your letting agent or property manager’s email address")
         }
 
         @Test
@@ -33,7 +35,9 @@ class DelegateToLettingAgentSinglePageTests : IntegrationTestWithMutableData("da
 
             allowLettingAgentPage.submitEmail("notAnEmail")
 
-            assertThat(allowLettingAgentPage.form.getErrorMessage()).containsText("Enter an email address in the right format")
+            assertThat(
+                allowLettingAgentPage.form.getErrorMessage(),
+            ).containsText("Enter an email address in the correct format, like name@example.com")
         }
 
         @Test
