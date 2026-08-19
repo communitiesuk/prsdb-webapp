@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -53,11 +54,11 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        // TODO: PDJB-1397: When delegating to a letting agent, the tenancy, licensing and compliance steps are
-        //  skipped, so their values must not be read below (they will be unreached). This flag forces the relevant
-        //  fields to "provide this later" instead.
-        val isDelegatingToLettingAgent = state.isDelegatingToLettingAgent
-        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatingToLettingAgent
+        // TODO PDJB-1391: when a letting agent provides the rented-out details the landlord provides no licensing,
+        //  tenancy or compliance details, so those tasks are skipped. Persist placeholder "provide later" values
+        //  until the real delegated-details flow is implemented.
+        val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
+        val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatedToLettingAgent
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         val jointLandlordEmails: List<String>? =
@@ -77,7 +78,7 @@ class SavePropertyRegistrationDataStepConfig(
                 } else {
                     null
                 },
-            licenseType = state.licensingTask.getLicensingType(),
+            licenseType = if (isDelegatedToLettingAgent) LicensingType.PROVIDE_LATER else state.licensingTask.getLicensingType(),
             licenceNumber = state.licensingTask.getLicenceNumberOrNull() ?: "",
             ownershipType =
                 state.ownershipAndLandlordsTask.ownershipTypeStep.formModel
@@ -138,7 +139,7 @@ class SavePropertyRegistrationDataStepConfig(
                     ?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater =
-                isDelegatingToLettingAgent ||
+                isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
             electricalSafetyExpiryDate =
@@ -149,7 +150,7 @@ class SavePropertyRegistrationDataStepConfig(
                 state.electricalSafetyTask.electricalSafetyDetailsTask
                     .mapElectricalCertificateTypeToGlobalCertificateType(),
             electricalSafetyCertProvideLater =
-                isDelegatingToLettingAgent ||
+                isDelegatedToLettingAgent ||
                     state.electricalSafetyTask.electricalSafetyDetailsTask
                         .hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
@@ -171,11 +172,11 @@ class SavePropertyRegistrationDataStepConfig(
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
             epcProvideLater =
-                isDelegatingToLettingAgent || state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
+                isDelegatedToLettingAgent || state.epcTask.epcDetailsTask.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
             licenseProvideLater =
-                isDelegatingToLettingAgent ||
+                isDelegatedToLettingAgent ||
                     state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
-            tenancyProvideLater = isDelegatingToLettingAgent || state.provideTenancyDetailsLater,
+            tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
         )
     }
 }

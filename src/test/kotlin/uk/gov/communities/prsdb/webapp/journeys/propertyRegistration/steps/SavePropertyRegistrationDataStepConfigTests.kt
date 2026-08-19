@@ -250,7 +250,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.isDelegatingToLettingAgent).thenReturn(true)
+        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
