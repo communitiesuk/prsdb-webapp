@@ -73,9 +73,12 @@ taskList:
     occupied: Tell us if your property’s occupied
   rentedOut:
     heading: How your property’s rented out
+    whoProvidesDetails: Who will provide these details
+    whoProvidesDetailsNotRequiredHint: Only occupied properties need this
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
     tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
+    lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
   checkAndSubmit:
@@ -160,3 +163,13 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+whoProvidesRentalDetails:
+  fieldSetHeading: Who will provide these details?
+  radios:
+    error:
+      missing: Select who will provide these details
+    option:
+      landlord:
+        label: Me
+      lettingAgent:
+        label: Letting agent
