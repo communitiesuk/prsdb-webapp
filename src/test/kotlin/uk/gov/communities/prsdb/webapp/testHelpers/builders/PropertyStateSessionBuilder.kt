@@ -27,7 +27,8 @@ class PropertyStateSessionBuilder(
     GasSafetyStateBuilder<PropertyStateSessionBuilder>,
     ElectricalSafetyStateBuilder<PropertyStateSessionBuilder>,
     EpcStateBuilder<PropertyStateSessionBuilder>,
-    JointLandlordsStateBuilder<PropertyStateSessionBuilder> {
+    JointLandlordsStateBuilder<PropertyStateSessionBuilder>,
+    WhoProvidesDetailsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
         return this
@@ -100,6 +101,7 @@ class PropertyStateSessionBuilder(
                 .withOwnershipType()
                 .withHasNoJointLandlords()
                 .withOccupancyStatus(true)
+                .withLandlordProvidesRentalDetails()
 
         fun beforePropertyRegistrationRestructuredOccupancy() =
             beforePropertyRegistrationOwnershipType()
@@ -116,7 +118,8 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationRentedOutHmoAdditionalLicence() =
             beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
 
-        fun beforePropertyRegistrationHouseholds() = beforePropertyRegistrationOccupancy().withOccupancyStatus(true)
+        fun beforePropertyRegistrationHouseholds() =
+            beforePropertyRegistrationOccupancy().withOccupancyStatus(true).withLandlordProvidesRentalDetails()
 
         fun beforePropertyRegistrationPeople() = beforePropertyRegistrationHouseholds().withHouseholds()
 
@@ -155,6 +158,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationInviteJointLandlords()
                 .withHasNoJointLandlords()
                 .withOccupancyStatus(propertyIsOccupied)
+                .apply { if (propertyIsOccupied) withLandlordProvidesRentalDetails() }
 
         fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()
 
@@ -385,6 +389,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckAnswersWithProvideTenancyDetailsLater() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(true)
+                .withLandlordProvidesRentalDetails()
                 .withProvideTenancyDetailsLater()
                 .withBedrooms()
                 .withHasNoJointLandlords()
@@ -423,7 +428,8 @@ class PropertyStateSessionBuilder(
                 bedrooms = bedrooms,
                 rentAmount = rentAmount,
                 includesBills = billsIncluded,
-            ).withHasNoJointLandlords()
+            ).withLandlordProvidesRentalDetails()
+            .withHasNoJointLandlords()
             .withGasSafetyTaskCompletedWithNoGasSupply()
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()

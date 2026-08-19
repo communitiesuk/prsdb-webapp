@@ -12,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.delegateToLettingAgentJourneyPages.ConfirmationPageDelegateToLettingAgent
 import kotlin.test.assertEquals
 
-// TODO: PDJB-1409/PDJB-1410 - Replace the placeholder assertions below with the real page content, and add
-//  steps for any pages added to the journey. PDJB-1411 will add the entry point from the property record,
-//  at which point this test should start from the property details page rather than navigating directly.
+// TODO: PDJB-1410 - Replace the placeholder assertions for the confirmation page with the real page content.
+//  PDJB-1411 will add the entry point from the property record, at which point this test should start
+//  from the property details page rather than navigating directly.
 class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     companion object {
         const val PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER = 4L
@@ -29,10 +29,11 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
     @Test
     fun `a landlord can walk the journey from the first step to the confirmation page`(page: Page) {
         val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER
+        // TODO: PDJB-1411: Don't navigate directly here
         val allowLettingAgentPage = navigator.goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId)
-        assertThat(allowLettingAgentPage.heading).containsText("TODO: PDJB-1409")
+        assertThat(allowLettingAgentPage.heading).containsText("Allow your letting agent or property manager to provide details")
 
-        allowLettingAgentPage.submitContinue()
+        allowLettingAgentPage.submitEmail("agent@example.com")
 
         val confirmationPage =
             assertPageIs(
