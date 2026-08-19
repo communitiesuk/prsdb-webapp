@@ -639,20 +639,6 @@ update:
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
 warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
-areYouSure:
-  landlordDeregistration:
-    noProperties:
-      fieldSetHeading: Are you sure you want to delete your account?
-      radios:
-        error:
-          missing: Select whether you want to delete your account
-    hasProperties:
-      fieldSetHeading: Are you sure you want to delete your account and all your properties?
-      fieldSetHint: 'By deleting your account, you are also deleting your properties.'
-    withProperties:
-      radios:
-        error:
-          missing: Select whether you want to delete your landlord record and properties
 reason:
   landlordDeregistration:
     fieldSetHeading: Why are you deleting your account? (optional)
