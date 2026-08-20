@@ -174,3 +174,12 @@ whoProvidesRentalDetails:
         label: Me
       lettingAgent:
         label: Letting agent
+  changeToLettingAgent:
+    heading: Are you sure you want to change this?
+    paragraph: >-
+      Your letting agent or property manager will provide the details about how this property's rented out.
+      If you continue, we'll delete the information you've already entered about:
+    erased:
+      licensing: property licensing
+      tenancy: tenancy details
+      compliance: gas safety, electrical safety and energy performance certificates
