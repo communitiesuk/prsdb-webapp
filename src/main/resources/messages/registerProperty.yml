@@ -74,7 +74,8 @@ taskList:
   rentedOut:
     heading: How your property’s rented out
     whoProvidesDetails: Who will provide these details
-    whoProvidesDetailsNotRequiredHint: Only occupied properties need this
+    whoProvidesDetailsOccupiedHint: If you’re using a letting agent or property manager, they can provide the rest of this section
+    whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
     tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied

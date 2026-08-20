@@ -30,8 +30,6 @@ class TaskListPagePropertyRegistration(
 
     fun clickSubmitYourRegistrationTaskWithName(name: String) = submitYourRegistrationTasks.getTask(name).clickAndWait()
 
-    fun getRegisterTask(name: String): TaskList.Task = registerTasks.getTask(name)
-
     fun getAboutYourPropertyTask(name: String): TaskList.Task = aboutYourPropertyTasks.getTask(name)
 
     fun getRentedOutTask(name: String): TaskList.Task = rentedOutTasks.getTask(name)
