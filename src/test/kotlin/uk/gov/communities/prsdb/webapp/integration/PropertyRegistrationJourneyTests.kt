@@ -85,6 +85,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
@@ -2038,6 +2039,122 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
                 assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
             }
+        }
+    }
+
+    @Nested
+    inner class RestructureAndSkippingWithDelegateToLettingAgentEnabled {
+        @BeforeEach
+        fun enableRestructureAndSkippingAndDelegateFlags() {
+            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `changing occupancy to unoccupied from CYA for a delegated property shows the interruption card and Go back returns to the occupancy page`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+
+            occupancyPage.submitIsVacant()
+            val interruptionPage = assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class)
+
+            assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+            assertThat(interruptionPage.body).containsText("You must now complete this registration yourself")
+            assertThat(interruptionPage.submitButton).containsText("Continue with the change")
+            assertThat(interruptionPage.goBackLink.locator).containsText("Go back")
+
+            interruptionPage.goBackLink.clickAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `continuing with the change from the interruption removes the delegation and returns to the task list with downstream tasks reset`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            occupancyPage.submitIsVacant()
+            val interruptionPage = assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class)
+
+            interruptionPage.submit()
+            val updatedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            assertEquals(
+                "Not\u00A0required",
+                updatedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
+            assertEquals(
+                "Not started",
+                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot start yet",
+                updatedTaskListPage.getRentedOutTask("Gas safety certificate").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot start yet",
+                updatedTaskListPage.getRentedOutTask("Electrical safety certificate").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot start yet",
+                updatedTaskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0required",
+                updatedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot start yet",
+                updatedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+            )
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `after removing the delegation switching the property back to occupied shows the who-provides task as unanswered rather than the previous letting agent answer`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsVacant()
+            assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class).submit()
+            val unoccupiedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            // Switch the property back to occupied. If the delegation had merely been hidden rather than cleared, the
+            // previous "letting agent provides" answer would resurface and the who-provides task would show as
+            // "Not required"/completed with the compliance tasks marked as provided by the letting agent.
+            unoccupiedTaskListPage.clickAboutYourPropertyTaskWithName("Tell us if your property’s occupied")
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
+
+            val reoccupiedTaskListPage = navigator.goToPropertyRegistrationTaskList()
+            assertEquals(
+                "Not started",
+                reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
         }
     }
 

@@ -415,6 +415,14 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent() =
+            beforePropertyRegistrationOwnershipType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+                .withOccupancyStatus(true)
+                .withDelegatedToLettingAgent()
+
         fun beforePropertyRegistrationCheckAnswersOccupied(
             households: Int = 2,
             people: Int = 4,

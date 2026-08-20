@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -45,6 +47,16 @@ class WhoProvidesRentalDetailsStepConfigTests {
         val result = stepConfig.mode(mockState)
 
         assertEquals(WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES, result)
+    }
+
+    @Test
+    fun `afterStepDataIsAdded caches the submitted who-provides value`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(routeSegment)).thenReturn(mapOf("whoProvides" to "LETTING_AGENT"))
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockState).cachedWhoProvidesRentalDetails = WhoProvidesRentalDetails.LETTING_AGENT
     }
 
     private fun setupStepConfig(): WhoProvidesRentalDetailsStepConfig {
