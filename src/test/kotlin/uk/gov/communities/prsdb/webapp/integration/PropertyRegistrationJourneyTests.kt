@@ -2098,23 +2098,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val updatedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
             assertEquals(
-                "Not\u00A0required",
+                "Not\u00A0needed\u00A0yet",
                 updatedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
             )
             assertEquals(
-                "Not started",
+                "Not\u00A0started",
                 updatedTaskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 updatedTaskListPage.getRentedOutTask("Gas safety certificate").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 updatedTaskListPage.getRentedOutTask("Electrical safety certificate").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 updatedTaskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.trim(),
             )
             assertEquals(
@@ -2122,7 +2122,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 updatedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 updatedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
@@ -2152,9 +2152,50 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val reoccupiedTaskListPage = navigator.goToPropertyRegistrationTaskList()
             assertEquals(
-                "Not started",
+                "Not\u00A0started",
                 reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
             )
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `changing occupancy from unoccupied to occupied from the CYA page returns to the task list because the rented out details are no longer complete`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
+
+            // The property now has tenants, so the who-provides and tenancy-details questions must be answered before
+            // the registration is complete. As they are not, the CYA page is unreachable and the user is returned to
+            // the task list rather than being shown a partially-complete check-your-answers page.
+            val reoccupiedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            // The who-provides question is now answerable but unanswered. The tenancy-details task becomes answerable
+            // too but is unanswered, and the CYA/submit task cannot be reached until both are complete.
+            assertEquals(
+                "Not\u00A0started",
+                reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0started",
+                reoccupiedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                reoccupiedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+            )
+
+            // Navigating straight to the CYA page is not possible while the registration is incomplete: the user is
+            // bounced back to the task list.
+            navigator.navigateToPropertyRegistrationCheckYourAnswers()
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
     }
 

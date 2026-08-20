@@ -591,17 +591,18 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
-                        val landlordProvidesPath =
-                            AndParents(
-                                journey.epcTask.isComplete(),
-                                OrParents(
-                                    journey.tenancyDetailsTask.isComplete(),
-                                    journey.occupied.hasOutcome(YesOrNo.NO),
-                                ),
-                            )
                         if (delegateEnabled) {
                             OrParents(
-                                landlordProvidesPath,
+                                AndParents(
+                                    journey.epcTask.isComplete(),
+                                    OrParents(
+                                        AndParents(
+                                            journey.tenancyDetailsTask.isComplete(),
+                                            journey.whoProvidesDetailsTask.isComplete(),
+                                        ),
+                                        journey.occupied.hasOutcome(YesOrNo.NO),
+                                    ),
+                                ),
                                 AndParents(
                                     journey.whoProvidesDetailsTask.isComplete(),
                                     journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
@@ -610,7 +611,13 @@ class PropertyRegistrationJourneyFactory(
                                 ),
                             )
                         } else {
-                            landlordProvidesPath
+                            AndParents(
+                                journey.epcTask.isComplete(),
+                                OrParents(
+                                    journey.tenancyDetailsTask.isComplete(),
+                                    journey.occupied.hasOutcome(YesOrNo.NO),
+                                ),
+                            )
                         }
                     }
                     nextStep { journey.hasMissingComplianceStep }
