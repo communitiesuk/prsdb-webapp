@@ -66,8 +66,7 @@ class CancelLettingAgentDelegationController(
             startNewJourneyOn = { it is PropertyOwnershipMismatchException },
         )
 
-    // TODO PDJB-1414: add the session guard so the confirmation page cannot be reached out of context,
-    //  and build the real confirmation page content, including the onward link back to the property record.
+    // TODO PDJB-1560: add the session guard so the confirmation page cannot be reached out of context
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -75,9 +74,12 @@ class CancelLettingAgentDelegationController(
         model: Model,
     ): String {
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
-        model.addAttribute("todoComment", "TODO PDJB-1414: letting agent or property manager removal confirmation")
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        // TODO PDJB-1560: retrieve the letting agent email from the delegation entity before it is deleted
+        model.addAttribute("lettingAgentEmail", "TODO: PDJB-1560")
+        model.addAttribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
         model.addAttribute("continueUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
-        return "forms/todoConfirmation"
+        return "cancelLettingAgentDelegationConfirmation"
     }
 
     companion object {
