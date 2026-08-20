@@ -6,4 +6,5 @@ enum class TaskStatus {
     IN_PROGRESS,
     COMPLETED,
     NOT_REQUIRED,
+    NOT_NEEDED_YET,
 }

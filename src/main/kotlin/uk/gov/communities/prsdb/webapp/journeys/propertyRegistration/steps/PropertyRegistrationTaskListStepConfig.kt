@@ -171,17 +171,20 @@ class PropertyRegistrationTaskListStepConfig(
             TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.tenancyDetails", state.tenancyDetailsTask)
         }
 
-    // TODO PDJB-1361: check that this and the methods below are what we want on the task list
     private fun whoProvidesDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.whoProvidesDetails",
-                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
+                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET),
                 hintKey = "registerProperty.taskList.rentedOut.whoProvidesDetailsNotRequiredHint",
                 url = null,
             )
         } else {
-            TaskListItemViewModel.fromTask("registerProperty.taskList.rentedOut.whoProvidesDetails", state.whoProvidesDetailsTask)
+            TaskListItemViewModel.fromTask(
+                "registerProperty.taskList.rentedOut.whoProvidesDetails",
+                state.whoProvidesDetailsTask,
+                "registerProperty.taskList.rentedOut.whoProvidesDetailsOccupiedHint",
+            )
         }
 
     private fun rentedOutComplianceItem(

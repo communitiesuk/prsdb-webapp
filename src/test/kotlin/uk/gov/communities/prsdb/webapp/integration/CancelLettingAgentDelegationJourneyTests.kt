@@ -27,8 +27,10 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
-        // TODO PDJB-1414: assert the real confirmation page content
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("TODO")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText(
+            "Letting agent or property manager can no longer provide details",
+        )
+        // TODO: PDJB-1560: Make sure the email is shown on this page
         confirmationPage.continueButton.clickAndWait()
 
         // Back to the property record page
@@ -49,6 +51,12 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
             )
 
         assertEquals(404, response?.status())
-        // TODO PDJB-1414: also assert the confirmation endpoint returns 404 when the flag is disabled
+
+        val confirmationResponse =
+            navigator.navigate(
+                CancelLettingAgentDelegationController.getRemoveLettingAgentConfirmationPath(propertyOwnershipId),
+            )
+
+        assertEquals(404, confirmationResponse?.status())
     }
 }

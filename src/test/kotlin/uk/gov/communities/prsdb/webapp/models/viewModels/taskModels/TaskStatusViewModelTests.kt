@@ -17,4 +17,14 @@ class TaskStatusViewModelTests {
         assertTrue(viewModel.isTag)
         assertFalse(viewModel.isCannotStart)
     }
+
+    @Test
+    fun `fromStatus maps NOT_NEEDED_YET to a grey tag with the not needed yet message key`() {
+        val viewModel = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET)
+
+        assertEquals("taskList.status.notNeededYet", viewModel.textKey)
+        assertEquals(TAG_COLOUR_GREY, viewModel.colour)
+        assertTrue(viewModel.isTag)
+        assertFalse(viewModel.isCannotStart)
+    }
 }
