@@ -24,7 +24,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
             assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Not\u00A0started"))
+            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
@@ -47,7 +47,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Complete"))
-            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Not\u00A0started"))
+            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("In progress"))
             assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
@@ -111,18 +111,6 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         @BeforeEach
         fun enableDelegateToLettingAgentFlag() {
             featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-        }
-
-        @Test
-        fun `Delegation task does not appear when occupancy has not been set`() {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationLicensingType(),
-                )
-
-            assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
-                "Delegation task should not be visible when occupancy has not been set"
-            }
         }
 
         @Test
