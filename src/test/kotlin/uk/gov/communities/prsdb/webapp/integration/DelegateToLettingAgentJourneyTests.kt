@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
@@ -51,6 +52,42 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
         BaseComponent
             .assertThat(confirmationPage.confirmationBanner)
             .containsText("Letting agent or property manager can make updates")
+        assertThat(confirmationPage.invitedEmailAddress).hasText("agent@example.com")
+        assertThat(confirmationPage.propertyAddress).containsText("4 Imaginary Street")
+        assertThat(confirmationPage.propertyAddress).containsText("FA1 1AH")
+    }
+
+    @Test
+    fun `the go back to the property record link on the confirmation page returns to the property record`(page: Page) {
+        val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER
+        val allowLettingAgentPage = navigator.goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId)
+        allowLettingAgentPage.submitEmail("agent@example.com")
+
+        val confirmationPage =
+            assertPageIs(
+                page,
+                ConfirmationPageDelegateToLettingAgent::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        confirmationPage.goBackToPropertyRecordLink.clickAndWait()
+
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    @Test
+    fun `navigating directly to the confirmation page without completing the journey returns a 404`() {
+        val response =
+            navigator.navigate(
+                "${DelegateToLettingAgentController.getDelegateToLettingAgentBasePath(
+                    PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER,
+                )}/$CONFIRMATION_PATH_SEGMENT",
+            )
+
+        assertEquals(404, response?.status())
     }
 
     @Test
