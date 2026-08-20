@@ -15,5 +15,4 @@ class ConfirmationPageCancelLettingAgentDelegation(
     ) {
     val confirmationBanner = ConfirmationBanner(page)
     val continueButton = Button.byText(page, "Continue")
-    // TODO PDJB-1414: extend with any additional locators needed for full assertions
 }
