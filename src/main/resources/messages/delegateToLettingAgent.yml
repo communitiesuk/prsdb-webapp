@@ -21,7 +21,10 @@ allowLettingAgent:
     invalidFormat: Enter an email address in the correct format, like name@example.com
     cannotUseLandlordEmail: You cannot enter yourself as the letting agent or property manager
 confirmation:
+  title: Letting agent or property manager can make updates
   banner:
     heading: Letting agent or property manager can make updates
-  paragraph:
-    one: "TODO: PDJB-1410 - Build the real confirmation page content"
+  emailSentTo: "We’ve sent an email to:"
+  detailsFor: "They will be able to provide and update details for:"
+  confirmationEmail: We’ve sent you a confirmation email.
+  goBackToPropertyRecord: Go back to the property record
