@@ -90,7 +90,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
                 PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
                     .withOccupancyStatus(true),
             )
-            
+
             assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
                 "Delegation task should not be visible for occupied property when feature flag is disabled"
             }
