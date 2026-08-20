@@ -23,14 +23,14 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
-            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
         }
 
         @Test
@@ -50,10 +50,10 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Complete"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("In progress"))
-            assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
-            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Electrical safety certificate").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getRentedOutTask("Tenancy details").statusText.contains("Cannot start yet"))
+            assert(taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.contains("Cannot start yet"))
         }
     }
 
