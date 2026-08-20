@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
