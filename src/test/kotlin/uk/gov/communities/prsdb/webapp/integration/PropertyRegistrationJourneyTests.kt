@@ -1828,21 +1828,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(propertyDetailsTask.hasLink)
 
             val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
-            assertEquals("Cannot start yet", ownershipTask.statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
             assertFalse(ownershipTask.hasLink)
 
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
@@ -1858,16 +1858,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
