@@ -61,10 +61,11 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
     inner class DelegationToLettingAgent {
         @Test
         fun `Delegation task appears with Not started status for occupied property`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
-                    .withOccupancyStatus(true),
-            )
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                        .withOccupancyStatus(true),
+                )
 
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Not\u00A0started"))
         }
@@ -86,10 +87,11 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Delegation task does not appear for occupied property when DELEGATE_TO_LETTING_AGENT feature flag is disabled`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
-                    .withOccupancyStatus(true),
-            )
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                        .withOccupancyStatus(true),
+                )
 
             assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
                 "Delegation task should not be visible for occupied property when feature flag is disabled"
@@ -115,10 +117,11 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Delegation task appears with Not started status for occupied property`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
-                    .withOccupancyStatus(true),
-            )
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                        .withOccupancyStatus(true),
+                )
 
             val delegationTask = taskListPage.getRentedOutTask("Who will provide these details")
             assert(delegationTask.statusText.contains("Not\u00A0started"))
