@@ -23,7 +23,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
-            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
