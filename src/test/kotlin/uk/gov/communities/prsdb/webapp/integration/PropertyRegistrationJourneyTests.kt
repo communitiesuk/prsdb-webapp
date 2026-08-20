@@ -76,6 +76,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LettingAgentEmailPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
@@ -104,6 +105,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -164,7 +166,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
         }
 
         @Test
@@ -264,6 +265,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             // Licensing type - render page
@@ -1480,6 +1483,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 listOf(
+                    "Who will provide these details",
                     "Tell us if your property needs a license",
                     "Gas safety certificate",
                     "Electrical safety certificate",
@@ -1587,6 +1591,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
             assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
             licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -1986,6 +1992,52 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
             assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                )
+
+            taskListPage.clickRentedOutTaskWithName("Who will provide these details")
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+
+            whoProvidesRentalDetailsPage.submitLettingAgentProvidesDetails()
+
+            val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+            lettingAgentEmailPage.submitContinue()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
+        @Nested
+        inner class DelegateToLettingAgentDisabled {
+            @BeforeEach
+            fun disableDelegateToLettingAgentFlag() {
+                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+            }
+
+            @Test
+            fun `occupied journey routes straight from occupancy to licensing without asking who provides the details`(page: Page) {
+                val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+                occupancyPage.submitIsOccupied()
+
+                assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            }
+
+            @Test
+            fun `who provides details task is absent from the rented out section`() {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                    )
+
+                assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
+            }
         }
     }
 
