@@ -174,3 +174,11 @@ whoProvidesRentalDetails:
         label: Me
       lettingAgent:
         label: Letting agent
+occupancyChangeInterruption:
+  heading: Are you sure you want to change this?
+  paragraph:
+    one: You’ve changed this property to being unoccupied.
+    two: This means you cannot ask your letting agent or property manager to provide this property’s details.
+    three: You must now complete this registration yourself, adding as many details as you can.
+    four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
+    five: You can go back to undo this change.
