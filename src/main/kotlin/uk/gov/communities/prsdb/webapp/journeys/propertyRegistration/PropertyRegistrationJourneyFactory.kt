@@ -50,6 +50,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpc
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRouteMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -119,8 +122,6 @@ class PropertyRegistrationJourneyFactory(
             when (checkingAnswersFor) {
                 // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
-                // TODO PDJB-1401: add occupancy-change CYA change journey + occupancy-change interruption
-                //  (occupied -> unoccupied) for the delegate-to-letting-agent flow.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 // TODO PDJB-1403: add who-provides-details CYA change journey + self -> agent interruption
                 //  for the delegate-to-letting-agent flow.
@@ -160,7 +161,32 @@ class PropertyRegistrationJourneyFactory(
 
                 OccupiedStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                            step(journey.occupied) {
+                                initialStep()
+                                routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                                nextStep { journey.occupancyChangeRoutingStep }
+                            }
+                            step(journey.occupancyChangeRoutingStep) {
+                                parents { journey.occupied.isComplete() }
+                                nextDestination { mode ->
+                                    when (mode) {
+                                        OccupancyChangeRouteMode.NO_INTERRUPTION -> Destination(journey.finishCyaStep)
+                                        OccupancyChangeRouteMode.REMOVING_DELEGATION ->
+                                            Destination(journey.occupancyChangeInterruptionStep)
+                                    }
+                                }
+                            }
+                            step(journey.occupancyChangeInterruptionStep) {
+                                routeSegment(OccupancyChangeInterruptionStep.ROUTE_SEGMENT)
+                                parents {
+                                    journey.occupancyChangeRoutingStep.hasOutcome(OccupancyChangeRouteMode.REMOVING_DELEGATION)
+                                }
+                                nextStep { journey.finishCyaStep }
+                            }
+                        } else {
+                            checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                        }
                     } else {
                         checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
@@ -665,6 +691,9 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Occupancy-change interruption steps (occupied -> unoccupied while delegated to a letting agent)
+    override val occupancyChangeRoutingStep: OccupancyChangeRoutingStep,
+    override val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep,
     // Confirm missing compliance steps
     override val hasMissingComplianceStep: HasMissingComplianceStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
@@ -764,6 +793,8 @@ interface PropertyRegistrationJourneyState :
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
+    val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
+    val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
