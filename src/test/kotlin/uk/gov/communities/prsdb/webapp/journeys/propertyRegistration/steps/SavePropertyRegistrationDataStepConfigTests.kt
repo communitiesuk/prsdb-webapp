@@ -190,6 +190,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = eq(false),
             licenseProvideLater = eq(false),
             tenancyProvideLater = any(),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -241,6 +242,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = eq(true),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -292,6 +294,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = eq(true),
             licenseProvideLater = eq(true),
             tenancyProvideLater = eq(true),
+            isDelegatedToLettingAgent = eq(true),
         )
     }
 
@@ -341,6 +344,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = any(),
+            isDelegatedToLettingAgent = any(),
         )
 
         // Act
@@ -396,6 +400,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -447,6 +452,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -498,6 +504,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
+            isDelegatedToLettingAgent = any(),
         )
     }
 

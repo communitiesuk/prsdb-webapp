@@ -10,6 +10,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyState
+import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -23,13 +24,16 @@ class AllowLettingAgentStepConfigTests {
     lateinit var mockDelegateToLettingAgentService: DelegateToLettingAgentService
 
     @Mock
+    lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
+
+    @Mock
     lateinit var mockJourneyState: DelegateToLettingAgentJourneyState
 
     @Mock
     lateinit var mockLandlord: Landlord
 
     private fun createStepConfig() =
-        AllowLettingAgentStepConfig(mockUserToLandlordService, mockDelegateToLettingAgentService).apply {
+        AllowLettingAgentStepConfig(mockUserToLandlordService, mockDelegateToLettingAgentService, mockDelegateToLettingAgentEmailService).apply {
             urlPath = AllowLettingAgentStep.ROUTE_SEGMENT
             validator = AlwaysTrueValidator()
         }
@@ -64,6 +68,19 @@ class AllowLettingAgentStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
         verify(mockDelegateToLettingAgentService).addDelegatedLettingAgentToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends delegation emails`() {
+        val stepConfig = createStepConfig()
+
+        whenever(mockJourneyState.getStepData(AllowLettingAgentStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("emailAddress" to "agent@example.com"))
+        whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+
+        stepConfig.afterStepDataIsAdded(mockJourneyState)
+
+        verify(mockDelegateToLettingAgentEmailService).sendDelegationEmails(PROPERTY_OWNERSHIP_ID, "agent@example.com")
     }
 
     @Test
