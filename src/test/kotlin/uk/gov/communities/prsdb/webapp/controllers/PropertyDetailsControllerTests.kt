@@ -434,7 +434,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails shows delegate panel when flag enabled and no agent assigned`() {
-            val propertyOwnership = createPropertyOwnership()
+            val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
 
             whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
@@ -456,7 +456,7 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LANDLORD"])
         fun `getPropertyDetails shows the delegate to letting agent link when the feature flag is enabled`() {
-            val propertyOwnership = createPropertyOwnership()
+            val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
@@ -485,6 +485,48 @@ class PropertyDetailsControllerTests(
                 status { isOk() }
                 model { attributeDoesNotExist("lettingAgentPanelLink") }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not include letting agent panel link when property is unoccupied`() {
+            val propertyOwnership = createPropertyOwnership(isOccupied = false)
+
+            whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("showLettingAgentPanel", true) }
+                    model { attribute("propertyIsOccupied", false) }
+                    model { attributeDoesNotExist("lettingAgentPanelLink") }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails includes letting agent panel link when property is occupied and not delegated`() {
+            val propertyOwnership = createPropertyOwnership(isOccupied = true, tenancyProvideLater = true)
+
+            whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc
+                .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
+                .andExpect {
+                    status { isOk() }
+                    model { attribute("showLettingAgentPanel", true) }
+                    model { attribute("propertyIsOccupied", true) }
+                    model { attributeExists("lettingAgentPanelLink") }
+                }
         }
     }
 
