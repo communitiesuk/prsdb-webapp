@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelLettingAgentDelegationController
@@ -10,8 +11,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelLettingAgentDelegationJourneyPages.ConfirmationPageCancelLettingAgentDelegation
 import kotlin.test.assertEquals
 
-class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
+class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
+    private val lettingAgentEmail = "letting.agent.one@example.com"
 
     @Test
     fun `a landlord can walk the remove letting agent journey and reach the confirmation page`(page: Page) {
@@ -22,8 +24,12 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
 
         // "Are you sure" page
         val areYouSurePage = navigator.goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId)
-        // TODO PDJB-1413: assert the real "are you sure" page content and the yes/no decision
-        areYouSurePage.continueButton.clickAndWait()
+        BaseComponent.assertThat(areYouSurePage.form.fieldsetHeading)
+            .containsText("Are you sure you want to remove $lettingAgentEmail?")
+        assertThat(page.locator("main")).containsText(
+            "They will no longer be able to provide details for this property record",
+        )
+        areYouSurePage.submitWantsToProceed()
 
         // Confirmation page
         val confirmationPage = assertPageIs(page, ConfirmationPageCancelLettingAgentDelegation::class)
@@ -39,6 +45,33 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithImmutableDat
             PropertyDetailsPageLandlordView::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
+
+        // The delegation has been removed, so the journey can no longer be started
+        val response =
+            navigator.navigate(
+                CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+            )
+
+        assertEquals(404, response?.status())
+    }
+
+    @Test
+    fun `a landlord who selects no is returned to the property record with the letting agent still delegated`(page: Page) {
+        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
+
+        val areYouSurePage = navigator.goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId)
+        areYouSurePage.submitDoesNotWantToProceed()
+
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+
+        // The delegation is untouched, so the journey can be started again
+        val restartedPage = navigator.goToCancelLettingAgentDelegationAreYouSurePage(propertyOwnershipId)
+        BaseComponent.assertThat(restartedPage.form.fieldsetHeading)
+            .containsText("Are you sure you want to remove $lettingAgentEmail?")
     }
 
     @Test

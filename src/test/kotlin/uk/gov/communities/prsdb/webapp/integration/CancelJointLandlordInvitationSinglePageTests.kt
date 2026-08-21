@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
 
@@ -16,5 +17,15 @@ class CancelJointLandlordInvitationSinglePageTests : IntegrationTestWithImmutabl
         assertPageIs(page, AreYouSurePageCancelJointLandlordInvitation::class)
         assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
             .containsText("Select if you want to cancel this invitation")
+    }
+
+    // The areYouSureForm template is shared, so this guards the defaults used by callers that do not override the
+    // submit button text or the cancel link's visibility
+    @Test
+    fun `the page has a Continue button and a cancel link`() {
+        val areYouSurePage = navigator.goToCancelJointLandlordInvitationAreYouSurePage(pendingInvitationId)
+
+        BaseComponent.assertThat(areYouSurePage.form.submitButton).containsText("Continue")
+        BaseComponent.assertThat(areYouSurePage.cancelLink).isVisible()
     }
 }
