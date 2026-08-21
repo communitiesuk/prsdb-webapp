@@ -584,17 +584,17 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.submitYourRegistration.heading", shouldUseNumbering = false)
                 step(journey.cyaStep) {
-                    val landlordProvidesPath =
-                        AndParents(
-                            journey.epcTask.isComplete(),
-                            OrParents(
-                                journey.tenancyDetailsTask.isComplete(),
-                                journey.occupied.hasOutcome(YesOrNo.NO),
-                            ),
-                        )
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
+                        val landlordProvidesPath =
+                            AndParents(
+                                journey.epcTask.isComplete(),
+                                OrParents(
+                                    journey.tenancyDetailsTask.isComplete(),
+                                    journey.occupied.hasOutcome(YesOrNo.NO),
+                                ),
+                            )
                         if (delegateEnabled) {
                             OrParents(
                                 landlordProvidesPath,
