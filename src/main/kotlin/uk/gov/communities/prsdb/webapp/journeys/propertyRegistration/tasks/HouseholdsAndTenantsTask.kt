@@ -23,6 +23,12 @@ class HouseholdsAndTenantsTask(
     HouseholdsAndTenantsState {
     override val taskState get() = this
 
+    fun clearFormData() {
+        households.clearFormData()
+        tenants.clearFormData()
+        provideTenancyDetailsLaterStep.clearFormData()
+    }
+
     override fun makeSubJourney(state: HouseholdsAndTenantsState) =
         subJourney(state) {
             step(journey.households) {

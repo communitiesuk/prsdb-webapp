@@ -14,6 +14,11 @@ class GasSafetyTask(
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
 ) : Task<GasSafetyState, GasSafetyDependencies>(journeyStateService),
     GasSafetyState {
+    fun clearFormData() {
+        gasSafetyDetailsTask.clearFormData()
+        checkGasSafetyAnswersStep.clearFormData()
+    }
+
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
             task(journey.gasSafetyDetailsTask) {

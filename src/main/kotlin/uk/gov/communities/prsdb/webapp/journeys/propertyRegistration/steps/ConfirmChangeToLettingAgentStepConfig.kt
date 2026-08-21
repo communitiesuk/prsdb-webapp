@@ -17,6 +17,15 @@ class ConfirmChangeToLettingAgentStepConfig :
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/whoProvidesChangeAreYouSureForm"
 
     override fun mode(state: PropertyRegistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
+        state.licensingTask.clearFormData()
+        state.tenancyDetailsTask.clearFormData()
+        state.gasSafetyTask.clearFormData()
+        state.electricalSafetyTask.clearFormData()
+        state.epcTask.clearFormData()
+        state.confirmMissingComplianceStep.clearFormData()
+    }
 }
 
 @JourneyFrameworkComponent
