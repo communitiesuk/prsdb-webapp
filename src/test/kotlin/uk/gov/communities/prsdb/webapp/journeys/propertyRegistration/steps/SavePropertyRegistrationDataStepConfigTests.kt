@@ -45,10 +45,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
@@ -172,6 +174,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = eq(true),
             gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
@@ -223,6 +226,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
@@ -251,6 +255,13 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
+        val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
+        val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
+        whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
+        whenever(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
+        whenever(mockLettingAgentEmailStep.formModel).thenReturn(
+            AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
+        )
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -274,6 +285,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
@@ -323,6 +335,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
@@ -378,6 +391,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
@@ -429,6 +443,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
@@ -480,6 +495,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = isNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
