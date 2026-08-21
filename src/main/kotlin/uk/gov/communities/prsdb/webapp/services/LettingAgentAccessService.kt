@@ -31,12 +31,13 @@ class LettingAgentAccessService(
 
     @Transactional
     fun deleteInvitation(lettingAgentAccess: LettingAgentAccess) {
+        lettingAgentAccess.propertyOwnership.removeLettingAgentAccess()
         lettingAgentAccessRepository.delete(lettingAgentAccess)
     }
 
     @Transactional
     fun deleteInvitationByPropertyOwnershipId(propertyOwnershipId: Long) {
         val invitation = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId) ?: return
-        lettingAgentAccessRepository.delete(invitation)
+        deleteInvitation(invitation)
     }
 }

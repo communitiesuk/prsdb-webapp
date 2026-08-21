@@ -77,7 +77,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     val propertyCompliance: PropertyCompliance? = null
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
-    val lettingAgentAccess: LettingAgentAccess? = null
+    var lettingAgentAccess: LettingAgentAccess? = null
+        private set
 
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
@@ -181,5 +182,15 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     fun addLandlord(landlord: Landlord) {
         ownershipLinks.add(OwnershipLink(landlord, this))
+    }
+
+    /**
+     * Clears the delegation from the owning side. Because this association is the inverse side of a one-to-one with
+     * `orphanRemoval = true`, clearing it on a managed entity also schedules the [LettingAgentAccess] row for deletion;
+     * conversely, leaving it populated while the child row is deleted makes Hibernate treat the child as transient on
+     * flush. Prefer `LettingAgentAccessService.deleteInvitation` over calling this directly.
+     */
+    fun removeLettingAgentAccess() {
+        lettingAgentAccess = null
     }
 }
