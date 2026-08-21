@@ -1,11 +1,14 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
@@ -21,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.stepConfig.AllowLettingAgentStep
+import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -29,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class DelegateToLettingAgentController(
     private val delegateToLettingAgentJourneyFactory: DelegateToLettingAgentJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val delegateToLettingAgentService: DelegateToLettingAgentService,
 ) {
     @GetMapping("/{*stepPath}")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
@@ -64,13 +69,28 @@ class DelegateToLettingAgentController(
             startNewJourneyOn = { it is PropertyOwnershipMismatchException },
         )
 
-    // TODO: PDJB-1410 - Add the session guard and build the real confirmation page content
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     fun getConfirmation(
+        model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
+
+        val invitedEmailAddress =
+            delegateToLettingAgentService.getDelegatedLettingAgentsFromSession()[propertyOwnershipId]
+                ?: throw ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "PropertyOwnershipId $propertyOwnershipId was not found in the list of properties delegated to a " +
+                        "letting agent in the session",
+                )
+
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+
+        model.addAttribute("invitedEmailAddress", invitedEmailAddress)
+        model.addAttribute("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
+        model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+
         return "delegateToLettingAgentConfirmation"
     }
 

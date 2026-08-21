@@ -1,14 +1,30 @@
-<!--/* TODO: PDJB-1410 - Build the real "Letting agent or property manager can make updates" confirmation page */-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{delegateToLettingAgent.title}, ~{::main}, false)}">
+<html th:replace="~{fragments/layout :: layout(#{delegateToLettingAgent.confirmation.title}, ~{::main}, false)}">
 <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{delegateToLettingAgent.confirmation.banner.heading}, null)}">
         </div>
-        <p class="govuk-body" th:text="#{delegateToLettingAgent.confirmation.paragraph.one}">
-            delegateToLettingAgent.confirmation.paragraph.one
+        <p class="govuk-body" th:text="#{delegateToLettingAgent.confirmation.emailSentTo}">
+            delegateToLettingAgent.confirmation.emailSentTo
+        </p>
+        <p id="invited-email-address" class="govuk-body" th:text="${invitedEmailAddress}">
+            invitedEmailAddress
+        </p>
+        <p class="govuk-body" th:text="#{delegateToLettingAgent.confirmation.detailsFor}">
+            delegateToLettingAgent.confirmation.detailsFor
+        </p>
+        <p id="property-address" class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressLines})}"></th:block>
+        </p>
+        <p class="govuk-body" th:text="#{delegateToLettingAgent.confirmation.confirmationEmail}">
+            delegateToLettingAgent.confirmation.confirmationEmail
+        </p>
+        <p class="govuk-body">
+            <a id="go-back-to-property-record" class="govuk-link"
+               th:href="@{${propertyDetailsUrl}}"
+               th:text="#{delegateToLettingAgent.confirmation.goBackToPropertyRecord}">delegateToLettingAgent.confirmation.goBackToPropertyRecord</a>
         </p>
     </div>
 </main>
