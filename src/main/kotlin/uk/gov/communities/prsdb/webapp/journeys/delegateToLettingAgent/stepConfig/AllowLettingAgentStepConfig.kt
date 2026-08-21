@@ -29,8 +29,7 @@ class AllowLettingAgentStepConfig(
     // TODO PDJB-1560: Remove this guard once the delegate-to-letting-agent link is reliably hidden for
     //  already-delegated properties. It stops a landlord who re-enters this journey (e.g. via a direct URL or the
     //  back button after delegating) from triggering a second letting_agent_access insert, which would violate the
-    //  unique property_ownership_id constraint. When unreachable, the step redirects to the property record (see the
-    //  unreachableStepUrl in DelegateToLettingAgentJourneyFactory).
+    //  unique property_ownership_id constraint.
     override fun beforeAttemptingToReachStep(state: DelegateToLettingAgentJourneyState): Boolean =
         !propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId).delegatesToLettingAgent
 
