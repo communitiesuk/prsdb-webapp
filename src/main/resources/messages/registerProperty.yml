@@ -174,6 +174,16 @@ whoProvidesRentalDetails:
         label: Me
       lettingAgent:
         label: Letting agent
+  changeToLettingAgent:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve selected for your letting agent or property manager to provide details about how your property’s rented out.
+      two: 'This means we’ll remove the details you’ve already provided about:'
+      three: You can go back to undo this change.
+    erased:
+      licensing: property licensing
+      compliance: compliance certificates
+      tenancy: the current tenancy
 lettingAgentEmail:
   heading: Allow your letting agent or property manager to provide details
   howItWorks:

@@ -1,0 +1,34 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <div id="interruption-card"
+         th:replace="~{fragments/interruptionCard :: interruptionCard(#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.heading}, ~{::#interruption-card-body}, #{forms.buttons.continueWithChange}, ${backUrl})}">
+        <th:block id="interruption-card-body">
+            <p th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.one}">
+                registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.one
+            </p>
+            <p th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.two}">
+                registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.two
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.licensing}">
+                    registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.licensing
+                </li>
+                <li th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.compliance}">
+                    registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.compliance
+                </li>
+                <li th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.tenancy}">
+                    registerProperty.whoProvidesRentalDetails.changeToLettingAgent.erased.tenancy
+                </li>
+            </ul>
+            <p th:text="#{registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.three}">
+                registerProperty.whoProvidesRentalDetails.changeToLettingAgent.paragraph.three
+            </p>
+        </th:block>
+    </div>
+</th:block>
+</html>
