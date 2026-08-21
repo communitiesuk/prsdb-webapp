@@ -1504,28 +1504,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
-            val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
-
-            // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
-            assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
-            assertEquals(
-                "We’ll ask for tenancy details when your property becomes occupied",
-                tenancyDetailsTask.hintText.trim(),
-            )
-            assertFalse(tenancyDetailsTask.hasLink)
-
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertTrue(checkAndSubmitTask.hasLink)
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
-            assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
-        }
-
-        @Test
         fun `restructured CYA does not show tenancy details section when the property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2038,6 +2016,28 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     )
 
                 assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
+            }
+
+            @Test
+            fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
+                val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+                val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
+
+                // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
+                assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
+                assertEquals(
+                    "We’ll ask for tenancy details when your property becomes occupied",
+                    tenancyDetailsTask.hintText.trim(),
+                )
+                assertFalse(tenancyDetailsTask.hasLink)
+
+                val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+                assertTrue(checkAndSubmitTask.hasLink)
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+                // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
+                assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
             }
         }
     }
