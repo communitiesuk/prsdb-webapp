@@ -18,7 +18,3 @@ allowed-tools: 'jetbrains'
    `<failure message>` and its text content, which contains the stack trace.
 5. If needed, IntelliJ also stores structured results under
    `%LOCALAPPDATA%\JetBrains\IntelliJIdea<version>\testHistory\<project-hash>\`.
-
-# Report the Result
-
-State the pass/fail/blocked status only.
