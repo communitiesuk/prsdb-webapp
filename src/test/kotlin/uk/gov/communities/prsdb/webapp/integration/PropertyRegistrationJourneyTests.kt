@@ -2129,7 +2129,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
-        fun `after removing the delegation switching the property back to occupied shows the who-provides task as unanswered rather than the previous letting agent answer`(
+        fun `after removing the delegation switching the property back to occupied restores the previous letting agent answer and the CYA page`(
             page: Page,
         ) {
             val taskListPage =
@@ -2144,17 +2144,24 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class).submit()
             val unoccupiedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
-            // Switch the property back to occupied. If the delegation had merely been hidden rather than cleared, the
-            // previous "letting agent provides" answer would resurface and the who-provides task would show as
-            // "Not required"/completed with the compliance tasks marked as provided by the letting agent.
+            // Switch the property back to occupied. Because the delegation was hidden rather than cleared, the previous
+            // "letting agent provides" answer resurfaces: the who-provides task is complete again and the tenancy task
+            // returns to "Not required", so the registration is complete and the CYA page is reachable once more.
             unoccupiedTaskListPage.clickAboutYourPropertyTaskWithName("Tell us if your property’s occupied")
             assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
 
             val reoccupiedTaskListPage = navigator.goToPropertyRegistrationTaskList()
             assertEquals(
-                "Not\u00A0started",
+                "Completed",
                 reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
             )
+            assertEquals(
+                "Not\u00A0required",
+                reoccupiedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+
+            navigator.navigateToPropertyRegistrationCheckYourAnswers()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test

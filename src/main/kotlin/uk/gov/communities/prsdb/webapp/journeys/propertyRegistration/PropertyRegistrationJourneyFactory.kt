@@ -160,8 +160,10 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                    val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+                    val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+                    when {
+                        isRestructured && isDelegateEnabled -> {
                             step(journey.occupied) {
                                 initialStep()
                                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
@@ -184,16 +186,10 @@ class PropertyRegistrationJourneyFactory(
                                 }
                                 nextStep { journey.finishCyaStep }
                             }
-                        } else {
-                            checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                         }
-                    } else {
-                        checkAnswerTask(journey.occupationTask.inJourney(journey))
+                        isRestructured -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                        else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
-                }
-
-                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask)
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
@@ -588,21 +584,20 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.submitYourRegistration.heading", shouldUseNumbering = false)
                 step(journey.cyaStep) {
+                    val landlordProvidesPath =
+                        AndParents(
+                            journey.epcTask.isComplete(),
+                            OrParents(
+                                journey.tenancyDetailsTask.isComplete(),
+                                journey.occupied.hasOutcome(YesOrNo.NO),
+                            ),
+                        )
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
                     parents {
                         if (delegateEnabled) {
                             OrParents(
-                                AndParents(
-                                    journey.epcTask.isComplete(),
-                                    OrParents(
-                                        AndParents(
-                                            journey.tenancyDetailsTask.isComplete(),
-                                            journey.whoProvidesDetailsTask.isComplete(),
-                                        ),
-                                        journey.occupied.hasOutcome(YesOrNo.NO),
-                                    ),
-                                ),
+                                landlordProvidesPath,
                                 AndParents(
                                     journey.whoProvidesDetailsTask.isComplete(),
                                     journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.hasOutcome(
@@ -611,13 +606,7 @@ class PropertyRegistrationJourneyFactory(
                                 ),
                             )
                         } else {
-                            AndParents(
-                                journey.epcTask.isComplete(),
-                                OrParents(
-                                    journey.tenancyDetailsTask.isComplete(),
-                                    journey.occupied.hasOutcome(YesOrNo.NO),
-                                ),
-                            )
+                            landlordProvidesPath
                         }
                     }
                     nextStep { journey.hasMissingComplianceStep }
