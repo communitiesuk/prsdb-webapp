@@ -161,7 +161,7 @@ class PropertyRegistrationTaskListStepConfig(
         if (state.cachedOccupied == false) {
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
-                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
+                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_NEEDED_YET),
                 hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint",
                 url = null,
             )

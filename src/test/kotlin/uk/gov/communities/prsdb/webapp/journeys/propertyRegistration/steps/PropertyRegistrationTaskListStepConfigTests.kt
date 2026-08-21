@@ -120,7 +120,7 @@ class PropertyRegistrationTaskListStepConfigTests {
     }
 
     @Test
-    fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property`() {
+    fun `getTaskListViewModel shows tenancy details as NOT_NEEDED_YET for an unoccupied property`() {
         // Arrange
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
@@ -135,7 +135,7 @@ class PropertyRegistrationTaskListStepConfigTests {
             taskListViewModel.taskSections[1].tasks.find {
                 it.nameKey == "registerProperty.taskList.rentedOut.tenancyDetails"
             }
-        assertEquals("taskList.status.notRequired", tenancyItem?.status?.textKey)
+        assertEquals("taskList.status.notNeededYet", tenancyItem?.status?.textKey)
         assertEquals("registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint", tenancyItem?.hintKey)
         assertNull(tenancyItem?.url)
     }
