@@ -184,6 +184,7 @@ class SavePropertyRegistrationDataStepConfig(
                 isDelegatedToLettingAgent ||
                     state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
             tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
+            isDelegatedToLettingAgent = isDelegatedToLettingAgent,
         )
     }
 }
