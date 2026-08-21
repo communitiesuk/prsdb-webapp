@@ -1,16 +1,21 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.CancelLettingAgentDelegationEmailService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent("cancelLettingAgentDelegationAreYouSureStepConfig")
-class AreYouSureStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, CancelLettingAgentDelegationJourneyState>() {
+class AreYouSureStepConfig(
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val cancelLettingAgentDelegationEmailService: CancelLettingAgentDelegationEmailService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, CancelLettingAgentDelegationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: CancelLettingAgentDelegationJourneyState): Map<String, Any?> =
@@ -24,9 +29,15 @@ class AreYouSureStepConfig :
         getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: CancelLettingAgentDelegationJourneyState) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
+        val lettingAgentAccess =
+            propertyOwnership.lettingAgentAccess
+                ?: throw PrsdbWebException(
+                    "Cannot cancel letting agent delegation for property ownership ${state.propertyOwnershipId}: " +
+                        "no letting agent access found",
+                )
         // TODO PDJB-1413: remove the letting agent / property manager delegation for this property
-        // TODO PDJB-1415: email the landlord to tell them the delegation has been removed
-        // TODO PDJB-1415: email the joint landlords (if any) to tell them the delegation has been removed
+        cancelLettingAgentDelegationEmailService.sendCancellationEmails(propertyOwnership, lettingAgentAccess.invitedEmail)
     }
 
     override fun resolveNextDestination(
