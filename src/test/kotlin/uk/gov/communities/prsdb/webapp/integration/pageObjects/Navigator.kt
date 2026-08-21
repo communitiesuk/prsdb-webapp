@@ -678,6 +678,11 @@ class Navigator(
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
+    fun navigateToPropertyRegistrationCheckYourAnswers() =
+        navigateToPropertyRegistrationJourneyStep(
+            PropertyRegistrationCyaStep.ROUTE_SEGMENT,
+        )
+
     fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)

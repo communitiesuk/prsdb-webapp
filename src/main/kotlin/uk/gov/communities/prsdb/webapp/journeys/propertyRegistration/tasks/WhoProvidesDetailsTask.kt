@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
@@ -19,6 +20,9 @@ class WhoProvidesDetailsTask(
 ) : TaskWithoutDependencies<WhoProvidesDetailsState>(journeyStateService),
     WhoProvidesDetailsState {
     override val taskState get() = this
+
+    override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
+        delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
 
     override fun makeSubJourney(state: WhoProvidesDetailsState) =
         subJourney(state) {

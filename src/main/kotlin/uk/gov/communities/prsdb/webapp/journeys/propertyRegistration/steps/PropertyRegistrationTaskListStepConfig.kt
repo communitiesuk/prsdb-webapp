@@ -159,10 +159,16 @@ class PropertyRegistrationTaskListStepConfig(
 
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
+            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
-                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
-                hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint",
+                status = TaskStatusViewModel.fromStatus(if (delegateEnabled) TaskStatus.NOT_NEEDED_YET else TaskStatus.NOT_REQUIRED),
+                hintKey =
+                    if (delegateEnabled) {
+                        "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint"
+                    } else {
+                        "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint"
+                    },
                 url = null,
             )
         } else if (isDelegatedToLettingAgent(state)) {
