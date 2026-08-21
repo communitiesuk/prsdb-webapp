@@ -248,6 +248,39 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(orgCard.summaryList.registrationNumberRow.value).not().isEmpty()
             }
         }
+
+        @Nested
+        inner class LettingAgentPanel {
+            @Test
+            fun `occupied property without letting agent shows delegate copy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(4)
+
+                assertThat(detailsPage.lettingAgentPanel).containsText(
+                    "They can provide this property's licensing, compliance certificates and tenancy details",
+                )
+                assertThat(detailsPage.delegateToLettingAgentLink).isVisible()
+            }
+
+            @Test
+            fun `occupied property with letting agent shows cancel delegation copy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+
+                assertThat(detailsPage.lettingAgentPanel).containsText(
+                    "They can keep this property's licensing, compliance certificates and tenancy details up to date",
+                )
+                assertThat(detailsPage.removeLettingAgentLink).isVisible()
+            }
+
+            @Test
+            fun `unoccupied property shows unoccupied letting agent copy`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(7)
+
+                assertThat(detailsPage.lettingAgentPanel).containsText(
+                    "Once your property's occupied, they can keep details updated for you",
+                )
+                assertThat(detailsPage.delegateToLettingAgentLink).not().isVisible()
+            }
+        }
     }
 
     @Nested
@@ -460,6 +493,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val successBanner = page.locator(".govuk-notification-banner--success")
             assertThat(successBanner).isVisible()
             assertThat(successBanner).containsText("expired@example.com")
+        }
+
+        @Test
+        fun `letting agent panel is not shown on local council view`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+            assertThat(detailsPage.lettingAgentPanel).not().isVisible()
         }
     }
 
