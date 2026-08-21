@@ -18,6 +18,11 @@ class RentFrequencyAndAmountTask(
     RentFrequencyAndAmountState {
     override val taskState get() = this
 
+    fun clearFormData() {
+        rentFrequency.clearFormData()
+        rentAmount.clearFormData()
+    }
+
     override fun makeSubJourney(state: RentFrequencyAndAmountState) =
         subJourney(state) {
             step(journey.rentFrequency) {

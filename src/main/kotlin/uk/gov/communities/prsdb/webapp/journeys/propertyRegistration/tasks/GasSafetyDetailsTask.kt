@@ -50,6 +50,20 @@ class GasSafetyDetailsTask(
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
 
+    fun clearFormData() {
+        hasGasSupplyStep.clearFormData()
+        hasGasCertStep.clearFormData()
+        gasCertIssueDateStep.clearFormData()
+        uploadGasCertStep.clearFormData()
+        checkGasCertUploadsStep.clearFormData()
+        removeGasCertUploadStep.clearFormData()
+        gasCertExpiredStep.clearFormData()
+        gasCertMissingStep.clearFormData()
+        provideGasCertLaterStep.clearFormData()
+        gasUploadMap = mapOf()
+        highestAssignedGasMemberId = null
+    }
+
     override fun makeSubJourney(state: GasSafetyDetailState) =
         subJourney(state) {
             step(journey.hasGasSupplyStep) {
