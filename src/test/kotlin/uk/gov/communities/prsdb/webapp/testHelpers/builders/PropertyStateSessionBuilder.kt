@@ -129,6 +129,7 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOccupancyStatus(true)
                 .withCheckEpcAnswersComplete()
+                .withDetailsProvidedBy()
 
         fun beforePropertyRegistrationBedrooms() = beforePropertyRegistrationPeople().withPeople()
 
@@ -390,6 +391,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
+                .withDetailsProvidedBy()
                 .withProvideTenancyDetailsLater()
                 .withBedrooms()
                 .withHasNoJointLandlords()
@@ -430,6 +432,7 @@ class PropertyStateSessionBuilder(
             rentAmount: String = "400",
             billsIncluded: Boolean = true,
         ) = beforePropertyRegistrationOccupancy()
+            .withDetailsProvidedBy()
             .withTenants(
                 households = households,
                 people = people,

@@ -3,21 +3,20 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-1388: this is a skeleton page. Replace the placeholder heading/labels
-// ("Me" / "Letting agent") and wire the real content when the page is built.
 @JourneyFrameworkComponent
 class WhoProvidesRentalDetailsStepConfig :
-    AbstractRequestableStepConfig<WhoProvidesRentalDetailsMode, WhoProvidesRentalDetailsFormModel, WhoProvidesDetailsState>() {
+    AbstractRequestableStepConfig<WhoProvidesRentalDetailsMode, WhoProvidesRentalDetailsFormModel, JourneyState>() {
     override val formModelClass = WhoProvidesRentalDetailsFormModel::class
 
-    override fun getStepSpecificContent(state: WhoProvidesDetailsState) =
+    override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "registerProperty.whoProvidesRentalDetails.fieldSetHeading",
+            "fieldSetHint" to "registerProperty.whoProvidesRentalDetails.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "radioOptions" to
                 listOf(
@@ -32,9 +31,9 @@ class WhoProvidesRentalDetailsStepConfig :
                 ),
         )
 
-    override fun chooseTemplate(state: WhoProvidesDetailsState): String = "forms/whoProvidesRentalDetailsForm"
+    override fun chooseTemplate(state: JourneyState): String = "forms/whoProvidesRentalDetailsForm"
 
-    override fun mode(state: WhoProvidesDetailsState): WhoProvidesRentalDetailsMode? =
+    override fun mode(state: JourneyState): WhoProvidesRentalDetailsMode? =
         getFormModelFromStateOrNull(state)?.whoProvides?.let {
             when (it) {
                 WhoProvidesRentalDetails.LANDLORD -> WhoProvidesRentalDetailsMode.LANDLORD_PROVIDES
@@ -50,7 +49,7 @@ class WhoProvidesRentalDetailsStepConfig :
 @JourneyFrameworkComponent
 final class WhoProvidesRentalDetailsStep(
     stepConfig: WhoProvidesRentalDetailsStepConfig,
-) : RequestableStep<WhoProvidesRentalDetailsMode, WhoProvidesRentalDetailsFormModel, WhoProvidesDetailsState>(stepConfig) {
+) : RequestableStep<WhoProvidesRentalDetailsMode, WhoProvidesRentalDetailsFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "who-provides-rental-details"
     }

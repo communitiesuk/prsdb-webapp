@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
@@ -27,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
 
 interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
@@ -68,6 +71,15 @@ interface OccupancyStateBuilder<SelfType : OccupancyStateBuilder<SelfType>> {
             }
         withSubmittedValue(OccupiedStep.ROUTE_SEGMENT, occupancyFormModel)
         additionalDataMap["cachedOccupied"] = Json.encodeToString(serializer(), occupied)
+        return self()
+    }
+
+    fun withDetailsProvidedBy(provider: WhoProvidesRentalDetails = WhoProvidesRentalDetails.LANDLORD): SelfType {
+        val agentOrManagerFormModel =
+            WhoProvidesRentalDetailsFormModel().apply {
+                whoProvides = provider
+            }
+        withSubmittedValue(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT, agentOrManagerFormModel)
         return self()
     }
 

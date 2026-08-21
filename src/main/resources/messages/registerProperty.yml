@@ -180,15 +180,16 @@ provideLicensingLater:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
 whoProvidesRentalDetails:
-  fieldSetHeading: Who will provide these details?
+  fieldSetHeading: Who will provide this property's rental details?
+  fieldSetHint: Choose whether you or your letting agent or property manager will provide details about how this property is rented out.
   radios:
     error:
-      missing: Select who will provide these details
+      missing: Select who will provide this property's rental details
     option:
       landlord:
-        label: Me
+        label: I will provide these details
       lettingAgent:
-        label: Letting agent
+        label: My letting agent or property manager
   changeToLettingAgent:
     heading: Are you sure you want to change this?
     paragraph:
