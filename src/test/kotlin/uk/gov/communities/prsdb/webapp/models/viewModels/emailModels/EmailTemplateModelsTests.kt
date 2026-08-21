@@ -348,6 +348,24 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/CancelDelegationLettingAgentNotification.md",
                 ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentConfirmationEmail(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent-1@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/DelegateToLettingAgentConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordDelegateToLettingAgentNotificationEmail(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent-1@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/JointLandlordDelegateToLettingAgentNotification.md",
+                ),
             )
     }
 
