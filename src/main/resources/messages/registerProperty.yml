@@ -78,7 +78,8 @@ taskList:
     whoProvidesDetailsNotRequiredHint: Once your property’s occupied, your letting agent or property manager can keep these details updated for you
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
-    tenancyDetailsNotRequiredHint: Once your property’s occupied, you’ll need to provide details about the tenancy
+    tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
+    tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration

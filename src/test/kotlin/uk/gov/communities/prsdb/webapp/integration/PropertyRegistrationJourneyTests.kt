@@ -1504,14 +1504,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows tenancy details as not needed yet when the property is unoccupied`(page: Page) {
+        fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
 
-            // The label uses a non-breaking space so "Not needed yet" doesn't wrap onto two lines when hint text is present
-            assertEquals("Not\u00A0needed\u00A0yet", tenancyDetailsTask.statusText.trim())
+            // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
+            assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
             assertEquals(
-                "Once your property’s occupied, you’ll need to provide details about the tenancy",
+                "We’ll ask for tenancy details when your property becomes occupied",
                 tenancyDetailsTask.hintText.trim(),
             )
             assertFalse(tenancyDetailsTask.hasLink)
