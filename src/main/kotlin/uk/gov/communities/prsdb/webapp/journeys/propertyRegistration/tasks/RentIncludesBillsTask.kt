@@ -20,6 +20,11 @@ class RentIncludesBillsTask(
     RentIncludesBillsState {
     override val taskState get() = this
 
+    fun clearFormData() {
+        rentIncludesBills.clearFormData()
+        billsIncluded.clearFormData()
+    }
+
     override fun makeSubJourney(state: RentIncludesBillsState) =
         subJourney(state) {
             step(journey.rentIncludesBills) {
