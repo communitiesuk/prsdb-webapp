@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.services.CancelLettingAgentDelegationEmailService
+import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent("cancelLettingAgentDelegationAreYouSureStepConfig")
 class AreYouSureStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val cancelLettingAgentDelegationEmailService: CancelLettingAgentDelegationEmailService,
+    private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, CancelLettingAgentDelegationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -37,7 +37,7 @@ class AreYouSureStepConfig(
                         "no letting agent access found",
                 )
         // TODO PDJB-1413: remove the letting agent / property manager delegation for this property
-        cancelLettingAgentDelegationEmailService.sendCancellationEmails(propertyOwnership, lettingAgentAccess.invitedEmail)
+        delegateToLettingAgentEmailService.sendCancellationEmails(propertyOwnership, lettingAgentAccess.invitedEmail)
     }
 
     override fun resolveNextDestination(
