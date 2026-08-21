@@ -32,6 +32,7 @@ class PropertyRegistrationService(
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyComplianceService: PropertyComplianceService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @Transactional
     fun registerProperty(
@@ -52,6 +53,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        lettingAgentEmail: String? = null,
         markedJointLandlord: Boolean = false,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
@@ -96,6 +98,10 @@ class PropertyRegistrationService(
                 mutableSetOf(landlord),
                 licenseProvideLater = licenseProvideLater,
             )
+
+        if (lettingAgentEmail != null) {
+            lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
+        }
 
         propertyComplianceService.saveRegistrationComplianceData(
             propertyOwnership.registrationNumber.number,
