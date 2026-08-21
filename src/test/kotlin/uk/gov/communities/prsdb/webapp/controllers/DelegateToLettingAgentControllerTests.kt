@@ -27,9 +27,10 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.stepConfig.AllowLettingAgentStep
-import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import kotlin.test.assertEquals
 
 @WebMvcTest(DelegateToLettingAgentController::class)
@@ -43,7 +44,7 @@ class DelegateToLettingAgentControllerTests(
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
-    private lateinit var delegateToLettingAgentService: DelegateToLettingAgentService
+    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -69,10 +70,16 @@ class DelegateToLettingAgentControllerTests(
     }
 
     private fun mockCompletedDelegation() {
-        whenever(delegateToLettingAgentService.getDelegatedLettingAgentsFromSession())
-            .thenReturn(mutableMapOf(testPropertyOwnershipId to "agent@example.com"))
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(testPropertyOwnershipId))
+            .thenReturn(
+                MockLettingAgentData.createLettingAgentAccess(
+                    invitedEmail = "agent@example.com",
+                    propertyOwnership = propertyOwnership,
+                ),
+            )
         whenever(propertyOwnershipService.getPropertyOwnership(testPropertyOwnershipId))
-            .thenReturn(MockLandlordData.createPropertyOwnership())
+            .thenReturn(propertyOwnership)
     }
 
     @Test
@@ -267,9 +274,9 @@ class DelegateToLettingAgentControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"], value = "user")
-    fun `getConfirmation returns 404 when the property was not delegated in this session`() {
+    fun `getConfirmation returns 404 when no invitation exists for the property`() {
         mockAuthorizedProperty()
-        whenever(delegateToLettingAgentService.getDelegatedLettingAgentsFromSession()).thenReturn(mutableMapOf())
+        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(testPropertyOwnershipId)).thenReturn(null)
 
         mvc.get("${getDelegateToLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isNotFound() }
