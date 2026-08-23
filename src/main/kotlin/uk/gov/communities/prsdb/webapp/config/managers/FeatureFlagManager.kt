@@ -74,6 +74,8 @@ class FeatureFlagManager(
 
     fun checkFeature(featureName: String): Boolean = super.check(featureName)
 
+    fun checkConfiguredFeature(featureName: String): Boolean = super.check(featureName, currentContext)
+
     override fun check(
         featureName: String,
         executionContext: FlippingExecutionContext?,
