@@ -12,15 +12,11 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
-import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 
 @WebMvcTest(FeatureFlagOverrideController::class)
 class FeatureFlagOverrideControllerDisabledTests(
     @Autowired val context: WebApplicationContext,
 ) : ControllerTest(context) {
-    @MockitoBean
-    lateinit var featureFlagOverrideService: FeatureFlagOverrideService
-
     @MockitoBean
     lateinit var featureFlagManager: FeatureFlagManager
 
