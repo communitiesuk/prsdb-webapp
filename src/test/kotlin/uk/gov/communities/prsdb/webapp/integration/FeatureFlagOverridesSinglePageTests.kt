@@ -119,6 +119,33 @@ class FeatureFlagOverridesSinglePageTests : IntegrationTestWithImmutableData("da
         assertEquals(HttpStatus.NOT_IMPLEMENTED.value(), failoverEndpointStatus())
     }
 
+    @Test
+    fun `the override banner is only shown on other pages while an override is set`() {
+        var dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.featureFlagOverrideBanner).hasCount(0)
+
+        overrideFlag(ENABLED_FLAG, FeatureFlagOverrideChoice.OFF)
+
+        dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.featureFlagOverrideBanner).isVisible()
+
+        val overridesPage = navigator.goToFeatureFlagOverrides()
+        overridesPage.resetButton.clickAndWait()
+
+        dashboard = navigator.goToLandlordDashboard()
+        assertThat(dashboard.featureFlagOverrideBanner).hasCount(0)
+    }
+
+    @Test
+    fun `the override banner links back to the overrides page`() {
+        overrideFlag(ENABLED_FLAG, FeatureFlagOverrideChoice.OFF)
+        val dashboard = navigator.goToLandlordDashboard()
+
+        dashboard.featureFlagOverrideBanner.manageOverridesLink.clickAndWait()
+
+        assertPageIs(dashboard.page, FeatureFlagOverridesPage::class)
+    }
+
     private fun failoverEndpointStatus() = navigator.navigate(ERROR_501_URL_ROUTE)?.status()
 
     private fun overrideFlag(
