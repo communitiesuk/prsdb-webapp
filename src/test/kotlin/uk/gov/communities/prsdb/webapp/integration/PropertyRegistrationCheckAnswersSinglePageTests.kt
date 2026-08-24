@@ -34,7 +34,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertTrue
@@ -159,7 +159,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLettingAgentProvidesRentalDetails()
-                        .withSubmittedValue(LettingAgentEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+                        .withSubmittedValue(LettingAgentEmailStep.ROUTE_SEGMENT, AllowLettingAgentEmailFormModel())
                         .withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -173,7 +173,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
             assertTrue(page.url().contains("/letting-agent-email"))
         }
-        
+
         @Test
         fun `rented out section appears after occupied and before licensing when landlord provides details`(page: Page) {
             val taskListPage =

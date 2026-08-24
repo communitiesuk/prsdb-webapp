@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
@@ -136,7 +136,7 @@ class PropertyRegistrationCyaStepConfigTests {
     private lateinit var mockWhoProvidesRentalDetailsFormModel: WhoProvidesRentalDetailsFormModel
 
     @Mock
-    private lateinit var mockNoInputFormModel: NoInputFormModel
+    private lateinit var mockLettingAgentEmailFormModel: AllowLettingAgentEmailFormModel
 
     @Mock
     private lateinit var mockLettingAgentEmailStep: LettingAgentEmailStep
@@ -186,7 +186,7 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModel).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
-        lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockNoInputFormModel)
+        lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
     }
 
     @Nested
