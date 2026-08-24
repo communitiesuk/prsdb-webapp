@@ -1,23 +1,35 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.CancelLettingAgentDelegationEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class RemoveDelegationStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val cancelLettingAgentDelegationEmailService: CancelLettingAgentDelegationEmailService,
 ) : AbstractInternalStepConfig<Complete, CancelLettingAgentDelegationJourneyState>() {
     override fun mode(state: CancelLettingAgentDelegationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: CancelLettingAgentDelegationJourneyState) {
+        val lettingAgentAccess =
+            lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId)
+                ?: throw PrsdbWebException(
+                    "Cannot cancel letting agent delegation for property ownership ${state.propertyOwnershipId}: " +
+                        "no letting agent access found",
+                )
+        val lettingAgentEmail = lettingAgentAccess.invitedEmail
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(state.propertyOwnershipId)
-        // TODO PDJB-1415: email the landlord to tell them the delegation has been removed
-        // TODO PDJB-1415: email the joint landlords (if any) to tell them the delegation has been removed
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
+        cancelLettingAgentDelegationEmailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
     }
 
     override fun resolveNextDestination(
