@@ -19,8 +19,6 @@ class CancelJointLandlordInvitationSinglePageTests : IntegrationTestWithImmutabl
             .containsText("Select if you want to cancel this invitation")
     }
 
-    // The areYouSureForm template is shared, so this guards the defaults used by callers that do not override the
-    // submit button text or the cancel link's visibility
     @Test
     fun `the page has a Continue button and a cancel link`() {
         val areYouSurePage = navigator.goToCancelJointLandlordInvitationAreYouSurePage(pendingInvitationId)
