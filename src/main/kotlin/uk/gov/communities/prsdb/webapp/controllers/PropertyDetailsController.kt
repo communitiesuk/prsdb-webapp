@@ -103,23 +103,26 @@ class PropertyDetailsController(
             modelAndView.addObject("showLettingAgentPanel", true)
             val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
             modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
-            if (lettingAgentAccess != null) {
-                modelAndView.addObject("lettingAgentEmail", lettingAgentAccess.invitedEmail)
-                modelAndView.addObject(
-                    "lettingAgentPanelLink",
-                    TicketPanelLinkViewModel(
-                        text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
-                        url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
-                    ),
-                )
-            } else {
-                modelAndView.addObject(
-                    "lettingAgentPanelLink",
-                    TicketPanelLinkViewModel(
-                        text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
-                        url = getDelegateToLettingAgentPath(propertyOwnershipId),
-                    ),
-                )
+            modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
+            if (propertyOwnership.isOccupied) {
+                if (lettingAgentAccess != null) {
+                    modelAndView.addObject("lettingAgentEmail", lettingAgentAccess.invitedEmail)
+                    modelAndView.addObject(
+                        "lettingAgentPanelLink",
+                        TicketPanelLinkViewModel(
+                            text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
+                            url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+                        ),
+                    )
+                } else {
+                    modelAndView.addObject(
+                        "lettingAgentPanelLink",
+                        TicketPanelLinkViewModel(
+                            text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
+                            url = getDelegateToLettingAgentPath(propertyOwnershipId),
+                        ),
+                    )
+                }
             }
         }
         if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
