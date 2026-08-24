@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{cancelLettingAgentDelegation.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{cancelLettingAgentDelegation.confirmation.banner.heading}, null)}">
+        </div>
+        <p class="govuk-body" th:text="#{cancelLettingAgentDelegation.confirmation.paragraph.one}">
+            cancelLettingAgentDelegation.confirmation.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="${lettingAgentEmail}">
+            lettingAgentEmail
+        </p>
+        <p class="govuk-body" th:text="#{cancelLettingAgentDelegation.confirmation.paragraph.two}">
+            cancelLettingAgentDelegation.confirmation.paragraph.two
+        </p>
+        <p class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+        </p>
+        <p class="govuk-body" th:text="#{cancelLettingAgentDelegation.confirmation.paragraph.three}">
+            cancelLettingAgentDelegation.confirmation.paragraph.three
+        </p>
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${continueUrl}, #{forms.buttons.continue})}">
+            Continue
+        </a>
+    </div>
+</main>
+</html>

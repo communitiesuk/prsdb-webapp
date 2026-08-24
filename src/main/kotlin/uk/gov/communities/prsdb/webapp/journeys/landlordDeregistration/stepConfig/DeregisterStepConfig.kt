@@ -42,16 +42,15 @@ class DeregisterStepConfig(
         val landlordEmailAddress = landlord.email
 
         if (landlordHadActiveSoloProperties) {
-            // TODO PDJB-311: This email does not address properties that are not deleted
             val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(soleLandlordProperties)
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
-                LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
+                LandlordWithPropertiesDeregistrationConfirmationEmail(landlord.name, propertySectionList),
             )
         } else {
             confirmationWithNoPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
-                LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                LandlordNoPropertiesDeregistrationConfirmationEmail(landlord.name),
             )
         }
 

@@ -13,18 +13,21 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController.Companion.getDelegateToLettingAgentPath
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.TicketPanelLinkViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsBeforePdjb939ViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
@@ -94,6 +97,28 @@ class PropertyDetailsController(
         val deregisterPropertyLink = DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
+        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+            modelAndView.addObject("showLettingAgentPanel", true)
+            modelAndView.addObject("delegatesToLettingAgent", propertyOwnership.delegatesToLettingAgent)
+            if (propertyOwnership.delegatesToLettingAgent) {
+                modelAndView.addObject("lettingAgentEmail", propertyOwnership.lettingAgentAccess!!.invitedEmail)
+                modelAndView.addObject(
+                    "lettingAgentPanelLink",
+                    TicketPanelLinkViewModel(
+                        text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
+                        url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+                    ),
+                )
+            } else {
+                modelAndView.addObject(
+                    "lettingAgentPanelLink",
+                    TicketPanelLinkViewModel(
+                        text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
+                        url = getDelegateToLettingAgentPath(propertyOwnershipId),
+                    ),
+                )
+            }
+        }
         if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
             modelAndView.addObject(
                 "switchToIndividualLink",

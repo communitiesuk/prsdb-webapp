@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -75,6 +76,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LettingAgentEmailPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
@@ -103,6 +105,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -262,6 +265,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             // Licensing type - render page
@@ -1478,6 +1483,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 listOf(
+                    "Who will provide these details",
                     "Tell us if your property needs a license",
                     "Gas safety certificate",
                     "Electrical safety certificate",
@@ -1585,6 +1591,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
             assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
             licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -1673,7 +1681,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -1682,7 +1690,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
@@ -1816,25 +1824,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
             val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
-            assertEquals("Not started", propertyDetailsTask.statusText.trim())
+            assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
             assertTrue(propertyDetailsTask.hasLink)
 
             val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
-            assertEquals("Cannot start yet", ownershipTask.statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
             assertFalse(ownershipTask.hasLink)
 
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
@@ -1850,16 +1858,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
@@ -1881,7 +1889,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
@@ -1984,6 +1992,52 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
             assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                )
+
+            taskListPage.clickRentedOutTaskWithName("Who will provide these details")
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+
+            whoProvidesRentalDetailsPage.submitLettingAgentProvidesDetails()
+
+            val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+            lettingAgentEmailPage.submitEmail("agent@example.com")
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
+        @Nested
+        inner class DelegateToLettingAgentDisabled {
+            @BeforeEach
+            fun disableDelegateToLettingAgentFlag() {
+                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+            }
+
+            @Test
+            fun `occupied journey routes straight from occupancy to licensing without asking who provides the details`(page: Page) {
+                val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+                occupancyPage.submitIsOccupied()
+
+                assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            }
+
+            @Test
+            fun `who provides details task is absent from the rented out section`() {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                    )
+
+                assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
+            }
         }
     }
 

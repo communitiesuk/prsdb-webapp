@@ -23,19 +23,28 @@ organisational:
         one: '{0,,organisationName} is no longer registered as a landlord.'
         two: Your organisation and property information has been deleted.
         three: You can no longer access the service on behalf of your organisation.
-noProperties:
-  confirmation:
-    banner:
-      heading: Account deleted
-      body: No longer registered as a landlord
+confirmation:
+  banner:
+    heading: Account deleted
+  paragraph:
+    one: You’re no longer registered as a landlord in England. We’ve sent you an email to confirm this.
+    two: You’ll need to register a new account if you become a landlord again.
+areYouSure:
+  withProperties:
+    heading: Are you sure you want to delete your account?
     paragraph:
-      one: We have sent you a confirmation email.
-      two: You’ll need to register a new account if you become a landlord again.
-withProperties:
-  confirmation:
-    banner:
-      heading: Account deleted
-      body: No longer registered as a landlord
-    paragraph:
-      one: You have deleted your landlord information and all your properties. We have sent you an email confirming this.
-      two: You’ll need to register a new account if you become a landlord again.
+      one: You’ll no longer be registered as a landlord in England.
+      two: 'This means we will:'
+    confirmButton: Yes, delete
+    cancelLink: Cancel and go back
+    bulletList:
+      one: delete all property registrations where you’re the only landlord
+      two: remove you as a joint landlord from any properties
+  noProperties:
+    fieldSetHeading: Are you sure you want to delete your account?
+    radios:
+      error:
+        missing: Select whether you want to delete your account
+  hasProperties:
+    fieldSetHeading: Are you sure you want to delete your account and all your properties?
+    fieldSetHint: 'By deleting your account, you are also deleting your properties.'

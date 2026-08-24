@@ -15,3 +15,6 @@ features:
     - name: "pdjb-1053-dashboard-nav-link"
       enabled: true
       expiry-date: "2026-12-31"
+    - name: "pdjb-1022-delegate-to-letting-agent"
+      enabled: true
+      expiry-date: "2026-12-31"

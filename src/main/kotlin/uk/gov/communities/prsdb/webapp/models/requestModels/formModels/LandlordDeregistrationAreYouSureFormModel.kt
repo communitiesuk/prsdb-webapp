@@ -11,23 +11,15 @@ class LandlordDeregistrationAreYouSureFormModel(
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.areYouSure.landlordDeregistration.noProperties.radios.error.missing",
+                messageKey = "deregisterLandlord.areYouSure.noProperties.radios.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isNotNullWhenLandlordHasNoProperties",
-            ),
-            ConstraintDescriptor(
-                messageKey = "forms.areYouSure.landlordDeregistration.withProperties.radios.error.missing",
-                validatorType = DelegatedPropertyConstraintValidator::class,
-                targetMethod = "isNotNullWhenLandlordHasRegisteredProperties",
             ),
         ],
     )
     var wantsToProceed: Boolean? = null,
     var userHasRegisteredProperties: Boolean? = null,
 ) : FormModel {
-    fun isNotNullWhenLandlordHasRegisteredProperties(): Boolean =
-        NotNullValidator().isValid(wantsToProceed, null) || userHasRegisteredProperties == false
-
     fun isNotNullWhenLandlordHasNoProperties(): Boolean =
         NotNullValidator().isValid(wantsToProceed, null) || userHasRegisteredProperties == true
 }

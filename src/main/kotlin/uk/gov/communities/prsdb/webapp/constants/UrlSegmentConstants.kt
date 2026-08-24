@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.constants
 const val UPDATE_PATH_SEGMENT = "update"
 const val LANDLORD_DETAILS_PATH_SEGMENT = "landlord-details"
 const val PROPERTY_DETAILS_SEGMENT = "property-details"
+const val REMOVE_LETTING_AGENT_PATH_SEGMENT = "remove-letting-agent"
 const val LOCAL_COUNCIL_PATH_SEGMENT = "local-council"
 const val LANDLORD_PATH_SEGMENT = "landlord"
 const val PROPERTY_PATH_SEGMENT = "property"

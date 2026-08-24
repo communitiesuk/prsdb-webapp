@@ -76,6 +76,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     val propertyCompliance: PropertyCompliance? = null
 
+    @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
+    val lettingAgentAccess: LettingAgentAccess? = null
+
+    val delegatesToLettingAgent: Boolean get() = lettingAgentAccess != null
+
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
 

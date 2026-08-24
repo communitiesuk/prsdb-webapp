@@ -30,6 +30,56 @@ class MyTaskRunner(
 - Annotate with `@PrsdbScheduledTask("task-name")` — this combines `@Component`, `@TaskName`, and conditional activation
 - The task **must** call `SpringApplication.exit()` and `exitProcess()` at the end
 - Inject services for business logic — keep the runner thin
+- The task **must exit with a non-zero exit code if any error occurs during execution** — see [Error Handling and Exit Codes](#error-handling-and-exit-codes)
+
+## Error Handling and Exit Codes
+
+Production tasks run as ephemeral ECS tasks, and the infrastructure **alarms when a task exits with a non-zero exit
+code**. This is the primary signal that a scheduled task has failed. It is therefore critical that **any error during
+execution results in a non-zero exit code** — otherwise failures are silent and no alarm is raised.
+
+There are two acceptable patterns, depending on whether the task should stop on the first error or process a batch to
+completion:
+
+### 1. Fail fast — let the exception propagate
+
+If the task should abort as soon as anything goes wrong, do nothing special: an uncaught exception thrown from `run()`
+causes Spring Boot to exit with a non-zero code. If you catch an exception only to log it, you **must re-throw** it:
+
+```kotlin
+override fun run(args: ApplicationArguments?) {
+    try {
+        service.doWork()
+        exitProcess(SpringApplication.exit(context, { 0 }))
+    } catch (throwable: Throwable) {
+        println("Error during task execution: ${throwable.message}")
+        throw throwable // re-throw so the process exits non-zero and the alarm fires
+    }
+}
+```
+
+### 2. Process the whole batch, then fail if any item failed
+
+If the task processes many items and one bad item should **not** stop the others (e.g. sending a batch of emails),
+catch the per-item exception, log it, continue, but **track the failures**. Return a failure count from the service /
+task logic and have the runner set a non-zero exit code when it is greater than zero:
+
+```kotlin
+override fun run(args: ApplicationArguments?) {
+    val failureCount = taskLogic.doWork()
+
+    val exitCode = if (failureCount > 0) 1 else 0
+    val code = SpringApplication.exit(context, { exitCode })
+    exitProcess(code)
+}
+```
+
+**Do not** silently swallow exceptions and exit 0 — a caught-and-logged error that still exits 0 will not raise an
+alarm and the failure will go unnoticed.
+
+> **Note on `@Transactional` batch tasks:** prefer *returning* a failure count over *throwing* after a partially
+> successful batch. Throwing out of a `@Transactional` method rolls back the whole transaction, undoing the work that
+> did succeed. Returning the count lets the successful work commit while the runner still exits non-zero.
 
 ## Custom Annotations
 
@@ -73,5 +123,7 @@ In production, tasks are triggered by **EventBridge Scheduler** which spins up e
 1. Create the runner class in `application/` implementing `ApplicationRunner`
 2. Annotate with `@PrsdbScheduledTask("your-task-name")`
 3. Inject services for business logic
-4. Call `SpringApplication.exit()` and `exitProcess()` at the end of `run()`
-5. Add any task-only services with `@PrsdbTaskService`
+4. Ensure any error during execution results in a non-zero exit code (fail fast by letting exceptions propagate, or
+   track failures and set the exit code — see [Error Handling and Exit Codes](#error-handling-and-exit-codes))
+5. Call `SpringApplication.exit()` and `exitProcess()` at the end of `run()`
+6. Add any task-only services with `@PrsdbTaskService`
