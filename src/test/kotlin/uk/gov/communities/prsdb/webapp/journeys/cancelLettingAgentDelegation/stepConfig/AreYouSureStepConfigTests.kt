@@ -1,81 +1,99 @@
 package uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
-import uk.gov.communities.prsdb.webapp.services.CancelLettingAgentDelegationEmailService
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 
 @ExtendWith(MockitoExtension::class)
 class AreYouSureStepConfigTests {
     @Mock
-    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+    lateinit var mockState: CancelLettingAgentDelegationJourneyState
 
     @Mock
-    lateinit var mockCancelLettingAgentDelegationEmailService: CancelLettingAgentDelegationEmailService
-
-    @Mock
-    lateinit var mockJourneyState: CancelLettingAgentDelegationJourneyState
-
-    @Mock
-    lateinit var mockPropertyOwnership: PropertyOwnership
-
-    @Mock
-    lateinit var mockLettingAgentAccess: LettingAgentAccess
-
-    private fun createStepConfig() =
-        AreYouSureStepConfig(mockPropertyOwnershipService, mockCancelLettingAgentDelegationEmailService).apply {
-            urlPath = AreYouSureStep.ROUTE_SEGMENT
-            validator = AlwaysTrueValidator()
-        }
+    lateinit var mockLettingAgentAccessService: LettingAgentAccessService
 
     @Test
-    fun `afterStepDataIsAdded sends cancellation emails with the letting agent email`() {
-        val stepConfig = createStepConfig()
-
-        whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID)).thenReturn(mockPropertyOwnership)
-        whenever(mockPropertyOwnership.lettingAgentAccess).thenReturn(mockLettingAgentAccess)
-        whenever(mockLettingAgentAccess.invitedEmail).thenReturn("agent@example.com")
-
-        stepConfig.afterStepDataIsAdded(mockJourneyState)
-
-        verify(mockCancelLettingAgentDelegationEmailService).sendCancellationEmails(mockPropertyOwnership, "agent@example.com")
+    fun `chooseTemplate returns the shared areYouSureForm template`() {
+        assertEquals("forms/areYouSureForm", setupStepConfig().chooseTemplate(mockState))
     }
 
     @Test
-    fun `afterStepDataIsAdded throws PrsdbWebException when letting agent access is null`() {
-        val stepConfig = createStepConfig()
+    fun `mode returns null when the form has not been submitted`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(null)
 
-        whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID)).thenReturn(mockPropertyOwnership)
-        whenever(mockPropertyOwnership.lettingAgentAccess).thenReturn(null)
-
-        assertThrows<PrsdbWebException> {
-            stepConfig.afterStepDataIsAdded(mockJourneyState)
-        }
+        assertNull(stepConfig.mode(mockState))
     }
 
     @Test
-    fun `resolveNextDestination deletes the journey and returns the default destination`() {
-        val stepConfig = createStepConfig()
-        val defaultDestination = Destination.ExternalUrl("/landlord/property-details/$PROPERTY_OWNERSHIP_ID")
+    fun `mode returns null when wantsToProceed has not been answered`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
-        val result = stepConfig.resolveNextDestination(mockJourneyState, defaultDestination)
+        assertNull(stepConfig.mode(mockState))
+    }
 
-        verify(mockJourneyState).deleteJourney()
-        assertEquals(defaultDestination, result)
+    @Test
+    fun `mode returns WANTS_TO_PROCEED when wantsToProceed is true`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("wantsToProceed" to "true"))
+
+        assertEquals(AreYouSureMode.WANTS_TO_PROCEED, stepConfig.mode(mockState))
+    }
+
+    @Test
+    fun `mode returns DOES_NOT_WANT_TO_PROCEED when wantsToProceed is false`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("wantsToProceed" to "false"))
+
+        assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, stepConfig.mode(mockState))
+    }
+
+    @Test
+    fun `getStepSpecificContent uses the letting agent email as the heading parameter`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "letting.agent.one@example.com"))
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals("cancelLettingAgentDelegation.areYouSure.fieldSetHeading", content["fieldSetHeading"])
+        assertEquals("letting.agent.one@example.com", content["optionalFieldSetHeadingParam"])
+        assertEquals("cancelLettingAgentDelegation.areYouSure.fieldSetHint", content["fieldSetHint"])
+        assertTrue(content.containsKey("radioOptions"))
+    }
+
+    @Test
+    fun `getStepSpecificContent renders a Confirm button with no cancel link`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess())
+
+        val content = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals("cancelLettingAgentDelegation.areYouSure.confirmButton", content["submitButtonTextKey"])
+        assertFalse(content["showCancelLink"] as Boolean)
+    }
+
+    private fun setupStepConfig(): AreYouSureStepConfig {
+        val stepConfig = AreYouSureStepConfig(mockLettingAgentAccessService)
+        stepConfig.urlPath = AreYouSureStep.ROUTE_SEGMENT
+        stepConfig.validator = AlwaysTrueValidator()
+        return stepConfig
     }
 
     companion object {
