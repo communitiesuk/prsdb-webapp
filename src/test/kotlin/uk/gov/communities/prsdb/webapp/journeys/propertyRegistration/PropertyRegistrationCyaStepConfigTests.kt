@@ -40,8 +40,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
