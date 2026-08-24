@@ -600,6 +600,12 @@ update:
   occupancy:
     occupied:
       fieldSetHeading: Update whether your property is occupied by tenants
+    lettingAgentInterruption:
+      heading: Are you sure you want to change this?
+      paragraph:
+        one: You’ve changed this property to being unoccupied.
+        two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
+        three: You can go back to undo this change.
   numberOfHouseholds:
     fieldSetHeading: Update how many households live in your property
   numberOfPeople:

@@ -62,7 +62,8 @@ for details.
 
 ### Known coverage gaps
 
-Three journeys are intentionally not counted. In each case there is no place to fire the event
+Some journeys, or paths through them, are intentionally not counted. In each case there is no place to
+fire the event
 exactly once per completion, and the project's standing preference is to **under-count rather than
 over-count**.
 
@@ -104,6 +105,21 @@ single path. Under-counting was preferred to double-counting. The other four lan
 Note that `forms/selectAddressForm.html` and `forms/manualAddressForm.html` are shared with the
 landlord registration, property registration, governing body member address and trustee address
 journeys, so any future fix must tag the update journey without affecting those.
+
+#### Occupancy updates on a property delegated to a letting agent
+
+Where a property is currently occupied *and* delegated to a letting agent, the occupancy update
+journey shows an "are you sure" interruption before saving, because making the property unoccupied
+removes the letting agent from the registration. The interruption is the commit step on that path, so
+it carries the `Transaction` tag and the tag is dropped from the preceding `occupied` question page —
+tagging both would count the journey twice.
+
+**Decision:** on that page, answering "yes" (leaving the property occupied) is intentionally **not
+counted**. Whether the interruption follows is a render-time decision taken before the user's radio
+selection is known, so the `occupied` page cannot be tagged only for the "yes" answer. The gap is
+harmless in practice: the interruption is only shown when the property was *already* occupied, so
+answering "yes" leaves the occupancy unchanged. All other occupancy updates — including every update
+to a property with no letting agent — are counted as normal.
 
 ## Cost and cost per transaction
 

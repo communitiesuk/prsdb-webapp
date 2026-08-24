@@ -5,6 +5,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -12,11 +13,13 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LettingAgentInterruptionState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -54,6 +57,8 @@ class UpdateOccupancyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.wasOccupied = propertyOwnership.isOccupied
+            state.isDelegatedToLettingAgent =
+                featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) && propertyOwnership.delegatesToLettingAgent
             state.isStateInitialized = true
         }
 
@@ -85,22 +90,45 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.completeOccupancyUpdateStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                        "submitButton" to "transactionSubmitButton",
-                        "showWarning" to true,
-                    )
+                nextStep { mode ->
+                    if (mode == YesOrNo.NO && journey.showsLettingAgentInterruption) {
+                        journey.lettingAgentInterruptionStep
+                    } else {
+                        journey.completeOccupancyUpdateStep
+                    }
                 }
+                withAdditionalContentProperties {
+                    buildMap {
+                        put("title", "propertyDetails.update.title")
+                        put("fieldSetHeading", "forms.update.occupancy.occupied.fieldSetHeading")
+                        put("submitButtonText", "forms.buttons.confirmAndSubmitUpdate")
+                        put("showWarning", true)
+                        // When the interruption follows this page it becomes the commit step and carries the
+                        // transaction event instead - tagging both would count the journey twice
+                        if (!journey.showsLettingAgentInterruption) {
+                            put("submitButton", "transactionSubmitButton")
+                        }
+                    }
+                }
+            }
+            step(journey.lettingAgentInterruptionStep) {
+                routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
+                parents {
+                    SingleParent(journey.occupied) {
+                        journey.occupied.outcome == YesOrNo.NO && journey.showsLettingAgentInterruption
+                    }
+                }
+                nextStep { journey.completeOccupancyUpdateStep }
+                withAdditionalContentProperties { mapOf("title" to "propertyDetails.update.title") }
             }
             step(journey.completeOccupancyUpdateStep) {
                 parents {
                     OrParents(
                         journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
+                        SingleParent(journey.occupied) {
+                            journey.occupied.outcome == YesOrNo.NO && !journey.showsLettingAgentInterruption
+                        },
+                        journey.lettingAgentInterruptionStep.isComplete(),
                     )
                 }
                 nextUrl { propertyDetailsRoute }
@@ -266,6 +294,8 @@ class UpdateOccupancyJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
+    // Interruption shown when unoccupying a property that is delegated to a letting agent
+    override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -283,6 +313,8 @@ class UpdateOccupancyJourney(
 
     override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
+    override var isDelegatedToLettingAgent: Boolean by delegateProvider.requiredImmutableDelegate("isDelegatedToLettingAgent")
+
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
     override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(false)
@@ -290,11 +322,12 @@ class UpdateOccupancyJourney(
 
 interface UpdateOccupancyJourneyState :
     OccupationState,
+    LettingAgentInterruptionState,
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
+    val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep
     val propertyId: Long
     val lastModifiedDate: String
-    val wasOccupied: Boolean
 }

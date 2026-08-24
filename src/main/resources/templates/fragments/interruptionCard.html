@@ -1,4 +1,4 @@
-<div th:fragment="interruptionCard(heading, bodyContent, buttonText, backUrl)" class="moj-interruption-card">
+<div th:fragment="interruptionCard(heading, bodyContent, buttonText, backUrl, isTransactionButton)" class="moj-interruption-card">
     <div class="moj-interruption-card__content">
         <h1 class="govuk-heading-l moj-interruption-card__heading" th:text="${heading}">heading</h1>
         <div class="govuk-body-l moj-interruption-card__body">
@@ -6,6 +6,7 @@
         </div>
         <div class="govuk-button-group moj-interruption-card__actions">
             <button type="submit" class="govuk-button govuk-button--inverse" data-module="govuk-button"
+                    th:attr="data-plausible-event=${isTransactionButton} ? 'Transaction' : null"
                     th:text="${buttonText}">
                 buttonText
             </button>
