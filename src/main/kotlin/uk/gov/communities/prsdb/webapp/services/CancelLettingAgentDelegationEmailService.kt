@@ -23,6 +23,7 @@ class CancelLettingAgentDelegationEmailService(
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 
         landlordConfirmationEmailService.sendEmail(
+            // TOOD: PDJB-1274: Update for sending to org landlords
             actingLandlord.email,
             CancelDelegationLandlordConfirmationEmail(
                 landlordName = actingLandlord.name,
@@ -34,6 +35,7 @@ class CancelLettingAgentDelegationEmailService(
 
         propertyOwnership.otherLandlordsTo(actingLandlord).forEach { jointLandlord ->
             jointLandlordNotificationEmailService.sendEmail(
+                // TOOD: PDJB-1274: Update for sending to org landlords
                 jointLandlord.email,
                 CancelDelegationJointLandlordNotificationEmail(
                     jointLandlordName = jointLandlord.name,
