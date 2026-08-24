@@ -1,10 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -16,30 +17,31 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 import kotlin.test.assertEquals
 
+@ExtendWith(MockitoExtension::class)
 class CancelLettingAgentDelegationEmailServiceTests {
-    private lateinit var mockUserToLandlordService: UserToLandlordService
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var mockLandlordConfirmationEmailService: EmailNotificationService<CancelDelegationLandlordConfirmationEmail>
-    private lateinit var mockJointLandlordNotificationEmailService: EmailNotificationService<CancelDelegationJointLandlordNotificationEmail>
-    private lateinit var mockLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>
-    private lateinit var emailService: CancelLettingAgentDelegationEmailService
+    @Mock
+    lateinit var mockUserToLandlordService: UserToLandlordService
 
-    @BeforeEach
-    fun setup() {
-        mockUserToLandlordService = mock()
-        mockAbsoluteUrlProvider = mock()
-        mockLandlordConfirmationEmailService = mock()
-        mockJointLandlordNotificationEmailService = mock()
-        mockLettingAgentNotificationEmailService = mock()
-        emailService =
-            CancelLettingAgentDelegationEmailService(
-                mockUserToLandlordService,
-                mockAbsoluteUrlProvider,
-                mockLandlordConfirmationEmailService,
-                mockJointLandlordNotificationEmailService,
-                mockLettingAgentNotificationEmailService,
-            )
-    }
+    @Mock
+    lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    lateinit var mockLandlordConfirmationEmailService: EmailNotificationService<CancelDelegationLandlordConfirmationEmail>
+
+    @Mock
+    lateinit var mockJointLandlordNotificationEmailService: EmailNotificationService<CancelDelegationJointLandlordNotificationEmail>
+
+    @Mock
+    lateinit var mockLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>
+
+    private fun createEmailService() =
+        CancelLettingAgentDelegationEmailService(
+            mockUserToLandlordService,
+            mockAbsoluteUrlProvider,
+            mockLandlordConfirmationEmailService,
+            mockJointLandlordNotificationEmailService,
+            mockLettingAgentNotificationEmailService,
+        )
 
     private val lettingAgentEmail = "agent@example.com"
 
@@ -50,7 +52,7 @@ class CancelLettingAgentDelegationEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
-        emailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
+        createEmailService().sendCancellationEmails(propertyOwnership, lettingAgentEmail)
 
         val captor = argumentCaptor<CancelDelegationLandlordConfirmationEmail>()
         verify(mockLandlordConfirmationEmailService).sendEmail(eq("alice@example.com"), captor.capture())
@@ -72,7 +74,7 @@ class CancelLettingAgentDelegationEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actingLandlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
-        emailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
+        createEmailService().sendCancellationEmails(propertyOwnership, lettingAgentEmail)
 
         val captor = argumentCaptor<CancelDelegationJointLandlordNotificationEmail>()
         verify(mockJointLandlordNotificationEmailService).sendEmail(eq("bob@example.com"), captor.capture())
@@ -87,7 +89,7 @@ class CancelLettingAgentDelegationEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
-        emailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
+        createEmailService().sendCancellationEmails(propertyOwnership, lettingAgentEmail)
 
         val captor = argumentCaptor<CancelDelegationLettingAgentNotificationEmail>()
         verify(mockLettingAgentNotificationEmailService).sendEmail(eq("agent@example.com"), captor.capture())
@@ -102,7 +104,7 @@ class CancelLettingAgentDelegationEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(5)).thenReturn(URI("https://example.com/property/5"))
 
-        emailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
+        createEmailService().sendCancellationEmails(propertyOwnership, lettingAgentEmail)
 
         verify(mockJointLandlordNotificationEmailService, never()).sendEmail(any(), any())
     }
