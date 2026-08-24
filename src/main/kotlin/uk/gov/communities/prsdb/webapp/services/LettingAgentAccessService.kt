@@ -30,15 +30,7 @@ class LettingAgentAccessService(
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
     @Transactional
-    fun deleteInvitation(lettingAgentAccess: LettingAgentAccess) {
-        // Clearing the association is what deletes the row. PropertyOwnership.lettingAgentAccess is the inverse side of
-        // a one-to-one with orphanRemoval = true, so Hibernate deletes the orphaned LettingAgentAccess on flush.
-        lettingAgentAccess.propertyOwnership.lettingAgentAccess = null
-    }
-
-    @Transactional
     fun deleteInvitationByPropertyOwnershipId(propertyOwnershipId: Long) {
-        val invitation = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId) ?: return
-        deleteInvitation(invitation)
+        lettingAgentAccessRepository.deleteByPropertyOwnershipId(propertyOwnershipId)
     }
 }

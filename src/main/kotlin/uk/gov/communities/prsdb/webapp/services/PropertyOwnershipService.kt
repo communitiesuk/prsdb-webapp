@@ -453,6 +453,8 @@ class PropertyOwnershipService(
     fun retrieveAllActivePropertiesForLandlord(landlord: Landlord): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id)
 
+    // Child rows are removed by orphanRemoval on PropertyOwnership's associations, except letting_agent_access, which
+    // is not mapped from this side and is removed by an ON DELETE CASCADE (see V1_50_0).
     fun deletePropertyOwnership(propertyOwnershipId: Long) {
         propertyOwnershipRepository.deleteById(propertyOwnershipId)
     }

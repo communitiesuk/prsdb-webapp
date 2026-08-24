@@ -11,7 +11,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
@@ -82,32 +81,9 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `deleteInvitation clears the delegation from the property ownership`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
-        invitation.propertyOwnership.lettingAgentAccess = invitation
-
-        lettingAgentAccessService.deleteInvitation(invitation)
-
-        assertNull(invitation.propertyOwnership.lettingAgentAccess)
-    }
-
-    @Test
-    fun `deleteInvitationByPropertyOwnershipId clears the delegation when one exists`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
-        invitation.propertyOwnership.lettingAgentAccess = invitation
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(invitation)
-
+    fun `deleteInvitationByPropertyOwnershipId deletes the invitation`() {
         lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
 
-        assertNull(invitation.propertyOwnership.lettingAgentAccess)
-    }
-
-    @Test
-    fun `deleteInvitationByPropertyOwnershipId does nothing when no invitation exists`() {
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
-
-        lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
-
-        verify(lettingAgentAccessRepository, never()).delete(any<LettingAgentAccess>())
+        verify(lettingAgentAccessRepository).deleteByPropertyOwnershipId(1L)
     }
 }
