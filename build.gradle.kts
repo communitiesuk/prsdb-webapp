@@ -38,8 +38,9 @@ extra["logback.version"] = "1.5.35"
 // CVE-2026-54515 / GHSA-5jmj-h7xm-6q6v: jackson-databind case-insensitive @JsonIgnoreProperties bypass (fixed in 2.21.5).
 extra["jackson-bom.version"] = "2.21.5"
 // Multiple netty-codec / netty-codec-http / netty-codec-http2 advisories fixed in 4.1.136.Final
-// (CVE-2026-55831, -55833, -56745, -56746, -59898, -59899, -59900, -59901, -59921).
-extra["netty.version"] = "4.1.136.Final"
+// (CVE-2026-55831, -55833, -56745, -56746, -59898, -59899, -59900, -59901, -59921), plus
+// GHSA-8c42-7qj2-3j46: netty-codec-http CORS Vary header overwrite cache poisoning (fixed in 4.1.137.Final).
+extra["netty.version"] = "4.1.137.Final"
 // CVE-2026-54291 / GHSA-j92g-9f8w-j867: PostgreSQL JDBC silent channel-binding auth downgrade (fixed in 42.7.12).
 extra["postgresql.version"] = "42.7.12"
 // CVE-2026-49844 / GHSA-qv9r-c865-cp47: log4j-api improper encoding of non-finite floating-point values

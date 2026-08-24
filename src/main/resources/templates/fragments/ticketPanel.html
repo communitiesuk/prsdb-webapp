@@ -2,7 +2,9 @@
     <section class="moj-ticket-panel__content moj-ticket-panel__content--blue">
         <h2 class="govuk-heading-m" th:text="#{${heading}}">Ticket panel heading</h2>
         <th:block th:insert="${content}"></th:block>
-        <a th:if="${link != null}" class="govuk-link" th:href="@{${link.url}}" th:text="#{${link.text}}"
-           th:attr="target=${link.opensInNewTab} ? '_blank' : null, rel=${link.opensInNewTab} ? 'noreferrer noopener' : null">Link text</a>
+        <p class="govuk-body">
+            <a th:if="${link != null}" class="govuk-link" th:href="@{${link.url}}" th:text="#{${link.text}}"
+               th:attr="target=${link.opensInNewTab} ? '_blank' : null, rel=${link.opensInNewTab} ? 'noreferrer noopener' : null">Link text</a>
+        </p>
     </section>
 </article>

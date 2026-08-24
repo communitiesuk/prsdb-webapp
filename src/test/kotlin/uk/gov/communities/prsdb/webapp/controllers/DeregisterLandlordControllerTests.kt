@@ -106,7 +106,6 @@ class DeregisterLandlordControllerTests(
     fun `getConfirmation returns 200 if the landlord was deregistered in the session`() {
         whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
         whenever(userToLandlordService.doesCurrentUserHaveLandlord()).thenReturn(false)
-        whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
             .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")

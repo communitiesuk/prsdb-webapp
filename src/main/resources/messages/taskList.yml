@@ -1,6 +1,7 @@
 status:
-  cannotStart: Cannot start yet
-  notStarted: Not started
+  cannotStart: Cannot start yet
+  notStarted: Not started
   inProgress: In progress
   completed: Completed
   notRequired: Not required
+  notNeededYet: Not needed yet

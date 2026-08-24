@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration
 
-import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,7 +18,7 @@ class PropertyRegistrationPreRestructureTaskListSinglePageTests : IntegrationTes
     @Nested
     inner class TaskListStep {
         @Test
-        fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
+        fun `Completing preceding steps will show a task as not started and completed steps as complete`() {
             navigator.skipToPropertyRegistrationHasJointLandlordsPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Property address", "Complete"))
@@ -27,21 +26,21 @@ class PropertyRegistrationPreRestructureTaskListSinglePageTests : IntegrationTes
             assert(taskListPage.taskHasStatus("How you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
             assert(taskListPage.taskHasStatus("Tenancy and rental information", "Complete"))
-            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
-            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not\u00A0started"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot\u00A0start\u00A0yet"))
         }
 
         @Test
-        fun `EPC task (starting with an internal step) shows as Not Started when the user is on the first step they see`(page: Page) {
+        fun `EPC task (starting with an internal step) shows as Not Started when the user is on the first step they see`() {
             navigator.skipToPropertyRegistrationHasEpcPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Not started"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Not\u00A0started"))
         }
 
         @Test
-        fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
+        fun `Completing first step of a task will show a task as in progress and completed steps as complete`() {
             navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Property address", "Complete"))
@@ -49,10 +48,10 @@ class PropertyRegistrationPreRestructureTaskListSinglePageTests : IntegrationTes
             assert(taskListPage.taskHasStatus("How you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
             assert(taskListPage.taskHasStatus("Tenancy and rental information", "In progress"))
-            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
-            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot\u00A0start\u00A0yet"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot\u00A0start\u00A0yet"))
         }
     }
 }

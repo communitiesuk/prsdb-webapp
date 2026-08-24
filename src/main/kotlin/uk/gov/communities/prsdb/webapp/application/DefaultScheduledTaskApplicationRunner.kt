@@ -16,7 +16,7 @@ class DefaultScheduledTaskApplicationRunner(
         println("The application was not configured for this scheduled task. Application will exit now.")
 
         val code =
-            SpringApplication.exit(context, { 0 })
+            SpringApplication.exit(context, { 1 })
         exitProcess(code)
     }
 }

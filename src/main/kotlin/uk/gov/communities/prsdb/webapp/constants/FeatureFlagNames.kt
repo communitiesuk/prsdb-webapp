@@ -18,6 +18,8 @@ const val PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING = "pdjb-939-property-re
 
 const val DASHBOARD_NAV_LINK = "pdjb-1053-dashboard-nav-link"
 
+const val DELEGATE_TO_LETTING_AGENT = "pdjb-1022-delegate-to-letting-agent"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -25,4 +27,5 @@ val featureFlagNames =
         ORGANISATION_LANDLORD_REGISTRATION,
         PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING,
         DASHBOARD_NAV_LINK,
+        DELEGATE_TO_LETTING_AGENT,
     )
