@@ -36,7 +36,7 @@ class AreYouSureStepConfig(
                     "Cannot cancel letting agent delegation for property ownership ${state.propertyOwnershipId}: " +
                         "no letting agent access found",
                 )
-        // TODO PDJB-1413: remove the letting agent / property manager delegation for this property
+        // TODO PDJB-1413: remove the letting agent / property manager delegation for this property & check the answer for delete is 'yes'
         cancelLettingAgentDelegationEmailService.sendCancellationEmails(propertyOwnership, lettingAgentAccess.invitedEmail)
     }
 
