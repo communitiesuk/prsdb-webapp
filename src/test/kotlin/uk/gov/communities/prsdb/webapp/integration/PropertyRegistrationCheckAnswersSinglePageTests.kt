@@ -12,6 +12,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -32,6 +33,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideTenancyDetailsLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertTrue
@@ -44,14 +47,15 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
     @BeforeEach
-    fun enableRestructureAndSkippingFlag() {
+    fun enabledFeatureFlags() {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
     @Nested
     inner class Confirmation {
         @Test
-        fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
+        fun `navigating here with an incomplete form returns a 400 error page`(page: Page) {
             navigator.navigateToPropertyRegistrationConfirmationPage()
             val errorPage = assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
@@ -61,7 +65,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
-        fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
+        fun `after changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -127,6 +131,89 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             occupancyPage.submitIsVacant()
             val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(updatedCheckAnswersPage.summaryList.occupancyQuestionRow.value).containsText("No")
+        }
+
+        @Test
+        fun `when landlord provides details, rented out section is shown and email row is hidden`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withLandlordProvidesRentalDetails()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
+            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isHidden()
+        }
+
+        @Test
+        fun `when letting agent provides details, rented out section shows email row with change link`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withLettingAgentProvidesRentalDetails()
+                        .withSubmittedValue(LettingAgentEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("My letting agent or property manager")
+            assertThat(
+                checkAnswersPage.summaryList.lettingAgentEmailRow.key,
+            ).containsText("Letting agent or property manager’s email address")
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
+            checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
+            assertTrue(page.url().contains("/letting-agent-email"))
+        }
+        
+        @Test
+        fun `rented out section appears after occupied and before licensing when landlord provides details`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withLandlordProvidesRentalDetails()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            val headings =
+                page
+                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
+                    .allInnerTexts()
+                    .map { it.trim() }
+            val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
+            val rentedOutIndex = headings.indexOf("How your property’s rented out")
+            val licensingIndex = headings.indexOf("Tell us if your property needs a license")
+
+            assertTrue(occupancyIndex >= 0 && rentedOutIndex >= 0 && licensingIndex >= 0)
+            assertTrue(rentedOutIndex > occupancyIndex, "Rented-out section should appear after occupied section")
+            assertTrue(rentedOutIndex < licensingIndex, "Rented-out section should appear before licensing section")
+        }
+
+        @Test
+        fun `when delegate to letting agent feature is disabled, rented out section is not displayed`(page: Page) {
+            featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withLandlordProvidesRentalDetails()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationHeading).isHidden()
         }
 
         @Test
@@ -229,14 +316,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class ConfirmMissingComplianceStep {
         @Test
-        fun `Submitting with no option selected returns an error`(page: Page) {
+        fun `submitting with no option selected returns an error`(page: Page) {
             val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
             confirmPage.form.submit()
             assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this registration")
         }
 
         @Test
-        fun `Selecting no, go back redirects to the check answers page`(page: Page) {
+        fun `selecting no, go back redirects to the check answers page`(page: Page) {
             val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
             confirmPage.form.radios.selectValue("false")
             confirmPage.form.submit()

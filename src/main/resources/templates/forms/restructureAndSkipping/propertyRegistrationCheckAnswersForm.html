@@ -25,8 +25,8 @@
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
-<!--/*@thymesVar id="lettingAgentDelegationTodo" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="lettingAgentDelegationTodoText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="lettingAgentDelegation" type="java.util.List"*/-->
+<!--/*@thymesVar id="lettingAgentDelegationBodyText" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
@@ -38,21 +38,8 @@
         <th:block th:if="${insetText == true}">
             <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
-        <!--/* TODO PDJB-1391: placeholder banner shown while the letting-agent path reuses this CYA page with mocked
-               "provide later" values for the skipped licensing and tenancy sections. Remove when the real
-               delegated-details display is implemented. */-->
-        <div th:if="${lettingAgentDelegationTodo == true}" class="govuk-warning-text">
-            <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-            <strong class="govuk-warning-text__text">
-                <span class="govuk-visually-hidden">Warning</span>
-                <span th:text="${lettingAgentDelegationTodoText}"></span>
-            </strong>
-        </div>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
-        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
-        <h3 class="govuk-heading-s" th:text="#{registerProperty.taskList.rentedOut.licensing}"></h3>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
         <th:block th:if="${!#lists.isEmpty(occupancyDetails)}">
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.occupancy.heading}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${occupancyDetails})}"></dl>
@@ -61,6 +48,15 @@
             <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
         </th:block>
+        <th:block th:if="${!#lists.isEmpty(lettingAgentDelegation)}">
+            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.heading}"></h2>
+            <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
+            <p th:if="${lettingAgentDelegationBodyText == true}" class="govuk-body" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.bodyText}"></p>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${lettingAgentDelegation})}"></dl>
+        </th:block>
+        <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}"></h2>
+        <h3 class="govuk-heading-s" th:text="#{registerProperty.taskList.rentedOut.licensing}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{registerProperty.checkAnswers.complianceCertificates.heading}"></h2>
         <h3 class="govuk-heading-s" th:text="#{checkGasSafety.heading}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>

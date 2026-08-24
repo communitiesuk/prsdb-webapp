@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,30 +15,37 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideTenancyDetailsLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -118,6 +126,21 @@ class PropertyRegistrationCyaStepConfigTests {
     @Mock
     private lateinit var mockProvideTenancyDetailsLaterStep: ProvideTenancyDetailsLaterStep
 
+    @Mock
+    private lateinit var mockWhoProvidesDetailsTask: WhoProvidesDetailsTask
+
+    @Mock
+    private lateinit var mockWhoProvidesRentalDetailsStep: WhoProvidesRentalDetailsStep
+
+    @Mock
+    private lateinit var mockWhoProvidesRentalDetailsFormModel: WhoProvidesRentalDetailsFormModel
+
+    @Mock
+    private lateinit var mockNoInputFormModel: NoInputFormModel
+
+    @Mock
+    private lateinit var mockLettingAgentEmailStep: LettingAgentEmailStep
+
     private lateinit var stepConfig: PropertyRegistrationCyaStepConfig
 
     @BeforeEach
@@ -131,6 +154,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 mockMessageSource,
                 mockFeatureFlagManager,
             )
+        lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         lenient().`when`(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         lenient().`when`(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
         lenient().`when`(mockAddressTask.getAddress()).thenReturn(AddressDataModel("1 Test Street", localCouncilId = 1))
@@ -157,6 +181,12 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockComplianceDetailsHelper.getGasSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getElectricalSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getEpcCyaContent(any(), any())).thenReturn(emptyMap())
+        lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
+        lenient().`when`(mockWhoProvidesDetailsTask.whoProvidesRentalDetailsStep).thenReturn(mockWhoProvidesRentalDetailsStep)
+        lenient().`when`(mockWhoProvidesRentalDetailsStep.formModel).thenReturn(mockWhoProvidesRentalDetailsFormModel)
+        lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
+        lenient().`when`(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
+        lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockNoInputFormModel)
     }
 
     @Nested
@@ -227,6 +257,66 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(expectedTenancyDetails, content["tenancyDetails"])
+        }
+    }
+
+    @Nested
+    inner class LettingAgentDelegationEnabled {
+        @BeforeEach
+        fun enableDelegationFlags() {
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
+        }
+
+        @Test
+        fun `getStepSpecificContent includes lettingAgentDelegation when delegated to agent`() {
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(content.containsKey("lettingAgentDelegation"))
+            val delegationSection = content["lettingAgentDelegation"] as? List<*>
+            assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
+            assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
+        }
+
+        @Test
+        fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details`() {
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+            val delegationSection = content["lettingAgentDelegation"] as? List<*>
+
+            assertTrue(content.containsKey("lettingAgentDelegation"))
+            assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
+            assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides form model is missing`() {
+            whenever(mockWhoProvidesRentalDetailsStep.formModelOrNull).thenReturn(null)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+        }
+    }
+
+    @Nested
+    inner class LettingAgentDelegationDisabled {
+        @BeforeEach
+        fun disableDelegationFlag() {
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation when delegate feature is disabled`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
         }
     }
 }
