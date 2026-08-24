@@ -21,6 +21,9 @@ class WhoProvidesDetailsTask(
     WhoProvidesDetailsState {
     override val taskState get() = this
 
+    // Hoists the who-provides answer onto a stable state key so the occupancy-change routing can read it from
+    // the base journey. The who-provides step isn't declared in that CYA journey, so its urlPath is unset and a
+    // form-model read would throw (see TODO PDJB-585). Populated in WhoProvidesRentalDetailsStepConfig.afterStepDataIsAdded.
     override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
         delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
 

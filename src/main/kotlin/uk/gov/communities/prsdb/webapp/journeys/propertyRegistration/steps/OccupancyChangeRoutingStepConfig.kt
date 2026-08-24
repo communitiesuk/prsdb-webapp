@@ -15,10 +15,10 @@ enum class OccupancyChangeRouteMode {
 @JourneyFrameworkComponent
 class OccupancyChangeRoutingStepConfig :
     AbstractInternalStepConfig<OccupancyChangeRouteMode, PropertyRegistrationJourneyState>() {
-    private lateinit var wasDelegatedToLettingAgent: () -> Boolean
+    private lateinit var previousIsDelegatedToLettingAgent: () -> Boolean
 
-    fun usingPreviousDelegation(wasDelegatedToLettingAgent: () -> Boolean): OccupancyChangeRoutingStepConfig {
-        this.wasDelegatedToLettingAgent = wasDelegatedToLettingAgent
+    fun usingPreviousDelegation(previousIsDelegatedToLettingAgent: () -> Boolean): OccupancyChangeRoutingStepConfig {
+        this.previousIsDelegatedToLettingAgent = previousIsDelegatedToLettingAgent
         return this
     }
 
@@ -28,11 +28,11 @@ class OccupancyChangeRoutingStepConfig :
             baseState.whoProvidesDetailsTask.cachedWhoProvidesRentalDetails == WhoProvidesRentalDetails.LETTING_AGENT
     }
 
-    override fun isSubClassInitialised() = ::wasDelegatedToLettingAgent.isInitialized
+    override fun isSubClassInitialised() = ::previousIsDelegatedToLettingAgent.isInitialized
 
     override fun mode(state: PropertyRegistrationJourneyState): OccupancyChangeRouteMode? {
         val newOccupancy = state.occupied.outcome ?: return null
-        return if (wasDelegatedToLettingAgent() && newOccupancy == YesOrNo.NO) {
+        return if (previousIsDelegatedToLettingAgent() && newOccupancy == YesOrNo.NO) {
             OccupancyChangeRouteMode.REMOVING_DELEGATION
         } else {
             OccupancyChangeRouteMode.NO_INTERRUPTION
