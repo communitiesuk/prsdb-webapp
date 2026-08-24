@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -11,52 +14,107 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoPr
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 class OccupancyChangeRoutingStepConfigTests {
-    private val config = OccupancyChangeRoutingStepConfig()
+    @Nested
+    inner class ModeTests {
+        @Test
+        fun `mode is REMOVING_DELEGATION when previously delegated to a letting agent and now unoccupied`() {
+            val result = configuredConfig(wasDelegated = true).mode(stateWith(YesOrNo.NO))
 
-    @Test
-    fun `mode is REMOVING_DELEGATION when previously delegated to a letting agent and now unoccupied`() {
-        val result = config.mode(stateWith(YesOrNo.NO, WhoProvidesRentalDetails.LETTING_AGENT))
-
-        assertEquals(OccupancyChangeRouteMode.REMOVING_DELEGATION, result)
-    }
-
-    @Test
-    fun `mode is NO_INTERRUPTION when previously delegated but staying occupied`() {
-        val result = config.mode(stateWith(YesOrNo.YES, WhoProvidesRentalDetails.LETTING_AGENT))
-
-        assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
-    }
-
-    @Test
-    fun `mode is NO_INTERRUPTION when the landlord provides details and now unoccupied`() {
-        val result = config.mode(stateWith(YesOrNo.NO, WhoProvidesRentalDetails.LANDLORD))
-
-        assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
-    }
-
-    @Test
-    fun `mode is NO_INTERRUPTION when there is no cached delegation and now unoccupied`() {
-        val result = config.mode(stateWith(YesOrNo.NO, null))
-
-        assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
-    }
-
-    @Test
-    fun `mode is null when the occupancy has not been submitted`() {
-        val result = config.mode(stateWith(null, WhoProvidesRentalDetails.LETTING_AGENT))
-
-        assertNull(result)
-    }
-
-    private fun stateWith(
-        newOccupancy: YesOrNo?,
-        cachedDelegation: WhoProvidesRentalDetails?,
-    ): PropertyRegistrationJourneyState {
-        val occupiedStep = mock<OccupiedStep> { on { outcome } doReturn newOccupancy }
-        val whoProvidesTask = mock<WhoProvidesDetailsTask> { on { cachedWhoProvidesRentalDetails } doReturn cachedDelegation }
-        return mock<PropertyRegistrationJourneyState> {
-            on { occupied } doReturn occupiedStep
-            on { whoProvidesDetailsTask } doReturn whoProvidesTask
+            assertEquals(OccupancyChangeRouteMode.REMOVING_DELEGATION, result)
         }
+
+        @Test
+        fun `mode is NO_INTERRUPTION when previously delegated but staying occupied`() {
+            val result = configuredConfig(wasDelegated = true).mode(stateWith(YesOrNo.YES))
+
+            assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
+        }
+
+        @Test
+        fun `mode is NO_INTERRUPTION when not previously delegated and now unoccupied`() {
+            val result = configuredConfig(wasDelegated = false).mode(stateWith(YesOrNo.NO))
+
+            assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
+        }
+
+        @Test
+        fun `mode is null without reading the previous delegation when the occupancy has not been submitted`() {
+            var previousDelegationWasRead = false
+            val config =
+                OccupancyChangeRoutingStepConfig().apply {
+                    usingPreviousDelegation {
+                        previousDelegationWasRead = true
+                        true
+                    }
+                }
+
+            val result = config.mode(stateWith(null))
+
+            assertNull(result)
+            assertFalse(previousDelegationWasRead)
+        }
+    }
+
+    @Nested
+    inner class PreviousDelegationTests {
+        @Test
+        fun `base journey lookup is true when originally occupied and delegated to a letting agent`() {
+            val result = getWasDelegatedFromBaseJourney(cachedOccupied = true, cachedDelegation = WhoProvidesRentalDetails.LETTING_AGENT)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `base journey lookup is false when originally occupied but the landlord provided details`() {
+            val result = getWasDelegatedFromBaseJourney(cachedOccupied = true, cachedDelegation = WhoProvidesRentalDetails.LANDLORD)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `base journey lookup is false when originally occupied with no cached delegation`() {
+            val result = getWasDelegatedFromBaseJourney(cachedOccupied = true, cachedDelegation = null)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `base journey lookup is false when the property was already unoccupied even with a stale delegation`() {
+            val result = getWasDelegatedFromBaseJourney(cachedOccupied = false, cachedDelegation = WhoProvidesRentalDetails.LETTING_AGENT)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `base journey lookup is false when the previous occupancy is unset`() {
+            val result = getWasDelegatedFromBaseJourney(cachedOccupied = null, cachedDelegation = WhoProvidesRentalDetails.LETTING_AGENT)
+
+            assertFalse(result)
+        }
+    }
+
+    private fun configuredConfig(wasDelegated: Boolean) =
+        OccupancyChangeRoutingStepConfig().apply {
+            usingPreviousDelegation { wasDelegated }
+        }
+
+    private fun stateWith(newOccupancy: YesOrNo?): PropertyRegistrationJourneyState {
+        val occupiedStep = mock<OccupiedStep> { on { outcome } doReturn newOccupancy }
+        return mock<PropertyRegistrationJourneyState> { on { occupied } doReturn occupiedStep }
+    }
+
+    private fun getWasDelegatedFromBaseJourney(
+        cachedOccupied: Boolean?,
+        cachedDelegation: WhoProvidesRentalDetails?,
+    ): Boolean {
+        val whoProvidesTask = mock<WhoProvidesDetailsTask> { on { cachedWhoProvidesRentalDetails } doReturn cachedDelegation }
+        val baseState =
+            mock<PropertyRegistrationJourneyState> {
+                on { this.cachedOccupied } doReturn cachedOccupied
+                on { whoProvidesDetailsTask } doReturn whoProvidesTask
+            }
+        val childState = mock<PropertyRegistrationJourneyState> { on { getBaseJourneyState() } doReturn baseState }
+
+        return OccupancyChangeRoutingStepConfig().getWasDelegatedToLettingAgentFromBaseJourney(childState)
     }
 }

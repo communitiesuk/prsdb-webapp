@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.occupancyChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -51,7 +52,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
@@ -163,30 +163,7 @@ class PropertyRegistrationJourneyFactory(
                     val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
                     val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
                     when {
-                        isRestructured && isDelegateEnabled -> {
-                            step(journey.occupied) {
-                                initialStep()
-                                routeSegment(OccupiedStep.ROUTE_SEGMENT)
-                                nextStep { journey.occupancyChangeRoutingStep }
-                            }
-                            step(journey.occupancyChangeRoutingStep) {
-                                parents { journey.occupied.isComplete() }
-                                nextDestination { mode ->
-                                    when (mode) {
-                                        OccupancyChangeRouteMode.NO_INTERRUPTION -> Destination(journey.finishCyaStep)
-                                        OccupancyChangeRouteMode.REMOVING_DELEGATION ->
-                                            Destination(journey.occupancyChangeInterruptionStep)
-                                    }
-                                }
-                            }
-                            step(journey.occupancyChangeInterruptionStep) {
-                                routeSegment(OccupancyChangeInterruptionStep.ROUTE_SEGMENT)
-                                parents {
-                                    journey.occupancyChangeRoutingStep.hasOutcome(OccupancyChangeRouteMode.REMOVING_DELEGATION)
-                                }
-                                nextStep { journey.finishCyaStep }
-                            }
-                        }
+                        isRestructured && isDelegateEnabled -> occupancyChangeCyaJourney()
                         isRestructured -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                         else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
