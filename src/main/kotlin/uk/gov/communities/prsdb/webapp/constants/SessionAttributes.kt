@@ -47,3 +47,5 @@ const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPrope
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 
 const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
+
+const val FEATURE_FLAG_OVERRIDES = "featureFlagOverrides"

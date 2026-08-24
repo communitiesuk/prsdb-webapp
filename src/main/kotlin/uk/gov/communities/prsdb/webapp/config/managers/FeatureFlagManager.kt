@@ -2,17 +2,21 @@ package uk.gov.communities.prsdb.webapp.config.managers
 
 import org.ff4j.FF4j
 import org.ff4j.core.Feature
+import org.ff4j.core.FlippingExecutionContext
 import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
 import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagOverrides
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 
 @Component
 class FeatureFlagManager(
     private val featureFlipStrategyInitialiser: FeatureFlipStrategyInitialiser,
+    private val featureFlagOverrideService: FeatureFlagOverrideService? = null,
 ) : FF4j() {
     fun initializeFeatureFlags(featureFlags: List<FeatureFlagConfigModel>) {
         featureFlags.forEach { flag ->
@@ -69,6 +73,22 @@ class FeatureFlagManager(
     }
 
     fun checkFeature(featureName: String): Boolean = super.check(featureName)
+
+    override fun check(
+        featureName: String,
+        executionContext: FlippingExecutionContext?,
+    ): Boolean {
+        val overrides = featureFlagOverrideService?.getOverrides() ?: FeatureFlagOverrides()
+        if (overrides.isEmpty()) return super.check(featureName, executionContext)
+
+        val releaseName = getFeature(featureName).group
+        if (!releaseName.isNullOrEmpty()) {
+            overrides.releases[releaseName]?.let { return it }
+        }
+        overrides.flags[featureName]?.let { return it }
+
+        return super.check(featureName, executionContext)
+    }
 
     fun enableFeature(flagName: String) = super.enable(flagName)
 
