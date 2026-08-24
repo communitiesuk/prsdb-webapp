@@ -14,7 +14,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -83,18 +82,9 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `deleteInvitation deletes the given invitation`() {
+    fun `deleteInvitation clears the delegation from the property ownership`() {
         val invitation = MockLettingAgentData.createLettingAgentAccess()
-
-        lettingAgentAccessService.deleteInvitation(invitation)
-
-        verify(lettingAgentAccessRepository).delete(invitation)
-    }
-
-    @Test
-    fun `deleteInvitation clears the delegation from the property ownership before deleting it`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
-        ReflectionTestUtils.setField(invitation.propertyOwnership, "lettingAgentAccess", invitation)
+        invitation.propertyOwnership.lettingAgentAccess = invitation
 
         lettingAgentAccessService.deleteInvitation(invitation)
 
@@ -102,13 +92,14 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `deleteInvitationByPropertyOwnershipId deletes the invitation when one exists`() {
+    fun `deleteInvitationByPropertyOwnershipId clears the delegation when one exists`() {
         val invitation = MockLettingAgentData.createLettingAgentAccess()
+        invitation.propertyOwnership.lettingAgentAccess = invitation
         whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(invitation)
 
         lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
 
-        verify(lettingAgentAccessRepository).delete(invitation)
+        assertNull(invitation.propertyOwnership.lettingAgentAccess)
     }
 
     @Test

@@ -10,12 +10,17 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 
 @ExtendWith(MockitoExtension::class)
 class AreYouSureStepConfigTests {
     @Mock
     lateinit var mockState: CancelLettingAgentDelegationJourneyState
+
+    @Mock
+    lateinit var mockLettingAgentAccessService: LettingAgentAccessService
 
     @Test
     fun `chooseTemplate returns the shared areYouSureForm template`() {
@@ -59,7 +64,9 @@ class AreYouSureStepConfigTests {
     @Test
     fun `getStepSpecificContent uses the letting agent email as the heading parameter`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.lettingAgentEmail).thenReturn("letting.agent.one@example.com")
+        whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "letting.agent.one@example.com"))
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -72,7 +79,9 @@ class AreYouSureStepConfigTests {
     @Test
     fun `getStepSpecificContent renders a Confirm button with no cancel link`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.lettingAgentEmail).thenReturn("letting.agent.one@example.com")
+        whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess())
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -81,9 +90,13 @@ class AreYouSureStepConfigTests {
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {
-        val stepConfig = AreYouSureStepConfig()
+        val stepConfig = AreYouSureStepConfig(mockLettingAgentAccessService)
         stepConfig.urlPath = AreYouSureStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
+    }
+
+    companion object {
+        private const val PROPERTY_OWNERSHIP_ID = 1L
     }
 }

@@ -6,10 +6,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CancelLettingAgentDelegationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
 @JourneyFrameworkComponent("cancelLettingAgentDelegationAreYouSureStepConfig")
-class AreYouSureStepConfig :
-    AbstractRequestableStepConfig<
+class AreYouSureStepConfig(
+    private val lettingAgentAccessService: LettingAgentAccessService,
+) : AbstractRequestableStepConfig<
         AreYouSureMode,
         CancelLettingAgentDelegationAreYouSureFormModel,
         CancelLettingAgentDelegationJourneyState,
@@ -20,7 +22,8 @@ class AreYouSureStepConfig :
         mapOf(
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             "fieldSetHeading" to "cancelLettingAgentDelegation.areYouSure.fieldSetHeading",
-            "optionalFieldSetHeadingParam" to state.lettingAgentEmail,
+            "optionalFieldSetHeadingParam" to
+                lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId)?.invitedEmail,
             "fieldSetHint" to "cancelLettingAgentDelegation.areYouSure.fieldSetHint",
             "submitButtonTextKey" to "cancelLettingAgentDelegation.areYouSure.confirmButton",
             "showCancelLink" to false,

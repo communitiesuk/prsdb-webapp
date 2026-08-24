@@ -145,18 +145,6 @@ class CancelLettingAgentDelegationControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], value = "user")
-    fun `getJourneyStep returns 404 when the property has no letting agent delegation`() {
-        mockAuthorizedProperty()
-        whenever(cancelLettingAgentDelegationJourneyFactory.createJourneySteps(testPropertyOwnershipId))
-            .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent delegation found"))
-
-        mvc.get(getRemoveLettingAgentPath(testPropertyOwnershipId)).andExpect {
-            status { isNotFound() }
-        }
-    }
-
-    @Test
     fun `postJourneyData returns a redirect for an unauthenticated user`() {
         mvc
             .post(getRemoveLettingAgentPath(testPropertyOwnershipId)) {

@@ -31,8 +31,9 @@ class LettingAgentAccessService(
 
     @Transactional
     fun deleteInvitation(lettingAgentAccess: LettingAgentAccess) {
-        lettingAgentAccess.propertyOwnership.removeLettingAgentAccess()
-        lettingAgentAccessRepository.delete(lettingAgentAccess)
+        // Clearing the association is what deletes the row. PropertyOwnership.lettingAgentAccess is the inverse side of
+        // a one-to-one with orphanRemoval = true, so Hibernate deletes the orphaned LettingAgentAccess on flush.
+        lettingAgentAccess.propertyOwnership.lettingAgentAccess = null
     }
 
     @Transactional

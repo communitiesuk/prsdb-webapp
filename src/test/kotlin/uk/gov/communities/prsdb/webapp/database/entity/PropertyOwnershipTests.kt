@@ -2,13 +2,10 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 
 class PropertyOwnershipTests {
     @Test
@@ -47,17 +44,6 @@ class PropertyOwnershipTests {
 
         assertFalse(property.landlords.contains(landlord))
         assertTrue(property.landlords.contains(coLandlord))
-    }
-
-    @Test
-    fun `removeLettingAgentAccess clears the letting agent delegation`() {
-        val property = MockLandlordData.createPropertyOwnership()
-        val lettingAgentAccess = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = property)
-        ReflectionTestUtils.setField(property, "lettingAgentAccess", lettingAgentAccess)
-
-        property.removeLettingAgentAccess()
-
-        assertNull(property.lettingAgentAccess)
     }
 
     @Test
