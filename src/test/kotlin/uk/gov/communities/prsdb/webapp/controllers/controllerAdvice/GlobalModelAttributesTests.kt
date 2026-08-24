@@ -20,10 +20,12 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -41,11 +43,15 @@ class GlobalModelAttributesTests {
     @Mock
     private lateinit var dashboardUrlProvider: DashboardUrlProvider
 
+    @Mock
+    private lateinit var featureFlagOverrideService: FeatureFlagOverrideService
+
     private val defaultServiceName = "Register your rental property"
     private val customServiceName = "Check a rental property or landlord"
 
     private fun createGlobalModelAttributes(): GlobalModelAttributes {
-        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource, dashboardUrlProvider)
+        val globalModelAttributes =
+            GlobalModelAttributes(backUrlStorageService, messageSource, dashboardUrlProvider, featureFlagOverrideService)
         ReflectionTestUtils.setField(globalModelAttributes, "plausibleSiteId", "test-site-id")
         return globalModelAttributes
     }
@@ -280,6 +286,34 @@ class GlobalModelAttributesTests {
         verify(dashboardUrlProvider, never()).getDashboardUrlForCurrentUser()
         verifyNoInteractions(messageSource)
         assertTrue(model.asMap().isEmpty())
+    }
+
+    @Test
+    fun `addGlobalModelAttributes advertises the overrides page when overrides are active`() {
+        whenever(featureFlagOverrideService.hasActiveOverrides()).thenReturn(true)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertTrue(model["featureFlagOverridesActive"] as Boolean)
+        assertEquals(FEATURE_FLAG_OVERRIDES_ROUTE, model["featureFlagOverridesUrl"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes does not advertise the overrides page when no overrides are active`() {
+        whenever(featureFlagOverrideService.hasActiveOverrides()).thenReturn(false)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["featureFlagOverridesActive"])
+        assertNull(model["featureFlagOverridesUrl"])
     }
 
     private fun createOAuth2AuthenticationToken(registrationId: String): OAuth2AuthenticationToken {

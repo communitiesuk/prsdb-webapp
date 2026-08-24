@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.FeatureFlagOverrideChoice
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagOverrides
 import uk.gov.communities.prsdb.webapp.models.requestModels.FeatureFlagOverrideRequestModel
-import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 
 @WebMvcTest(FeatureFlagOverrideController::class)
@@ -33,9 +32,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagCo
 class FeatureFlagOverrideControllerTests(
     @Autowired val context: WebApplicationContext,
 ) : ControllerTest(context) {
-    @MockitoBean
-    lateinit var featureFlagOverrideService: FeatureFlagOverrideService
-
     @MockitoBean
     lateinit var featureFlagManager: FeatureFlagManager
 
