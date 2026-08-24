@@ -15,7 +15,9 @@ open class Form(
     // the property here in the Form class
     val fieldsetHeading = FieldsetHeading(locator)
 
-    fun submit() = SubmitButton(locator).clickAndWait()
+    val submitButton = SubmitButton(locator)
+
+    fun submit() = submitButton.clickAndWait()
 
     fun submitSelectedButton(buttonValue: String) = SubmitButtonWithValue(locator, buttonValue).clickAndWait()
 
