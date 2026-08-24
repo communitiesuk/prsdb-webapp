@@ -35,7 +35,7 @@ class RemoveDelegationStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(lettingAgentAccessService).deleteInvitationByPropertyOwnershipId(1L)
+        verify(lettingAgentAccessService).deleteDelegationByPropertyOwnershipId(1L)
     }
 
     @Test

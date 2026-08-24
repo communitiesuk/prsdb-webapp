@@ -30,7 +30,7 @@ class LettingAgentAccessService(
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
     @Transactional
-    fun deleteInvitationByPropertyOwnershipId(propertyOwnershipId: Long) {
+    fun deleteDelegationByPropertyOwnershipId(propertyOwnershipId: Long) {
         lettingAgentAccessRepository.deleteByPropertyOwnershipId(propertyOwnershipId)
     }
 }

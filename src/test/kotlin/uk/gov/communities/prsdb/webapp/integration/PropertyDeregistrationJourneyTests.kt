@@ -21,8 +21,6 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
 
     @Test
     fun `User can delete a property record that a letting agent has been delegated to`(page: Page) {
-        // The letting_agent_access row has a non-nullable FK to property_ownership and is not mapped from the parent
-        // entity, so it is only removed by the ON DELETE CASCADE added in V1_50_0.
         val propertyOwnershipId = 1
         assertNotNull(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId.toLong()))
 

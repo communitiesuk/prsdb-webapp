@@ -81,8 +81,8 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `deleteInvitationByPropertyOwnershipId deletes the invitation`() {
-        lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
+    fun `deleteDelegationByPropertyOwnershipId deletes the delegation`() {
+        lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(1L)
 
         verify(lettingAgentAccessRepository).deleteByPropertyOwnershipId(1L)
     }

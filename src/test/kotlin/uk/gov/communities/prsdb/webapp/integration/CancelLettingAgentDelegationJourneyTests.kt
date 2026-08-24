@@ -41,11 +41,16 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
         confirmationPage.continueButton.clickAndWait()
 
         // Back to the property record page
-        assertPageIs(
-            page,
-            PropertyDetailsPageLandlordView::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
+        val propertyRecordPage =
+            assertPageIs(
+                page,
+                PropertyDetailsPageLandlordView::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+
+        // The property record now offers delegation again, showing the delegation was removed
+        assertThat(propertyRecordPage.delegateToLettingAgentLink.locator).isVisible()
+        assertThat(propertyRecordPage.removeLettingAgentLink.locator).hasCount(0)
 
         // The delegation has been removed, so the journey can no longer be started
         val response =
