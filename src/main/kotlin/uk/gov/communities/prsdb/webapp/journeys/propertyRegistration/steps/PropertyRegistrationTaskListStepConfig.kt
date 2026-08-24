@@ -36,10 +36,10 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
         val sectionViewModels =
-            if (isRestructured) {
+            if (isSkippingEnabled) {
                 restructuredSectionViewModels(state)
             } else {
                 legacySectionViewModels(state)
@@ -55,7 +55,7 @@ class PropertyRegistrationTaskListStepConfig(
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
-            numberSections = !isRestructured,
+            numberSections = !isSkippingEnabled,
             backUrl = backUrlFromState,
         )
     }

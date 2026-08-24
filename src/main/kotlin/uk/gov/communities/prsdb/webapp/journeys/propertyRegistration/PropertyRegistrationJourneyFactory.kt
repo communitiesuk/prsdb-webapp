@@ -162,11 +162,11 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+                    val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
                     val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
                     when {
-                        isRestructured && isDelegateEnabled -> occupancyChangeCyaJourney()
-                        isRestructured -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                        isSkippingEnabled && isDelegateEnabled -> occupancyChangeCyaJourney()
+                        isSkippingEnabled -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                         else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
                 }

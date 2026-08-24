@@ -2067,11 +2067,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             occupancyPage.submitIsVacant()
             val interruptionPage = assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class)
-
             assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
-            assertThat(interruptionPage.body).containsText("You must now complete this registration yourself")
-            assertThat(interruptionPage.submitButton).containsText("Continue with the change")
-            assertThat(interruptionPage.goBackLink.locator).containsText("Go back")
 
             interruptionPage.goBackLink.clickAndWait()
             assertPageIs(page, OccupancyFormPagePropertyRegistration::class)

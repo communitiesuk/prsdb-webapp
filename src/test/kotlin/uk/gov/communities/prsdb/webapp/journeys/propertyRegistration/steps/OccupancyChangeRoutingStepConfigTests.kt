@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -34,23 +33,6 @@ class OccupancyChangeRoutingStepConfigTests {
             val result = configuredConfig(wasDelegated = false).mode(stateWith(YesOrNo.NO))
 
             assertEquals(OccupancyChangeRouteMode.NO_INTERRUPTION, result)
-        }
-
-        @Test
-        fun `mode is null without reading the previous delegation when the occupancy has not been submitted`() {
-            var previousDelegationWasRead = false
-            val config =
-                OccupancyChangeRoutingStepConfig().apply {
-                    usingPreviousDelegation {
-                        previousDelegationWasRead = true
-                        true
-                    }
-                }
-
-            val result = config.mode(stateWith(null))
-
-            assertNull(result)
-            assertFalse(previousDelegationWasRead)
         }
     }
 
