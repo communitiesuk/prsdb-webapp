@@ -49,7 +49,14 @@ class PropertyRegistrationCyaStepConfig(
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
-                "submitButtonText" to "forms.buttons.completeRegistration",
+                "submitButtonText" to
+                    if (isDelegateToLettingAgentEnabled) {
+                        "registerProperty.taskList.checkAndSubmit.confirmAndPay"
+                    } else {
+                        "forms.buttons.completeRegistration"
+                    },
+                "hideDelegatedSections" to isDelegatedToLettingAgent,
+                "lettingAgentDelegationWarningText" to isDelegateToLettingAgentEnabled,
                 "insetText" to true,
                 "propertyName" to
                     state.propertyDetailsTask.addressTask

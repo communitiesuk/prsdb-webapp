@@ -279,6 +279,9 @@ class PropertyRegistrationCyaStepConfigTests {
             val delegationSection = content["lettingAgentDelegation"] as? List<*>
             assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
             assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
+            assertEquals(true, content["hideDelegatedSections"], "Delegated path should hide the later sections")
+            assertEquals(true, content["lettingAgentDelegationWarningText"], "Warning text should be shown for letting agent path")
+            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"], "Delegated properties should use the confirm-and-pay message key")
         }
 
         @Test
@@ -292,6 +295,9 @@ class PropertyRegistrationCyaStepConfigTests {
             assertTrue(content.containsKey("lettingAgentDelegation"))
             assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
             assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
+            assertEquals(false, content["hideDelegatedSections"], "Landlord path should keep the later sections visible")
+            assertEquals(true, content["lettingAgentDelegationWarningText"], "Warning text should also be shown for landlord path")
+            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"], "Non-delegated properties should also use the confirm-and-pay message key")
         }
 
         @Test
@@ -317,6 +323,12 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+            assertEquals(false, content["lettingAgentDelegationWarningText"], "Warning text should be hidden for landlord path")
+            assertEquals(
+                "forms.buttons.completeRegistration",
+                content["submitButtonText"],
+                "Non-delegated properties should keep the existing CTA",
+            )
         }
     }
 }
