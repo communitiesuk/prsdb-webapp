@@ -25,7 +25,7 @@ class OccupancyChangeRoutingStepConfig :
     fun getWasDelegatedToLettingAgentFromBaseJourney(state: PropertyRegistrationJourneyState): Boolean {
         val baseState = state.getBaseJourneyState() as PropertyRegistrationJourneyState
         return baseState.cachedOccupied == true &&
-            baseState.whoProvidesDetailsTask.cachedWhoProvidesRentalDetails == WhoProvidesRentalDetails.LETTING_AGENT
+            baseState.cachedWhoProvidesRentalDetails == WhoProvidesRentalDetails.LETTING_AGENT
     }
 
     override fun isSubClassInitialised() = ::previousIsDelegatedToLettingAgent.isInitialized

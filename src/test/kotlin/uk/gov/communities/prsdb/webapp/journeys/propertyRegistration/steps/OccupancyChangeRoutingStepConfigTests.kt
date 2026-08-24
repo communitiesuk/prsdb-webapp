@@ -10,7 +10,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 class OccupancyChangeRoutingStepConfigTests {
@@ -107,11 +106,10 @@ class OccupancyChangeRoutingStepConfigTests {
         cachedOccupied: Boolean?,
         cachedDelegation: WhoProvidesRentalDetails?,
     ): Boolean {
-        val whoProvidesTask = mock<WhoProvidesDetailsTask> { on { cachedWhoProvidesRentalDetails } doReturn cachedDelegation }
         val baseState =
             mock<PropertyRegistrationJourneyState> {
                 on { this.cachedOccupied } doReturn cachedOccupied
-                on { whoProvidesDetailsTask } doReturn whoProvidesTask
+                on { this.cachedWhoProvidesRentalDetails } doReturn cachedDelegation
             }
         val childState = mock<PropertyRegistrationJourneyState> { on { getBaseJourneyState() } doReturn baseState }
 

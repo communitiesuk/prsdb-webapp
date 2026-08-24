@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
@@ -17,15 +17,15 @@ class WhoProvidesDetailsTask(
     journeyStateService: JourneyStateService,
     override val whoProvidesRentalDetailsStep: WhoProvidesRentalDetailsStep,
     override val lettingAgentEmailStep: LettingAgentEmailStep,
-) : TaskWithoutDependencies<WhoProvidesDetailsState>(journeyStateService),
+) : Task<WhoProvidesDetailsState, WhoProvidesDetailsDependencies>(journeyStateService),
     WhoProvidesDetailsState {
     override val taskState get() = this
 
-    // Hoists the who-provides answer onto a stable state key so the occupancy-change routing can read it from
-    // the base journey. The who-provides step isn't declared in that CYA journey, so its urlPath is unset and a
-    // form-model read would throw (see TODO PDJB-585). Populated in WhoProvidesRentalDetailsStepConfig.afterStepDataIsAdded.
-    override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
-        delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
+    override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails?
+        get() = dependencies.cachedWhoProvidesRentalDetails
+        set(value) {
+            dependencies.cachedWhoProvidesRentalDetails = value
+        }
 
     override fun makeSubJourney(state: WhoProvidesDetailsState) =
         subJourney(state) {
@@ -54,4 +54,8 @@ class WhoProvidesDetailsTask(
                 }
             }
         }
+}
+
+interface WhoProvidesDetailsDependencies {
+    var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails?
 }
