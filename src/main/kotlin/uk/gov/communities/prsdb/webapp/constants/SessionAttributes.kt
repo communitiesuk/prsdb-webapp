@@ -10,6 +10,8 @@ const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDereg
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
+const val LETTING_AGENTS_DELEGATED_THIS_SESSION = "lettingAgentsDelegatedThisSession"
+
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
 const val COOKIE_TOKENS = "cookieTokens"
