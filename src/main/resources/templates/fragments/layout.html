@@ -15,6 +15,9 @@
     <link rel="mask-icon" th:href="@{/assets/rebrand/images/govuk-icon-mask.svg}" color="#1d70b8">
     <link rel="apple-touch-icon" th:href="@{/assets/rebrand/images/govuk-icon-180.png}">
     <link rel="manifest" th:href="@{/assets/rebrand/manifest.json}" crossorigin="use-credentials">
+    <!-- These filenames are content-hashed, but have been stable across govuk-frontend v4 and v5. -->
+    <link rel="preload" th:href="@{/assets/fonts/light-94a07e06a1-v2.woff2}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" th:href="@{/assets/fonts/bold-b542beb274-v2.woff2}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" th:href="@{/assets/css/govuk-frontend.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/service-header.css}">
     <link rel="stylesheet" th:href="@{/assets/css/accessible-autocomplete.min.css}"/>

@@ -1189,4 +1189,68 @@ class PropertyRegistrationServiceTests {
             tenancyProvideLater = eq(true),
         )
     }
+
+    @Test
+    fun `registerProperty sends confirmation email with isDelegatedToLettingAgent when delegated`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 9999)
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord),
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                isOccupied = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                landlords = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
+                tenancyProvideLater = anyOrNull(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
+
+        propertyRegistrationService.registerProperty(
+            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.NO_LICENSING,
+            licenceNumber = "",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
+            numberOfHouseholds = 1,
+            numberOfPeople = 1,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            customPropertyType = null,
+            isDelegatedToLettingAgent = true,
+        )
+
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq(landlord.email),
+            argThat<PropertyRegistrationConfirmationEmail> { isDelegatedToLettingAgent },
+        )
+    }
 }

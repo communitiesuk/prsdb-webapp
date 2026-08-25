@@ -6,6 +6,7 @@ data class PropertyRegistrationConfirmationEmail(
     val prsdUrl: String,
     val isOccupied: Boolean,
     val jointLandlordEmails: List<String>? = null,
+    val isDelegatedToLettingAgent: Boolean = false,
 ) : EmailTemplateModel {
     private val prnKey = "prn number"
     private val addressKey = "property address"
@@ -14,6 +15,8 @@ data class PropertyRegistrationConfirmationEmail(
     private val unoccupiedKey = "unoccupied"
     private val landlordInvitesKey = "landlordInvites"
     private val hasJointLandlordsKey = "hasJointLandlords"
+    private val hasDelegatedToLettingAgentKey = "hasDelegatedToLettingAgent"
+    private val lettingAgentProvideListKey = "lettingAgentProvideList"
 
     override val template = EmailTemplate.PROPERTY_REGISTRATION_CONFIRMATION
 
@@ -35,6 +38,21 @@ data class PropertyRegistrationConfirmationEmail(
             baseMap[hasJointLandlordsKey] = "no"
         }
 
+        baseMap[hasDelegatedToLettingAgentKey] = if (isDelegatedToLettingAgent) "yes" else "no"
+        baseMap[lettingAgentProvideListKey] = if (isDelegatedToLettingAgent) buildLettingProvideList() else ""
+
         return baseMap
+    }
+
+    private fun buildLettingProvideList(): String {
+        val items =
+            listOf(
+                "licensing details",
+                "gas safety certificate",
+                "electrical safety certificate",
+                "energy performance certificate (EPC)",
+                "tenancy details",
+            )
+        return formatAsBulletList(items)
     }
 }
