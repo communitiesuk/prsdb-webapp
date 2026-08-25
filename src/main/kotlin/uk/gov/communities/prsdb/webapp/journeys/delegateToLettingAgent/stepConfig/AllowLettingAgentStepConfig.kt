@@ -31,7 +31,7 @@ class AllowLettingAgentStepConfig(
     //  back button after delegating) from triggering a second letting_agent_access insert, which would violate the
     //  unique property_ownership_id constraint.
     override fun beforeAttemptingToReachStep(state: DelegateToLettingAgentJourneyState): Boolean =
-        !propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId).delegatesToLettingAgent
+        lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId) == null
 
     override fun enrichSubmittedDataBeforeValidation(
         state: DelegateToLettingAgentJourneyState,

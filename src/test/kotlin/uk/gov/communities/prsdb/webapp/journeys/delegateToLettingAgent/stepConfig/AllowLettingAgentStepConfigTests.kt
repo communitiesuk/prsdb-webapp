@@ -9,7 +9,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyState
@@ -93,11 +92,10 @@ class AllowLettingAgentStepConfigTests {
     @Test
     fun `beforeAttemptingToReachStep returns true when the property is not already delegated`() {
         val stepConfig = createStepConfig()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
 
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID))
-            .thenReturn(propertyOwnership)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(null)
 
         assertTrue(stepConfig.beforeAttemptingToReachStep(mockJourneyState))
     }
@@ -105,16 +103,10 @@ class AllowLettingAgentStepConfigTests {
     @Test
     fun `beforeAttemptingToReachStep returns false when the property is already delegated`() {
         val stepConfig = createStepConfig()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        ReflectionTestUtils.setField(
-            propertyOwnership,
-            "lettingAgentAccess",
-            MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership),
-        )
 
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID))
-            .thenReturn(propertyOwnership)
+        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess())
 
         assertFalse(stepConfig.beforeAttemptingToReachStep(mockJourneyState))
     }
