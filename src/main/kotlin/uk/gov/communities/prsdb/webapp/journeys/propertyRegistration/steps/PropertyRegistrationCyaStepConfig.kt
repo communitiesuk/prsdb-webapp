@@ -45,7 +45,6 @@ class PropertyRegistrationCyaStepConfig(
             } else {
                 null
             }
-        val hasWhoProvidesRentalDetailsAnswer = whoProvidesRentalDetails != null
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
@@ -93,8 +92,8 @@ class PropertyRegistrationCyaStepConfig(
                     },
             )
 
-        if (hasWhoProvidesRentalDetailsAnswer) {
-            content += getLettingAgentDelegationSummaryContent(state, whoProvidesRentalDetails!!)
+        whoProvidesRentalDetails?.let {
+            content += getLettingAgentDelegationSummaryContent(state, it)
         }
 
         if (isDelegatedToLettingAgent) {
