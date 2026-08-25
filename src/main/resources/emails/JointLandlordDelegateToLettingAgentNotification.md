@@ -16,9 +16,9 @@ Allowed a letting agent or property manager to provide details
 
 ## What happens next
 
-Letting agents and property managers can now provide a property's licensing, compliance certificates and tenancy details.
+Letting agents and property managers can now provide a property’s licensing, compliance certificates and tenancy details.
 
-^ You remain responsible for this registration. We'll email you whenever your letting agent or property manager makes any updates, so you can check the provided details are correct.
+^ You remain responsible for this registration. We’ll email you whenever your letting agent or property manager makes any updates, so you can check the provided details are correct.
 
 [View property record](((property record url)))
 
