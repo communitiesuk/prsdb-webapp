@@ -3,10 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -36,39 +34,39 @@ class PropertyRegistrationCyaStepConfig(
         }
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val isDelegateToLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
-        val whoProvidesRentalDetails =
-            if (isRestructured && isDelegateToLettingAgentEnabled) {
-                state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelOrNull?.whoProvides
-            } else {
-                null
-            }
-        val hasWhoProvidesRentalDetailsAnswer = whoProvidesRentalDetails != null
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
+                // TODO PDJB-1391: shows a placeholder banner while the letting-agent path reuses this CYA page with
+                //  mocked "provide later" values. Replace with the real delegated-details display.
+                "lettingAgentDelegationTodo" to isDelegatedToLettingAgent,
+                "lettingAgentDelegationTodoText" to
+                    "TODO PDJB-1391: a letting agent is providing the rented-out details. Licensing and tenancy " +
+                    "details below are placeholder \"provide later\" values and are not yet implemented.",
                 "propertyName" to
                     state.propertyDetailsTask.addressTask
                         .getAddress()
                         .singleLineAddress,
                 "propertyDetails" to
-                    if (isRestructured) {
+                    if (isSkippingEnabled) {
                         getRestructuredPropertyDetailsSummaryList(state)
                     } else {
                         getPropertyDetailsSummaryList(state)
                     },
                 "licensingDetails" to
                     if (isDelegatedToLettingAgent) {
+                        // TODO PDJB-1391: licensing is skipped when a letting agent provides the details, so no real
+                        //  answer exists yet. Substitute a placeholder "provide later" row so the page can render.
                         getMockProvideLaterSummaryList("forms.checkPropertyAnswers.propertyDetails.licensingType")
                     } else {
                         licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask)
                     },
                 "occupancyDetails" to
-                    if (isRestructured) {
+                    if (isSkippingEnabled) {
                         occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
                     } else {
                         null
@@ -76,10 +74,12 @@ class PropertyRegistrationCyaStepConfig(
                 "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
                 "tenancyDetails" to
                     if (isDelegatedToLettingAgent) {
+                        // TODO PDJB-1391: tenancy details are skipped when a letting agent provides the details, so no
+                        //  real answer exists yet. Substitute a placeholder "provide later" row so the page can render.
                         getMockProvideLaterSummaryList(
                             "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
                         )
-                    } else if (isRestructured) {
+                    } else if (isSkippingEnabled) {
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
                             state,
                             messageSource,
@@ -93,11 +93,10 @@ class PropertyRegistrationCyaStepConfig(
                     },
             )
 
-        if (hasWhoProvidesRentalDetailsAnswer) {
-            content += getLettingAgentDelegationSummaryContent(state, whoProvidesRentalDetails!!)
-        }
-
         if (isDelegatedToLettingAgent) {
+            // TODO PDJB-1391: the gas and electrical safety tasks are skipped when a letting agent provides the
+            //  details. Their CYA row factories throw when the task was never reached, so substitute placeholder
+            //  "provide later" rows. (The EPC factory degrades gracefully to a "no EPC provided" summary.)
             content += getMockDelegatedGasContent()
             content += getMockDelegatedElectricalContent()
         } else {
@@ -226,46 +225,6 @@ class PropertyRegistrationCyaStepConfig(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             ownershipTypeStep.formModel.ownershipType,
             Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
-        )
-    }
-
-    private fun getLettingAgentDelegationSummaryContent(
-        state: PropertyRegistrationJourneyState,
-        whoProvides: WhoProvidesRentalDetails,
-    ): Map<String, Any?> {
-        val whoWillProvideMsgKey =
-            when (whoProvides) {
-                WhoProvidesRentalDetails.LANDLORD -> "forms.checkPropertyAnswers.lettingAgentDelegation.values.landlord.label"
-                WhoProvidesRentalDetails.LETTING_AGENT -> "forms.checkPropertyAnswers.lettingAgentDelegation.values.lettingAgent.label"
-            }
-
-        val rows =
-            mutableListOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.lettingAgentDelegation.rows.whoWillProvide.label",
-                    whoWillProvideMsgKey,
-                    Destination.VisitableStep(
-                        state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep,
-                        state.getCyaJourneyId(state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep),
-                    ),
-                ),
-            )
-
-        if (whoProvides == WhoProvidesRentalDetails.LETTING_AGENT) {
-            rows +=
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.lettingAgentDelegation.rows.agentEmail.label",
-                    "",
-                    Destination.VisitableStep(
-                        state.whoProvidesDetailsTask.lettingAgentEmailStep,
-                        state.getCyaJourneyId(state.whoProvidesDetailsTask.lettingAgentEmailStep),
-                    ),
-                )
-        }
-
-        return mapOf(
-            "lettingAgentDelegation" to rows,
-            "lettingAgentDelegationBodyText" to (whoProvides == WhoProvidesRentalDetails.LETTING_AGENT),
         )
     }
 }

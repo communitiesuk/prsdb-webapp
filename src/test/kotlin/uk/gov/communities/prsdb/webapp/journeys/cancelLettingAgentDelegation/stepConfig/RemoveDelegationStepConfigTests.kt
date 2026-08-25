@@ -53,7 +53,7 @@ class RemoveDelegationStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached deletes delegation then sends cancellation emails`() {
+    fun `afterStepIsReached deletes delegation, records the removed email in the session, then sends cancellation emails`() {
         val stepConfig = createStepConfig()
 
         whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
@@ -67,6 +67,7 @@ class RemoveDelegationStepConfigTests {
 
         val inOrder: InOrder = inOrder(mockLettingAgentAccessService, mockCancelLettingAgentDelegationEmailService)
         inOrder.verify(mockLettingAgentAccessService).deleteDelegationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID)
+        inOrder.verify(mockLettingAgentAccessService).addRemovedLettingAgentToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
         inOrder
             .verify(mockCancelLettingAgentDelegationEmailService)
             .sendCancellationEmails(mockPropertyOwnership, "agent@example.com")

@@ -36,10 +36,10 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
         val sectionViewModels =
-            if (isRestructured) {
+            if (isSkippingEnabled) {
                 restructuredSectionViewModels(state)
             } else {
                 legacySectionViewModels(state)
@@ -55,7 +55,7 @@ class PropertyRegistrationTaskListStepConfig(
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
-            numberSections = !isRestructured,
+            numberSections = !isSkippingEnabled,
             backUrl = backUrlFromState,
         )
     }
@@ -159,10 +159,16 @@ class PropertyRegistrationTaskListStepConfig(
 
     private fun tenancyDetailsItem(state: PropertyRegistrationJourneyState): TaskListItemViewModel =
         if (state.cachedOccupied == false) {
+            val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
             TaskListItemViewModel(
                 nameKey = "registerProperty.taskList.rentedOut.tenancyDetails",
-                status = TaskStatusViewModel.fromStatus(TaskStatus.NOT_REQUIRED),
-                hintKey = "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint",
+                status = TaskStatusViewModel.fromStatus(if (delegateEnabled) TaskStatus.NOT_NEEDED_YET else TaskStatus.NOT_REQUIRED),
+                hintKey =
+                    if (delegateEnabled) {
+                        "registerProperty.taskList.rentedOut.tenancyDetailsNotNeededYetHint"
+                    } else {
+                        "registerProperty.taskList.rentedOut.tenancyDetailsNotRequiredHint"
+                    },
                 url = null,
             )
         } else if (isDelegatedToLettingAgent(state)) {

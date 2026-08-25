@@ -22,9 +22,6 @@ class DelegateToLettingAgentJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
-            // TODO PDJB-1560: Revert to `unreachableStepStep { journey.allowLettingAgentStep }` once the guard in
-            //  AllowLettingAgentStepConfig.beforeAttemptingToReachStep is removed. This sends a landlord who re-enters
-            //  the journey while already delegated back to the property record instead of the (unused) step default.
             unreachableStepUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
             configure {
                 withAdditionalContentProperty { "title" to "delegateToLettingAgent.title" }
