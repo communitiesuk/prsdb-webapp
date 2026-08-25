@@ -132,43 +132,52 @@ class PropertyRegistrationJourneyFactory(
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
-                    check(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        "Unknown checkable element $checkingAnswersFor"
-                    }
-                    fromTask(journey.whoProvidesDetailsTask) {
-                        step(task.whoProvidesRentalDetailsStep) {
-                            initialStep()
-                            routeSegment(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT)
-                            nextStep { journey.whoProvidesUpdateRoutingStep }
-                        }
-                        step(task.lettingAgentEmailStep) {
-                            routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
-                            parents { journey.confirmChangeToLettingAgentStep.isComplete() }
-                            nextStep { journey.finishCyaStep }
-                        }
-                    }
-                    step<WhoProvidesUpdateRouteMode, WhoProvidesUpdateRoutingStepConfig>(journey.whoProvidesUpdateRoutingStep) {
-                        stepSpecificInitialisation {
-                            usingPreviouslyDelegated { getPreviouslyDelegatedFromBaseJourney(journey) }
-                        }
-                        parents { journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.isComplete() }
-                        nextDestination { mode ->
-                            when (mode) {
-                                WhoProvidesUpdateRouteMode.UNCHANGED -> Destination(journey.finishCyaStep)
-                                WhoProvidesUpdateRouteMode.CHANGED_TO_LANDLORD -> Destination(journey.finishCyaStep)
-                                WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT ->
-                                    Destination(journey.confirmChangeToLettingAgentStep)
+                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                        fromTask(journey.whoProvidesDetailsTask) {
+                            step(task.whoProvidesRentalDetailsStep) {
+                                initialStep()
+                                routeSegment(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT)
+                                nextStep { journey.whoProvidesUpdateRoutingStep }
+                            }
+                            step(task.lettingAgentEmailStep) {
+                                routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
+                                parents { journey.confirmChangeToLettingAgentStep.isComplete() }
+                                nextStep { journey.finishCyaStep }
                             }
                         }
-                    }
-                    step(journey.confirmChangeToLettingAgentStep) {
-                        routeSegment(ConfirmChangeToLettingAgentStep.ROUTE_SEGMENT)
-                        parents {
-                            journey.whoProvidesUpdateRoutingStep.hasOutcome(WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT)
+                        step<WhoProvidesUpdateRouteMode, WhoProvidesUpdateRoutingStepConfig>(journey.whoProvidesUpdateRoutingStep) {
+                            stepSpecificInitialisation {
+                                usingPreviouslyDelegated { getPreviouslyDelegatedFromBaseJourney(journey) }
+                            }
+                            parents { journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.isComplete() }
+                            nextDestination { mode ->
+                                when (mode) {
+                                    WhoProvidesUpdateRouteMode.UNCHANGED -> {
+                                        Destination(journey.finishCyaStep)
+                                    }
+
+                                    WhoProvidesUpdateRouteMode.CHANGED_TO_LANDLORD -> {
+                                        Destination(journey.finishCyaStep)
+                                    }
+
+                                    WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT -> {
+                                        Destination(journey.confirmChangeToLettingAgentStep)
+                                    }
+                                }
+                            }
                         }
-                        nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
+                        step(journey.confirmChangeToLettingAgentStep) {
+                            routeSegment(ConfirmChangeToLettingAgentStep.ROUTE_SEGMENT)
+                            parents {
+                                journey.whoProvidesUpdateRoutingStep.hasOutcome(WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT)
+                            }
+                            nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
+                        }
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                     }
                 }
+
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
                 }

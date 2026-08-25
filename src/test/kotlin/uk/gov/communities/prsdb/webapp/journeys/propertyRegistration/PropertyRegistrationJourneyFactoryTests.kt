@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoPr
 
 class PropertyRegistrationJourneyFactoryTests {
     @Test
-    fun `createJourneySteps throws when checking the who-provides answer while the delegate feature flag is disabled`() {
+    fun `createJourneySteps treats the who-provides answer as an unknown checkable element when the delegate feature flag is disabled`() {
         val factory = factoryFor(checkingAnswersFor = WhoProvidesRentalDetailsStep.ROUTE_SEGMENT, delegateEnabled = false)
 
         val exception = assertThrows<IllegalStateException> { factory.createJourneySteps() }
