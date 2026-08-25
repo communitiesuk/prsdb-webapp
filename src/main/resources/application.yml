@@ -116,6 +116,7 @@ ff4j:
     enabled: false
 
 features:
+  overrides-enabled: false
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: false
