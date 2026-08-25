@@ -132,6 +132,9 @@ class PropertyRegistrationJourneyFactory(
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
+                    check(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                        "Unknown checkable element $checkingAnswersFor"
+                    }
                     fromTask(journey.whoProvidesDetailsTask) {
                         step(task.whoProvidesRentalDetailsStep) {
                             initialStep()
