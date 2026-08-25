@@ -78,10 +78,10 @@ class DelegateToLettingAgentController(
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
         val invitedEmailAddress =
-            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)?.invitedEmail
+            lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession()[propertyOwnershipId]
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "No letting agent invitation was found for propertyOwnershipId $propertyOwnershipId",
+                    "PropertyOwnershipId $propertyOwnershipId was not delegated to a letting agent in this session",
                 )
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)

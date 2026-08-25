@@ -76,6 +76,7 @@ class AllowLettingAgentStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
         verify(mockLettingAgentAccessService).createInvitation(propertyOwnership, "agent@example.com")
+        verify(mockLettingAgentAccessService).addDelegatedPropertyOwnershipToSession(PROPERTY_OWNERSHIP_ID, "agent@example.com")
     }
 
     @Test

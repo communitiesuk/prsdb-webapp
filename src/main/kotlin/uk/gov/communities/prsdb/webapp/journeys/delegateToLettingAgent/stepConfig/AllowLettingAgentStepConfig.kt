@@ -44,6 +44,7 @@ class AllowLettingAgentStepConfig(
         getFormModelFromState(state).emailAddress?.let { invitedEmailAddress ->
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
             lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
+            lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
         }
     }
 

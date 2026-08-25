@@ -285,7 +285,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
-            lettingAgentEmail = anyOrNull(),
+            lettingAgentEmail = eq("letting.agent@example.com"),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
