@@ -38,6 +38,9 @@
         <th:block th:if="${insetText == true}">
             <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
+        <!--/* TODO PDJB-1601: Complete the remaining 28-days-later CYA restructuring. This template, including
+               the licensing section below, is only selected when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is
+               enabled; flag-off journeys use propertyRegistrationCheckAnswersFormLegacy. */-->
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails})}"></dl>
         <th:block th:if="${!#lists.isEmpty(occupancyDetails)}">
