@@ -162,7 +162,7 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (56, '2026-04-14 00:00:00+00', 210000000056, 0),
        (57, '2026-07-01 00:00:00+00', 210000000057, 1),
        (58, '2026-07-02 10:00:00+00', 210000000058, 1),
-       (59, '2026-08-25 00:00:00+00', 210000000059, 1) ON CONFLICT DO NOTHING;
+       (66, '2026-08-25 00:00:00+00', 210000000066, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -211,7 +211,7 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
        (10, 58, 9073642, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
         '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
         true),
-       (11, 59, 9073642, '2026-08-25 00:00:00+00', 'Katrina.DiMuro@communities.gov.uk', null, true, null, 'Katrina DiMuro',
+       (11, 66, 9073642, '2026-08-25 00:00:00+00', 'Katrina.DiMuro@communities.gov.uk', null, true, null, 'Katrina DiMuro',
         '07777777777', 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '1990-01-01', 'England or Wales', true,
         true) ON CONFLICT DO NOTHING;
 
