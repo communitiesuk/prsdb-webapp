@@ -184,7 +184,7 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         lenient().`when`(mockWhoProvidesDetailsTask.whoProvidesRentalDetailsStep).thenReturn(mockWhoProvidesRentalDetailsStep)
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModel).thenReturn(mockWhoProvidesRentalDetailsFormModel)
-        lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
+        lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
         lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
     }
@@ -295,8 +295,8 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides form model is missing`() {
-            whenever(mockWhoProvidesRentalDetailsStep.formModelOrNull).thenReturn(null)
+        fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides step is unreachable`() {
+            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
