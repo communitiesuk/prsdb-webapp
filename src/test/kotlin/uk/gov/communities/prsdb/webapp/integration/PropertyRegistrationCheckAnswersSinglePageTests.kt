@@ -159,7 +159,10 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withLettingAgentProvidesRentalDetails()
-                        .withSubmittedValue(LettingAgentEmailStep.ROUTE_SEGMENT, AllowLettingAgentEmailFormModel())
+                        .withSubmittedValue(
+                            LettingAgentEmailStep.ROUTE_SEGMENT,
+                            AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
+                        )
                         .withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -169,6 +172,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertThat(
                 checkAnswersPage.summaryList.lettingAgentEmailRow.key,
             ).containsText("Letting agent or property manager’s email address")
+            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText("letting.agent@example.com")
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
             checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
             assertTrue(page.url().contains("/letting-agent-email"))

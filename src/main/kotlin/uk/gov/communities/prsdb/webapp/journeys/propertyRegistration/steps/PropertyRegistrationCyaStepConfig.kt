@@ -254,7 +254,7 @@ class PropertyRegistrationCyaStepConfig(
             rows +=
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.lettingAgentDelegation.rows.agentEmail.label",
-                    "",
+                    state.whoProvidesDetailsTask.lettingAgentEmailStep.formModel.emailAddress,
                     Destination.VisitableStep(
                         state.whoProvidesDetailsTask.lettingAgentEmailStep,
                         state.getCyaJourneyId(state.whoProvidesDetailsTask.lettingAgentEmailStep),
