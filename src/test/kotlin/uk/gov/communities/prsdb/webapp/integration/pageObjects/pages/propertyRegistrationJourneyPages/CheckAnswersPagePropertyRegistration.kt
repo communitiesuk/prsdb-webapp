@@ -83,7 +83,7 @@ class CheckAnswersPagePropertyRegistration(
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
-        val whoProvidesRentalDetailsRow = getRow(Pattern.compile("^Who will provide this property’s rental details?\\??$"))
+        val whoProvidesRentalDetailsRow = getRow("Who will provide this property’s rental details?")
         val lettingAgentEmailRow = getRow("Letting agent or property manager’s email address")
         val occupiedByTenantsRow = getRow(Pattern.compile("^Occupied by tenants$"))
         val tenancyDetailsRow = getRow("Tenancy details")
