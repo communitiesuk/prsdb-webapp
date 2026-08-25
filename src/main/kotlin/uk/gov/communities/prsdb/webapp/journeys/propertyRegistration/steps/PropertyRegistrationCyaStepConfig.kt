@@ -41,7 +41,7 @@ class PropertyRegistrationCyaStepConfig(
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val whoProvidesRentalDetails =
             if (isSkippingEnabled && isDelegateToLettingAgentEnabled) {
-                state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelOrNull?.whoProvides
+                state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
             } else {
                 null
             }
