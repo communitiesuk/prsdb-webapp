@@ -14,7 +14,9 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
@@ -29,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -61,6 +64,12 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var lettingAgentAccessService: LettingAgentAccessService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -136,6 +145,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .perform(
@@ -164,6 +174,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .perform(
@@ -203,6 +214,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .perform(
@@ -254,6 +266,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .perform(
@@ -282,6 +295,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createOrgLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
         mvc
             .perform(
@@ -308,5 +322,91 @@ class RegisterPropertyControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl("$TASK_LIST_PATH_SEGMENT?journeyId=$journeyId")
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns delegatedToLettingAgent true when flag enabled and delegation exists`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                currentNumTenants = 2,
+                currentNumHouseholds = 1,
+                numberOfBedrooms = 1,
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(mock())
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("lettingAgentFeatureEnabled", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
+            .andExpect(MockMvcResultMatchers.model().attributeExists("completeByDate"))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns delegatedToLettingAgent false when flag disabled`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("lettingAgentFeatureEnabled", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", false))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns delegatedToLettingAgent false when flag enabled but no delegation exists`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(null)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("lettingAgentFeatureEnabled", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", false))
     }
 }
