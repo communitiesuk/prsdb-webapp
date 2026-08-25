@@ -22,15 +22,11 @@ Make a note of the Property Registration Number.
 
 ((hasDelegatedToLettingAgent??## You sent a request to your letting agent or property manager))
 
-((hasDelegatedToLettingAgent??You’ve asked your letting agent or property manager to provide the:))
+((hasDelegatedToLettingAgent??You've asked your letting agent or property manager to provide the:))
 
-((hasDelegatedToLettingAgent??* licensing details))
-((hasDelegatedToLettingAgent??* gas safety certificate))
-((hasDelegatedToLettingAgent??* electrical safety certificate))
-((hasDelegatedToLettingAgent??* energy performance certificate (EPC)))
-((hasDelegatedToLettingAgent??* tenancy details))
+((lettingAgentProvideList))
 
-((hasDelegatedToLettingAgent??To keep the property registered, they must provide these details within 28 days. We’ll notify you when they've provided this information.))
+((hasDelegatedToLettingAgent??To keep the property registered, they must provide these details within 28 days. We'll notify you when they've provided this information.))
 
 You should save this email so you can reference it if needed.
 
