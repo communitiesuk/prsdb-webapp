@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -38,13 +39,9 @@ class CheckAnswersPagePropertyRegistration(
         )
 
     val lettingAgentDelegationBodyText =
-        Heading(
-            page.locator(
-                "p.govuk-body",
-                Page.LocatorOptions().setHasText(
-                    "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
-                ),
-            ),
+        Paragraph.byText(
+            page,
+            "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
         )
 
     val complianceSummaryList = ComplianceSummaryList(page)
