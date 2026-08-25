@@ -54,7 +54,7 @@
                     <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
                         <article id="letting-agent-panel"
                                  th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.cancelDelegation.heading', ~{::#letting-agent-panel/content()}, ${lettingAgentPanelLink})}">
-                            <p class="govuk-heading-m" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
+                            <p class="govuk-body-l" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
                             <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.cancelDelegation.body}">propertyDetails.lettingAgentPanel.cancelDelegation.body</p>
                         </article>
                     </div>
