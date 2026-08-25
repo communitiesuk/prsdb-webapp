@@ -28,8 +28,8 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "2da7c844-8061-4f51-b3c5-7a076a55f9a1",
-    "prod_id": "3c417d81-c38a-46ce-ab9c-263682ec40ca",
+    "test_id": "c8853acc-ae51-4037-884f-7c9d02dc3766",
+    "prod_id": "46eaaf61-72fa-4fdb-a537-9e82e675b8df",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
@@ -308,5 +308,19 @@
     "enumName": "LETTING_AGENT_CANCEL_DELEGATION_LETTING_AGENT_NOTIFICATION_EMAIL",
     "subject": "You can no longer update ((single line address))",
     "bodyLocation": "/emails/CancelDelegationLettingAgentNotification.md"
+  },
+  {
+    "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
+    "prod_id": "b3f8620c-67b8-4988-98c7-1d8bf7738aea",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_CONFIRMATION_EMAIL",
+    "subject": "You updated a property record",
+    "bodyLocation": "/emails/DelegateToLettingAgentConfirmation.md"
+  },
+  {
+    "test_id": "fd181c1b-be1a-4984-8139-d6e8e6c31ec6",
+    "prod_id": "815691d4-adb4-41ef-839f-335c65eae6a6",
+    "enumName": "JOINT_LANDLORD_DELEGATE_TO_LETTING_AGENT_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordDelegateToLettingAgentNotification.md"
   }
 ]
