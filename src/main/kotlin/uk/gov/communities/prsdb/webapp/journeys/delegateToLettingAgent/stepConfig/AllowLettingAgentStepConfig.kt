@@ -26,10 +26,6 @@ class AllowLettingAgentStepConfig(
 
     override fun mode(state: DelegateToLettingAgentJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    // TODO PDJB-1560: Remove this guard once the delegate-to-letting-agent link is reliably hidden for
-    //  already-delegated properties. It stops a landlord who re-enters this journey (e.g. via a direct URL or the
-    //  back button after delegating) from triggering a second letting_agent_access insert, which would violate the
-    //  unique property_ownership_id constraint.
     override fun beforeAttemptingToReachStep(state: DelegateToLettingAgentJourneyState): Boolean =
         lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId) == null
 

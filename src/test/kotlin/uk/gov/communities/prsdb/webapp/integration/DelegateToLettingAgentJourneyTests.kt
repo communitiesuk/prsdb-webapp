@@ -99,6 +99,26 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
     }
 
     @Test
+    fun `navigating directly to the first step when already delegated redirects to the property record`(page: Page) {
+        val propertyOwnershipId = PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER
+        val allowLettingAgentPage = navigator.goToDelegateToLettingAgentAllowLettingAgentPage(propertyOwnershipId)
+        allowLettingAgentPage.submitEmail("agent@example.com")
+        assertPageIs(
+            page,
+            ConfirmationPageDelegateToLettingAgent::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+
+        navigator.navigate(DelegateToLettingAgentController.getDelegateToLettingAgentPath(propertyOwnershipId))
+
+        assertPageIs(
+            page,
+            PropertyDetailsPageLandlordView::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    @Test
     fun `the property record does not show the delegate to letting agent link when the feature flag is disabled`() {
         featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
 
