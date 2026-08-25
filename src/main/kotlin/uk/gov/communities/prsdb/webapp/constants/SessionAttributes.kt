@@ -12,6 +12,8 @@ const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
 const val PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION = "propertiesDelegatedToLettingAgentThisSession"
 
+const val LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS = "lettingAgentsRemovedThisSessionWithEmails"
+
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
 const val COOKIE_TOKENS = "cookieTokens"

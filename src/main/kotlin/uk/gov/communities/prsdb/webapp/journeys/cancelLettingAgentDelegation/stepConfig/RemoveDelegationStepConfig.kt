@@ -28,6 +28,7 @@ class RemoveDelegationStepConfig(
                 )
         val lettingAgentEmail = lettingAgentAccess.invitedEmail
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(state.propertyOwnershipId)
+        lettingAgentAccessService.addRemovedLettingAgentToSession(state.propertyOwnershipId, lettingAgentEmail)
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         cancelLettingAgentDelegationEmailService.sendCancellationEmails(propertyOwnership, lettingAgentEmail)
     }

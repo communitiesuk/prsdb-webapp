@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -49,4 +50,23 @@ class LettingAgentAccessService(
     fun getDelegatedPropertyOwnershipEmailsFromSession(): MutableMap<Long, String> =
         session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION) as MutableMap<Long, String>?
             ?: mutableMapOf()
+
+    fun addRemovedLettingAgentToSession(
+        propertyOwnershipId: Long,
+        lettingAgentEmail: String,
+    ) = session.setAttribute(
+        LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
+        getRemovedLettingAgentsFromSession() + (propertyOwnershipId to lettingAgentEmail),
+    )
+
+    fun wasLettingAgentRemovedInThisSession(propertyOwnershipId: Long): Boolean =
+        propertyOwnershipId in getRemovedLettingAgentsFromSession()
+
+    fun getRemovedLettingAgentEmailFromSession(propertyOwnershipId: Long): String? =
+        getRemovedLettingAgentsFromSession()[propertyOwnershipId]
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getRemovedLettingAgentsFromSession(): Map<Long, String> =
+        session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS) as Map<Long, String>?
+            ?: emptyMap()
 }
