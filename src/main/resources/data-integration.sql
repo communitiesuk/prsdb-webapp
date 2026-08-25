@@ -55,7 +55,9 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '2026-07-01 10:33:22.395944+00'),  -- danielle.dias@madetech.com
        ('8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', '2026-07-01 10:33:22.395944+00'),  -- danielle.dias@madetech.com
        ('a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', '2026-07-02 10:00:00+00'), -- benjamin.johnson@madetech.com
-       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '2026-07-02 10:00:00+00') -- benjamin.johnson@madetech.com
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '2026-07-02 10:00:00+00'), -- benjamin.johnson@madetech.com
+       ('2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', '2026-08-25 00:00:00+00'), -- Katrina.DiMuro@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '2026-08-25 00:00:00+00') -- Katrina.DiMuro@communities.gov.uk
     ON CONFLICT DO NOTHING;
 
 
@@ -80,7 +82,9 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (14, '2026-07-01 00:00:00+00', null, '8d2125eb8dbe8146d91491783e13106694ed320224dc34fb56d86c8fba6b3bbb', true, 2, -- pragma: allowlist secret
         'danielle.dias@madetech.com', 'Danielle Dias', true),
        (15, '2026-07-02 10:00:00+00', null, 'a84d3882f2dd7b9bfe55a33cc035b29987d1affb92f6e556e12be513075302f3', true, 2, -- pragma: allowlist secret
-        'benjamin.johnson@madetech.com', 'Ben Johnson', true)
+        'benjamin.johnson@madetech.com', 'Ben Johnson', true),
+       (16, '2026-08-25 00:00:00+00', null, '2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', true, 2, -- pragma: allowlist secret
+        'Katrina.DiMuro@communities.gov.uk', 'Katrina DiMuro', true)
     ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
@@ -157,7 +161,8 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (55, '2026-04-14 00:00:00+00', 210000000055, 0),
        (56, '2026-04-14 00:00:00+00', 210000000056, 0),
        (57, '2026-07-01 00:00:00+00', 210000000057, 1),
-       (58, '2026-07-02 10:00:00+00', 210000000058, 1) ON CONFLICT DO NOTHING;
+       (58, '2026-07-02 10:00:00+00', 210000000058, 1),
+       (59, '2026-08-25 00:00:00+00', 210000000059, 1) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -205,6 +210,9 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
         true),
        (10, 58, 9073642, '2026-07-02 10:00:00+00', 'benjamin.johnson@madetech.com', null, true, null, 'Ben Johnson',
         '07777777777', 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '1990-01-01', 'England or Wales', true,
+        true),
+       (11, 59, 9073642, '2026-08-25 00:00:00+00', 'Katrina.DiMuro@communities.gov.uk', null, true, null, 'Katrina DiMuro',
+        '07777777777', 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '1990-01-01', 'England or Wales', true,
         true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
@@ -479,7 +487,8 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzE
        (6, '2025-03-18 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'),
        (7, '2025-05-01 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'),
        (8, '2026-07-01 10:33:22.395944+00', null, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA'),
-       (9, '2026-07-02 10:00:00+00', null, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w') ON CONFLICT DO NOTHING;
+       (9, '2026-07-02 10:00:00+00', null, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w'),
+       (10, '2026-08-25 00:00:00+00', null, 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 

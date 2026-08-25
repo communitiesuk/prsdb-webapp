@@ -39,7 +39,8 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('ia-mock-user-12345', '10/14/24'),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', '07/01/26'), -- danielle.dias@madetech.com
        ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', '07/02/26'), -- benjamin.johnson@madetech.com
-       ('urn:fdc:gov.uk:2022:ORG01', '07/23/26');
+       ('urn:fdc:gov.uk:2022:ORG01', '07/23/26'),
+       ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '08/25/26'); -- Katrina.DiMuro@communities.gov.uk
 
 
 -- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
@@ -62,7 +63,8 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Pref
         'Team-PRSDB+lauser@softwire.com', true),
        ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', true, 1, '07/01/26', '07/01/26', 'Danielle Dias', 'danielle.dias@madetech.com', true),
-       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', true, 1, '07/02/26', '07/02/26', 'Ben Johnson', 'benjamin.johnson@madetech.com', true);
+       ('urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', true, 1, '07/02/26', '07/02/26', 'Ben Johnson', 'benjamin.johnson@madetech.com', true),
+       ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', true, 1, '08/25/26', '08/25/26', 'Katrina DiMuro', 'Katrina.DiMuro@communities.gov.uk', true);
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -158,7 +160,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (81, '07/23/26', 1502423343, 1),
        (82, '07/23/26', 1502423344, 0),
        (83, '07/23/26', 1502423345, 0),
-       (84, '08/19/26', 1502423346, 0);
+       (84, '08/19/26', 1502423346, 0),
+       (85, '08/25/26', 1502423347, 1);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -271,7 +274,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
        (32, '01/15/25', '01/15/25', 32, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Y', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
        (33, '01/15/25', '01/15/25', 33, 5, '06/13/1989', true, 0, 'urn:fdc:gov.uk:2022:Z', 'PRSDB', 'test@example.com', 'England or Wales', true, true),
        (34, '07/01/26', '07/01/26', 71, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:ErdvdxjqbulqrJI9hDob1vE0BQ_BqVXlv-mWZwgBJgA', 'Danielle Dias', 'danielle.dias@madetech.com', 'England or Wales', true, true),
-       (35, '07/02/26', '07/02/26', 72, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', 'Ben Johnson', 'benjamin.johnson@madetech.com', 'England or Wales', true, true);
+       (35, '07/02/26', '07/02/26', 72, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:qw2_iN4-Be1BkbYb8y-KyMuPfG7F49W_1fsa_V6iX9w', 'Ben Johnson', 'benjamin.johnson@madetech.com', 'England or Wales', true, true),
+       (36, '08/25/26', '08/25/26', 85, 5, '01/01/1990', true, 07777777777, 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', 'Katrina DiMuro', 'Katrina.DiMuro@communities.gov.uk', 'England or Wales', true, true);
 
 -- TODO: PDJB-1295: Add some more
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, landlord_type,
