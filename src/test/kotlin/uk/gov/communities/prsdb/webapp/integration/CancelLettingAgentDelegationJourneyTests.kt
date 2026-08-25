@@ -37,7 +37,7 @@ class CancelLettingAgentDelegationJourneyTests : IntegrationTestWithMutableData(
         BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText(
             "Letting agent or property manager can no longer provide details",
         )
-        assertThat(page.locator("main")).containsText(lettingAgentEmail)
+        assertThat(confirmationPage.lettingAgentEmail).hasText(lettingAgentEmail)
         confirmationPage.continueButton.clickAndWait()
 
         // Back to the property record page

@@ -14,5 +14,6 @@ class ConfirmationPageCancelLettingAgentDelegation(
         "/$REMOVE_LETTING_AGENT_PATH_SEGMENT/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)
+    val lettingAgentEmail = page.locator("#letting-agent-email")
     val continueButton = Button.byText(page, "Continue")
 }
