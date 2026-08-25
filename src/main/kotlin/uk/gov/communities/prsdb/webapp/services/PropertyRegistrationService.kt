@@ -72,6 +72,7 @@ class PropertyRegistrationService(
         epcProvideLater: Boolean? = null,
         licenseProvideLater: Boolean = false,
         tenancyProvideLater: Boolean? = null,
+        isDelegatedToLettingAgent: Boolean = false,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
@@ -124,7 +125,7 @@ class PropertyRegistrationService(
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
 
-        sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails)
+        sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails, isDelegatedToLettingAgent)
     }
 
     private fun createPropertyOwnershipAndRelatedEntities(
@@ -190,6 +191,7 @@ class PropertyRegistrationService(
         propertyOwnership: PropertyOwnership,
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
+        isDelegatedToLettingAgent: Boolean,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -202,6 +204,7 @@ class PropertyRegistrationService(
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
+                isDelegatedToLettingAgent,
             ),
         )
 
