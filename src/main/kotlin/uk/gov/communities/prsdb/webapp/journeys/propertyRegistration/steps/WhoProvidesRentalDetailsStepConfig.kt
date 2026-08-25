@@ -41,6 +41,10 @@ class WhoProvidesRentalDetailsStepConfig :
                 WhoProvidesRentalDetails.LETTING_AGENT -> WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
             }
         }
+
+    override fun afterStepDataIsAdded(state: WhoProvidesDetailsState) {
+        state.cachedWhoProvidesRentalDetails = getFormModelFromState(state).whoProvides
+    }
 }
 
 @JourneyFrameworkComponent

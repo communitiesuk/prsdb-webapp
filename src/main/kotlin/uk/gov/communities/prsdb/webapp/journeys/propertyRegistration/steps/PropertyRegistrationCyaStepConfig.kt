@@ -34,7 +34,7 @@ class PropertyRegistrationCyaStepConfig(
         }
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val content =
             mutableMapOf<String, Any?>(
@@ -52,7 +52,7 @@ class PropertyRegistrationCyaStepConfig(
                         .getAddress()
                         .singleLineAddress,
                 "propertyDetails" to
-                    if (isRestructured) {
+                    if (isSkippingEnabled) {
                         getRestructuredPropertyDetailsSummaryList(state)
                     } else {
                         getPropertyDetailsSummaryList(state)
@@ -66,7 +66,7 @@ class PropertyRegistrationCyaStepConfig(
                         licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask)
                     },
                 "occupancyDetails" to
-                    if (isRestructured) {
+                    if (isSkippingEnabled) {
                         occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
                     } else {
                         null
@@ -79,7 +79,7 @@ class PropertyRegistrationCyaStepConfig(
                         getMockProvideLaterSummaryList(
                             "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
                         )
-                    } else if (isRestructured) {
+                    } else if (isSkippingEnabled) {
                         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
                             state,
                             messageSource,

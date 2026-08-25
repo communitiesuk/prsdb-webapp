@@ -79,6 +79,7 @@ taskList:
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
     tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
+    tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
@@ -189,3 +190,11 @@ lettingAgentEmail:
   emailLabel: "What is your letting agent or property manager’s email address?"
   emailHint: "We’ll email them a link to provide this property’s remaining details"
   submitButton: Save and continue
+occupancyChangeInterruption:
+  heading: Are you sure you want to change this?
+  paragraph:
+    one: You’ve changed this property to being unoccupied.
+    two: This means you cannot ask your letting agent or property manager to provide this property’s details.
+    three: You must now complete this registration yourself, adding as many details as you can.
+    four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
+    five: You can go back to undo this change.
