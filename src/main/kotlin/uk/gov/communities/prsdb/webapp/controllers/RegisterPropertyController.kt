@@ -20,8 +20,10 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
@@ -44,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -63,6 +66,8 @@ class RegisterPropertyController(
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -113,9 +118,18 @@ class RegisterPropertyController(
             } else {
                 false
             }
+
+        val lettingAgentFeatureEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+        model.addAttribute("lettingAgentFeatureEnabled", lettingAgentFeatureEnabled)
+
+        val delegatedToLettingAgent =
+            lettingAgentFeatureEnabled &&
+                lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id) != null
+        model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
+
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
-        if (actionRequiredForCompliance) {
+        if (delegatedToLettingAgent || actionRequiredForCompliance) {
             val completeByDate =
                 CompleteByDateHelper.getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
             val formattedDate =
