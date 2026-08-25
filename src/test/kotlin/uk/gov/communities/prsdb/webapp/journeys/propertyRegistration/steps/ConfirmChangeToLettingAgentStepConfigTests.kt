@@ -7,14 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmChangeToLettingAgentStepConfigTests {
     @Mock
-    lateinit var mockState: PropertyRegistrationJourneyState
+    lateinit var mockState: JourneyState
 
     private val routeSegment = ConfirmChangeToLettingAgentStep.ROUTE_SEGMENT
 
@@ -39,12 +39,12 @@ class ConfirmChangeToLettingAgentStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns whoProvidesChangeAreYouSureForm`() {
+    fun `chooseTemplate returns whoProvidesChangeInterruptionForm`() {
         val stepConfig = setupStepConfig()
 
         val result = stepConfig.chooseTemplate(mockState)
 
-        assertEquals("forms/whoProvidesChangeAreYouSureForm", result)
+        assertEquals("forms/whoProvidesChangeInterruptionForm", result)
     }
 
     private fun setupStepConfig(): ConfirmChangeToLettingAgentStepConfig {

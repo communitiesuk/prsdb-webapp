@@ -195,10 +195,10 @@ whoProvidesRentalDetails:
       one: You’ve selected for your letting agent or property manager to provide details about how your property’s rented out.
       two: 'This means we’ll remove the details you’ve already provided about:'
       three: You can go back to undo this change.
-    erased:
-      licensing: property licensing
-      compliance: compliance certificates
-      tenancy: the current tenancy
+    bullet:
+      one: property licensing
+      two: compliance certificates
+      three: the current tenancy
 lettingAgentEmail:
   heading: Allow your letting agent or property manager to provide details
   howItWorks:
