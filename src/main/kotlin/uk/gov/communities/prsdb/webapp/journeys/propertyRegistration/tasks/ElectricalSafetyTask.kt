@@ -14,11 +14,6 @@ class ElectricalSafetyTask(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
 ) : Task<ElectricalSafetyState, ElectricalSafetyDependencies>(journeyStateService),
     ElectricalSafetyState {
-    fun clearFormData() {
-        electricalSafetyDetailsTask.clearFormData()
-        checkElectricalSafetyAnswersStep.clearFormData()
-    }
-
     override fun makeSubJourney(state: ElectricalSafetyState) =
         subJourney(state) {
             task(journey.electricalSafetyDetailsTask) {

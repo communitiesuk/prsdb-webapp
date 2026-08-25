@@ -31,14 +31,6 @@ class LicensingTask(
     override val allowProvideLicensingLaterRoute: Boolean
         get() = dependencies.allowProvideLicensingLaterRoute
 
-    fun clearFormData() {
-        licensingTypeStep.clearFormData()
-        selectiveLicenceStep.clearFormData()
-        hmoMandatoryLicenceStep.clearFormData()
-        hmoAdditionalLicenceStep.clearFormData()
-        provideLicensingLaterStep.clearFormData()
-    }
-
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
             step(journey.licensingTypeStep) {

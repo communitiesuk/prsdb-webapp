@@ -47,19 +47,6 @@ class ElectricalSafetyDetailsTask(
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
 
-    fun clearFormData() {
-        hasElectricalCertStep.clearFormData()
-        electricalCertExpiryDateStep.clearFormData()
-        uploadElectricalCertStep.clearFormData()
-        checkElectricalCertUploadsStep.clearFormData()
-        removeElectricalCertUploadStep.clearFormData()
-        electricalCertExpiredStep.clearFormData()
-        electricalCertMissingStep.clearFormData()
-        provideElectricalCertLaterStep.clearFormData()
-        electricalUploadMap = mapOf()
-        highestAssignedElectricalMemberId = null
-    }
-
     override fun makeSubJourney(state: ElectricalSafetyDetailState) =
         subJourney(state) {
             step(journey.hasElectricalCertStep) {

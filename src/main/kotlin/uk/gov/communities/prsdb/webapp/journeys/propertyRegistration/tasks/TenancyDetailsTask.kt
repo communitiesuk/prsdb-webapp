@@ -24,13 +24,6 @@ class TenancyDetailsTask(
     TenancyDetailsState {
     override val taskState get() = this
 
-    fun clearFormData() {
-        householdsAndTenantsTask.clearFormData()
-        rentIncludesBillsTask.clearFormData()
-        furnishedStatus.clearFormData()
-        rentFrequencyAndAmountTask.clearFormData()
-    }
-
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             task(journey.householdsAndTenantsTask) {

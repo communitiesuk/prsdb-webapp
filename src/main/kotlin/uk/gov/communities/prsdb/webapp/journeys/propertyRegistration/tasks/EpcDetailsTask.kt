@@ -85,31 +85,6 @@ class EpcDetailsTask(
         .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
-    fun clearFormData() {
-        startEpcStep.clearFormData()
-        hasEpcStep.clearFormData()
-        checkUprnMatchedEpcStep.clearFormData()
-        confirmEpcDetailsRetrievedByCertificateNumberStep.clearFormData()
-        findYourEpcStep.clearFormData()
-        checkSupersededEpcStep.clearFormData()
-        epcNotFoundStep.clearFormData()
-        epcInDateAtStartOfTenancyCheckStep.clearFormData()
-        hasMeesExemptionStep.clearFormData()
-        meesExemptionStep.clearFormData()
-        lowEnergyRatingStep.clearFormData()
-        epcExpiredStep.clearFormData()
-        isEpcRequiredStep.clearFormData()
-        epcExemptionStep.clearFormData()
-        epcMissingStep.clearFormData()
-        provideEpcLaterStep.clearFormData()
-        epcRetrievedByUprn = null
-        epcRetrievedByUprnUpdatedSinceUserReview = null
-        epcRetrievedByCertificateNumber = null
-        epcRetrievedByCertificateNumberUpdatedSinceUserReview = null
-        updatedEpcRetrievedByCertificateNumber = null
-        acceptedEpc = null
-    }
-
     override fun makeSubJourney(state: EpcDetailState) =
         subJourney(state) {
             step(journey.startEpcStep) {

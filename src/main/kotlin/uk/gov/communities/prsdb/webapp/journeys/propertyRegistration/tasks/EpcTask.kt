@@ -15,11 +15,6 @@ class EpcTask(
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
 ) : Task<EpcState, EpcDependencies>(journeyStateService),
     EpcState {
-    fun clearFormData() {
-        epcDetailsTask.clearFormData()
-        checkEpcAnswersStep.clearFormData()
-    }
-
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
             taskStatus {
