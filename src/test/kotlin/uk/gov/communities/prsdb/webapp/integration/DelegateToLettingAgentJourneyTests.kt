@@ -4,9 +4,11 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentController
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -19,6 +21,9 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
         const val PROPERTY_OWNERSHIP_ID_OWNED_BY_CURRENT_USER = 4L
         const val PROPERTY_OWNERSHIP_ID_OWNED_BY_ANOTHER_LANDLORD = 3L
     }
+
+    @Autowired
+    lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 
     @BeforeEach
     fun enableDelegateToLettingAgentFlag() {
@@ -55,6 +60,9 @@ class DelegateToLettingAgentJourneyTests : IntegrationTestWithMutableData("data-
         assertThat(confirmationPage.invitedEmailAddress).hasText("agent@example.com")
         assertThat(confirmationPage.propertyAddress).containsText("4 Imaginary Street")
         assertThat(confirmationPage.propertyAddress).containsText("FA1 1AH")
+
+        val invitation = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
+        assertEquals("agent@example.com", invitation!!.invitedEmail)
     }
 
     @Test

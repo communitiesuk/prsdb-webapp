@@ -8,13 +8,15 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
-import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent("delegateToLettingAgentAllowLettingAgentStepConfig")
 class AllowLettingAgentStepConfig(
     private val userToLandlordService: UserToLandlordService,
-    private val delegateToLettingAgentService: DelegateToLettingAgentService,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
 ) : AbstractRequestableStepConfig<Complete, AllowLettingAgentEmailFormModel, DelegateToLettingAgentJourneyState>() {
     override val formModelClass = AllowLettingAgentEmailFormModel::class
 
@@ -23,6 +25,13 @@ class AllowLettingAgentStepConfig(
     override fun chooseTemplate(state: DelegateToLettingAgentJourneyState) = "forms/allowLettingAgentForm"
 
     override fun mode(state: DelegateToLettingAgentJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    // TODO PDJB-1560: Remove this guard once the delegate-to-letting-agent link is reliably hidden for
+    //  already-delegated properties. It stops a landlord who re-enters this journey (e.g. via a direct URL or the
+    //  back button after delegating) from triggering a second letting_agent_access insert, which would violate the
+    //  unique property_ownership_id constraint.
+    override fun beforeAttemptingToReachStep(state: DelegateToLettingAgentJourneyState): Boolean =
+        lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId) == null
 
     override fun enrichSubmittedDataBeforeValidation(
         state: DelegateToLettingAgentJourneyState,
@@ -33,7 +42,9 @@ class AllowLettingAgentStepConfig(
 
     override fun afterStepDataIsAdded(state: DelegateToLettingAgentJourneyState) {
         getFormModelFromState(state).emailAddress?.let { invitedEmailAddress ->
-            delegateToLettingAgentService.addDelegatedLettingAgentToSession(state.propertyOwnershipId, invitedEmailAddress)
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
+            lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
+            lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
         }
     }
 
