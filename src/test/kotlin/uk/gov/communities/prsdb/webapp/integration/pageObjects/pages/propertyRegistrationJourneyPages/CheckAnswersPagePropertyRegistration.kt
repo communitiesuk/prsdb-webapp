@@ -4,6 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -25,6 +26,23 @@ class CheckAnswersPagePropertyRegistration(
 
     val occupancyHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
+
+    val lettingAgentDelegationHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("How your property’s rented out")))
+
+    val lettingAgentDelegationSubheading =
+        Heading(
+            page.locator(
+                "h3.govuk-heading-s",
+                Page.LocatorOptions().setHasText("Who will provide these details"),
+            ),
+        )
+
+    val lettingAgentDelegationBodyText =
+        Paragraph.byText(
+            page,
+            "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
+        )
 
     val complianceSummaryList = ComplianceSummaryList(page)
 
@@ -65,6 +83,8 @@ class CheckAnswersPagePropertyRegistration(
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
+        val whoProvidesRentalDetailsRow = getRow("Who will provide this property’s rental details?")
+        val lettingAgentEmailRow = getRow("Letting agent or property manager’s email address")
         val occupiedByTenantsRow = getRow(Pattern.compile("^Occupied by tenants$"))
         val tenancyDetailsRow = getRow("Tenancy details")
         val numberOfHouseholdsRow = getRow("Number of households")

@@ -324,6 +324,20 @@
     "bodyLocation": "/emails/JointLandlordDelegateToLettingAgentNotification.md"
   },
   {
+    "test_id": "024382de-23ee-41bf-8d76-d66d668f1a61",
+    "prod_id": "b4a40f0a-2001-47e5-a71a-852c7c76e1b7",
+    "enumName": "PROPERTY_UPDATE_WITH_LETTING_AGENT_REMOVED_CONFIRMATION",
+    "subject": "You updated a property record",
+    "bodyLocation": "/emails/PropertyUpdateWithLettingAgentRemovedConfirmation.md"
+  },
+  {
+    "test_id": "fedf5c4a-be8d-418f-9881-a7e30bfa8a7d",
+    "prod_id": "79328d1f-e477-4b7d-b502-0928dcfa30b2",
+    "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_WITH_LETTING_AGENT_REMOVED_NOTIFICATION",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordPropertyUpdateWithLettingAgentRemovedNotification.md"
+  },
+  {
     "test_id": "ddc927e7-8c05-4521-bb9e-5da1aadd6b3f",
     "prod_id": "59cc4b17-f851-45a1-890e-2561151d53c4",
     "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_EMAIL",
