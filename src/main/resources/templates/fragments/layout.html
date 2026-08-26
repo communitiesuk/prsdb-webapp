@@ -48,6 +48,7 @@
     </script>
 </head>
 <body class="govuk-template__body">
+<script th:nonce="${serverGeneratedNonce}">document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 <header th:replace="~{fragments/header/header :: header(${navLinks})}"></header>
 <div class="govuk-width-container">
