@@ -53,13 +53,13 @@ confirmation:
     heading: What happens next
     lettingAgent:
       subHeading: Your letting agent or property manager needs to provide the remaining required details
-      emailedParagraph: "We've now emailed your letting agent or property manager and asked them to provide:"
+      emailedParagraph: "We’ve now emailed your letting agent or property manager and asked them to provide:"
       licensingDetails: licensing details
       gasSafetyCertificate: gas safety certificate
       electricalSafetyCertificate: electrical safety certificate
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
-      completeByParagraph: To keep the property registered, they must provide these details before {0}. We'll notify you when they've provided this information.
+      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they've provided this information.
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
