@@ -19,16 +19,23 @@
                 <strong th:text="${prn}">L-GD47-39FX</strong>
             </div>
 
+            <!--/* TODO: PDJB-1617: Remove this when we removed the feature flag */-->
             <p class="govuk-body"
-               th:text="#{registerProperty.confirmation.keepNumber}">
-                registerProperty.confirmation.keepNumber
+               th:unless="${lettingAgentFeatureEnabled}"
+               th:text="#{registerProperty.confirmation.keepNumber.old}">
+                registerProperty.confirmation.keepNumber.old
+            </p>
+            <p class="govuk-body"
+               th:if="${lettingAgentFeatureEnabled}"
+               th:text="#{registerProperty.confirmation.keepNumber.lettingAgentRedesign}">
+                registerProperty.confirmation.keepNumber.lettingAgentRedesign
             </p>
             <p class="govuk-body"
                th:text="#{registerProperty.confirmation.useInAdverts}">
                 registerProperty.confirmation.useInAdverts
             </p>
 
-            <th:block th:if="${actionRequiredForCompliance}">
+            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent}">
                 <h2 class="govuk-heading-m"
                     th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
                     registerProperty.confirmation.whatYouNeedToDoNext.heading
@@ -40,6 +47,33 @@
                 <p class="govuk-body"
                    th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
                     registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
+                </p>
+            </th:block>
+
+            <!--/* TODO: PDJB-1618: Show joint landlords copy here as well */-->
+            <th:block th:if="${delegatedToLettingAgent}">
+                <h2 class="govuk-heading-m"
+                    th:text="#{registerProperty.confirmation.whatHappensNext.heading}">
+                    registerProperty.confirmation.whatHappensNext.heading
+                </h2>
+                <h3 class="govuk-heading-s"
+                    th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading}">
+                    registerProperty.confirmation.whatHappensNext.lettingAgent.subHeading
+                </h3>
+                <p class="govuk-body"
+                   th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph}">
+                    registerProperty.confirmation.whatHappensNext.lettingAgent.emailedParagraph
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.licensingDetails</li>
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.gasSafetyCertificate</li>
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate}">registerProperty.confirmation.whatHappensNext.lettingAgent.electricalSafetyCertificate</li>
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.epc}">registerProperty.confirmation.whatHappensNext.lettingAgent.epc</li>
+                    <li th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails}">registerProperty.confirmation.whatHappensNext.lettingAgent.tenancyDetails</li>
+                </ul>
+                <p class="govuk-body"
+                   th:text="#{registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph(${completeByDate})}">
+                    registerProperty.confirmation.whatHappensNext.lettingAgent.completeByParagraph
                 </p>
             </th:block>
 
