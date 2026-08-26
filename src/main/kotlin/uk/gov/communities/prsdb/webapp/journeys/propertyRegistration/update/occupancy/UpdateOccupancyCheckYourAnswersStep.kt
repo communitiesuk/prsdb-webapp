@@ -21,8 +21,6 @@ class UpdateOccupancyCheckYourAnswersStepConfig :
             "summaryListData" to emptyList<SummaryListRowViewModel>(),
         )
 
-    // Do not delete the journey here: the internal CompleteOccupancyUpdateStep performs the save/delegation removal
-    // and deletes the journey (mirrors PropertyRegistrationCyaStep -> SavePropertyRegistrationDataStep).
     override fun resolveNextDestination(
         state: UpdateOccupancyJourneyState,
         defaultDestination: Destination,
