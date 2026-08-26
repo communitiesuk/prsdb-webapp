@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
@@ -345,6 +346,7 @@ class RegisterPropertyControllerTests(
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(mock())
 
         mvc
@@ -398,6 +400,7 @@ class RegisterPropertyControllerTests(
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(null)
 
         mvc
