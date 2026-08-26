@@ -17,12 +17,15 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -30,6 +33,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
@@ -43,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
@@ -118,6 +126,12 @@ class PropertyRegistrationCyaStepConfigTests {
     private lateinit var mockTenancyDetailsTask: TenancyDetailsTask
 
     @Mock
+    private lateinit var mockOccupiedStep: OccupiedStep
+
+    @Mock
+    private lateinit var mockOccupancyFormModel: OccupancyFormModel
+
+    @Mock
     private lateinit var mockHouseholdsAndTenantsTask: HouseholdsAndTenantsTask
 
     @Mock
@@ -128,6 +142,21 @@ class PropertyRegistrationCyaStepConfigTests {
 
     @Mock
     private lateinit var mockWhoProvidesDetailsTask: WhoProvidesDetailsTask
+
+    @Mock
+    private lateinit var mockLicensingTask: LicensingTask
+
+    @Mock
+    private lateinit var mockLicensingTypeStep: LicensingTypeStep
+
+    @Mock
+    private lateinit var mockGasSafetyTask: GasSafetyTask
+
+    @Mock
+    private lateinit var mockElectricalSafetyTask: ElectricalSafetyTask
+
+    @Mock
+    private lateinit var mockEpcTask: EpcTask
 
     @Mock
     private lateinit var mockWhoProvidesRentalDetailsStep: WhoProvidesRentalDetailsStep
@@ -174,6 +203,9 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockHasJointLandlordsStep.formModel).thenReturn(mockHasJointLandlordsFormModel)
         lenient().`when`(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
         lenient().`when`(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
+        lenient().`when`(mockState.occupied).thenReturn(mockOccupiedStep)
+        lenient().`when`(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
+        lenient().`when`(mockOccupancyFormModel.occupied).thenReturn(true)
         lenient().`when`(mockTenancyDetailsTask.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
         lenient().`when`(mockHouseholdsAndTenantsTask.households).thenReturn(mockHouseholdStep)
         lenient().`when`(mockHouseholdsAndTenantsTask.provideTenancyDetailsLaterStep).thenReturn(mockProvideTenancyDetailsLaterStep)
@@ -181,7 +213,17 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockComplianceDetailsHelper.getGasSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getElectricalSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getEpcCyaContent(any(), any())).thenReturn(emptyMap())
+        lenient().`when`(mockLicensingDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
+        lenient().`when`(mockOccupancyDetailsHelper.getRestructuredOccupancySummaryList(any())).thenReturn(emptyList())
+        lenient().`when`(mockOccupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(any(), any(), any())).thenReturn(emptyList())
+        lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
+        lenient().`when`(mockState.licensingTask).thenReturn(mockLicensingTask)
+        lenient().`when`(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
+        lenient().`when`(mockLicensingTask.licensingTypeStep).thenReturn(mockLicensingTypeStep)
+        lenient().`when`(mockState.gasSafetyTask).thenReturn(mockGasSafetyTask)
+        lenient().`when`(mockState.electricalSafetyTask).thenReturn(mockElectricalSafetyTask)
+        lenient().`when`(mockState.epcTask).thenReturn(mockEpcTask)
         lenient().`when`(mockWhoProvidesDetailsTask.whoProvidesRentalDetailsStep).thenReturn(mockWhoProvidesRentalDetailsStep)
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModel).thenReturn(mockWhoProvidesRentalDetailsFormModel)
         lenient().`when`(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(mockWhoProvidesRentalDetailsFormModel)
@@ -224,6 +266,35 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(expectedTenancyDetails, content["tenancyDetails"])
+        }
+
+        @Test
+        fun `getStepSpecificContent includes flattened about-property and rented-out keys`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.checkPropertyAnswers.aboutYourProperty.heading", content["aboutPropertyHeadingKey"])
+            assertEquals("forms.checkPropertyAnswers.rentedOut.heading", content["rentedOutHeadingKey"])
+            assertTrue(content["rentedOutLicensingRows"] is List<*>)
+            assertTrue(content["rentedOutTenancyRows"] is List<*>)
+        }
+
+        @Test
+        fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
+            assertEquals(
+                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                licensingRows.first().fieldValue,
+            )
+            assertEquals(
+                "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText",
+                content["tenancyUnoccupiedBodyTextKey"],
+            )
         }
     }
 

@@ -212,8 +212,8 @@ class OccupancyDetailsHelperTests {
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.people", rows[1].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.furnishedStatus", rows[2].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills", rows[3].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentFrequency", rows[4].fieldHeading)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentAmount", rows[5].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentAmount", rows[4].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.rentFrequency", rows[5].fieldHeading)
     }
 
     @Test

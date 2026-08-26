@@ -552,6 +552,8 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
+  aboutYourProperty:
+    heading: About your property
   propertyDetails:
     heading: Property details
     address: Property address
@@ -562,9 +564,16 @@ checkPropertyAnswers:
     licensingType: Licensing type
     noLicensing: None
     licensingProvideLater: Provide this later
+    licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+  ownershipAndLandlords:
+    heading: Ownership and landlords
   occupancy:
     heading: Tell us if your property’s occupied
     question: Is this property occupied by tenants?
+  rentedOut:
+    heading: How your property’s rented out
+    licensing:
+      heading: Tell us if the property needs a license
   tenancyDetails:
     restructureAndSkipping:
       heading: Tenancy details
@@ -573,6 +582,8 @@ checkPropertyAnswers:
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later
+    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
     bedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills
