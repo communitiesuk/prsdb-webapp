@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -11,6 +13,7 @@ import java.util.Locale
 
 abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
     protected abstract val provideLaterNoDeadlineKey: String
@@ -44,14 +47,8 @@ abstract class ComplianceViewModelFactoryBase(
                 provideLaterUnoccupiedKey
             }
 
-            status == ComplianceCertStatus.PROVIDE_LATER && propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration -> {
-                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.registrationDate)
-            }
-
             status == ComplianceCertStatus.PROVIDE_LATER -> {
-                // The property has been unoccupied at some point since registration, so we cannot know the deadline.
-                // Show the provide-later message without a date, mirroring the tenancy/licensing details on the record.
-                provideLaterNoDeadlineKey
+                getProvideLaterValue(propertyCompliance)
             }
 
             else -> {
@@ -59,9 +56,26 @@ abstract class ComplianceViewModelFactoryBase(
             }
         }
 
-    private fun getProvideLaterWithDeadlineText(registrationDate: LocalDate): String {
-        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
-        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+    private fun getProvideLaterValue(propertyCompliance: PropertyCompliance): Any {
+        val propertyOwnership = propertyCompliance.propertyOwnership
+        return if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            if (propertyOwnership.hasBeenOccupiedSinceRegistration) {
+                getProvideLaterWithDeadlineText(propertyOwnership.registrationDate)
+            } else {
+                // The property has been unoccupied at some point since registration, so we cannot know the deadline.
+                // Show the provide-later message without a date, mirroring the tenancy/licensing details on the record.
+                provideLaterNoDeadlineKey
+            }
+        } else {
+            val lastOccupiedDate =
+                propertyOwnership.lastOccupiedDate
+                    ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
+            getProvideLaterWithDeadlineText(lastOccupiedDate)
+        }
+    }
+
+    private fun getProvideLaterWithDeadlineText(anchorDate: LocalDate): String {
+        val deadline = anchorDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(provideLaterWithDeadlineKey, arrayOf(formattedDate))
     }

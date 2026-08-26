@@ -6,7 +6,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -35,6 +37,7 @@ class PropertyComplianceService(
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val userToLandlordService: UserToLandlordService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -200,7 +203,10 @@ class PropertyComplianceService(
 
         return compliances
             .map {
-                ComplianceStatusDataModel.fromPropertyCompliance(it)
+                ComplianceStatusDataModel.fromPropertyCompliance(
+                    it,
+                    useRegistrationDateDeadline = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+                )
             }.filter { it.shouldShowOnComplianceActionsPage }
     }
 

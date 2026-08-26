@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -15,7 +16,8 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
-) : ComplianceViewModelFactoryBase(messageSource) {
+    featureFlagManager: FeatureFlagManager,
+) : ComplianceViewModelFactoryBase(messageSource, featureFlagManager) {
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
     override val provideLaterNoDeadlineKey = "checkGasSafety.provideThisLater.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "checkGasSafety.provideThisLater.occupiedWithDeadline"

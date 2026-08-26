@@ -45,7 +45,10 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            useRegistrationDateDeadline: Boolean = false,
+        ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -60,10 +63,16 @@ data class ComplianceStatusDataModel(
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline =
-                    if (propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration) {
-                        propertyCompliance.propertyOwnership.registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                    if (useRegistrationDateDeadline) {
+                        if (propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration) {
+                            propertyCompliance.propertyOwnership.registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                        } else {
+                            null
+                        }
                     } else {
-                        null
+                        propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
+                            PROVIDE_LATER_DEADLINE_DAYS.toLong(),
+                        )
                     },
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
