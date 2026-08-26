@@ -366,6 +366,26 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordDelegateToLettingAgentNotification.md",
                 ),
+                EmailTemplateTestData(
+                    PropertyUpdateWithLettingAgentRemovedConfirmation(
+                        name = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedMessage = "The property was made unoccupied",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/PropertyUpdateWithLettingAgentRemovedConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordPropertyUpdateWithLettingAgentRemovedNotification(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedMessage = "The property was made unoccupied",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/JointLandlordPropertyUpdateWithLettingAgentRemovedNotification.md",
+                ),
             )
     }
 
