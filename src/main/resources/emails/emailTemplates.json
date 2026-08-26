@@ -322,5 +322,19 @@
     "enumName": "JOINT_LANDLORD_DELEGATE_TO_LETTING_AGENT_NOTIFICATION_EMAIL",
     "subject": "A joint landlord made an update to a property record",
     "bodyLocation": "/emails/JointLandlordDelegateToLettingAgentNotification.md"
+  },
+  {
+    "test_id": "ddc927e7-8c05-4521-bb9e-5da1aadd6b3f",
+    "prod_id": "59cc4b17-f851-45a1-890e-2561151d53c4",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_EMAIL",
+    "subject": "You can provide details for ((single line address))",
+    "bodyLocation": "/emails/DelegateToLettingAgentInvitation.md"
+  },
+  {
+    "test_id": "ebc1fb15-7a3f-4174-b943-b9e1c92f2acb",
+    "prod_id": "b3b875c6-0efb-4207-97da-2df9d2abb7f2",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_WITH_DEADLINE_EMAIL",
+    "subject": "You can provide details for ((single line address))",
+    "bodyLocation": "/emails/DelegateToLettingAgentInvitationWithDeadline.md"
   }
 ]
