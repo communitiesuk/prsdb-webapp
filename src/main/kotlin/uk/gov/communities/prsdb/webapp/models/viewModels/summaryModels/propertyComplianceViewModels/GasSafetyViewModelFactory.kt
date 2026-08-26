@@ -17,6 +17,7 @@ class GasSafetyViewModelFactory(
     messageSource: MessageSource,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
+    override val provideLaterNoDeadlineKey = "checkGasSafety.provideThisLater.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "checkGasSafety.provideThisLater.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "checkGasSafety.occupiedNoCertInsetText"

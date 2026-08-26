@@ -18,6 +18,7 @@ class ElectricalSafetyViewModelFactory(
     messageSource: MessageSource,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
+    override val provideLaterNoDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.none"
     override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"

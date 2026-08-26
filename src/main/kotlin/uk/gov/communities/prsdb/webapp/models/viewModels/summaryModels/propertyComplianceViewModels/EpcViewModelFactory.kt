@@ -18,6 +18,7 @@ class EpcViewModelFactory(
     messageSource: MessageSource,
 ) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
+    override val provideLaterNoDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"

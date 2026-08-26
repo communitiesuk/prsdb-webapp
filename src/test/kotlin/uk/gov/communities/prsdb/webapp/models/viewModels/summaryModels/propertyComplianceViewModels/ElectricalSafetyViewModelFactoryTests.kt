@@ -15,11 +15,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -55,6 +57,10 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
+
+        // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date.
+        private val occupiedAtRegistrationDate = LocalDate.of(2025, 1, 1)
+        private val occupiedAtRegistrationInstant = occupiedAtRegistrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
 
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
         private val compliantViaPluralUploads =
@@ -115,8 +121,22 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
         private val missingUnoccupied = PropertyComplianceBuilder.createWithMissingCerts()
         private val missingOccupiedProvideLater =
             PropertyComplianceBuilder()
-                .withOccupiedPropertyOwnership(lastOccupiedDate = LocalDate.now().minusDays(5))
-                .withElectricalCertType()
+                .withPropertyOwnership(
+                    MockLandlordData.createOccupiedPropertyOwnership(
+                        createdDate = occupiedAtRegistrationInstant,
+                        lastOccupiedDate = occupiedAtRegistrationDate,
+                    ),
+                ).withElectricalCertType()
+                .withElectricalSafetyCertProvideLater()
+                .build()
+        private val missingOccupiedAfterRegistrationProvideLater =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(
+                    MockLandlordData.createOccupiedPropertyOwnership(
+                        createdDate = occupiedAtRegistrationInstant,
+                        lastOccupiedDate = occupiedAtRegistrationDate.plusDays(30),
+                    ),
+                ).withElectricalCertType()
                 .withElectricalSafetyCertProvideLater()
                 .build()
         private val missingOccupiedNoCert =
@@ -265,17 +285,29 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 ),
                 arguments(
                     named(
-                        "without electrical safety certificate, occupied, and provide later",
+                        "without electrical safety certificate, occupied at registration, and provide later",
                         missingOccupiedProvideLater,
                     ),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes",
                             "Provide this later (before ${
-                                missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
-                                    ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                                    ?.format(DATE_FORMATTER)
+                                occupiedAtRegistrationDate
+                                    .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                                    .format(DATE_FORMATTER)
                             })",
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "without electrical safety certificate, occupied after registration, and provide later",
+                        missingOccupiedAfterRegistrationProvideLater,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes",
+                            "checkElectricalSafety.provideThisLater.occupiedNoDeadline",
                         ),
                     ),
                 ),

@@ -16,12 +16,14 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -76,6 +78,9 @@ class EpcViewModelFactoryTests {
         private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
 
         private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
+
+        // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date.
+        private val occupiedAtRegistrationInstant = lastOccupiedDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant()
         private val deadlineDate = lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
         private val formattedDeadline = deadlineDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
         private val expectedDeadlineText = "Provide EPC details later (before $formattedDeadline)"
@@ -137,8 +142,22 @@ class EpcViewModelFactoryTests {
         private val missingOccupied = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
         private val missingOccupiedProvideLater =
             PropertyComplianceBuilder()
-                .withOccupiedPropertyOwnership(lastOccupiedDate)
-                .withElectricalCertType()
+                .withPropertyOwnership(
+                    MockLandlordData.createOccupiedPropertyOwnership(
+                        createdDate = occupiedAtRegistrationInstant,
+                        lastOccupiedDate = lastOccupiedDate,
+                    ),
+                ).withElectricalCertType()
+                .withEpcProvideLater()
+                .build()
+        private val missingOccupiedAfterRegistrationProvideLater =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(
+                    MockLandlordData.createOccupiedPropertyOwnership(
+                        createdDate = occupiedAtRegistrationInstant,
+                        lastOccupiedDate = lastOccupiedDate.plusDays(30),
+                    ),
+                ).withElectricalCertType()
                 .withEpcProvideLater()
                 .build()
         private val missingOccupiedNoCert =
@@ -374,13 +393,25 @@ class EpcViewModelFactoryTests {
                 ),
                 arguments(
                     named(
-                        "without epc and occupied (provide later)",
+                        "without epc and occupied at registration (provide later)",
                         missingOccupiedProvideLater,
                     ),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.hasEpc",
                             expectedDeadlineText,
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "without epc and occupied after registration (provide later)",
+                        missingOccupiedAfterRegistrationProvideLater,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.hasEpc",
+                            "propertyDetails.complianceInformation.energyPerformance.occupiedNoDeadline",
                         ),
                     ),
                 ),

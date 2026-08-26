@@ -13,6 +13,7 @@ abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
+    protected abstract val provideLaterNoDeadlineKey: String
     protected abstract val provideLaterWithDeadlineKey: String
     protected abstract val missingCertOccupiedValue: String
     protected abstract val occupiedNoCertInsetKey: String
@@ -43,8 +44,14 @@ abstract class ComplianceViewModelFactoryBase(
                 provideLaterUnoccupiedKey
             }
 
+            status == ComplianceCertStatus.PROVIDE_LATER && propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration -> {
+                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.registrationDate)
+            }
+
             status == ComplianceCertStatus.PROVIDE_LATER -> {
-                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
+                // The property has been unoccupied at some point since registration, so we cannot know the deadline.
+                // Show the provide-later message without a date, mirroring the tenancy/licensing details on the record.
+                provideLaterNoDeadlineKey
             }
 
             else -> {
@@ -52,13 +59,9 @@ abstract class ComplianceViewModelFactoryBase(
             }
         }
 
-    private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
-        // TODO PDJB-1479: Only show the dated deadline for properties that were occupied at registration. Properties
-        //  that became occupied after registration should show a provide-later message without a date, mirroring the
-        //  tenancy/licensing details on the property record (see PropertyDetailsViewModel).
-        val deadline =
-            lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
+    private fun getProvideLaterWithDeadlineText(registrationDate: LocalDate): String {
+        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
+        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(provideLaterWithDeadlineKey, arrayOf(formattedDate))
     }

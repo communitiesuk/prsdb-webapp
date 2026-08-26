@@ -85,7 +85,7 @@ class ComplianceActionViewModelBuilder {
             add(
                 SummaryListRowViewModel(
                     fieldHeading = label,
-                    fieldValue = getCertStatusValue(status, certTypeKey),
+                    fieldValue = getCertStatusValue(status, certTypeKey, provideLaterDeadline),
                     optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, expiryDate),
                 ),
             )
@@ -94,6 +94,7 @@ class ComplianceActionViewModelBuilder {
         private fun getCertStatusValue(
             status: ComplianceCertStatus,
             certTypeKey: String,
+            provideLaterDeadline: LocalDate?,
         ): String {
             val baseKey = MessageKeyConverter.convert(status)
             return when (status) {
@@ -101,7 +102,11 @@ class ComplianceActionViewModelBuilder {
                     "$baseKey.$certTypeKey"
                 }
 
-                ComplianceCertStatus.PROVIDE_LATER, ComplianceCertStatus.EXPIRED -> {
+                ComplianceCertStatus.PROVIDE_LATER -> {
+                    if (provideLaterDeadline == null) "complianceActions.status.provideLaterNoDeadline" else baseKey
+                }
+
+                ComplianceCertStatus.EXPIRED -> {
                     baseKey
                 }
 
@@ -118,13 +123,7 @@ class ComplianceActionViewModelBuilder {
         ): String? =
             when (status) {
                 ComplianceCertStatus.PROVIDE_LATER -> {
-                    if (provideLaterDeadline == null) {
-                        throw PrsdbWebException(
-                            "A certificate with PROVIDE_LATER status must be occupied" +
-                                "and so must have a provideLaterDeadline to show with a compliance action",
-                        )
-                    }
-                    provideLaterDeadline.format(DATE_FORMATTER)
+                    provideLaterDeadline?.format(DATE_FORMATTER)
                 }
 
                 ComplianceCertStatus.EXPIRED -> {

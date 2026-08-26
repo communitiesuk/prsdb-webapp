@@ -60,9 +60,11 @@ data class ComplianceStatusDataModel(
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline =
-                    propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
-                        PROVIDE_LATER_DEADLINE_DAYS.toLong(),
-                    ),
+                    if (propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration) {
+                        propertyCompliance.propertyOwnership.registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                    } else {
+                        null
+                    },
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
