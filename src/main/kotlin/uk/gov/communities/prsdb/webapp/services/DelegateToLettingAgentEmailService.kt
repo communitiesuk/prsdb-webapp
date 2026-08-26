@@ -120,10 +120,17 @@ class DelegateToLettingAgentEmailService(
             )
         }
 
+        sendLettingAgentCancellationEmail(propertyOwnership, lettingAgentEmail)
+    }
+
+    fun sendLettingAgentCancellationEmail(
+        propertyOwnership: PropertyOwnership,
+        lettingAgentEmail: String,
+    ) {
         cancelLettingAgentNotificationEmailService.sendEmail(
             lettingAgentEmail,
             CancelDelegationLettingAgentNotificationEmail(
-                propertyAddress = propertyAddress,
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
             ),
         )

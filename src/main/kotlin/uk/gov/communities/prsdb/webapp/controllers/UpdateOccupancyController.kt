@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController.Companion.UPDATE_OCCUPANCY_ROUTE
@@ -25,6 +27,7 @@ import java.security.Principal
 class UpdateOccupancyController(
     private val journeyFactory: UpdateOccupancyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
@@ -53,13 +56,15 @@ class UpdateOccupancyController(
         propertyOwnershipId: Long,
         principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
-    ): ModelAndView =
-        JourneyStepDispatcher.handleInitialisableRequest(
+    ): ModelAndView {
+        val withCya = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+        return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, withCya) },
             initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
             dispatch = dispatch,
         )
+    }
 
     companion object {
         const val UPDATE_OCCUPANCY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-occupancy"

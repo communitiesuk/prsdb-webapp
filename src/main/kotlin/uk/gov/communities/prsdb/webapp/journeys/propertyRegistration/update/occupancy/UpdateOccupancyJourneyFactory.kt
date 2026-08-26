@@ -46,7 +46,10 @@ class UpdateOccupancyJourneyFactory(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        withCya: Boolean = false,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -64,8 +67,7 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRedesigned) {
-            // The redesigned occupancy update is a single-page update (no check-your-answers page)
-            redesignedJourneyMap(state, propertyId)
+            redesignedJourneyMap(state, propertyId, withCya)
         } else if (checkingAnswersFor == null) {
             oldMainJourneyMap(state, propertyId)
         } else {
@@ -76,6 +78,7 @@ class UpdateOccupancyJourneyFactory(
     private fun redesignedJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
+        withCya: Boolean,
     ): Map<String, StepLifecycleOrchestrator> {
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
@@ -85,25 +88,54 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.completeOccupancyUpdateStep }
+                if (withCya) {
+                    nextStep { journey.checkYourAnswersStep }
+                } else {
+                    nextStep { journey.completeOccupancyUpdateStep }
+                }
                 withAdditionalContentProperties {
-                    mapOf(
-                        "title" to "propertyDetails.update.title",
-                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
-                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                        "submitButton" to "transactionSubmitButton",
-                        "showWarning" to true,
-                    )
+                    if (withCya) {
+                        mapOf(
+                            "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.saveAndContinue",
+                        )
+                    } else {
+                        mapOf(
+                            "title" to "propertyDetails.update.title",
+                            "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                            "submitButton" to "transactionSubmitButton",
+                            "showWarning" to true,
+                        )
+                    }
                 }
             }
-            step(journey.completeOccupancyUpdateStep) {
-                parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
+            if (withCya) {
+                step(journey.checkYourAnswersStep) {
+                    routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
+                    parents {
+                        OrParents(
+                            journey.occupied.hasOutcome(YesOrNo.YES),
+                            journey.occupied.hasOutcome(YesOrNo.NO),
+                        )
+                    }
+                    nextStep { journey.completeOccupancyUpdateStep }
                 }
-                nextUrl { propertyDetailsRoute }
+                step(journey.completeOccupancyUpdateStep) {
+                    parents { journey.checkYourAnswersStep.isComplete() }
+                    nextUrl { propertyDetailsRoute }
+                }
+            } else {
+                step(journey.completeOccupancyUpdateStep) {
+                    parents {
+                        OrParents(
+                            journey.occupied.hasOutcome(YesOrNo.YES),
+                            journey.occupied.hasOutcome(YesOrNo.NO),
+                        )
+                    }
+                    nextUrl { propertyDetailsRoute }
+                }
             }
         }
     }
@@ -266,6 +298,8 @@ class UpdateOccupancyJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
+    // Check-your-answers step for the redesigned update (gated by DELEGATE_TO_LETTING_AGENT at the controller)
+    override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -294,6 +328,7 @@ interface UpdateOccupancyJourneyState :
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
+    val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
