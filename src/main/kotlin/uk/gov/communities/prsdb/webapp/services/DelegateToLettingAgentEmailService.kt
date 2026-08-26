@@ -68,6 +68,7 @@ class DelegateToLettingAgentEmailService(
                 DelegateToLettingAgentInvitationWithDeadlineEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
                     invitationLink = "https://example.com",
                     deadlineDate = deadlineDate,
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
@@ -79,6 +80,7 @@ class DelegateToLettingAgentEmailService(
                 DelegateToLettingAgentInvitationEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
                     invitationLink = "https://example.com",
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
