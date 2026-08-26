@@ -28,6 +28,7 @@ class CompleteOccupancyUpdateStepConfig(
     override fun afterStepIsReached(state: UpdateOccupancyJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         try {
+            // TODO: PDJB-1633: Delete the LettingAgentAccess row when becoming unoccupied
             propertyOwnershipService.updateIsOccupied(
                 id = state.propertyId,
                 isOccupied = isOccupied,
@@ -47,7 +48,6 @@ class CompleteOccupancyUpdateStepConfig(
         val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyId)
 
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) && !isOccupied && lettingAgentAccess != null) {
-            // TODO: PDJB-1633: Call a service to delete the LettingAgentAccess row when becoming unoccupied
             propertyUpdateEmailService.sendUpdateWithLettingAgentRemovedEmails(
                 state.propertyId,
                 "The property was made unoccupied",
