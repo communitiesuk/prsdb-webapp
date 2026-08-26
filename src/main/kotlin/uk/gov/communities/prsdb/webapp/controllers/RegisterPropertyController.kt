@@ -120,9 +120,11 @@ class RegisterPropertyController(
                 false
             }
 
+        // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
         val lettingAgentFeatureEnabled =
             featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
                 // We should release the prop reg restructures first, but just to be sure make sure it's released too.
+                // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
                 featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         model.addAttribute("lettingAgentFeatureEnabled", lettingAgentFeatureEnabled)
 

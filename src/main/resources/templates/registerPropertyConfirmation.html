@@ -19,6 +19,7 @@
                 <strong th:text="${prn}">L-GD47-39FX</strong>
             </div>
 
+            <!--/* TODO: PDJB-1617: Remove this when we removed the feature flag */-->
             <p class="govuk-body"
                th:unless="${lettingAgentFeatureEnabled}"
                th:text="#{registerProperty.confirmation.keepNumber.old}">
