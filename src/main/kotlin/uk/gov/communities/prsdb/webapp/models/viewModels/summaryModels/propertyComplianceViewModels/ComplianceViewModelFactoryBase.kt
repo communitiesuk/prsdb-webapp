@@ -62,8 +62,6 @@ abstract class ComplianceViewModelFactoryBase(
             if (propertyOwnership.hasBeenOccupiedSinceRegistration) {
                 getProvideLaterWithDeadlineText(propertyOwnership.registrationDate)
             } else {
-                // The property has been unoccupied at some point since registration, so we cannot know the deadline.
-                // Show the provide-later message without a date, mirroring the tenancy/licensing details on the record.
                 provideLaterNoDeadlineKey
             }
         } else {

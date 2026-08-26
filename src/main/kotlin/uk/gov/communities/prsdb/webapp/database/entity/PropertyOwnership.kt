@@ -173,8 +173,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     val registrationDate: LocalDate
         get() = createdDate.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
 
-    // True only when the property has been continuously occupied since it was registered. If it has been unoccupied at
-    // any point since registration, lastOccupiedDate will have moved past the registration date and this is false.
     val hasBeenOccupiedSinceRegistration: Boolean
         get() = isOccupied && lastOccupiedDate?.isEqual(registrationDate) == true
 
