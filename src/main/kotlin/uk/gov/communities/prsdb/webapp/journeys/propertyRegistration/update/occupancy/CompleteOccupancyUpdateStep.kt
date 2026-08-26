@@ -47,7 +47,7 @@ class CompleteOccupancyUpdateStepConfig(
         val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyId)
 
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) && !isOccupied && lettingAgentAccess != null) {
-            // TODO: PDJB-1633: Delete the LettingAgentAccess row when becoming unoccupied
+            // TODO: PDJB-1633: Call a service to delete the LettingAgentAccess row when becoming unoccupied
             propertyUpdateEmailService.sendUpdateWithLettingAgentRemovedEmails(
                 state.propertyId,
                 "The property was made unoccupied",
