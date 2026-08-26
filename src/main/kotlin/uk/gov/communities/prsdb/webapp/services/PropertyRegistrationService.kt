@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -19,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @PrsdbWebService
 class PropertyRegistrationService(
@@ -33,6 +36,7 @@ class PropertyRegistrationService(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyComplianceService: PropertyComplianceService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
 ) {
     @Transactional
     fun registerProperty(
@@ -102,6 +106,16 @@ class PropertyRegistrationService(
 
         if (lettingAgentEmail != null) {
             lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
+            val deadlineDate =
+                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
+                    DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
+                )
+            delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
+                propertyOwnership,
+                landlord.name,
+                lettingAgentEmail,
+                deadlineDate,
+            )
         }
 
         propertyComplianceService.saveRegistrationComplianceData(

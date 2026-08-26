@@ -386,6 +386,25 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordPropertyUpdateWithLettingAgentRemovedNotification.md",
                 ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentInvitationEmail(
+                        landlordName = "Wallis Smith",
+                        propertyAddress = "11 Street\nTown\nPostcode",
+                        invitationLink = "https://example.com/start/abc123",
+                        singleLineAddress = "11 Street, Town, Postcode",
+                    ),
+                    "/emails/DelegateToLettingAgentInvitation.md",
+                ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentInvitationWithDeadlineEmail(
+                        landlordName = "Wallis Smith",
+                        propertyAddress = "11 Street\nTown\nPostcode",
+                        invitationLink = "https://example.com/start/abc123",
+                        deadlineDate = "13 June 2026",
+                        singleLineAddress = "11 Street, Town, Postcode",
+                    ),
+                    "/emails/DelegateToLettingAgentInvitationWithDeadline.md",
+                ),
             )
     }
 

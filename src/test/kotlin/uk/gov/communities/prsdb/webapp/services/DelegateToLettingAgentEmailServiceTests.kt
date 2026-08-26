@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDeleg
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDelegationLandlordConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDelegationLettingAgentNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
@@ -49,6 +51,13 @@ class DelegateToLettingAgentEmailServiceTests {
     private lateinit var mockCancelLettingAgentNotificationEmailService:
         EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>
 
+    @Mock
+    private lateinit var mockInvitationEmailService: EmailNotificationService<DelegateToLettingAgentInvitationEmail>
+
+    @Mock
+    private lateinit var mockInvitationWithDeadlineEmailService:
+        EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>
+
     private val propertyOwnershipId = 123L
     private val agentEmail = "agent@example.com"
 
@@ -66,6 +75,8 @@ class DelegateToLettingAgentEmailServiceTests {
                 mockCancelLandlordConfirmationEmailService,
                 mockCancelJointLandlordNotificationEmailService,
                 mockCancelLettingAgentNotificationEmailService,
+                mockInvitationEmailService,
+                mockInvitationWithDeadlineEmailService,
             )
     }
 
@@ -84,7 +95,7 @@ class DelegateToLettingAgentEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
-        emailService.sendDelegationEmails(propertyOwnershipId, agentEmail)
+        emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
 
         verify(mockConfirmationEmailService).sendEmail(
             eq(actor.email),
@@ -109,7 +120,7 @@ class DelegateToLettingAgentEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
-        emailService.sendDelegationEmails(propertyOwnershipId, agentEmail)
+        emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
 
         verify(mockNotificationEmailService).sendEmail(
             eq(other.email),
@@ -135,9 +146,39 @@ class DelegateToLettingAgentEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnershipId)).thenReturn(URI("http://property"))
 
-        emailService.sendDelegationEmails(propertyOwnershipId, agentEmail)
+        emailService.sendDelegationEmailToLandlords(propertyOwnershipId, agentEmail)
 
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendDelegationEmailToLettingAgent sends no-deadline template when deadlineDate is null`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+
+        emailService.sendDelegationEmailToLettingAgent(propertyOwnership, "Wallis Smith", agentEmail)
+
+        verify(mockInvitationEmailService).sendEmail(
+            eq(agentEmail),
+            argThat<DelegateToLettingAgentInvitationEmail> {
+                this.landlordName == "Wallis Smith"
+            },
+        )
+        verify(mockInvitationWithDeadlineEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendDelegationEmailToLettingAgent sends with-deadline template when deadlineDate is provided`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+
+        emailService.sendDelegationEmailToLettingAgent(propertyOwnership, "Wallis Smith", agentEmail, "13 June 2026")
+
+        verify(mockInvitationWithDeadlineEmailService).sendEmail(
+            eq(agentEmail),
+            argThat<DelegateToLettingAgentInvitationWithDeadlineEmail> {
+                this.landlordName == "Wallis Smith" && this.deadlineDate == "13 June 2026"
+            },
+        )
+        verify(mockInvitationEmailService, never()).sendEmail(any(), any())
     }
 
     @Test

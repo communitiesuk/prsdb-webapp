@@ -6,6 +6,8 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDeleg
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDelegationLandlordConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.CancelDelegationLettingAgentNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
 
 @PrsdbWebService
@@ -18,8 +20,10 @@ class DelegateToLettingAgentEmailService(
     private val cancelLandlordConfirmationEmailService: EmailNotificationService<CancelDelegationLandlordConfirmationEmail>,
     private val cancelJointLandlordNotificationEmailService: EmailNotificationService<CancelDelegationJointLandlordNotificationEmail>,
     private val cancelLettingAgentNotificationEmailService: EmailNotificationService<CancelDelegationLettingAgentNotificationEmail>,
+    private val invitationEmailService: EmailNotificationService<DelegateToLettingAgentInvitationEmail>,
+    private val invitationWithDeadlineEmailService: EmailNotificationService<DelegateToLettingAgentInvitationWithDeadlineEmail>,
 ) {
-    fun sendDelegationEmails(
+    fun sendDelegationEmailToLandlords(
         propertyOwnershipId: Long,
         invitedLettingAgentEmail: String,
     ) {
@@ -47,6 +51,38 @@ class DelegateToLettingAgentEmailService(
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                     lettingAgentEmail = invitedLettingAgentEmail,
                     propertyRecordUrl = propertyRecordUrl,
+                ),
+            )
+        }
+    }
+
+    fun sendDelegationEmailToLettingAgent(
+        propertyOwnership: PropertyOwnership,
+        landlordName: String,
+        lettingAgentEmail: String,
+        deadlineDate: String? = null,
+    ) {
+        if (deadlineDate != null) {
+            invitationWithDeadlineEmailService.sendEmail(
+                lettingAgentEmail,
+                DelegateToLettingAgentInvitationWithDeadlineEmail(
+                    landlordName = landlordName,
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
+                    invitationLink = "https://example.com",
+                    deadlineDate = deadlineDate,
+                    singleLineAddress = propertyOwnership.address.singleLineAddress,
+                ),
+            )
+        } else {
+            invitationEmailService.sendEmail(
+                lettingAgentEmail,
+                DelegateToLettingAgentInvitationEmail(
+                    landlordName = landlordName,
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
+                    invitationLink = "https://example.com",
+                    singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
             )
         }
