@@ -286,6 +286,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             @Nested
             inner class OccupancyUpdates {
+                @BeforeEach
+                fun disableDelegateToLettingAgentFlag() {
+                    // Without delegation the redesigned occupancy journey is a single page with no check answers page
+                    featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+                }
+
                 @Test
                 fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
                     // Details page
@@ -361,8 +367,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
-                    assertThat(propertyDetailsPage.delegateToLettingAgentLink.locator).isVisible()
+                    // The property is now vacant, so neither the remove nor the delegate letting agent link is shown
                     assertThat(propertyDetailsPage.removeLettingAgentLink.locator).hasCount(0)
+                    assertThat(propertyDetailsPage.delegateToLettingAgentLink.locator).hasCount(0)
                 }
 
                 @Test
