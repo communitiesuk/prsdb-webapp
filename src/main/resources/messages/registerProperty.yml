@@ -41,6 +41,7 @@ confirmation:
   prn:
     label: 'Your <strong>Property Registration Number</strong> is:'
   keepNumber:
+    # TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
     old: Keep this number for your records. We’ve sent it to you in an email.
     lettingAgentRedesign: We’ve sent you a confirmation email including this number.
   useInAdverts: Use this Property Registration Number when advertising this property, alongside each landlord’s Landlord Registration Number.
