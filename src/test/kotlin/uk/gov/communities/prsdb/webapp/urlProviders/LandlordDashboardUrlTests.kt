@@ -177,6 +177,7 @@ class LandlordDashboardUrlTests(
                 jointLandlordInvitationService = mock(),
                 propertyComplianceService = mock(),
                 lettingAgentAccessService = mock(),
+                delegateToLettingAgentEmailService = mock(),
             )
 
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
