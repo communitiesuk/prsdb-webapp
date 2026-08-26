@@ -43,7 +43,12 @@ class AllowLettingAgentStepConfig(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
             lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
             lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
-            delegateToLettingAgentEmailService.sendDelegationEmails(state.propertyOwnershipId, invitedEmailAddress)
+            delegateToLettingAgentEmailService.sendDelegationEmailToLandlords(state.propertyOwnershipId, invitedEmailAddress)
+            delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
+                propertyOwnership,
+                userToLandlordService.getCurrentLandlordForUser().name,
+                invitedEmailAddress,
+            )
         }
     }
 
