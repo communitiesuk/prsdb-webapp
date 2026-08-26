@@ -155,7 +155,8 @@ class ComplianceStatusDataModelTests {
                 ).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, useRegistrationDateDeadline = true)
 
         // Assert
         assertEquals(
@@ -178,10 +179,37 @@ class ComplianceStatusDataModelTests {
                 ).build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, useRegistrationDateDeadline = true)
 
         // Assert
         assertNull(complianceStatusDataModel.provideLaterDeadline)
+    }
+
+    @Test
+    fun `fromPropertyCompliance anchors provideLaterDeadline to lastOccupiedDate when registration-date deadline is disabled`() {
+        // Arrange - with the feature disabled, the deadline is always anchored to the last occupied date, even when the
+        // property became occupied after registration
+        val registrationDate = LocalDate.of(2025, 1, 15)
+        val lastOccupiedDate = registrationDate.plusDays(30)
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(
+                    MockLandlordData.createOccupiedPropertyOwnership(
+                        createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                        lastOccupiedDate = lastOccupiedDate,
+                    ),
+                ).build()
+
+        // Act
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, useRegistrationDateDeadline = false)
+
+        // Assert
+        assertEquals(
+            lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+            complianceStatusDataModel.provideLaterDeadline,
+        )
     }
 
     @Test
@@ -193,7 +221,8 @@ class ComplianceStatusDataModelTests {
                 .build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel =
+            ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, useRegistrationDateDeadline = true)
 
         // Assert
         assertNull(complianceStatusDataModel.provideLaterDeadline)

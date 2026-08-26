@@ -25,6 +25,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -76,6 +77,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService

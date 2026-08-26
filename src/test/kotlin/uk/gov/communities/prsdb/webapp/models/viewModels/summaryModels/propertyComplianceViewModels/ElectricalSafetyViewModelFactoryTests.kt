@@ -2,14 +2,18 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named.named
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -37,7 +41,35 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource, mockFeatureFlagManager(true)).fromEntity(propertyCompliance)
+    }
+
+    @Test
+    fun `fromEntity anchors the provide-later deadline to the last occupied date when the registration-date deadline is disabled`() {
+        val messageSource = mock<MessageSource>()
+        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
+            .thenAnswer { invocation ->
+                val args = invocation.getArgument<Array<Any>>(1)
+                "Provide this later (before ${args[0]})"
+            }
+        val factory = ElectricalSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager(false))
+
+        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+
+        val expectedDeadline =
+            occupiedAtRegistrationDate
+                .plusDays(30)
+                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .format(DATE_FORMATTER)
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes",
+                    "Provide this later (before $expectedDeadline)",
+                ),
+            ),
+            rows,
+        )
     }
 
     @ParameterizedTest(name = "{0}")
@@ -54,9 +86,12 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource, mock())
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
+
+        private fun mockFeatureFlagManager(registrationDateDeadlineEnabled: Boolean): FeatureFlagManager =
+            mock { on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn registrationDateDeadlineEnabled }
 
         // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date.
         private val occupiedAtRegistrationDate = LocalDate.of(2025, 1, 1)
