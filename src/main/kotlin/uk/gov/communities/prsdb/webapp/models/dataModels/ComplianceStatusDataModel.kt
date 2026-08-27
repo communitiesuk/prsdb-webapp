@@ -46,6 +46,10 @@ data class ComplianceStatusDataModel(
     companion object {
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
+            // TODO PDJB-939: this parameter only exists so the flag decision stays out of the model while the flag is
+            //  live (the flag-off branch in PropertyComplianceService.getProvideLaterDeadline differs from the entity
+            //  value). When the flag is decommissioned, delete the parameter and read
+            //  propertyCompliance.propertyOwnership.provideLaterDeadline directly here.
             provideLaterDeadline: LocalDate? = null,
         ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
