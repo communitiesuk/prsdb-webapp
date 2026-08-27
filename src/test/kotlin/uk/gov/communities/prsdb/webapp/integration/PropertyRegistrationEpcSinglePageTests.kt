@@ -286,13 +286,13 @@ class PropertyRegistrationEpcSinglePageTests : IntegrationTestWithImmutableData(
         }
 
         @Test
-        fun `Shows hasEpc row with occupied provide-later text for occupied property choosing to provide EPC later`(page: Page) {
+        fun `Shows hasEpc row with occupied provide-later text for occupied property choosing to provide EPC later`() {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckEpcAnswers(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied(),
                 )
 
-            assertThat(cyaPage.rows.hasEpcRow.value).containsText("Provide EPC details later")
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("Provide this later")
             BaseComponent.assertThat(cyaPage.epcCard).isHidden()
             assertThat(cyaPage.meetsRequirementsInset).isHidden()
         }
@@ -355,9 +355,7 @@ class PropertyRegistrationEpcSinglePageTests : IntegrationTestWithImmutableData(
 
         @Suppress("ktlint:standard:max-line-length")
         @Test
-        fun `Shows EPC card, expired text, tenancy check, low rating text, no exemption row, and council inset for occupied property with expired low-rating EPC in date at tenancy start and no exemption`(
-            page: Page,
-        ) {
+        fun `Shows EPC card, expired text, tenancy check, low rating text, no exemption row, and council inset for occupied property with expired low-rating EPC in date at tenancy start and no exemption`() {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckEpcAnswers(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied(),
