@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
 // TODO PDJB-1660: Implement token validation logic
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("lettingAgentInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, LettingAgentInvitationJourneyState>() {
@@ -28,7 +28,7 @@ class ValidateTokenStepConfig(
     }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("lettingAgentInvitationValidateTokenStep")
 final class ValidateTokenStep(
     stepConfig: ValidateTokenStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, LettingAgentInvitationJourneyState>(stepConfig) {
