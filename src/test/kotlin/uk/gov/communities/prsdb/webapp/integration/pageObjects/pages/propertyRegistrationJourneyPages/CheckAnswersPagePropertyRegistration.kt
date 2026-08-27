@@ -95,6 +95,7 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
+
         // Heading text differs between the legacy CYA ("Invitations") and the restructured CYA
         // ("Joint landlord invitations"), so match either depending on which template is rendered.
         val jointLandlordsInvitationsRow = getRow(Pattern.compile("^(Invitations|Joint landlord invitations)$"))

@@ -457,7 +457,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses noJointLandlords wording for legacy jointLandlordsDetails row when there are no joint landlords`() {
+        fun `getStepSpecificContent uses noJointLandlords wording for legacy jointLandlordsDetails row`() {
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
 
             val content = stepConfig.getStepSpecificContent(mockState)
