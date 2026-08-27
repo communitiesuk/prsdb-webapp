@@ -1,16 +1,23 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 
 @JourneyFrameworkComponent
-class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
-    override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult {
+class HasMissingComplianceStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
+    override fun mode(state: PropertyRegistrationJourneyState): ConfirmMissingComplianceCheckResult {
+        if (state.isDelegatedToLettingAgent(featureFlagManager)) {
+            return ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES
+        }
+
         val anyInvalid =
             isGasCertInvalid(state.gasSafetyTask) ||
                 isElectricalCertInvalid(state.electricalSafetyTask) ||
@@ -62,7 +69,7 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
 @JourneyFrameworkComponent
 class HasMissingComplianceStep(
     stepConfig: HasMissingComplianceStepConfig,
-) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>(stepConfig)
+) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>(stepConfig)
 
 enum class ConfirmMissingComplianceCheckResult {
     UNOCCUPIED_OR_VALID_CERTIFICATES,

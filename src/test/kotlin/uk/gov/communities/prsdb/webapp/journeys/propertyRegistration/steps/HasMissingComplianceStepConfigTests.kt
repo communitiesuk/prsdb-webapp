@@ -11,9 +11,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
@@ -28,9 +29,17 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 @ExtendWith(MockitoExtension::class)
 class HasMissingComplianceStepConfigTests {
     @Mock
-    private lateinit var mockState: CombinedComplianceCheckState
+    private lateinit var mockState: PropertyRegistrationJourneyState
 
-    private val stepConfig = HasMissingComplianceStepConfig()
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+
+    private lateinit var stepConfig: HasMissingComplianceStepConfig
+
+    @BeforeEach
+    fun setUpStepConfig() {
+        stepConfig = HasMissingComplianceStepConfig(mockFeatureFlagManager)
+    }
 
     @Nested
     inner class Mode {
@@ -117,6 +126,32 @@ class HasMissingComplianceStepConfigTests {
 
             // Assert
             assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+        }
+
+        @Test
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES when occupied and delegated to a letting agent`() {
+            // Arrange
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
+
+            // Act
+            val result = stepConfig.mode(mockState)
+
+            // Assert
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+        }
+
+        @Test
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied with missing certs and not delegated to a letting agent`() {
+            // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            setupGasCertMissing()
+
+            // Act
+            val result = stepConfig.mode(mockState)
+
+            // Assert
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES, result)
         }
 
         private fun setupGasCertMissing() {
