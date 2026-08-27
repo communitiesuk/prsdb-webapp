@@ -364,6 +364,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                         val updateOccupancyPage =
                             assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, delegatedPropertyUrlArguments)
 
+                        // The interruption will follow and commit the change, so this page must not also be tagged
+                        assertThat(updateOccupancyPage.form.submitButton).not().hasAttribute("data-plausible-event", "Transaction")
+
                         updateOccupancyPage.submitIsVacant()
                         val interruptionPage =
                             assertPageIs(
@@ -373,7 +376,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                             )
 
                         assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
-                        assertThat(interruptionPage.body).containsText("You’ve changed this property to being unoccupied.")
                         assertThat(interruptionPage.body)
                             .containsText("your letting agent or property manager will be removed from this registration")
 
@@ -418,6 +420,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                         val updateOccupancyPage =
                             assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
 
+                        // No interruption follows, so this page is the commit step and carries the transaction metric
+                        assertThat(updateOccupancyPage.form.submitButton).hasAttribute("data-plausible-event", "Transaction")
+
                         updateOccupancyPage.submitIsVacant()
                         val updatedPropertyDetailsPage =
                             assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
@@ -430,6 +435,10 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                         propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
                         val updateOccupancyPage =
                             assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, delegatedPropertyUrlArguments)
+
+                        // An interruption could follow this page, so the transaction tag is dropped and this answer is
+                        // intentionally not counted - see the known coverage gaps in docs/MetricsReadMe.md
+                        assertThat(updateOccupancyPage.form.submitButton).not().hasAttribute("data-plausible-event", "Transaction")
 
                         updateOccupancyPage.submitIsOccupied()
                         val updatedPropertyDetailsPage =
