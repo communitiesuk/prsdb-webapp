@@ -133,16 +133,11 @@ class PropertyRegistrationJourneyFactory(
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask) {
+                        fromTask(journey.whoProvidesDetailsTask, journey) {
                             step(task.whoProvidesRentalDetailsStep) {
                                 initialStep()
                                 routeSegment(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT)
                                 nextStep { journey.whoProvidesUpdateRoutingStep }
-                            }
-                            step(task.lettingAgentEmailStep) {
-                                routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
-                                parents { journey.confirmChangeToLettingAgentStep.isComplete() }
-                                nextStep { journey.finishCyaStep }
                             }
                         }
                         step<WhoProvidesUpdateRouteMode, WhoProvidesUpdateRoutingStepConfig>(journey.whoProvidesUpdateRoutingStep) {
@@ -172,6 +167,13 @@ class PropertyRegistrationJourneyFactory(
                                 journey.whoProvidesUpdateRoutingStep.hasOutcome(WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT)
                             }
                             nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
+                        }
+                        fromTask(journey.whoProvidesDetailsTask) {
+                            step(task.lettingAgentEmailStep) {
+                                routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
+                                parents { journey.confirmChangeToLettingAgentStep.isComplete() }
+                                nextStep { journey.finishCyaStep }
+                            }
                         }
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
