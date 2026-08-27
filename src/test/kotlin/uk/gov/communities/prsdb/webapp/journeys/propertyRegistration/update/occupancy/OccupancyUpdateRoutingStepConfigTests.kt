@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -6,9 +6,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.OccupancyUpdateRouteMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.OccupancyUpdateRoutingStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 class OccupancyUpdateRoutingStepConfigTests {
