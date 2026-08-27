@@ -189,4 +189,21 @@ class LettingAgentAccessServiceTests {
 
         assertNull(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
     }
+
+    @Test
+    fun `getInvitationByTokenOrNull returns the invitation when it exists`() {
+        val token = UUID.randomUUID()
+        val invitation = MockLettingAgentData.createLettingAgentAccess(token = token)
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(invitation)
+
+        assertEquals(invitation, lettingAgentAccessService.getInvitationByTokenOrNull(token))
+    }
+
+    @Test
+    fun `getInvitationByTokenOrNull returns null when no invitation exists`() {
+        val token = UUID.randomUUID()
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
+
+        assertNull(lettingAgentAccessService.getInvitationByTokenOrNull(token))
+    }
 }
