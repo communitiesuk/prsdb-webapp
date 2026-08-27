@@ -43,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdateOccupancyInterruptionPagePropertyDetailsUpdate
 import kotlin.test.assertContains
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -351,10 +352,18 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
                     propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
 
-                    // Occupancy question page, then the check answers page (only shown when delegation is enabled)
+                    // Occupancy question page, then the interruption page and the check answers page (only shown
+                    // when delegation is enabled)
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     updateOccupancyPage.submitIsVacant()
+                    val interruptionPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyInterruptionPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    interruptionPage.continueToCheckAnswers()
                     val checkAnswersPage =
                         assertPageIs(
                             page,
@@ -381,6 +390,13 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     updateOccupancyPage.submitIsOccupied()
+                    val interruptionPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyInterruptionPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    interruptionPage.continueToCheckAnswers()
                     val checkAnswersPage =
                         assertPageIs(
                             page,

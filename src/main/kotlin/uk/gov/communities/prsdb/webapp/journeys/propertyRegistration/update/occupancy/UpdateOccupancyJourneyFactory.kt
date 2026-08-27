@@ -95,7 +95,7 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.checkYourAnswersStep }
+                nextStep { journey.interruptionStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
@@ -104,14 +104,19 @@ class UpdateOccupancyJourneyFactory(
                     )
                 }
             }
-            step(journey.checkYourAnswersStep) {
-                routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
+            step(journey.interruptionStep) {
+                routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.occupied.hasOutcome(YesOrNo.YES),
                         journey.occupied.hasOutcome(YesOrNo.NO),
                     )
                 }
+                nextStep { journey.checkYourAnswersStep }
+            }
+            step(journey.checkYourAnswersStep) {
+                routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
+                parents { journey.interruptionStep.isComplete() }
                 nextStep { journey.completeOccupancyUpdateStep }
             }
             step(journey.completeOccupancyUpdateStep) {
@@ -317,6 +322,9 @@ class UpdateOccupancyJourney(
     // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
     // see redesignedJourneyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
+    // Skeleton interruption / "are you sure" step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT
+    // is enabled - see redesignedJourneyMap)
+    override val interruptionStep: UpdateOccupancyInterruptionStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -346,6 +354,7 @@ interface UpdateOccupancyJourneyState :
     override val cyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
+    val interruptionStep: UpdateOccupancyInterruptionStep
     val propertyId: Long
     val lastModifiedDate: String
     val wasOccupied: Boolean
