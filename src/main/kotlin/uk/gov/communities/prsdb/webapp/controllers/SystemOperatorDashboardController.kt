@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
+import uk.gov.communities.prsdb.webapp.controllers.GeneratePassphraseController.Companion.GENERATE_PASSPHRASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.INVITE_LOCAL_COUNCIL_ADMIN_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
 
@@ -26,6 +27,7 @@ class SystemOperatorDashboardController(
         if (environment.activeProfiles.contains("require-passcode")) {
             model.addAttribute("generatePasscodeUrl", GENERATE_PASSCODE_URL)
         }
+        model.addAttribute("generatePassphraseUrl", GENERATE_PASSPHRASE_URL)
         model.addAttribute("inviteLocalCouncilAdminUrl", INVITE_LOCAL_COUNCIL_ADMIN_ROUTE)
         model.addAttribute("metricsUrl", METRICS_URL)
         return "systemOperatorDashboard"

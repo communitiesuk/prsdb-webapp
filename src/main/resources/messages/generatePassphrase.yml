@@ -1,0 +1,11 @@
+title: Generate a passphrase
+banner:
+  heading: New passphrase
+  body: The passphrase is
+howToUse: How to use a passphrase
+paragraph:
+  one: This page displays a new passphrase every time it is reloaded. A passphrase is a random sequence of words.
+  two: >
+    To authenticate a user, send a passphrase to their stored contact details (by email or SMS), ask them to repeat it to you (over the
+    phone), and check it matches the passphrase you generated.
+  three: Always generate a new passphrase for every authentication attempt.
