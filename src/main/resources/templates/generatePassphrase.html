@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{generatePassphrase.banner.heading}, ~{::main/content()}, false, null, null)}">
+<main>
+    <div id="page-content" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
+        <div id="confirmation-banner" th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{generatePassphrase.banner.heading}, ~{::#confirmation-banner/content()})}">
+            <span th:text="#{generatePassphrase.banner.body}" th:remove="tag">generatePassphrase.banner.body</span>
+            <br>
+            <strong th:text="${passphrase}"></strong>
+        </div>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{generatePassphrase.howToUse}">generatePassphrase.howToUse</h2>
+            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.one}">generatePassphrase.paragraph.one</p>
+            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.two}">generatePassphrase.paragraph.two</p>
+            <p class="govuk-body" th:text="#{generatePassphrase.paragraph.three}">generatePassphrase.paragraph.three</p>
+        </section>
+    </div>
+</main>
+</html>
