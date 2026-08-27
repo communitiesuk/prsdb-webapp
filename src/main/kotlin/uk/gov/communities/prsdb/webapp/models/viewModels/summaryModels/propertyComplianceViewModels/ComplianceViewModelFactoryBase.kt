@@ -59,23 +59,19 @@ abstract class ComplianceViewModelFactoryBase(
     private fun getProvideLaterValue(propertyCompliance: PropertyCompliance): Any {
         val propertyOwnership = propertyCompliance.propertyOwnership
         // TODO PDJB-939: when the flag is permanently on, delete the flag-off branch (and the injected
-        //  featureFlagManager) so the deadline is always anchored to the registration date.
+        //  featureFlagManager); the deadline is always propertyOwnership.provideLaterDeadline.
         return if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            if (propertyOwnership.hasBeenOccupiedSinceRegistration) {
-                getProvideLaterWithDeadlineText(propertyOwnership.registrationDate)
-            } else {
-                provideLaterNoDeadlineKey
-            }
+            val deadline = propertyOwnership.provideLaterDeadline
+            if (deadline != null) getProvideLaterWithDeadlineText(deadline) else provideLaterNoDeadlineKey
         } else {
-            val lastOccupiedDate =
-                propertyOwnership.lastOccupiedDate
+            val deadline =
+                propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                     ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
-            getProvideLaterWithDeadlineText(lastOccupiedDate)
+            getProvideLaterWithDeadlineText(deadline)
         }
     }
 
-    private fun getProvideLaterWithDeadlineText(anchorDate: LocalDate): String {
-        val deadline = anchorDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+    private fun getProvideLaterWithDeadlineText(deadline: LocalDate): String {
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(provideLaterWithDeadlineKey, arrayOf(formattedDate))
     }

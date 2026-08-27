@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -203,14 +204,21 @@ class PropertyComplianceService(
 
         return compliances
             .map {
-                // TODO PDJB-939: when the flag is permanently on, pass useRegistrationDateDeadline = true (or drop the
-                //  argument entirely once the parameter is removed) and delete the featureFlagManager check.
                 ComplianceStatusDataModel.fromPropertyCompliance(
                     it,
-                    useRegistrationDateDeadline = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+                    provideLaterDeadline = getProvideLaterDeadline(it.propertyOwnership),
                 )
             }.filter { it.shouldShowOnComplianceActionsPage }
     }
+
+    // TODO PDJB-939: when the flag is permanently on, always use propertyOwnership.provideLaterDeadline and delete
+    //  the flag-off branch (and the featureFlagManager check).
+    private fun getProvideLaterDeadline(propertyOwnership: PropertyOwnership): LocalDate? =
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            propertyOwnership.provideLaterDeadline
+        } else {
+            propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+        }
 
     @Transactional
     fun updateGasSafety(

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import java.time.LocalDate
@@ -45,11 +44,9 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
-        // TODO PDJB-939: when the flag is permanently on, remove the useRegistrationDateDeadline parameter and the
-        //  lastOccupiedDate branch so the deadline is always anchored to the registration date.
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
-            useRegistrationDateDeadline: Boolean = false,
+            provideLaterDeadline: LocalDate? = null,
         ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
@@ -64,18 +61,7 @@ data class ComplianceStatusDataModel(
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
-                provideLaterDeadline =
-                    if (useRegistrationDateDeadline) {
-                        if (propertyCompliance.propertyOwnership.hasBeenOccupiedSinceRegistration) {
-                            propertyCompliance.propertyOwnership.registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                        } else {
-                            null
-                        }
-                    } else {
-                        propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
-                            PROVIDE_LATER_DEADLINE_DAYS.toLong(),
-                        )
-                    },
+                provideLaterDeadline = provideLaterDeadline,
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,

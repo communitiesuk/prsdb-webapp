@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -175,6 +176,14 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val hasBeenOccupiedSinceRegistration: Boolean
         get() = isOccupied && lastOccupiedDate?.isEqual(registrationDate) == true
+
+    val provideLaterDeadline: LocalDate?
+        get() =
+            if (hasBeenOccupiedSinceRegistration) {
+                registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+            } else {
+                null
+            }
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
