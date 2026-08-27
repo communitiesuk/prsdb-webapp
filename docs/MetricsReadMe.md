@@ -114,20 +114,20 @@ Note that `forms/selectAddressForm.html` and `forms/manualAddressForm.html` are 
 landlord registration, property registration, governing body member address and trustee address
 journeys, so any future fix must tag the update journey without affecting those.
 
-#### Occupancy updates on a property delegated to a letting agent
+#### Occupancy updates while `DELEGATE_TO_LETTING_AGENT` is enabled
 
-Where a property is currently occupied *and* delegated to a letting agent, the occupancy update
-journey shows an "are you sure" interruption before saving, because making the property unoccupied
-removes the letting agent from the registration. The interruption is the commit step on that path, so
-it carries the `Transaction` tag and the tag is dropped from the preceding `occupied` question page —
-tagging both would count the journey twice.
+With the flag off, the occupancy update is a single page and its `occupied` question page carries the
+`Transaction` tag as normal.
 
-**Decision:** on that page, answering "yes" (leaving the property occupied) is intentionally **not
-counted**. Whether the interruption follows is a render-time decision taken before the user's radio
-selection is known, so the `occupied` page cannot be tagged only for the "yes" answer. The gap is
-harmless in practice: the interruption is only shown when the property was *already* occupied, so
-answering "yes" leaves the occupancy unchanged. All other occupancy updates — including every update
-to a property with no letting agent — are counted as normal.
+With the flag on, the journey gains a check-your-answers page and — where a property is currently
+occupied *and* delegated to a letting agent — an "are you sure" interruption before it, because making
+the property unoccupied removes the letting agent from the registration. The check-your-answers page is
+the commit step on every variant of that journey, so it is the page that should carry the tag.
+
+**Decision:** that page is still a placeholder (see `TODO(PDJB-1635)`), so occupancy updates made with
+`DELEGATE_TO_LETTING_AGENT` enabled are intentionally **not counted** for now. The `Transaction` tag
+should be added to the check-your-answers page when it is built. This is not a live gap: the flag gates
+an unreleased journey, and every occupancy update made with the flag off is counted as normal.
 
 ## Cost and cost per transaction
 

@@ -244,4 +244,19 @@ class DelegateToLettingAgentEmailServiceTests {
 
         verify(mockCancelJointLandlordNotificationEmailService, never()).sendEmail(any(), any())
     }
+
+    @Test
+    fun `sendLettingAgentCancellationEmail sends only the letting agent notification email`() {
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 5, landlords = mutableSetOf(landlord))
+
+        emailService.sendLettingAgentCancellationEmail(propertyOwnership, agentEmail)
+
+        val captor = argumentCaptor<CancelDelegationLettingAgentNotificationEmail>()
+        verify(mockCancelLettingAgentNotificationEmailService).sendEmail(eq(agentEmail), captor.capture())
+        assertEquals(propertyOwnership.address.toMultiLineAddress(), captor.firstValue.propertyAddress)
+        assertEquals(propertyOwnership.address.singleLineAddress, captor.firstValue.singleLineAddress)
+        verify(mockCancelLandlordConfirmationEmailService, never()).sendEmail(any(), any())
+        verify(mockCancelJointLandlordNotificationEmailService, never()).sendEmail(any(), any())
+    }
 }

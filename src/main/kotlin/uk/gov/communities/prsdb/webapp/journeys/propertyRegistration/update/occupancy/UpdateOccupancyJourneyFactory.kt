@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -70,7 +71,6 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRedesigned) {
-            // The redesigned occupancy update is a single-page update (no check-your-answers page)
             redesignedJourneyMap(state, propertyId)
         } else if (checkingAnswersFor == null) {
             oldMainJourneyMap(state, propertyId)
@@ -80,6 +80,16 @@ class UpdateOccupancyJourneyFactory(
     }
 
     private fun redesignedJourneyMap(
+        state: UpdateOccupancyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> =
+        if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+            redesignedWithCheckAnswersJourneyMap(state, propertyId)
+        } else {
+            redesignedSinglePageJourneyMap(state, propertyId)
+        }
+
+    private fun redesignedWithCheckAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -93,28 +103,18 @@ class UpdateOccupancyJourneyFactory(
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.occupancyUpdateRoutingStep }
                 withAdditionalContentProperties {
-                    buildMap {
-                        put("title", "propertyDetails.update.title")
-                        put("fieldSetHeading", "forms.update.occupancy.occupied.fieldSetHeading")
-                        put("submitButtonText", "forms.buttons.confirmAndSubmitUpdate")
-                        put("showWarning", true)
-                        // When the interruption follows this page it becomes the commit step and carries the
-                        // transaction event instead - tagging both would count the journey twice.
-                        // TODO(PDJB-1635): revisit once the occupancy update gains a check-your-answers page,
-                        //  which will become the commit step and remove the need to move the event around.
-                        //  Until then the "still occupied" answer on a delegated property is intentionally not
-                        //  counted - see the known coverage gaps in docs/MetricsReadMe.md.
-                        if (!journey.showsLettingAgentInterruption) {
-                            put("submitButton", "transactionSubmitButton")
-                        }
-                    }
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                        "submitButtonText" to "forms.buttons.saveAndContinue",
+                    )
                 }
             }
             step<OccupancyUpdateRouteMode, OccupancyUpdateRoutingStepConfig>(journey.occupancyUpdateRoutingStep) {
                 parents { journey.occupied.isComplete() }
                 nextDestination { mode ->
                     when (mode) {
-                        OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.completeOccupancyUpdateStep)
+                        OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.checkYourAnswersStep)
                         OccupancyUpdateRouteMode.REMOVING_DELEGATION -> Destination(journey.lettingAgentInterruptionStep)
                     }
                 }
@@ -122,14 +122,54 @@ class UpdateOccupancyJourneyFactory(
             step(journey.lettingAgentInterruptionStep) {
                 routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
                 parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.REMOVING_DELEGATION) }
-                nextStep { journey.completeOccupancyUpdateStep }
+                nextStep { journey.checkYourAnswersStep }
                 withAdditionalContentProperties { mapOf("title" to "propertyDetails.update.title") }
             }
-            step(journey.completeOccupancyUpdateStep) {
+            step(journey.checkYourAnswersStep) {
+                routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.NO_INTERRUPTION),
                         journey.lettingAgentInterruptionStep.isComplete(),
+                    )
+                }
+                nextStep { journey.completeOccupancyUpdateStep }
+            }
+            step(journey.completeOccupancyUpdateStep) {
+                parents { journey.checkYourAnswersStep.isComplete() }
+                nextUrl { propertyDetailsRoute }
+            }
+        }
+    }
+
+    private fun redesignedSinglePageJourneyMap(
+        state: UpdateOccupancyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            step(journey.occupied) {
+                routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                initialStep()
+                backUrl { propertyDetailsRoute }
+                nextStep { journey.completeOccupancyUpdateStep }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "submitButton" to "transactionSubmitButton",
+                        "showWarning" to true,
+                    )
+                }
+            }
+            step(journey.completeOccupancyUpdateStep) {
+                parents {
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.YES),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
                     )
                 }
                 nextUrl { propertyDetailsRoute }
@@ -299,6 +339,9 @@ class UpdateOccupancyJourney(
     override val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep,
     // Interruption shown when unoccupying a property that is delegated to a letting agent
     override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
+    // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
+    // see redesignedJourneyMap)
+    override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -332,6 +375,7 @@ interface UpdateOccupancyJourneyState :
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep
     val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep
+    val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
     val propertyId: Long
     val lastModifiedDate: String
 }
