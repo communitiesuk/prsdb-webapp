@@ -4,35 +4,30 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import uk.gov.communities.prsdb.webapp.journeys.Destination
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class UpdateOccupancyCheckYourAnswersStepConfigTests {
+    // TODO(PDJB-1635): these assert the skeleton todo page. Replace them with the real occupancy check-your-answers
+    //  content assertions when the page is built.
     @Mock
     private lateinit var mockState: UpdateOccupancyJourneyState
 
     private val stepConfig = UpdateOccupancyCheckYourAnswersStepConfig()
 
     @Test
-    fun `resolveNextDestination returns the default destination without deleting the journey`() {
-        val defaultDestination = Destination.ExternalUrl("redirect")
-
-        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
-
-        assertEquals(defaultDestination, result)
-        verify(mockState, never()).deleteJourney()
+    fun `chooseTemplate returns the skeleton todo template`() {
+        assertEquals("forms/todo", stepConfig.chooseTemplate(mockState))
     }
 
     @Test
-    fun `getStepSpecificContent returns skeleton check-answers content`() {
+    fun `getStepSpecificContent exposes a todo comment referencing the follow-up ticket`() {
         val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals("propertyDetails.update.title", content["title"])
-        assertEquals(true, content["showWarning"])
-        assertEquals("forms.buttons.confirmAndSubmitUpdate", content["submitButtonText"])
-        assertEquals(emptyList<Any>(), content["summaryListData"])
+        val todoComment = content["todoComment"] as String
+        assertTrue(todoComment.isNotBlank())
+        assertContains(todoComment, "PDJB-1635")
     }
 }

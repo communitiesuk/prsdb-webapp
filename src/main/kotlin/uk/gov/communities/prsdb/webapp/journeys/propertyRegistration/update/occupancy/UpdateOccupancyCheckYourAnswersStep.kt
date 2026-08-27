@@ -1,36 +1,33 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
+// TODO(PDJB-1635): this is a skeleton page. Replace the placeholder todo content with the real occupancy
+//  check-your-answers summary and submit button when the page is built.
 @JourneyFrameworkComponent
 class UpdateOccupancyCheckYourAnswersStepConfig :
-    AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
-    // TODO(PDJB-1635): populate the real occupancy check-your-answers summary content. This is a skeleton page: it
-    //  shows the warning and submit button with an empty summary list until the real content is built.
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
+    AbstractRequestableStepConfig<Complete, NoInputFormModel, UpdateOccupancyJourneyState>() {
+    override val formModelClass = NoInputFormModel::class
+
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState) =
         mapOf(
-            "title" to "propertyDetails.update.title",
-            "showWarning" to true,
-            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-            "insetText" to true,
-            "summaryName" to "forms.update.checkOccupancy.notOccupied.summaryName",
-            "summaryListData" to emptyList<SummaryListRowViewModel>(),
+            "todoComment" to
+                "TODO: PDJB-1635 - occupancy update check your answers page",
         )
 
-    override fun resolveNextDestination(
-        state: UpdateOccupancyJourneyState,
-        defaultDestination: Destination,
-    ): Destination = defaultDestination
+    override fun chooseTemplate(state: UpdateOccupancyJourneyState) = "forms/todo"
+
+    override fun mode(state: UpdateOccupancyJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class UpdateOccupancyCheckYourAnswersStep(
     stepConfig: UpdateOccupancyCheckYourAnswersStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateOccupancyJourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, UpdateOccupancyJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-your-answers"
     }
