@@ -118,7 +118,7 @@ class CompleteOccupancyUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached removes the delegation and emails the landlords and letting agent when becoming unoccupied with a delegation`() {
+    fun `afterStepIsReached removes delegation and emails landlords and agent when becoming unoccupied with a delegation`() {
         stubStateWithOccupancy(occupied = false)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId))
@@ -140,7 +140,7 @@ class CompleteOccupancyUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends the standard update email and does not remove a delegation when becoming unoccupied with no delegation`() {
+    fun `afterStepIsReached sends standard email and removes no delegation when becoming unoccupied with no delegation`() {
         stubStateWithOccupancy(occupied = false)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId)).thenReturn(null)
@@ -157,7 +157,7 @@ class CompleteOccupancyUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends the standard update email and does not remove a delegation when becoming unoccupied with the flag disabled`() {
+    fun `afterStepIsReached sends standard email and removes no delegation when becoming unoccupied with the flag disabled`() {
         stubStateWithOccupancy(occupied = false)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
