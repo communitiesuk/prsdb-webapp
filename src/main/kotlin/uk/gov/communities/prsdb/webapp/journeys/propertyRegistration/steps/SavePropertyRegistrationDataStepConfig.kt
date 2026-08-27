@@ -53,13 +53,17 @@ class SavePropertyRegistrationDataStepConfig(
 
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         // TODO PDJB-1391: when a letting agent provides the rented-out details the landlord provides no licensing,
         //  tenancy or compliance details, so those tasks are skipped. Persist placeholder "provide later" values
         //  until the real delegated-details flow is implemented.
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
-        // TODO PDJB-1587: when isDelegatedToLettingAgent is true, persist the letting agent delegation details
-        //  (e.g. the letting agent's email address from the WhoProvidesDetailsTask).
+        val lettingAgentEmail =
+            if (isDelegatedToLettingAgent) {
+                state.whoProvidesDetailsTask.lettingAgentEmailStep.formModel.emailAddress
+            } else {
+                null
+            }
         val shouldRequireTenancyDetails = isOccupied && !state.provideTenancyDetailsLater && !isDelegatedToLettingAgent
         val billsIncludedDataModel = state.rentIncludesBillsTask.getBillsIncludedOrNull()
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
@@ -103,7 +107,7 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numBedrooms =
-                if (isRestructured || shouldRequireTenancyDetails) {
+                if (isSkippingEnabled || shouldRequireTenancyDetails) {
                     state.bedrooms.formModel
                         .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
                         .toInt()
@@ -133,6 +137,7 @@ class SavePropertyRegistrationDataStepConfig(
                     null
                 },
             jointLandlordEmails = jointLandlordEmails,
+            lettingAgentEmail = lettingAgentEmail,
             markedJointLandlord = markedJointLandlord,
             hasGasSupply = state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate =
@@ -179,6 +184,7 @@ class SavePropertyRegistrationDataStepConfig(
                 isDelegatedToLettingAgent ||
                     state.licensingTask.licensingTypeStep.outcome == LicensingTypeMode.PROVIDE_LATER,
             tenancyProvideLater = isDelegatedToLettingAgent || state.provideTenancyDetailsLater,
+            isDelegatedToLettingAgent = isDelegatedToLettingAgent,
         )
     }
 }

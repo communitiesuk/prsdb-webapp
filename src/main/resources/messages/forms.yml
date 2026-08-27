@@ -586,6 +586,20 @@ checkPropertyAnswers:
     invitations: Invitations
     areThereJointLandlords: Are there any other landlords for this property?
     noJointLandlords: No, I am the only landlord
+  lettingAgentDelegation:
+    heading: How your property’s rented out
+    subheading: Who will provide these details
+    bodyText: "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:"
+    values:
+      landlord:
+        label: I will provide these details
+      lettingAgent:
+        label: My letting agent or property manager
+    rows:
+      whoWillProvide:
+        label: Who will provide this property’s rental details?
+      agentEmail:
+        label: Letting agent or property manager’s email address
 update:
   email:
     fieldSetHeading: What is your updated email address?

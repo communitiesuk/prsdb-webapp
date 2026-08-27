@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -53,6 +54,7 @@ class PropertyDetailsController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
+    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -99,24 +101,28 @@ class PropertyDetailsController(
         modelAndView.addObject("isLandlordView", true)
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             modelAndView.addObject("showLettingAgentPanel", true)
-            modelAndView.addObject("delegatesToLettingAgent", propertyOwnership.delegatesToLettingAgent)
-            if (propertyOwnership.delegatesToLettingAgent) {
-                modelAndView.addObject("lettingAgentEmail", propertyOwnership.lettingAgentAccess!!.invitedEmail)
-                modelAndView.addObject(
-                    "lettingAgentPanelLink",
-                    TicketPanelLinkViewModel(
-                        text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
-                        url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
-                    ),
-                )
-            } else {
-                modelAndView.addObject(
-                    "lettingAgentPanelLink",
-                    TicketPanelLinkViewModel(
-                        text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
-                        url = getDelegateToLettingAgentPath(propertyOwnershipId),
-                    ),
-                )
+            val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
+            modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
+            modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
+            if (propertyOwnership.isOccupied) {
+                if (lettingAgentAccess != null) {
+                    modelAndView.addObject("lettingAgentEmail", lettingAgentAccess.invitedEmail)
+                    modelAndView.addObject(
+                        "lettingAgentPanelLink",
+                        TicketPanelLinkViewModel(
+                            text = "propertyDetails.lettingAgentPanel.cancelDelegation.link",
+                            url = CancelLettingAgentDelegationController.getRemoveLettingAgentPath(propertyOwnershipId),
+                        ),
+                    )
+                } else {
+                    modelAndView.addObject(
+                        "lettingAgentPanelLink",
+                        TicketPanelLinkViewModel(
+                            text = "propertyDetails.lettingAgentPanel.delegateToLettingAgent.link",
+                            url = getDelegateToLettingAgentPath(propertyOwnershipId),
+                        ),
+                    )
+                }
             }
         }
         if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {

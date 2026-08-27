@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.config.security
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -31,12 +33,16 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 @EnableMethodSecurity
 class DefaultSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
+    @Value("\${features.overrides-enabled:false}") private val featureFlagOverridesEnabled: Boolean,
 ) {
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     fun defaultSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { requests ->
+                if (featureFlagOverridesEnabled) {
+                    requests.requestMatchers(FEATURE_FLAG_OVERRIDES_ROUTE).permitAll()
+                }
                 requests
                     .requestMatchers("/")
                     .permitAll()

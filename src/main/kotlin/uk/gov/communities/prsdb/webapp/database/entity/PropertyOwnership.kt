@@ -50,6 +50,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
+    fun otherLandlordsTo(landlord: Landlord): Set<Landlord> = landlords.filter { it.id != landlord.id }.toSet()
+
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
 
@@ -75,11 +77,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     val propertyCompliance: PropertyCompliance? = null
-
-    @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
-    val lettingAgentAccess: LettingAgentAccess? = null
-
-    val delegatesToLettingAgent: Boolean get() = lettingAgentAccess != null
 
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()

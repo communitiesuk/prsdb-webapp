@@ -40,13 +40,27 @@ confirmation:
     heading: Property registered
   prn:
     label: 'Your <strong>Property Registration Number</strong> is:'
-  keepNumber: Keep this number for your records. We’ve sent it to you in an email.
+  keepNumber:
+    # TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
+    old: Keep this number for your records. We’ve sent it to you in an email.
+    lettingAgentRedesign: We’ve sent you a confirmation email including this number.
   useInAdverts: Use this Property Registration Number when advertising this property, alongside each landlord’s Landlord Registration Number.
   whatYouNeedToDoNext:
     heading: What you need to do next
     uploadCompliance:
       heading: Upload compliance certificates
       paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
+  whatHappensNext:
+    heading: What happens next
+    lettingAgent:
+      subHeading: Your letting agent or property manager needs to provide the remaining required details
+      emailedParagraph: "We’ve now emailed your letting agent or property manager and asked them to provide:"
+      licensingDetails: licensing details
+      gasSafetyCertificate: gas safety certificate
+      electricalSafetyCertificate: electrical safety certificate
+      epc: energy performance certificate (EPC)
+      tenancyDetails: tenancy details
+      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they've provided this information.
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
@@ -79,6 +93,7 @@ taskList:
     licensing: Tell us if your property needs a license
     tenancyDetails: Tenancy details
     tenancyDetailsNotRequiredHint: We’ll ask for tenancy details when your property becomes occupied
+    tenancyDetailsNotNeededYetHint: Once your property’s occupied, you’ll need to provide details about the tenancy
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
@@ -189,3 +204,11 @@ lettingAgentEmail:
   emailLabel: "What is your letting agent or property manager’s email address?"
   emailHint: "We’ll email them a link to provide this property’s remaining details"
   submitButton: Save and continue
+occupancyChangeInterruption:
+  heading: Are you sure you want to change this?
+  paragraph:
+    one: You’ve changed this property to being unoccupied.
+    two: This means you cannot ask your letting agent or property manager to provide this property’s details.
+    three: You must now complete this registration yourself, adding as many details as you can.
+    four: When the property’s occupied, you can add a letting agent or property manager again. They can provide any missing details for you.
+    five: You can go back to undo this change.

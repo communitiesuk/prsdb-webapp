@@ -6,7 +6,7 @@
         </div>
         <div class="govuk-button-group moj-interruption-card__actions">
             <button type="submit" class="govuk-button govuk-button--inverse" data-module="govuk-button"
-                    th:attr="data-plausible-event=${isTransactionButton} ? 'Transaction' : null"
+                    th:attr="data-plausible-event=${isTransactionButton == true} ? 'Transaction' : null"
                     th:text="${buttonText}">
                 buttonText
             </button>

@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentControl
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
@@ -60,6 +61,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.FeatureFlagOverridesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
@@ -677,6 +679,11 @@ class Navigator(
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
+
+    fun navigateToPropertyRegistrationCheckYourAnswers() =
+        navigateToPropertyRegistrationJourneyStep(
+            PropertyRegistrationCyaStep.ROUTE_SEGMENT,
+        )
 
     fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
@@ -1488,6 +1495,11 @@ class Navigator(
     fun goToSystemOperatorDashboard(): SystemOperatorDashboardPage {
         navigate(SYSTEM_OPERATOR_DASHBOARD_URL)
         return createValidPage(page, SystemOperatorDashboardPage::class)
+    }
+
+    fun goToFeatureFlagOverrides(): FeatureFlagOverridesPage {
+        navigate(FEATURE_FLAG_OVERRIDES_ROUTE)
+        return createValidPage(page, FeatureFlagOverridesPage::class)
     }
 
     fun goToGeneratePasscodePage(): GeneratePasscodePage {

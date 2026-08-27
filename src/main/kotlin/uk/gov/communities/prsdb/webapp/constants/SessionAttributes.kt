@@ -10,7 +10,9 @@ const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDereg
 
 const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
-const val LETTING_AGENTS_DELEGATED_THIS_SESSION = "lettingAgentsDelegatedThisSession"
+const val PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION = "propertiesDelegatedToLettingAgentThisSession"
+
+const val LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS = "lettingAgentsRemovedThisSessionWithEmails"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
@@ -47,3 +49,5 @@ const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPrope
 const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 
 const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
+
+const val FEATURE_FLAG_OVERRIDES = "featureFlagOverrides"

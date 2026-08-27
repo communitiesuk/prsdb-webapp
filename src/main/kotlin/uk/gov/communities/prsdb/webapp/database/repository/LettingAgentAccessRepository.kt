@@ -8,4 +8,6 @@ interface LettingAgentAccessRepository : JpaRepository<LettingAgentAccess, Long>
     fun findByToken(token: UUID): LettingAgentAccess?
 
     fun findByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess?
+
+    fun deleteByPropertyOwnershipId(propertyOwnershipId: Long)
 }

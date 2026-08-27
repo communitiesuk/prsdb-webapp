@@ -49,25 +49,37 @@
             <p class="govuk-body">
                 <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
-            <div th:if="${showLettingAgentPanel}">
-                <div th:if="${!delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
-                    <article id="delegate-to-letting-agent-ticket-panel"
+            <th:block th:if="${showLettingAgentPanel}">
+                <th:block th:if="${propertyIsOccupied}">
+                    <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
+                        <article id="letting-agent-panel"
+                                 th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.cancelDelegation.heading', ~{::#letting-agent-panel/content()}, ${lettingAgentPanelLink})}">
+                            <p class="govuk-body-l" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
+                            <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.cancelDelegation.body}">propertyDetails.lettingAgentPanel.cancelDelegation.body</p>
+                        </article>
+                    </div>
+                    <div th:unless="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
+                        <article id="delegate-to-letting-agent-ticket-panel"
+                                 th:replace="~{fragments/ticketPanel ::
+                                 ticketPanel('propertyDetails.lettingAgentPanel.delegateToLettingAgent.heading',
+                                 ~{::#delegate-to-letting-agent-ticket-panel/content()}, ${lettingAgentPanelLink})}">
+                            <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.delegateToLettingAgent.body}">
+                                propertyDetails.lettingAgentPanel.delegateToLettingAgent.body
+                            </p>
+                        </article>
+                    </div>
+                </th:block>
+                <div th:unless="${propertyIsOccupied}" class="govuk-!-width-two-thirds">
+                    <article id="unoccupied-letting-agent-ticket-panel"
                              th:replace="~{fragments/ticketPanel ::
-                             ticketPanel('propertyDetails.lettingAgentPanel.delegateToLettingAgent.heading',
-                             ~{::#delegate-to-letting-agent-ticket-panel/content()}, ${lettingAgentPanelLink})}">
-                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.delegateToLettingAgent.body}">
-                            propertyDetails.lettingAgentPanel.delegateToLettingAgent.body
+                             ticketPanel('propertyDetails.lettingAgentPanel.unoccupied.heading',
+                             ~{::#unoccupied-letting-agent-ticket-panel/content()}, null)}">
+                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.unoccupied.body}">
+                            propertyDetails.lettingAgentPanel.unoccupied.body
                         </p>
                     </article>
                 </div>
-                <div th:if="${delegatesToLettingAgent}" class="govuk-!-width-two-thirds">
-                    <article id="letting-agent-panel"
-                             th:replace="~{fragments/ticketPanel :: ticketPanel('propertyDetails.lettingAgentPanel.cancelDelegation.heading', ~{::#letting-agent-panel/content()}, ${lettingAgentPanelLink})}">
-                        <p class="govuk-heading-m" th:text="${lettingAgentEmail}">lettingAgentEmail</p>
-                        <p class="govuk-body" th:text="#{propertyDetails.lettingAgentPanel.cancelDelegation.body}">propertyDetails.lettingAgentPanel.cancelDelegation.body</p>
-                    </article>
-                </div>
-            </div>
+            </th:block>
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyRecord.heading})}"></li>
