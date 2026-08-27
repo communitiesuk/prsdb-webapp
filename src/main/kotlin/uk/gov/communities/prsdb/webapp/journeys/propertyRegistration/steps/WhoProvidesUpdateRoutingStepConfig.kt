@@ -24,14 +24,10 @@ class WhoProvidesUpdateRoutingStepConfig :
 
     // In a CYA change journey the newly-submitted answer lives in the child journey, while the previous answer
     // remains in the base journey until the change is committed. We therefore read the previous answer from the
-    // base journey to decide whether the answer has actually changed.
+    // base journey's cached value to decide whether the answer has actually changed.
     fun getPreviouslyDelegatedFromBaseJourney(state: PropertyRegistrationJourneyState): Boolean {
         val baseState = state.getBaseJourneyState() as PropertyRegistrationJourneyState
-        val baseTask = baseState.whoProvidesDetailsTask
-        baseTask.setJourneyId(baseState.journeyId)
-        return state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.stepConfig
-            .getFormModelFromStateOrNull(baseTask)
-            ?.whoProvides == WhoProvidesRentalDetails.LETTING_AGENT
+        return baseState.cachedWhoProvidesRentalDetails == WhoProvidesRentalDetails.LETTING_AGENT
     }
 
     override fun isSubClassInitialised() = ::previouslyDelegated.isInitialized

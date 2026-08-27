@@ -11,7 +11,6 @@ import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
 
 class WhoProvidesUpdateRoutingStepConfigTests {
     @Nested
@@ -99,20 +98,13 @@ class WhoProvidesUpdateRoutingStepConfigTests {
     }
 
     private fun getPreviouslyDelegatedFromBaseJourney(previousAnswer: WhoProvidesRentalDetails?): Boolean {
-        val baseTask = mock<WhoProvidesDetailsTask>()
         val baseState =
             mock<PropertyRegistrationJourneyState> {
-                on { whoProvidesDetailsTask } doReturn baseTask
-                on { journeyId } doReturn "base-journey-id"
+                on { cachedWhoProvidesRentalDetails } doReturn previousAnswer
             }
-        val formModel = mock<WhoProvidesRentalDetailsFormModel> { on { whoProvides } doReturn previousAnswer }
-        val stepConfig = mock<WhoProvidesRentalDetailsStepConfig> { on { getFormModelFromStateOrNull(baseTask) } doReturn formModel }
-        val step = mock<WhoProvidesRentalDetailsStep> { on { this.stepConfig } doReturn stepConfig }
-        val liveTask = mock<WhoProvidesDetailsTask> { on { whoProvidesRentalDetailsStep } doReturn step }
         val childState =
             mock<PropertyRegistrationJourneyState> {
                 on { getBaseJourneyState() } doReturn baseState
-                on { whoProvidesDetailsTask } doReturn liveTask
             }
 
         return WhoProvidesUpdateRoutingStepConfig().getPreviouslyDelegatedFromBaseJourney(childState)
