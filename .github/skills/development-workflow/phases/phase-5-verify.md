@@ -16,17 +16,15 @@ Dispatch a single sub-agent (general-purpose) with:
 - The working directory (worktree path or current workspace) as `projectPath`
 - Instructions to run each step and return a structured report
 
-The sub-agent should use these commands:
+The sub-agent should use the `running-tests` skill for all test execution (unit,
+controller, integration, targeted, and frontend tests). For other verification:
 
-| Verification | PowerShell | Bash |
-|-------------|------------|------|
-| Unit + controller tests | `.\gradlew testWithoutIntegration --console=plain` | `./gradlew testWithoutIntegration --console=plain` |
-| Targeted test class | `.\gradlew test --tests "fully.qualified.TestClass" --console=plain` | `./gradlew test --tests "fully.qualified.TestClass" --console=plain` |
-| Full suite | `.\gradlew test --console=plain` | `./gradlew test --console=plain` |
-| Linting | `.\gradlew ktlintCheck --console=plain` | `./gradlew ktlintCheck --console=plain` |
-| Frontend JS tests | `npm test` | `npm test` |
-| Build check | `jetbrains-build_project` with projectPath | `jetbrains-build_project` with projectPath |
-| Smoke test | Use `smoke-testing` skill (Playwright CLI) | Use `smoke-testing` skill (Playwright CLI) |
+| Verification | Command |
+|-------------|---------|
+| Tests (all types) | Use the `running-tests` skill |
+| Linting | Use the `running-lint` skill |
+| Build check | Use the `running-builds` skill |
+| Smoke test | Use the `smoke-testing` skill |
 
 The sub-agent returns a structured report:
 ```json
@@ -48,55 +46,29 @@ The orchestrator acts only on this report.
 After each verification step completes, update the checkpoint with the result and
 what remains.
 
-## Streaming Output
+## Long-Running Verification
 
-**CRITICAL:** Tests can take up to 20 minutes. Sub-agents and subshells MUST stream
-output rather than waiting silently for completion. Progress checks must verify that
-tests are actually progressing, not just wait for them to finish.
+**CRITICAL:** Tests can take up to 20 minutes. Use the `running-tests` skill for
+execution via IntelliJ, but note that MCP does not stream test output.
 
-### PowerShell (Windows)
+When running the full suite via the powershell tool instead (e.g. for streaming
+progress), use `--console=plain` and `mode: "sync"` with `initial_wait: 300`.
+If still running after `initial_wait`, use `read_powershell` every 30–60 seconds.
+
+### PowerShell
 
 ```powershell
-# Run tests with streaming output — use sync mode with long initial_wait
-# The --console=plain flag prevents Gradle's rich console from suppressing output
 .\gradlew test --console=plain
-```
-
-When running via the powershell tool:
-```
-powershell:
-  command: ".\gradlew test --console=plain"
-  mode: "sync"
-  initial_wait: 300
-```
-If the command is still running after `initial_wait`, it continues in the background.
-Use `read_powershell` periodically (every 30-60 seconds) to check progress.
-
-### Bash (Linux/macOS)
-
-```bash
-# Run with unbuffered streaming output
-./gradlew test --console=plain
-```
-
-When running via the powershell tool:
-```
-powershell:
-  command: "./gradlew test --console=plain"
-  mode: "sync"
-  initial_wait: 300
 ```
 
 ### Progress Indicators
 
-Look for these in the streaming output to confirm progress:
-- `> Task :test` — tests are starting
+- `> Task :test` — tests starting
 - `uk.gov.communities.prsdb.webapp.` — individual test classes running
 - `X tests completed, Y failed` — periodic Gradle summary
 - `BUILD SUCCESSFUL` / `BUILD FAILED` — completion
 
-If the output stalls (no new lines for 2+ minutes), the tests may be stuck.
-Check for database lock issues or Docker container health.
+If no new output for 2+ minutes, investigate (database locks, Docker health).
 
 ## Parallelising Work
 

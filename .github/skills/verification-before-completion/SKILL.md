@@ -23,60 +23,39 @@ Before claiming any status:
 
 ## Verification Commands
 
-| Claim | Command (PowerShell) | Command (Bash) |
-|-------|---------------------|----------------|
-| Unit tests pass | `.\gradlew testWithoutIntegration --console=plain` | `./gradlew testWithoutIntegration --console=plain` |
-| Specific test passes | `.\gradlew test --tests "fully.qualified.Class" --console=plain` | `./gradlew test --tests "fully.qualified.Class" --console=plain` |
-| All tests pass | `.\gradlew test --console=plain` | `./gradlew test --console=plain` |
-| Lint clean | `.\gradlew ktlintCheck --console=plain` | `./gradlew ktlintCheck --console=plain` |
-| Build succeeds | `jetbrains-build_project` with worktree `projectPath` | same |
-| Frontend tests pass | `npm test` | `npm test` |
-| No compilation errors | `jetbrains-get_file_problems` on modified files | same |
-| Bug fixed | Reproduce → fix → verify symptom gone | same |
+For **all test execution** (unit, controller, integration, targeted, frontend), use
+the `running-tests` skill. It handles test discovery, execution via IntelliJ run
+configurations, and result parsing.
 
-## Streaming Output
+For other verification:
 
-**CRITICAL:** Tests can take up to 20 minutes. Commands MUST stream output so
-progress can be monitored.
+| Claim | Command |
+|-------|---------|
+| Lint clean | Use the `running-lint` skill |
+| Build succeeds | Use the `running-builds` skill |
+| No compilation errors | Use the `running-builds` skill |
+| Bug fixed | Reproduce → fix → verify symptom gone |
+
+## Long-Running Verification
+
+**CRITICAL:** Tests can take up to 20 minutes. Use the `running-tests` skill for
+execution via IntelliJ, but note that MCP does not stream test output.
+
+When running the full suite via the powershell tool instead (e.g. for streaming
+progress), use `--console=plain` and `mode: "sync"` with `initial_wait: 300`.
+If still running after `initial_wait`, use `read_powershell` every 30–60 seconds.
 
 ### PowerShell
 
 ```powershell
-# Use sync mode with long initial_wait
 .\gradlew test --console=plain
-```
-
-Via the powershell tool:
-```
-powershell:
-  command: ".\gradlew test --console=plain"
-  mode: "sync"
-  initial_wait: 300
-```
-
-If still running after `initial_wait`, use `read_powershell` every 30-60 seconds
-to check progress.
-
-### Bash
-
-```bash
-./gradlew test --console=plain
-```
-
-Via the powershell tool:
-```
-powershell:
-  command: "./gradlew test --console=plain"
-  mode: "sync"
-  initial_wait: 300
 ```
 
 ### Progress Indicators
 
-Look for these to confirm tests are progressing:
 - `> Task :test` — tests starting
-- `uk.gov.communities.prsdb.webapp.` — individual test classes
-- `X tests completed, Y failed` — periodic summary
+- `uk.gov.communities.prsdb.webapp.` — individual test classes running
+- `X tests completed, Y failed` — periodic Gradle summary
 - `BUILD SUCCESSFUL` / `BUILD FAILED` — completion
 
 If no new output for 2+ minutes, investigate (database locks, Docker health).
