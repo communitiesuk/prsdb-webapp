@@ -60,7 +60,7 @@ confirmation:
       electricalSafetyCertificate: electrical safety certificate
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
-      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they've provided this information.
+      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they’ve provided this information.
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
