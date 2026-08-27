@@ -122,7 +122,12 @@ class UpdateOccupancyJourneyFactory(
             }
             step(journey.checkYourAnswersStep) {
                 routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.interruptionStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.occupied.hasOutcome(YesOrNo.YES),
+                        journey.occupied.hasOutcome(YesOrNo.NO),
+                    )
+                }
                 nextStep { journey.completeOccupancyUpdateStep }
             }
             step(journey.completeOccupancyUpdateStep) {

@@ -20,7 +20,7 @@ class UpdateOccupancyCheckYourAnswersStepConfig(
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
         )
 
-    // override this as the next step (CompleteOccupancyUpdateStep) will handle deleting the journey and saving the update
+    // override this as the next step will handle deleting the journey
     override fun resolveNextDestination(
         state: UpdateOccupancyJourneyState,
         defaultDestination: Destination,
