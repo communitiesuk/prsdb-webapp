@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
@@ -65,7 +66,7 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRedesigned) {
-            redesignedJourneyMap(state, propertyId)
+            redesignedJourneyMap(state, checkingAnswersFor, propertyId)
         } else if (checkingAnswersFor == null) {
             oldMainJourneyMap(state, propertyId)
         } else {
@@ -75,10 +76,15 @@ class UpdateOccupancyJourneyFactory(
 
     private fun redesignedJourneyMap(
         state: UpdateOccupancyJourney,
+        checkingAnswersFor: String?,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> =
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-            redesignedWithCheckAnswersJourneyMap(state, propertyId)
+            if (checkingAnswersFor == null) {
+                redesignedWithCheckAnswersJourneyMap(state, propertyId)
+            } else {
+                redesignedCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            }
         } else {
             redesignedSinglePageJourneyMap(state, propertyId)
         }
@@ -122,6 +128,40 @@ class UpdateOccupancyJourneyFactory(
             step(journey.completeOccupancyUpdateStep) {
                 parents { journey.checkYourAnswersStep.isComplete() }
                 nextUrl { propertyDetailsRoute }
+            }
+        }
+    }
+
+    private fun redesignedCheckYourAnswersJourneyMap(
+        state: UpdateOccupancyJourney,
+        checkingAnswersFor: String,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT) {
+                        withAdditionalContentProperties {
+                            mapOf(
+                                "title" to "propertyDetails.update.title",
+                                "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            )
+                        }
+                    }
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
             }
         }
     }
@@ -173,12 +213,12 @@ class UpdateOccupancyJourneyFactory(
             task(journey.occupationTask.inJourney(journey)) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.cyaStep }
+                nextStep { journey.legacyCyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
-            step(journey.cyaStep) {
+            step(journey.legacyCyaStep) {
                 routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
                 parents { journey.occupationTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
@@ -315,7 +355,7 @@ class UpdateOccupancyJourney(
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
-    override val cyaStep: UpdateOccupancyCyaStep,
+    override val legacyCyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
@@ -325,11 +365,22 @@ class UpdateOccupancyJourney(
     // Skeleton interruption / "are you sure" step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT
     // is enabled - see redesignedJourneyMap)
     override val interruptionStep: UpdateOccupancyInterruptionStep,
+    private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
+    // The redesigned update uses the new check-your-answers step, while the old (flag-off) journey uses the
+    // legacy check-your-answers step. Both journeys share a single state object, so switch on the flag here.
+    override val cyaStep: JourneyStep.RequestableStep<*, *, *>
+        get() =
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                checkYourAnswersStep
+            } else {
+                legacyCyaStep
+            }
+
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -351,7 +402,7 @@ interface UpdateOccupancyJourneyState :
     OccupationState,
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
-    override val cyaStep: UpdateOccupancyCyaStep
+    val legacyCyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
     val interruptionStep: UpdateOccupancyInterruptionStep

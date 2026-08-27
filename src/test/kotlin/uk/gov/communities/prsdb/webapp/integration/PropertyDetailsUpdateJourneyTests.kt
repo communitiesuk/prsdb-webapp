@@ -370,6 +370,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                             UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
                             occupiedPropertyUrlArguments,
                         )
+                    assertThat(checkAnswersPage.summaryList.occupancyRow.value).containsText("No")
                     checkAnswersPage.confirm()
 
                     // Back on the property record: occupancy is updated and the delegation has been removed
@@ -403,10 +404,53 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                             UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
                             occupiedPropertyUrlArguments,
                         )
+                    assertThat(checkAnswersPage.summaryList.occupancyRow.value).containsText("Yes")
                     checkAnswersPage.confirm()
 
                     // The property is still occupied, so the delegation is retained
                     propertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                }
+
+                @Test
+                fun `the occupancy answer can be changed from the check answers page`(page: Page) {
+                    navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                        .propertyDetailsSummaryList.occupancyRow
+                        .clickFirstActionLinkAndWait()
+
+                    // Initially answer that the property is vacant
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                        .submitIsVacant()
+                    assertPageIs(
+                        page,
+                        UpdateOccupancyInterruptionPagePropertyDetailsUpdate::class,
+                        occupiedPropertyUrlArguments,
+                    ).continueToCheckAnswers()
+                    val checkAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    assertThat(checkAnswersPage.summaryList.occupancyRow.value).containsText("No")
+
+                    // Change the occupancy answer to occupied and return to the check answers page
+                    checkAnswersPage.clickChangeOccupancy()
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                        .submitIsOccupied()
+                    val updatedCheckAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    assertThat(updatedCheckAnswersPage.summaryList.occupancyRow.value).containsText("Yes")
+
+                    // Submitting keeps the property occupied and retains the delegation
+                    updatedCheckAnswersPage.confirm()
+                    val propertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
                     assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
