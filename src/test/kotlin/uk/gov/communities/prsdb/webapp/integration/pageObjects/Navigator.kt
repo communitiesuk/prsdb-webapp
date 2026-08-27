@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandl
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
+import uk.gov.communities.prsdb.webapp.controllers.GeneratePassphraseController.Companion.GENERATE_PASSPHRASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.InviteOrganisationalLandlordUserController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
@@ -70,6 +71,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.FeatureFlagOverridesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePassphrasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -1690,6 +1692,11 @@ class Navigator(
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
         navigate(GENERATE_PASSCODE_URL)
         return createValidPage(page, GeneratePasscodePage::class)
+    }
+
+    fun goToGeneratePassphrasePage(): GeneratePassphrasePage {
+        navigate(GENERATE_PASSPHRASE_URL)
+        return createValidPage(page, GeneratePassphrasePage::class)
     }
 
     fun goToMetricsPage(): MetricsPage {
