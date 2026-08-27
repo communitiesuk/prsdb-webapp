@@ -203,6 +203,8 @@ class PropertyComplianceService(
 
         return compliances
             .map {
+                // TODO PDJB-939: when the flag is permanently on, pass useRegistrationDateDeadline = true (or drop the
+                //  argument entirely once the parameter is removed) and delete the featureFlagManager check.
                 ComplianceStatusDataModel.fromPropertyCompliance(
                     it,
                     useRegistrationDateDeadline = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),

@@ -45,6 +45,8 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
+        // TODO PDJB-939: when the flag is permanently on, remove the useRegistrationDateDeadline parameter and the
+        //  lastOccupiedDate branch so the deadline is always anchored to the registration date.
         fun fromPropertyCompliance(
             propertyCompliance: PropertyCompliance,
             useRegistrationDateDeadline: Boolean = false,

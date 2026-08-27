@@ -103,6 +103,8 @@ class ComplianceActionViewModelBuilder {
                 }
 
                 ComplianceCertStatus.PROVIDE_LATER -> {
+                    // TODO PDJB-939: a null provideLaterDeadline only occurs for occupied-after-registration properties
+                    //  under the flag; this no-deadline branch can be revisited when the flag is decommissioned.
                     if (provideLaterDeadline == null) "complianceActions.status.provideLaterNoDeadline" else baseKey
                 }
 

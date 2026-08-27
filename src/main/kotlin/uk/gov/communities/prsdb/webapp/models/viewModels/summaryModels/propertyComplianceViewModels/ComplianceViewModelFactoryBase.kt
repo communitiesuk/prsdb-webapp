@@ -58,6 +58,8 @@ abstract class ComplianceViewModelFactoryBase(
 
     private fun getProvideLaterValue(propertyCompliance: PropertyCompliance): Any {
         val propertyOwnership = propertyCompliance.propertyOwnership
+        // TODO PDJB-939: when the flag is permanently on, delete the flag-off branch (and the injected
+        //  featureFlagManager) so the deadline is always anchored to the registration date.
         return if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
             if (propertyOwnership.hasBeenOccupiedSinceRegistration) {
                 getProvideLaterWithDeadlineText(propertyOwnership.registrationDate)
