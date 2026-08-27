@@ -27,7 +27,7 @@ class CheckAnswersPagePropertyRegistration(
     val occupancyHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
 
-    val lettingAgentDelegationHeading =
+    val rentedOutHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("How your property’s rented out")))
 
     val lettingAgentDelegationSubheading =
@@ -50,19 +50,21 @@ class CheckAnswersPagePropertyRegistration(
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
 
     val restructuredTenancyHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tenancy details")))
+    val restructuredTenancyUnoccupiedBodyText =
+        Paragraph.byText(
+            page,
+            "We’ll ask for tenancy details when your property becomes occupied.",
+        )
     private val restructuredTenancyRowKeys =
         page
-            .locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
+            .locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tenancy details"))
             .locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
 
     fun restructuredTenancyRowHeadings(): List<String> {
         val rowCount = restructuredTenancyRowKeys.count()
         return (0 until rowCount).map { index -> restructuredTenancyRowKeys.nth(index).innerText().trim() }
     }
-
-    val jointLandlordsHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
 
     val complianceCertificatesHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
@@ -79,7 +81,9 @@ class CheckAnswersPagePropertyRegistration(
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
-        val ownershipRow = getRow("Ownership type")
+        // Heading text differs between the legacy CYA ("Ownership type") and the restructured CYA
+        // ("How do you own this property?"), so match either depending on which template is rendered.
+        val ownershipRow = getRow(Pattern.compile("^(Ownership type|How do you own this property\\?)$"))
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
@@ -91,7 +95,9 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
-        val jointLandlordsInvitationsRow = getRow("Invitations")
+        // Heading text differs between the legacy CYA ("Invitations") and the restructured CYA
+        // ("Joint landlord invitations"), so match either depending on which template is rendered.
+        val jointLandlordsInvitationsRow = getRow(Pattern.compile("^(Invitations|Joint landlord invitations)$"))
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 

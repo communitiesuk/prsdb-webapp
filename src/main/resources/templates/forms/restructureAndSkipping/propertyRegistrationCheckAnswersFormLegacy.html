@@ -23,6 +23,7 @@
 <!--/*@thymesVar id="epcInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="warningTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -80,7 +81,7 @@
         <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
             <p class="govuk-body" th:text="#{${epcInsetTextKey}}"></p>
         </div>
-        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+        <div th:replace="~{fragments/warningText :: warningText(#{${warningTextKey}})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">
         <input type="hidden" name="submittedFilteredJourneyData" th:value="${submittedFilteredJourneyData}"/>

@@ -495,7 +495,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check answers - render page
             assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
-            assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
+            assertThat(checkAnswersPage.rentedOutHeading).isVisible()
             assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
             assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
             assertThat(checkAnswersPage.epcHeading).isVisible()
@@ -1504,12 +1504,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured CYA does not show tenancy details section when the property is unoccupied`(page: Page) {
+        fun `restructured CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).isHidden()
+            assertThat(checkAnswersPage.restructuredTenancyHeading).isVisible()
+            assertThat(checkAnswersPage.restructuredTenancyUnoccupiedBodyText).isVisible()
+            assertEquals(emptyList<String>(), checkAnswersPage.restructuredTenancyRowHeadings())
         }
 
         @Test
@@ -1929,6 +1931,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
@@ -1948,6 +1951,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
@@ -3588,7 +3594,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -3620,6 +3626,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions

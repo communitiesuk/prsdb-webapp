@@ -10,11 +10,13 @@ buttons:
   confirm: Confirm
   confirmAndContinue: Confirm and continue
   completeRegistration: Complete registration
+  continueToPayment: Continue to payment
   useThisAddress: Use this address
   submit: Submit
   confirmAndSubmitUpdate: Confirm and submit update
   uploadAndContinue: Upload and continue
   provideThisLater: Provide this later
+  provideDetailsLater: Provide details later
   iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
@@ -552,6 +554,7 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
+  warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it's accurate to the best of your knowledge.
   aboutYourProperty:
     heading: About your property
   propertyDetails:
@@ -563,6 +566,8 @@ checkPropertyAnswers:
     ownership: Ownership type
     licensingType: Licensing type
     noLicensing: None
+    restructureAndSkipping:
+      noLicensing: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -595,8 +600,9 @@ checkPropertyAnswers:
   jointLandlordsDetails:
     heading: Invite joint landlords
     invitations: Invitations
+    jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?
-    noJointLandlords: No, I am the only landlord
+    noJointLandlords: No, I am the only landlord for this property
   lettingAgentDelegation:
     heading: How your property’s rented out
     subheading: Who will provide these details

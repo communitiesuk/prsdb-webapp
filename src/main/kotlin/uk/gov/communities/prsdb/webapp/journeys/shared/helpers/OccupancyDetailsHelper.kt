@@ -221,9 +221,8 @@ class OccupancyDetailsHelper {
                     ),
                 )
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
-                // Restructured CYA shows rent amount before rent frequency
-                add(getRentAmountRow(state, state.rentFrequencyAndAmountTask, messageSource))
                 add(getRentFrequencyRow(state, state.rentFrequencyAndAmountTask))
+                add(getRentAmountRow(state, state.rentFrequencyAndAmountTask, messageSource))
             }
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : BedroomsState, T : CheckYourAnswersJourneyState {

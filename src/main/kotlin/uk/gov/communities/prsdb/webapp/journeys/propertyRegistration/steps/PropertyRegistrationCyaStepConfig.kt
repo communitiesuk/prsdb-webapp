@@ -57,14 +57,26 @@ class PropertyRegistrationCyaStepConfig(
                     getProvideLaterMessageKey(isOccupied),
                 )
             } else {
-                getLicensingDetailsForState(state, isOccupied)
+                getLicensingDetailsForState(state, isOccupied, isSkippingEnabled)
             }
         val tenancyDetails = getTenancyDetails(state, isDelegatedInSkippingFlow, isSkippingEnabled, isOccupied)
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
-                "submitButtonText" to "forms.buttons.completeRegistration",
-                "insetText" to true,
+                // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+                "submitButtonText" to
+                    if (isSkippingEnabled) {
+                        "forms.buttons.continueToPayment"
+                    } else {
+                        "forms.buttons.completeRegistration"
+                    },
+                "warningTextKey" to
+                    if (isSkippingEnabled) {
+                        "forms.checkPropertyAnswers.warning"
+                    } else {
+                        "forms.warning"
+                    },
+                "insetText" to !isSkippingEnabled,
                 "propertyName" to
                     state.propertyDetailsTask.addressTask
                         .getAddress()
@@ -110,8 +122,12 @@ class PropertyRegistrationCyaStepConfig(
                     "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
                     "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
                     "ownershipAndLandlordsRows" to
-                        listOfNotNull(
-                            (content["jointLandlordsDetails"] as? SummaryListRowViewModel),
+                        listOf(
+                            getOwnershipTypeRow(state, "propertyDetails.propertyRecord.ownership.ownershipType"),
+                            getJointLandLordsSummaryRow(
+                                state,
+                                "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
+                            ),
                         ),
                     "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
                     "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
@@ -122,7 +138,7 @@ class PropertyRegistrationCyaStepConfig(
                     "rentedOutLicensingRows" to licensingDetails,
                     "rentedOutGasRows" to gasSupplyRows,
                     "rentedOutElectricalRows" to electricalRows,
-                    "rentedOutTenancyRows" to tenancyDetails,
+                    "rentedOutTenancyRows" to if (isOccupied) tenancyDetails else emptyList<SummaryListRowViewModel>(),
                     "occupancyDetails" to occupancyDetails,
                     "tenancyUnoccupiedBodyTextKey" to
                         if (!isOccupied) {
@@ -167,15 +183,19 @@ class PropertyRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+    private fun hasJointLandlords(state: PropertyRegistrationJourneyState): Boolean =
+        state.ownershipAndLandlordsTask.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+            HasJointLandlordsFormModel::hasJointLandlords,
+        )
+
+    private fun getJointLandLordsSummaryRow(
+        state: PropertyRegistrationJourneyState,
+        invitationsHeadingKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+    ): SummaryListRowViewModel {
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
-        val hasJointLandlords =
-            jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
-                HasJointLandlordsFormModel::hasJointLandlords,
-            )
-        return if (hasJointLandlords) {
+        return if (hasJointLandlords(state)) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                invitationsHeadingKey,
                 jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlords,
                 Destination.VisitableStep(
                     jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep,
@@ -230,15 +250,14 @@ class PropertyRegistrationCyaStepConfig(
         )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state) +
+        getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
             getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state)
+            getOwnershipTypeRow(state, "forms.checkPropertyAnswers.propertyDetails.ownership")
 
     private fun getRestructuredPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state) +
+        getAddressRows(state, "propertyDetails.propertyRecord.propertyDetails.address") +
             getPropertyTypeRow(state) +
-            getBedroomsRow(state) +
-            getOwnershipTypeRow(state)
+            getBedroomsRow(state)
 
     private fun getBedroomsRow(state: PropertyRegistrationJourneyState) =
         SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -247,27 +266,29 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.bedrooms, state.getCyaJourneyId(state.bedrooms)),
         )
 
-    private fun getAddressRows(state: PropertyRegistrationJourneyState) =
-        state.propertyDetailsTask.addressTask.getAddress().let { address ->
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.address",
-                    address.singleLineAddress,
-                    Destination.VisitableStep(
-                        state.propertyDetailsTask.addressTask.lookupAddressStep,
-                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),
-                    ),
+    private fun getAddressRows(
+        state: PropertyRegistrationJourneyState,
+        addressHeadingKey: String,
+    ) = state.propertyDetailsTask.addressTask.getAddress().let { address ->
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                addressHeadingKey,
+                address.singleLineAddress,
+                Destination.VisitableStep(
+                    state.propertyDetailsTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),
                 ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                    localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(
-                        state.propertyDetailsTask.addressTask.localCouncilStep,
-                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.localCouncilStep),
-                    ),
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
+                Destination.VisitableStep(
+                    state.propertyDetailsTask.addressTask.localCouncilStep,
+                    state.getCyaJourneyId(state.propertyDetailsTask.addressTask.localCouncilStep),
                 ),
-            )
-        }
+            ),
+        )
+    }
 
     private fun getPropertyTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val propertyTypeStep = state.propertyDetailsTask.propertyTypeStep
@@ -280,10 +301,13 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+    private fun getOwnershipTypeRow(
+        state: PropertyRegistrationJourneyState,
+        ownershipHeadingKey: String,
+    ): SummaryListRowViewModel {
         val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
         return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.propertyDetails.ownership",
+            ownershipHeadingKey,
             ownershipTypeStep.formModel.ownershipType,
             Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
         )
@@ -332,19 +356,32 @@ class PropertyRegistrationCyaStepConfig(
     private fun getLicensingDetailsForState(
         state: PropertyRegistrationJourneyState,
         isOccupied: Boolean,
+        isSkippingEnabled: Boolean,
     ): List<SummaryListRowViewModel> {
         val licensingTask = state.licensingTask
-        if (isOccupied || licensingTask.getLicensingType() != LicensingType.PROVIDE_LATER) {
-            return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
+        val licensingType = licensingTask.getLicensingType()
+
+        if (isSkippingEnabled && licensingType == LicensingType.NO_LICENSING) {
+            return listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
+                ),
+            )
         }
 
-        return listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
-                Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
-            ),
-        )
+        if (!isOccupied && licensingType == LicensingType.PROVIDE_LATER) {
+            return listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
+                ),
+            )
+        }
+
+        return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
 
     private fun getProvideLaterMessageKey(isOccupied: Boolean): String =

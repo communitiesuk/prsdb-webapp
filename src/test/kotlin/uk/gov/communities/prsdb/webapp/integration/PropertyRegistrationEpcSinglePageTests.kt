@@ -334,7 +334,7 @@ class PropertyRegistrationEpcSinglePageTests : IntegrationTestWithImmutableData(
 
             BaseComponent.assertThat(cyaPage.epcCard).isHidden()
             assertThat(cyaPage.rows.hasEpcRow.value)
-                .containsText("Provide EPC details later (within 28 days of the property being occupied)")
+                .containsText("Provide this later (within 28 days of the property being occupied)")
             assertThat(cyaPage.lowRatingText).isHidden()
             assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
         }
