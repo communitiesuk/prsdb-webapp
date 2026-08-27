@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentEmailService
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
@@ -21,6 +22,7 @@ class CompleteOccupancyUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractInternalStepConfig<Complete, UpdateOccupancyJourneyState>() {
     override fun mode(state: UpdateOccupancyJourneyState): Complete = Complete.COMPLETE
@@ -28,7 +30,6 @@ class CompleteOccupancyUpdateStepConfig(
     override fun afterStepIsReached(state: UpdateOccupancyJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         try {
-            // TODO: PDJB-1633: Delete the LettingAgentAccess row when becoming unoccupied
             propertyOwnershipService.updateIsOccupied(
                 id = state.propertyId,
                 isOccupied = isOccupied,
@@ -48,14 +49,24 @@ class CompleteOccupancyUpdateStepConfig(
         val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyId)
 
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) && !isOccupied && lettingAgentAccess != null) {
-            propertyUpdateEmailService.sendUpdateWithLettingAgentRemovedEmails(
-                state.propertyId,
-                "The property was made unoccupied",
-                lettingAgentAccess.invitedEmail,
-            )
+            removeLettingAgentDelegationAndSendEmails(state.propertyId, lettingAgentAccess.invitedEmail)
         } else {
             propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("Whether the property is occupied by tenants"))
         }
+    }
+
+    private fun removeLettingAgentDelegationAndSendEmails(
+        propertyId: Long,
+        lettingAgentEmail: String,
+    ) {
+        lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(propertyId)
+        propertyUpdateEmailService.sendUpdateWithLettingAgentRemovedEmails(
+            propertyId,
+            "The property was made unoccupied",
+            lettingAgentEmail,
+        )
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
+        delegateToLettingAgentEmailService.sendLettingAgentCancellationEmail(propertyOwnership, lettingAgentEmail)
     }
 
     override fun resolveNextDestination(
