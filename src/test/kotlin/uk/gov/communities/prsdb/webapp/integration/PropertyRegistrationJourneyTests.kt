@@ -513,6 +513,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertTrue(propertyOwnershipCaptor.value.isOccupied)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
+            assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -1984,7 +1986,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOccupancy()
+                        .withOccupancyStatus(true)
+                        .withBedrooms()
+                        .withHasNoJointLandlords(),
                 )
 
             taskListPage.clickRentedOutTaskWithName("Who will provide these details")
@@ -1995,7 +2001,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
             lettingAgentEmailPage.submitEmail("agent@example.com")
 
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            val confirmMissingCompliancePage =
+                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+            confirmMissingCompliancePage.form.radios.selectValue("true")
+            confirmMissingCompliancePage.form.submit()
+
+            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+            assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
         }
 
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed

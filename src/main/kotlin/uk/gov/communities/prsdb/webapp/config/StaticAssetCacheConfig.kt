@@ -8,11 +8,16 @@ import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import java.time.Duration
 
 @PrsdbWebConfiguration
-class FontCacheConfig : WebMvcConfigurer {
+class StaticAssetCacheConfig : WebMvcConfigurer {
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry
             .addResourceHandler("/$ASSETS_PATH_SEGMENT/fonts/**")
             .addResourceLocations("classpath:/static/$ASSETS_PATH_SEGMENT/fonts/")
             .setCacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable())
+
+        registry
+            .addResourceHandler("/$ASSETS_PATH_SEGMENT/**")
+            .addResourceLocations("classpath:/static/$ASSETS_PATH_SEGMENT/")
+            .setCacheControl(CacheControl.maxAge(Duration.ofSeconds(60)).cachePublic())
     }
 }

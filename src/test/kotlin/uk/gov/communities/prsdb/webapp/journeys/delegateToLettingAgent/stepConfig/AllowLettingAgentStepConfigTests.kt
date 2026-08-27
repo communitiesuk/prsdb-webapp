@@ -73,6 +73,7 @@ class AllowLettingAgentStepConfigTests {
     @Test
     fun `afterStepDataIsAdded persists the submitted email as a letting agent invitation`() {
         val stepConfig = createStepConfig()
+        val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
 
         whenever(mockJourneyState.getStepData(AllowLettingAgentStep.ROUTE_SEGMENT))
@@ -80,6 +81,7 @@ class AllowLettingAgentStepConfigTests {
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID))
             .thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
@@ -88,16 +90,23 @@ class AllowLettingAgentStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends delegation emails`() {
+    fun `afterStepDataIsAdded sends delegation emails to landlords and letting agent`() {
         val stepConfig = createStepConfig()
+        val landlord = MockLandlordData.createIndividualLandlord(name = "Wallis Smith")
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = PROPERTY_OWNERSHIP_ID)
 
         whenever(mockJourneyState.getStepData(AllowLettingAgentStep.ROUTE_SEGMENT))
             .thenReturn(mapOf("emailAddress" to "agent@example.com"))
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID)).thenReturn(propertyOwnership)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
-        verify(mockDelegateToLettingAgentEmailService).sendDelegationEmails(PROPERTY_OWNERSHIP_ID, "agent@example.com")
+        verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLandlords(PROPERTY_OWNERSHIP_ID, "agent@example.com")
+        verify(
+            mockDelegateToLettingAgentEmailService,
+        ).sendDelegationEmailToLettingAgent(propertyOwnership, "Wallis Smith", "agent@example.com")
     }
 
     @Test

@@ -69,6 +69,9 @@ class PropertyRegistrationServiceTests {
     @Mock
     private lateinit var mockLettingAgentAccessService: LettingAgentAccessService
 
+    @Mock
+    private lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
+
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
 
@@ -856,6 +859,12 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         verify(mockLettingAgentAccessService).createInvitation(expectedPropertyOwnership, lettingAgentEmail)
+        verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLettingAgent(
+            eq(expectedPropertyOwnership),
+            any(),
+            eq(lettingAgentEmail),
+            any(),
+        )
     }
 
     @Test

@@ -12,6 +12,10 @@ class ConfirmationPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
     val registrationNumberText: String = page.locator(".govuk-inset-text").textContent().trim()
     val whatYouNeedToDoNextHeading = page.locator("h2:has-text('What you need to do next')")
+    val whatHappensNextHeading = page.locator("h2:has-text('What happens next')")
+    val lettingAgentSubHeading =
+        page.locator("h3:has-text('Your letting agent or property manager needs to provide the remaining required details')")
+
     val surveyLink = Button.byText(page, "Go to survey")
     val goToDashboardLink = Link.byText(page, "Go to dashboard")
 }
