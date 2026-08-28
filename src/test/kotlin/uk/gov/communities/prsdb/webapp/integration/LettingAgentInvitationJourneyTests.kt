@@ -42,6 +42,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         // TODO PDJB-1570: Assert redirect to letting agent property record page
     }
 
+    @Test
     fun `user who has a password can walk the enter password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
