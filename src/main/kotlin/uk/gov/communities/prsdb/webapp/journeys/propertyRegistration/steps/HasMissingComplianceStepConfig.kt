@@ -14,18 +14,14 @@ class HasMissingComplianceStepConfig(
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): ConfirmMissingComplianceCheckResult {
-        if (state.isDelegatedToLettingAgent(featureFlagManager)) {
-            return ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES
-        }
-
         val anyInvalid =
             isGasCertInvalid(state.gasSafetyTask) ||
                 isElectricalCertInvalid(state.electricalSafetyTask) ||
                 isEpcInvalid(state.epcTask)
-        return if (state.isOccupied && anyInvalid) {
+        return if (state.isOccupied && anyInvalid && !state.isDelegatedToLettingAgent(featureFlagManager)) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
-            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES
+            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED
         }
     }
 
@@ -72,6 +68,6 @@ class HasMissingComplianceStep(
 ) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, PropertyRegistrationJourneyState>(stepConfig)
 
 enum class ConfirmMissingComplianceCheckResult {
-    UNOCCUPIED_OR_VALID_CERTIFICATES,
+    UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
     OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
 }

@@ -44,7 +44,7 @@ class HasMissingComplianceStepConfigTests {
     @Nested
     inner class Mode {
         @Test
-        fun `returns UNOCCUPIED_OR_ALL_CERTIFICATES when not occupied`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when not occupied`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(false)
             setupGasCertMissing()
@@ -53,11 +53,11 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and gas cert missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and gas cert missing`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertMissing()
@@ -70,7 +70,7 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and electrical cert missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and electrical cert missing`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
@@ -84,7 +84,7 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and epc missing`() {
+        fun `returns OCCUPIED_AND_HAS_INVALID_CERTIFICATES when occupied and epc missing`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
@@ -99,7 +99,7 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns UNOCCUPIED_OR_ALL_CERTIFICATES when occupied and all certs present`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied and all certs present`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
@@ -110,11 +110,11 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
         }
 
         @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES when occupied but all certs are provide later`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied but all certs are provide later`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertProvideLater()
@@ -125,19 +125,21 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
         }
 
         @Test
-        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES when occupied and delegated to a letting agent`() {
+        fun `returns UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED when occupied and delegated to a letting agent`() {
             // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
+            setupGasCertMissing()
 
             // Act
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED, result)
         }
 
         @Test
