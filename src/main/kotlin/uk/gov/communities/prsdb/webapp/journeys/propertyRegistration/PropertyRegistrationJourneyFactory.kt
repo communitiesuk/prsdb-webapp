@@ -125,8 +125,6 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
-                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 // TODO PDJB-1403: add who-provides-details CYA change journey + self -> agent interruption
                 //  for the delegate-to-letting-agent flow.
