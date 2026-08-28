@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import java.util.UUID
 
 @Entity
@@ -32,13 +31,6 @@ class LettingAgentAccess(
     @Column(name = "encoded_password")
     var encodedPassword: String? = null
         private set
-
-    fun recordEncodedPassword(encoded: String) {
-        if (encodedPassword != null) {
-            throw PrsdbWebException("Password has already been set for letting agent access $id")
-        }
-        encodedPassword = encoded
-    }
 
     constructor(
         token: UUID,

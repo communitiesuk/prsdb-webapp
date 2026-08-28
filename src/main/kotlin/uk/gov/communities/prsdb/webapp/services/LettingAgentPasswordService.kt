@@ -14,25 +14,28 @@ class LettingAgentPasswordService(
 ) {
     @Transactional
     fun setPassword(
-        lettingAgentAccess: LettingAgentAccess,
+        lettingAgentAccessId: Long,
         rawPassword: String,
     ) {
         if (rawPassword.isBlank()) {
             throw PrsdbWebException("Password must not be blank")
         }
+
+        val lettingAgentAccess =
+            lettingAgentAccessRepository.findById(lettingAgentAccessId).orElseThrow {
+                PrsdbWebException("Letting agent access $lettingAgentAccessId not found")
+            }
+
         if (lettingAgentAccess.encodedPassword != null) {
-            throw PrsdbWebException("Password has already been set for letting agent access ${lettingAgentAccess.id}")
+            throw PrsdbWebException("Password has already been set for letting agent access $lettingAgentAccessId")
         }
 
         val encoded = passwordEncoder.encode(rawPassword)
 
-        val updatedRows = lettingAgentAccessRepository.setEncodedPasswordIfAbsent(lettingAgentAccess.id, encoded)
+        val updatedRows = lettingAgentAccessRepository.setEncodedPasswordIfAbsent(lettingAgentAccessId, encoded)
         if (updatedRows == 0) {
-            throw PrsdbWebException("Password has already been set for letting agent access ${lettingAgentAccess.id}")
+            throw PrsdbWebException("Password has already been set for letting agent access $lettingAgentAccessId")
         }
-
-        lettingAgentAccess.recordEncodedPassword(encoded)
-        lettingAgentAccessRepository.save(lettingAgentAccess)
     }
 
     fun isPasswordCorrect(
