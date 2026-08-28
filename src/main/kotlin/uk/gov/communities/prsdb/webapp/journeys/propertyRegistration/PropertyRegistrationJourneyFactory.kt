@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.occupancyChangeCyaJourney
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.whoProvidesChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -50,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
@@ -71,9 +71,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Start
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRouteMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -133,48 +131,7 @@ class PropertyRegistrationJourneyFactory(
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask, journey) {
-                            step(task.whoProvidesRentalDetailsStep) {
-                                initialStep()
-                                routeSegment(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT)
-                                nextStep { journey.whoProvidesUpdateRoutingStep }
-                            }
-                        }
-                        step<WhoProvidesUpdateRouteMode, WhoProvidesUpdateRoutingStepConfig>(journey.whoProvidesUpdateRoutingStep) {
-                            stepSpecificInitialisation {
-                                usingPreviouslyDelegated { getPreviouslyDelegatedFromBaseJourney(journey) }
-                            }
-                            parents { journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.isComplete() }
-                            nextDestination { mode ->
-                                when (mode) {
-                                    WhoProvidesUpdateRouteMode.UNCHANGED -> {
-                                        Destination(journey.finishCyaStep)
-                                    }
-
-                                    WhoProvidesUpdateRouteMode.CHANGED_TO_LANDLORD -> {
-                                        Destination(journey.finishCyaStep)
-                                    }
-
-                                    WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT -> {
-                                        Destination(journey.confirmChangeToLettingAgentStep)
-                                    }
-                                }
-                            }
-                        }
-                        step(journey.confirmChangeToLettingAgentStep) {
-                            routeSegment(ConfirmChangeToLettingAgentStep.ROUTE_SEGMENT)
-                            parents {
-                                journey.whoProvidesUpdateRoutingStep.hasOutcome(WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT)
-                            }
-                            nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
-                        }
-                        fromTask(journey.whoProvidesDetailsTask) {
-                            step(task.lettingAgentEmailStep) {
-                                routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
-                                parents { journey.confirmChangeToLettingAgentStep.isComplete() }
-                                nextStep { journey.finishCyaStep }
-                            }
-                        }
+                        whoProvidesChangeCyaJourney()
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                     }

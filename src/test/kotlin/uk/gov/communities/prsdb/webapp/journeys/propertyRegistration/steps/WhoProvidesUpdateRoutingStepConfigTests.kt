@@ -49,7 +49,7 @@ class WhoProvidesUpdateRoutingStepConfigTests {
             var previouslyDelegatedWasRead = false
             val config =
                 WhoProvidesUpdateRoutingStepConfig().apply {
-                    usingPreviouslyDelegated {
+                    usingPreviousDelegation {
                         previouslyDelegatedWasRead = true
                         true
                     }
@@ -88,7 +88,7 @@ class WhoProvidesUpdateRoutingStepConfigTests {
 
     private fun configuredConfig(previouslyDelegated: Boolean) =
         WhoProvidesUpdateRoutingStepConfig().apply {
-            usingPreviouslyDelegated { previouslyDelegated }
+            usingPreviousDelegation { previouslyDelegated }
         }
 
     private fun stateWith(newMode: WhoProvidesRentalDetailsMode?): PropertyRegistrationJourneyState {
@@ -107,6 +107,6 @@ class WhoProvidesUpdateRoutingStepConfigTests {
                 on { getBaseJourneyState() } doReturn baseState
             }
 
-        return WhoProvidesUpdateRoutingStepConfig().getPreviouslyDelegatedFromBaseJourney(childState)
+        return WhoProvidesUpdateRoutingStepConfig().getWasDelegatedToLettingAgentFromBaseJourney(childState)
     }
 }

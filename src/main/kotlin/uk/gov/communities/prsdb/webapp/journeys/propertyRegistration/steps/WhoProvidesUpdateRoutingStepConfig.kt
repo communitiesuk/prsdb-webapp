@@ -15,29 +15,26 @@ enum class WhoProvidesUpdateRouteMode {
 @JourneyFrameworkComponent
 class WhoProvidesUpdateRoutingStepConfig :
     AbstractInternalStepConfig<WhoProvidesUpdateRouteMode, PropertyRegistrationJourneyState>() {
-    private lateinit var previouslyDelegated: () -> Boolean
+    private lateinit var previousIsDelegatedToLettingAgent: () -> Boolean
 
-    fun usingPreviouslyDelegated(previouslyDelegated: () -> Boolean): WhoProvidesUpdateRoutingStepConfig {
-        this.previouslyDelegated = previouslyDelegated
+    fun usingPreviousDelegation(previouslyDelegated: () -> Boolean): WhoProvidesUpdateRoutingStepConfig {
+        this.previousIsDelegatedToLettingAgent = previouslyDelegated
         return this
     }
 
-    // In a CYA change journey the newly-submitted answer lives in the child journey, while the previous answer
-    // remains in the base journey until the change is committed. We therefore read the previous answer from the
-    // base journey's cached value to decide whether the answer has actually changed.
-    fun getPreviouslyDelegatedFromBaseJourney(state: PropertyRegistrationJourneyState): Boolean {
+    fun getWasDelegatedToLettingAgentFromBaseJourney(state: PropertyRegistrationJourneyState): Boolean {
         val baseState = state.getBaseJourneyState() as PropertyRegistrationJourneyState
         return baseState.cachedWhoProvidesRentalDetails == WhoProvidesRentalDetails.LETTING_AGENT
     }
 
-    override fun isSubClassInitialised() = ::previouslyDelegated.isInitialized
+    override fun isSubClassInitialised() = ::previousIsDelegatedToLettingAgent.isInitialized
 
     override fun mode(state: PropertyRegistrationJourneyState): WhoProvidesUpdateRouteMode? {
         val newIsDelegated =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome
                 ?.let { it == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES } ?: return null
         return when {
-            previouslyDelegated() == newIsDelegated -> WhoProvidesUpdateRouteMode.UNCHANGED
+            previousIsDelegatedToLettingAgent() == newIsDelegated -> WhoProvidesUpdateRouteMode.UNCHANGED
             newIsDelegated -> WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT
             else -> WhoProvidesUpdateRouteMode.CHANGED_TO_LANDLORD
         }
