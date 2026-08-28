@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,12 +15,16 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
@@ -188,5 +193,89 @@ class LettingAgentAccessServiceTests {
         whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
 
         assertNull(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
+    }
+
+    @Test
+    fun `getInvitationByTokenOrNull returns the invitation when it exists`() {
+        val token = UUID.randomUUID()
+        val invitation = MockLettingAgentData.createLettingAgentAccess(token = token)
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(invitation)
+
+        assertEquals(invitation, lettingAgentAccessService.getInvitationByTokenOrNull(token))
+    }
+
+    @Test
+    fun `getInvitationByTokenOrNull returns null when no invitation exists`() {
+        val token = UUID.randomUUID()
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
+
+        assertNull(lettingAgentAccessService.getInvitationByTokenOrNull(token))
+    }
+
+    @Nested
+    inner class AddJourneyIdInvitationTokenPairToSession {
+        @Test
+        fun `addJourneyIdInvitationTokenPairToSession adds pair to empty session`() {
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(null)
+
+            lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession("journey1", "token1")
+
+            val captor = argumentCaptor<MutableList<Pair<String, String>>>()
+            verify(session).setAttribute(
+                eq(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS),
+                captor.capture(),
+            )
+            assertEquals(listOf(Pair("journey1", "token1")), captor.firstValue)
+        }
+
+        @Test
+        fun `addJourneyIdInvitationTokenPairToSession appends pair to existing pairs`() {
+            val existingPairs = mutableListOf(Pair("journey1", "token1"))
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(existingPairs)
+
+            lettingAgentAccessService.addJourneyIdInvitationTokenPairToSession("journey2", "token2")
+
+            val captor = argumentCaptor<MutableList<Pair<String, String>>>()
+            verify(session).setAttribute(
+                eq(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS),
+                captor.capture(),
+            )
+            assertEquals(listOf(Pair("journey1", "token1"), Pair("journey2", "token2")), captor.firstValue)
+        }
+    }
+
+    @Nested
+    inner class GetInvitationTokenForJourneyIdFromSession {
+        @Test
+        fun `getInvitationTokenForJourneyIdFromSession returns token when journey id exists`() {
+            val pairs = mutableListOf(Pair("journey1", "token1"), Pair("journey2", "token2"))
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(pairs)
+
+            assertEquals("token2", lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("journey2"))
+        }
+
+        @Test
+        fun `getInvitationTokenForJourneyIdFromSession throws when journey id does not exist`() {
+            val pairs = mutableListOf(Pair("journey1", "token1"))
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(pairs)
+
+            assertThrows<PrsdbWebException> {
+                lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("nonexistent")
+            }
+        }
+
+        @Test
+        fun `getInvitationTokenForJourneyIdFromSession throws when session attribute is null`() {
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(null)
+
+            assertThrows<PrsdbWebException> {
+                lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("journey1")
+            }
+        }
     }
 }
