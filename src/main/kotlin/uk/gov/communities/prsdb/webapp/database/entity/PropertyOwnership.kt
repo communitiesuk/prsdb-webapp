@@ -10,12 +10,14 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -168,6 +170,20 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
                 else -> LicensingType.NO_LICENSING
             }
         }
+
+    val registrationDate: LocalDate
+        get() = createdDate.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
+
+    val hasBeenOccupiedSinceRegistration: Boolean
+        get() = isOccupied && lastOccupiedDate?.isEqual(registrationDate) == true
+
+    val provideLaterDeadline: LocalDate?
+        get() =
+            if (hasBeenOccupiedSinceRegistration) {
+                registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+            } else {
+                null
+            }
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null

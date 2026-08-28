@@ -60,7 +60,7 @@ confirmation:
       electricalSafetyCertificate: electrical safety certificate
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
-      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they've provided this information.
+      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they’ve provided this information.
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
@@ -189,6 +189,16 @@ whoProvidesRentalDetails:
         label: Me
       lettingAgent:
         label: Letting agent
+  changeToLettingAgent:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve selected for your letting agent or property manager to provide details about how your property’s rented out.
+      two: 'This means we’ll remove the details you’ve already provided about:'
+      three: You can go back to undo this change.
+    bullet:
+      one: property licensing
+      two: compliance certificates
+      three: the current tenancy
 lettingAgentEmail:
   heading: Allow your letting agent or property manager to provide details
   howItWorks:

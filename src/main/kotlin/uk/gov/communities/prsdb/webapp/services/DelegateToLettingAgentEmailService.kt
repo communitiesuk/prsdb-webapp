@@ -68,7 +68,7 @@ class DelegateToLettingAgentEmailService(
                 DelegateToLettingAgentInvitationWithDeadlineEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
+                    // TODO: PDJB-1661: Update this link to the letA journey
                     invitationLink = "https://example.com",
                     deadlineDate = deadlineDate,
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
@@ -80,7 +80,7 @@ class DelegateToLettingAgentEmailService(
                 DelegateToLettingAgentInvitationEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    // TODO: PDJB-1565: Update this link when the skeleton journey exists to link to
+                    // TODO: PDJB-1661: Update this link to the letA journey
                     invitationLink = "https://example.com",
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
@@ -120,10 +120,17 @@ class DelegateToLettingAgentEmailService(
             )
         }
 
+        sendLettingAgentCancellationEmail(propertyOwnership, lettingAgentEmail)
+    }
+
+    fun sendLettingAgentCancellationEmail(
+        propertyOwnership: PropertyOwnership,
+        lettingAgentEmail: String,
+    ) {
         cancelLettingAgentNotificationEmailService.sendEmail(
             lettingAgentEmail,
             CancelDelegationLettingAgentNotificationEmail(
-                propertyAddress = propertyAddress,
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
             ),
         )
