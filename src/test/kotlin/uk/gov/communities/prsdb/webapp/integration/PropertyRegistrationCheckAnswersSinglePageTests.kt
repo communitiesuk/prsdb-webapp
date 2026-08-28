@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Letti
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -176,6 +177,41 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
             checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
             assertTrue(page.url().contains("/letting-agent-email"))
+        }
+
+        @Test
+        fun `delegated occupied property CYA displays only required sections`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withLettingAgentProvidesRentalDetails()
+                        .withSubmittedValue(
+                            LettingAgentEmailStep.ROUTE_SEGMENT,
+                            AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
+                        )
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            val headings =
+                page
+                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
+                    .allInnerTexts()
+                    .map { it.trim() }
+
+            assertEquals(
+                listOf(
+                    "About your property",
+                    "Property details",
+                    "Ownership and landlords",
+                    "Tell us if your property’s occupied",
+                    "How your property’s rented out",
+                    "Who will provide these details",
+                ),
+                headings,
+            )
         }
 
         @Test
