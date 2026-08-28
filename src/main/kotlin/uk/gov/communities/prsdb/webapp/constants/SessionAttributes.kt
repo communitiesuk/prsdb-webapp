@@ -51,3 +51,5 @@ const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
 const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
 
 const val FEATURE_FLAG_OVERRIDES = "featureFlagOverrides"
+
+const val LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS = "lettingAgentInvitationTokenWithJourneyIds"
