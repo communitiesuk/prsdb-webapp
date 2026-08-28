@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.EpcRegistrationCyaSummaryRowsFactory
@@ -12,11 +14,13 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class CheckEpcAnswersStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
-        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state.epcDetailsTask)
+        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state.epcDetailsTask, isSkippingEnabled)
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),
             "epcCardActions" to factory.createEpcCardActions(),

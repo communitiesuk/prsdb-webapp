@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.occupancyChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -47,9 +49,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -64,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -77,6 +83,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OwnershipAndLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.TenancyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
@@ -119,8 +126,6 @@ class PropertyRegistrationJourneyFactory(
             when (checkingAnswersFor) {
                 // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
-                // TODO PDJB-1401: add occupancy-change CYA change journey + occupancy-change interruption
-                //  (occupied -> unoccupied) for the delegate-to-letting-agent flow.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 // TODO PDJB-1403: add who-provides-details CYA change journey + self -> agent interruption
                 //  for the delegate-to-letting-agent flow.
@@ -159,15 +164,19 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
-                    } else {
-                        checkAnswerTask(journey.occupationTask.inJourney(journey))
+                    val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+                    val isDelegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+                    when {
+                        isSkippingEnabled && isDelegateEnabled -> occupancyChangeCyaJourney()
+                        isSkippingEnabled -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                        else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
                 }
 
-                ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.tenancyDetailsTask)
+                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT,
+                LettingAgentEmailStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.whoProvidesDetailsTask, { journey })
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
@@ -469,6 +478,7 @@ class PropertyRegistrationJourneyFactory(
                 section {
                     withHeadingMessageKey("registerProperty.taskList.rentedOut.whoProvidesDetails", shouldUseNumbering = false)
                     task(journey.whoProvidesDetailsTask) {
+                        withDependencies { journey }
                         parents { journey.occupied.hasOutcome(YesOrNo.YES) }
                         nextStep {
                             if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
@@ -665,6 +675,9 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Occupancy-change interruption steps (occupied -> unoccupied while delegated to a letting agent)
+    override val occupancyChangeRoutingStep: OccupancyChangeRoutingStep,
+    override val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep,
     // Confirm missing compliance steps
     override val hasMissingComplianceStep: HasMissingComplianceStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
@@ -676,6 +689,12 @@ class PropertyRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
+
+    // Hoists the who-provides answer onto the base journey state so the occupancy-change routing can read it
+    // from the base journey. The who-provides step isn't declared in that CYA journey, so its urlPath is unset
+    // and a form-model read would throw (see TODO PDJB-585). Populated in WhoProvidesRentalDetailsStepConfig.afterStepDataIsAdded.
+    override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? by
+        delegateProvider.nullableDelegate("cachedWhoProvidesRentalDetails")
     override val householdsAndTenantsDependencies = HouseHoldsAndTenantsDependencies(true)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -742,6 +761,7 @@ interface PropertyRegistrationJourneyState :
     ElectricalSafetyDependencies,
     EpcDependencies,
     LicensingDependencies,
+    WhoProvidesDetailsDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
@@ -764,6 +784,8 @@ interface PropertyRegistrationJourneyState :
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
+    val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
+    val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 

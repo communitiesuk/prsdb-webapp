@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.AuthenticatedHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BetaBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FeatureFlagOverrideBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
@@ -15,6 +16,7 @@ class LandlordDashboardPage(
 ) : BasePage(page, LANDLORD_DASHBOARD_URL) {
     val authenticatedHeader = AuthenticatedHeader(page)
     val betaBanner = BetaBanner(page)
+    val featureFlagOverrideBanner = FeatureFlagOverrideBanner(page)
     val dashboardBannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val dashboardBannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
     val registerPropertyButton = Button.byText(page, "Register a property")

@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
+import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -11,9 +14,10 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -24,6 +28,9 @@ import java.util.UUID
 class LettingAgentAccessServiceTests {
     @Mock
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Mock
+    private lateinit var session: HttpSession
 
     @InjectMocks
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
@@ -82,30 +89,104 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `deleteInvitation deletes the given invitation`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
+    fun `deleteDelegationByPropertyOwnershipId deletes the delegation`() {
+        lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(1L)
 
-        lettingAgentAccessService.deleteInvitation(invitation)
-
-        verify(lettingAgentAccessRepository).delete(invitation)
+        verify(lettingAgentAccessRepository).deleteByPropertyOwnershipId(1L)
     }
 
     @Test
-    fun `deleteInvitationByPropertyOwnershipId deletes the invitation when one exists`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(invitation)
+    fun `addDelegatedPropertyOwnershipToSession adds the id and email to the existing map in the session`() {
+        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION))
+            .thenReturn(mutableMapOf(2L to "other.agent@example.com"))
 
-        lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
+        lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(1L, "letting.agent@example.com")
 
-        verify(lettingAgentAccessRepository).delete(invitation)
+        verify(session).setAttribute(
+            PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION,
+            mapOf(2L to "other.agent@example.com", 1L to "letting.agent@example.com"),
+        )
     }
 
     @Test
-    fun `deleteInvitationByPropertyOwnershipId does nothing when no invitation exists`() {
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
+    fun `addDelegatedPropertyOwnershipToSession starts a new map when none exists in the session`() {
+        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(null)
 
-        lettingAgentAccessService.deleteInvitationByPropertyOwnershipId(1L)
+        lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(1L, "letting.agent@example.com")
 
-        verify(lettingAgentAccessRepository, never()).delete(any<LettingAgentAccess>())
+        verify(session).setAttribute(
+            PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION,
+            mapOf(1L to "letting.agent@example.com"),
+        )
+    }
+
+    @Test
+    fun `addRemovedLettingAgentToSession stores the email keyed by property ownership id`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
+
+        lettingAgentAccessService.addRemovedLettingAgentToSession(1L, "letting.agent@example.com")
+
+        verify(session).setAttribute(
+            LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
+            mapOf(1L to "letting.agent@example.com"),
+        )
+    }
+
+    @Test
+    fun `getDelegatedPropertyOwnershipEmailsFromSession returns the map from the session`() {
+        val delegatedEmails = mutableMapOf(1L to "letting.agent@example.com", 2L to "other.agent@example.com")
+        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(delegatedEmails)
+
+        assertEquals(delegatedEmails, lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession())
+    }
+
+    @Test
+    fun `getDelegatedPropertyOwnershipEmailsFromSession returns an empty map when none exists in the session`() {
+        whenever(session.getAttribute(PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION)).thenReturn(null)
+
+        assertEquals(mutableMapOf<Long, String>(), lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession())
+    }
+
+    @Test
+    fun `addRemovedLettingAgentToSession preserves previously removed letting agents`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
+            .thenReturn(mapOf(1L to "first.agent@example.com"))
+
+        lettingAgentAccessService.addRemovedLettingAgentToSession(2L, "second.agent@example.com")
+
+        verify(session).setAttribute(
+            LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS,
+            mapOf(1L to "first.agent@example.com", 2L to "second.agent@example.com"),
+        )
+    }
+
+    @Test
+    fun `wasLettingAgentRemovedInThisSession returns true when the property is in the session`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
+            .thenReturn(mapOf(1L to "letting.agent@example.com"))
+
+        assertTrue(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(1L))
+    }
+
+    @Test
+    fun `wasLettingAgentRemovedInThisSession returns false when the property is not in the session`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
+
+        assertFalse(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(1L))
+    }
+
+    @Test
+    fun `getRemovedLettingAgentEmailFromSession returns the stored email`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS))
+            .thenReturn(mapOf(1L to "letting.agent@example.com"))
+
+        assertEquals("letting.agent@example.com", lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
+    }
+
+    @Test
+    fun `getRemovedLettingAgentEmailFromSession returns null when the property is not in the session`() {
+        whenever(session.getAttribute(LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS)).thenReturn(null)
+
+        assertNull(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(1L))
     }
 }

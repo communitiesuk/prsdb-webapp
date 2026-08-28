@@ -1,9 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.TaskWithoutDependencies
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
@@ -16,9 +17,15 @@ class WhoProvidesDetailsTask(
     journeyStateService: JourneyStateService,
     override val whoProvidesRentalDetailsStep: WhoProvidesRentalDetailsStep,
     override val lettingAgentEmailStep: LettingAgentEmailStep,
-) : TaskWithoutDependencies<WhoProvidesDetailsState>(journeyStateService),
+) : Task<WhoProvidesDetailsState, WhoProvidesDetailsDependencies>(journeyStateService),
     WhoProvidesDetailsState {
     override val taskState get() = this
+
+    override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails?
+        get() = dependencies.cachedWhoProvidesRentalDetails
+        set(value) {
+            dependencies.cachedWhoProvidesRentalDetails = value
+        }
 
     override fun makeSubJourney(state: WhoProvidesDetailsState) =
         subJourney(state) {
@@ -47,4 +54,8 @@ class WhoProvidesDetailsTask(
                 }
             }
         }
+}
+
+interface WhoProvidesDetailsDependencies {
+    var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails?
 }

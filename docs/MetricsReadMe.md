@@ -62,7 +62,7 @@ for details.
 
 ### Known coverage gaps
 
-Three journeys are intentionally not counted. In each case there is no place to fire the event
+Four journeys are intentionally not counted. In each case there is no place to fire the event
 exactly once per completion, and the project's standing preference is to **under-count rather than
 over-count**.
 
@@ -86,6 +86,15 @@ following `cancelInvitationStep` is internal with no button.
 
 **Decision:** cancelled invitations are intentionally **not counted**, for the same reason as above —
 there is no place to fire the event that does not also fire it when the user answers "no".
+
+#### Removing a letting agent or property manager
+
+The `cancelLettingAgentDelegation` journey's only button is on its `are-you-sure` page, and the
+following `removeDelegationStep` is internal with no button.
+
+**Decision:** removals are intentionally **not counted**, for the same reason as above. Note that the
+corresponding *delegation* journey (`allowLettingAgentForm`) **is** counted, so delegations will
+appear in the metrics while removals will not.
 
 #### Landlord address updates
 

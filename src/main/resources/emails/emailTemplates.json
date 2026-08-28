@@ -28,8 +28,8 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "2da7c844-8061-4f51-b3c5-7a076a55f9a1",
-    "prod_id": "3c417d81-c38a-46ce-ab9c-263682ec40ca",
+    "test_id": "c8853acc-ae51-4037-884f-7c9d02dc3766",
+    "prod_id": "46eaaf61-72fa-4fdb-a537-9e82e675b8df",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
     "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
@@ -262,14 +262,14 @@
   },
   {
     "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
-    "prod_id": "",
+    "prod_id": "1c21afd0-943e-4613-a441-203869e0559a",
     "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
   },
   {
     "test_id": "df2afd98-4575-45a7-8722-26f763aa8fb1",
-    "prod_id": "",
+    "prod_id": "d337073d-5452-4abb-8ae0-6a51590090ae",
     "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
     "subject": "You’re no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
@@ -287,5 +287,68 @@
     "enumName": "ORGANISATIONAL_LANDLORD_DEREGISTRATION_CONFIRMATION_EMAIL",
     "subject": "Your organisation has been removed from Register your rental property",
     "bodyLocation": "/emails/OrganisationalLandlordDeregistrationConfirmation.md"
+  },
+  {
+    "test_id": "370f632f-b5ac-4b0d-ae2d-c2b21b57728a",
+    "prod_id": "3e210af5-5e77-4dad-9895-fedac9853869",
+    "enumName": "LETTING_AGENT_CANCEL_DELEGATION_LANDLORD_CONFIRMATION_EMAIL",
+    "subject": "You updated a property record",
+    "bodyLocation": "/emails/CancelDelegationLandlordConfirmation.md"
+  },
+  {
+    "test_id": "7231d6d5-6c11-4168-b0eb-73da82422fdb",
+    "prod_id": "b1468499-c6c7-4d6c-9b00-fd99e335adab",
+    "enumName": "LETTING_AGENT_CANCEL_DELEGATION_JOINT_LANDLORD_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/CancelDelegationJointLandlordNotification.md"
+  },
+  {
+    "test_id": "9aaed08b-f62d-4104-a88a-3458ec06c939",
+    "prod_id": "3920bfb3-d46f-4b67-a45b-fceba5f34b48",
+    "enumName": "LETTING_AGENT_CANCEL_DELEGATION_LETTING_AGENT_NOTIFICATION_EMAIL",
+    "subject": "You can no longer update ((single line address))",
+    "bodyLocation": "/emails/CancelDelegationLettingAgentNotification.md"
+  },
+  {
+    "test_id": "12c79488-bdd6-4832-9365-80e4025c82fa",
+    "prod_id": "b3f8620c-67b8-4988-98c7-1d8bf7738aea",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_CONFIRMATION_EMAIL",
+    "subject": "You updated a property record",
+    "bodyLocation": "/emails/DelegateToLettingAgentConfirmation.md"
+  },
+  {
+    "test_id": "fd181c1b-be1a-4984-8139-d6e8e6c31ec6",
+    "prod_id": "815691d4-adb4-41ef-839f-335c65eae6a6",
+    "enumName": "JOINT_LANDLORD_DELEGATE_TO_LETTING_AGENT_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordDelegateToLettingAgentNotification.md"
+  },
+  {
+    "test_id": "024382de-23ee-41bf-8d76-d66d668f1a61",
+    "prod_id": "b4a40f0a-2001-47e5-a71a-852c7c76e1b7",
+    "enumName": "PROPERTY_UPDATE_WITH_LETTING_AGENT_REMOVED_CONFIRMATION",
+    "subject": "You updated a property record",
+    "bodyLocation": "/emails/PropertyUpdateWithLettingAgentRemovedConfirmation.md"
+  },
+  {
+    "test_id": "fedf5c4a-be8d-418f-9881-a7e30bfa8a7d",
+    "prod_id": "79328d1f-e477-4b7d-b502-0928dcfa30b2",
+    "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_WITH_LETTING_AGENT_REMOVED_NOTIFICATION",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordPropertyUpdateWithLettingAgentRemovedNotification.md"
+  },
+  {
+    "test_id": "ddc927e7-8c05-4521-bb9e-5da1aadd6b3f",
+    "prod_id": "59cc4b17-f851-45a1-890e-2561151d53c4",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_EMAIL",
+    "subject": "You can provide details for ((single line address))",
+    "bodyLocation": "/emails/DelegateToLettingAgentInvitation.md"
+  },
+  {
+    "test_id": "ebc1fb15-7a3f-4174-b943-b9e1c92f2acb",
+    "prod_id": "b3b875c6-0efb-4207-97da-2df9d2abb7f2",
+    "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_WITH_DEADLINE_EMAIL",
+    "subject": "You can provide details for ((single line address))",
+    "bodyLocation": "/emails/DelegateToLettingAgentInvitationWithDeadline.md"
   }
 ]
