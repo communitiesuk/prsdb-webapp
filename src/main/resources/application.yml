@@ -78,6 +78,11 @@ management:
         namespace: ${METRICS_CLOUDWATCH_NAMESPACE}
         step: 1m
 
+argon2:
+  iterations: ${ARGON2_ITERATIONS}
+  memory: ${ARGON2_MEMORY}
+  parallelism: ${ARGON2_PARALLELISM}
+
 base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-council: ${LOCAL_COUNCIL_BASE_URL}
