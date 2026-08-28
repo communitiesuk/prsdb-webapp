@@ -51,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
@@ -128,10 +129,19 @@ class PropertyRegistrationJourneyFactory(
             when (checkingAnswersFor) {
                 // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
-                // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
                         whoProvidesChangeCyaJourney()
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
+                LettingAgentEmailStep.ROUTE_SEGMENT -> {
+                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                        fromTask(journey.whoProvidesDetailsTask) {
+                            checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
+                        }
                     } else {
                         throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                     }
