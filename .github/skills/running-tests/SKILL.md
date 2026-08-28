@@ -16,5 +16,5 @@ allowed-tools: 'jetbrains'
 4. For a failed run, read the matching result file under
    `build/test-results/test/TEST-<fully-qualified-test-class>.xml`. Extract the
    `<failure message>` and its text content, which contains the stack trace.
-5. If needed, IntelliJ also stores structured results under
-   `%LOCALAPPDATA%\JetBrains\IntelliJIdea<version>\testHistory\<project-hash>\`.
+5. If there is no file present, this may suggest a build fail. Use running builds
+   skill to diagnose.

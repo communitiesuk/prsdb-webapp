@@ -51,10 +51,9 @@ abstract class PropertyDetailsViewModelBase(
 
     val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
-    private val registrationDate = propertyOwnership.createdDate.atZone(DateTimeHelper.UK_ZONE).toLocalDate()
+    private val registrationDate = propertyOwnership.registrationDate
 
-    protected val hasBeenOccupiedSinceRegistration: Boolean =
-        propertyOwnership.isOccupied && propertyOwnership.lastOccupiedDate?.isEqual(registrationDate) == true
+    protected val hasBeenOccupiedSinceRegistration: Boolean = propertyOwnership.hasBeenOccupiedSinceRegistration
 
     protected fun registrationNumberRow(): SummaryListRowViewModel =
         row(

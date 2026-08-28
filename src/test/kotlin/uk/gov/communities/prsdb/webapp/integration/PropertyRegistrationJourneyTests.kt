@@ -1998,11 +1998,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.confirm()
 
-            val confirmMissingCompliancePage =
-                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
-            confirmMissingCompliancePage.form.radios.selectValue("true")
-            confirmMissingCompliancePage.form.submit()
-
             val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.whatHappensNextHeading.isVisible)

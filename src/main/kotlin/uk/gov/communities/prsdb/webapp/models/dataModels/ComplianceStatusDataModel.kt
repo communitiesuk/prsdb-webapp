@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import java.time.LocalDate
@@ -45,7 +44,14 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            // TODO PDJB-939: this parameter only exists so the flag decision stays out of the model while the flag is
+            //  live (the flag-off branch in PropertyComplianceService.getProvideLaterDeadline differs from the entity
+            //  value). When the flag is decommissioned, delete the parameter and read
+            //  propertyCompliance.propertyOwnership.provideLaterDeadline directly here.
+            provideLaterDeadline: LocalDate? = null,
+        ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -59,10 +65,7 @@ data class ComplianceStatusDataModel(
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
-                provideLaterDeadline =
-                    propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
-                        PROVIDE_LATER_DEADLINE_DAYS.toLong(),
-                    ),
+                provideLaterDeadline = provideLaterDeadline,
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
