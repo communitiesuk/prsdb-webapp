@@ -17,7 +17,9 @@ class LettingAgentPasswordService(
         lettingAgentAccess: LettingAgentAccess,
         rawPassword: String,
     ) {
-        require(rawPassword.isNotBlank()) { "Password must not be blank" }
+        if (rawPassword.isBlank()) {
+            throw PrsdbWebException("Password must not be blank")
+        }
         if (lettingAgentAccess.encodedPassword != null) {
             throw PrsdbWebException("Password has already been set for letting agent access ${lettingAgentAccess.id}")
         }
