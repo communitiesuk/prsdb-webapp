@@ -2039,6 +2039,29 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         @Suppress("ktlint:standard:max-line-length")
+        fun `confirm missing compliance page back link still returns to the check answers page when the delegate feature flag is enabled`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            // Regression guard: hasMissingComplianceStep's parentage must resolve to a single allowing
+            // parent step (cyaStep) so that its back link is computed correctly, rather than being lost
+            // due to duplicate parentage entries for the same step.
+            val confirmMissingCompliancePage =
+                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+            confirmMissingCompliancePage.backLink.clickAndWait()
+
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
         fun `unoccupied property completes registration directly without the missing compliance check even with missing certificates`(
             page: Page,
         ) {
