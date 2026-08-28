@@ -79,9 +79,9 @@ management:
         step: 1m
 
 argon2:
-  iterations: ${ARGON2_ITERATIONS}
-  memory: ${ARGON2_MEMORY}
-  parallelism: ${ARGON2_PARALLELISM}
+  iterations: 2
+  memory: 16384
+  parallelism: 1
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
