@@ -128,6 +128,35 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
     }
 
     @Test
+    fun `submitting a blank email on the letting agent email page returns a validation error`(page: Page) {
+        val checkAnswersPage = goToCheckAnswersWithLandlordProvidingDetails(page)
+        checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            .submitLettingAgentProvidesDetails()
+        assertPageIs(page, WhoProvidesChangeInterruptionPagePropertyRegistration::class).submit()
+        val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+
+        emailPage.submitEmail("")
+
+        assertThat(emailPage.form.getErrorMessage())
+            .containsText("Enter your letting agent or property manager’s email address")
+    }
+
+    @Test
+    fun `going back from the letting agent email page returns to the interruption`(page: Page) {
+        val checkAnswersPage = goToCheckAnswersWithLandlordProvidingDetails(page)
+        checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            .submitLettingAgentProvidesDetails()
+        assertPageIs(page, WhoProvidesChangeInterruptionPagePropertyRegistration::class).submit()
+        val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+
+        emailPage.backLink.clickAndWait()
+
+        assertPageIs(page, WhoProvidesChangeInterruptionPagePropertyRegistration::class)
+    }
+
+    @Test
     fun `re-selecting letting agent when already delegated returns to the CYA without the interruption`(page: Page) {
         val checkAnswersPage = goToCheckAnswersWithLettingAgentProvidingDetails(page)
         checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.clickFirstActionLinkAndWait()
