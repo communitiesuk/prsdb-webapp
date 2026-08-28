@@ -158,6 +158,14 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
 
             @Test
+            fun `occupied after registration property with provide later shows undated provide this later message`() {
+                val complianceActionsPage = navigator.goToComplianceActions()
+                val card = complianceActionsPage.findSummaryCard("EPC Provide Later Occupied After Registration")
+                assertThat(card.summaryList.energyPerformanceRow)
+                    .containsText("Provide this later (within 28 days of the property being occupied)")
+            }
+
+            @Test
             fun `unoccupied property with provide later does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
                 val card = complianceActionsPage.findSummaryCard("EPC Provide Later Unoccupied")
