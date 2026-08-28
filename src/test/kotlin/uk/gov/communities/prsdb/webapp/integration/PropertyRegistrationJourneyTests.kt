@@ -1517,7 +1517,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`(page: Page) {
+        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -1831,7 +1831,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows a grouping task as in progress when it is partially completed`(page: Page) {
+        fun `restructured task list shows a grouping task as in progress when it is partially completed`() {
             // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
             // grouping task (which now contains all three) is partway through.
             val taskListPage =
@@ -1856,7 +1856,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows grouping tasks as complete when their answers are provided`(page: Page) {
+        fun `restructured task list shows grouping tasks as complete when their answers are provided`() {
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
@@ -1885,7 +1885,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -1901,7 +1901,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA does not show Which bills are included row when rent does not include bills`(page: Page) {
+        fun `CYA does not show Which bills are included row when rent does not include bills`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
             assertFalse(checkAnswersPage.restructuredTenancyRowHeadings().contains("Which bills are included"))
@@ -2004,15 +2004,57 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             checkAnswersPage.confirm()
 
+            // Delegated registrations skip the missing-compliance check, as the letting agent
+            // is responsible for compliance certificates rather than the landlord.
+            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+            assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `landlord providing details for an occupied property with missing certificates still shows the confirm missing compliance page`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            // A landlord-provided (non-delegated) registration must still go through the missing-compliance
+            // check, even when the delegate-to-letting-agent feature is enabled.
             val confirmMissingCompliancePage =
                 assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
             val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
-            assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `unoccupied property completes registration directly without the missing compliance check even with missing certificates`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            // Unoccupied properties are never delegated (delegation is only offered when occupied), and the
+            // missing-compliance check already treats unoccupied properties as having valid certificates, so
+            // the confirm-missing-compliance page must not appear regardless of the delegate feature flag.
+            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
         }
 
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed

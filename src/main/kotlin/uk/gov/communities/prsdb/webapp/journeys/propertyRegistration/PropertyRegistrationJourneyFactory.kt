@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -597,10 +598,20 @@ class PropertyRegistrationJourneyFactory(
                             landlordProvidesPath
                         }
                     }
-                    nextStep { journey.hasMissingComplianceStep }
+                    nextStep {
+                        if (journey.isDelegatedToLettingAgent(featureFlagManager)) {
+                            journey.savePropertyRegistrationDataStep
+                        } else {
+                            journey.hasMissingComplianceStep
+                        }
+                    }
                 }
                 step(journey.hasMissingComplianceStep) {
-                    parents { journey.cyaStep.isComplete() }
+                    parents {
+                        SingleParent(journey.cyaStep) {
+                            journey.cyaStep.outcome != null && !journey.isDelegatedToLettingAgent(featureFlagManager)
+                        }
+                    }
                     nextStep { mode ->
                         when (mode) {
                             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES -> {
@@ -639,6 +650,9 @@ class PropertyRegistrationJourneyFactory(
                                 ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                            SingleParent(journey.cyaStep) {
+                                journey.cyaStep.outcome != null && journey.isDelegatedToLettingAgent(featureFlagManager)
+                            },
                         )
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
