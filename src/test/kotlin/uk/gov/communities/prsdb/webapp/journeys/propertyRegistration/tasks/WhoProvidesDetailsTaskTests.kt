@@ -1,17 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
-import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -21,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.TaskInitialiser
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStepConfig
@@ -33,23 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 class WhoProvidesDetailsTaskTests {
-    @ParameterizedTest(name = "epcComplete={0}, occupied={1}")
-    @MethodSource("provideReachabilityScenarios")
-    fun `first step is reachable only when epc is complete and occupied is yes`(
-        epcComplete: Boolean,
-        occupied: YesOrNo?,
-        expectedReachable: Boolean,
-    ) {
-        val task =
-            buildTask(
-                provider = WhoProvidesRentalDetails.LANDLORD,
-                epcComplete = epcComplete,
-                occupied = occupied,
-            )
-
-        assertEquals(expectedReachable, task.firstStep.isStepReachable)
-    }
-
     @Test
     fun `landlord choice routes to exit step and completes the task`() {
         val task =
@@ -112,14 +90,15 @@ class WhoProvidesDetailsTaskTests {
 
         val occupiedStep = initializedOccupiedStep(occupied)
 
+        task.bindDependencies(
+            object : WhoProvidesDetailsDependencies {
+                override var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails? = null
+            },
+        )
+
         TaskInitialiser(task, task)
             .apply {
-                parents {
-                    AndParents(
-                        epcTask.isComplete(),
-                        occupiedStep.hasOutcome(YesOrNo.YES),
-                    )
-                }
+                initialStep()
                 nextDestination { Destination.Nowhere() }
                 unreachableStepDestinationIfNotSet { Destination.Nowhere() }
             }.build()

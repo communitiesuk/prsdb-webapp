@@ -467,22 +467,19 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             if (delegateEnabled) {
-                section {
-                    withHeadingMessageKey("registerProperty.taskList.rentedOut.whoProvidesDetails", shouldUseNumbering = false)
-                    task(journey.whoProvidesDetailsTask) {
-                        withDependencies { journey }
-                        parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                        nextStep {
-                            if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
-                                WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
-                            ) {
-                                journey.cyaStep
-                            } else {
-                                journey.licensingTask.firstStep
-                            }
+                task(journey.whoProvidesDetailsTask) {
+                    withDependencies { journey }
+                    parents { journey.occupied.hasOutcome(YesOrNo.YES) }
+                    nextStep {
+                        if (journey.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome ==
+                            WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
+                        ) {
+                            journey.cyaStep
+                        } else {
+                            journey.licensingTask.firstStep
                         }
-                        saveProgress()
                     }
+                    saveProgress()
                 }
             }
             section {
