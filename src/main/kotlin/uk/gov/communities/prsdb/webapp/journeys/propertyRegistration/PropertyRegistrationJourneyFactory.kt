@@ -23,12 +23,14 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.occupancyChangeCyaJourney
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswersChangeJourneys.whoProvidesChangeCyaJourney
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmChangeToLettingAgentStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
@@ -68,6 +70,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -125,8 +129,14 @@ class PropertyRegistrationJourneyFactory(
                 // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
                 //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 // TODO PDJB-1402: add letting-agent email CYA change journey for the delegate-to-letting-agent flow.
-                // TODO PDJB-1403: add who-provides-details CYA change journey + self -> agent interruption
-                //  for the delegate-to-letting-agent flow.
+                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
+                    if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                        whoProvidesChangeCyaJourney()
+                    } else {
+                        throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                    }
+                }
+
                 LookupAddressStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.propertyDetailsTask.addressTask)
                 }
@@ -673,6 +683,9 @@ class PropertyRegistrationJourney(
     // Confirm missing compliance steps
     override val hasMissingComplianceStep: HasMissingComplianceStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
+    // Who-provides-details CYA change steps
+    override val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep,
+    override val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
@@ -775,6 +788,8 @@ interface PropertyRegistrationJourneyState :
     override val cyaStep: PropertyRegistrationCyaStep
     val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
+    val whoProvidesUpdateRoutingStep: WhoProvidesUpdateRoutingStep
+    val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
