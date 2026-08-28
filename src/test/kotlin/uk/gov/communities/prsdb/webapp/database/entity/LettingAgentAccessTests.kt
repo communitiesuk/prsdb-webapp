@@ -27,14 +27,8 @@ class LettingAgentAccessTests {
     }
 
     @Test
-    fun `encodedPassword is null by default`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
-        assertNull(access.encodedPassword)
-    }
-
-    @Test
     fun `recordEncodedPassword sets the encoded password`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
         access.recordEncodedPassword("{bcrypt}\$2a\$10\$examplehash")
         assertEquals("{bcrypt}\$2a\$10\$examplehash", access.encodedPassword)
     }

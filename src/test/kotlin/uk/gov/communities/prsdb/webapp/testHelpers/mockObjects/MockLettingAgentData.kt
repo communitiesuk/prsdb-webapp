@@ -9,6 +9,7 @@ import java.util.UUID
 class MockLettingAgentData {
     companion object {
         const val DEFAULT_LETTING_AGENT_ACCESS_ID = 456L
+        const val DEFAULT_ENCODED_PASSWORD = "\$argon2id\$v=19\$m=16384,t=2,p=1\$defaultsaltvalue1\$defaulthashvalue1234567890abcdefghij"
 
         fun createLettingAgentAccess(
             id: Long = DEFAULT_LETTING_AGENT_ACCESS_ID,
@@ -16,7 +17,7 @@ class MockLettingAgentData {
             invitedEmail: String = "letting.agent@example.com",
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
             createdDate: Instant = Instant.now(),
-            encodedPassword: String? = null,
+            encodedPassword: String? = DEFAULT_ENCODED_PASSWORD,
         ): LettingAgentAccess {
             val lettingAgentAccess =
                 LettingAgentAccess(
@@ -33,5 +34,13 @@ class MockLettingAgentData {
 
             return lettingAgentAccess
         }
+
+        fun createLettingAgentAccessWithoutPassword(
+            id: Long = DEFAULT_LETTING_AGENT_ACCESS_ID,
+            token: UUID = UUID.randomUUID(),
+            invitedEmail: String = "letting.agent@example.com",
+            propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
+            createdDate: Instant = Instant.now(),
+        ): LettingAgentAccess = createLettingAgentAccess(id, token, invitedEmail, propertyOwnership, createdDate, encodedPassword = null)
     }
 }

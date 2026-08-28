@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -16,6 +15,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 
 @ExtendWith(MockitoExtension::class)
@@ -31,7 +31,7 @@ class LettingAgentPasswordServiceTests {
 
     @Test
     fun `setPassword rejects a blank password`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
 
         assertThrows<IllegalArgumentException> {
             lettingAgentPasswordService.setPassword(access, "   ")
@@ -53,7 +53,7 @@ class LettingAgentPasswordServiceTests {
 
     @Test
     fun `setPassword encodes and persists the password`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
         whenever(passwordEncoder.encode("myPassword")).thenReturn("{bcrypt}encoded")
         whenever(
             lettingAgentAccessRepository.setEncodedPasswordIfAbsent(
@@ -75,7 +75,7 @@ class LettingAgentPasswordServiceTests {
 
     @Test
     fun `setPassword throws when atomic update changes zero rows`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
         whenever(passwordEncoder.encode("myPassword")).thenReturn("{bcrypt}encoded")
         whenever(
             lettingAgentAccessRepository.setEncodedPasswordIfAbsent(any(), any()),
@@ -104,7 +104,7 @@ class LettingAgentPasswordServiceTests {
 
     @Test
     fun `isPasswordCorrect throws when no password has been set`() {
-        val access = MockLettingAgentData.createLettingAgentAccess()
+        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
 
         assertThrows<PrsdbWebException> {
             lettingAgentPasswordService.isPasswordCorrect(access, "candidate")
