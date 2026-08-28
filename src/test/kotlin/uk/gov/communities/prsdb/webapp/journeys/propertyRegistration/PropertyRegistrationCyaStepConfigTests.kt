@@ -489,6 +489,34 @@ class PropertyRegistrationCyaStepConfigTests {
             val delegationSection = content["lettingAgentDelegation"] as? List<*>
             assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
             assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
+            assertEquals(true, content["hideDelegatedSections"], "Delegated path should hide the licensing/compliance/tenancy sections")
+            assertEquals(
+                "registerProperty.taskList.checkAndSubmit.confirmAndPay",
+                content["submitButtonText"],
+                "Delegated properties should use the confirm-and-pay message key",
+            )
+        }
+
+        @Test
+        fun `getStepSpecificContent leaves licensing, compliance and tenancy content empty when delegated to agent`() {
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(emptyList<Any>(), content["licensingDetails"])
+            assertEquals(emptyList<Any>(), content["gasSupplyRows"])
+            assertEquals(emptyList<Any>(), content["gasCertRows"])
+            assertEquals(emptyList<Any>(), content["electricalRows"])
+            assertNull(content["epcCardTitle"])
+            assertNull(content["epcCardActions"])
+            assertEquals(emptyList<Any>(), content["epcCardRows"])
+            assertNull(content["epcExpiredTextKey"])
+            assertEquals(emptyList<Any>(), content["tenancyCheckRows"])
+            assertNull(content["lowRatingTextKey"])
+            assertEquals(emptyList<Any>(), content["exemptionReasonRows"])
+            assertEquals(emptyList<Any>(), content["nonEpcRows"])
+            assertNull(content["epcInsetTextKey"])
+            assertEquals(emptyList<Any>(), content["tenancyDetails"])
         }
 
         @Test
@@ -502,6 +530,12 @@ class PropertyRegistrationCyaStepConfigTests {
             assertTrue(content.containsKey("lettingAgentDelegation"))
             assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
             assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
+            assertEquals(false, content["hideDelegatedSections"], "Landlord path should keep the later sections visible")
+            assertEquals(
+                "registerProperty.taskList.checkAndSubmit.confirmAndPay",
+                content["submitButtonText"],
+                "Non-delegated properties with an answer should also use the confirm-and-pay message key",
+            )
         }
 
         @Test
@@ -511,6 +545,20 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation when property is unoccupied`() {
+            // The whoProvidesRentalDetails step is only reachable when occupied == YES (see
+            // PropertyRegistrationJourneyFactory's `parents { journey.occupied.hasOutcome(YesOrNo.YES) }`),
+            // so an unoccupied property makes the step unreachable in the real journey.
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+            assertNull(content["lettingAgentDelegationBodyText"])
         }
     }
 

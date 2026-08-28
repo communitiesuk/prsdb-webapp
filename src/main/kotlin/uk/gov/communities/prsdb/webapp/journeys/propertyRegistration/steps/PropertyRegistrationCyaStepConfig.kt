@@ -52,20 +52,17 @@ class PropertyRegistrationCyaStepConfig(
             }
         val licensingDetails =
             if (isDelegatedInSkippingFlow) {
-                getMockProvideLaterSummaryList(
-                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    getProvideLaterMessageKey(isOccupied),
-                )
+                emptyList()
             } else {
                 getLicensingDetailsForState(state, isOccupied, isSkippingEnabled)
             }
-        val tenancyDetails = getTenancyDetails(state, isDelegatedInSkippingFlow, isSkippingEnabled, isOccupied)
+        val tenancyDetails = getTenancyDetails(state, isDelegatedInSkippingFlow, isSkippingEnabled)
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
                 // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
                 "submitButtonText" to
-                    if (isDelegateToLettingAgentEnabled) {
+                    if (whoProvidesRentalDetails != null) {
                         "registerProperty.taskList.checkAndSubmit.confirmAndPay"
                     } else if (isSkippingEnabled) {
                         "forms.buttons.continueToPayment"
@@ -78,7 +75,7 @@ class PropertyRegistrationCyaStepConfig(
                     } else {
                         "forms.warning"
                     },
-                "lettingAgentDelegationWarningText" to isDelegateToLettingAgentEnabled,
+                "hideDelegatedSections" to isDelegatedInSkippingFlow,
                 "insetText" to !isSkippingEnabled,
                 "propertyName" to
                     state.propertyDetailsTask.addressTask
@@ -97,6 +94,7 @@ class PropertyRegistrationCyaStepConfig(
                     } else {
                         null
                     },
+                "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
                 "tenancyDetails" to tenancyDetails,
             )
 
@@ -105,13 +103,25 @@ class PropertyRegistrationCyaStepConfig(
         }
 
         if (isDelegatedInSkippingFlow) {
-            content += getMockDelegatedGasContent(isOccupied)
-            content += getMockDelegatedElectricalContent(isOccupied)
+            content += mapOf("gasSupplyRows" to emptyList<SummaryListRowViewModel>(), "gasCertRows" to emptyList<SummaryListRowViewModel>())
+            content += mapOf("electricalRows" to emptyList<SummaryListRowViewModel>())
+            content +=
+                mapOf(
+                    "epcCardTitle" to null,
+                    "epcCardActions" to null,
+                    "epcCardRows" to emptyList<SummaryListRowViewModel>(),
+                    "epcExpiredTextKey" to null,
+                    "tenancyCheckRows" to emptyList<SummaryListRowViewModel>(),
+                    "lowRatingTextKey" to null,
+                    "exemptionReasonRows" to emptyList<SummaryListRowViewModel>(),
+                    "nonEpcRows" to emptyList<SummaryListRowViewModel>(),
+                    "epcInsetTextKey" to null,
+                )
         } else {
             content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
             content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+            content += complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
         }
-        content += complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
 
         if (isSkippingEnabled) {
             val occupancyDetails = (content["occupancyDetails"] as? List<SummaryListRowViewModel>) ?: emptyList()
@@ -157,14 +167,9 @@ class PropertyRegistrationCyaStepConfig(
         state: PropertyRegistrationJourneyState,
         isDelegatedInSkippingFlow: Boolean,
         isSkippingEnabled: Boolean,
-        isOccupied: Boolean,
     ): List<SummaryListRowViewModel> =
         when {
-            isDelegatedInSkippingFlow ->
-                getMockProvideLaterSummaryList(
-                    "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
-                    getProvideLaterMessageKey(isOccupied),
-                )
+            isDelegatedInSkippingFlow -> emptyList()
 
             isSkippingEnabled ->
                 occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
@@ -214,41 +219,6 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
     }
-
-    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
-    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
-    private fun getMockProvideLaterSummaryList(
-        fieldHeading: String,
-        provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
-    ): List<SummaryListRowViewModel> =
-        listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading,
-                provideLaterMessageKey,
-                actionUrl = null,
-            ),
-        )
-
-    // TODO PDJB-1391: placeholder gas safety content for the skipped letting-agent path (matches the keys the real
-    //  ComplianceDetailsHelper.getGasSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedGasContent(isOccupied: Boolean): Map<String, Any?> =
-        mapOf(
-            "gasSupplyRows" to getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading", getProvideLaterMessageKey(isOccupied)),
-            "gasCertRows" to emptyList<SummaryListRowViewModel>(),
-            "gasInsetTextKey" to null,
-        )
-
-    // TODO PDJB-1391: placeholder electrical safety content for the skipped letting-agent path (matches the keys the
-    //  real ComplianceDetailsHelper.getElectricalSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedElectricalContent(isOccupied: Boolean): Map<String, Any?> =
-        mapOf(
-            "electricalRows" to
-                getMockProvideLaterSummaryList(
-                    "checkElectricalSafety.electricalCert.fieldHeading",
-                    getProvideLaterMessageKey(isOccupied),
-                ),
-            "electricalInsetTextKey" to null,
-        )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
@@ -383,13 +353,6 @@ class PropertyRegistrationCyaStepConfig(
 
         return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
-
-    private fun getProvideLaterMessageKey(isOccupied: Boolean): String =
-        if (isOccupied) {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLater"
-        } else {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLaterUnoccupied"
-        }
 }
 
 @JourneyFrameworkComponent
