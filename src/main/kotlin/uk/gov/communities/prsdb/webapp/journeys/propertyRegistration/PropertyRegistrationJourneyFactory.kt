@@ -358,7 +358,7 @@ class PropertyRegistrationJourneyFactory(
                                 journey.confirmMissingComplianceStep
                             }
 
-                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
                                 journey.savePropertyRegistrationDataStep
                             }
                         }
@@ -387,7 +387,7 @@ class PropertyRegistrationJourneyFactory(
                     parents {
                         OrParents(
                             journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES,
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                         )
@@ -599,7 +599,7 @@ class PropertyRegistrationJourneyFactory(
                                 journey.confirmMissingComplianceStep
                             }
 
-                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
                                 journey.savePropertyRegistrationDataStep
                             }
                         }
@@ -628,7 +628,7 @@ class PropertyRegistrationJourneyFactory(
                     parents {
                         OrParents(
                             journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES,
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                         )
