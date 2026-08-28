@@ -16,6 +16,7 @@ class MockLettingAgentData {
             invitedEmail: String = "letting.agent@example.com",
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
             createdDate: Instant = Instant.now(),
+            encodedPassword: String? = null,
         ): LettingAgentAccess {
             val lettingAgentAccess =
                 LettingAgentAccess(
@@ -26,6 +27,9 @@ class MockLettingAgentData {
 
             ReflectionTestUtils.setField(lettingAgentAccess, "id", id)
             ReflectionTestUtils.setField(lettingAgentAccess, "createdDate", createdDate)
+            if (encodedPassword != null) {
+                ReflectionTestUtils.setField(lettingAgentAccess, "encodedPassword", encodedPassword)
+            }
 
             return lettingAgentAccess
         }
