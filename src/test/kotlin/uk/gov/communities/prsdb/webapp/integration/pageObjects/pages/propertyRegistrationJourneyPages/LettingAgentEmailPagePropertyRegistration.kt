@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -18,6 +19,7 @@ class LettingAgentEmailPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
     val form = LettingAgentEmailForm(page)
     val submitButton = Button.byText(page, "Save and continue")
+    val backLink = BackLink.default(page)
 
     fun submitEmail(email: String) {
         form.emailInput.fill(email)
