@@ -12,11 +12,11 @@
 <!--/*@thymesVar id="rentedOutLicensingHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutLicensingRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="rentedOutGasHeadingKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rentedOutGasRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasCertRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutElectricalHeadingKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rentedOutElectricalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="electricalRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="electricalInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutEpcHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcCardTitle" type="java.lang.String"*/-->
@@ -69,7 +69,7 @@
         <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
         <h3 class="govuk-heading-s" th:text="#{${rentedOutGasHeadingKey}}"></h3>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutGasRows})}"></dl>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
         <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
             <h4 class="govuk-heading-s" th:text="#{checkGasSafety.certSubHeading}"></h4>
             <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
@@ -78,7 +78,7 @@
             <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}"></div>
         </th:block>
         <h3 class="govuk-heading-s" th:text="#{${rentedOutElectricalHeadingKey}}"></h3>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutElectricalRows})}"></dl>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${electricalRows})}"></dl>
         <th:block th:if="${electricalInsetTextKey != null}">
             <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}"></div>
         </th:block>

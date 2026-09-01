@@ -550,7 +550,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     }
 
     @Test
-    fun `createNonEpcRows returns forms buttons provideThisLater when scenario is SKIPPED_OCCUPIED and isSkippingEnabled is true`() {
+    fun `createNonEpcRows returns provideThisLaterOccupied when scenario is SKIPPED_OCCUPIED and isSkippingEnabled is true`() {
         // Arrange
         setupStateForScenario(EpcScenario.SKIPPED_OCCUPIED)
         whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
@@ -558,7 +558,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
-                    "forms.buttons.provideThisLater",
+                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied",
                     null as String?,
                 ),
             )

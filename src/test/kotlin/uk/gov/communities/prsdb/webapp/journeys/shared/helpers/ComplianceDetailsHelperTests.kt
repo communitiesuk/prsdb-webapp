@@ -257,7 +257,7 @@ class ComplianceDetailsHelperTests {
         }
 
         @Test
-        fun `skipped occupied with restructure and skipping enabled returns provideThisLater value`() {
+        fun `skipped occupied with restructure and skipping enabled returns provideThisLaterOccupied value`() {
             whenever(mockEpcDetailsTask.startEpcStep).thenReturn(mockStartEpcStep)
             whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
             whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
@@ -270,7 +270,10 @@ class ComplianceDetailsHelperTests {
             @Suppress("UNCHECKED_CAST")
             val nonEpcRows = content["nonEpcRows"] as List<SummaryListRowViewModel>
             assertEquals(1, nonEpcRows.size)
-            assertEquals("forms.buttons.provideThisLater", nonEpcRows.first().fieldValue)
+            assertEquals(
+                "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied",
+                nonEpcRows.first().fieldValue,
+            )
         }
     }
 }

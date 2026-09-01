@@ -91,11 +91,22 @@ class PropertyRegistrationCyaStepConfig(
         val licensingDetails = getLicensingDetailsForState(state, isOccupied, true)
         val tenancyDetails = getRestructuredTenancyDetails(state)
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
-        val complianceContent = getComplianceContent(state)
+        val gasSafetyContent = complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
+        val electricalSafetyContent = complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+        val complianceContent =
+            gasSafetyContent +
+                electricalSafetyContent +
+                complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
         return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
             delegationContent +
             complianceContent +
-            getRestructuredContentSections(state, isOccupied, licensingDetails, tenancyDetails, occupancyDetails, complianceContent)
+            getRestructuredContentSections(
+                state,
+                isOccupied,
+                licensingDetails,
+                tenancyDetails,
+                occupancyDetails,
+            )
     }
 
     private fun getDelegatedRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
@@ -111,16 +122,34 @@ class PropertyRegistrationCyaStepConfig(
                 getProvideLaterMessageKey(isOccupied),
             )
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
+        val gasSupplyRows =
+            getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading", getProvideLaterMessageKey(isOccupied))
+        val electricalRows =
+            getMockProvideLaterSummaryList(
+                "checkElectricalSafety.electricalCert.fieldHeading",
+                getProvideLaterMessageKey(isOccupied),
+            )
         val complianceContent =
-            getMockDelegatedGasContent(isOccupied) +
-                getMockDelegatedElectricalContent(isOccupied) +
+            mapOf(
+                "gasSupplyRows" to gasSupplyRows,
+                "gasCertRows" to emptyList<SummaryListRowViewModel>(),
+                "gasInsetTextKey" to null,
+                "electricalRows" to electricalRows,
+                "electricalInsetTextKey" to null,
+            ) +
                 complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
         val whoProvides =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
         return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
             (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
             complianceContent +
-            getRestructuredContentSections(state, isOccupied, licensingDetails, tenancyDetails, occupancyDetails, complianceContent)
+            getRestructuredContentSections(
+                state,
+                isOccupied,
+                licensingDetails,
+                tenancyDetails,
+                occupancyDetails,
+            )
     }
 
     private fun getBaseContent(
@@ -172,10 +201,7 @@ class PropertyRegistrationCyaStepConfig(
         licensingDetails: List<SummaryListRowViewModel>,
         tenancyDetails: List<SummaryListRowViewModel>,
         occupancyDetails: List<SummaryListRowViewModel>,
-        complianceContent: Map<String, Any?>,
     ): Map<String, Any?> {
-        val gasSupplyRows = complianceContent["gasSupplyRows"] as? List<SummaryListRowViewModel> ?: emptyList()
-        val electricalRows = complianceContent["electricalRows"] as? List<SummaryListRowViewModel> ?: emptyList()
         return mapOf(
             "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
             "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
@@ -191,8 +217,6 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutEpcHeadingKey" to "propertyCompliance.epcTask.checkEpcAnswers.heading",
             "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.heading",
             "rentedOutLicensingRows" to licensingDetails,
-            "rentedOutGasRows" to gasSupplyRows,
-            "rentedOutElectricalRows" to electricalRows,
             "rentedOutTenancyRows" to if (isOccupied) tenancyDetails else emptyList<SummaryListRowViewModel>(),
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
@@ -260,27 +284,6 @@ class PropertyRegistrationCyaStepConfig(
                 provideLaterMessageKey,
                 actionUrl = null,
             ),
-        )
-
-    // TODO PDJB-1391: placeholder gas safety content for the skipped letting-agent path (matches the keys the real
-    //  ComplianceDetailsHelper.getGasSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedGasContent(isOccupied: Boolean): Map<String, Any?> =
-        mapOf(
-            "gasSupplyRows" to getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading", getProvideLaterMessageKey(isOccupied)),
-            "gasCertRows" to emptyList<SummaryListRowViewModel>(),
-            "gasInsetTextKey" to null,
-        )
-
-    // TODO PDJB-1391: placeholder electrical safety content for the skipped letting-agent path (matches the keys the
-    //  real ComplianceDetailsHelper.getElectricalSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedElectricalContent(isOccupied: Boolean): Map<String, Any?> =
-        mapOf(
-            "electricalRows" to
-                getMockProvideLaterSummaryList(
-                    "checkElectricalSafety.electricalCert.fieldHeading",
-                    getProvideLaterMessageKey(isOccupied),
-                ),
-            "electricalInsetTextKey" to null,
         )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =

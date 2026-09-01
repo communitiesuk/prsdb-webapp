@@ -257,7 +257,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 EpcScenario.SKIPPED_OCCUPIED ->
                     // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
                     if (isSkippingEnabled) {
-                        "forms.buttons.provideThisLater"
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied"
                     } else {
                         "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
                     }
