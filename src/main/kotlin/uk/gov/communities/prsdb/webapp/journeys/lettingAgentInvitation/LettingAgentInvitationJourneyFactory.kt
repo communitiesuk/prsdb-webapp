@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -20,11 +21,13 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Set
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import java.util.UUID
 
 @PrsdbWebService
 class LettingAgentInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<LettingAgentInvitationJourney>,
+    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -77,8 +80,13 @@ class LettingAgentInvitationJourneyFactory(
                         journey.enterPasswordStep.isComplete(),
                     )
                 }
-                // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
-                nextDestination { Destination.ExternalUrl("/") }
+                nextDestination {
+                    val token = UUID.fromString(journey.invitationToken)
+                    val propertyOwnershipId = lettingAgentAccessService.getInvitationByToken(token).propertyOwnership.id
+                    Destination.ExternalUrl(
+                        LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(propertyOwnershipId),
+                    )
+                }
             }
         }
     }

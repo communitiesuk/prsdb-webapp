@@ -1,0 +1,48 @@
+<!--/*@thymesVar id="propertyDetails" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LettingAgentPropertyDetailsViewModel"*/-->
+<!--/*@thymesVar id="complianceDetails" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel"*/-->
+<!DOCTYPE html>
+<html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.lettingAgentView.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper">
+        <div id="page-contents" class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <span class="govuk-caption-l" th:text="#{propertyDetails.lettingAgentView.caption}">propertyDetails.lettingAgentView.caption</span>
+                <h1 class="govuk-heading-l">
+                    <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
+                </h1>
+
+                <div id="provide-details-banner" th:if="${propertyDetails.showProvideDetailsBanner}"
+                     class="govuk-inset-text" th:utext="${propertyDetails.provideDetailsBannerText}">
+                    propertyDetails.lettingAgentView.provideDetailsBanner
+                </div>
+
+                <!-- TODO PDJB-1571: Re-enable the licensing change link by building this view model with change links. -->
+                <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h2>
+                <dl th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}"
+                    th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
+
+                <!-- TODO PDJB-1572 to PDJB-1576: Re-enable the tenancy change links (tenancy, households/tenants, bills, furnished, rent) by building this view model with change links. -->
+                <th:block th:if="${propertyDetails.showTenancySection}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancy.heading}">propertyDetails.propertyRecord.tenancy.heading</h2>
+                    <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
+                        th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
+                </th:block>
+
+                <!-- TODO PDJB-1577 to PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building the compliance view model with landlordView = true. -->
+                <div id="compliance-certificates" th:if="${complianceDetails != null}">
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.complianceCertificates.heading}">propertyDetails.lettingAgentView.complianceCertificates.heading</h2>
+
+                    <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
+                        propertyDetails.complianceInformation.insetText.allValid
+                    </div>
+
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList}, ~{fragments/insetText :: insetText(${complianceDetails.gasSafetySummaryCard.insetViewModel?.messageKey})})}"></div>
+
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.electricalSafetySummaryCard.title}, null, ${complianceDetails.electricalSafetySummaryCard.actions}, ${complianceDetails.electricalSafetySummaryCard.summaryList}, ~{fragments/insetText :: insetText(${complianceDetails.electricalSafetySummaryCard.insetViewModel?.messageKey})})}"></div>
+
+                    <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList}, ~{fragments/epcAdditionalContent :: epcAdditionalContent(${complianceDetails.epcSupplementarySections}, ${complianceDetails.epcSummaryCard.insetViewModel?.messageKey}, ${complianceDetails.epcExpiredInsetViewModel})})}"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</html>

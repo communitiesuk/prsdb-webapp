@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.HasPasswordPage
@@ -39,7 +40,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        // TODO PDJB-1570: Assert redirect to letting agent property record page
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("propertyOwnershipId" to "1"))
     }
 
     @Test
@@ -63,6 +64,6 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        // TODO PDJB-1570: Assert redirect to letting agent property record page
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("propertyOwnershipId" to "1"))
     }
 }

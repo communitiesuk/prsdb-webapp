@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Com
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.HasPasswordStep
@@ -61,6 +62,10 @@ class LettingAgentSecurityConfig {
                     ).anonymous()
                     .requestMatchers(
                         "$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT",
+                    ).anonymous()
+                    .requestMatchers(
+                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
+                        LETTING_AGENT_PROPERTY_DETAILS_ROUTE,
                     ).anonymous()
                     .anyRequest()
                     .authenticated()

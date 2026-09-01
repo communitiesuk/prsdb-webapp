@@ -40,6 +40,9 @@ class GasSafetyViewModelFactory(
             .apply {
                 val status = getStatus(propertyCompliance)
 
+                // TODO: PDJB-1665: Hide the "Does the property have a gas supply..." (hasGasSupply) row in the
+                //  letting-agent view to match the Figma. This factory is shared with the landlord view, where the
+                //  row must remain, so thread landlordView through fromEntity and guard the hasGasSupply addRow calls.
                 when (status) {
                     ComplianceCertStatus.NOT_REQUIRED -> {
                         addRow(
