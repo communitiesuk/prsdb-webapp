@@ -7,15 +7,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 enum class OccupancyUpdateRouteMode {
     NO_INTERRUPTION,
-    REMOVING_DELEGATION,
+    SHOW_INTERRUPTION,
 }
 
 @JourneyFrameworkComponent
 class OccupancyUpdateRoutingStepConfig : AbstractInternalStepConfig<OccupancyUpdateRouteMode, UpdateOccupancyJourneyState>() {
     override fun mode(state: UpdateOccupancyJourneyState): OccupancyUpdateRouteMode? {
         val newOccupancy = state.occupied.outcome ?: return null
-        return if (state.showsLettingAgentInterruption && newOccupancy == YesOrNo.NO) {
-            OccupancyUpdateRouteMode.REMOVING_DELEGATION
+        val isRemovingDelegation =
+            state.propertyIsOccupied && state.propertyIsDelegatedToLettingAgent && newOccupancy == YesOrNo.NO
+        return if (isRemovingDelegation) {
+            OccupancyUpdateRouteMode.SHOW_INTERRUPTION
         } else {
             OccupancyUpdateRouteMode.NO_INTERRUPTION
         }

@@ -353,7 +353,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 }
 
                 @Test
-                fun `making a delegated property vacant shows the check answers page and removes the delegation`(page: Page) {
+                fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
                     // The property starts occupied and delegated to a letting agent
                     var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                     assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
@@ -401,7 +401,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     val updateOccupancyPage =
                         assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                     updateOccupancyPage.submitIsOccupied()
-                    // The property stays occupied, so the delegation is not at risk and the interruption is skipped
                     val checkAnswersPage =
                         assertPageIs(
                             page,
@@ -450,7 +449,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                     updateOccupancyPage.submitIsVacant()
 
-                    // There is no delegation to lose, so the journey goes straight to the check answers page
                     val checkAnswersPage =
                         assertPageIs(
                             page,

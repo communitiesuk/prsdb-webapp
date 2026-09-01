@@ -11,7 +11,8 @@ class OccupancyLettingAgentInterruptionStepConfig :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, UpdateOccupancyJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any> = emptyMap()
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any> =
+        mapOf("title" to "propertyDetails.update.title")
 
     override fun chooseTemplate(state: UpdateOccupancyJourneyState): String = "forms/occupancyLettingAgentInterruptionForm"
 

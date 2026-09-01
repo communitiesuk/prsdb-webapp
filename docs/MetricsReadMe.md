@@ -124,7 +124,7 @@ occupied *and* delegated to a letting agent — an "are you sure" interruption b
 the property unoccupied removes the letting agent from the registration. The check-your-answers page is
 the commit step on every variant of that journey, so it is the page that should carry the tag.
 
-**Decision:** that page is still a placeholder (see `TODO(PDJB-1635)`), so occupancy updates made with
+**TODO(PDJB-1635):** the check-your-answers page is still a placeholder, so occupancy updates made with
 `DELEGATE_TO_LETTING_AGENT` enabled are intentionally **not counted** for now. The `Transaction` tag
 should be added to the check-your-answers page when it is built. This is not a live gap: the flag gates
 an unreleased journey, and every occupancy update made with the flag off is counted as normal.

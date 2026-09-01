@@ -12,41 +12,57 @@ class OccupancyUpdateRoutingStepConfigTests {
     private val stepConfig = OccupancyUpdateRoutingStepConfig()
 
     @Test
-    fun `mode is REMOVING_DELEGATION when a delegated property is being made vacant`() {
-        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, showsInterruption = true))
+    fun `mode is SHOW_INTERRUPTION when a delegated property is being made vacant`() {
+        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, isOccupied = true, isDelegated = true))
 
-        assertEquals(OccupancyUpdateRouteMode.REMOVING_DELEGATION, result)
+        assertEquals(OccupancyUpdateRouteMode.SHOW_INTERRUPTION, result)
     }
 
     @Test
     fun `mode is NO_INTERRUPTION when a delegated property stays occupied`() {
-        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.YES, showsInterruption = true))
+        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.YES, isOccupied = true, isDelegated = true))
 
         assertEquals(OccupancyUpdateRouteMode.NO_INTERRUPTION, result)
     }
 
     @Test
     fun `mode is NO_INTERRUPTION when an undelegated property is being made vacant`() {
-        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, showsInterruption = false))
+        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, isOccupied = true, isDelegated = false))
+
+        assertEquals(OccupancyUpdateRouteMode.NO_INTERRUPTION, result)
+    }
+
+    @Test
+    fun `mode is NO_INTERRUPTION when the property was already vacant`() {
+        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, isOccupied = false, isDelegated = true))
+
+        assertEquals(OccupancyUpdateRouteMode.NO_INTERRUPTION, result)
+    }
+
+    @Test
+    fun `mode is NO_INTERRUPTION when an undelegated property was already vacant`() {
+        val result = stepConfig.mode(stateWith(newOccupancy = YesOrNo.NO, isOccupied = false, isDelegated = false))
 
         assertEquals(OccupancyUpdateRouteMode.NO_INTERRUPTION, result)
     }
 
     @Test
     fun `mode is null when the new occupancy has not been chosen yet`() {
-        val result = stepConfig.mode(stateWith(newOccupancy = null, showsInterruption = true))
+        val result = stepConfig.mode(stateWith(newOccupancy = null, isOccupied = true, isDelegated = true))
 
         assertNull(result)
     }
 
     private fun stateWith(
         newOccupancy: YesOrNo?,
-        showsInterruption: Boolean,
+        isOccupied: Boolean,
+        isDelegated: Boolean,
     ): UpdateOccupancyJourneyState {
         val occupiedStep = mock<OccupiedStep> { on { outcome } doReturn newOccupancy }
         return mock<UpdateOccupancyJourneyState> {
             on { occupied } doReturn occupiedStep
-            on { showsLettingAgentInterruption } doReturn showsInterruption
+            on { propertyIsOccupied } doReturn isOccupied
+            on { propertyIsDelegatedToLettingAgent } doReturn isDelegated
         }
     }
 }

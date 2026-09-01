@@ -57,8 +57,8 @@ class UpdateOccupancyJourneyFactory(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
-            state.wasOccupied = propertyOwnership.isOccupied
-            state.isDelegatedToLettingAgent =
+            state.propertyIsOccupied = propertyOwnership.isOccupied
+            state.propertyIsDelegatedToLettingAgent =
                 featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
                 lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId) != null
             state.isStateInitialized = true
@@ -115,15 +115,14 @@ class UpdateOccupancyJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.checkYourAnswersStep)
-                        OccupancyUpdateRouteMode.REMOVING_DELEGATION -> Destination(journey.lettingAgentInterruptionStep)
+                        OccupancyUpdateRouteMode.SHOW_INTERRUPTION -> Destination(journey.lettingAgentInterruptionStep)
                     }
                 }
             }
             step(journey.lettingAgentInterruptionStep) {
                 routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
-                parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.REMOVING_DELEGATION) }
+                parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.SHOW_INTERRUPTION) }
                 nextStep { journey.checkYourAnswersStep }
-                withAdditionalContentProperties { mapOf("title" to "propertyDetails.update.title") }
             }
             step(journey.checkYourAnswersStep) {
                 routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
@@ -357,9 +356,10 @@ class UpdateOccupancyJourney(
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
-    override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
+    override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("propertyIsOccupied")
 
-    override var isDelegatedToLettingAgent: Boolean by delegateProvider.requiredImmutableDelegate("isDelegatedToLettingAgent")
+    override var propertyIsDelegatedToLettingAgent: Boolean by
+        delegateProvider.requiredImmutableDelegate("propertyIsDelegatedToLettingAgent")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
