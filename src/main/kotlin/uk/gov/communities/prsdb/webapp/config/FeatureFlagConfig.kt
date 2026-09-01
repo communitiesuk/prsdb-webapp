@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.featureFlagNames
 import uk.gov.communities.prsdb.webapp.constants.featureFlagReleaseNames
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 
 @Configuration
 @ComponentScan(basePackages = ["uk.gov.communities.prsdb.webapp"])
@@ -22,8 +23,11 @@ class FeatureFlagConfig(
     var releases: List<FeatureReleaseConfigModel> = emptyList()
 
     @Bean
-    fun featureFlagManager(strategyInitialiser: FeatureFlipStrategyInitialiser): FeatureFlagManager {
-        val featureFlagManager = FeatureFlagManager(strategyInitialiser)
+    fun featureFlagManager(
+        strategyInitialiser: FeatureFlipStrategyInitialiser,
+        featureFlagOverrideService: FeatureFlagOverrideService?,
+    ): FeatureFlagManager {
+        val featureFlagManager = FeatureFlagManager(strategyInitialiser, featureFlagOverrideService)
         featureFlagManager.initializeFeatureFlags(featureFlags)
         featureFlagManager.initialiseFeatureReleases(releases)
         return featureFlagManager

@@ -23,10 +23,12 @@ import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import java.util.Locale
 
 @PrsdbControllerAdvice
@@ -34,6 +36,7 @@ class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
     private val dashboardUrlProvider: DashboardUrlProvider,
+    private val featureFlagOverrideService: FeatureFlagOverrideService,
 ) {
     @Value("\${plausible.site-id}")
     private lateinit var plausibleSiteId: String
@@ -53,6 +56,11 @@ class GlobalModelAttributes(
 
         // Feedback banner attributes
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
+
+        if (featureFlagOverrideService.hasActiveOverrides()) {
+            model.addAttribute("featureFlagOverridesActive", true)
+            model.addAttribute("featureFlagOverridesUrl", FEATURE_FLAG_OVERRIDES_ROUTE)
+        }
 
         // Authenticated header attributes
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")

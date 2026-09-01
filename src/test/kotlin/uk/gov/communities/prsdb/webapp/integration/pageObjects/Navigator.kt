@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DelegateToLettingAgentControl
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
+import uk.gov.communities.prsdb.webapp.controllers.FeatureFlagOverrideController.Companion.FEATURE_FLAG_OVERRIDES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
@@ -60,6 +62,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.FeatureFlagOverridesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
@@ -131,6 +134,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
@@ -677,6 +681,11 @@ class Navigator(
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
+
+    fun navigateToPropertyRegistrationCheckYourAnswers() =
+        navigateToPropertyRegistrationJourneyStep(
+            PropertyRegistrationCyaStep.ROUTE_SEGMENT,
+        )
 
     fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
@@ -1490,6 +1499,11 @@ class Navigator(
         return createValidPage(page, SystemOperatorDashboardPage::class)
     }
 
+    fun goToFeatureFlagOverrides(): FeatureFlagOverridesPage {
+        navigate(FEATURE_FLAG_OVERRIDES_ROUTE)
+        return createValidPage(page, FeatureFlagOverridesPage::class)
+    }
+
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
         navigate(GENERATE_PASSCODE_URL)
         return createValidPage(page, GeneratePasscodePage::class)
@@ -1666,6 +1680,13 @@ class Navigator(
             InviteJointLandlordFormPageInviteJointLandlord::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
+    }
+
+    fun goToLettingAgentInvitationJourney(token: String): ValidateTokenPage {
+        navigate(
+            "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, ValidateTokenPage::class)
     }
 
     companion object {

@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.assertEquals
@@ -41,6 +42,9 @@ class CancelLettingAgentDelegationControllerTests(
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @MockitoBean
+    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -212,12 +216,28 @@ class CancelLettingAgentDelegationControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getConfirmation returns 200 for an authorised landlord`() {
         mockAuthorizedProperty()
+        whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
+            .thenReturn(true)
+        whenever(lettingAgentAccessService.getRemovedLettingAgentEmailFromSession(eq(testPropertyOwnershipId)))
+            .thenReturn("letting.agent@example.com")
         val propertyOwnership = createPropertyOwnership()
         whenever(propertyOwnershipService.getPropertyOwnership(eq(testPropertyOwnershipId)))
             .thenReturn(propertyOwnership)
 
         mvc.get("${getRemoveLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
             status { isOk() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getConfirmation returns 404 when no letting agent was removed in this session`() {
+        mockAuthorizedProperty()
+        whenever(lettingAgentAccessService.wasLettingAgentRemovedInThisSession(eq(testPropertyOwnershipId)))
+            .thenReturn(false)
+
+        mvc.get("${getRemoveLettingAgentBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT").andExpect {
+            status { isNotFound() }
         }
     }
 

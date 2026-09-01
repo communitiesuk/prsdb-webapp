@@ -5,17 +5,21 @@
 <!--/*@thymesVar id="optionalFieldSetHeadingParam" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showCancelLink" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
 <th:block id="form-content"
-          th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)}" >
+          th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)},
+                   submitButtonKey=${submitButtonTextKey == null ? 'forms.buttons.continue' : submitButtonTextKey},
+                   showCancel=${showCancelLink == null ? true : showCancelLink}" >
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'wantsToProceed', #{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${fieldSetHintMsg})}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
     </th:block>
     <div class="govuk-button-group">
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
-        <a th:href="@{${backUrl}}" class="govuk-link" th:text="#{forms.links.cancel}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonKey}})}"></button>
+        <a th:if="${showCancel}" th:href="@{${backUrl}}" class="govuk-link" th:text="#{forms.links.cancel}">
             forms.links.cancel
         </a>
     </div>

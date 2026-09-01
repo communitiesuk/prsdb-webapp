@@ -99,6 +99,7 @@ beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 
 features:
+  overrides-enabled: true
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: true

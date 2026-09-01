@@ -1,0 +1,30 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <div id="interruption-card"
+         th:replace="~{fragments/interruptionCard :: interruptionCard(#{registerProperty.occupancyChangeInterruption.heading}, ~{::#interruption-card-body}, #{forms.buttons.continueWithChange}, ${backUrl})}">
+        <th:block id="interruption-card-body">
+            <p th:text="#{registerProperty.occupancyChangeInterruption.paragraph.one}">
+                registerProperty.occupancyChangeInterruption.paragraph.one
+            </p>
+            <p th:text="#{registerProperty.occupancyChangeInterruption.paragraph.two}">
+                registerProperty.occupancyChangeInterruption.paragraph.two
+            </p>
+            <p class="govuk-!-font-weight-bold" th:text="#{common.confirmationPage.whatHappensNext}">common.confirmationPage.whatHappensNext</p>
+            <p th:text="#{registerProperty.occupancyChangeInterruption.paragraph.three}">
+                registerProperty.occupancyChangeInterruption.paragraph.three
+            </p>
+            <p th:text="#{registerProperty.occupancyChangeInterruption.paragraph.four}">
+                registerProperty.occupancyChangeInterruption.paragraph.four
+            </p>
+            <p th:text="#{registerProperty.occupancyChangeInterruption.paragraph.five}">
+                registerProperty.occupancyChangeInterruption.paragraph.five
+            </p>
+        </th:block>
+    </div>
+</th:block>
+</html>
