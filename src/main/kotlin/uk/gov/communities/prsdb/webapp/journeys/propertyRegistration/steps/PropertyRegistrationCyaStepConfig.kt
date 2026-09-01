@@ -131,9 +131,13 @@ class PropertyRegistrationCyaStepConfig(
             )
         val complianceContent =
             mapOf(
+                // TODO PDJB-1391: placeholder gas safety content for the skipped letting-agent path. These keys
+                //  match ComplianceDetailsHelper.getGasSafetyCyaContent, so the template renders unchanged.
                 "gasSupplyRows" to gasSupplyRows,
                 "gasCertRows" to emptyList<SummaryListRowViewModel>(),
                 "gasInsetTextKey" to null,
+                // TODO PDJB-1391: placeholder electrical safety content for the skipped letting-agent path. These
+                //  keys match ComplianceDetailsHelper.getElectricalSafetyCyaContent, so the template renders unchanged.
                 "electricalRows" to electricalRows,
                 "electricalInsetTextKey" to null,
             ) +
@@ -272,8 +276,8 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
-    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
+    // TODO PDJB-1391: temporary licensing, tenancy, gas and electrical CYA content while the letting-agent path
+    //  reuses this page. Those tasks are skipped, so this renders a single "provide later" row for each one.
     private fun getMockProvideLaterSummaryList(
         fieldHeading: String,
         provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
