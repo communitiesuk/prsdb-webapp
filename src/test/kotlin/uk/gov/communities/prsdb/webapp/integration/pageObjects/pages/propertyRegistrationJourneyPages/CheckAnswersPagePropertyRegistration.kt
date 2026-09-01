@@ -82,6 +82,7 @@ class CheckAnswersPagePropertyRegistration(
         page: Page,
     ) : SummaryList(page) {
         val ownershipRow = getRow("How do you own this property?")
+
         // TODO: PDJB-1340: We can delete ownershipRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
         val ownershipRowLegacy = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
@@ -95,8 +96,9 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
-        
+
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
+
         // TODO: PDJB-1340: We can delete jointLandlordsInvitationsRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
         val jointLandlordsInvitationsRowLegacy = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
