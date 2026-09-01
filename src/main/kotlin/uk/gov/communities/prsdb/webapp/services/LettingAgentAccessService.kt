@@ -88,6 +88,16 @@ class LettingAgentAccessService(
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
             ?: throw PrsdbWebException("Invitation token not found in session for journey $journeyId")
 
+    fun getTokenIsValid(token: String): Boolean {
+        val tokenUuid =
+            try {
+                UUID.fromString(token)
+            } catch (_: IllegalArgumentException) {
+                return false
+            }
+        return lettingAgentAccessRepository.findByToken(tokenUuid) != null
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
         session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS) as? MutableList<Pair<String, String>>

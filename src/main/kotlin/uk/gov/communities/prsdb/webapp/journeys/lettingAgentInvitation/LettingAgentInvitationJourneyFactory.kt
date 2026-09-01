@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Pas
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
+import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.TokenValidationResult
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
 import java.util.UUID
 
@@ -40,13 +43,20 @@ class LettingAgentInvitationJourneyFactory(
                 nextStep { journey.validateTokenStep }
             }
             step(journey.validateTokenStep) {
-                routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
                 parents { journey.startStep.isComplete() }
-                nextStep { journey.hasPasswordStep }
+                nextDestination { mode ->
+                    when (mode) {
+                        TokenValidationResult.VALID -> Destination(journey.hasPasswordStep)
+                        TokenValidationResult.INVALID ->
+                            Destination.ExternalUrl(
+                                "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}/$INVALID_LINK_PAGE_PATH_SEGMENT",
+                            )
+                    }
+                }
             }
             step(journey.hasPasswordStep) {
                 routeSegment(HasPasswordStep.ROUTE_SEGMENT)
-                parents { journey.validateTokenStep.isComplete() }
+                parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
                 nextStep { status ->
                     when (status) {
                         PasswordStatus.HAS_PASSWORD -> journey.enterPasswordStep

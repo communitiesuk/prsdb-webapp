@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Has
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -38,10 +37,6 @@ class LettingAgentSecurityConfig {
                     .anonymous()
                     .requestMatchers(
                         "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1660: Remove when validate token step becomes an internal step
-                        "$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
                     ).anonymous()
                     .requestMatchers(
                         // TODO: PDJB-1658: Remove when check password set step becomes an internal step
