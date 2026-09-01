@@ -66,30 +66,30 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRedesigned) {
-            redesignedJourneyMap(state, checkingAnswersFor, propertyId)
+            journeyMap(state, checkingAnswersFor, propertyId)
         } else if (checkingAnswersFor == null) {
-            oldMainJourneyMap(state, propertyId)
+            beforePdjb939MainJourneyMap(state, propertyId)
         } else {
-            oldCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            beforePdjb939CheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
 
-    private fun redesignedJourneyMap(
+    private fun journeyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String?,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> =
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             if (checkingAnswersFor == null) {
-                redesignedWithCheckAnswersJourneyMap(state, propertyId)
+                mainJourneyMap(state, propertyId)
             } else {
-                redesignedCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+                checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
             }
         } else {
-            redesignedSinglePageJourneyMap(state, propertyId)
+            beforePdjb1022JourneyMap(state, propertyId)
         }
 
-    private fun redesignedWithCheckAnswersJourneyMap(
+    private fun mainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -133,7 +133,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun redesignedCheckYourAnswersJourneyMap(
+    private fun checkYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,
@@ -176,7 +176,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun redesignedSinglePageJourneyMap(
+    private fun beforePdjb1022JourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -212,7 +212,7 @@ class UpdateOccupancyJourneyFactory(
     }
 
     // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun oldMainJourneyMap(
+    private fun beforePdjb939MainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -223,12 +223,12 @@ class UpdateOccupancyJourneyFactory(
             task(journey.occupationTask.inJourney(journey)) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.legacyCyaStep }
+                nextStep { journey.beforePdjb939CyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
-            step(journey.legacyCyaStep) {
+            step(journey.beforePdjb939CyaStep) {
                 routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
                 parents { journey.occupationTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
@@ -238,7 +238,7 @@ class UpdateOccupancyJourneyFactory(
     }
 
     // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun oldCheckYourAnswersJourneyMap(
+    private fun beforePdjb939CheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,
@@ -365,15 +365,15 @@ class UpdateOccupancyJourney(
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
-    override val legacyCyaStep: UpdateOccupancyCyaStep,
+    override val beforePdjb939CyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
     // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
-    // see redesignedJourneyMap)
+    // see journeyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
     // Skeleton interruption / "are you sure" step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT
-    // is enabled - see redesignedJourneyMap)
+    // is enabled - see journeyMap)
     override val interruptionStep: UpdateOccupancyInterruptionStep,
     private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
@@ -391,7 +391,7 @@ class UpdateOccupancyJourney(
             ) {
                 checkYourAnswersStep
             } else {
-                legacyCyaStep
+                beforePdjb939CyaStep
             }
 
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
@@ -415,7 +415,7 @@ interface UpdateOccupancyJourneyState :
     OccupationState,
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
-    val legacyCyaStep: UpdateOccupancyCyaStep
+    val beforePdjb939CyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
     val interruptionStep: UpdateOccupancyInterruptionStep

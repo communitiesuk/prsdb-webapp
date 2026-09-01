@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 // TODO(PDJB-1340): delete this old (flag-off) check-your-answers step when
 // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. The redesigned occupancy update is a single-page
-// update (see UpdateOccupancyJourneyFactory.redesignedJourneyMap) and does not use this step.
+// update (see UpdateOccupancyJourneyFactory.journeyMap) and does not use this step.
 @JourneyFrameworkComponent
 class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
