@@ -234,10 +234,11 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class RestructureAndSkippingEnabled {
+    inner class RestructuredContentWithoutLettingAgents {
         @BeforeEach
-        fun enableRestructureAndSkippingFlag() {
+        fun enableRestructureAndSkippingFlagWithoutLettingAgents() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         }
 
         @Test
@@ -268,6 +269,13 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(expectedTenancyDetails, content["tenancyDetails"])
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
         }
 
         @Test
@@ -304,7 +312,6 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
             whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -471,24 +478,12 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class LettingAgentDelegationEnabled {
+    inner class LettingAgentRestructuredContent {
         @BeforeEach
-        fun enableDelegationFlags() {
+        fun enableLettingAgentFlags() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
-        }
-
-        @Test
-        fun `getStepSpecificContent includes lettingAgentDelegation when delegated to agent`() {
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(content.containsKey("lettingAgentDelegation"))
-            val delegationSection = content["lettingAgentDelegation"] as? List<*>
-            assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
-            assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
         }
 
         @Test
@@ -515,18 +510,24 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class LettingAgentDelegationDisabled {
+    inner class DelegatedRestructuredContent {
         @BeforeEach
-        fun disableDelegationFlag() {
+        fun enableDelegationFlags() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
         }
 
         @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation when delegate feature is disabled`() {
+        fun `getStepSpecificContent includes lettingAgentDelegation when delegated to agent`() {
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
+
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+            assertTrue(content.containsKey("lettingAgentDelegation"))
+            val delegationSection = content["lettingAgentDelegation"] as? List<*>
+            assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
+            assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
         }
     }
 }
