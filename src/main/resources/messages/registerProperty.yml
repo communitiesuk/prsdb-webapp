@@ -60,7 +60,7 @@ confirmation:
       electricalSafetyCertificate: electrical safety certificate
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
-      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they've provided this information.
+      completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they’ve provided this information.
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'
@@ -180,15 +180,33 @@ provideLicensingLater:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
 whoProvidesRentalDetails:
-  fieldSetHeading: Who will provide these details?
+  heading: Who will provide details about how your property’s rented out
+  intro: 'To register your property, we need details about:'
+  bullet:
+    licensing: if your property needs a license
+    complianceCertificates: compliance certificates
+    tenancy: the current tenancy
+  lettingAgentParagraph: If you’re using a letting agent or property manager, you can choose for them to provide these details for you. They can also keep these details up to date.
+  fieldSetHeading: Who will provide this property’s rental details?
   radios:
     error:
-      missing: Select who will provide these details
+      missing: Select who will provide this property’s rental details
     option:
       landlord:
-        label: Me
+        label: I will provide these details
       lettingAgent:
-        label: Letting agent
+        label: My letting agent or property manager
+        hint: Give them access to provide these details
+  changeToLettingAgent:
+    heading: Are you sure you want to change this?
+    paragraph:
+      one: You’ve selected for your letting agent or property manager to provide details about how your property’s rented out.
+      two: 'This means we’ll remove the details you’ve already provided about:'
+      three: You can go back to undo this change.
+    bullet:
+      one: property licensing
+      two: compliance certificates
+      three: the current tenancy
 lettingAgentEmail:
   heading: Allow your letting agent or property manager to provide details
   howItWorks:

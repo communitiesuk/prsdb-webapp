@@ -262,14 +262,14 @@
   },
   {
     "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
-    "prod_id": "",
+    "prod_id": "1c21afd0-943e-4613-a441-203869e0559a",
     "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
     "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
   },
   {
     "test_id": "df2afd98-4575-45a7-8722-26f763aa8fb1",
-    "prod_id": "",
+    "prod_id": "d337073d-5452-4abb-8ae0-6a51590090ae",
     "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
     "subject": "You’re no longer registered as a landlord for a property",
     "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"

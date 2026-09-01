@@ -8,8 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.WhoProvidesRentalDetailsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-1388: this is a skeleton page. Replace the placeholder heading/labels
-// ("Me" / "Letting agent") and wire the real content when the page is built.
 @JourneyFrameworkComponent
 class WhoProvidesRentalDetailsStepConfig :
     AbstractRequestableStepConfig<WhoProvidesRentalDetailsMode, WhoProvidesRentalDetailsFormModel, WhoProvidesDetailsState>() {
@@ -18,6 +16,7 @@ class WhoProvidesRentalDetailsStepConfig :
     override fun getStepSpecificContent(state: WhoProvidesDetailsState) =
         mapOf(
             "fieldSetHeading" to "registerProperty.whoProvidesRentalDetails.fieldSetHeading",
+            "fieldSetHint" to "registerProperty.whoProvidesRentalDetails.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "radioOptions" to
                 listOf(
@@ -28,6 +27,7 @@ class WhoProvidesRentalDetailsStepConfig :
                     RadiosButtonViewModel(
                         value = WhoProvidesRentalDetails.LETTING_AGENT,
                         labelMsgKey = "registerProperty.whoProvidesRentalDetails.radios.option.lettingAgent.label",
+                        hintMsgKey = "registerProperty.whoProvidesRentalDetails.radios.option.lettingAgent.hint",
                     ),
                 ),
         )

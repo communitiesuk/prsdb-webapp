@@ -2,10 +2,14 @@ package uk.gov.communities.prsdb.webapp.database.entity
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.time.LocalDate
 
 class PropertyOwnershipTests {
     @Test
@@ -77,5 +81,36 @@ class PropertyOwnershipTests {
             )
 
         assertEquals(LicensingType.NO_LICENSING, property.licenseType)
+    }
+
+    @Test
+    fun `provideLaterDeadline is the registration date plus the deadline period when occupied since registration`() {
+        val registrationDate = LocalDate.of(2025, 1, 15)
+        val property =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate,
+            )
+
+        assertEquals(registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()), property.provideLaterDeadline)
+    }
+
+    @Test
+    fun `provideLaterDeadline is null when the property became occupied after registration`() {
+        val registrationDate = LocalDate.of(2025, 1, 15)
+        val property =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate.plusDays(30),
+            )
+
+        assertNull(property.provideLaterDeadline)
+    }
+
+    @Test
+    fun `provideLaterDeadline is null when the property is unoccupied`() {
+        val property = MockLandlordData.createUnoccupiedPropertyOwnership()
+
+        assertNull(property.provideLaterDeadline)
     }
 }

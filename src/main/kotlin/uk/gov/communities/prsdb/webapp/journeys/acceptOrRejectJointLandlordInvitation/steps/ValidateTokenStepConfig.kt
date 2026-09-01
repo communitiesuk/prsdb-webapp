@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("jointLandlordInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig(
     private val invitationService: JointLandlordInvitationService,
 ) : AbstractRequestableStepConfig<TokenValidationResult, NoInputFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
@@ -34,7 +34,7 @@ class ValidateTokenStepConfig(
     }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("jointLandlordInvitationValidateTokenStep")
 final class ValidateTokenStep(
     stepConfig: ValidateTokenStepConfig,
 ) : JourneyStep.RequestableStep<TokenValidationResult, NoInputFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>(stepConfig) {
