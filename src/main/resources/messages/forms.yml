@@ -607,6 +607,7 @@ checkPropertyAnswers:
     heading: How your property’s rented out
     subheading: Who will provide these details
     bodyText: "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:"
+    unoccupiedBodyText: When your property becomes occupied, you can choose for your letting agent or property manager to provide this section for you. They can also keep these details up to date.
     values:
       landlord:
         label: I will provide these details

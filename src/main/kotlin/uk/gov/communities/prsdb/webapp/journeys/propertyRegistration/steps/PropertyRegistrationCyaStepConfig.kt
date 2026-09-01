@@ -157,6 +157,8 @@ class PropertyRegistrationCyaStepConfig(
                         } else {
                             null
                         },
+                    "showLettingAgentDelegationUnoccupiedInset" to
+                        (isDelegateToLettingAgentEnabled && !isOccupied && whoProvidesRentalDetails == null),
                 )
         }
 

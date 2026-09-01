@@ -37,6 +37,7 @@
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="lettingAgentDelegation" type="java.util.List"*/-->
 <!--/*@thymesVar id="lettingAgentDelegationBodyText" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showLettingAgentDelegationUnoccupiedInset" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="hideDelegatedSections" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -67,6 +68,10 @@
             <dl th:replace="~{fragments/summaryList :: summaryList(${lettingAgentDelegation})}"></dl>
         </th:block>
         <h2 th:if="${#lists.isEmpty(lettingAgentDelegation)}" class="govuk-heading-m" th:text="#{${rentedOutHeadingKey}}"></h2>
+        <th:block th:if="${showLettingAgentDelegationUnoccupiedInset == true}">
+            <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
+            <div class="govuk-inset-text" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.unoccupiedBodyText}"></div>
+        </th:block>
         <th:block th:if="${hideDelegatedSections != true}">
             <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
