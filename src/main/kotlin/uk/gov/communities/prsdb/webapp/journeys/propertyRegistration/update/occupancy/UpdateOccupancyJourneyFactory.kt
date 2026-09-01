@@ -110,6 +110,7 @@ class UpdateOccupancyJourneyFactory(
                     )
                 }
             }
+            // TODO(PDJB-1417): show the interruption only when the change removes an existing letting agent
             step(journey.interruptionStep) {
                 routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
                 parents {
@@ -157,8 +158,6 @@ class UpdateOccupancyJourneyFactory(
                         }
                     }
                     // TODO(PDJB-1417): show the interruption only when the change removes an existing letting agent
-                    //  delegation (occupied -> vacant), mirroring OccupancyChangeCyaJourney. For now it mirrors the
-                    //  main redesigned flow and is shown after any occupancy change from the check-your-answers page.
                     step(journey.interruptionStep) {
                         routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
                         parents { journey.occupied.isComplete() }
