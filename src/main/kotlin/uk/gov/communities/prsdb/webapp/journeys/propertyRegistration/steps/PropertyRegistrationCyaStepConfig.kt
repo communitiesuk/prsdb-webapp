@@ -217,7 +217,7 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutEpcHeadingKey" to "propertyCompliance.epcTask.checkEpcAnswers.heading",
             "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.heading",
             "rentedOutLicensingRows" to licensingDetails,
-            "rentedOutTenancyRows" to if (isOccupied) tenancyDetails else emptyList<SummaryListRowViewModel>(),
+            "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
         )
