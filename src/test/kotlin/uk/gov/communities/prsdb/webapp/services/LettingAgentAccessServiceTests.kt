@@ -278,4 +278,25 @@ class LettingAgentAccessServiceTests {
             }
         }
     }
+
+    @Test
+    fun `getTokenIsValid returns true when invitation exists for token`() {
+        val token = UUID.randomUUID()
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token))
+
+        assertTrue(lettingAgentAccessService.getTokenIsValid(token.toString()))
+    }
+
+    @Test
+    fun `getTokenIsValid returns false when no invitation exists for token`() {
+        val token = UUID.randomUUID()
+        whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
+
+        assertFalse(lettingAgentAccessService.getTokenIsValid(token.toString()))
+    }
+
+    @Test
+    fun `getTokenIsValid returns false when token is not a valid UUID`() {
+        assertFalse(lettingAgentAccessService.getTokenIsValid("not-a-valid-uuid"))
+    }
 }

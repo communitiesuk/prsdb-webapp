@@ -6,22 +6,20 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.HasPasswordPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.InvalidLinkPageLettingAgentInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 
 class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val validToken = "3334abcd-5678-abcd-1234-567abcd1111a"
+    private val invalidToken = "00000000-0000-0000-0000-000000000000"
 
     @Test
     fun `user who does not have a password can walk the set password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(validToken)
-        // TODO PDJB-1658: Update when validate token step is implemented
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
+        navigator.goToLettingAgentInvitationJourney(validToken)
 
         val hasPasswordPage = assertPageIs(page, HasPasswordPage::class)
         // TODO PDJB-1658: Remove this step from the journey test
@@ -46,10 +44,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     fun `user who has a password can walk the enter password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(validToken)
-        // TODO PDJB-1658: Update when validate token step is implemented
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
+        navigator.goToLettingAgentInvitationJourney(validToken)
 
         val hasPasswordPage = assertPageIs(page, HasPasswordPage::class)
         // TODO PDJB-1658: Remove this step from the journey test
@@ -64,5 +59,14 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         storeAccessPage.form.submit()
 
         // TODO PDJB-1570: Assert redirect to letting agent property record page
+    }
+
+    @Test
+    fun `user with an invalid token is redirected to the invalid link page`(page: Page) {
+        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
+
+        navigator.goToLettingAgentInvitationJourney(invalidToken)
+
+        assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
     }
 }
