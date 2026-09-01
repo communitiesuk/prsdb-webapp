@@ -436,10 +436,15 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                         )
                     assertThat(checkAnswersPage.summaryList.occupancyRow.value).containsText("No")
 
-                    // Change the occupancy answer to occupied and return to the check answers page
+                    // Change the occupancy answer to occupied; the interruption is shown again before returning to CYA
                     checkAnswersPage.clickChangeOccupancy()
                     assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
                         .submitIsOccupied()
+                    assertPageIs(
+                        page,
+                        UpdateOccupancyInterruptionPagePropertyDetailsUpdate::class,
+                        occupiedPropertyUrlArguments,
+                    ).continueToCheckAnswers()
                     val updatedCheckAnswersPage =
                         assertPageIs(
                             page,

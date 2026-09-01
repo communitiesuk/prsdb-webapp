@@ -122,12 +122,7 @@ class UpdateOccupancyJourneyFactory(
             }
             step(journey.checkYourAnswersStep) {
                 routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
-                }
+                parents { journey.interruptionStep.isComplete() }
                 nextStep { journey.completeOccupancyUpdateStep }
             }
             step(journey.completeOccupancyUpdateStep) {
@@ -149,7 +144,10 @@ class UpdateOccupancyJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT) {
+                    step(journey.occupied) {
+                        initialStep()
+                        routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                        nextStep { journey.interruptionStep }
                         withAdditionalContentProperties {
                             mapOf(
                                 "title" to "propertyDetails.update.title",
@@ -157,6 +155,14 @@ class UpdateOccupancyJourneyFactory(
                                 "submitButtonText" to "forms.buttons.saveAndContinue",
                             )
                         }
+                    }
+                    // TODO(PDJB-1417): show the interruption only when the change removes an existing letting agent
+                    //  delegation (occupied -> vacant), mirroring OccupancyChangeCyaJourney. For now it mirrors the
+                    //  main redesigned flow and is shown after any occupancy change from the check-your-answers page.
+                    step(journey.interruptionStep) {
+                        routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
+                        parents { journey.occupied.isComplete() }
+                        nextStep { journey.finishCyaStep }
                     }
                 }
 
@@ -376,11 +382,14 @@ class UpdateOccupancyJourney(
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    // The redesigned update uses the new check-your-answers step, while the old (flag-off) journey uses the
-    // legacy check-your-answers step. Both journeys share a single state object, so switch on the flag here.
+    // The redesigned update with letting agent delegation uses the new check-your-answers step; every other
+    // variant (the redesigned single-page update with delegation off, and the old flag-off journey) uses the
+    // legacy check-your-answers step. All variants share a single state object, so switch on the flags here.
     override val cyaStep: JourneyStep.RequestableStep<*, *, *>
         get() =
-            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+                featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+            ) {
                 checkYourAnswersStep
             } else {
                 legacyCyaStep
