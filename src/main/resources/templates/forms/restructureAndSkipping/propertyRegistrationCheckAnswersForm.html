@@ -59,13 +59,12 @@
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.occupancy.heading}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${occupancyDetails})}"></dl>
         </th:block>
+        <h2 class="govuk-heading-m" th:text="#{${rentedOutHeadingKey}}"></h2>
         <th:block th:if="${!#lists.isEmpty(lettingAgentDelegation)}">
-            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.heading}"></h2>
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
             <p th:if="${lettingAgentDelegationBodyText == true}" class="govuk-body" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.bodyText}"></p>
             <dl th:replace="~{fragments/summaryList :: summaryList(${lettingAgentDelegation})}"></dl>
         </th:block>
-        <h2 th:if="${#lists.isEmpty(lettingAgentDelegation)}" class="govuk-heading-m" th:text="#{${rentedOutHeadingKey}}"></h2>
         <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
         <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
         <h3 class="govuk-heading-s" th:text="#{${rentedOutGasHeadingKey}}"></h3>
