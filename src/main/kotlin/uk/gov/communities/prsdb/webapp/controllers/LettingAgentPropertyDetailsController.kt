@@ -9,6 +9,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
@@ -64,7 +65,7 @@ class LettingAgentPropertyDetailsController(
         const val LETTING_AGENT_PROPERTY_DETAILS_VIEW = "propertyDetailsLettingAgentView"
 
         const val LETTING_AGENT_PROPERTY_DETAILS_ROUTE =
-            "/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
         fun getLettingAgentPropertyDetailsPath(propertyOwnershipId: Long): String =
             UriTemplate(LETTING_AGENT_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
