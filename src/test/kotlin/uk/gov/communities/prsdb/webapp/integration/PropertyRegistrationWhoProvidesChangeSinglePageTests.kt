@@ -170,6 +170,21 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
     }
 
     @Test
+    fun `switching from letting agent to landlord removes the letting agent email row from the CYA`(page: Page) {
+        val checkAnswersPage = goToCheckAnswersWithLettingAgentProvidingDetails(page)
+        assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText(LETTING_AGENT_EMAIL)
+
+        checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.clickFirstActionLinkAndWait()
+        assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            .submitLandlordProvidesDetails()
+
+        val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(updatedCheckAnswersPage.summaryList.whoProvidesRentalDetailsRow.value)
+            .containsText("I will provide these details")
+        assertThat(updatedCheckAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
+    }
+
+    @Test
     fun `switching to landlord then back to letting agent restores the previously entered email`(page: Page) {
         val checkAnswersPage = goToCheckAnswersWithLettingAgentProvidingDetails(page)
 
