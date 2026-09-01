@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.DelegateToLettingAgentJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.delegateToLettingAgent.stepConfig.AllowLettingAgentStep
-import uk.gov.communities.prsdb.webapp.services.DelegateToLettingAgentService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class DelegateToLettingAgentController(
     private val delegateToLettingAgentJourneyFactory: DelegateToLettingAgentJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val delegateToLettingAgentService: DelegateToLettingAgentService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @GetMapping("/{*stepPath}")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
@@ -78,11 +78,10 @@ class DelegateToLettingAgentController(
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
         val invitedEmailAddress =
-            delegateToLettingAgentService.getDelegatedLettingAgentsFromSession()[propertyOwnershipId]
+            lettingAgentAccessService.getDelegatedPropertyOwnershipEmailsFromSession()[propertyOwnershipId]
                 ?: throw ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "PropertyOwnershipId $propertyOwnershipId was not found in the list of properties delegated to a " +
-                        "letting agent in the session",
+                    "PropertyOwnershipId $propertyOwnershipId was not delegated to a letting agent in this session",
                 )
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)

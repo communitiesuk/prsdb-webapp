@@ -1,0 +1,20 @@
+title: Feature flag overrides
+heading: Feature flag overrides
+description: These overrides apply only to your own browser session and are cleared when it ends.
+releasesHeading: Releases
+flagsHeading: Feature flags
+hint:
+  defaultOn: Default is on
+  defaultOff: Default is off
+  inRelease: ', in release {0}'
+  noRelease: ', not in a release'
+  supersededByRelease: ', a release override is set, which takes precedence over this flag'
+  releaseFlags: Contains {0}
+  noReleaseFlags: Contains no flags
+choice:
+  # Quoted because YAML would otherwise read these keys and values as booleans
+  "DEFAULT": Default
+  "ON": "On"
+  "OFF": "Off"
+submit: Save overrides
+reset: Reset all overrides

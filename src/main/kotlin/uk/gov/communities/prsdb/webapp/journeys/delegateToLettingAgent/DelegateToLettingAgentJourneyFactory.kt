@@ -22,7 +22,7 @@ class DelegateToLettingAgentJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
-            unreachableStepStep { journey.allowLettingAgentStep }
+            unreachableStepUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
             configure {
                 withAdditionalContentProperty { "title" to "delegateToLettingAgent.title" }
             }

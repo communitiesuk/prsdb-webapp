@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -11,8 +13,10 @@ import java.util.Locale
 
 abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
+    protected abstract val provideLaterNoDeadlineKey: String
     protected abstract val provideLaterWithDeadlineKey: String
     protected abstract val missingCertOccupiedValue: String
     protected abstract val occupiedNoCertInsetKey: String
@@ -44,7 +48,7 @@ abstract class ComplianceViewModelFactoryBase(
             }
 
             status == ComplianceCertStatus.PROVIDE_LATER -> {
-                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
+                getProvideLaterValue(propertyCompliance)
             }
 
             else -> {
@@ -52,13 +56,22 @@ abstract class ComplianceViewModelFactoryBase(
             }
         }
 
-    private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
-        // TODO PDJB-1479: Only show the dated deadline for properties that were occupied at registration. Properties
-        //  that became occupied after registration should show a provide-later message without a date, mirroring the
-        //  tenancy/licensing details on the property record (see PropertyDetailsViewModel).
-        val deadline =
-            lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
+    private fun getProvideLaterValue(propertyCompliance: PropertyCompliance): Any {
+        val propertyOwnership = propertyCompliance.propertyOwnership
+        // TODO PDJB-939: when the flag is permanently on, delete the flag-off branch (and the injected
+        //  featureFlagManager); the deadline is always propertyOwnership.provideLaterDeadline.
+        return if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            val deadline = propertyOwnership.provideLaterDeadline
+            if (deadline != null) getProvideLaterWithDeadlineText(deadline) else provideLaterNoDeadlineKey
+        } else {
+            val deadline =
+                propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                    ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
+            getProvideLaterWithDeadlineText(deadline)
+        }
+    }
+
+    private fun getProvideLaterWithDeadlineText(deadline: LocalDate): String {
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(provideLaterWithDeadlineKey, arrayOf(formattedDate))
     }

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityExistsException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -19,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @PrsdbWebService
 class PropertyRegistrationService(
@@ -32,6 +35,8 @@ class PropertyRegistrationService(
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyComplianceService: PropertyComplianceService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val delegateToLettingAgentEmailService: DelegateToLettingAgentEmailService,
 ) {
     @Transactional
     fun registerProperty(
@@ -52,6 +57,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        lettingAgentEmail: String? = null,
         markedJointLandlord: Boolean = false,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
@@ -70,6 +76,7 @@ class PropertyRegistrationService(
         epcProvideLater: Boolean? = null,
         licenseProvideLater: Boolean = false,
         tenancyProvideLater: Boolean? = null,
+        isDelegatedToLettingAgent: Boolean = false,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
 
@@ -97,6 +104,20 @@ class PropertyRegistrationService(
                 licenseProvideLater = licenseProvideLater,
             )
 
+        if (lettingAgentEmail != null) {
+            lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
+            val deadlineDate =
+                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
+                    DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
+                )
+            delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
+                propertyOwnership,
+                landlord.name,
+                lettingAgentEmail,
+                deadlineDate,
+            )
+        }
+
         propertyComplianceService.saveRegistrationComplianceData(
             propertyOwnership.registrationNumber.number,
             hasGasSupply,
@@ -118,7 +139,7 @@ class PropertyRegistrationService(
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
 
-        sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails)
+        sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails, isDelegatedToLettingAgent)
     }
 
     private fun createPropertyOwnershipAndRelatedEntities(
@@ -184,6 +205,7 @@ class PropertyRegistrationService(
         propertyOwnership: PropertyOwnership,
         addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
+        isDelegatedToLettingAgent: Boolean,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord (check which org email address to use, currently registrant)
         confirmationEmailSender.sendEmail(
@@ -196,6 +218,7 @@ class PropertyRegistrationService(
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,
+                isDelegatedToLettingAgent,
             ),
         )
 

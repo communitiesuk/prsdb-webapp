@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{featureFlagOverrides.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{featureFlagOverrides.heading}">featureFlagOverrides.heading</h1>
+        <p class="govuk-body" th:text="#{featureFlagOverrides.description}">featureFlagOverrides.description</p>
+
+        <form method="POST" th:action="@{''}">
+            <section th:if="${!#lists.isEmpty(releases)}">
+                <h2 class="govuk-heading-m" th:text="#{featureFlagOverrides.releasesHeading}">featureFlagOverrides.releasesHeading</h2>
+                <div class="govuk-form-group" th:each="release : ${releases}"
+                     th:id="|release-${release.name}|"
+                     th:with="releaseHintId=|release-${release.name}-hint|">
+                    <fieldset class="govuk-fieldset" th:attr="aria-describedby=${releaseHintId}">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s" th:text="${release.name}">release.name</legend>
+                        <div class="govuk-hint" th:id="${releaseHintId}"
+                             th:text="${#lists.isEmpty(release.flagNames)}
+                                      ? #{featureFlagOverrides.hint.noReleaseFlags}
+                                      : #{featureFlagOverrides.hint.releaseFlags(${#strings.listJoin(release.flagNames, ', ')})}">featureFlagOverrides.hint.releaseFlags</div>
+                        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                            <div class="govuk-radios__item" th:each="choice : ${choices}"
+                                 th:with="radioId=|release-${release.name}-${choice}|">
+                                <input class="govuk-radios__input"
+                                       type="radio"
+                                       th:id="${radioId}"
+                                       th:name="|releases[${release.name}]|"
+                                       th:value="${choice}"
+                                       th:checked="${release.choice == choice}">
+                                <label class="govuk-label govuk-radios__label"
+                                       th:for="${radioId}"
+                                       th:text="#{'featureFlagOverrides.choice.' + ${choice}}">featureFlagOverrides.choice</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{featureFlagOverrides.flagsHeading}">featureFlagOverrides.flagsHeading</h2>
+                <div class="govuk-form-group" th:each="flag : ${flags}"
+                     th:id="|flag-${flag.name}|"
+                     th:with="flagHintId=|flag-${flag.name}-hint|">
+                    <fieldset class="govuk-fieldset" th:attr="aria-describedby=${flagHintId}">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s" th:text="${flag.name}">flag.name</legend>
+                        <div class="govuk-hint" th:id="${flagHintId}"
+                             th:text="(${flag.isEnabledByDefault}
+                                       ? #{featureFlagOverrides.hint.defaultOn}
+                                       : #{featureFlagOverrides.hint.defaultOff})
+                                      + (${flag.release} != null
+                                       ? #{featureFlagOverrides.hint.inRelease(${flag.release})}
+                                       : #{featureFlagOverrides.hint.noRelease})
+                                      + (${flag.isSupersededByReleaseOverride}
+                                       ? #{featureFlagOverrides.hint.supersededByRelease}
+                                       : '')">featureFlagOverrides.hint.currentlyOn</div>
+                        <div class="govuk-radios govuk-radios--inline" data-module="govuk-radios">
+                            <div class="govuk-radios__item" th:each="choice : ${choices}"
+                                 th:with="radioId=|flag-${flag.name}-${choice}|">
+                                <input class="govuk-radios__input"
+                                       type="radio"
+                                       th:id="${radioId}"
+                                       th:name="|flags[${flag.name}]|"
+                                       th:value="${choice}"
+                                       th:checked="${flag.choice == choice}">
+                                <label class="govuk-label govuk-radios__label"
+                                       th:for="${radioId}"
+                                       th:text="#{'featureFlagOverrides.choice.' + ${choice}}">featureFlagOverrides.choice</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
+
+            <div class="govuk-button-group">
+                <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{featureFlagOverrides.submit}, 'action', ${saveAction})}">featureFlagOverrides.submit</button>
+                <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{featureFlagOverrides.reset}, 'action', ${resetAction})}">featureFlagOverrides.reset</button>
+            </div>
+        </form>
+    </main>
+</html>

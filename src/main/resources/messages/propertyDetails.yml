@@ -8,6 +8,9 @@ lettingAgentPanel:
     heading: If you’re using a letting agent or property manager
     body: They can provide this property’s licensing, compliance certificates and tenancy details.
     link: Allow your letting agent or property manager to update details
+  unoccupied:
+    heading: If you’re using a letting agent or property manager
+    body: Once your property’s occupied, they can keep details updated for you.
   cancelDelegation:
     heading: Your letting agent or property manager can provide details for this property record
     body: They can keep this property’s licensing, compliance certificates and tenancy details up to date.
@@ -110,6 +113,7 @@ complianceInformation:
     isEpcRequired: Is an EPC required to let this property?
     epcExemption: Why does this property not need an EPC?
     provideEpcLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    occupiedNoDeadline: Provide this later (within 28 days of the property being occupied)
     occupiedWithDeadline: Provide this later (before {0})
     occupiedNoEpcInset: The council will see that there’s no valid EPC, even though the property’s occupied.
   insetText:

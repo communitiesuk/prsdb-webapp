@@ -17,14 +17,17 @@ import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
+import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfig
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
     DefaultSecurityConfig::class,
     LandlordSecurityConfig::class,
+    LettingAgentSecurityConfig::class,
     LocalCouncilSecurityConfig::class,
     CustomErrorConfig::class,
     TrailingSlashFilterConfiguration::class,
@@ -59,6 +62,9 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var dashboardUrlProvider: DashboardUrlProvider
+
+    @MockitoBean
+    lateinit var featureFlagOverrideService: FeatureFlagOverrideService
 
     @MockitoBean
     lateinit var mockPrsdbWebMvcRegistration: PrsdbWebMvcRegistration
