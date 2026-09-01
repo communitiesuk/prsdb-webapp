@@ -51,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LettingAgentEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
@@ -180,12 +179,6 @@ class PropertyRegistrationJourneyFactory(
                         isSkippingEnabled -> checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
                         else -> checkAnswerTask(journey.occupationTask.inJourney(journey))
                     }
-                }
-
-                WhoProvidesRentalDetailsStep.ROUTE_SEGMENT,
-                LettingAgentEmailStep.ROUTE_SEGMENT,
-                -> {
-                    checkAnswerTask(journey.whoProvidesDetailsTask, { journey })
                 }
 
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
