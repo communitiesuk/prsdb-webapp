@@ -127,8 +127,6 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
-                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
                         whoProvidesChangeCyaJourney()
