@@ -47,13 +47,13 @@ class PropertyRegistrationCyaStepConfig(
 
         val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         if (!isLettingAgentEnabled) {
-            return getRestructuredContent(state)
+            return getRestructured28DaysLaterContent(state)
         }
 
         return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
             getDelegatedRestructuredContent(state)
         } else {
-            getLettingAgentRestructuredContent(state)
+            getLettingAgentRestructured28DaysLaterContent(state)
         }
     }
 
@@ -71,19 +71,19 @@ class PropertyRegistrationCyaStepConfig(
         ) + getComplianceContent(state)
     }
 
-    private fun getRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        return getRestructuredContent(state, emptyMap())
+    private fun getRestructured28DaysLaterContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        return getRestructured28DaysLaterContent(state, emptyMap())
     }
 
-    private fun getLettingAgentRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+    private fun getLettingAgentRestructured28DaysLaterContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val delegationContent =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides?.let {
                 getLettingAgentDelegationSummaryContent(state, it)
             } ?: emptyMap()
-        return getRestructuredContent(state, delegationContent)
+        return getRestructured28DaysLaterContent(state, delegationContent)
     }
 
-    private fun getRestructuredContent(
+    private fun getRestructured28DaysLaterContent(
         state: PropertyRegistrationJourneyState,
         delegationContent: Map<String, Any?>,
     ): Map<String, Any?> {
