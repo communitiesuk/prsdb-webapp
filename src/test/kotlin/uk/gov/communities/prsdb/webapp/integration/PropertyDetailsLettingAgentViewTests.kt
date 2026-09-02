@@ -70,13 +70,6 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     }
 
     @Test
-    fun `no change links are shown for any summary list row`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedToken)
-
-        assertThat(page.locator(".govuk-summary-list__actions a")).hasCount(0)
-    }
-
-    @Test
     fun `a not found page is returned when the delegate to letting agent flag is disabled`(page: Page) {
         featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
 

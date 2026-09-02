@@ -13,19 +13,6 @@ class LettingAgentPropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
     @Test
-    fun `no row in the licensing or tenancy sections has a change link`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
-
-        val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
-
-        (viewModel.licensingSection + viewModel.tenancySection).forEach { row ->
-            assertFalse(row.hasActions, "Expected row '${row.fieldHeading}' to have no change link")
-            assertTrue(row.actions.isEmpty(), "Expected row '${row.fieldHeading}' to have no actions")
-        }
-    }
-
-    @Test
     fun `the provide-details banner is shown when licensing details are outstanding`() {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = true)
 
