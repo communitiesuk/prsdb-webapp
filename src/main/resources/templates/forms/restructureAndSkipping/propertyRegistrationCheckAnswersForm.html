@@ -69,7 +69,10 @@
         </th:block>
         <th:block th:if="${showLettingAgentDelegationUnoccupiedInset == true}">
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
-            <div class="govuk-inset-text" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.unoccupiedBodyText}"></div>
+            <article id="letting-agent-delegation-unoccupied-panel"
+                     th:replace="~{fragments/ticketPanel :: ticketPanel(null, ~{::#letting-agent-delegation-unoccupied-panel/content()}, null)}">
+                <p class="govuk-body" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.unoccupiedBodyText}"></p>
+            </article>
         </th:block>
         <th:block th:if="${hideDelegatedSections != true}">
         <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
