@@ -25,7 +25,10 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        propertyDetailsUrl: String = PropertyDetailsController.getPropertyDetailsPath(propertyId),
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -40,17 +43,16 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, propertyDetailsUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, propertyDetailsUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyId: Long,
+        propertyDetailsRoute: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.householdsAndTenantsTask) {
@@ -82,9 +84,8 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyId: Long,
+        propertyDetailsRoute: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
@@ -113,7 +114,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
     fun initializeJourneyState(
         ownershipId: Long,
-        user: Principal,
+        user: Principal?,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 }
 

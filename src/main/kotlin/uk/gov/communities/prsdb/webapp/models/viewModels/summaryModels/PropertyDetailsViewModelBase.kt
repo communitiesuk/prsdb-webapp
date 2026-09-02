@@ -5,7 +5,9 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
@@ -124,8 +126,14 @@ abstract class PropertyDetailsViewModelBase(
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
-            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateHouseholdsAndTenantsController.getBaseRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = true,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
@@ -251,8 +259,14 @@ abstract class PropertyDetailsViewModelBase(
             } else {
                 "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
-            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateTenancyDetailsController.getBaseRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
         )
 
     // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
