@@ -9,16 +9,17 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import java.util.UUID
 
 class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("data-local.sql") {
-    // See data-local.sql: PO 39 has all details (licensing, tenancy, compliance) marked "provide later".
-    private val allDetailsDelegatedPropertyId = 39L
+    // See data-local.sql: PO 39 (token ...2222a) has all details (licensing, tenancy, compliance) marked "provide later".
+    private val allDetailsDelegatedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222a")
 
-    // PO 43 has licensing and tenancy marked "provide later" but valid, in-date compliance certificates.
-    private val licensingAndTenancyOutstandingPropertyId = 43L
+    // PO 43 (token ...2222c) has licensing and tenancy marked "provide later" but valid, in-date compliance certificates.
+    private val licensingAndTenancyOutstandingToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
 
-    // PO 40 has all details provided and valid, in-date compliance certificates.
-    private val allDetailsProvidedPropertyId = 40L
+    // PO 40 (token ...2222b) has all details provided and valid, in-date compliance certificates.
+    private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
 
     @BeforeEach
     fun enableFeatureFlag() {
@@ -27,7 +28,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
     @Test
     fun `when all details are delegated the provide-details banner and single provide-later rows are shown`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedPropertyId)
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
 
         assertThat(detailsPage.provideDetailsBanner).isVisible()
         assertThat(detailsPage.provideDetailsBanner).containsText("Provide all details")
@@ -44,7 +45,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
     @Test
     fun `when only licensing and tenancy are outstanding the banner is shown and compliance is valid`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(licensingAndTenancyOutstandingPropertyId)
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(licensingAndTenancyOutstandingToken)
 
         assertThat(detailsPage.provideDetailsBanner).isVisible()
         assertThat(detailsPage.summaryList.licensingRow).isVisible()
@@ -54,7 +55,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
     @Test
     fun `when all details are provided the banner is hidden and the full detail rows are shown`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedPropertyId)
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedToken)
 
         assertThat(detailsPage.provideDetailsBanner).not().isVisible()
 
@@ -70,7 +71,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
     @Test
     fun `no change links are shown for any summary list row`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedPropertyId)
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedToken)
 
         assertThat(page.locator(".govuk-summary-list__actions a")).hasCount(0)
     }
@@ -80,7 +81,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
         featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
 
         navigator.navigate(
-            LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(allDetailsProvidedPropertyId),
+            LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(allDetailsProvidedToken),
         )
 
         val errorPage = createValidPage(page, ErrorPage::class)

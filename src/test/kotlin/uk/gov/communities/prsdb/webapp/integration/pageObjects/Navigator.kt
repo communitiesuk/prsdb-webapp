@@ -1359,12 +1359,12 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDetailsLettingAgentView(id: Long): PropertyDetailsPageLettingAgentView {
-        navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(id))
+    fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
+        navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
         return createValidPage(
             page,
             PropertyDetailsPageLettingAgentView::class,
-            mapOf("propertyOwnershipId" to id.toString()),
+            mapOf("token" to token.toString()),
         )
     }
 

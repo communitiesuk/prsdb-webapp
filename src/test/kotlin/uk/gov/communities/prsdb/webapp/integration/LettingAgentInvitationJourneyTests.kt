@@ -40,7 +40,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("propertyOwnershipId" to "1"))
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to validToken))
     }
 
     @Test
@@ -64,6 +64,6 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("propertyOwnershipId" to "1"))
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to validToken))
     }
 }

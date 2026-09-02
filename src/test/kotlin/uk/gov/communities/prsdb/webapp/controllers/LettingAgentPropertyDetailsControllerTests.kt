@@ -14,16 +14,22 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.util.UUID
 
 @WebMvcTest(LettingAgentPropertyDetailsController::class)
 @Import(MessageSourceConfig::class)
 class LettingAgentPropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
+    @MockitoBean
+    private lateinit var lettingAgentAccessService: LettingAgentAccessService
+
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -35,15 +41,18 @@ class LettingAgentPropertyDetailsControllerTests(
 
     @Test
     fun `getLettingAgentPropertyDetails is accessible without authentication and renders the letting agent view`() {
+        val token = UUID.randomUUID()
         val propertyOwnership = createOccupiedPropertyOwnership()
 
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
 
         mvc
-            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(propertyOwnership.id))
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
             .andExpect {
                 status { isOk() }
                 view { name("propertyDetailsLettingAgentView") }
@@ -53,16 +62,33 @@ class LettingAgentPropertyDetailsControllerTests(
     }
 
     @Test
+    fun `getLettingAgentPropertyDetails returns not found when the token is not recognised`() {
+        val token = UUID.randomUUID()
+
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(null)
+
+        mvc
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
     fun `getLettingAgentPropertyDetails throws when the property has no compliance record`() {
+        val token = UUID.randomUUID()
         val propertyOwnership = createOccupiedPropertyOwnership()
 
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(null)
 
         assertThrows<ServletException> {
-            mvc.get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(propertyOwnership.id))
+            mvc.get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
         }
     }
 }

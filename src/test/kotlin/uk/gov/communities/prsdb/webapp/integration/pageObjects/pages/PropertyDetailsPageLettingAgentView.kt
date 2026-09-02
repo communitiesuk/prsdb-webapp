@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import java.util.UUID
 
 class PropertyDetailsPageLettingAgentView(
     page: Page,
@@ -14,7 +15,7 @@ class PropertyDetailsPageLettingAgentView(
 ) : BasePage(
         page,
         LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(
-            urlArguments["propertyOwnershipId"]!!.toLong(),
+            UUID.fromString(urlArguments["token"]!!),
         ),
     ) {
     val backLink = BackLink.default(page)
