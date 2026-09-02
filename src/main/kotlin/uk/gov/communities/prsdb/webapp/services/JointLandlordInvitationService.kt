@@ -132,11 +132,11 @@ class JointLandlordInvitationService(
 
     private fun hideExpiredPropertyInvitesForEmails(
         ownership: PropertyOwnership,
-        email: List<String>,
+        emails: List<String>,
     ) {
         invitationRepository
             .findByRegisteredOwnership(ownership)
-            .filter { it.status == JointLandlordInvitationStatus.EXPIRED && email.containsEmail(it.invitedEmail) }
+            .filter { it.status == JointLandlordInvitationStatus.EXPIRED && emails.containsEmail(it.invitedEmail) }
             .forEach { expiredInvitation ->
                 expiredInvitation.isHidden = true
                 invitationRepository.save(expiredInvitation)
