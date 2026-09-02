@@ -234,10 +234,11 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class RestructureAndSkippingEnabled {
+    inner class RestructuredContentWithoutLettingAgents {
         @BeforeEach
-        fun enableRestructureAndSkippingFlag() {
+        fun enableRestructureAndSkippingFlagWithoutLettingAgents() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         }
 
         @Test
@@ -268,6 +269,13 @@ class PropertyRegistrationCyaStepConfigTests {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals(expectedTenancyDetails, content["tenancyDetails"])
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
         }
 
         @Test
@@ -304,7 +312,6 @@ class PropertyRegistrationCyaStepConfigTests {
         @Test
         fun `getStepSpecificContent uses unoccupied provide-later wording and tenancy placeholder key when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
             whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.PROVIDE_LATER)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -471,7 +478,39 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class LettingAgentDelegationEnabled {
+    inner class LettingAgentRestructuredContent {
+        @BeforeEach
+        fun enableLettingAgentFlags() {
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+        }
+
+        @Test
+        fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details`() {
+            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+            val delegationSection = content["lettingAgentDelegation"] as? List<*>
+
+            assertTrue(content.containsKey("lettingAgentDelegation"))
+            assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
+            assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
+        }
+
+        @Test
+        fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides step is unreachable`() {
+            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
+        }
+    }
+
+    @Nested
+    inner class DelegatedRestructuredContent {
         @BeforeEach
         fun enableDelegationFlags() {
             whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
@@ -489,92 +528,12 @@ class PropertyRegistrationCyaStepConfigTests {
             val delegationSection = content["lettingAgentDelegation"] as? List<*>
             assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
             assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
-            assertEquals(true, content["hideDelegatedSections"], "Delegated path should hide the licensing/compliance/tenancy sections")
+            assertEquals(true, content["hideDelegatedSections"], "Delegated path should hide the licensing, compliance and tenancy sections")
             assertEquals(
                 "registerProperty.taskList.checkAndSubmit.confirmAndPay",
                 content["submitButtonText"],
                 "Delegated properties should use the confirm-and-pay message key",
             )
-        }
-
-        @Test
-        fun `getStepSpecificContent leaves licensing, compliance and tenancy content empty when delegated to agent`() {
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LETTING_AGENT)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals(emptyList<Any>(), content["licensingDetails"])
-            assertEquals(emptyList<Any>(), content["gasSupplyRows"])
-            assertEquals(emptyList<Any>(), content["gasCertRows"])
-            assertEquals(emptyList<Any>(), content["electricalRows"])
-            assertNull(content["epcCardTitle"])
-            assertNull(content["epcCardActions"])
-            assertEquals(emptyList<Any>(), content["epcCardRows"])
-            assertNull(content["epcExpiredTextKey"])
-            assertEquals(emptyList<Any>(), content["tenancyCheckRows"])
-            assertNull(content["lowRatingTextKey"])
-            assertEquals(emptyList<Any>(), content["exemptionReasonRows"])
-            assertEquals(emptyList<Any>(), content["nonEpcRows"])
-            assertNull(content["epcInsetTextKey"])
-            assertEquals(emptyList<Any>(), content["tenancyDetails"])
-        }
-
-        @Test
-        fun `getStepSpecificContent includes lettingAgentDelegation when landlord provides details`() {
-            whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val delegationSection = content["lettingAgentDelegation"] as? List<*>
-
-            assertTrue(content.containsKey("lettingAgentDelegation"))
-            assertEquals(1, delegationSection?.size, "Landlord path should only include who-will-provide row")
-            assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
-            assertEquals(false, content["hideDelegatedSections"], "Landlord path should keep the later sections visible")
-            assertEquals(
-                "registerProperty.taskList.checkAndSubmit.confirmAndPay",
-                content["submitButtonText"],
-                "Non-delegated properties with an answer should also use the confirm-and-pay message key",
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation when whoProvides step is unreachable`() {
-            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
-        }
-
-        @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation when property is unoccupied`() {
-            // The whoProvidesRentalDetails step is only reachable when occupied == YES (see
-            // PropertyRegistrationJourneyFactory's `parents { journey.occupied.hasOutcome(YesOrNo.YES) }`),
-            // so an unoccupied property makes the step unreachable in the real journey.
-            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
-            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
-            assertNull(content["lettingAgentDelegationBodyText"])
-        }
-    }
-
-    @Nested
-    inner class LettingAgentDelegationDisabled {
-        @BeforeEach
-        fun disableDelegationFlag() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
-        }
-
-        @Test
-        fun `getStepSpecificContent does not include lettingAgentDelegation when delegate feature is disabled`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
         }
     }
 }

@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
@@ -16,9 +18,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcDetailState,
-    private val isSkippingEnabled: Boolean = false,
+    featureFlagManager: FeatureFlagManager? = null,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
+    private val isSkippingEnabled = featureFlagManager?.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) ?: false
     private val scenario: EpcScenario = determineScenario(state)
 
     private fun determineScenario(state: EpcDetailState): EpcScenario {
@@ -254,7 +257,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 EpcScenario.SKIPPED_OCCUPIED ->
                     // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
                     if (isSkippingEnabled) {
-                        "forms.buttons.provideThisLater"
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied"
                     } else {
                         "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
                     }

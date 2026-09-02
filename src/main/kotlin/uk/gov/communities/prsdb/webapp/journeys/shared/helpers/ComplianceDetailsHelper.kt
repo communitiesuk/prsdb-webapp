@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.helpers
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.ElectricalSafetyRegistrationCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.EpcRegistrationCyaSummaryRowsFactory
@@ -57,7 +56,7 @@ class ComplianceDetailsHelper(
             EpcRegistrationCyaSummaryRowsFactory(
                 epcCertificateUrlProvider,
                 epcState.epcDetailsTask,
-                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING),
+                featureFlagManager,
             ) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }

@@ -52,7 +52,14 @@ We have unit tests for the emails in `EmailTemplateModelsTests`.
 
 ### Testing against notify templates
 The testing for emails checks that the templates in notify match the templates in the codebase.
-The test are built into our pipelines so run whenever a PR is made.
+Every template is checked against both Notify-integration and Notify-prod, so a template that has only been updated in one of them is caught before it reaches production.
+The tests are built into our pipelines so run whenever a PR is made.
+
+Each notify service needs its own api key:
+- Notify-integration -> `EMAILNOTIFICATIONS_APIKEY`
+- Notify-prod -> `EMAILNOTIFICATIONS_PRODUCTION_APIKEY`
+
+A service whose key is not set is skipped, and the tests are disabled entirely when neither key is set.
 
 If you want to run them locally you need to add the `notify-template-tests.run.xml` to `.run` directory in the codebase. If you don't have a copy someone on the team should be able to help.
 This will give you the test configuration to run the tests locally.

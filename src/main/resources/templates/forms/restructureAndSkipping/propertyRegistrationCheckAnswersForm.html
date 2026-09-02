@@ -12,11 +12,11 @@
 <!--/*@thymesVar id="rentedOutLicensingHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutLicensingRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="rentedOutGasHeadingKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rentedOutGasRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasCertRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="gasInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutElectricalHeadingKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="rentedOutElectricalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="electricalRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="electricalInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentedOutEpcHeadingKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcCardTitle" type="java.lang.String"*/-->
@@ -48,7 +48,7 @@
             <span th:text="${propertyName}"></span>
         </h1>
         <th:block th:if="${insetText == true}">
-            <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText</p>
+            <p class="govuk-inset-text" th:text="#{forms.update.cya.insetText}">forms.update.cya.insetText/p>
         </th:block>
         <h2 class="govuk-heading-m" th:text="#{${aboutPropertyHeadingKey}}"></h2>
         <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.propertyDetails.heading}"></h3>
@@ -61,61 +61,60 @@
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.occupancy.heading}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${occupancyDetails})}"></dl>
         </th:block>
+        <h2 class="govuk-heading-m" th:text="#{${rentedOutHeadingKey}}"></h2>
         <th:block th:if="${!#lists.isEmpty(lettingAgentDelegation)}">
-            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.heading}"></h2>
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
             <p th:if="${lettingAgentDelegationBodyText == true}" class="govuk-body" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.bodyText}"></p>
             <dl th:replace="~{fragments/summaryList :: summaryList(${lettingAgentDelegation})}"></dl>
         </th:block>
-        <h2 th:if="${#lists.isEmpty(lettingAgentDelegation)}" class="govuk-heading-m" th:text="#{${rentedOutHeadingKey}}"></h2>
         <th:block th:if="${showLettingAgentDelegationUnoccupiedInset == true}">
             <h3 class="govuk-heading-s" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
             <div class="govuk-inset-text" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.unoccupiedBodyText}"></div>
         </th:block>
         <th:block th:if="${hideDelegatedSections != true}">
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutGasHeadingKey}}"></h3>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutGasRows})}"></dl>
-            <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
-                <h4 class="govuk-heading-s" th:text="#{checkGasSafety.certSubHeading}"></h4>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
-            </th:block>
-            <th:block th:if="${gasInsetTextKey != null}">
-                <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}"></div>
-            </th:block>
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutElectricalHeadingKey}}"></h3>
-            <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutElectricalRows})}"></dl>
-            <th:block th:if="${electricalInsetTextKey != null}">
-                <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}"></div>
-            </th:block>
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutEpcHeadingKey}}"></h3>
-            <th:block th:if="${epcCardTitle != null}">
-                <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
-            </th:block>
-            <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>
-            <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">
-                <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyCheckRows})}"></dl>
-            </th:block>
-            <p th:if="${lowRatingTextKey != null}" class="govuk-body" th:utext="#{${lowRatingTextKey}}"></p>
-            <th:block th:if="${!#lists.isEmpty(exemptionReasonRows)}">
-                <dl th:replace="~{fragments/summaryList :: summaryList(${exemptionReasonRows})}"></dl>
-            </th:block>
-            <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">
-                <dl th:replace="~{fragments/summaryList :: summaryList(${nonEpcRows})}"></dl>
-            </th:block>
-            <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
-                <p class="govuk-body" th:text="#{${epcInsetTextKey}}"></p>
-            </div>
-            <th:block th:if="${!#lists.isEmpty(rentedOutTenancyRows) or tenancyUnoccupiedBodyTextKey != null}">
-                <h3 class="govuk-heading-s"
-                    th:classappend="${tenancyUnoccupiedBodyTextKey != null and #lists.isEmpty(rentedOutTenancyRows)} ? 'govuk-!-margin-bottom-0' : ''"
-                    th:text="#{${rentedOutTenancyHeadingKey}}"></h3>
-                <dl th:if="${!#lists.isEmpty(rentedOutTenancyRows)}" th:replace="~{fragments/summaryList :: summaryList(${rentedOutTenancyRows})}"></dl>
-                <p th:if="${tenancyUnoccupiedBodyTextKey != null}" class="govuk-body" th:text="#{${tenancyUnoccupiedBodyTextKey}}"></p>
-                <hr th:if="${tenancyUnoccupiedBodyTextKey != null and #lists.isEmpty(rentedOutTenancyRows)}"
-                    class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-2 govuk-!-margin-bottom-2">
-            </th:block>
+        <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
+        <h3 class="govuk-heading-s" th:text="#{${rentedOutGasHeadingKey}}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
+        <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
+            <h4 class="govuk-heading-s" th:text="#{checkGasSafety.certSubHeading}"></h4>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
+        </th:block>
+        <th:block th:if="${gasInsetTextKey != null}">
+            <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}"></div>
+        </th:block>
+        <h3 class="govuk-heading-s" th:text="#{${rentedOutElectricalHeadingKey}}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${electricalRows})}"></dl>
+        <th:block th:if="${electricalInsetTextKey != null}">
+            <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}"></div>
+        </th:block>
+        <h3 class="govuk-heading-s" th:text="#{${rentedOutEpcHeadingKey}}"></h3>
+        <th:block th:if="${epcCardTitle != null}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
+        </th:block>
+        <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>
+        <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyCheckRows})}"></dl>
+        </th:block>
+        <p th:if="${lowRatingTextKey != null}" class="govuk-body" th:utext="#{${lowRatingTextKey}}"></p>
+        <th:block th:if="${!#lists.isEmpty(exemptionReasonRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${exemptionReasonRows})}"></dl>
+        </th:block>
+        <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${nonEpcRows})}"></dl>
+        </th:block>
+        <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
+            <p class="govuk-body" th:text="#{${epcInsetTextKey}}"></p>
+        </div>
+        <th:block th:if="${!#lists.isEmpty(rentedOutTenancyRows) or tenancyUnoccupiedBodyTextKey != null}">
+            <h3 class="govuk-heading-s"
+                th:classappend="${tenancyUnoccupiedBodyTextKey != null and #lists.isEmpty(rentedOutTenancyRows)} ? 'govuk-!-margin-bottom-0' : ''"
+                th:text="#{${rentedOutTenancyHeadingKey}}"></h3>
+            <dl th:if="${!#lists.isEmpty(rentedOutTenancyRows)}" th:replace="~{fragments/summaryList :: summaryList(${rentedOutTenancyRows})}"></dl>
+            <p th:if="${tenancyUnoccupiedBodyTextKey != null}" class="govuk-body" th:text="#{${tenancyUnoccupiedBodyTextKey}}"></p>
+            <hr th:if="${tenancyUnoccupiedBodyTextKey != null and #lists.isEmpty(rentedOutTenancyRows)}"
+                class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-2 govuk-!-margin-bottom-2">
+        </th:block>
         </th:block>
         <div th:replace="~{fragments/warningText :: warningText(#{${warningTextKey}})}">forms.update.warning</div>
     </th:block>

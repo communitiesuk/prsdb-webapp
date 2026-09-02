@@ -87,9 +87,10 @@ class CheckAnswersPagePropertyRegistration(
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
-        // Heading text differs between the legacy CYA ("Ownership type") and the restructured CYA
-        // ("How do you own this property?"), so match either depending on which template is rendered.
-        val ownershipRow = getRow(Pattern.compile("^(Ownership type|How do you own this property\\?)$"))
+        val ownershipRow = getRow("How do you own this property?")
+
+        // TODO: PDJB-1340: We can delete ownershipRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+        val ownershipRowLegacy = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
@@ -102,9 +103,10 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
 
-        // Heading text differs between the legacy CYA ("Invitations") and the restructured CYA
-        // ("Joint landlord invitations"), so match either depending on which template is rendered.
-        val jointLandlordsInvitationsRow = getRow(Pattern.compile("^(Invitations|Joint landlord invitations)$"))
+        val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
+
+        // TODO: PDJB-1340: We can delete jointLandlordsInvitationsRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+        val jointLandlordsInvitationsRowLegacy = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 

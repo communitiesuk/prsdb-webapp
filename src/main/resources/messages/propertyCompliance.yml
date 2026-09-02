@@ -527,7 +527,7 @@ epcTask:
       provideEpcLaterOccupied: Provide EPC details later
       provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
       occupiedWithDeadline: Provide EPC details later (before {0})
-      # TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+      provideThisLaterOccupied: Provide this later
       provideThisLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
     isEpcRequired: Is an EPC required to let this property?
     epcExemption: Why does this property not need an EPC?

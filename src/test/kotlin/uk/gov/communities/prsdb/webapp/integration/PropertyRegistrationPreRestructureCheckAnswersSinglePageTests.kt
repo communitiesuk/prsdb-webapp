@@ -65,7 +65,7 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
         fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.summaryList.ownershipRow.actions.firstActionLink
+            checkAnswersPage.summaryList.ownershipRowLegacy.actions.firstActionLink
                 .clickAndWait()
             val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
@@ -154,7 +154,7 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
     @Nested
     inner class ConfirmMissingComplianceStep {
         @Test
-        fun `Submitting with no option selected returns an error`(page: Page) {
+        fun `Submitting with no option selected returns an error`() {
             val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
             confirmPage.form.submit()
             assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this registration")
