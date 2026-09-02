@@ -16,19 +16,16 @@
                     propertyDetails.lettingAgentView.provideDetailsBanner
                 </div>
 
-                <!-- TODO PDJB-1571: Re-enable the licensing change link by building this view model with change links. -->
                 <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h2>
                 <dl th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}"
                     th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
 
-                <!-- TODO PDJB-1572 to PDJB-1576: Re-enable the tenancy change links (tenancy, households/tenants, bills, furnished, rent) by building this view model with change links. -->
                 <th:block th:if="${propertyDetails.showTenancySection}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancy.heading}">propertyDetails.propertyRecord.tenancy.heading</h2>
                     <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
                         th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
                 </th:block>
 
-                <!-- TODO PDJB-1577 to PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building the compliance view model with landlordView = true. -->
                 <div id="compliance-certificates" th:if="${complianceDetails != null}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.complianceCertificates.heading}">propertyDetails.lettingAgentView.complianceCertificates.heading</h2>
 

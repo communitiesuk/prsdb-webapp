@@ -4,13 +4,6 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 
-/**
- * View model for the letting-agent Property Details page.
- *
- * It extends [PropertyDetailsViewModelBase] with `isLandlordView = false` so that every reused row is
- * rendered without a change link. Change links for the letting-agent view will be added by the
- * respective update-journey tickets (PDJB-1571 to PDJB-1579).
- */
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     private val complianceAllValid: Boolean,
@@ -32,6 +25,7 @@ class LettingAgentPropertyDetailsViewModel(
             messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsBannerNoDeadline")
         }
 
+    // TODO PDJB-1571: Re-enable the licensing change link by building this section with change links.
     val licensingSection: List<SummaryListRowViewModel> =
         if (isLicensingProvideLater) {
             listOf(licensingProvideLaterRow())
@@ -39,6 +33,7 @@ class LettingAgentPropertyDetailsViewModel(
             listOfNotNull(licensingTypeRow(), licensingNumberRow())
         }
 
+    // TODO PDJB-1572 to PDJB-1576: Re-enable the tenancy change links (tenancy, households/tenants, bills, furnished, rent) by building this section with change links.
     val tenancySection: List<SummaryListRowViewModel> =
         when {
             !showTenancySection -> {
