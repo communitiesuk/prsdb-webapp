@@ -47,6 +47,13 @@ class LettingAgentPropertyDetailsController(
         val propertyOwnershipId = lettingAgentAccess.propertyOwnership.id
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
+        if (!propertyOwnership.isOccupied) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Property ownership $propertyOwnershipId is not occupied so cannot be viewed by a letting agent",
+            )
+        }
+
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")

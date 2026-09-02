@@ -9,14 +9,18 @@ class LettingAgentPropertyDetailsViewModel(
     private val complianceAllValid: Boolean,
     messageSource: MessageSource,
 ) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView = false, messageSource) {
+    init {
+        check(isOccupied) {
+            "Property ownership ${propertyOwnership.id} is not occupied so cannot be viewed by a letting agent"
+        }
+    }
+
     val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
 
     val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
-    val showTenancySection: Boolean = isOccupied
-
     val showProvideDetailsBanner: Boolean =
-        isLicensingProvideLater || (showTenancySection && isTenancyProvideLater) || !complianceAllValid
+        isLicensingProvideLater || isTenancyProvideLater || !complianceAllValid
 
     val provideDetailsBannerText: String =
         if (hasBeenOccupiedSinceRegistration) {
@@ -33,27 +37,23 @@ class LettingAgentPropertyDetailsViewModel(
             listOfNotNull(licensingTypeRow(), licensingNumberRow())
         }
 
-    // TODO PDJB-1572 to PDJB-1576: Re-enable the tenancy change links (tenancy, households/tenants, bills, furnished, rent) by building this section with change links.
     val tenancySection: List<SummaryListRowViewModel> =
-        when {
-            !showTenancySection -> {
-                emptyList()
-            }
-
-            isTenancyProvideLater -> {
-                listOf(tenancyProvideLaterRow())
-            }
-
-            else -> {
-                buildList {
-                    add(householdsRow())
-                    add(tenantsRow())
-                    add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                    add(furnishedStatusRow())
-                    add(rentFrequencyRow(withoutBottomBorder = true))
-                    add(rentAmountRow(includeChangeLink = false))
-                }
+        if (isTenancyProvideLater) {
+            // TODO PDJB-1572: Re-enable the tenancy change link.
+            listOf(tenancyProvideLaterRow())
+        } else {
+            buildList {
+                // TODO PDJB-1573: Re-enable the households and tenants change links.
+                add(householdsRow())
+                add(tenantsRow())
+                // TODO PDJB-1574: Re-enable the bills change link.
+                add(rentIncludesBillsRow())
+                if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+                // TODO PDJB-1575: Re-enable the furnished change link.
+                add(furnishedStatusRow())
+                // TODO PDJB-1576: Re-enable the rent change link.
+                add(rentFrequencyRow(withoutBottomBorder = true))
+                add(rentAmountRow(includeChangeLink = false))
             }
         }
 

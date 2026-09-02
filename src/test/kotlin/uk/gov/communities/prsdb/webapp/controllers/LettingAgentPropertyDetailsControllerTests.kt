@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
 
@@ -39,6 +40,7 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
+    // TODO PDJB-1683 - update so getLettingAgentPropertyDetails is NOT be accessible without authentication
     @Test
     fun `getLettingAgentPropertyDetails is accessible without authentication and renders the letting agent view`() {
         val token = UUID.randomUUID()
@@ -67,6 +69,23 @@ class LettingAgentPropertyDetailsControllerTests(
 
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
             .thenReturn(null)
+
+        mvc
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    fun `getLettingAgentPropertyDetails returns not found when the property is not occupied`() {
+        val token = UUID.randomUUID()
+        val propertyOwnership = createUnoccupiedPropertyOwnership()
+
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
+        whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
+            .thenReturn(propertyOwnership)
 
         mvc
             .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))

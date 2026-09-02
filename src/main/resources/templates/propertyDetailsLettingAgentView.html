@@ -20,11 +20,9 @@
                 <dl th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}"
                     th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
 
-                <th:block th:if="${propertyDetails.showTenancySection}">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancy.heading}">propertyDetails.propertyRecord.tenancy.heading</h2>
-                    <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
-                        th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
-                </th:block>
+                <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancy.heading}">propertyDetails.propertyRecord.tenancy.heading</h2>
+                <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
+                    th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
 
                 <div id="compliance-certificates" th:if="${complianceDetails != null}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.complianceCertificates.heading}">propertyDetails.lettingAgentView.complianceCertificates.heading</h2>

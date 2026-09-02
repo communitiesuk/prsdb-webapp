@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
@@ -69,14 +70,12 @@ class LettingAgentPropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the tenancy section is empty when the property is not occupied`() {
+    fun `constructing the view model throws when the property is not occupied`() {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
-        val viewModel =
+        assertThrows<IllegalStateException> {
             LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
-
-        assertFalse(viewModel.showTenancySection)
-        assertTrue(viewModel.tenancySection.isEmpty())
+        }
     }
 
     @Test
