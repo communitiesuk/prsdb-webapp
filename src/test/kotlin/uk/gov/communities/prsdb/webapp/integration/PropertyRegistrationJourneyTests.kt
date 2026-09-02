@@ -160,6 +160,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
+        whenever(
+            absoluteUrlProvider.buildLettingAgentInvitationUri(any()),
+        ).thenReturn(URI("http://localhost/letting-agent/invitation?token=test-token"))
     }
 
     @Nested
@@ -3639,7 +3642,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
-                .containsText("No, I am the only landlord")
+                .containsText("No, I am the only landlord for this property")
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions

@@ -47,13 +47,13 @@ class PropertyRegistrationCyaStepConfig(
 
         val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         if (!isLettingAgentEnabled) {
-            return getRestructured28DaysLaterContent(state)
+            return getRestructuredContent(state)
         }
 
         return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
             getDelegatedRestructuredContent(state)
         } else {
-            getLettingAgentRestructured28DaysLaterContent(state)
+            getLettingAgentRestructuredContent(state)
         }
     }
 
@@ -71,23 +71,23 @@ class PropertyRegistrationCyaStepConfig(
         ) + getComplianceContent(state)
     }
 
-    private fun getRestructured28DaysLaterContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        return getRestructured28DaysLaterContent(state, emptyMap())
+    private fun getRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        return getRestructuredContent(state, emptyMap())
     }
 
-    private fun getLettingAgentRestructured28DaysLaterContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+    private fun getLettingAgentRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val delegationContent =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides?.let {
                 getLettingAgentDelegationSummaryContent(state, it)
             } ?: emptyMap()
-        return getRestructured28DaysLaterContent(state, delegationContent) +
+        return getRestructuredContent(state, delegationContent) +
             mapOf(
                 "showLettingAgentDelegationUnoccupiedInset" to
                     (!state.occupied.formModel.notNullValue(OccupancyFormModel::occupied) && delegationContent.isEmpty()),
             )
     }
 
-    private fun getRestructured28DaysLaterContent(
+    private fun getRestructuredContent(
         state: PropertyRegistrationJourneyState,
         delegationContent: Map<String, Any?>,
     ): Map<String, Any?> {
@@ -210,11 +210,7 @@ class PropertyRegistrationCyaStepConfig(
             "ownershipAndLandlordsRows" to
                 listOf(
                     getOwnershipTypeRow(state, "propertyDetails.propertyRecord.ownership.ownershipType"),
-                    getJointLandLordsSummaryRow(
-                        state,
-                        "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
-                        "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.restructureAndSkipping",
-                    ),
+                    getJointLandLordsSummaryRow(state, "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations"),
                 ),
             "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
             "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
@@ -255,7 +251,6 @@ class PropertyRegistrationCyaStepConfig(
     private fun getJointLandLordsSummaryRow(
         state: PropertyRegistrationJourneyState,
         invitationsHeadingKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
-        noJointLandlordsKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.old",
     ): SummaryListRowViewModel {
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         return if (hasJointLandlords(state)) {
@@ -270,7 +265,7 @@ class PropertyRegistrationCyaStepConfig(
         } else {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
-                noJointLandlordsKey,
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
                 Destination.VisitableStep(
                     jointLandlordsTask.hasJointLandlordsStep,
                     state.getCyaJourneyId(jointLandlordsTask.hasJointLandlordsStep),
@@ -278,6 +273,20 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
     }
+
+    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
+    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
+    private fun getMockProvideLaterSummaryList(
+        fieldHeading: String,
+        provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+    ): List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                fieldHeading,
+                provideLaterMessageKey,
+                actionUrl = null,
+            ),
+        )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
@@ -395,7 +404,7 @@ class PropertyRegistrationCyaStepConfig(
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
+                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )
@@ -413,6 +422,13 @@ class PropertyRegistrationCyaStepConfig(
 
         return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
+
+    private fun getProvideLaterMessageKey(isOccupied: Boolean): String =
+        if (isOccupied) {
+            "forms.checkPropertyAnswers.tenancyDetails.provideLater"
+        } else {
+            "forms.checkPropertyAnswers.tenancyDetails.provideLaterUnoccupied"
+        }
 }
 
 @JourneyFrameworkComponent
