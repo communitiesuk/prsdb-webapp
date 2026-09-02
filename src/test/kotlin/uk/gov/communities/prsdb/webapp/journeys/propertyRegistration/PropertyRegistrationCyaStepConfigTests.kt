@@ -297,12 +297,12 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses continue to payment button when unoccupied`() {
+        fun `getStepSpecificContent uses confirm and pay button when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("forms.buttons.continueToPayment", content["submitButtonText"])
+            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"])
         }
 
         @Test
