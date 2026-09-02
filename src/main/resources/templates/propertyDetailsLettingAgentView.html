@@ -24,7 +24,7 @@
                 <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
                     th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
 
-                <div id="compliance-certificates" th:if="${complianceDetails != null}">
+                <div id="compliance-certificates">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.complianceCertificates.heading}">propertyDetails.lettingAgentView.complianceCertificates.heading</h2>
 
                     <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
