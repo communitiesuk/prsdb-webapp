@@ -3639,7 +3639,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
-                .containsText("No, I am the only landlord for this property")
+                .containsText("No, I am the only landlord")
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
