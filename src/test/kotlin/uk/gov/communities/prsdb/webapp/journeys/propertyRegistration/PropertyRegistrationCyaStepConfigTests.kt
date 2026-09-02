@@ -516,6 +516,36 @@ class PropertyRegistrationCyaStepConfigTests {
 
             assertTrue(!content.containsKey("lettingAgentDelegation") || content["lettingAgentDelegation"] == null)
         }
+
+        @Test
+        fun `getStepSpecificContent shows unoccupied inset when property is unoccupied and whoProvides step is unreachable`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(true, content["showLettingAgentDelegationUnoccupiedInset"])
+        }
+
+        @Test
+        fun `getStepSpecificContent does not show unoccupied inset when property is occupied`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+            whenever(mockWhoProvidesRentalDetailsStep.formModelIfReachableOrNull).thenReturn(null)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(false, content["showLettingAgentDelegationUnoccupiedInset"])
+        }
+
+        @Test
+        fun `getStepSpecificContent does not show unoccupied inset when whoProvides has already been answered`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+            whenever(mockWhoProvidesRentalDetailsFormModel.whoProvides).thenReturn(WhoProvidesRentalDetails.LANDLORD)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals(false, content["showLettingAgentDelegationUnoccupiedInset"])
+        }
     }
 
     @Nested
