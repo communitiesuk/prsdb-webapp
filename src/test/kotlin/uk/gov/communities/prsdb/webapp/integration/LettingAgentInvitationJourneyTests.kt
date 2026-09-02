@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.HasPasswordPage
@@ -10,10 +12,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
+import java.util.UUID
 
 class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val validToken = "3334abcd-5678-abcd-1234-567abcd1111a"
     private val invalidToken = "00000000-0000-0000-0000-000000000000"
+
+    @Autowired
+    lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 
     @Test
     fun `user who does not have a password can walk the set password journey`(page: Page) {
@@ -66,6 +72,28 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
         navigator.goToLettingAgentInvitationJourney(invalidToken)
+
+        assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
+    }
+
+    @Test
+    fun `user whose access is revoked mid-journey is redirected to the invalid link page`(page: Page) {
+        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
+
+        navigator.goToLettingAgentInvitationJourney(validToken)
+
+        val hasPasswordPage = assertPageIs(page, HasPasswordPage::class)
+        // TODO PDJB-1658: Remove this step from the journey test
+        hasPasswordPage.submitNoPassword()
+
+        // TODO PDJB-1566: Update when set password page is implemented
+        val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
+
+        // Revoke the letting agent's access by deleting the invitation from the database
+        val invitation = lettingAgentAccessRepository.findByToken(UUID.fromString(validToken))!!
+        lettingAgentAccessRepository.delete(invitation)
+
+        setPasswordPage.form.submit()
 
         assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
     }
