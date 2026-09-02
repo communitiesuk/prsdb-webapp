@@ -181,16 +181,25 @@ class PropertyRegistrationCyaStepConfig(
         licensingDetails: List<SummaryListRowViewModel>,
         tenancyDetails: List<SummaryListRowViewModel>,
         occupancyDetails: List<SummaryListRowViewModel>,
-    ) = getBaseContent(
-        state,
-        "forms.buttons.continueToPayment",
-        "forms.checkPropertyAnswers.warning",
-        false,
-        getRestructuredPropertyDetailsSummaryList(state),
-        licensingDetails,
-        occupancyDetails,
-        tenancyDetails,
-    )
+    ): Map<String, Any?> {
+        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val submitButtonText =
+            if (isOccupied) {
+                "registerProperty.taskList.checkAndSubmit.confirmAndPay"
+            } else {
+                "forms.buttons.continueToPayment"
+            }
+        return getBaseContent(
+            state,
+            submitButtonText,
+            "forms.checkPropertyAnswers.warning",
+            false,
+            getRestructuredPropertyDetailsSummaryList(state),
+            licensingDetails,
+            occupancyDetails,
+            tenancyDetails,
+        )
+    }
 
     private fun getComplianceContent(state: PropertyRegistrationJourneyState) =
         complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask) +

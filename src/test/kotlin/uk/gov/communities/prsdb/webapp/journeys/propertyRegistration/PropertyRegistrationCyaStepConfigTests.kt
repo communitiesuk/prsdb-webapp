@@ -289,11 +289,20 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses continue to payment button and restructured warning text`() {
+        fun `getStepSpecificContent uses confirm and pay button and restructured warning text when occupied`() {
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"])
+            assertEquals("forms.checkPropertyAnswers.warning", content["warningTextKey"])
+        }
+
+        @Test
+        fun `getStepSpecificContent uses continue to payment button when unoccupied`() {
+            whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals("forms.buttons.continueToPayment", content["submitButtonText"])
-            assertEquals("forms.checkPropertyAnswers.warning", content["warningTextKey"])
         }
 
         @Test
