@@ -498,7 +498,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check answers - render page
             assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
-            assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
+            assertThat(checkAnswersPage.rentedOutHeading).isVisible()
             assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
             assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
             assertThat(checkAnswersPage.epcHeading).isVisible()
@@ -1509,16 +1509,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured CYA does not show tenancy details section when the property is unoccupied`(page: Page) {
+        fun `restructured CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).isHidden()
+            assertThat(checkAnswersPage.restructuredTenancyHeading).isVisible()
+            assertThat(checkAnswersPage.restructuredTenancyUnoccupiedBodyText).isVisible()
+            assertEquals(emptyList<String>(), checkAnswersPage.restructuredTenancyRowHeadings())
         }
 
         @Test
-        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`(page: Page) {
+        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -1832,7 +1834,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows a grouping task as in progress when it is partially completed`(page: Page) {
+        fun `restructured task list shows a grouping task as in progress when it is partially completed`() {
             // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
             // grouping task (which now contains all three) is partway through.
             val taskListPage =
@@ -1857,7 +1859,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows grouping tasks as complete when their answers are provided`(page: Page) {
+        fun `restructured task list shows grouping tasks as complete when their answers are provided`() {
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
@@ -1886,7 +1888,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -1902,7 +1904,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA does not show Which bills are included row when rent does not include bills`(page: Page) {
+        fun `CYA does not show Which bills are included row when rent does not include bills`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
             assertFalse(checkAnswersPage.restructuredTenancyRowHeadings().contains("Which bills are included"))
@@ -1934,6 +1936,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
@@ -1953,6 +1956,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
@@ -3603,7 +3609,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -3623,7 +3629,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
 
             val changeLink =
-                checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
+                checkAnswersPage.summaryList.jointLandlordsInvitationsRowLegacy.actions
                     .getActionLink("Change")
             assertThat(changeLink).isVisible()
 
@@ -3635,6 +3641,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
