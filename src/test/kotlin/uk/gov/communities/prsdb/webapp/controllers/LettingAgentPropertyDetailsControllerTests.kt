@@ -5,14 +5,20 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.ElectricalSafetyViewModelFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.EpcViewModelFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.GasSafetyViewModelFactory
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -52,6 +58,9 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        val complianceViewModel = createComplianceViewModel()
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any()))
+            .thenReturn(complianceViewModel)
 
         mvc
             .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
@@ -61,6 +70,20 @@ class LettingAgentPropertyDetailsControllerTests(
                 model { attributeExists("propertyDetails") }
                 model { attributeExists("backUrl") }
             }
+    }
+
+    private fun createComplianceViewModel(): PropertyComplianceViewModel {
+        val messageSource = mock<MessageSource>()
+        whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
+        return PropertyComplianceViewModelFactory(
+            GasSafetyViewModelFactory(mock(), messageSource, mock()),
+            ElectricalSafetyViewModelFactory(mock(), messageSource, mock()),
+            EpcViewModelFactory(messageSource, mock()),
+        ).create(
+            propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
+            landlordView = false,
+            propertyOwnershipId = 1L,
+        )
     }
 
     @Test
