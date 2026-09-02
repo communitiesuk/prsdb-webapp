@@ -2,7 +2,7 @@
 <!--/*@thymesVar id="complianceDetails" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel"*/-->
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.lettingAgentView.title}, ~{::#main-content/content()}, false)}">
-    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
     <main class="govuk-main-wrapper">
         <div id="page-contents" class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
@@ -11,16 +11,16 @@
                     <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
                 </h1>
 
-                <div id="provide-details-banner" th:if="${propertyDetails.showProvideDetailsBanner}"
-                     class="govuk-inset-text" th:utext="${propertyDetails.provideDetailsBannerText}">
-                    propertyDetails.lettingAgentView.provideDetailsBanner
+                <div id="provide-details-inset" th:if="${propertyDetails.showProvideDetailsInset}"
+                     class="govuk-inset-text" th:utext="${propertyDetails.provideDetailsInsetText}">
+                    propertyDetails.lettingAgentView.provideDetailsInset
                 </div>
 
-                <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensing.heading}">propertyDetails.propertyRecord.licensing.heading</h2>
+                <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.licensing.heading}">propertyDetails.lettingAgentView.licensing.heading</h2>
                 <dl th:if="${not #lists.isEmpty(propertyDetails.licensingSection)}"
                     th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingSection})}"></dl>
 
-                <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancy.heading}">propertyDetails.propertyRecord.tenancy.heading</h2>
+                <h2 class="govuk-heading-m" th:text="#{propertyDetails.lettingAgentView.tenancy.heading}">propertyDetails.lettingAgentView.tenancy.heading</h2>
                 <dl th:if="${not #lists.isEmpty(propertyDetails.tenancySection)}"
                     th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancySection})}"></dl>
 

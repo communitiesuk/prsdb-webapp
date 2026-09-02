@@ -1,12 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
-    private val complianceAllValid: Boolean,
+    propertyCompliance: PropertyCompliance,
     messageSource: MessageSource,
 ) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView = false, messageSource) {
     init {
@@ -19,14 +21,16 @@ class LettingAgentPropertyDetailsViewModel(
 
     val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
-    val showProvideDetailsBanner: Boolean =
-        isLicensingProvideLater || isTenancyProvideLater || !complianceAllValid
+    val showProvideDetailsInset: Boolean =
+        isLicensingProvideLater ||
+            isTenancyProvideLater ||
+            !ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
 
-    val provideDetailsBannerText: String =
+    val provideDetailsInsetText: String =
         if (hasBeenOccupiedSinceRegistration) {
-            getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsBanner")
+            getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")
         } else {
-            messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsBannerNoDeadline")
+            messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
         }
 
     // TODO PDJB-1571: Re-enable the licensing change link by building this section with change links.

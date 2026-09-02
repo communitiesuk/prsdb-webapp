@@ -27,11 +27,11 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     }
 
     @Test
-    fun `when all details are delegated the provide-details banner and single provide-later rows are shown`(page: Page) {
+    fun `when all details are delegated the provide-details inset and single provide-later rows are shown`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
 
-        assertThat(detailsPage.provideDetailsBanner).isVisible()
-        assertThat(detailsPage.provideDetailsBanner).containsText("Provide all details")
+        assertThat(detailsPage.provideDetailsInset).isVisible()
+        assertThat(detailsPage.provideDetailsInset).containsText("Provide all details")
 
         assertThat(detailsPage.sectionHeading("Property licensing")).isVisible()
         assertThat(detailsPage.summaryList.licensingRow).isVisible()
@@ -44,20 +44,20 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     }
 
     @Test
-    fun `when only licensing and tenancy are outstanding the banner is shown and compliance is valid`(page: Page) {
+    fun `when only licensing and tenancy are outstanding the inset is shown and compliance is valid`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(licensingAndTenancyOutstandingToken)
 
-        assertThat(detailsPage.provideDetailsBanner).isVisible()
+        assertThat(detailsPage.provideDetailsInset).isVisible()
         assertThat(detailsPage.summaryList.licensingRow).isVisible()
         assertThat(detailsPage.summaryList.tenancyRow).isVisible()
         assertThat(detailsPage.complianceCertificates).isVisible()
     }
 
     @Test
-    fun `when all details are provided the banner is hidden and the full detail rows are shown`(page: Page) {
+    fun `when all details are provided the inset is hidden and the full detail rows are shown`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsProvidedToken)
 
-        assertThat(detailsPage.provideDetailsBanner).not().isVisible()
+        assertThat(detailsPage.provideDetailsInset).not().isVisible()
 
         assertThat(detailsPage.summaryList.licensingTypeRow).isVisible()
         assertThat(detailsPage.summaryList.licensingNumberRow).isVisible()

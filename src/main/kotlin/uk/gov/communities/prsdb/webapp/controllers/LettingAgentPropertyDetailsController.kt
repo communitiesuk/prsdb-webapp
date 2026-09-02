@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LettingAgentPropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
@@ -58,11 +57,9 @@ class LettingAgentPropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        val complianceAllValid = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
-
         model.addAttribute(
             "propertyDetails",
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid, messageSource),
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, propertyCompliance, messageSource),
         )
         model.addAttribute(
             "complianceDetails",

@@ -26,8 +26,8 @@ class PropertyDetailsPageLettingAgentView(
     val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
     val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
 
-    val provideDetailsBanner: Locator
-        get() = page.locator("#provide-details-banner")
+    val provideDetailsInset: Locator
+        get() = page.locator("#provide-details-inset")
 
     val complianceCertificates: Locator
         get() = page.locator("#compliance-certificates")

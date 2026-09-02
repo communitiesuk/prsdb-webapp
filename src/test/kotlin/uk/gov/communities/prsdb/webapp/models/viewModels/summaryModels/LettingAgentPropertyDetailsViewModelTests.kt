@@ -5,55 +5,62 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData.Companion.createPropertyCompliance
 
 class LettingAgentPropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
+    private fun validCompliance(propertyOwnership: PropertyOwnership) = createPropertyCompliance(propertyOwnership = propertyOwnership)
+
+    private fun outstandingCompliance(propertyOwnership: PropertyOwnership) =
+        createPropertyCompliance(propertyOwnership = propertyOwnership, gasSafetyCertIssueDate = null)
+
     @Test
-    fun `the provide-details banner is shown when licensing details are outstanding`() {
+    fun `the provide-details inset is shown when licensing details are outstanding`() {
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = true)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
-        assertTrue(viewModel.showProvideDetailsBanner)
-        assertTrue(viewModel.provideDetailsBannerText.isNotBlank())
+        assertTrue(viewModel.showProvideDetailsInset)
+        assertTrue(viewModel.provideDetailsInsetText.isNotBlank())
         assertEquals(1, viewModel.licensingSection.size)
     }
 
     @Test
-    fun `the provide-details banner is shown when tenancy details are outstanding`() {
+    fun `the provide-details inset is shown when tenancy details are outstanding`() {
         val propertyOwnership = createOccupiedPropertyOwnership(tenancyProvideLater = true)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
-        assertTrue(viewModel.showProvideDetailsBanner)
+        assertTrue(viewModel.showProvideDetailsInset)
         assertEquals(1, viewModel.tenancySection.size)
     }
 
     @Test
-    fun `the provide-details banner is shown when compliance certificates are outstanding`() {
+    fun `the provide-details inset is shown when compliance certificates are outstanding`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = false, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, outstandingCompliance(propertyOwnership), mockMessageSource)
 
-        assertTrue(viewModel.showProvideDetailsBanner)
+        assertTrue(viewModel.showProvideDetailsInset)
     }
 
     @Test
-    fun `the provide-details banner is hidden when all details and compliance are provided`() {
+    fun `the provide-details inset is hidden when all details and compliance are provided`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
-        assertFalse(viewModel.showProvideDetailsBanner)
+        assertFalse(viewModel.showProvideDetailsInset)
     }
 
     @Test
@@ -61,7 +68,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
         assertThrows<IllegalStateException> {
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
         }
     }
 
@@ -70,7 +77,7 @@ class LettingAgentPropertyDetailsViewModelTests {
         val propertyOwnership = createOccupiedPropertyOwnership()
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, complianceAllValid = true, messageSource = mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
         assertEquals(
             listOf("propertyDetails.propertyRecord.licensingInformation.licensingType"),
