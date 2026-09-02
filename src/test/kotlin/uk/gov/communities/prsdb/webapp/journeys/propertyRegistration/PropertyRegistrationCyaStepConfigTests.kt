@@ -567,7 +567,11 @@ class PropertyRegistrationCyaStepConfigTests {
             val delegationSection = content["lettingAgentDelegation"] as? List<*>
             assertEquals(2, delegationSection?.size, "Should have 2 rows: who will provide and email placeholder")
             assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
-            assertEquals(true, content["hideDelegatedSections"], "Delegated path should hide the licensing, compliance and tenancy sections")
+            assertEquals(
+                true,
+                content["hideDelegatedSections"],
+                "Delegated path should hide the licensing, compliance and tenancy sections",
+            )
             assertEquals(
                 "registerProperty.taskList.checkAndSubmit.confirmAndPay",
                 content["submitButtonText"],

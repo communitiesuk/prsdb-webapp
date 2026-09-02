@@ -413,7 +413,6 @@ class PropertyRegistrationCyaStepConfig(
 
         return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
-
 }
 
 @JourneyFrameworkComponent

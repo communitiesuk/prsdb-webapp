@@ -281,7 +281,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isHidden()
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).containsText(
-                "When your property becomes occupied, you can choose for your letting agent or property manager to provide this section for you. They can also keep these details up to date.",
+                "When your property becomes occupied, you can choose for your letting agent or property manager to " +
+                    "provide this section for you. They can also keep these details up to date.",
             )
         }
 
