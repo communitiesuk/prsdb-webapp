@@ -313,7 +313,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
                 licensingRows.first().fieldValue,
             )
         }
@@ -379,7 +379,7 @@ class PropertyRegistrationCyaStepConfigTests {
                 ownershipAndLandlordsRows.map(SummaryListRowViewModel::fieldHeading),
             )
             assertEquals(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.restructureAndSkipping",
                 ownershipAndLandlordsRows.last().fieldValue,
             )
             assertEquals(expectedOccupancyDetails, occupancyDetails)
@@ -480,7 +480,7 @@ class PropertyRegistrationCyaStepConfigTests {
             val jointLandlordsDetailsRow = content["jointLandlordsDetails"] as SummaryListRowViewModel
 
             assertEquals(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.old",
                 jointLandlordsDetailsRow.fieldValue,
             )
         }

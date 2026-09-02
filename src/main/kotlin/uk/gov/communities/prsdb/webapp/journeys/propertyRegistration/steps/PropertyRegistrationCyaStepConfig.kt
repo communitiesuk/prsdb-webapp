@@ -210,7 +210,11 @@ class PropertyRegistrationCyaStepConfig(
             "ownershipAndLandlordsRows" to
                 listOf(
                     getOwnershipTypeRow(state, "propertyDetails.propertyRecord.ownership.ownershipType"),
-                    getJointLandLordsSummaryRow(state, "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations"),
+                    getJointLandLordsSummaryRow(
+                        state,
+                        "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations",
+                        "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.restructureAndSkipping",
+                    ),
                 ),
             "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
             "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
@@ -251,6 +255,7 @@ class PropertyRegistrationCyaStepConfig(
     private fun getJointLandLordsSummaryRow(
         state: PropertyRegistrationJourneyState,
         invitationsHeadingKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+        noJointLandlordsKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords.old",
     ): SummaryListRowViewModel {
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
         return if (hasJointLandlords(state)) {
@@ -265,7 +270,7 @@ class PropertyRegistrationCyaStepConfig(
         } else {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
-                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                noJointLandlordsKey,
                 Destination.VisitableStep(
                     jointLandlordsTask.hasJointLandlordsStep,
                     state.getCyaJourneyId(jointLandlordsTask.hasJointLandlordsStep),
@@ -390,7 +395,7 @@ class PropertyRegistrationCyaStepConfig(
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )

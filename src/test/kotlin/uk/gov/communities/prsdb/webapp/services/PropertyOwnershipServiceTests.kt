@@ -314,7 +314,7 @@ class PropertyOwnershipServiceTests {
         private val currentLandlord = MockLandlordData.createIndividualLandlord()
         private val registeredLandlords: MutableSet<Landlord> = mutableSetOf(currentLandlord)
         private val localCouncil = LocalCouncil(11, "DERBYSHIRE DALES DISTRICT COUNCIL", "1045")
-        private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing"
+        private val expectedPropertyLicence = "forms.checkPropertyAnswers.propertyDetails.noLicensing.old"
         private val expectedIsTenantedMessageKey = "commonText.no"
         private val expectedCurrentUrlKey = 101
 

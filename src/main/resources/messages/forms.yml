@@ -565,9 +565,9 @@ checkPropertyAnswers:
     bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
-    noLicensing: None
-    restructureAndSkipping:
-      noLicensing: This property does not need a licence
+    noLicensing:
+      old: None
+      restructureAndSkipping: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -602,7 +602,9 @@ checkPropertyAnswers:
     invitations: Invitations
     jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?
-    noJointLandlords: No, I am the only landlord for this property
+    noJointLandlords:
+      old: No, I am the only landlord
+      restructureAndSkipping: No, I am the only landlord for this property
   lettingAgentDelegation:
     heading: How your property’s rented out
     subheading: Who will provide these details
