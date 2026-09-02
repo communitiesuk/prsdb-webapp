@@ -160,6 +160,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
+        whenever(
+            absoluteUrlProvider.buildLettingAgentInvitationUri(any()),
+        ).thenReturn(URI("http://localhost/letting-agent/invitation?token=test-token"))
     }
 
     @Nested
