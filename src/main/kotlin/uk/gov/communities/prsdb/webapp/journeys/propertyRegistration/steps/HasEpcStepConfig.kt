@@ -1,11 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -15,22 +13,14 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFor
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class HasEpcStepConfig(
-    private val featureFlagManager: FeatureFlagManager,
-) : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, EpcDetailState>() {
+class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, EpcDetailState>() {
     override val formModelClass = HasEpcFormModel::class
 
     override fun getStepSpecificContent(state: EpcDetailState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.hasEpc.fieldSetHeading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            "secondarySubmitButtonText" to
-                // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
-                if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-                    "forms.buttons.provideDetailsLater"
-                } else {
-                    "propertyCompliance.epcTask.hasEpc.buttons.provideEpcDetailsLater"
-                },
+            "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
             "showSecondarySubmitButton" to state.allowProvideCertificateLaterRoute,
