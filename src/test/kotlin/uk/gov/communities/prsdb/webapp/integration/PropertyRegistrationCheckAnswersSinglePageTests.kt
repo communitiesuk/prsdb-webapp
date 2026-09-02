@@ -265,7 +265,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when property is unoccupied, who will provide these details section is not displayed`(page: Page) {
+        fun `when property is unoccupied, letting agent delegation unoccupied panel is displayed`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -275,8 +275,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isHidden()
+            BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.key).hasCount(0)
+            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isHidden()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).containsText(
+                "When your property becomes occupied, you can choose for your letting agent or property manager to provide this section for you. They can also keep these details up to date.",
+            )
         }
 
         @Test

@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
@@ -45,6 +46,8 @@ class CheckAnswersPagePropertyRegistration(
             page,
             "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
         )
+
+    val lettingAgentDelegationUnoccupiedPanel = TicketPanel(page)
 
     val warning = Warning.default(page)
 
