@@ -121,14 +121,16 @@ abstract class PropertyDetailsViewModelBase(
             withChangeLinks,
         )
 
-    protected fun householdsRow(): SummaryListRowViewModel =
+    protected fun householdsRow(
+        updateRouteBase: String = UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id),
+        withChangeLink: Boolean = withChangeLinks,
+    ): SummaryListRowViewModel =
         row(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
             changeLinkMessageKey,
-            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
-            withChangeLinks,
+            "$updateRouteBase/${HouseholdStep.ROUTE_SEGMENT}",
+            withChangeLink,
             withoutBottomBorder = true,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",

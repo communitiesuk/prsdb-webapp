@@ -39,7 +39,10 @@ class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        propertyDetailsUrl: String = PropertyDetailsController.getPropertyDetailsPath(propertyId),
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -54,18 +57,16 @@ class UpdateTenancyDetailsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, propertyDetailsUrl)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyDetailsUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateTenancyDetailsJourney,
-        propertyId: Long,
+        propertyDetailsRoute: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
@@ -102,10 +103,8 @@ class UpdateTenancyDetailsJourneyFactory(
     private fun checkYourAnswersJourneyMap(
         state: UpdateTenancyDetailsJourney,
         checkingAnswersFor: String,
-        propertyId: Long,
+        propertyDetailsRoute: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
@@ -149,7 +148,7 @@ class UpdateTenancyDetailsJourneyFactory(
 
     fun initializeJourneyState(
         ownershipId: Long,
-        user: Principal,
+        user: Principal?,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {

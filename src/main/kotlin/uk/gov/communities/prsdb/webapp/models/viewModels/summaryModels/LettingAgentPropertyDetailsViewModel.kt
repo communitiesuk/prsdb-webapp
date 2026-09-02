@@ -1,12 +1,17 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import java.util.UUID
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     private val complianceAllValid: Boolean,
+    private val token: UUID,
     messageSource: MessageSource,
 ) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView = false, messageSource) {
     init {
@@ -39,12 +44,15 @@ class LettingAgentPropertyDetailsViewModel(
 
     val tenancySection: List<SummaryListRowViewModel> =
         if (isTenancyProvideLater) {
-            // TODO PDJB-1572: Re-enable the tenancy change link.
             listOf(tenancyProvideLaterRow())
         } else {
             buildList {
-                // TODO PDJB-1573: Re-enable the households and tenants change links.
-                add(householdsRow())
+                add(
+                    householdsRow(
+                        updateRouteBase = LettingAgentUpdateHouseholdsAndTenantsController.getBaseRoute(token),
+                        withChangeLink = true,
+                    ),
+                )
                 add(tenantsRow())
                 // TODO PDJB-1574: Re-enable the bills change link.
                 add(rentIncludesBillsRow())
@@ -76,6 +84,8 @@ class LettingAgentPropertyDetailsViewModel(
             } else {
                 "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
-            withActionLink = false,
+            changeLinkMessageKey,
+            "${LettingAgentUpdateTenancyDetailsController.getBaseRoute(token)}/${HouseholdStep.ROUTE_SEGMENT}",
+            withActionLink = true,
         )
 }
