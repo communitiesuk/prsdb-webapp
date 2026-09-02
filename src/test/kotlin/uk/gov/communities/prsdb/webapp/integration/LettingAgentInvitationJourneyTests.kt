@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
@@ -36,8 +38,14 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
         setPasswordPage.submitPasswords(rawPassword, rawPassword)
 
-        // TODO PDJB-1567: Assert confirmation page content once the upstream stub steps provide real data
         val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
+            .containsText("Property password created")
+        assertThat(confirmationPage.insetText).containsText("Check you have a copy of this link")
+        // TODO PDJB-1661: Update the expected update link once the real invitation link is wired in
+        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", "https://example.com")
+        assertThat(confirmationPage.updateLink.locator).hasText("https://example.com")
         confirmationPage.form.submit()
 
         // TODO PDJB-1659: Remove this step from the journey test
