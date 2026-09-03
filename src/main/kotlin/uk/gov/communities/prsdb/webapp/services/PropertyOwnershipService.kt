@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -42,6 +44,8 @@ class PropertyOwnershipService(
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -123,7 +127,15 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
-    fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean = isCurrentUserLandlord(propertyOwnershipId)
+    fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean {
+        if (isCurrentUserLandlord(propertyOwnershipId)) return true
+        if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
+
+        val lettingAgentAccess =
+            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId) ?: return false
+        // TODO PDJB-1659: Check that lettingAgentAccess.token is in the session
+        return true
+    }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
         if (!getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)) {
