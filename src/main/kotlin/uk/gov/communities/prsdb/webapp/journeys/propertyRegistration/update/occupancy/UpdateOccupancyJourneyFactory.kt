@@ -410,9 +410,10 @@ class UpdateOccupancyJourney(
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    // The redesigned update with letting agent delegation uses the new check-your-answers step; every other
-    // variant (the redesigned single-page update with delegation off, and the old flag-off journey) uses the
-    // legacy check-your-answers step. All variants share a single state object, so switch on the flags here.
+    // Only the redesigned update with letting agent delegation has its own check-your-answers page, so cyaStep
+    // resolves to the new step when both flags are on. Otherwise it falls back to the legacy step used by the old
+    // flag-off journey. (The redesigned single-page update with delegation off has no check-your-answers page, so it
+    // never reads this.)
     override val cyaStep: JourneyStep.RequestableStep<*, *, *>
         get() =
             if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
