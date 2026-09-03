@@ -615,4 +615,7 @@ VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a',
 INSERT INTO letting_agent_access (invited_email, property_ownership_id, token, created_date)
 VALUES ('letting.agent.one@example.com', 1, '3334abcd-5678-abcd-1234-567abcd1111a', current_date),
        ('letting.agent.two@example.com', 5, '3334abcd-5678-abcd-1234-567abcd1111b', current_date - 10),
-       ('letting-agent@example.com', 49, '3334abcd-5678-abcd-1234-567abcd1111c', current_date);
+       ('letting-agent@example.com', 49, '3334abcd-5678-abcd-1234-567abcd1111c', current_date),
+       ('letting.agent.details@example.com', 39, '3334abcd-5678-abcd-1234-567abcd2222a', current_date),
+       ('letting.agent.details@example.com', 40, '3334abcd-5678-abcd-1234-567abcd2222b', current_date),
+       ('letting.agent.details@example.com', 43, '3334abcd-5678-abcd-1234-567abcd2222c', current_date);

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -77,8 +78,12 @@ class LettingAgentInvitationJourneyFactory(
                         journey.enterPasswordStep.isComplete(),
                     )
                 }
-                // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
-                nextDestination { Destination.ExternalUrl("/") }
+                nextDestination {
+                    val token = UUID.fromString(journey.invitationToken)
+                    Destination.ExternalUrl(
+                        LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token),
+                    )
+                }
             }
         }
     }

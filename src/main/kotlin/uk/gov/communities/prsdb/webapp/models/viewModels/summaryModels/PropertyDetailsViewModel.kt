@@ -1,22 +1,19 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
-import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
-) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView, messageSource) {
-    val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
-
-    val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
-
+) : PropertyDetailsViewModelBase(
+        propertyOwnership,
+        if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
+        messageSource,
+    ) {
     val showTenancySection: Boolean = isOccupied
 
     val tenancyHeadingKey: String = "propertyDetails.propertyRecord.tenancy.heading"
@@ -33,12 +30,7 @@ class PropertyDetailsViewModel(
     val occupiedSection: List<SummaryListRowViewModel> =
         listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
 
-    val licensingSection: List<SummaryListRowViewModel> =
-        when {
-            !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
-            isLandlordView -> listOf(licensingProvideLaterRow())
-            else -> emptyList()
-        }
+    val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
     val licensingProvideLaterParagraph: String? =
         if (isLicensingProvideLater && !isLandlordView) {
@@ -51,32 +43,7 @@ class PropertyDetailsViewModel(
             null
         }
 
-    val tenancySection: List<SummaryListRowViewModel> =
-        when {
-            !showTenancySection -> {
-                emptyList()
-            }
-
-            isTenancyProvideLater && isLandlordView -> {
-                listOf(tenancyProvideLaterRow())
-            }
-
-            isTenancyProvideLater && !isLandlordView -> {
-                emptyList()
-            }
-
-            else -> {
-                buildList {
-                    add(householdsRow())
-                    add(tenantsRow())
-                    add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                    add(furnishedStatusRow())
-                    add(rentFrequencyRow(withoutBottomBorder = true))
-                    add(rentAmountRow(includeChangeLink = false))
-                }
-            }
-        }
+    val tenancySection: List<SummaryListRowViewModel> = buildTenancySection()
 
     val tenancyProvideLaterParagraph: String? =
         when {
@@ -96,32 +63,4 @@ class PropertyDetailsViewModel(
                 null
             }
         }
-
-    private fun licensingProvideLaterRow(): SummaryListRowViewModel =
-        row(
-            "propertyDetails.propertyRecord.licensing.rowName",
-            if (hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterWithDeadline")
-            } else {
-                "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
-            },
-            changeLinkMessageKey,
-            getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
-            withChangeLinks,
-        )
-
-    private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
-        row(
-            "propertyDetails.propertyRecord.tenancy.rowName",
-            if (hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline")
-            } else {
-                "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
-            },
-            changeLinkMessageKey,
-            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
-            withChangeLinks,
-        )
 }

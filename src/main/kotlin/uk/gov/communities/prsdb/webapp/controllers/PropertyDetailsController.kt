@@ -74,7 +74,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = true,
+                withChangeLinks = true,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
@@ -214,7 +214,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = false,
+                withChangeLinks = false,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
