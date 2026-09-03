@@ -18,5 +18,9 @@ abstract class ModifiableAuditableEntity :
     open var lastModifiedDate: Instant? = null
         protected set
 
+    fun touch() {
+        lastModifiedDate = Instant.now()
+    }
+
     fun getMostRecentlyUpdated(): Instant = lastModifiedDate ?: createdDate
 }

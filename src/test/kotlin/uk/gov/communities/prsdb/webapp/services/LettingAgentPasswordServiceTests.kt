@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -27,6 +28,9 @@ class LettingAgentPasswordServiceTests {
     @Mock
     private lateinit var passwordEncoder: PasswordEncoder
 
+    @Mock
+    private lateinit var entityManager: EntityManager
+
     @InjectMocks
     private lateinit var lettingAgentPasswordService: LettingAgentPasswordService
 
@@ -52,7 +56,7 @@ class LettingAgentPasswordServiceTests {
 
     @Test
     fun `setPassword rejects when password already set on entity`() {
-        val access = MockLettingAgentData.createLettingAgentAccess(encodedPassword = "{bcrypt}existing")
+        val access = MockLettingAgentData.createLettingAgentAccess(encodedPassword = "existing")
         whenever(lettingAgentAccessRepository.findById(defaultId)).thenReturn(Optional.of(access))
 
         assertThrows<PrsdbWebException> {
@@ -75,6 +79,8 @@ class LettingAgentPasswordServiceTests {
 
         verify(passwordEncoder).encode("myPassword")
         verify(lettingAgentAccessRepository).setEncodedPasswordIfAbsent(defaultId, "{bcrypt}encoded")
+        verify(entityManager).refresh(access)
+        verify(lettingAgentAccessRepository).save(access)
     }
 
     @Test
