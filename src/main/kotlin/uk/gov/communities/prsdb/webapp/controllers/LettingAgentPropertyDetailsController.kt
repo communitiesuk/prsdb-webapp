@@ -73,8 +73,7 @@ class LettingAgentPropertyDetailsController(
                 propertyOwnershipId = propertyOwnershipId,
             ),
         )
-        // TODO PDJB-1567: This page currently has no back link, as it is the closest thing a letting agent
-        //  has to a dashboard. A back link (e.g. to the letting-agent confirmation page) may be added here later.
+
         return LETTING_AGENT_PROPERTY_DETAILS_VIEW
     }
 
