@@ -2005,6 +2005,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             lettingAgentEmailPage.submitEmail("agent@example.com")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.submitButton).containsText("Confirm and pay")
+            assertThat(checkAnswersPage.warning).isVisible()
             checkAnswersPage.confirm()
 
             val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)

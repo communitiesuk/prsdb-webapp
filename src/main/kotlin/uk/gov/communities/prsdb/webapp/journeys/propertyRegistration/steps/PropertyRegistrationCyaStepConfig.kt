@@ -274,20 +274,6 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
-    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
-    private fun getMockProvideLaterSummaryList(
-        fieldHeading: String,
-        provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
-    ): List<SummaryListRowViewModel> =
-        listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading,
-                provideLaterMessageKey,
-                actionUrl = null,
-            ),
-        )
-
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
             getPropertyTypeRow(state) +
@@ -422,13 +408,6 @@ class PropertyRegistrationCyaStepConfig(
 
         return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
-
-    private fun getProvideLaterMessageKey(isOccupied: Boolean): String =
-        if (isOccupied) {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLater"
-        } else {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLaterUnoccupied"
-        }
 }
 
 @JourneyFrameworkComponent

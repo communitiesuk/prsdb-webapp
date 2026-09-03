@@ -587,7 +587,6 @@ checkPropertyAnswers:
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later
-    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
     unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
     bedrooms: Number of bedrooms

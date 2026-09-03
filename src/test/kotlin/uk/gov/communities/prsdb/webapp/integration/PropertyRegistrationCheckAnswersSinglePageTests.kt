@@ -155,7 +155,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when letting agent provides details, rented out section shows email row with change link`(page: Page) {
+        fun `delegated occupied property CYA displays required sections and letting agent details`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -170,44 +170,11 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("My letting agent or property manager")
-            assertThat(
-                checkAnswersPage.summaryList.lettingAgentEmailRow.key,
-            ).containsText("Letting agent or property manager’s email address")
-            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText("letting.agent@example.com")
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
-            checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
-            val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
-
-            emailPage.submitEmail("new.agent@example.com")
-
-            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(updatedCheckAnswersPage.summaryList.lettingAgentEmailRow.value)
-                .containsText("new.agent@example.com")
-        }
-
-        @Test
-        fun `delegated occupied property CYA displays only required sections`(page: Page) {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withLettingAgentProvidesRentalDetails()
-                        .withSubmittedValue(
-                            LettingAgentEmailStep.ROUTE_SEGMENT,
-                            AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
-                        )
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
             val headings =
                 page
                     .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
                     .allInnerTexts()
                     .map { it.trim() }
-
             assertEquals(
                 listOf(
                     "About your property",
@@ -219,6 +186,24 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 ),
                 headings,
             )
+            BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("My letting agent or property manager")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.actions.getActionLink("Change")).isVisible()
+            assertThat(
+                checkAnswersPage.summaryList.lettingAgentEmailRow.key,
+            ).containsText("Letting agent or property manager’s email address")
+            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText("letting.agent@example.com")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.actions.getActionLink("Change")).isVisible()
+            checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
+            val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+
+            emailPage.submitEmail("new.agent@example.com")
+
+            val updatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(updatedCheckAnswersPage.summaryList.lettingAgentEmailRow.value)
+                .containsText("new.agent@example.com")
         }
 
         @Test
