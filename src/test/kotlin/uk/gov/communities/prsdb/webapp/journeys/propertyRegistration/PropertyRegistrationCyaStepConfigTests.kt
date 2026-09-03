@@ -313,7 +313,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
                 licensingRows.first().fieldValue,
             )
         }

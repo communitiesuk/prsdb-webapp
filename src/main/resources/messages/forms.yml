@@ -565,9 +565,9 @@ checkPropertyAnswers:
     bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
-    noLicensing: None
-    restructureAndSkipping:
-      noLicensing: This property does not need a licence
+    noLicensing:
+      old: None
+      restructureAndSkipping: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:

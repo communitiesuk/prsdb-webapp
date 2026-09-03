@@ -393,7 +393,7 @@ class PropertyRegistrationCyaStepConfig(
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )
