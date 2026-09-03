@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
@@ -74,13 +76,17 @@ class LettingAgentPropertyDetailsViewModelTests {
 
     @Test
     fun `the licensing section shows the licensing type and number rows when licensing details are provided`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(license = License(LicensingType.HMO_MANDATORY_LICENCE, "L1234"))
 
         val viewModel =
             LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
         assertEquals(
-            listOf("propertyDetails.propertyRecord.licensingInformation.licensingType"),
+            listOf(
+                "propertyDetails.propertyRecord.licensingInformation.licensingType",
+                "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
+            ),
             viewModel.licensingSection.map { it.fieldHeading },
         )
     }

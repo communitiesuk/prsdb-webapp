@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -18,8 +17,6 @@ class PropertyDetailsPageLettingAgentView(
             UUID.fromString(urlArguments["token"]!!),
         ),
     ) {
-    val backLink = BackLink.default(page)
-
     val summaryList = LettingAgentSummaryList(page)
 
     val gasSafetyCard = SummaryCard(page, "Gas safety certificate")

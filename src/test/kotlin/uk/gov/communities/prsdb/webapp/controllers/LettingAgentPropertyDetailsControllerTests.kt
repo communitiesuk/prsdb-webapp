@@ -68,7 +68,6 @@ class LettingAgentPropertyDetailsControllerTests(
                 status { isOk() }
                 view { name("propertyDetailsLettingAgentView") }
                 model { attributeExists("propertyDetails") }
-                model { attributeExists("backUrl") }
             }
     }
 
