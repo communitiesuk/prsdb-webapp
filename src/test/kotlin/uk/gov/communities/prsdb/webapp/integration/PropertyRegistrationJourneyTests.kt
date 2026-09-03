@@ -2015,6 +2015,33 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
         }
 
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `submitting the CYA page when the landlord provides details and a certificate is missing shows the confirm missing compliance page before reaching confirmation`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
+
+            checkAnswersPage.confirm()
+
+            val confirmMissingCompliancePage =
+                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+            assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
+
+            confirmMissingCompliancePage.form.radios.selectValue("true")
+            confirmMissingCompliancePage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+        }
+
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
         @Nested
         inner class DelegateToLettingAgentDisabled {
