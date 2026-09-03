@@ -3629,7 +3629,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
 
             val changeLink =
-                checkAnswersPage.summaryList.jointLandlordsInvitationsRowLegacy.actions
+                checkAnswersPage.summaryList.beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow.actions
                     .getActionLink("Change")
             assertThat(changeLink).isVisible()
 
