@@ -38,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -45,6 +46,7 @@ import java.security.Principal
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
@@ -54,7 +56,7 @@ class UpdateOccupancyJourneyFactory(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
-            state.wasOccupied = propertyOwnership.isOccupied
+            state.propertyIsOccupied = propertyOwnership.isOccupied
             state.isStateInitialized = true
         }
 
@@ -72,6 +74,10 @@ class UpdateOccupancyJourneyFactory(
             oldCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
+
+    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean =
+        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
+            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId) != null
 
     private fun redesignedJourneyMap(
         state: UpdateOccupancyJourney,
@@ -95,7 +101,7 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.interruptionStep }
+                nextStep { journey.occupancyUpdateRoutingStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
@@ -104,19 +110,31 @@ class UpdateOccupancyJourneyFactory(
                     )
                 }
             }
-            step(journey.interruptionStep) {
-                routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
+            step<OccupancyUpdateRouteMode, OccupancyUpdateRoutingStepConfig>(journey.occupancyUpdateRoutingStep) {
+                stepSpecificInitialisation {
+                    usingCurrentDelegation { isDelegatedToLettingAgent(propertyId) }
                 }
+                parents { journey.occupied.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.checkYourAnswersStep)
+                        OccupancyUpdateRouteMode.SHOW_INTERRUPTION -> Destination(journey.lettingAgentInterruptionStep)
+                    }
+                }
+            }
+            step(journey.lettingAgentInterruptionStep) {
+                routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
+                parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.SHOW_INTERRUPTION) }
                 nextStep { journey.checkYourAnswersStep }
             }
             step(journey.checkYourAnswersStep) {
                 routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.interruptionStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.NO_INTERRUPTION),
+                        journey.lettingAgentInterruptionStep.isComplete(),
+                    )
+                }
                 nextStep { journey.completeOccupancyUpdateStep }
             }
             step(journey.completeOccupancyUpdateStep) {
@@ -319,12 +337,13 @@ class UpdateOccupancyJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
+    // Routes past the interruption unless the property is being unoccupied while delegated to a letting agent
+    override val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep,
+    // Interruption shown when unoccupying a property that is delegated to a letting agent
+    override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
     // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
     // see redesignedJourneyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
-    // Skeleton interruption / "are you sure" step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT
-    // is enabled - see redesignedJourneyMap)
-    override val interruptionStep: UpdateOccupancyInterruptionStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
@@ -340,7 +359,7 @@ class UpdateOccupancyJourney(
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
-    override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
+    override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
@@ -353,9 +372,10 @@ interface UpdateOccupancyJourneyState :
     val occupationTask: OccupationTask
     override val cyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
+    val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep
+    val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep
     val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
-    val interruptionStep: UpdateOccupancyInterruptionStep
     val propertyId: Long
     val lastModifiedDate: String
-    val wasOccupied: Boolean
+    val propertyIsOccupied: Boolean
 }
