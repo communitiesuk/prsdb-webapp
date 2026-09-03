@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -10,7 +11,7 @@ class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     propertyCompliance: PropertyCompliance,
     messageSource: MessageSource,
-) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView = false, messageSource) {
+) : PropertyDetailsViewModelBase(propertyOwnership, PropertyDetailsViewType.LETTING_AGENT, messageSource) {
     init {
         check(propertyOwnership.isViewableByLettingAgent) {
             "Property ownership ${propertyOwnership.id} is not viewable by a letting agent"

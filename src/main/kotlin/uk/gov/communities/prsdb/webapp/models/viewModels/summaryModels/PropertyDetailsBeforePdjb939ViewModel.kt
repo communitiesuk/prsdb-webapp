@@ -1,14 +1,19 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 // TODO PDJB-939: delete this class and its message keys when the flag is permanently on.
 class PropertyDetailsBeforePdjb939ViewModel(
     propertyOwnership: PropertyOwnership,
-    isLandlordView: Boolean = true,
+    private val isLandlordView: Boolean = true,
     messageSource: MessageSource,
-) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView, messageSource) {
+) : PropertyDetailsViewModelBase(
+        propertyOwnership,
+        if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
+        messageSource,
+    ) {
     // Property state may have been created while the flag was on, so an occupied property can be in a
     // provide-later state with no tenancy details. This view cannot render those, so it treats such a
     // property as unoccupied and hides the tenancy section.

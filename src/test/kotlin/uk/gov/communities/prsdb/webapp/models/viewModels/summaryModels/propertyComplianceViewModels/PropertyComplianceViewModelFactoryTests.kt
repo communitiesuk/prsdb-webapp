@@ -55,14 +55,14 @@ class PropertyComplianceViewModelFactoryTests {
     @Nested
     inner class CardActions {
         @Test
-        fun `cards have change actions when landlordView is true`() {
+        fun `cards have change actions when withChangeLinks is true`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
             val propertyOwnershipId = propertyCompliance.propertyOwnership.id
 
             val result =
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
-                    landlordView = true,
+                    withChangeLinks = true,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -100,13 +100,13 @@ class PropertyComplianceViewModelFactoryTests {
         }
 
         @Test
-        fun `cards have no change actions when landlordView is false`() {
+        fun `cards have no change actions when withChangeLinks is false`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
             val result =
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
-                    landlordView = false,
+                    withChangeLinks = false,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 

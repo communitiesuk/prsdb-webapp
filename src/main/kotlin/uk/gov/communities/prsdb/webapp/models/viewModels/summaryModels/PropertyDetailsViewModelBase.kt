@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
@@ -36,11 +37,19 @@ import java.util.Locale
 // TODO PDJB-939 - this can be combined with PropertyDetailsViewModel once the pdjb939 flag is removed (assuming it is not used elsewhere)
 abstract class PropertyDetailsViewModelBase(
     protected val propertyOwnership: PropertyOwnership,
-    protected val isLandlordView: Boolean,
+    protected val viewType: PropertyDetailsViewType,
     protected val messageSource: MessageSource,
 ) {
-    // Change links are only shown to landlords; the local council view is read-only.
-    protected val withChangeLinks: Boolean = isLandlordView
+    protected val withChangeLinks: Boolean =
+        when (viewType) {
+            PropertyDetailsViewType.LANDLORD -> true
+            // The local council view is read-only.
+            PropertyDetailsViewType.LOCAL_COUNCIL -> false
+            // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get their
+            //  own change links (pointing at letting-agent update journeys) once those journeys are built, at which
+            //  point this becomes true.
+            PropertyDetailsViewType.LETTING_AGENT -> false
+        }
 
     protected val changeLinkMessageKey = "forms.links.change"
 

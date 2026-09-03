@@ -81,7 +81,7 @@ class LettingAgentPropertyDetailsControllerTests(
             EpcViewModelFactory(messageSource, mock()),
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
-            landlordView = false,
+            withChangeLinks = false,
             propertyOwnershipId = 1L,
         )
     }

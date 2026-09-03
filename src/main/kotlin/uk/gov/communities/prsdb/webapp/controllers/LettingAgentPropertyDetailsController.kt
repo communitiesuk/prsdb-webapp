@@ -65,8 +65,8 @@ class LettingAgentPropertyDetailsController(
             "complianceDetails",
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                // TODO PDJB-1577 to PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building this with landlordView = true.
-                landlordView = false,
+                // TODO PDJB-1577, PDJB-1578, PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building this with withChangeLinks = true.
+                withChangeLinks = false,
                 propertyOwnershipId = propertyOwnershipId,
             ),
         )

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -12,7 +13,11 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
-) : PropertyDetailsViewModelBase(propertyOwnership, isLandlordView, messageSource) {
+) : PropertyDetailsViewModelBase(
+        propertyOwnership,
+        if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
+        messageSource,
+    ) {
     val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
 
     val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true

@@ -20,11 +20,11 @@ class PropertyComplianceViewModelFactory(
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
-        landlordView: Boolean = true,
+        withChangeLinks: Boolean = true,
         propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
-            if (landlordView) {
+            if (withChangeLinks) {
                 SummaryCardActionViewModel.changeAction(
                     UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
                 )
@@ -33,7 +33,7 @@ class PropertyComplianceViewModelFactory(
             }
 
         val electricalSafetyChangeActions =
-            if (landlordView) {
+            if (withChangeLinks) {
                 SummaryCardActionViewModel.changeAction(
                     UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
                 )
@@ -42,7 +42,7 @@ class PropertyComplianceViewModelFactory(
             }
 
         val gasSafetyChangeActions =
-            if (landlordView) {
+            if (withChangeLinks) {
                 SummaryCardActionViewModel.changeAction(
                     UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                 )
