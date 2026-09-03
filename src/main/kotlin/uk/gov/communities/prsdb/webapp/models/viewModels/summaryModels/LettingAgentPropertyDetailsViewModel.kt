@@ -18,10 +18,6 @@ class LettingAgentPropertyDetailsViewModel(
         }
     }
 
-    val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
-
-    val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
-
     val showProvideDetailsInset: Boolean =
         isLicensingProvideLater ||
             isTenancyProvideLater ||
@@ -34,53 +30,11 @@ class LettingAgentPropertyDetailsViewModel(
             messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
         }
 
-    // TODO PDJB-1571: Re-enable the licensing change link by building this section with change links.
-    val licensingSection: List<SummaryListRowViewModel> =
-        if (isLicensingProvideLater) {
-            listOf(licensingProvideLaterRow())
-        } else {
-            listOfNotNull(licensingTypeRow(), licensingNumberRow())
-        }
+    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get change links on
+    //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared section
+    //  builders show a letting-agent change link on a row only once changeableRow is given a lettingAgentActionLink
+    //  for it; until then the rows render without links (see PropertyDetailsViewModelBase).
+    val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
-    val tenancySection: List<SummaryListRowViewModel> =
-        if (isTenancyProvideLater) {
-            // TODO PDJB-1572: Re-enable the tenancy change link.
-            listOf(tenancyProvideLaterRow())
-        } else {
-            buildList {
-                // TODO PDJB-1573: Re-enable the households and tenants change links.
-                add(householdsRow())
-                add(tenantsRow())
-                // TODO PDJB-1574: Re-enable the bills change link.
-                add(rentIncludesBillsRow())
-                if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                // TODO PDJB-1575: Re-enable the furnished change link.
-                add(furnishedStatusRow())
-                // TODO PDJB-1576: Re-enable the rent change link.
-                add(rentFrequencyRow(withoutBottomBorder = true))
-                add(rentAmountRow(includeChangeLink = false))
-            }
-        }
-
-    private fun licensingProvideLaterRow(): SummaryListRowViewModel =
-        row(
-            "propertyDetails.propertyRecord.licensing.rowName",
-            if (hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterWithDeadline")
-            } else {
-                "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
-            },
-            withActionLink = false,
-        )
-
-    private fun tenancyProvideLaterRow(): SummaryListRowViewModel =
-        row(
-            "propertyDetails.propertyRecord.tenancy.rowName",
-            if (hasBeenOccupiedSinceRegistration) {
-                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline")
-            } else {
-                "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
-            },
-            withActionLink = false,
-        )
+    val tenancySection: List<SummaryListRowViewModel> = buildTenancySection()
 }

@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -40,17 +41,6 @@ abstract class PropertyDetailsViewModelBase(
     protected val viewType: PropertyDetailsViewType,
     protected val messageSource: MessageSource,
 ) {
-    protected val withChangeLinks: Boolean =
-        when (viewType) {
-            PropertyDetailsViewType.LANDLORD -> true
-            // The local council view is read-only.
-            PropertyDetailsViewType.LOCAL_COUNCIL -> false
-            // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get their
-            //  own change links (pointing at letting-agent update journeys) once those journeys are built, at which
-            //  point this becomes true.
-            PropertyDetailsViewType.LETTING_AGENT -> false
-        }
-
     protected val changeLinkMessageKey = "forms.links.change"
 
     val address: String = propertyOwnership.address.singleLineAddress
@@ -63,6 +53,10 @@ abstract class PropertyDetailsViewModelBase(
     private val registrationDate = propertyOwnership.registrationDate
 
     protected val hasBeenOccupiedSinceRegistration: Boolean = propertyOwnership.hasBeenOccupiedSinceRegistration
+
+    val isLicensingProvideLater: Boolean = propertyOwnership.licenseProvideLater == true
+
+    val isTenancyProvideLater: Boolean = propertyOwnership.tenancyProvideLater == true
 
     protected fun registrationNumberRow(): SummaryListRowViewModel =
         row(
@@ -97,47 +91,39 @@ abstract class PropertyDetailsViewModelBase(
         )
 
     protected fun ownershipTypeRow(labelKey: String): SummaryListRowViewModel =
-        row(
+        changeableRow(
             labelKey,
             MessageKeyConverter.convert(propertyOwnership.ownershipType),
-            changeLinkMessageKey,
             UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
                 "/${OwnershipTypeStep.ROUTE_SEGMENT}",
-            withChangeLinks,
         )
 
     protected fun occupiedRow(
         labelKey: String,
         occupied: Boolean = isOccupied,
     ): SummaryListRowViewModel =
-        row(
+        changeableRow(
             labelKey,
             MessageKeyConverter.convert(occupied),
-            changeLinkMessageKey,
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                 "/${OccupiedStep.ROUTE_SEGMENT}",
-            withChangeLinks,
         )
 
     protected fun bedroomsRow(): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
             propertyOwnership.numBedrooms
                 ?: "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms.notAdded",
-            changeLinkMessageKey,
             UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
                 "/${BedroomsStep.ROUTE_SEGMENT}",
-            withChangeLinks,
         )
 
     protected fun householdsRow(): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
-            changeLinkMessageKey,
             UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",
-            withChangeLinks,
             withoutBottomBorder = true,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
@@ -151,13 +137,11 @@ abstract class PropertyDetailsViewModelBase(
         )
 
     protected fun rentIncludesBillsRow(): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
             MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
-            changeLinkMessageKey,
             UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
                 "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
-            withChangeLinks,
             withoutBottomBorder = propertyOwnership.rentIncludesBills,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.changeLinkAriaLabel",
@@ -166,13 +150,11 @@ abstract class PropertyDetailsViewModelBase(
     protected fun billsIncludedRow(includeChangeLink: Boolean = true): SummaryListRowViewModel {
         val value = BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource)
         return if (includeChangeLink) {
-            row(
+            changeableRow(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                 value,
-                changeLinkMessageKey,
                 UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
                     "/${BillsIncludedStep.ROUTE_SEGMENT}",
-                withChangeLinks,
             )
         } else {
             row("propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded", value, withActionLink = false)
@@ -180,25 +162,21 @@ abstract class PropertyDetailsViewModelBase(
     }
 
     protected fun furnishedStatusRow(): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
-            changeLinkMessageKey,
             UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
                 "/${FurnishedStatusStep.ROUTE_SEGMENT}",
-            withChangeLinks,
         )
 
     protected fun rentFrequencyRow(withoutBottomBorder: Boolean = false): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
-            changeLinkMessageKey,
             UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
                 "/${RentFrequencyStep.ROUTE_SEGMENT}",
-            withChangeLinks,
             withoutBottomBorder = withoutBottomBorder,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
@@ -213,13 +191,11 @@ abstract class PropertyDetailsViewModelBase(
                 messageSource,
             )
         return if (includeChangeLink) {
-            row(
+            changeableRow(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
                 value,
-                changeLinkMessageKey,
                 UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
                     "/${RentAmountStep.ROUTE_SEGMENT}",
-                withChangeLinks,
             )
         } else {
             row("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount", value, withActionLink = false)
@@ -227,15 +203,13 @@ abstract class PropertyDetailsViewModelBase(
     }
 
     protected fun licensingTypeRow(): SummaryListRowViewModel =
-        row(
+        changeableRow(
             "propertyDetails.propertyRecord.licensingInformation.licensingType",
             propertyOwnership.license?.let {
                 MessageKeyConverter.convert(it.licenseType)
             } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-            changeLinkMessageKey,
             getUpdateLicensingBaseRoute(propertyOwnership.id) +
                 "/${LicensingTypeStep.ROUTE_SEGMENT}",
-            withChangeLinks,
         )
 
     protected fun licensingNumberRow(): SummaryListRowViewModel? =
@@ -247,6 +221,56 @@ abstract class PropertyDetailsViewModelBase(
             )
         } else {
             null
+        }
+
+    protected fun licensingProvideLaterRow(): SummaryListRowViewModel =
+        changeableRow(
+            "propertyDetails.propertyRecord.licensing.rowName",
+            if (hasBeenOccupiedSinceRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.licensing.provideLaterWithDeadline")
+            } else {
+                "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
+            },
+            getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                "/${LicensingTypeStep.ROUTE_SEGMENT}",
+        )
+
+    protected fun tenancyProvideLaterRow(): SummaryListRowViewModel =
+        changeableRow(
+            "propertyDetails.propertyRecord.tenancy.rowName",
+            if (hasBeenOccupiedSinceRegistration) {
+                getProvideLaterDeadlineText("propertyDetails.propertyRecord.tenancy.provideLaterWithDeadline")
+            } else {
+                "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
+            },
+            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
+        )
+
+    // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
+    // views show a provide-later row (with a change link only where changeableRow supplies a route for the view type).
+    protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
+        when {
+            !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
+            viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
+            else -> listOf(licensingProvideLaterRow())
+        }
+
+    protected fun buildTenancySection(): List<SummaryListRowViewModel> =
+        when {
+            !isOccupied -> emptyList()
+            isTenancyProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
+            isTenancyProvideLater -> listOf(tenancyProvideLaterRow())
+            else ->
+                buildList {
+                    add(householdsRow())
+                    add(tenantsRow())
+                    add(rentIncludesBillsRow())
+                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+                    add(furnishedStatusRow())
+                    add(rentFrequencyRow(withoutBottomBorder = true))
+                    add(rentAmountRow(includeChangeLink = false))
+                }
         }
 
     protected fun row(
@@ -270,6 +294,39 @@ abstract class PropertyDetailsViewModelBase(
                     withAriaLabelForAction = withAriaLabelForAction,
                 )
             }.single()
+
+    // Builds a row whose change link is shown only where the current view type has a route to link to:
+    //  - Landlord: always linked, using the landlord update route.
+    //  - Local council: never linked - the council view is read-only.
+    //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
+    //    lettingAgentActionLink; until then the row renders without a link.
+    // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
+    // PDJB-1574, PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
+    // independently, without turning on (or pointing at the wrong route for) any of the others.
+    protected fun changeableRow(
+        key: String,
+        value: Any?,
+        landlordActionLink: String,
+        lettingAgentActionLink: String? = null,
+        withoutBottomBorder: Boolean = false,
+        withAriaLabelForAction: String? = null,
+    ): SummaryListRowViewModel {
+        val (actionLink, withActionLink) =
+            when (viewType) {
+                PropertyDetailsViewType.LANDLORD -> landlordActionLink to true
+                PropertyDetailsViewType.LOCAL_COUNCIL -> null to false
+                PropertyDetailsViewType.LETTING_AGENT -> lettingAgentActionLink to (lettingAgentActionLink != null)
+            }
+        return row(
+            key = key,
+            value = value,
+            actionText = changeLinkMessageKey,
+            actionLink = actionLink,
+            withActionLink = withActionLink,
+            withoutBottomBorder = withoutBottomBorder,
+            withAriaLabelForAction = withAriaLabelForAction,
+        )
+    }
 
     protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
         // Occupied-at-registration properties anchor the 28-day deadline to their registration date.

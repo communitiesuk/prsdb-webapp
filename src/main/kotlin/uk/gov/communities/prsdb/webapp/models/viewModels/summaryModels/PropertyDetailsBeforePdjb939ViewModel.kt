@@ -17,8 +17,6 @@ class PropertyDetailsBeforePdjb939ViewModel(
     // Property state may have been created while the flag was on, so an occupied property can be in a
     // provide-later state with no tenancy details. This view cannot render those, so it treats such a
     // property as unoccupied and hides the tenancy section.
-    private val isTenancyProvideLater = propertyOwnership.tenancyProvideLater == true
-
     val effectivelyOccupied = isOccupied && !isTenancyProvideLater
 
     val effectiveIsOccupiedKey: String =
