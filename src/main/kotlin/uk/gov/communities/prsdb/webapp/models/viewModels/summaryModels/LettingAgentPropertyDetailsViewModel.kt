@@ -32,7 +32,7 @@ class LettingAgentPropertyDetailsViewModel(
 
     // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get change links on
     //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared section
-    //  builders show a letting-agent change link on a row only once changeableRow is given a lettingAgentActionLink
+    //  builders show a letting-agent change link on a row only once rowWithViewTypeSpecificChangeLink is given a lettingAgentActionLink
     //  for it; until then the rows render without links (see PropertyDetailsViewModelBase).
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
