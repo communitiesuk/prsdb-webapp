@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -33,7 +35,7 @@ class SetPasswordStepConfig(
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
         val invitation = getInvitation(state)
         if (invitation.encodedPassword != null) {
-            throw PrsdbWebException("Password has already been set for letting agent access ${invitation.id}")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Password has already been set for letting agent access ${invitation.id}")
         }
     }
 

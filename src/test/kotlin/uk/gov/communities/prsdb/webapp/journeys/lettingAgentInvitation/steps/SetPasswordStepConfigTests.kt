@@ -9,8 +9,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SetPasswordFormModel
@@ -77,7 +77,7 @@ class SetPasswordStepConfigTests {
         val invitation = MockLettingAgentData.createLettingAgentAccess(token = token)
         setupInvitation(invitation)
 
-        assertThrows(PrsdbWebException::class.java) {
+        assertThrows(ResponseStatusException::class.java) {
             stepConfig.afterStepIsReached(state)
         }
     }
