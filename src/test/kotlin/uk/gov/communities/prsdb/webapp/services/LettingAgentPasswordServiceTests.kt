@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityManager
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -10,7 +10,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -27,9 +26,6 @@ class LettingAgentPasswordServiceTests {
 
     @Mock
     private lateinit var passwordEncoder: PasswordEncoder
-
-    @Mock
-    private lateinit var entityManager: EntityManager
 
     @InjectMocks
     private lateinit var lettingAgentPasswordService: LettingAgentPasswordService
@@ -71,28 +67,12 @@ class LettingAgentPasswordServiceTests {
         val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
         whenever(lettingAgentAccessRepository.findById(defaultId)).thenReturn(Optional.of(access))
         whenever(passwordEncoder.encode("myPassword")).thenReturn("{bcrypt}encoded")
-        whenever(
-            lettingAgentAccessRepository.setEncodedPasswordIfAbsent(eq(defaultId), eq("{bcrypt}encoded")),
-        ).thenReturn(1)
 
         lettingAgentPasswordService.setPassword(defaultId, "myPassword")
 
         verify(passwordEncoder).encode("myPassword")
-        verify(lettingAgentAccessRepository).setEncodedPasswordIfAbsent(defaultId, "{bcrypt}encoded")
-        verify(entityManager).refresh(access)
         verify(lettingAgentAccessRepository).save(access)
-    }
-
-    @Test
-    fun `setPassword throws when atomic update changes zero rows`() {
-        val access = MockLettingAgentData.createLettingAgentAccessWithoutPassword()
-        whenever(lettingAgentAccessRepository.findById(defaultId)).thenReturn(Optional.of(access))
-        whenever(passwordEncoder.encode("myPassword")).thenReturn("{bcrypt}encoded")
-        whenever(lettingAgentAccessRepository.setEncodedPasswordIfAbsent(any(), any())).thenReturn(0)
-
-        assertThrows<PrsdbWebException> {
-            lettingAgentPasswordService.setPassword(defaultId, "myPassword")
-        }
+        assertEquals("{bcrypt}encoded", access.encodedPassword)
     }
 
     @Test

@@ -32,6 +32,10 @@ class LettingAgentAccess(
     var encodedPassword: String? = null
         private set
 
+    fun setEncodedPassword(encoded: String) {
+        this.encodedPassword = encoded
+    }
+
     constructor(
         token: UUID,
         invitedEmail: String,

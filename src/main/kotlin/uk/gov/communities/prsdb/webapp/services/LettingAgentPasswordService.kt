@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.persistence.EntityManager
 import jakarta.transaction.Transactional
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -12,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 class LettingAgentPasswordService(
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val entityManager: EntityManager,
 ) {
     @Transactional
     fun setPassword(
@@ -32,15 +30,7 @@ class LettingAgentPasswordService(
             throw PrsdbWebException("Password has already been set for letting agent access $lettingAgentAccessId")
         }
 
-        val encoded = passwordEncoder.encode(rawPassword)
-
-        val updatedRows = lettingAgentAccessRepository.setEncodedPasswordIfAbsent(lettingAgentAccessId, encoded)
-        if (updatedRows == 0) {
-            throw PrsdbWebException("Password has already been set for letting agent access $lettingAgentAccessId")
-        }
-
-        entityManager.refresh(lettingAgentAccess)
-        lettingAgentAccess.touch()
+        lettingAgentAccess.setEncodedPassword(passwordEncoder.encode(rawPassword))
         lettingAgentAccessRepository.save(lettingAgentAccess)
     }
 
