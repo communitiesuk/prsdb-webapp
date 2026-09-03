@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController.Companion.UPDATE_TENANCY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController.Companion.UPDATE_TENANCY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -26,7 +26,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_TENANCY_DETAILS_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateTenancyDetailsController(
+class LandlordUpdateTenancyDetailsController(
     private val journeyFactory: UpdateTenancyDetailsJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
