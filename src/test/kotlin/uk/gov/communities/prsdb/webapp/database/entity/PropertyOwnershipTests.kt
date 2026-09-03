@@ -113,4 +113,18 @@ class PropertyOwnershipTests {
 
         assertNull(property.provideLaterDeadline)
     }
+
+    @Test
+    fun `isViewableByLettingAgent is true when the property is occupied`() {
+        val property = MockLandlordData.createOccupiedPropertyOwnership()
+
+        assertTrue(property.isViewableByLettingAgent)
+    }
+
+    @Test
+    fun `isViewableByLettingAgent is false when the property is unoccupied`() {
+        val property = MockLandlordData.createUnoccupiedPropertyOwnership()
+
+        assertFalse(property.isViewableByLettingAgent)
+    }
 }
