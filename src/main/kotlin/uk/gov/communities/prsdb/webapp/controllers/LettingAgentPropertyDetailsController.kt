@@ -35,6 +35,9 @@ class LettingAgentPropertyDetailsController(
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping
     fun getLettingAgentPropertyDetails(
+        // TODO: PDJB-1659: Check that the interceptor will direct this to the invalid link page instead of showing a 404
+        //  if this is not parseable as a UUID.
+        //  It might be a case of making this a string then checking the validity with the same method the interceptor uses.
         @PathVariable token: UUID,
         model: Model,
     ): String {
