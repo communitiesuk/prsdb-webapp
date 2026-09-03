@@ -56,6 +56,8 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
+        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+            .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
         val complianceViewModel = createComplianceViewModel()
@@ -100,7 +102,7 @@ class LettingAgentPropertyDetailsControllerTests(
     }
 
     @Test
-    fun `getLettingAgentPropertyDetails returns not found when the property is not occupied`() {
+    fun `getLettingAgentPropertyDetails returns not found when the property does not have a letting agent`() {
         val token = UUID.randomUUID()
         val propertyOwnership = createUnoccupiedPropertyOwnership()
 
@@ -108,6 +110,8 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
+        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+            .thenReturn(false)
 
         mvc
             .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
@@ -125,6 +129,8 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
+        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+            .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(null)
 

@@ -13,8 +13,8 @@ class LettingAgentPropertyDetailsViewModel(
     messageSource: MessageSource,
 ) : PropertyDetailsViewModelBase(propertyOwnership, PropertyDetailsViewType.LETTING_AGENT, messageSource) {
     init {
-        check(propertyOwnership.isViewableByLettingAgent) {
-            "Property ownership ${propertyOwnership.id} is not viewable by a letting agent"
+        check(propertyOwnership.isOccupied) {
+            "Property ownership ${propertyOwnership.id} is not occupied and cannot be shown in the letting agent view"
         }
     }
 

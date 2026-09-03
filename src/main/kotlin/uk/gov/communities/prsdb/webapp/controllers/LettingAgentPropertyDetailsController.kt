@@ -46,10 +46,10 @@ class LettingAgentPropertyDetailsController(
         val propertyOwnershipId = lettingAgentAccess.propertyOwnership.id
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
 
-        if (!propertyOwnership.isViewableByLettingAgent) {
+        if (!lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Property ownership $propertyOwnershipId is not viewable by a letting agent",
+                "Property ownership $propertyOwnershipId does not have a letting agent",
             )
         }
 

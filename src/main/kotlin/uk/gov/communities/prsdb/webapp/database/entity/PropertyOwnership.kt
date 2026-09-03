@@ -177,9 +177,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     val hasBeenOccupiedSinceRegistration: Boolean
         get() = isOccupied && lastOccupiedDate?.isEqual(registrationDate) == true
 
-    val isViewableByLettingAgent: Boolean
-        get() = isOccupied
-
     val provideLaterDeadline: LocalDate?
         get() =
             if (hasBeenOccupiedSinceRegistration) {
