@@ -805,11 +805,8 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1570, PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576, PDJB-1577, PDJB-1578,
-    //  PDJB-1579: the CYA/save steps persist placeholder "provide later" values for licensing, tenancy and
-    //  compliance when a letting agent is delegated to provide the rented-out details, instead of collecting
-    //  them from the landlord. Replace this with the real flow for the letting agent to submit that data
-    //  themselves once it lands.
+    // TODO PDJB-1391: replace the placeholder "provide later" handling in the CYA/save steps with the real
+    //  delegated-details flow.
     // Both flags must be checked before reading the step outcome: the who-provides step is only wired into the
     // graph when restructure is also on, so reading its outcome in the legacy journey would throw.
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
