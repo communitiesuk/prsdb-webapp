@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
+// TODO: PDJB-1659: Remove this in favour of an interceptor
 @JourneyFrameworkComponent("lettingAgentInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
