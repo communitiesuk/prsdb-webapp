@@ -29,7 +29,7 @@ class LocalCouncilSecurityConfig(
     val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     @Bean
-    @Order(3)
+    @Order(4)
     fun localCouncilSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/$LOCAL_COUNCIL_PATH_SEGMENT/**")

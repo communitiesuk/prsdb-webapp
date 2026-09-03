@@ -28,6 +28,14 @@ class LettingAgentAccess(
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
+    @Column(name = "encoded_password")
+    var encodedPassword: String? = null
+        private set
+
+    fun setEncodedPassword(encoded: String) {
+        this.encodedPassword = encoded
+    }
+
     constructor(
         token: UUID,
         invitedEmail: String,

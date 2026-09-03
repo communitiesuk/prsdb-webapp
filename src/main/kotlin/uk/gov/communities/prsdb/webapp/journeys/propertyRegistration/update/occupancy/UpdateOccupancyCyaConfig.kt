@@ -100,7 +100,7 @@ class UpdateOccupancyCyaConfig(
         val bullets =
             buildList {
                 add("Whether the property is occupied by tenants")
-                if (!state.wasOccupied && isOccupied) {
+                if (!state.propertyIsOccupied && isOccupied) {
                     add("The number of households living in this property")
                     add("The number of people living in this property")
                 }

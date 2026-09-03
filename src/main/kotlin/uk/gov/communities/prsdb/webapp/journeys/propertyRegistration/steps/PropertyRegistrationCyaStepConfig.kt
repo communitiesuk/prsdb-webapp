@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
+import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -28,6 +30,7 @@ class PropertyRegistrationCyaStepConfig(
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
+    // TODO PDJB-1340: Remove the legacy template branch when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
             "forms/restructureAndSkipping/propertyRegistrationCheckAnswersForm"
@@ -36,92 +39,221 @@ class PropertyRegistrationCyaStepConfig(
         }
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        val isDelegateToLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-        val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
-        val whoProvidesRentalDetails =
-            if (isSkippingEnabled && isDelegateToLettingAgentEnabled) {
-                state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
-            } else {
-                null
-            }
-        val content =
-            mutableMapOf<String, Any?>(
-                "title" to "registerProperty.title",
-                "submitButtonText" to "forms.buttons.completeRegistration",
-                "insetText" to true,
-                "propertyName" to
-                    state.propertyDetailsTask.addressTask
-                        .getAddress()
-                        .singleLineAddress,
-                "propertyDetails" to
-                    if (isSkippingEnabled) {
-                        getRestructuredPropertyDetailsSummaryList(state)
-                    } else {
-                        getPropertyDetailsSummaryList(state)
-                    },
-                "licensingDetails" to
-                    if (isDelegatedToLettingAgent) {
-                        getMockProvideLaterSummaryList("forms.checkPropertyAnswers.propertyDetails.licensingType")
-                    } else {
-                        licensingHelper.getCheckYourAnswersSummaryList(state, state.licensingTask)
-                    },
-                "occupancyDetails" to
-                    if (isSkippingEnabled) {
-                        occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
-                    } else {
-                        null
-                    },
-                "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
-                "tenancyDetails" to
-                    if (isDelegatedToLettingAgent) {
-                        getMockProvideLaterSummaryList(
-                            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
-                        )
-                    } else if (isSkippingEnabled) {
-                        occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
-                            state,
-                            messageSource,
-                            Destination.VisitableStep(
-                                state.tenancyDetailsTask.householdsAndTenantsTask.households,
-                                state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
-                            ),
-                        )
-                    } else {
-                        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
-                    },
-            )
-
-        whoProvidesRentalDetails?.let {
-            content += getLettingAgentDelegationSummaryContent(state, it)
+        val isRestructureAndSkippingEnabled =
+            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        if (!isRestructureAndSkippingEnabled) {
+            return getLegacyContent(state)
         }
 
-        if (isDelegatedToLettingAgent) {
-            content += getMockDelegatedGasContent()
-            content += getMockDelegatedElectricalContent()
+        val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+        if (!isLettingAgentEnabled) {
+            return getRestructuredContent(state)
+        }
+
+        return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
+            getDelegatedRestructuredContent(state)
         } else {
-            content += complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
-            content += complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+            getLettingAgentRestructuredContent(state)
         }
-        content += complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
-
-        return content
     }
+
+    private fun getLegacyContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        return getBaseContent(
+            state = state,
+            submitButtonText = "forms.buttons.completeRegistration",
+            warningTextKey = "forms.warning",
+            insetText = true,
+            propertyDetails = getPropertyDetailsSummaryList(state),
+            licensingDetails = getLicensingDetailsForState(state, isOccupied, false),
+            occupancyDetails = null,
+            tenancyDetails = getTenancyDetails(state),
+        ) + getComplianceContent(state)
+    }
+
+    private fun getRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        return getRestructuredContent(state, emptyMap())
+    }
+
+    private fun getLettingAgentRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val delegationContent =
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides?.let {
+                getLettingAgentDelegationSummaryContent(state, it)
+            } ?: emptyMap()
+        return getRestructuredContent(state, delegationContent)
+    }
+
+    private fun getRestructuredContent(
+        state: PropertyRegistrationJourneyState,
+        delegationContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val licensingDetails = getLicensingDetailsForState(state, isOccupied, true)
+        val tenancyDetails = getRestructuredTenancyDetails(state)
+        val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
+        val gasSafetyContent = complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
+        val electricalSafetyContent = complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask)
+        val complianceContent =
+            gasSafetyContent +
+                electricalSafetyContent +
+                complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
+        return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
+            delegationContent +
+            complianceContent +
+            getRestructuredContentSections(
+                state,
+                isOccupied,
+                licensingDetails,
+                tenancyDetails,
+                occupancyDetails,
+            )
+    }
+
+    private fun getDelegatedRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
+        val licensingDetails =
+            getMockProvideLaterSummaryList(
+                "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                getProvideLaterMessageKey(isOccupied),
+            )
+        val tenancyDetails =
+            getMockProvideLaterSummaryList(
+                "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
+                getProvideLaterMessageKey(isOccupied),
+            )
+        val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
+        val gasSupplyRows =
+            getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading", getProvideLaterMessageKey(isOccupied))
+        val electricalRows =
+            getMockProvideLaterSummaryList(
+                "checkElectricalSafety.electricalCert.fieldHeading",
+                getProvideLaterMessageKey(isOccupied),
+            )
+        val complianceContent =
+            mapOf(
+                "gasSupplyRows" to gasSupplyRows,
+                "gasCertRows" to emptyList<SummaryListRowViewModel>(),
+                "gasInsetTextKey" to null,
+                "electricalRows" to electricalRows,
+                "electricalInsetTextKey" to null,
+            ) +
+                complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
+        val whoProvides =
+            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+        return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
+            (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
+            complianceContent +
+            getRestructuredContentSections(
+                state,
+                isOccupied,
+                licensingDetails,
+                tenancyDetails,
+                occupancyDetails,
+            )
+    }
+
+    private fun getBaseContent(
+        state: PropertyRegistrationJourneyState,
+        submitButtonText: String,
+        warningTextKey: String,
+        insetText: Boolean,
+        propertyDetails: List<SummaryListRowViewModel>,
+        licensingDetails: List<SummaryListRowViewModel>,
+        occupancyDetails: List<SummaryListRowViewModel>?,
+        tenancyDetails: List<SummaryListRowViewModel>,
+    ) = mapOf<String, Any?>(
+        "title" to "registerProperty.title",
+        "submitButtonText" to submitButtonText,
+        "warningTextKey" to warningTextKey,
+        "insetText" to insetText,
+        "propertyName" to state.propertyDetailsTask.addressTask.getAddress().singleLineAddress,
+        "propertyDetails" to propertyDetails,
+        "licensingDetails" to licensingDetails,
+        "occupancyDetails" to occupancyDetails,
+        "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
+        "tenancyDetails" to tenancyDetails,
+    )
+
+    private fun getRestructuredBaseContent(
+        state: PropertyRegistrationJourneyState,
+        licensingDetails: List<SummaryListRowViewModel>,
+        tenancyDetails: List<SummaryListRowViewModel>,
+        occupancyDetails: List<SummaryListRowViewModel>,
+    ) = getBaseContent(
+        state,
+        "forms.buttons.continueToPayment",
+        "forms.checkPropertyAnswers.warning",
+        false,
+        getRestructuredPropertyDetailsSummaryList(state),
+        licensingDetails,
+        occupancyDetails,
+        tenancyDetails,
+    )
+
+    private fun getComplianceContent(state: PropertyRegistrationJourneyState) =
+        complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask) +
+            complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask) +
+            complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
+
+    private fun getRestructuredContentSections(
+        state: PropertyRegistrationJourneyState,
+        isOccupied: Boolean,
+        licensingDetails: List<SummaryListRowViewModel>,
+        tenancyDetails: List<SummaryListRowViewModel>,
+        occupancyDetails: List<SummaryListRowViewModel>,
+    ): Map<String, Any?> {
+        return mapOf(
+            "aboutPropertyHeadingKey" to "forms.checkPropertyAnswers.aboutYourProperty.heading",
+            "ownershipAndLandlordsHeadingKey" to "forms.checkPropertyAnswers.ownershipAndLandlords.heading",
+            "ownershipAndLandlordsRows" to
+                listOf(
+                    getOwnershipTypeRow(state, "propertyDetails.propertyRecord.ownership.ownershipType"),
+                    getJointLandLordsSummaryRow(state, "forms.checkPropertyAnswers.jointLandlordsDetails.jointLandlordInvitations"),
+                ),
+            "rentedOutHeadingKey" to "forms.checkPropertyAnswers.rentedOut.heading",
+            "rentedOutLicensingHeadingKey" to "forms.checkPropertyAnswers.rentedOut.licensing.heading",
+            "rentedOutGasHeadingKey" to "checkGasSafety.heading",
+            "rentedOutElectricalHeadingKey" to "checkElectricalSafety.heading",
+            "rentedOutEpcHeadingKey" to "propertyCompliance.epcTask.checkEpcAnswers.heading",
+            "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.heading",
+            "rentedOutLicensingRows" to licensingDetails,
+            "rentedOutTenancyRows" to tenancyDetails,
+            "occupancyDetails" to occupancyDetails,
+            "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
+        )
+    }
+
+    private fun getTenancyDetails(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
+        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
+
+    private fun getRestructuredTenancyDetails(state: PropertyRegistrationJourneyState) =
+        occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
+            state,
+            messageSource,
+            Destination.VisitableStep(
+                state.tenancyDetailsTask.householdsAndTenantsTask.households,
+                state.getCyaJourneyId(state.tenancyDetailsTask.householdsAndTenantsTask.provideTenancyDetailsLaterStep),
+            ),
+        )
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+    private fun hasJointLandlords(state: PropertyRegistrationJourneyState): Boolean =
+        state.ownershipAndLandlordsTask.jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
+            HasJointLandlordsFormModel::hasJointLandlords,
+        )
+
+    private fun getJointLandLordsSummaryRow(
+        state: PropertyRegistrationJourneyState,
+        invitationsHeadingKey: String = "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+    ): SummaryListRowViewModel {
         val jointLandlordsTask = state.ownershipAndLandlordsTask.jointLandlordsTask
-        val hasJointLandlords =
-            jointLandlordsTask.hasJointLandlordsStep.formModel.notNullValue(
-                HasJointLandlordsFormModel::hasJointLandlords,
-            )
-        return if (hasJointLandlords) {
+        return if (hasJointLandlords(state)) {
             SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                invitationsHeadingKey,
                 jointLandlordsTask.inviteJointLandlordsTask.invitedJointLandlords,
                 Destination.VisitableStep(
                     jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep,
@@ -142,42 +274,27 @@ class PropertyRegistrationCyaStepConfig(
 
     // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
     //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
-    private fun getMockProvideLaterSummaryList(fieldHeading: String): List<SummaryListRowViewModel> =
+    private fun getMockProvideLaterSummaryList(
+        fieldHeading: String,
+        provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+    ): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading,
-                "forms.checkPropertyAnswers.tenancyDetails.provideLater",
+                provideLaterMessageKey,
                 actionUrl = null,
             ),
         )
 
-    // TODO PDJB-1391: placeholder gas safety content for the skipped letting-agent path (matches the keys the real
-    //  ComplianceDetailsHelper.getGasSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedGasContent(): Map<String, Any?> =
-        mapOf(
-            "gasSupplyRows" to getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading"),
-            "gasCertRows" to emptyList<SummaryListRowViewModel>(),
-            "gasInsetTextKey" to null,
-        )
-
-    // TODO PDJB-1391: placeholder electrical safety content for the skipped letting-agent path (matches the keys the
-    //  real ComplianceDetailsHelper.getElectricalSafetyCyaContent produces, so the template renders unchanged).
-    private fun getMockDelegatedElectricalContent(): Map<String, Any?> =
-        mapOf(
-            "electricalRows" to getMockProvideLaterSummaryList("checkElectricalSafety.electricalCert.fieldHeading"),
-            "electricalInsetTextKey" to null,
-        )
-
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state) +
+        getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
             getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state)
+            getOwnershipTypeRow(state, "forms.checkPropertyAnswers.propertyDetails.ownership")
 
     private fun getRestructuredPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state) +
+        getAddressRows(state, "propertyDetails.propertyRecord.propertyDetails.address") +
             getPropertyTypeRow(state) +
-            getBedroomsRow(state) +
-            getOwnershipTypeRow(state)
+            getBedroomsRow(state)
 
     private fun getBedroomsRow(state: PropertyRegistrationJourneyState) =
         SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -186,27 +303,29 @@ class PropertyRegistrationCyaStepConfig(
             Destination.VisitableStep(state.bedrooms, state.getCyaJourneyId(state.bedrooms)),
         )
 
-    private fun getAddressRows(state: PropertyRegistrationJourneyState) =
-        state.propertyDetailsTask.addressTask.getAddress().let { address ->
-            listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.address",
-                    address.singleLineAddress,
-                    Destination.VisitableStep(
-                        state.propertyDetailsTask.addressTask.lookupAddressStep,
-                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),
-                    ),
+    private fun getAddressRows(
+        state: PropertyRegistrationJourneyState,
+        addressHeadingKey: String,
+    ) = state.propertyDetailsTask.addressTask.getAddress().let { address ->
+        listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                addressHeadingKey,
+                address.singleLineAddress,
+                Destination.VisitableStep(
+                    state.propertyDetailsTask.addressTask.lookupAddressStep,
+                    state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),
                 ),
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.propertyDetails.localCouncil",
-                    localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(
-                        state.propertyDetailsTask.addressTask.localCouncilStep,
-                        state.getCyaJourneyId(state.propertyDetailsTask.addressTask.localCouncilStep),
-                    ),
+            ),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.propertyDetails.localCouncil",
+                localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
+                Destination.VisitableStep(
+                    state.propertyDetailsTask.addressTask.localCouncilStep,
+                    state.getCyaJourneyId(state.propertyDetailsTask.addressTask.localCouncilStep),
                 ),
-            )
-        }
+            ),
+        )
+    }
 
     private fun getPropertyTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val propertyTypeStep = state.propertyDetailsTask.propertyTypeStep
@@ -219,10 +338,13 @@ class PropertyRegistrationCyaStepConfig(
         )
     }
 
-    private fun getOwnershipTypeRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+    private fun getOwnershipTypeRow(
+        state: PropertyRegistrationJourneyState,
+        ownershipHeadingKey: String,
+    ): SummaryListRowViewModel {
         val ownershipTypeStep = state.ownershipAndLandlordsTask.ownershipTypeStep
         return SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.propertyDetails.ownership",
+            ownershipHeadingKey,
             ownershipTypeStep.formModel.ownershipType,
             Destination.VisitableStep(ownershipTypeStep, state.getCyaJourneyId(ownershipTypeStep)),
         )
@@ -267,6 +389,44 @@ class PropertyRegistrationCyaStepConfig(
             "lettingAgentDelegationBodyText" to (whoProvides == WhoProvidesRentalDetails.LETTING_AGENT),
         )
     }
+
+    private fun getLicensingDetailsForState(
+        state: PropertyRegistrationJourneyState,
+        isOccupied: Boolean,
+        isSkippingEnabled: Boolean,
+    ): List<SummaryListRowViewModel> {
+        val licensingTask = state.licensingTask
+        val licensingType = licensingTask.getLicensingType()
+
+        if (isSkippingEnabled && licensingType == LicensingType.NO_LICENSING) {
+            return listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
+                ),
+            )
+        }
+
+        if (!isOccupied && licensingType == LicensingType.PROVIDE_LATER) {
+            return listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "forms.checkPropertyAnswers.propertyDetails.licensingType",
+                    "forms.checkPropertyAnswers.propertyDetails.licensingProvideLaterUnoccupied",
+                    Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
+                ),
+            )
+        }
+
+        return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
+    }
+
+    private fun getProvideLaterMessageKey(isOccupied: Boolean): String =
+        if (isOccupied) {
+            "forms.checkPropertyAnswers.tenancyDetails.provideLater"
+        } else {
+            "forms.checkPropertyAnswers.tenancyDetails.provideLaterUnoccupied"
+        }
 }
 
 @JourneyFrameworkComponent

@@ -148,26 +148,36 @@ class OccupancyDetailsHelper {
         rentFrequencyAndAmountState: RentFrequencyAndAmountState,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
-                val rentAmountStep = rentFrequencyAndAmountState.rentAmount
-                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        rentFrequencyAndAmountState.getRentAmount(messageSource),
-                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
-                    ),
-                )
-            }
+        listOf(
+            getRentFrequencyRow(state, rentFrequencyAndAmountState),
+            getRentAmountRow(state, rentFrequencyAndAmountState, messageSource),
+        )
+
+    private fun getRentFrequencyRow(
+        state: CheckYourAnswersJourneyState,
+        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
+    ): SummaryListRowViewModel {
+        val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
+        val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
+            RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
+            Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
+        )
+    }
+
+    private fun getRentAmountRow(
+        state: CheckYourAnswersJourneyState,
+        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
+        messageSource: MessageSource,
+    ): SummaryListRowViewModel {
+        val rentAmountStep = rentFrequencyAndAmountState.rentAmount
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
+            rentFrequencyAndAmountState.getRentAmount(messageSource),
+            Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
+        )
+    }
 
     private fun getOccupancyStatusRow(
         isOccupied: Boolean,
@@ -220,7 +230,8 @@ class OccupancyDetailsHelper {
                     ),
                 )
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
-                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource))
+                add(getRentFrequencyRow(state, state.rentFrequencyAndAmountTask))
+                add(getRentAmountRow(state, state.rentFrequencyAndAmountTask, messageSource))
             }
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : BedroomsState, T : CheckYourAnswersJourneyState {

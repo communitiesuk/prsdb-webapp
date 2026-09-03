@@ -41,13 +41,14 @@ class AllowLettingAgentStepConfig(
     override fun afterStepDataIsAdded(state: DelegateToLettingAgentJourneyState) {
         getFormModelFromState(state).emailAddress?.let { invitedEmailAddress ->
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
-            lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
+            val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, invitedEmailAddress)
             lettingAgentAccessService.addDelegatedPropertyOwnershipToSession(state.propertyOwnershipId, invitedEmailAddress)
             delegateToLettingAgentEmailService.sendDelegationEmailToLandlords(state.propertyOwnershipId, invitedEmailAddress)
             delegateToLettingAgentEmailService.sendDelegationEmailToLettingAgent(
                 propertyOwnership,
                 userToLandlordService.getCurrentLandlordForUser().name,
                 invitedEmailAddress,
+                invitationToken = invitation.token,
             )
         }
     }

@@ -134,7 +134,7 @@ class UpdateOccupancyCyaConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-        lenient().`when`(mockState.wasOccupied).thenReturn(false)
+        lenient().`when`(mockState.propertyIsOccupied).thenReturn(false)
         lenient().`when`(mockState.householdsAndTenantsTask).thenReturn(mockHouseholdsAndTenantsTask)
         lenient().`when`(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         lenient().`when`(mockState.rentFrequencyAndAmountTask).thenReturn(mockRentFrequencyAndAmountTask)
@@ -162,7 +162,7 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends update emails listing households and tenants when transitioning unoccupied to occupied`() {
-        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockState.propertyIsOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -181,7 +181,7 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when property was already occupied`() {
-        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockState.propertyIsOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -194,7 +194,7 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when transitioning occupied to unoccupied`() {
-        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockState.propertyIsOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -207,7 +207,7 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when property remains unoccupied`() {
-        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockState.propertyIsOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)

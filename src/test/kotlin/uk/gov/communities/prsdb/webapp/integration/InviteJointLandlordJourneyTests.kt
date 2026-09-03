@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -109,6 +110,49 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
             )
         returnedDetailsPage.tabs.goToLandlordDetails()
         assertThat(returnedDetailsPage.inviteJointLandlordLink.locator).isVisible()
+    }
+
+    @Nested
+    inner class ReInvitingAnExpiredEmail :
+        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
+        private val propertyOwnershipIdWithExpiredInvite = 2L
+        private val urlArgumentsExpired =
+            mapOf("propertyOwnershipId" to propertyOwnershipIdWithExpiredInvite.toString())
+
+        @Test
+        fun `Landlord can invite a joint landlord using the same email as an expired invitation`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipIdWithExpiredInvite)
+            detailsPage.tabs.goToLandlordDetails()
+            detailsPage.inviteJointLandlordLink.clickAndWait()
+
+            val hasJointLandlordsPage =
+                assertPageIs(page, HasJointLandlordsFormPageInviteJointLandlord::class, urlArgumentsExpired)
+            hasJointLandlordsPage.submitHasJointLandlords()
+
+            val inviteJointLandlordPage =
+                assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArgumentsExpired)
+            inviteJointLandlordPage.submitEmail("expired@example.com")
+
+            val checkJointLandlordsPage =
+                assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArgumentsExpired)
+            assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("expired@example.com")
+            checkJointLandlordsPage.form.submit()
+
+            val checkInvitationsPage =
+                assertPageIs(page, CheckInvitationsPageInviteJointLandlord::class, urlArgumentsExpired)
+            assertThat(checkInvitationsPage.summaryList.invitationsRow.value).containsText("expired@example.com")
+            checkInvitationsPage.confirm()
+
+            val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArgumentsExpired)
+            assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+
+            // The stale expired invitation should no longer be shown once replaced by the new pending one
+            val returnedDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipIdWithExpiredInvite)
+            returnedDetailsPage.tabs.goToLandlordDetails()
+            assertThat(returnedDetailsPage.pendingInvitationsDetails).containsText("Pending invitations (2)")
+            assertThat(returnedDetailsPage.pendingInvitationsDetails).containsText("expired@example.com")
+            assertThat(returnedDetailsPage.expiredInvitationsDetails).isHidden()
+        }
     }
 }
 

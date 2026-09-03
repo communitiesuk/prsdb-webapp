@@ -47,7 +47,7 @@ class LandlordSecurityConfig(
     val userRolesService: UserRolesService,
 ) {
     @Bean
-    @Order(2)
+    @Order(3)
     fun landlordSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher("/landlord/**")

@@ -8,7 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
@@ -18,6 +20,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 class HasEpcStepConfigTests {
     @Mock
     lateinit var mockJourneyState: EpcDetailState
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     val routeSegment = HasEpcStep.ROUTE_SEGMENT
 
@@ -122,8 +127,34 @@ class HasEpcStepConfigTests {
         assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
+    @Test
+    fun `getStepSpecificContent shows the restructure and skipping button text when feature flag is enabled`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockJourneyState)
+
+        // Assert
+        assertEquals("forms.buttons.provideDetailsLater", content["secondarySubmitButtonText"])
+    }
+
+    @Test
+    fun `getStepSpecificContent shows the legacy button text when feature flag is disabled`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockJourneyState)
+
+        // Assert
+        assertEquals("propertyCompliance.epcTask.hasEpc.buttons.provideEpcDetailsLater", content["secondarySubmitButtonText"])
+    }
+
     private fun setupStepConfig(): HasEpcStepConfig {
-        val stepConfig = HasEpcStepConfig()
+        val stepConfig = HasEpcStepConfig(mockFeatureFlagManager)
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
