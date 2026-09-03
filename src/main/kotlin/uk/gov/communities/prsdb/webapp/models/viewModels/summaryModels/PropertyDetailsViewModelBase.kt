@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
@@ -15,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Com
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -260,7 +260,7 @@ abstract class PropertyDetailsViewModelBase(
                 "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
             landlordActionLink =
-                UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
+                LandlordUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
                     "/${HouseholdStep.ROUTE_SEGMENT}",
             lettingAgentActionLink =
                 lettingAgentAccessToken?.let {

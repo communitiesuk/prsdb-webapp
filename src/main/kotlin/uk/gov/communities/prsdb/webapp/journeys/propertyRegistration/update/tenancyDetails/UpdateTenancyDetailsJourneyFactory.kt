@@ -39,7 +39,12 @@ class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(
+    fun initializeJourneyState(
+        ownershipId: Long,
+        user: Principal?,
+    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+
+    fun createJourneySteps(
         propertyId: Long,
         propertyDetailsUrl: String = PropertyDetailsController.getPropertyDetailsPath(propertyId),
     ): Map<String, StepLifecycleOrchestrator> {
@@ -66,8 +71,8 @@ class UpdateTenancyDetailsJourneyFactory(
     private fun mainJourneyMap(
         state: UpdateTenancyDetailsJourney,
         propertyDetailsRoute: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
@@ -98,14 +103,13 @@ class UpdateTenancyDetailsJourneyFactory(
             }
             replaceHeadingsAndButtons(state)
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateTenancyDetailsJourney,
         checkingAnswersFor: String,
         propertyDetailsRoute: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
@@ -144,98 +148,56 @@ class UpdateTenancyDetailsJourneyFactory(
                 nextDestination { Destination.Nowhere() }
             }
         }
-    }
-
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal?,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
     private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadingsAndButtons(state: UpdateTenancyDetailsJourney) {
         configureStep(journey.householdsAndTenantsTask.households) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.householdsAndTenantsTask.tenants) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.furnishedStatus) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-            withAdditionalContentProperty {
-                "heading" to "forms.update.rentFrequency.heading"
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "heading" to "forms.update.rentFrequency.heading" }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-            withAdditionalContentProperty {
-                "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-            }
-            withAdditionalContentProperty {
-                "submitButtonText" to "forms.buttons.continue"
-            }
+            withAdditionalContentProperty { "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading() }
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
     }
 }
 
 @JourneyFrameworkComponent
 class UpdateTenancyDetailsJourney(
-    // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
-    // Nested rent includes bills task
     override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val furnishedStatus: FurnishedStatusStep,
-    // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // Check your answers step
     override val cyaStep: UpdateTenancyDetailsCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
-    journeyName: String = "tenancy details",
-    override val stateFactory: ObjectFactory<UpdateTenancyDetailsJourneyState>,
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
+    override val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "tenancy details"),
     UpdateTenancyDetailsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
-
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 

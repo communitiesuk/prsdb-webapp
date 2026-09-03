@@ -67,7 +67,6 @@ class LettingAgentSecurityConfig {
                         LETTING_AGENT_PROPERTY_DETAILS_ROUTE,
                     ).anonymous()
                     .requestMatchers(
-                    .requestMatchers(
                         // TODO: PDJB-1683: Restrict to the letting agent with session access to this property.
                         "$LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE/**",
                     ).anonymous()

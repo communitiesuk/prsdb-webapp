@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -25,7 +26,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(
+    fun createJourneySteps(
         propertyId: Long,
         propertyDetailsUrl: String = PropertyDetailsController.getPropertyDetailsPath(propertyId),
     ): Map<String, StepLifecycleOrchestrator> {
@@ -69,22 +70,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            configureStep(journey.householdsAndTenantsTask.households) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
-            }
-            configureStep(journey.householdsAndTenantsTask.tenants) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
-            }
+            replaceHeadingsAndButtons()
         }
     }
 
@@ -105,21 +91,25 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.householdsAndTenantsTask.households) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
+            replaceHeadingsAndButtons()
+        }
+    }
+
+    private fun JourneyBuilder<UpdateHouseholdsAndTenantsJourney>.replaceHeadingsAndButtons() {
+        configureStep(journey.householdsAndTenantsTask.households) {
+            withAdditionalContentProperty {
+                "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
             }
-            configureStep(journey.householdsAndTenantsTask.tenants) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
+        }
+        configureStep(journey.householdsAndTenantsTask.tenants) {
+            withAdditionalContentProperty {
+                "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
     }
@@ -137,10 +127,9 @@ class UpdateHouseholdsAndTenantsJourney(
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
     journeyStateService: JourneyStateService,
-    journeyName: String = "households and tenants",
     override val finishCyaStep: FinishCyaJourneyStep,
-    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourneyState>,
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
+    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "households and tenants"),
     UpdateHouseholdsAndTenantsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
