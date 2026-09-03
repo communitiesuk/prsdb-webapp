@@ -24,13 +24,13 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
-    // TODO PDJB-1340: Delete these legacy-only heading locators when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    val legacyHeading = Heading(page.locator("h1.govuk-heading-l"))
+    // TODO PDJB-1340: Delete these before-restructure heading locators when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    val beforePropertyRegistrationRestructuredHeading = Heading(page.locator("h1.govuk-heading-l"))
 
-    val legacyPropertyDetailsHeading =
+    val beforePropertyRegistrationRestructuredPropertyDetailsHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
 
-    val legacyGasSafetyHeading =
+    val beforePropertyRegistrationRestructuredGasSafetyHeading =
         Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
 
     val restructuredHeading = Heading(page.locator("h1.govuk-heading-xl"))
@@ -87,21 +87,21 @@ class CheckAnswersPagePropertyRegistration(
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
 
     val gasSafetyHeading =
-        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Gas safety certificate")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Gas safety certificate")))
 
     val electricalSafetyHeading =
-        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Electrical safety certificate")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Electrical safety certificate")))
 
     val epcHeading =
-        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
 
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
         val ownershipRow = getRow("How do you own this property?")
 
-        // TODO: PDJB-1340: We can delete ownershipRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
-        val ownershipRowLegacy = getRow("Ownership type")
+        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredOwnershipRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+        val beforePropertyRegistrationRestructuredOwnershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
@@ -116,8 +116,8 @@ class CheckAnswersPagePropertyRegistration(
 
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
-        // TODO: PDJB-1340: We can delete jointLandlordsInvitationsRowLegacy when we remove the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
-        val jointLandlordsInvitationsRowLegacy = getRow("Invitations")
+        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+        val beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 

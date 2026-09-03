@@ -219,12 +219,12 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
                 )
-                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-                BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
-                BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
-                BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
         }
 
         @Test

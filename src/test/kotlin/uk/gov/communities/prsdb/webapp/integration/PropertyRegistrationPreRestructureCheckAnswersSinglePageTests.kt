@@ -62,12 +62,13 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
-        fun `uses the legacy heading hierarchy when restructure and skipping is disabled`() {
+        fun `before property registration restructure CYA page uses the expected heading hierarchy`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            BaseComponent.assertThat(checkAnswersPage.legacyHeading).containsText("Check your answers for:")
-            BaseComponent.assertThat(checkAnswersPage.legacyPropertyDetailsHeading).isVisible()
-            BaseComponent.assertThat(checkAnswersPage.legacyGasSafetyHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredHeading)
+                .containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredPropertyDetailsHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredGasSafetyHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.restructuredHeading).isHidden()
         }
 
@@ -75,7 +76,7 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
         fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.summaryList.ownershipRowLegacy.actions.firstActionLink
+            checkAnswersPage.summaryList.beforePropertyRegistrationRestructuredOwnershipRow.actions.firstActionLink
                 .clickAndWait()
             val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
