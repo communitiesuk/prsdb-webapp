@@ -199,7 +199,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
             val headings =
                 page
-                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
+                    .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
                     .allInnerTexts()
                     .map { it.trim() }
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
@@ -209,6 +209,22 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             assertTrue(occupancyIndex >= 0 && rentedOutIndex >= 0 && licensingIndex >= 0)
             assertTrue(rentedOutIndex > occupancyIndex, "Rented-out section should appear after occupied section")
             assertTrue(rentedOutIndex < licensingIndex, "Rented-out section should appear before licensing section")
+        }
+
+        @Test
+        fun `restructured CYA page uses the expected heading hierarchy`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+                BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
+                BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
+                BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
         }
 
         @Test

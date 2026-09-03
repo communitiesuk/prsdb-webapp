@@ -62,6 +62,16 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
+        fun `uses the legacy heading hierarchy when restructure and skipping is disabled`() {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+
+            BaseComponent.assertThat(checkAnswersPage.legacyHeading).containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.legacyPropertyDetailsHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.legacyGasSafetyHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.restructuredHeading).isHidden()
+        }
+
+        @Test
         fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
