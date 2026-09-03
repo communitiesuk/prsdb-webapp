@@ -96,7 +96,7 @@ class UpdateTenancyDetailsJourneyFactory(
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
-            replaceHeadings(state)
+            replaceHeadingsAndButtons(state)
         }
     }
 
@@ -138,7 +138,7 @@ class UpdateTenancyDetailsJourneyFactory(
                     throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
                 }
             }
-            replaceHeadings(state)
+            replaceHeadingsAndButtons(state)
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
@@ -151,40 +151,61 @@ class UpdateTenancyDetailsJourneyFactory(
         user: Principal?,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
 
-    private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadings(state: UpdateTenancyDetailsJourney) {
+    private fun JourneyBuilder<UpdateTenancyDetailsJourney>.replaceHeadingsAndButtons(state: UpdateTenancyDetailsJourney) {
         configureStep(journey.householdsAndTenantsTask.households) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
         configureStep(journey.householdsAndTenantsTask.tenants) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
             }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
         }
         configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
         configureStep(journey.rentIncludesBillsTask.billsIncluded) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
             }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
         }
         configureStep(journey.furnishedStatus) {
             withAdditionalContentProperty {
                 "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
             withAdditionalContentProperty {
                 "heading" to "forms.update.rentFrequency.heading"
             }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
         }
         configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
             withAdditionalContentProperty {
                 "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
             }
         }
     }

@@ -73,10 +73,16 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
                 }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
+                }
             }
             configureStep(journey.householdsAndTenantsTask.tenants) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+                }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
                 }
             }
         }
@@ -103,10 +109,16 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
                 }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
+                }
             }
             configureStep(journey.householdsAndTenantsTask.tenants) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+                }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
                 }
             }
         }
