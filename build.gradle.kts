@@ -69,6 +69,7 @@ dependencies {
 
     // Auth
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.85.2")
 
     // Templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
