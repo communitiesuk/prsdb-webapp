@@ -74,6 +74,11 @@ local:
     persistentExceptionAddress: persistent@example.com
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
 
+argon2:
+  iterations: 2
+  memory: 16384
+  parallelism: 1
+
 base-url:
   landlord: http://localhost:${server.port}/landlord
   local-council: http://localhost:${server.port}/local-council

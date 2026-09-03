@@ -6,7 +6,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <div id="interruption-card"
-         th:replace="~{fragments/interruptionCard :: interruptionCard(#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.heading}, ~{::#interruption-card-body}, #{forms.buttons.continueWithChange}, ${backUrl})}">
+         th:replace="~{fragments/interruptionCard :: interruptionCard(heading=#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.heading}, bodyContent=~{::#interruption-card-body}, buttonText=#{forms.buttons.continueWithChange}, backUrl=${backUrl})}">
         <th:block id="interruption-card-body">
             <p th:text="#{registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.one}">
                 registerAsALandlord.orgTypeTrustInterruption.addingTrust.paragraph.one
