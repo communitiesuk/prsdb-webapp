@@ -23,6 +23,11 @@ notify:
   support-email: support@example.com
   use-production-notify: false
 
+argon2:
+  iterations: 2
+  memory: 16384
+  parallelism: 1
+
 base-url:
   landlord: example.com
   local-council: example.com

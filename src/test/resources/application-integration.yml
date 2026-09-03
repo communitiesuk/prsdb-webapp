@@ -18,3 +18,8 @@ features:
     - name: "pdjb-1022-delegate-to-letting-agent"
       enabled: true
       expiry-date: "2026-12-31"
+
+argon2:
+  iterations: 2
+  memory: 16384
+  parallelism: 1
