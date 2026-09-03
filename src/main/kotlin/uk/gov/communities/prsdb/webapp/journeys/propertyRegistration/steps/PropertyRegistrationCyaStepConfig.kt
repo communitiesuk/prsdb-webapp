@@ -238,6 +238,9 @@ class PropertyRegistrationCyaStepConfig(
             ),
         )
 
+    // Overrides AbstractCheckYourAnswersStepConfig, which deleted the journey
+    // We don't want to delete the journey at this stage when this page is included within another journey,
+    // such as accepting a joint landlord invitation
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
