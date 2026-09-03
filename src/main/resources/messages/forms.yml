@@ -554,7 +554,7 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
-  warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
+  warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
   aboutYourProperty:
     heading: About your property
   propertyDetails:
