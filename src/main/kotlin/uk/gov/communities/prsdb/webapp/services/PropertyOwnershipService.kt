@@ -131,9 +131,9 @@ class PropertyOwnershipService(
         if (isCurrentUserLandlord(propertyOwnershipId)) return true
         if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
 
-        val lettingAgentAccess =
-            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId) ?: return false
-        // TODO PDJB-1659: Check that lettingAgentAccess.token is in the session
+        val lettingAgentToken =
+            lettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId) ?: return false
+        // TODO PDJB-1659: Check that lettingAgentToken is in the session
         return true
     }
 
