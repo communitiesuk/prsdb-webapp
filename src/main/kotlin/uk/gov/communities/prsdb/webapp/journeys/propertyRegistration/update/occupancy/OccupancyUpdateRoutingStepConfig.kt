@@ -12,11 +12,18 @@ enum class OccupancyUpdateRouteMode {
 
 @JourneyFrameworkComponent
 class OccupancyUpdateRoutingStepConfig : AbstractInternalStepConfig<OccupancyUpdateRouteMode, UpdateOccupancyJourneyState>() {
+    private lateinit var isDelegatedToLettingAgent: () -> Boolean
+
+    fun usingCurrentDelegation(isDelegatedToLettingAgent: () -> Boolean): OccupancyUpdateRoutingStepConfig {
+        this.isDelegatedToLettingAgent = isDelegatedToLettingAgent
+        return this
+    }
+
+    override fun isSubClassInitialised() = ::isDelegatedToLettingAgent.isInitialized
+
     override fun mode(state: UpdateOccupancyJourneyState): OccupancyUpdateRouteMode? {
         val newOccupancy = state.occupied.outcome ?: return null
-        val isRemovingDelegation =
-            state.propertyIsOccupied && state.propertyIsDelegatedToLettingAgent && newOccupancy == YesOrNo.NO
-        return if (isRemovingDelegation) {
+        return if (newOccupancy == YesOrNo.NO && isDelegatedToLettingAgent()) {
             OccupancyUpdateRouteMode.SHOW_INTERRUPTION
         } else {
             OccupancyUpdateRouteMode.NO_INTERRUPTION

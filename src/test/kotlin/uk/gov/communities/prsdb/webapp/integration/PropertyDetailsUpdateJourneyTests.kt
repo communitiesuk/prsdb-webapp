@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
@@ -13,6 +14,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
+import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -46,9 +50,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.OccupancyLettingAgentInterruptionStep
+import java.util.UUID
 import kotlin.test.assertContains
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @Autowired
+    lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Autowired
+    lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
@@ -469,6 +480,34 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                             "/${OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT}",
                     )
                     assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
+                }
+
+                @Test
+                fun `a property delegated after the journey started still shows the interruption`(page: Page) {
+                    // Start the journey while the property has no letting agent, so any cached delegation would be false
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
+
+                    // The property is delegated elsewhere while the journey is in flight
+                    delegatePropertyToLettingAgent(undelegatedPropertyOwnershipId)
+
+                    updateOccupancyPage.submitIsVacant()
+
+                    // The interruption is shown, because the delegation is read live rather than from the journey state
+                    assertPageIs(
+                        page,
+                        OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate::class,
+                        undelegatedPropertyUrlArguments,
+                    )
+                }
+
+                private fun delegatePropertyToLettingAgent(propertyOwnershipId: Long) {
+                    val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+                    lettingAgentAccessRepository.save(
+                        LettingAgentAccess(UUID.randomUUID(), "letting.agent@example.com", propertyOwnership),
+                    )
                 }
             }
 
