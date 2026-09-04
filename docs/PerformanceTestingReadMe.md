@@ -4,6 +4,8 @@
 
 To check how long passwords take to hash, log in as a system operator and call the `/system-operator/password-benchmark` endpoint.
 
+The `PASSWORD_BENCHMARK_ENDPOINT` feature flag needs to be enabled for this endpoint to be active.
+
 You should receive a report like:
 
 ```
