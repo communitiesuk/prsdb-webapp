@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
 
 class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("data-local.sql") {
     private val validToken = "3334abcd-5678-abcd-1234-567abcd1111a"
@@ -59,6 +60,10 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
             val setPasswordPage = navigator.skipToLettingAgentInvitationSetPasswordPage(validToken)
 
             setPasswordPage.submitPasswords("password1", "password1")
+
+            // TODO PDJB-1659: Remove this step once store-access becomes a silent step
+            val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
+            storeAccessPage.form.submit()
 
             assertPageIs(page, PasswordCreationConfirmationPage::class)
         }
