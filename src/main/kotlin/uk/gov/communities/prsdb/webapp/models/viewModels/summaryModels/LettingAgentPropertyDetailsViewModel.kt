@@ -37,7 +37,7 @@ class LettingAgentPropertyDetailsViewModel(
             messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
         }
 
-    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1575, PDJB-1576: letting agents will get change links on
+    // TODO PDJB-1572, PDJB-1573, PDJB-1575, PDJB-1576: letting agents will get change links on
     //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared row
     //  builders show a letting-agent change link only when their letting-agent controller can compute a route
     //  from the lettingAgentAccessToken supplied to PropertyDetailsViewModelBase; until then rows render without links.

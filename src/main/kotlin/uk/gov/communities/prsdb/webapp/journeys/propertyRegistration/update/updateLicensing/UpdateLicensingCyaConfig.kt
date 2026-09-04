@@ -54,6 +54,7 @@ class UpdateLicensingCyaConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateLicensingJourneyState) {
+        if (!state.sendsUpdateEmails) return
         propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The licensing information"))
     }
 
