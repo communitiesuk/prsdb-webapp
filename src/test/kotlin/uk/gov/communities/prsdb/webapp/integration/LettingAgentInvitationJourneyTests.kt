@@ -20,8 +20,8 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
-    private val tokenWithoutPassword = "11111111-1111-4111-8111-111111111111"
-    private val tokenWithPassword = "22222222-2222-4222-8222-222222222222"
+    private val tokenWithoutPassword = "3334abcd-5678-abcd-1234-567abcd1111a"
+    private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
 
     @Test
     fun `user who does not have a password can walk the set password journey`(page: Page) {
