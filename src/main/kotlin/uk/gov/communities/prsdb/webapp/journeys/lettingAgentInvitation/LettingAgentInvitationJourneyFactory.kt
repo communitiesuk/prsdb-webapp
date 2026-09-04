@@ -103,6 +103,7 @@ class LettingAgentInvitationJourney(
     override var invitationToken: String? by delegateProvider.nullableDelegate("invitationToken")
     override var hasExistingPassword: Boolean? by delegateProvider.nullableDelegate("hasExistingPassword")
     override var hasSetNewPassword: Boolean? by delegateProvider.nullableDelegate("hasSetNewPassword")
+    override var hasEnteredPassword: Boolean? by delegateProvider.nullableDelegate("hasEnteredPassword")
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? UUID
@@ -125,4 +126,7 @@ interface LettingAgentInvitationJourneyState : JourneyState {
 
     // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
     var hasSetNewPassword: Boolean?
+
+    // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
+    var hasEnteredPassword: Boolean?
 }
