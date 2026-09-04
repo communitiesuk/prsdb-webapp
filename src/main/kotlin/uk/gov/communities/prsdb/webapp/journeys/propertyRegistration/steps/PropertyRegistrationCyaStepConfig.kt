@@ -287,12 +287,21 @@ class PropertyRegistrationCyaStepConfig(
         )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state, "forms.checkPropertyAnswers.propertyDetails.address") +
+        getAddressRows(
+            state,
+            "forms.checkPropertyAnswers.propertyDetails.address",
+            // TODO PDJB-1340: Remove this legacy address format when the restructure and skipping flag is removed.
+            multiLineAddress = false,
+        ) +
             getPropertyTypeRow(state) +
             getOwnershipTypeRow(state, "forms.checkPropertyAnswers.propertyDetails.ownership")
 
     private fun getRestructuredPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state, "propertyDetails.propertyRecord.propertyDetails.address") +
+        getAddressRows(
+            state,
+            "propertyDetails.propertyRecord.propertyDetails.address",
+            multiLineAddress = true,
+        ) +
             getPropertyTypeRow(state) +
             getBedroomsRow(state)
 
@@ -306,11 +315,12 @@ class PropertyRegistrationCyaStepConfig(
     private fun getAddressRows(
         state: PropertyRegistrationJourneyState,
         addressHeadingKey: String,
+        multiLineAddress: Boolean,
     ) = state.propertyDetailsTask.addressTask.getAddress().let { address ->
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 addressHeadingKey,
-                address.singleLineAddress,
+                if (multiLineAddress) address.toMultiLineAddress().split("\n") else address.singleLineAddress,
                 Destination.VisitableStep(
                     state.propertyDetailsTask.addressTask.lookupAddressStep,
                     state.getCyaJourneyId(state.propertyDetailsTask.addressTask.lookupAddressStep),

@@ -330,11 +330,29 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `getStepSpecificContent uses Address heading for restructured property details row`() {
+            whenever(mockAddressTask.getAddress()).thenReturn(
+                AddressDataModel.fromManualAddressData(
+                    addressLineOne = "1 Example Road",
+                    addressLineTwo = "Example estate",
+                    townOrCity = "Example town",
+                    county = "Exampleshire",
+                    postcode = "AB1 2CD",
+                    localCouncilId = 1,
+                ),
+            )
+
             val content = stepConfig.getStepSpecificContent(mockState)
             val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
 
+            val addressRow =
+                propertyDetailsRows.single { it.fieldHeading == "propertyDetails.propertyRecord.propertyDetails.address" }
+            assertEquals(
+                listOf("1 Example Road", "Example estate", "Example town", "Exampleshire", "AB1 2CD"),
+                addressRow.fieldValue,
+            )
             assertTrue(
-                propertyDetailsRows.any { it.fieldHeading == "propertyDetails.propertyRecord.propertyDetails.address" },
+                (addressRow.fieldValue as List<*>).none { (it as String).contains(",") },
+                "Restructured address lines should not contain commas as they are rendered on separate lines",
             )
         }
 
@@ -445,11 +463,29 @@ class PropertyRegistrationCyaStepConfigTests {
 
         @Test
         fun `getStepSpecificContent uses Property address heading for legacy property details row`() {
+            whenever(mockAddressTask.getAddress()).thenReturn(
+                AddressDataModel.fromManualAddressData(
+                    addressLineOne = "1 Example Road",
+                    addressLineTwo = "Example estate",
+                    townOrCity = "Example town",
+                    county = "Exampleshire",
+                    postcode = "AB1 2CD",
+                    localCouncilId = 1,
+                ),
+            )
+
             val content = stepConfig.getStepSpecificContent(mockState)
             val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
 
+            val addressRow =
+                propertyDetailsRows.single { it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address" }
+            assertEquals(
+                "1 Example Road, Example estate, Example town, Exampleshire, AB1 2CD",
+                addressRow.fieldValue,
+            )
             assertTrue(
-                propertyDetailsRows.any { it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address" },
+                addressRow.fieldValue is String,
+                "Legacy address should remain a single comma-separated string, not a multi-line list",
             )
         }
 
