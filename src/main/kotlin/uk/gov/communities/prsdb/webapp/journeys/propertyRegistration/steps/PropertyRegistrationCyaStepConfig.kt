@@ -112,6 +112,7 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getDelegatedRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
         val whoProvides =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
@@ -145,9 +146,9 @@ class PropertyRegistrationCyaStepConfig(
             ) +
             getRestructuredContentSections(
                 state,
-                true,
-                emptyList(),
-                emptyList(),
+                isOccupied,
+                licensingDetails = emptyList(),
+                tenancyDetails = emptyList(),
                 occupancyDetails,
             )
     }
