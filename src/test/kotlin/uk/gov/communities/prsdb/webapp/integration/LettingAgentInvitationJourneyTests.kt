@@ -2,7 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
@@ -11,6 +14,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 
 class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @Autowired
+    private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncoder
+
     private val tokenWithoutPassword = "11111111-1111-4111-8111-111111111111"
     private val tokenWithPassword = "22222222-2222-4222-8222-222222222222"
 
@@ -23,9 +32,9 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         assertPageIs(page, ValidateTokenPage::class)
         validateTokenPage.form.submit()
 
-        // TODO PDJB-1566: Update when set password page is implemented
+        val rawPassword = "password1"
         val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
-        setPasswordPage.form.submit()
+        setPasswordPage.submitPasswords(rawPassword, rawPassword)
 
         // TODO PDJB-1567: Update when password creation confirmation page is implemented
         val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
