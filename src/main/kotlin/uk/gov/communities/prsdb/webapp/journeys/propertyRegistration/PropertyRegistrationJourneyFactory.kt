@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.SingleParent
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -409,9 +408,6 @@ class PropertyRegistrationJourneyFactory(
                                 ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                            SingleParent(journey.cyaStep) {
-                                journey.cyaStep.outcome != null && journey.isDelegatedToLettingAgent(featureFlagManager)
-                            },
                         )
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
