@@ -76,14 +76,12 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getLettingAgentRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val delegationContent =
-            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides?.let {
-                getLettingAgentDelegationSummaryContent(state, it)
-            } ?: emptyMap()
+        val whoProvides = state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+        val delegationContent = whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()
         return getRestructuredContent(state, delegationContent) +
             mapOf(
                 "showLettingAgentDelegationUnoccupiedInset" to
-                    (!state.occupied.formModel.notNullValue(OccupancyFormModel::occupied) && delegationContent.isEmpty()),
+                    (!state.occupied.formModel.notNullValue(OccupancyFormModel::occupied) && whoProvides == null),
             )
     }
 

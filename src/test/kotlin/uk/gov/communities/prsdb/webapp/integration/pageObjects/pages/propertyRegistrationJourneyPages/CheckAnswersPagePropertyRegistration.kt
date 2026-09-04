@@ -83,7 +83,7 @@ class CheckAnswersPagePropertyRegistration(
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
 
     val restructuredTenancyHeading =
-        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tenancy details")))
     val restructuredTenancyUnoccupiedBodyText =
         Paragraph.byText(
             page,
@@ -91,7 +91,7 @@ class CheckAnswersPagePropertyRegistration(
         )
     private val restructuredTenancyRowKeys =
         page
-            .locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
+            .locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tenancy details"))
             .locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
 
     fun restructuredTenancyRowHeadings(): List<String> {
