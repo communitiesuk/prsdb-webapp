@@ -37,6 +37,10 @@ class LettingAgentAccessService(
     fun getInvitationByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
+    fun getTokenByPropertyOwnershipId(propertyOwnershipId: Long): UUID? =
+        // TODO PDJB-1687: commonise this check with any other has LetA checks
+        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)?.token
+
     @Transactional
     fun deleteDelegationByPropertyOwnershipId(propertyOwnershipId: Long) {
         lettingAgentAccessRepository.deleteByPropertyOwnershipId(propertyOwnershipId)
