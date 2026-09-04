@@ -2,7 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
@@ -14,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import java.net.URI
 
 class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @Autowired
@@ -24,6 +30,15 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
 
     private val tokenWithoutPassword = "3334abcd-5678-abcd-1234-567abcd1111a"
     private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
+    private val invitationLink = "http://localhost/letting-agent/invitation?token=$tokenWithoutPassword"
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @BeforeEach
+    fun setup() {
+        whenever(absoluteUrlProvider.buildLettingAgentInvitationUri(any())).thenReturn(URI(invitationLink))
+    }
 
     @Test
     fun `user who does not have a password can walk the set password journey`(page: Page) {
@@ -47,9 +62,8 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
             .assertThat(confirmationPage.confirmationBanner)
             .containsText("Property password created")
         assertThat(confirmationPage.backLink.locator).hasCount(0)
-        // TODO PDJB-1661: Update the expected update link once the real invitation link is wired in
-        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", "https://example.com")
-        assertThat(confirmationPage.updateLink.locator).hasText("https://example.com")
+        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", invitationLink)
+        assertThat(confirmationPage.updateLink.locator).hasText(invitationLink)
         confirmationPage.form.submit()
 
         // TODO PDJB-1570: Assert redirect to letting agent property record page

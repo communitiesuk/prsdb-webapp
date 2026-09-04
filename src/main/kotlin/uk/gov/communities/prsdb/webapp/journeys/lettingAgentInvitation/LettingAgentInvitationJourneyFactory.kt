@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -75,7 +76,9 @@ class LettingAgentInvitationJourneyFactory(
                 nextDestination {
                     when (journey.hasPasswordStep.outcome) {
                         PasswordStatus.NO_PASSWORD -> Destination(journey.confirmationStep)
-                        else -> Destination.ExternalUrl("/")
+                        // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
+                        PasswordStatus.HAS_PASSWORD -> Destination.ExternalUrl("/")
+                        null -> throw PrsdbWebException("hasPassword outcome is missing, so the next destination cannot be determined")
                     }
                 }
             }
@@ -87,7 +90,7 @@ class LettingAgentInvitationJourneyFactory(
                         journey.hasPasswordStep.hasOutcome(PasswordStatus.NO_PASSWORD),
                     )
                 }
-                backUrl { null }
+                backDestination { Destination.Nowhere() }
                 // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
                 nextDestination { Destination.ExternalUrl("/") }
             }

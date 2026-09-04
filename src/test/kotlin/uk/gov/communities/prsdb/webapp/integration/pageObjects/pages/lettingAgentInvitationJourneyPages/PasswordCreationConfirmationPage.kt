@@ -12,7 +12,7 @@ class PasswordCreationConfirmationPage(
     page: Page,
 ) : BasePage(page, "/${ConfirmationStep.ROUTE_SEGMENT}") {
     val confirmationBanner = ConfirmationBanner(page)
-    val updateLink = Link(page.locator("#update-link"))
+    val updateLink = Link(page.locator(".govuk-summary-list a.govuk-link"))
     val insetText = page.locator(".govuk-inset-text")
     val backLink = BackLink.default(page)
     val form = Form(page)
