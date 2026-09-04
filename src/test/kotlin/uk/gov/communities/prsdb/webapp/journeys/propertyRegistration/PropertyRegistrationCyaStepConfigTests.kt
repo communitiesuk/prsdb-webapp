@@ -289,10 +289,10 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses continue to payment button and restructured warning text`() {
+        fun `getStepSpecificContent uses complete registration button and restructured warning text`() {
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("forms.buttons.continueToPayment", content["submitButtonText"])
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
             assertEquals("forms.checkPropertyAnswers.warning", content["warningTextKey"])
         }
 
