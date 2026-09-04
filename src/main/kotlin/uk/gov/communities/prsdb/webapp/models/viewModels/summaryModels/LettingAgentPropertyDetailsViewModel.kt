@@ -6,12 +6,19 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import java.util.UUID
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     propertyCompliance: PropertyCompliance,
     messageSource: MessageSource,
-) : PropertyDetailsViewModelBase(propertyOwnership, PropertyDetailsViewType.LETTING_AGENT, messageSource) {
+    token: UUID? = null,
+) : PropertyDetailsViewModelBase(
+        propertyOwnership,
+        PropertyDetailsViewType.LETTING_AGENT,
+        messageSource,
+        lettingAgentAccessToken = token,
+    ) {
     init {
         check(propertyOwnership.isOccupied) {
             "Property ownership ${propertyOwnership.id} is not occupied and cannot be shown in the letting agent view"
@@ -30,10 +37,10 @@ class LettingAgentPropertyDetailsViewModel(
             messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
         }
 
-    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get change links on
-    //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared section
-    //  builders show a letting-agent change link on a row only once rowWithViewTypeSpecificChangeLink is given a lettingAgentActionLink
-    //  for it; until then the rows render without links (see PropertyDetailsViewModelBase).
+    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1575, PDJB-1576: letting agents will get change links on
+    //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared row
+    //  builders show a letting-agent change link only when their letting-agent controller can compute a route
+    //  from the lettingAgentAccessToken supplied to PropertyDetailsViewModelBase; until then rows render without links.
     val licensingSection: List<SummaryListRowViewModel> = buildLicensingSection()
 
     val tenancySection: List<SummaryListRowViewModel> = buildTenancySection()
