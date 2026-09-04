@@ -39,7 +39,7 @@ class LettingAgentSecurityConfig {
                         "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",
                     ).anonymous()
                     .requestMatchers(
-                        // TODO: PDJB-1660: Remove when validate token step becomes an internal step
+                        // TODO: PDJB-1659: Remove when validate token step is replaced by an interceptor
                         "$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
                     ).anonymous()
                     .requestMatchers(

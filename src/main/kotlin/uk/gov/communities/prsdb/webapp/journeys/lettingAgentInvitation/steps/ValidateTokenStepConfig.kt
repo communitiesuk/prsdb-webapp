@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
-// TODO PDJB-1660: Implement token validation logic
+// TODO PDJB-1659: Remove this step - token validation is being replaced by an interceptor
 @JourneyFrameworkComponent("lettingAgentInvitationValidateTokenStepConfig")
 class ValidateTokenStepConfig(
     private val lettingAgentAccessService: LettingAgentAccessService,
@@ -16,7 +16,7 @@ class ValidateTokenStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: LettingAgentInvitationJourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO: PDJB-1660: Validate token step")
+        mapOf("todoComment" to "TODO: PDJB-1659: Validate token step")
 
     override fun chooseTemplate(state: LettingAgentInvitationJourneyState): String = "forms/todo"
 

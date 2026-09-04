@@ -28,7 +28,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
         val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithoutPassword)
-        // TODO PDJB-1660: Update when validate token step is implemented
+        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
         assertPageIs(page, ValidateTokenPage::class)
         validateTokenPage.form.submit()
 
@@ -52,7 +52,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
         val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithPassword)
-        // TODO PDJB-1660: Update when validate token step is implemented
+        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
         assertPageIs(page, ValidateTokenPage::class)
         validateTokenPage.form.submit()
 
