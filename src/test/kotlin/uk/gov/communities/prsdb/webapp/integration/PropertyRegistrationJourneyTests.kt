@@ -2250,6 +2250,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             navigator.navigateToPropertyRegistrationCheckYourAnswers()
             assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
+
+        @Test
+        fun `submitting an unoccupied property with the letting agent panel displayed reaches the confirmation page`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).isVisible()
+
+            checkAnswersPage.confirm()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+        }
     }
 
     companion object {

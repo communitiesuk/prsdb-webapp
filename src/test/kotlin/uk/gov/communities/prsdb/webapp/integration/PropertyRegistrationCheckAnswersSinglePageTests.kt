@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
@@ -277,25 +276,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                 "When your property becomes occupied, you can choose for your letting agent or property manager to " +
                     "provide this section for you. They can also keep these details up to date.",
             )
-        }
-
-        @Test
-        fun `confirming and paying for an unoccupied property with the letting agent panel displayed reaches the confirmation page`(
-            page: Page,
-        ) {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswers()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).isVisible()
-
-            checkAnswersPage.confirm()
-
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         }
 
         @Test
