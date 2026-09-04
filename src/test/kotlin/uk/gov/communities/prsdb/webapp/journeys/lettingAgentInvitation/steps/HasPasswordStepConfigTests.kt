@@ -27,22 +27,22 @@ class HasPasswordStepConfigTests {
     lateinit var mockState: LettingAgentInvitationJourneyState
 
     @Test
-    fun `mode returns HAS_PASSWORD when hasPassword is cached as true on the state`() {
-        whenever(mockState.hasPassword).thenReturn(true)
+    fun `mode returns HAS_PASSWORD when hasExistingPassword is cached as true on the state`() {
+        whenever(mockState.hasExistingPassword).thenReturn(true)
 
         assertEquals(PasswordStatus.HAS_PASSWORD, setupStepConfig().mode(mockState))
     }
 
     @Test
-    fun `mode returns NO_PASSWORD when hasPassword is cached as false on the state`() {
-        whenever(mockState.hasPassword).thenReturn(false)
+    fun `mode returns NO_PASSWORD when hasExistingPassword is cached as false on the state`() {
+        whenever(mockState.hasExistingPassword).thenReturn(false)
 
         assertEquals(PasswordStatus.NO_PASSWORD, setupStepConfig().mode(mockState))
     }
 
     @Test
-    fun `mode throws when hasPassword has not been set on the state`() {
-        whenever(mockState.hasPassword).thenReturn(null)
+    fun `mode throws when hasExistingPassword has not been set on the state`() {
+        whenever(mockState.hasExistingPassword).thenReturn(null)
 
         assertThrows<PrsdbWebException> { setupStepConfig().mode(mockState) }
     }
@@ -57,7 +57,7 @@ class HasPasswordStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockState).hasPassword = true
+        verify(mockState).hasExistingPassword = true
     }
 
     @Test
@@ -70,7 +70,7 @@ class HasPasswordStepConfigTests {
 
         setupStepConfig().afterStepIsReached(mockState)
 
-        verify(mockState).hasPassword = false
+        verify(mockState).hasExistingPassword = false
     }
 
     @Test

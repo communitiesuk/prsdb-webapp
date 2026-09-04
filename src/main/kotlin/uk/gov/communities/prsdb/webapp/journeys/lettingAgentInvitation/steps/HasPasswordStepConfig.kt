@@ -20,16 +20,16 @@ class HasPasswordStepConfig(
     private val lettingAgentPasswordService: LettingAgentPasswordService,
 ) : AbstractInternalStepConfig<PasswordStatus, LettingAgentInvitationJourneyState>() {
     override fun mode(state: LettingAgentInvitationJourneyState): PasswordStatus =
-        when (state.hasPassword) {
+        when (state.hasExistingPassword) {
             true -> PasswordStatus.HAS_PASSWORD
             false -> PasswordStatus.NO_PASSWORD
-            null -> throw PrsdbWebException("hasPassword has not been set on journey state")
+            null -> throw PrsdbWebException("hasExistingPassword has not been set on journey state")
         }
 
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
         val token = UUID.fromString(requireNotNull(state.invitationToken) { "Invitation token is missing from the journey state" })
         val invitation = lettingAgentAccessService.getInvitationByToken(token)
-        state.hasPassword = lettingAgentPasswordService.hasPasswordBeenSet(invitation)
+        state.hasExistingPassword = lettingAgentPasswordService.hasPasswordBeenSet(invitation)
     }
 }
 
