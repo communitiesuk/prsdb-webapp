@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 import java.util.UUID
 
 @PrsdbController
@@ -36,33 +35,31 @@ class LettingAgentUpdateHouseholdsAndTenantsController(
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping("/{*stepPath}")
     fun getUpdateStep(
-        principal: Principal?,
         @PathVariable token: UUID,
         @PathVariable stepPath: String,
-    ): ModelAndView = dispatchJourneyStep(token, stepPath, principal) { getStepModelAndView() }
+    ): ModelAndView = dispatchJourneyStep(token, stepPath) { getStepModelAndView() }
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
-        principal: Principal?,
         @PathVariable token: UUID,
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-    ): ModelAndView = dispatchJourneyStep(token, stepPath, principal) { postStepModelAndView(formData) }
+    ): ModelAndView = dispatchJourneyStep(token, stepPath) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
         token: UUID,
         stepPath: String,
-        principal: Principal?,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView {
         val propertyOwnershipId = resolveOccupiedPropertyOwnershipId(token)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         val propertyDetailsUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, propertyDetailsUrl) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(token) },
             dispatch = dispatch,
         )
     }
