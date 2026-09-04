@@ -43,12 +43,13 @@ class PasswordBenchmarkControllerTests : FeatureFlagTestCallingEndpoints() {
         featureFlagManager.enableFeature(PASSWORD_BENCHMARK_ENDPOINT)
 
         mvc
-            .get(PasswordBenchmarkController.PASSWORD_BENCHMARK_ROUTE)
-            .andExpect {
+            .get(PasswordBenchmarkController.PASSWORD_BENCHMARK_ROUTE) {
+                param("hashes", "1")
+            }.andExpect {
                 status { isOk() }
                 content {
                     contentTypeCompatibleWith("text/plain")
-                    string(containsString("50 hashes"))
+                    string(containsString("1 hashes"))
                     string(containsString("iterations"))
                     string(containsString("total"))
                     string(containsString("average"))
