@@ -289,10 +289,10 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses confirm and pay button and restructured warning text when occupied`() {
+        fun `getStepSpecificContent uses complete registration button and restructured warning text`() {
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"])
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
             assertEquals("forms.checkPropertyAnswers.warning", content["warningTextKey"])
         }
 

@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.HasPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasPasswordFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 class LettingAgentInvitationStateSessionBuilder : JourneyStateSessionBuilder<LettingAgentInvitationStateSessionBuilder>() {
@@ -17,8 +15,13 @@ class LettingAgentInvitationStateSessionBuilder : JourneyStateSessionBuilder<Let
         return self()
     }
 
-    fun withHasPasswordCompletedAsNoPassword(): LettingAgentInvitationStateSessionBuilder {
-        withSubmittedValue(HasPasswordStep.ROUTE_SEGMENT, HasPasswordFormModel(hasPassword = false))
+    fun withNoExistingPassword(): LettingAgentInvitationStateSessionBuilder {
+        withAdditionalData("hasExistingPassword", "false")
+        return self()
+    }
+
+    fun withExistingPassword(): LettingAgentInvitationStateSessionBuilder {
+        withAdditionalData("hasExistingPassword", "true")
         return self()
     }
 
@@ -32,7 +35,14 @@ class LettingAgentInvitationStateSessionBuilder : JourneyStateSessionBuilder<Let
             LettingAgentInvitationStateSessionBuilder()
                 .withStartCompleted()
                 .withValidateTokenCompleted()
-                .withHasPasswordCompletedAsNoPassword()
+                .withNoExistingPassword()
+                .withInvitationToken(token)
+
+        fun beforeEnterPassword(token: String): LettingAgentInvitationStateSessionBuilder =
+            LettingAgentInvitationStateSessionBuilder()
+                .withStartCompleted()
+                .withValidateTokenCompleted()
+                .withExistingPassword()
                 .withInvitationToken(token)
     }
 }
