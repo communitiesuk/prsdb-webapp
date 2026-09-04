@@ -20,6 +20,11 @@ class LettingAgentInvitationStateSessionBuilder : JourneyStateSessionBuilder<Let
         return self()
     }
 
+    fun withExistingPassword(): LettingAgentInvitationStateSessionBuilder {
+        withAdditionalData("hasExistingPassword", "true")
+        return self()
+    }
+
     fun withInvitationToken(token: String): LettingAgentInvitationStateSessionBuilder {
         withAdditionalData("invitationToken", "\"$token\"")
         return self()
@@ -31,6 +36,13 @@ class LettingAgentInvitationStateSessionBuilder : JourneyStateSessionBuilder<Let
                 .withStartCompleted()
                 .withValidateTokenCompleted()
                 .withNoExistingPassword()
+                .withInvitationToken(token)
+
+        fun beforeEnterPassword(token: String): LettingAgentInvitationStateSessionBuilder =
+            LettingAgentInvitationStateSessionBuilder()
+                .withStartCompleted()
+                .withValidateTokenCompleted()
+                .withExistingPassword()
                 .withInvitationToken(token)
     }
 }
