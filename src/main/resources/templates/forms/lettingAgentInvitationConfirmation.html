@@ -1,0 +1,32 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html id="form-content"
+      th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+
+    <div id="confirmation-banner"
+         th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{lettingAgentInvitation.confirmation.banner.heading}, null)}">
+    </div>
+
+    <p class="govuk-body" th:text="#{lettingAgentInvitation.confirmation.continueToProvideDetails}">
+        lettingAgentInvitation.confirmation.continueToProvideDetails
+    </p>
+
+    <h2 class="govuk-heading-m" th:text="#{lettingAgentInvitation.confirmation.updatingInFuture.heading}">
+        lettingAgentInvitation.confirmation.updatingInFuture.heading
+    </h2>
+
+    <p class="govuk-body" th:text="#{lettingAgentInvitation.confirmation.updatingInFuture.body}">
+        lettingAgentInvitation.confirmation.updatingInFuture.body
+    </p>
+
+    <dl th:replace="~{fragments/summaryList :: summaryList(${summaryListRows})}"></dl>
+
+    <div class="govuk-inset-text" th:text="#{lettingAgentInvitation.confirmation.insetText}">
+        lettingAgentInvitation.confirmation.insetText
+    </div>
+
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{lettingAgentInvitation.confirmation.continueButton})}"></button>
+</html>

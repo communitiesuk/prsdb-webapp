@@ -66,6 +66,10 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
 
             setPasswordPage.submitPasswords("password1", "password1")
 
+            // TODO PDJB-1659: Remove this step once store-access becomes a silent step
+            val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
+            storeAccessPage.form.submit()
+
             assertPageIs(page, PasswordCreationConfirmationPage::class)
         }
     }
