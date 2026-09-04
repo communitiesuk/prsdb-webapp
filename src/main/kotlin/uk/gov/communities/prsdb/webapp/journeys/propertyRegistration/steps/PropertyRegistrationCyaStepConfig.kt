@@ -290,6 +290,7 @@ class PropertyRegistrationCyaStepConfig(
         getAddressRows(
             state,
             "forms.checkPropertyAnswers.propertyDetails.address",
+            // TODO PDJB-1340: Remove this legacy address format when the restructure and skipping flag is removed.
             multiLineAddress = false,
         ) +
             getPropertyTypeRow(state) +
