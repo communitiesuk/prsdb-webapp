@@ -102,7 +102,6 @@ taskList:
     checkAnswers: Check and submit your answers
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
-    confirmAndPay: Confirm and pay
 checkAnswers:
   complianceCertificates:
     heading: Compliance certificates

@@ -118,7 +118,7 @@ class PropertyRegistrationCyaStepConfig(
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
         return getBaseContent(
             state = state,
-            submitButtonText = "registerProperty.taskList.checkAndSubmit.confirmAndPay",
+            submitButtonText = "forms.buttons.completeRegistration",
             warningTextKey = "forms.checkPropertyAnswers.warning",
             insetText = false,
             propertyDetails = getRestructuredPropertyDetailsSummaryList(state),

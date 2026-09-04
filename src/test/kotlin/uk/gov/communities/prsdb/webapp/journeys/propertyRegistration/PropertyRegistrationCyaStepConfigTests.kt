@@ -297,12 +297,12 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses confirm and pay button when unoccupied`() {
+        fun `getStepSpecificContent uses complete registration button when unoccupied`() {
             whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals("registerProperty.taskList.checkAndSubmit.confirmAndPay", content["submitButtonText"])
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
         }
 
         @Test
@@ -623,9 +623,9 @@ class PropertyRegistrationCyaStepConfigTests {
                 "Delegated path should hide the licensing, compliance and tenancy sections",
             )
             assertEquals(
-                "registerProperty.taskList.checkAndSubmit.confirmAndPay",
+                "forms.buttons.completeRegistration",
                 content["submitButtonText"],
-                "Delegated properties should use the confirm-and-pay message key",
+                "Delegated properties should use the complete-registration message key",
             )
         }
 
