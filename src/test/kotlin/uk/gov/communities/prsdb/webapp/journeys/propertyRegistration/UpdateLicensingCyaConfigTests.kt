@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -74,9 +75,20 @@ class UpdateLicensingCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends update emails with the correct updated items`() {
+        whenever(mockState.sendsUpdateEmails).thenReturn(true)
+
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(mockPropertyUpdateEmailService).sendUpdateEmails(eq(propertyId), eq(listOf("The licensing information")))
+    }
+
+    @Test
+    fun `afterStepDataIsAdded does not send update emails when the journey does not send them`() {
+        whenever(mockState.sendsUpdateEmails).thenReturn(false)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockPropertyUpdateEmailService, never()).sendUpdateEmails(any(), any())
     }
 
     @Test

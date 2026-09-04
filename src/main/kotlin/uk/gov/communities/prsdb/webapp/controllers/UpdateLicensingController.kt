@@ -12,6 +12,7 @@ import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_LICENSING_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.UPDATE_LICENSING_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -57,13 +58,20 @@ class UpdateLicensingController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
+                    sendsUpdateEmails = true,
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
     companion object {
-        const val UPDATE_LICENSING_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-licensing"
+        const val UPDATE_LICENSING_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/$UPDATE_LICENSING_PATH_SEGMENT"
 
         fun getUpdateLicensingBaseRoute(propertyOwnershipId: Long): String =
             UriTemplate(UPDATE_LICENSING_ROUTE).expand(propertyOwnershipId).toASCIIString()

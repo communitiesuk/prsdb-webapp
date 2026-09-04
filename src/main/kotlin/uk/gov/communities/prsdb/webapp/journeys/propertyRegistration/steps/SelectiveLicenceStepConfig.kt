@@ -17,6 +17,7 @@ class SelectiveLicenceStepConfig : AbstractRequestableStepConfig<Complete, Selec
             "label" to "forms.selectiveLicence.label",
             "detailSummary" to "forms.selectiveLicence.detail.summary",
             "detailMainText" to "forms.selectiveLicence.detail.text",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: JourneyState): String = "forms/licenceNumberForm"
