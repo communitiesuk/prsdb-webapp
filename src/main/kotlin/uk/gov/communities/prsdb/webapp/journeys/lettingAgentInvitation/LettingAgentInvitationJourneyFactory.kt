@@ -78,7 +78,9 @@ class LettingAgentInvitationJourneyFactory(
                         PasswordStatus.NO_PASSWORD -> Destination(journey.confirmationStep)
                         // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
                         PasswordStatus.HAS_PASSWORD -> Destination.ExternalUrl("/")
-                        null -> throw PrsdbWebException("hasPassword outcome is missing, so the next destination cannot be determined")
+                        null -> throw PrsdbWebException(
+                            "hasExistingPassword outcome is missing, so the next destination cannot be determined",
+                        )
                     }
                 }
             }
