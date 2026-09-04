@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -32,21 +31,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal?,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 
     fun createJourneySteps(
         propertyId: Long,
-        propertyDetailsUrl: String = PropertyDetailsController.getPropertyDetailsPath(propertyId),
+        propertyDetailsUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 

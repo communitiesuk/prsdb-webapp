@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -32,7 +33,11 @@ class LandlordUpdateTenancyDetailsControllerTests(
     override val formContent = "numberOfHouseholds=2"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(HouseholdStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+        whenever(
+            journeyFactory.createJourneySteps(
+                eq(propertyOwnershipId),
+                eq(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)),
+            ),
+        ).thenReturn(mapOf(HouseholdStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }

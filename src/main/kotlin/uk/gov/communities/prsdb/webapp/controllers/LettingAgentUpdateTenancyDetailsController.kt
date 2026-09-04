@@ -18,12 +18,11 @@ import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController.Companion.LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tenancyDetails.UpdateTenancyDetailsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 import java.util.UUID
 
 @PrsdbController
@@ -33,46 +32,36 @@ class LettingAgentUpdateTenancyDetailsController(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    @GetMapping("{stepName}")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
+    @GetMapping("/{*stepPath}")
     fun getUpdateStep(
-        principal: Principal?,
         @PathVariable token: UUID,
-        @PathVariable("stepName") stepName: String,
-    ): ModelAndView {
-        val propertyOwnershipId = resolveOccupiedPropertyOwnershipId(token)
-        val propertyDetailsUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId, propertyDetailsUrl)
-            journeyMap[stepName]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
-    }
+        @PathVariable stepPath: String,
+    ): ModelAndView = dispatchJourneyStep(token, stepPath) { getStepModelAndView() }
 
-    @PostMapping("{stepName}")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
+    @PostMapping("/{*stepPath}")
     fun postUpdateStep(
         model: Model,
-        principal: Principal?,
         @PathVariable token: UUID,
-        @PathVariable("stepName") stepName: String,
+        @PathVariable stepPath: String,
         @RequestParam formData: FormData,
+    ): ModelAndView = dispatchJourneyStep(token, stepPath) { postStepModelAndView(formData) }
+
+    private fun dispatchJourneyStep(
+        token: UUID,
+        stepPath: String,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView {
         val propertyOwnershipId = resolveOccupiedPropertyOwnershipId(token)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
         val propertyDetailsUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(propertyOwnershipId, propertyDetailsUrl)
-            journeyMap[stepName]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            val journeyId = journeyFactory.initializeJourneyState(propertyOwnershipId, principal)
-            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-            ModelAndView("redirect:$redirectUrl")
-        }
+        return JourneyStepDispatcher.handleInitialisableRequest(
+            rawStepPath = stepPath,
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, propertyDetailsUrl) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(token) },
+            dispatch = dispatch,
+        )
     }
 
     private fun resolveOccupiedPropertyOwnershipId(token: UUID): Long {
