@@ -47,7 +47,7 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
             assertPageIs(page, SetPasswordPage::class)
             BaseComponent
                 .assertThat(setPasswordPage.errorSummary)
-                .containsText("Password must be at least 8 characters and include letters and numbers")
+                .containsText("Your password must be at least 8 characters and include letters and numbers")
         }
 
         @Test

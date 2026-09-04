@@ -10,7 +10,7 @@ setPassword:
     hint: Must be at least 8 characters and include letters and numbers
     error:
       missing: Enter a password
-      invalid: Password must be at least 8 characters and include letters and numbers
+      invalid: Your password must be at least 8 characters and include letters and numbers
       mismatch: Enter the same password in both fields
   confirmPassword:
     label: Re-type password
