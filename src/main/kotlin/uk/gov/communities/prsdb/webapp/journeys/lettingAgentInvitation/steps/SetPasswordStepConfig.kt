@@ -30,7 +30,8 @@ class SetPasswordStepConfig(
 
     override fun chooseTemplate(state: LettingAgentInvitationJourneyState): String = "forms/setPasswordForm"
 
-    override fun mode(state: LettingAgentInvitationJourneyState): Complete? = if (state.hasSetPassword == true) Complete.COMPLETE else null
+    override fun mode(state: LettingAgentInvitationJourneyState): Complete? =
+        if (state.hasSetNewPassword == true) Complete.COMPLETE else null
 
     override fun afterPrimaryValidation(
         state: LettingAgentInvitationJourneyState,
@@ -72,7 +73,7 @@ class SetPasswordStepConfig(
     ): FormData = emptyMap()
 
     override fun afterStepDataIsAdded(state: LettingAgentInvitationJourneyState) {
-        state.hasSetPassword = true
+        state.hasSetNewPassword = true
     }
 
     private fun getInvitation(state: LettingAgentInvitationJourneyState) =

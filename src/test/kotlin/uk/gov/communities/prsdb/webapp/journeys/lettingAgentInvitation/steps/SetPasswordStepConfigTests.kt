@@ -169,26 +169,26 @@ class SetPasswordStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sets hasSetPassword on state`() {
+    fun `afterStepDataIsAdded sets hasSetNewPassword on state`() {
         val stepConfig = createStepConfig()
 
         stepConfig.afterStepDataIsAdded(state)
 
-        verify(state).hasSetPassword = true
+        verify(state).hasSetNewPassword = true
     }
 
     @Test
-    fun `mode is null before hasSetPassword is set`() {
+    fun `mode is null before hasSetNewPassword is set`() {
         val stepConfig = createStepConfig()
-        whenever(state.hasSetPassword).thenReturn(null)
+        whenever(state.hasSetNewPassword).thenReturn(null)
 
         assertNull(stepConfig.mode(state))
     }
 
     @Test
-    fun `mode is complete after hasSetPassword is set`() {
+    fun `mode is complete after hasSetNewPassword is set`() {
         val stepConfig = createStepConfig()
-        whenever(state.hasSetPassword).thenReturn(true)
+        whenever(state.hasSetNewPassword).thenReturn(true)
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(state))
     }
