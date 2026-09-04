@@ -34,6 +34,11 @@ class PasswordBenchmarkController(
         @RequestParam(required = false) parallelism: Int?,
         @RequestParam(required = false) hashes: Int?,
     ): ResponseEntity<String> {
+        rejectIfAboveCap("iterations", iterations, defaultIterations * 10)?.let { return it }
+        rejectIfAboveCap("memory", memory, defaultMemory * 10)?.let { return it }
+        rejectIfAboveCap("parallelism", parallelism, defaultParallelism * 10)?.let { return it }
+        rejectIfAboveCap("hashes", hashes, DEFAULT_HASH_COUNT * 10)?.let { return it }
+
         val effectiveIterations = iterations ?: defaultIterations
         val effectiveMemory = memory ?: defaultMemory
         val effectiveParallelism = parallelism ?: defaultParallelism
@@ -87,6 +92,20 @@ class PasswordBenchmarkController(
             .contentType(MediaType.TEXT_PLAIN)
             .body(body)
     }
+
+    private fun rejectIfAboveCap(
+        name: String,
+        value: Int?,
+        cap: Int,
+    ): ResponseEntity<String>? =
+        if (value != null && value > cap) {
+            ResponseEntity
+                .badRequest()
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("$name=$value exceeds cap of $cap")
+        } else {
+            null
+        }
 
     companion object {
         const val PASSWORD_BENCHMARK_ROUTE =
