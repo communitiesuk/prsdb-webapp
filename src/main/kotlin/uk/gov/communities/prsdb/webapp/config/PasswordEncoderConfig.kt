@@ -13,5 +13,10 @@ class PasswordEncoderConfig(
     @Value("\${argon2.parallelism}") private val parallelism: Int,
 ) {
     @Bean
-    fun passwordEncoder(): PasswordEncoder = Argon2PasswordEncoder(16, 32, parallelism, memory, iterations)
+    fun passwordEncoder(): PasswordEncoder = Argon2PasswordEncoder(ARGON2_SALT_LENGTH, ARGON2_HASH_LENGTH, parallelism, memory, iterations)
+
+    companion object {
+        const val ARGON2_SALT_LENGTH = 16
+        const val ARGON2_HASH_LENGTH = 32
+    }
 }

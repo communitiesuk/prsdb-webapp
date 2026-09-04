@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.PasswordEncoderConfig.Companion.ARGON2_HASH_LENGTH
+import uk.gov.communities.prsdb.webapp.config.PasswordEncoderConfig.Companion.ARGON2_SALT_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.PASSWORD_BENCHMARK_ENDPOINT
 import uk.gov.communities.prsdb.webapp.constants.PASSWORD_BENCHMARK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
@@ -92,7 +94,5 @@ class PasswordBenchmarkController(
 
         private const val DEFAULT_HASH_COUNT = 50
         private const val BENCHMARK_PASSWORD = "password-benchmark-input"
-        private const val ARGON2_SALT_LENGTH = 16
-        private const val ARGON2_HASH_LENGTH = 32
     }
 }
