@@ -181,7 +181,7 @@ class PropertyRegistrationCyaStepConfig(
         occupancyDetails: List<SummaryListRowViewModel>,
     ) = getBaseContent(
         state,
-        "forms.buttons.continueToPayment",
+        "forms.buttons.completeRegistration",
         "forms.checkPropertyAnswers.warning",
         false,
         getRestructuredPropertyDetailsSummaryList(state),
