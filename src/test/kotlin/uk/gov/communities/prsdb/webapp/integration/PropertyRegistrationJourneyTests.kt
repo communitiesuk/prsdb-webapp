@@ -2005,12 +2005,41 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             lettingAgentEmailPage.submitEmail("agent@example.com")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.submitButton).containsText("Complete registration")
+            assertThat(checkAnswersPage.warning).isVisible()
             checkAnswersPage.confirm()
 
             val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `submitting the CYA page when the landlord provides details and a certificate is missing shows the confirm missing compliance page before reaching confirmation`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
+
+            checkAnswersPage.confirm()
+
+            val confirmMissingCompliancePage =
+                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+            assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
+
+            confirmMissingCompliancePage.form.radios.selectValue("true")
+            confirmMissingCompliancePage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         }
 
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
@@ -2220,6 +2249,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // bounced back to the task list.
             navigator.navigateToPropertyRegistrationCheckYourAnswers()
             assertPageIs(page, TaskListPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `submitting an unoccupied property with the letting agent panel displayed reaches the confirmation page`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).isVisible()
+
+            checkAnswersPage.confirm()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         }
     }
 

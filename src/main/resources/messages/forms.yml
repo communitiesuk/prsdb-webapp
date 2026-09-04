@@ -555,7 +555,7 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
-  warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
+  warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
   aboutYourProperty:
     heading: About your property
   propertyDetails:
@@ -566,9 +566,9 @@ checkPropertyAnswers:
     bedrooms: Number of bedrooms
     ownership: Ownership type
     licensingType: Licensing type
-    noLicensing: None
-    restructureAndSkipping:
-      noLicensing: This property does not need a licence
+    noLicensing:
+      old: None
+      restructureAndSkipping: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -588,7 +588,6 @@ checkPropertyAnswers:
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later
-    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
     unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
     bedrooms: Number of bedrooms
@@ -608,6 +607,7 @@ checkPropertyAnswers:
     heading: How your property’s rented out
     subheading: Who will provide these details
     bodyText: "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:"
+    unoccupiedBodyText: When your property becomes occupied, you can choose for your letting agent or property manager to provide this section for you. They can also keep these details up to date.
     values:
       landlord:
         label: I will provide these details
