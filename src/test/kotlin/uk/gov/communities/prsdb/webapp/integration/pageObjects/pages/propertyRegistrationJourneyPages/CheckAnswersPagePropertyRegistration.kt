@@ -66,6 +66,13 @@ class CheckAnswersPagePropertyRegistration(
 
     val lettingAgentDelegationUnoccupiedPanel = TicketPanel(page)
 
+    val restructuredSectionHeadings: List<String>
+        get() =
+            page
+                .locator("main h2.govuk-heading-l, main h3.govuk-heading-m, main h3.govuk-heading-s")
+                .allInnerTexts()
+                .map { it.trim() }
+
     val warning = Warning.default(page)
 
     val submitButton = Button.default(page)

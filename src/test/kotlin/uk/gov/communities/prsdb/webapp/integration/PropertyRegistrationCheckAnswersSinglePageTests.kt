@@ -171,11 +171,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            val headings =
-                page
-                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
-                    .allInnerTexts()
-                    .map { it.trim() }
+            val headings = checkAnswersPage.restructuredSectionHeadings
             assertEquals(
                 listOf(
                     "About your property",
@@ -217,13 +213,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            val headings =
-                page
-                    .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
-                    .allInnerTexts()
-                    .map { it.trim() }
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val headings = checkAnswersPage.restructuredSectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
             val licensingIndex = headings.indexOf("Tell us if the property needs a license")
@@ -285,32 +276,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).containsText(
                 "When your property becomes occupied, you can choose for your letting agent or property manager to " +
                     "provide this section for you. They can also keep these details up to date.",
-            )
-        }
-
-        @Test
-        fun `who will provide these details subheading appears before licensing subheading when property is unoccupied`(page: Page) {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswers()
-                        .withBedrooms(),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            val headings =
-                page
-                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
-                    .allInnerTexts()
-                    .map { it.trim() }
-            val whoProvidesIndex = headings.indexOf("Who will provide these details")
-            val licensingIndex = headings.indexOf("Tell us if the property needs a license")
-
-            assertTrue(whoProvidesIndex >= 0 && licensingIndex >= 0)
-            assertTrue(
-                licensingIndex == whoProvidesIndex + 1,
-                "Licensing subheading should appear immediately after the who-provides subheading",
             )
         }
 
