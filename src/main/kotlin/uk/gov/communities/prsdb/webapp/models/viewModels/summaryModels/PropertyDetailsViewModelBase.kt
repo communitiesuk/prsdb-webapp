@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
@@ -34,12 +35,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 
 // TODO PDJB-939 - this can be combined with PropertyDetailsViewModel once the pdjb939 flag is removed (assuming it is not used elsewhere)
 abstract class PropertyDetailsViewModelBase(
     protected val propertyOwnership: PropertyOwnership,
     protected val viewType: PropertyDetailsViewType,
     protected val messageSource: MessageSource,
+    protected val lettingAgentAccessToken: UUID? = null,
 ) {
     protected val changeLinkMessageKey = "forms.links.change"
 
@@ -140,8 +143,14 @@ abstract class PropertyDetailsViewModelBase(
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
             MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
-            UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
-                "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
+                    "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(it) +
+                        "/${RentIncludesBillsStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = propertyOwnership.rentIncludesBills,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.changeLinkAriaLabel",
@@ -258,10 +267,19 @@ abstract class PropertyDetailsViewModelBase(
 
     protected fun buildTenancySection(): List<SummaryListRowViewModel> =
         when {
-            !isOccupied -> emptyList()
-            isTenancyProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
-            isTenancyProvideLater -> listOf(tenancyProvideLaterRow())
-            else ->
+            !isOccupied -> {
+                emptyList()
+            }
+
+            isTenancyProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> {
+                emptyList()
+            }
+
+            isTenancyProvideLater -> {
+                listOf(tenancyProvideLaterRow())
+            }
+
+            else -> {
                 buildList {
                     add(householdsRow())
                     add(tenantsRow())
@@ -271,6 +289,7 @@ abstract class PropertyDetailsViewModelBase(
                     add(rentFrequencyRow(withoutBottomBorder = true))
                     add(rentAmountRow(includeChangeLink = false))
                 }
+            }
         }
 
     protected fun row(
@@ -301,7 +320,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
     // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
-    // PDJB-1574, PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
+    // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
         key: String,
