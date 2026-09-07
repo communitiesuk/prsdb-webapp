@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcDetailState
@@ -16,8 +18,10 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcDetailState,
+    featureFlagManager: FeatureFlagManager? = null,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
+    private val isSkippingEnabled = featureFlagManager?.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) ?: false
     private val scenario: EpcScenario = determineScenario(state)
 
     private fun determineScenario(state: EpcDetailState): EpcScenario {
@@ -250,13 +254,25 @@ class EpcRegistrationCyaSummaryRowsFactory(
     private fun getHasEpcRow(): SummaryListRowViewModel {
         val fieldValue =
             when (scenario) {
-                EpcScenario.SKIPPED_OCCUPIED -> "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
+                EpcScenario.SKIPPED_OCCUPIED ->
+                    // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+                    if (isSkippingEnabled) {
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied"
+                    } else {
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
+                    }
 
                 EpcScenario.SKIPPED_UNOCCUPIED,
                 EpcScenario.EPC_EXPIRED_UNOCCUPIED,
                 EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED,
                 EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED,
-                -> "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
+                ->
+                    // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
+                    if (isSkippingEnabled) {
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterUnoccupied"
+                    } else {
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
+                    }
 
                 else -> "commonText.no"
             }

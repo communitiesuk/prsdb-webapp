@@ -54,6 +54,11 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
         data: FormData,
     ) {}
 
+    open fun enrichStepDataBeforeItIsAdded(
+        state: TState,
+        data: FormData,
+    ): FormData = data
+
     open fun afterStepDataIsAdded(state: TState) {}
 
     open fun beforeSaveState(state: TState) {}

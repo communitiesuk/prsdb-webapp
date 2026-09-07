@@ -25,12 +25,20 @@ class OccupancyDetailsHelper {
         val occupiedStep = state.occupied
         val isOccupied = occupiedStep.formModel.occupied ?: false
         return listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.occupancy.question",
+            getOccupancyStatusRow(
                 isOccupied,
-                Destination.VisitableStep(occupiedStep, state.getCyaJourneyId(occupiedStep)),
+                occupiedStep,
+                state.getCyaJourneyId(occupiedStep),
+                "forms.checkPropertyAnswers.occupancy.question",
             ),
         )
+    }
+
+    fun <T> getOccupancyStatusSummaryList(
+        state: T,
+    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState {
+        val isOccupied = state.occupied.formModel.occupied ?: false
+        return listOf(getOccupancyStatusRow(isOccupied, state.occupied, state.getCyaJourneyId(state.occupied)))
     }
 
     fun <T> getCheckYourAnswersSummaryList(
@@ -140,34 +148,45 @@ class OccupancyDetailsHelper {
         rentFrequencyAndAmountState: RentFrequencyAndAmountState,
         messageSource: MessageSource,
     ): List<SummaryListRowViewModel> =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
-                val rentAmountStep = rentFrequencyAndAmountState.rentAmount
-                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        rentFrequencyAndAmountState.getRentAmount(messageSource),
-                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
-                    ),
-                )
-            }
+        listOf(
+            getRentFrequencyRow(state, rentFrequencyAndAmountState),
+            getRentAmountRow(state, rentFrequencyAndAmountState, messageSource),
+        )
+
+    private fun getRentFrequencyRow(
+        state: CheckYourAnswersJourneyState,
+        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
+    ): SummaryListRowViewModel {
+        val rentFrequencyStep = rentFrequencyAndAmountState.rentFrequency
+        val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
+            RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
+            Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
+        )
+    }
+
+    private fun getRentAmountRow(
+        state: CheckYourAnswersJourneyState,
+        rentFrequencyAndAmountState: RentFrequencyAndAmountState,
+        messageSource: MessageSource,
+    ): SummaryListRowViewModel {
+        val rentAmountStep = rentFrequencyAndAmountState.rentAmount
+        return SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
+            rentFrequencyAndAmountState.getRentAmount(messageSource),
+            Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
+        )
+    }
 
     private fun getOccupancyStatusRow(
         isOccupied: Boolean,
         occupiedStep: RequestableStep<*, *, *>,
         childJourneyId: String,
+        labelKey: String = "forms.checkPropertyAnswers.tenancyDetails.occupied",
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.occupied",
+            labelKey,
             isOccupied,
             Destination.VisitableStep(occupiedStep, childJourneyId),
         )
@@ -211,7 +230,8 @@ class OccupancyDetailsHelper {
                     ),
                 )
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, state.rentIncludesBillsTask, messageSource))
-                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, state.rentFrequencyAndAmountTask, messageSource))
+                add(getRentFrequencyRow(state, state.rentFrequencyAndAmountTask))
+                add(getRentAmountRow(state, state.rentFrequencyAndAmountTask, messageSource))
             }
 
     private fun <T> getBedroomsRow(state: T): SummaryListRowViewModel where T : BedroomsState, T : CheckYourAnswersJourneyState {
