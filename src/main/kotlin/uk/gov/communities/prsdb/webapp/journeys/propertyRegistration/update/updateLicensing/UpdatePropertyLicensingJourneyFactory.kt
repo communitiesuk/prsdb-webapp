@@ -26,13 +26,11 @@ class UpdateLicensingJourneyFactory(
     final fun createJourneySteps(
         propertyId: Long,
         returnUrl: String,
-        sendsUpdateEmails: Boolean,
     ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.sendsUpdateEmails = sendsUpdateEmails
             val propertyOwnership = ownershipService.getPropertyOwnership(propertyId)
             state.hasOriginalLicense = propertyOwnership.license != null
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
@@ -138,7 +136,6 @@ class UpdateLicensingJourney(
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
-    override var sendsUpdateEmails: Boolean by delegateProvider.requiredDelegate("sendsUpdateEmails", true)
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
@@ -156,12 +153,4 @@ interface UpdateLicensingJourneyState :
     val hasOriginalLicense: Boolean
     val propertyId: Long
     val lastModifiedDate: String
-
-    /**
-     * Update confirmation emails are addressed to the landlord who made the change, so they cannot be sent when a
-     * letting agent updates a property on a landlord's behalf.
-     *
-     * TODO PDJB-1581: Send letting agent update emails, and remove this.
-     */
-    var sendsUpdateEmails: Boolean
 }

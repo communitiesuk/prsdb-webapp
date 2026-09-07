@@ -5,13 +5,13 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController

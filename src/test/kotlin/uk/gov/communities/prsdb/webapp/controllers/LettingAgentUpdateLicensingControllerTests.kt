@@ -63,7 +63,7 @@ class LettingAgentUpdateLicensingControllerTests(
         val propertyOwnership = createOccupiedPropertyOwnership()
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), any(), any()))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), any()))
             .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 

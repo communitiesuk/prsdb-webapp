@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
@@ -23,8 +25,16 @@ class PropertyUpdateEmailService(
         propertyId: Long,
         updatedBullets: List<String>,
     ) {
+        val actingLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        if (actingLandlord == null) {
+            // TODO: PDJB-1581: Send update emails when a letting agent makes the update. No emails are sent yet.
+            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)) return
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No acting landlord was found for the update to property ownership $propertyId",
+            )
+        }
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
-        val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val registrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 

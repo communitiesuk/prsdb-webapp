@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.UPDATE_LICENSING_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController.Companion.LETTING_AGENT_UPDATE_LICENSING_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -62,10 +61,7 @@ class LettingAgentUpdateLicensingController(
 
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = {
-                // TODO PDJB-1581: Send letting agent update emails, and remove sendsUpdateEmails.
-                journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl, sendsUpdateEmails = false)
-            },
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl) },
             initialiseJourney = { journeyFactory.initializeJourneyState(token) },
             dispatch = dispatch,
         )
@@ -73,7 +69,7 @@ class LettingAgentUpdateLicensingController(
 
     companion object {
         const val LETTING_AGENT_UPDATE_LICENSING_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/$UPDATE_LICENSING_PATH_SEGMENT"
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-licensing"
 
         fun getUpdateLicensingRoute(token: UUID): String = UriTemplate(LETTING_AGENT_UPDATE_LICENSING_ROUTE).expand(token).toASCIIString()
     }
