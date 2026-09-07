@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import java.util.UUID
 
@@ -25,18 +24,17 @@ class LettingAgentPropertyDetailsViewModel(
     }
 
     val showProvideDetailsInset: Boolean =
-        isLicensingProvideLater ||
-            isTenancyProvideLater ||
-            !ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
+        hasBeenOccupiedSinceRegistration &&
+            (
+                isLicensingProvideLater ||
+                    isTenancyProvideLater ||
+                    ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAnyProvideLater
+            )
 
     val provideDetailsInsetText: String =
-        if (hasBeenOccupiedSinceRegistration) {
-            getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")
-        } else {
-            messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
-        }
+        getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")
 
-    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get change links on
+    // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1575, PDJB-1576: letting agents will get change links on
     //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared section
     //  builders show a letting-agent change link on a row only once rowWithViewTypeSpecificChangeLink is given a lettingAgentActionLink
     //  for it; until then the rows render without links (see PropertyDetailsViewModelBase).
