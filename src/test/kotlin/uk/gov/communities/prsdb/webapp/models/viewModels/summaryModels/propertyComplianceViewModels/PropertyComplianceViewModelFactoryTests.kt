@@ -8,6 +8,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
@@ -55,14 +56,14 @@ class PropertyComplianceViewModelFactoryTests {
     @Nested
     inner class CardActions {
         @Test
-        fun `cards have change actions when landlordView is true`() {
+        fun `cards have change actions for the landlord view`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
             val propertyOwnershipId = propertyCompliance.propertyOwnership.id
 
             val result =
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
-                    landlordView = true,
+                    viewType = PropertyDetailsViewType.LANDLORD,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 
@@ -100,13 +101,13 @@ class PropertyComplianceViewModelFactoryTests {
         }
 
         @Test
-        fun `cards have no change actions when landlordView is false`() {
+        fun `cards have no change actions for the local council view`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
             val result =
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance,
-                    landlordView = false,
+                    viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                     propertyOwnershipId = propertyOwnershipId,
                 )
 

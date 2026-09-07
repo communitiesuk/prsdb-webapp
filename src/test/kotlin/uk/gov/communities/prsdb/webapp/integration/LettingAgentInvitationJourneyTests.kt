@@ -9,6 +9,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
@@ -60,7 +61,7 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         assertThat(confirmationPage.updateLink.locator).hasText(invitationLink)
         confirmationPage.form.submit()
 
-        // TODO PDJB-1570: Assert redirect to letting agent property record page
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithoutPassword))
     }
 
     @Test
@@ -79,6 +80,6 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        // TODO PDJB-1570: Assert redirect to letting agent property record page
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithPassword))
     }
 }
