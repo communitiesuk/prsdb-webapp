@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
@@ -88,13 +89,13 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initialiseJourneyState(eq(token))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -130,6 +131,31 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "landlord-user")
+    fun `getUpdateStep returns 403 when a landlord is logged in`() {
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "letting-agent-user")
+    fun `getUpdateStep returns 403 when a letting agent with access to a different property is logged in`() {
+        // TODO: PDJB-1683: Ensure this test works & checks the accesses in the session correctly
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"], username = "council-user")
+    fun `getUpdateStep returns 403 when a local council user is logged in`() {
+        mvc.get(updateStepRoute).andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
     fun `postUpdateStep redirects for a valid token`() {
         stubValidTokenForOccupiedProperty()
         val redirectUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
@@ -155,7 +181,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -166,7 +192,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initialiseJourneyState(eq(token))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
