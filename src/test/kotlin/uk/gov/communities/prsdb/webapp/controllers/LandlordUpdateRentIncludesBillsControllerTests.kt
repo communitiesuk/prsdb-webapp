@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateRentIncludesBillsController::class)
-class UpdateRentIncludesBillsControllerTests(
+@WebMvcTest(LandlordUpdateRentIncludesBillsController::class)
+class LandlordUpdateRentIncludesBillsControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -28,7 +28,7 @@ class UpdateRentIncludesBillsControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnershipId) +
+        LandlordUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnershipId) +
             "/${RentIncludesBillsStep.ROUTE_SEGMENT}"
 
     override val formContent = "rentIncludesBills=true"
