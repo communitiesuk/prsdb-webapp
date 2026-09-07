@@ -4,12 +4,21 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
-<!-- TODO PDJB-1388: skeleton page - replace placeholder heading and radio labels with the real content. -->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.whoProvidesRentalDetails.heading}">registerProperty.whoProvidesRentalDetails.heading</h1>
+    <p class="govuk-body" th:text="#{registerProperty.whoProvidesRentalDetails.intro}">registerProperty.whoProvidesRentalDetails.intro</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{registerProperty.whoProvidesRentalDetails.bullet.licensing}">registerProperty.whoProvidesRentalDetails.bullet.licensing</li>
+        <li th:text="#{registerProperty.whoProvidesRentalDetails.bullet.complianceCertificates}">registerProperty.whoProvidesRentalDetails.bullet.complianceCertificates</li>
+        <li th:text="#{registerProperty.whoProvidesRentalDetails.bullet.tenancy}">registerProperty.whoProvidesRentalDetails.bullet.tenancy</li>
+    </ul>
+    <p class="govuk-body" th:text="#{registerProperty.whoProvidesRentalDetails.lettingAgentParagraph}">registerProperty.whoProvidesRentalDetails.lettingAgentParagraph</p>
+</th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'whoProvides', #{${fieldSetHeading}}, null)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'whoProvides', #{${fieldSetHeading}}, null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'whoProvides',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>

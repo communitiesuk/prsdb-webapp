@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenF
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
@@ -96,6 +97,6 @@ class LettingAgentInvitationController(
 
     companion object {
         const val LETTING_AGENT_INVITATION_ROUTE =
-            "/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT"
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT"
     }
 }

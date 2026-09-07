@@ -146,7 +146,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("I will provide these details")
             assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
@@ -199,12 +199,12 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
             val headings =
                 page
-                    .locator("main h2.govuk-heading-m, main h3.govuk-heading-s")
+                    .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
                     .allInnerTexts()
                     .map { it.trim() }
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
-            val licensingIndex = headings.indexOf("Tell us if your property needs a license")
+            val licensingIndex = headings.indexOf("Tell us if the property needs a license")
 
             assertTrue(occupancyIndex >= 0 && rentedOutIndex >= 0 && licensingIndex >= 0)
             assertTrue(rentedOutIndex > occupancyIndex, "Rented-out section should appear after occupied section")
@@ -212,7 +212,23 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when delegate to letting agent feature is disabled, rented out section is not displayed`(page: Page) {
+        fun `restructured CYA page uses the expected heading hierarchy`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
+        }
+
+        @Test
+        fun `when delegate to letting agent feature is disabled, letting agent delegation section is not displayed`(page: Page) {
             featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
@@ -224,7 +240,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationHeading).isHidden()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isHidden()
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.key).hasCount(0)
         }
 
         @Test
@@ -327,7 +344,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class ConfirmMissingComplianceStep {
         @Test
-        fun `submitting with no option selected returns an error`(page: Page) {
+        fun `submitting with no option selected returns an error`() {
             val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
             confirmPage.form.submit()
             assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this registration")

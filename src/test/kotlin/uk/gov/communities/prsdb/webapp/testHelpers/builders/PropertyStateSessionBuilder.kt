@@ -129,6 +129,7 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOccupancyStatus(true)
                 .withCheckEpcAnswersComplete()
+                .withLandlordProvidesRentalDetails()
 
         fun beforePropertyRegistrationBedrooms() = beforePropertyRegistrationPeople().withPeople()
 
