@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -17,7 +18,12 @@ class LettingAgentPropertyDetailsViewModel(
     }
 
     val showProvideDetailsInset: Boolean =
-        hasBeenOccupiedSinceRegistration && (isLicensingProvideLater || isTenancyProvideLater)
+        hasBeenOccupiedSinceRegistration &&
+            (
+                isLicensingProvideLater ||
+                    isTenancyProvideLater ||
+                    ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAnyProvideLater
+            )
 
     val provideDetailsInsetText: String =
         getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")

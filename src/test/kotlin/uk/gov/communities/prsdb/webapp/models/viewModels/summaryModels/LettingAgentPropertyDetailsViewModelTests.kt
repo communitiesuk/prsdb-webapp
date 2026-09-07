@@ -26,8 +26,17 @@ class LettingAgentPropertyDetailsViewModelTests {
 
     private fun validCompliance(propertyOwnership: PropertyOwnership) = createPropertyCompliance(propertyOwnership = propertyOwnership)
 
-    private fun outstandingCompliance(propertyOwnership: PropertyOwnership) =
+    private fun missingCompliance(propertyOwnership: PropertyOwnership) =
         createPropertyCompliance(propertyOwnership = propertyOwnership, gasSafetyCertIssueDate = null)
+
+    private fun provideLaterCompliance(propertyOwnership: PropertyOwnership) =
+        validCompliance(propertyOwnership).apply { gasSafetyCertProvideLater = true }
+
+    private fun expiredCompliance(propertyOwnership: PropertyOwnership) =
+        createPropertyCompliance(
+            propertyOwnership = propertyOwnership,
+            electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+        )
 
     @Test
     fun `the provide-details inset is shown when licensing details are outstanding and there is a deadline`() {
@@ -62,7 +71,7 @@ class LettingAgentPropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `the provide-details inset is hidden when only compliance certificates are outstanding`() {
+    fun `the provide-details inset is shown when compliance is provide-later and there is a deadline`() {
         val propertyOwnership =
             createOccupiedPropertyOwnership(
                 createdDate = occupiedAtRegistrationInstant,
@@ -72,7 +81,39 @@ class LettingAgentPropertyDetailsViewModelTests {
             )
 
         val viewModel =
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, outstandingCompliance(propertyOwnership), mockMessageSource)
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, provideLaterCompliance(propertyOwnership), mockMessageSource)
+
+        assertTrue(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when compliance is missing but not provide-later`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, missingCompliance(propertyOwnership), mockMessageSource)
+
+        assertFalse(viewModel.showProvideDetailsInset)
+    }
+
+    @Test
+    fun `the provide-details inset is hidden when compliance is expired but not provide-later`() {
+        val propertyOwnership =
+            createOccupiedPropertyOwnership(
+                createdDate = occupiedAtRegistrationInstant,
+                lastOccupiedDate = occupiedAtRegistrationDate,
+                licenseProvideLater = false,
+                tenancyProvideLater = false,
+            )
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, expiredCompliance(propertyOwnership), mockMessageSource)
 
         assertFalse(viewModel.showProvideDetailsInset)
     }
