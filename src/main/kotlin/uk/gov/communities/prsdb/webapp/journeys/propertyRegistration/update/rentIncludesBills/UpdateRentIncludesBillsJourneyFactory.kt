@@ -125,7 +125,7 @@ class UpdateRentIncludesBillsJourneyFactory(
             }
         }
 
-    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent

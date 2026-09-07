@@ -60,7 +60,7 @@ class UpdateRentIncludesBillsController(
                     PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
