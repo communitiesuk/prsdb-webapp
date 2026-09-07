@@ -286,6 +286,30 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingNumberRow.value,
                 ).containsText(secondNewLicenceNumber)
             }
+
+            @Test
+            fun `The back link on the licensing number page returns to the check licensing answers page when reached from there`(
+                page: Page,
+            ) {
+                // Reach the check licensing answers page
+                val propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+                propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
+                val updateLicensingTypePage =
+                    assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+                updateLicensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
+                val updateLicenceNumberPage =
+                    assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+                updateLicenceNumberPage.submitLicenseNumber("SL456")
+                val checkLicensingAnswersPage =
+                    assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+
+                // Change the licensing number from the check answers page, then check the back link returns there
+                checkLicensingAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
+                val updateLicenceNumberPageFromCya =
+                    assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
+                updateLicenceNumberPageFromCya.backLink.clickAndWait()
+                assertPageIs(page, CheckLicensingAnswersPagePropertyDetailsUpdate::class, urlArguments)
+            }
         }
 
         @Nested
@@ -596,6 +620,50 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Check CYA page displays values without leading zeros
                     assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText("3")
                     assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText("7")
+                }
+
+                @Test
+                fun `The back link on the number of tenants page returns to the check occupancy answers page when reached from there`(
+                    page: Page,
+                ) {
+                    // Reach the check occupancy answers page
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+                    val updateNumberOfHouseholdsPage =
+                        assertPageIs(
+                            page,
+                            NumberOfHouseholdsFormPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    updateNumberOfHouseholdsPage.submitNumberOfHouseholds(1)
+                    val updateNumberOfPeoplePage =
+                        assertPageIs(
+                            page,
+                            HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    updateNumberOfPeoplePage.submitNumOfPeople(3)
+                    val checkOccupancyAnswersPage =
+                        assertPageIs(
+                            page,
+                            CheckHouseholdsAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+
+                    // Change the number of tenants from the check answers page, then check the back link returns there
+                    checkOccupancyAnswersPage.summaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
+                    val updateNumberOfPeoplePageFromCya =
+                        assertPageIs(
+                            page,
+                            HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    updateNumberOfPeoplePageFromCya.backLink.clickAndWait()
+                    assertPageIs(
+                        page,
+                        CheckHouseholdsAnswersPagePropertyDetailsUpdate::class,
+                        occupiedPropertyUrlArguments,
+                    )
                 }
             }
 
@@ -940,6 +1008,41 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                     // Check CYA page displays value without leading zeros
                     assertThat(checkYourAnswersPage.summaryList.rentAmountRow).containsText("£500.50")
+                }
+
+                @Test
+                fun `The back link on the rent amount page returns to the check rent answers page when reached from there`(page: Page) {
+                    // Reach the check rent answers page
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+                    val rentFrequencyPage =
+                        assertPageIs(
+                            page,
+                            RentFrequencyFormPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+                    rentFrequencyPage.form.submit()
+                    val rentAmountPage =
+                        assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                    rentAmountPage.submitRentAmount("500")
+                    val checkYourAnswersPage =
+                        assertPageIs(
+                            page,
+                            CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+
+                    // Change the rent amount from the check answers page, then check the back link returns there
+                    checkYourAnswersPage.summaryList.rentAmountRow.clickFirstActionLinkAndWait()
+                    val rentAmountPageFromCya =
+                        assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                    rentAmountPageFromCya.backLink.clickAndWait()
+                    assertPageIs(
+                        page,
+                        CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate::class,
+                        occupiedPropertyUrlArguments,
+                    )
                 }
             }
         }

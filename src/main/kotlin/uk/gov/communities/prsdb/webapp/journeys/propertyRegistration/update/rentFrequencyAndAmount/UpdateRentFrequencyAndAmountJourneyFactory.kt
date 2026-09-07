@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -91,20 +92,29 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
-            checkAnswerTask(journey.rentFrequencyAndAmountTask)
+            when (state.checkingAnswersFor) {
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                        withAdditionalContentProperty {
+                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                        }
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
+                        withAdditionalContentProperty {
+                            "heading" to "forms.update.rentFrequency.heading"
+                        }
+                    }
+                }
+            }
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
-            }
-            configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-                withAdditionalContentProperty {
-                    "heading" to "forms.update.rentFrequency.heading"
-                }
-            }
-            configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-                withAdditionalContentProperty {
-                    "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-                }
             }
         }
     }

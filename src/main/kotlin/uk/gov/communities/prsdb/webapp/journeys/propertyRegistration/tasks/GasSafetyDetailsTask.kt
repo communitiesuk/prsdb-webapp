@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 
 @JourneyFrameworkComponent("propertyRegistrationGasSafetyDetailsTask")
 class GasSafetyDetailsTask(
@@ -105,7 +107,14 @@ class GasSafetyDetailsTask(
                 routeSegment(CheckGasCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadGasCertStep.isComplete() }
                 nextStep { exitStep }
-                backStep { journey.gasCertIssueDateStep }
+                backDestination {
+                    val cyaState = dependencies as? CheckYourAnswersJourneyState
+                    if (cyaState?.isCheckingAnswers == true) {
+                        cyaState.returnToCyaPageDestination
+                    } else {
+                        Destination(journey.gasCertIssueDateStep)
+                    }
+                }
                 savable()
             }
             step(journey.removeGasCertUploadStep) {

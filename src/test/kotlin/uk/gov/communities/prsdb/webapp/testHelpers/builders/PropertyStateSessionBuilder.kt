@@ -443,9 +443,58 @@ class PropertyStateSessionBuilder(
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersGasCertUploaded() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithUploadedCert()
+                .withElectricalSafetyCertificateMissing()
+                .withCompliantEpc()
+
+        fun beforePropertyRegistrationCheckAnswersElectricalCertUploaded() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withEic()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+                .withPropertyHasNoEpc()
+                .withIsEpcNotRequired()
+                .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
+                .withCheckEpcAnswersComplete()
+
+        fun beforePropertyRegistrationCheckAnswersEpcLowRatingWithExemption(
+            exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+        ) = beforePropertyRegistrationOccupancy()
+            .withOccupancyStatus(false)
+            .withBedrooms()
+            .withHasNoJointLandlords()
+            .withGasSafetyTaskCompletedWithNoGasSupply()
+            .withElectricalSafetyCertificateMissing()
+            .withEpcLowEnergyRating()
+            .withHasMeesExemption(true)
+            .withMeesExemptionReason(exemptionReason)
+
+        fun beforePropertyRegistrationCheckAnswersEpcExpiredInDateAtTenancyStart() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(true)
+                .withLandlordProvidesRentalDetails()
+                .withProvideTenancyDetailsLater()
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
+                .withEpcInDateAtTenancyStart(true)
+                .withCheckEpcAnswersComplete()
+
         fun beforePropertyRegistrationCheckAnswersNoEpcExempt() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
+                .withBedrooms()
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()

@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
@@ -108,10 +109,18 @@ class UpdateElectricalSafetyJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(
-                journey.electricalSafetyDetailsTask,
-                { journey },
-            )
+            when (state.checkingAnswersFor) {
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                }
+            }
 
             step(journey.finishCyaStep) {
                 initialStep()

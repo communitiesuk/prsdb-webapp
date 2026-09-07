@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElec
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration.CheckUploadsForm
@@ -16,6 +17,7 @@ class CheckElectricalCertUploadsFormPageUpdateElectricalSafety(
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
             "/${CheckElectricalCertUploadsStep.ROUTE_SEGMENT}",
     ) {
+    val backLink = BackLink.default(page)
     val table = Table(page)
     val form = CheckUploadsForm(page)
 }

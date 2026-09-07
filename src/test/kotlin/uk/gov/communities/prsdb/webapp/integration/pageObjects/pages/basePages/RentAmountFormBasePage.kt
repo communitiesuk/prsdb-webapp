@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
@@ -14,6 +15,7 @@ abstract class RentAmountFormBasePage(
         page,
         urlSegment,
     ) {
+    val backLink = BackLink.default(page)
     val header = Heading(page.locator("h1"))
     val subheading = Heading(page.locator("main h2"))
     val sectionHeader = SectionHeader(page.locator("main"))
