@@ -250,27 +250,48 @@ abstract class PropertyDetailsViewModelBase(
     // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
     // views show a provide-later row (with a change link only where rowWithViewTypeSpecificChangeLink supplies a route for the view type).
     protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
-        when {
-            !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
-            viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
-            else -> listOf(licensingProvideLaterRow())
+        when (viewType) {
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+                if (isLicensingProvideLater) {
+                    listOf(licensingProvideLaterRow())
+                } else {
+                    listOfNotNull(licensingTypeRow(), licensingNumberRow())
+                }
+            PropertyDetailsViewType.LOCAL_COUNCIL ->
+                if (isLicensingProvideLater) {
+                    emptyList()
+                } else {
+                    listOfNotNull(licensingTypeRow(), licensingNumberRow())
+                }
         }
 
-    protected fun buildTenancySection(): List<SummaryListRowViewModel> =
-        when {
-            !isOccupied -> emptyList()
-            isTenancyProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
-            isTenancyProvideLater -> listOf(tenancyProvideLaterRow())
-            else ->
-                buildList {
-                    add(householdsRow())
-                    add(tenantsRow())
-                    add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                    add(furnishedStatusRow())
-                    add(rentFrequencyRow(withoutBottomBorder = true))
-                    add(rentAmountRow(includeChangeLink = false))
+    protected fun buildTenancySection(): List<SummaryListRowViewModel> {
+        if (!isOccupied) return emptyList()
+        return when (viewType) {
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+                if (isTenancyProvideLater) {
+                    listOf(tenancyProvideLaterRow())
+                } else {
+                    buildOccupiedTenancyRows()
                 }
+            PropertyDetailsViewType.LOCAL_COUNCIL ->
+                if (isTenancyProvideLater) {
+                    emptyList()
+                } else {
+                    buildOccupiedTenancyRows()
+                }
+        }
+    }
+
+    private fun buildOccupiedTenancyRows(): List<SummaryListRowViewModel> =
+        buildList {
+            add(householdsRow())
+            add(tenantsRow())
+            add(rentIncludesBillsRow())
+            if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+            add(furnishedStatusRow())
+            add(rentFrequencyRow(withoutBottomBorder = true))
+            add(rentAmountRow(includeChangeLink = false))
         }
 
     protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
