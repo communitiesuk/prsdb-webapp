@@ -47,7 +47,7 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
             assertPageIs(page, SetPasswordPage::class)
             BaseComponent
                 .assertThat(setPasswordPage.errorSummary)
-                .containsText("Password must be at least 8 characters and include letters and numbers")
+                .containsText("Your password must be at least 8 characters and include letters and numbers")
         }
 
         @Test
@@ -65,6 +65,10 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
             val setPasswordPage = navigator.skipToLettingAgentInvitationSetPasswordPage(validToken)
 
             setPasswordPage.submitPasswords("password1", "password1")
+
+            // TODO PDJB-1659: Remove this step once store-access becomes a silent step
+            val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
+            storeAccessPage.form.submit()
 
             assertPageIs(page, PasswordCreationConfirmationPage::class)
         }

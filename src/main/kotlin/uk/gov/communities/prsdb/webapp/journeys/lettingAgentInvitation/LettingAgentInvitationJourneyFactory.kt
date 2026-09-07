@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -56,11 +58,6 @@ class LettingAgentInvitationJourneyFactory(
             step(journey.setPasswordStep) {
                 routeSegment(SetPasswordStep.ROUTE_SEGMENT)
                 parents { journey.hasPasswordStep.hasOutcome(PasswordStatus.NO_PASSWORD) }
-                nextStep { journey.confirmationStep }
-            }
-            step(journey.confirmationStep) {
-                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
-                parents { journey.setPasswordStep.isComplete() }
                 nextStep { journey.storeAccessStep }
             }
             step(journey.enterPasswordStep) {
@@ -72,10 +69,30 @@ class LettingAgentInvitationJourneyFactory(
                 routeSegment(StoreAccessStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.confirmationStep.isComplete(),
+                        journey.setPasswordStep.isComplete(),
                         journey.enterPasswordStep.isComplete(),
                     )
                 }
+                nextDestination {
+                    when (journey.hasPasswordStep.outcome) {
+                        PasswordStatus.NO_PASSWORD -> Destination(journey.confirmationStep)
+                        // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
+                        PasswordStatus.HAS_PASSWORD -> Destination.ExternalUrl("/")
+                        null -> throw PrsdbWebException(
+                            "hasExistingPassword outcome is missing, so the next destination cannot be determined",
+                        )
+                    }
+                }
+            }
+            step(journey.confirmationStep) {
+                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
+                parents {
+                    AndParents(
+                        journey.storeAccessStep.isComplete(),
+                        journey.hasPasswordStep.hasOutcome(PasswordStatus.NO_PASSWORD),
+                    )
+                }
+                backDestination { Destination.Nowhere() }
                 // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
                 nextDestination { Destination.ExternalUrl("/") }
             }
