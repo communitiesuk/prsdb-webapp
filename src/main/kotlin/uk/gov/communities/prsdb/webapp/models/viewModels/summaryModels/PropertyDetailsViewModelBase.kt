@@ -364,3 +364,9 @@ abstract class PropertyDetailsViewModelBase(
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
 }
+
+enum class PropertyDetailsViewType {
+    LANDLORD,
+    LOCAL_COUNCIL,
+    LETTING_AGENT,
+}
