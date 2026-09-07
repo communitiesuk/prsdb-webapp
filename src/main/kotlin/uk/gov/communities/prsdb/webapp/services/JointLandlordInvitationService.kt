@@ -53,7 +53,7 @@ class JointLandlordInvitationService(
     fun getExistingInvitedEmails(ownershipId: Long): List<String> =
         invitationRepository
             .findByRegisteredOwnershipId(ownershipId)
-            .filter { it.status != JointLandlordInvitationStatus.HIDDEN }
+            .filter { it.status == JointLandlordInvitationStatus.PENDING }
             .map { it.invitedEmail }
 
     fun sendInvitationEmails(
@@ -74,6 +74,8 @@ class JointLandlordInvitationService(
                 !alreadyInvitedEmails.containsEmail(candidateEmail) &&
                     !existingLandlordEmails.containsEmail(candidateEmail)
             }
+
+        hideExpiredPropertyInvitesForEmails(propertyOwnership, emailsToInvite)
 
         emailsToInvite.forEach { email ->
             val token = UUID.randomUUID()
@@ -126,6 +128,19 @@ class JointLandlordInvitationService(
                 )
             }
         }
+    }
+
+    private fun hideExpiredPropertyInvitesForEmails(
+        ownership: PropertyOwnership,
+        emails: List<String>,
+    ) {
+        invitationRepository
+            .findByRegisteredOwnership(ownership)
+            .filter { it.status == JointLandlordInvitationStatus.EXPIRED && emails.containsEmail(it.invitedEmail) }
+            .forEach { expiredInvitation ->
+                expiredInvitation.isHidden = true
+                invitationRepository.save(expiredInvitation)
+            }
     }
 
     @Transactional

@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
@@ -38,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -45,6 +47,7 @@ import java.security.Principal
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val lettingAgentAccessService: LettingAgentAccessService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
@@ -54,7 +57,7 @@ class UpdateOccupancyJourneyFactory(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
-            state.wasOccupied = propertyOwnership.isOccupied
+            state.propertyIsOccupied = propertyOwnership.isOccupied
             state.isStateInitialized = true
         }
 
@@ -65,25 +68,34 @@ class UpdateOccupancyJourneyFactory(
         val checkingAnswersFor = state.checkingAnswersFor
         val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         return if (isRedesigned) {
-            redesignedJourneyMap(state, propertyId)
+            journeyMap(state, checkingAnswersFor, propertyId)
         } else if (checkingAnswersFor == null) {
-            oldMainJourneyMap(state, propertyId)
+            beforePdjb939MainJourneyMap(state, propertyId)
         } else {
-            oldCheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            beforePdjb939CheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
         }
     }
 
-    private fun redesignedJourneyMap(
+    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean =
+        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
+            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId) != null
+
+    private fun journeyMap(
         state: UpdateOccupancyJourney,
+        checkingAnswersFor: String?,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> =
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-            redesignedWithCheckAnswersJourneyMap(state, propertyId)
+            if (checkingAnswersFor == null) {
+                mainJourneyMap(state, propertyId)
+            } else {
+                checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            }
         } else {
-            redesignedSinglePageJourneyMap(state, propertyId)
+            beforePdjb1022JourneyMap(state, propertyId)
         }
 
-    private fun redesignedWithCheckAnswersJourneyMap(
+    private fun mainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -95,7 +107,7 @@ class UpdateOccupancyJourneyFactory(
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.interruptionStep }
+                nextStep { journey.occupancyUpdateRoutingStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
@@ -104,19 +116,31 @@ class UpdateOccupancyJourneyFactory(
                     )
                 }
             }
-            step(journey.interruptionStep) {
-                routeSegment(UpdateOccupancyInterruptionStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.occupied.hasOutcome(YesOrNo.YES),
-                        journey.occupied.hasOutcome(YesOrNo.NO),
-                    )
+            step<OccupancyUpdateRouteMode, OccupancyUpdateRoutingStepConfig>(journey.occupancyUpdateRoutingStep) {
+                stepSpecificInitialisation {
+                    usingCurrentDelegation { isDelegatedToLettingAgent(propertyId) }
                 }
+                parents { journey.occupied.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.checkYourAnswersStep)
+                        OccupancyUpdateRouteMode.SHOW_INTERRUPTION -> Destination(journey.lettingAgentInterruptionStep)
+                    }
+                }
+            }
+            step(journey.lettingAgentInterruptionStep) {
+                routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
+                parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.SHOW_INTERRUPTION) }
                 nextStep { journey.checkYourAnswersStep }
             }
             step(journey.checkYourAnswersStep) {
                 routeSegment(UpdateOccupancyCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.interruptionStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.NO_INTERRUPTION),
+                        journey.lettingAgentInterruptionStep.isComplete(),
+                    )
+                }
                 nextStep { journey.completeOccupancyUpdateStep }
             }
             step(journey.completeOccupancyUpdateStep) {
@@ -126,7 +150,61 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun redesignedSinglePageJourneyMap(
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateOccupancyJourney,
+        checkingAnswersFor: String,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    step(journey.occupied) {
+                        initialStep()
+                        routeSegment(OccupiedStep.ROUTE_SEGMENT)
+                        nextStep { journey.occupancyUpdateRoutingStep }
+                        withAdditionalContentProperties {
+                            mapOf(
+                                "title" to "propertyDetails.update.title",
+                                "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading",
+                                "submitButtonText" to "forms.buttons.saveAndContinue",
+                            )
+                        }
+                    }
+                    step<OccupancyUpdateRouteMode, OccupancyUpdateRoutingStepConfig>(journey.occupancyUpdateRoutingStep) {
+                        stepSpecificInitialisation {
+                            usingCurrentDelegation { isDelegatedToLettingAgent(propertyId) }
+                        }
+                        parents { journey.occupied.isComplete() }
+                        nextDestination { mode ->
+                            when (mode) {
+                                OccupancyUpdateRouteMode.NO_INTERRUPTION -> Destination(journey.finishCyaStep)
+                                OccupancyUpdateRouteMode.SHOW_INTERRUPTION -> Destination(journey.lettingAgentInterruptionStep)
+                            }
+                        }
+                    }
+                    step(journey.lettingAgentInterruptionStep) {
+                        routeSegment(OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT)
+                        parents { journey.occupancyUpdateRoutingStep.hasOutcome(OccupancyUpdateRouteMode.SHOW_INTERRUPTION) }
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+    }
+
+    private fun beforePdjb1022JourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -162,7 +240,7 @@ class UpdateOccupancyJourneyFactory(
     }
 
     // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun oldMainJourneyMap(
+    private fun beforePdjb939MainJourneyMap(
         state: UpdateOccupancyJourney,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
@@ -173,12 +251,12 @@ class UpdateOccupancyJourneyFactory(
             task(journey.occupationTask.inJourney(journey)) {
                 initialStep()
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.cyaStep }
+                nextStep { journey.beforePdjb939CyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
-            step(journey.cyaStep) {
+            step(journey.beforePdjb939CyaStep) {
                 routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
                 parents { journey.occupationTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
@@ -188,7 +266,7 @@ class UpdateOccupancyJourneyFactory(
     }
 
     // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun oldCheckYourAnswersJourneyMap(
+    private fun beforePdjb939CheckYourAnswersJourneyMap(
         state: UpdateOccupancyJourney,
         checkingAnswersFor: String,
         propertyId: Long,
@@ -315,21 +393,37 @@ class UpdateOccupancyJourney(
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
-    override val cyaStep: UpdateOccupancyCyaStep,
+    override val beforePdjb939CyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
+    // Routes past the interruption unless the property is being unoccupied while delegated to a letting agent
+    override val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep,
+    // Interruption shown when unoccupying a property that is delegated to a letting agent
+    override val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep,
     // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
-    // see redesignedJourneyMap)
+    // see journeyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
-    // Skeleton interruption / "are you sure" step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT
-    // is enabled - see redesignedJourneyMap)
-    override val interruptionStep: UpdateOccupancyInterruptionStep,
+    private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
+    // Only the redesigned update with letting agent delegation has its own check-your-answers page, so cyaStep
+    // resolves to the new step when both flags are on. Otherwise it falls back to the legacy step used by the old
+    // flag-off journey. (The redesigned single-page update with delegation off has no check-your-answers page, so it
+    // never reads this.)
+    override val cyaStep: JourneyStep.RequestableStep<*, *, *>
+        get() =
+            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
+                featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
+            ) {
+                checkYourAnswersStep
+            } else {
+                beforePdjb939CyaStep
+            }
+
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -340,7 +434,7 @@ class UpdateOccupancyJourney(
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
-    override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
+    override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
@@ -351,11 +445,12 @@ interface UpdateOccupancyJourneyState :
     OccupationState,
     CheckYourAnswersJourneyState {
     val occupationTask: OccupationTask
-    override val cyaStep: UpdateOccupancyCyaStep
+    val beforePdjb939CyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
+    val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep
+    val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep
     val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep
-    val interruptionStep: UpdateOccupancyInterruptionStep
     val propertyId: Long
     val lastModifiedDate: String
-    val wasOccupied: Boolean
+    val propertyIsOccupied: Boolean
 }

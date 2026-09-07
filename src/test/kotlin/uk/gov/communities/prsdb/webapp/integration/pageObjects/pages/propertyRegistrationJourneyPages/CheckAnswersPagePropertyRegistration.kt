@@ -24,16 +24,33 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
-    val occupancyHeading =
-        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
+    // TODO PDJB-1340: Delete these before-restructure heading locators when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+    val beforePropertyRegistrationRestructuredHeading = Heading(page.locator("h1.govuk-heading-l"))
 
-    val lettingAgentDelegationHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("How your property’s rented out")))
+    val beforePropertyRegistrationRestructuredPropertyDetailsHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
+
+    val beforePropertyRegistrationRestructuredGasSafetyHeading =
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
+
+    val restructuredHeading = Heading(page.locator("h1.govuk-heading-xl"))
+
+    val aboutYourPropertyHeading =
+        Heading(page.locator("h2.govuk-heading-l", Page.LocatorOptions().setHasText("About your property")))
+
+    val propertyDetailsHeading =
+        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
+
+    val occupancyHeading =
+        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tell us if your property’s occupied")))
+
+    val rentedOutHeading =
+        Heading(page.locator("h2.govuk-heading-l", Page.LocatorOptions().setHasText("How your property’s rented out")))
 
     val lettingAgentDelegationSubheading =
         Heading(
             page.locator(
-                "h3.govuk-heading-s",
+                "h3.govuk-heading-m",
                 Page.LocatorOptions().setHasText("Who will provide these details"),
             ),
         )
@@ -50,10 +67,15 @@ class CheckAnswersPagePropertyRegistration(
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
 
     val restructuredTenancyHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+        Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
+    val restructuredTenancyUnoccupiedBodyText =
+        Paragraph.byText(
+            page,
+            "We’ll ask for tenancy details when your property becomes occupied.",
+        )
     private val restructuredTenancyRowKeys =
         page
-            .locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
+            .locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
             .locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
 
     fun restructuredTenancyRowHeadings(): List<String> {
@@ -61,25 +83,25 @@ class CheckAnswersPagePropertyRegistration(
         return (0 until rowCount).map { index -> restructuredTenancyRowKeys.nth(index).innerText().trim() }
     }
 
-    val jointLandlordsHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
-
     val complianceCertificatesHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
 
     val gasSafetyHeading =
-        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Gas safety certificate")))
 
     val electricalSafetyHeading =
-        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Electrical safety certificate")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Electrical safety certificate")))
 
     val epcHeading =
-        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
+        Heading(page.locator("h3", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
 
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
-        val ownershipRow = getRow("Ownership type")
+        val ownershipRow = getRow("How do you own this property?")
+
+        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredOwnershipRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+        val beforePropertyRegistrationRestructuredOwnershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
@@ -91,7 +113,11 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
-        val jointLandlordsInvitationsRow = getRow("Invitations")
+
+        val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
+
+        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
+        val beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 

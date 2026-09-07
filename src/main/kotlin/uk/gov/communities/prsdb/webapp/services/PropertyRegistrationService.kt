@@ -105,7 +105,7 @@ class PropertyRegistrationService(
             )
 
         if (lettingAgentEmail != null) {
-            lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
+            val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
             val deadlineDate =
                 LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(
                     DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK),
@@ -115,6 +115,7 @@ class PropertyRegistrationService(
                 landlord.name,
                 lettingAgentEmail,
                 deadlineDate,
+                invitationToken = invitation.token,
             )
         }
 

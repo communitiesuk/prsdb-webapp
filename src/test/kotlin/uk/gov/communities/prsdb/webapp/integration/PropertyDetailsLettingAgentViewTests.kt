@@ -16,7 +16,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
     private val licensingAndTenancyOutstandingToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
 
-    private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+    private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222d")
 
     @BeforeEach
     fun enableFeatureFlag() {

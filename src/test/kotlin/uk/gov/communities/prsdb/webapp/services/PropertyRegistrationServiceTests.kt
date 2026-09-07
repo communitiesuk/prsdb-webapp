@@ -31,8 +31,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.net.URI
 import java.time.LocalDate
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -835,6 +837,9 @@ class PropertyRegistrationServiceTests {
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+        val expectedToken = UUID.randomUUID()
+        whenever(mockLettingAgentAccessService.createInvitation(expectedPropertyOwnership, lettingAgentEmail))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = expectedToken, propertyOwnership = expectedPropertyOwnership))
 
         // Act
         propertyRegistrationService.registerProperty(
@@ -864,6 +869,7 @@ class PropertyRegistrationServiceTests {
             any(),
             eq(lettingAgentEmail),
             any(),
+            invitationToken = eq(expectedToken),
         )
     }
 
