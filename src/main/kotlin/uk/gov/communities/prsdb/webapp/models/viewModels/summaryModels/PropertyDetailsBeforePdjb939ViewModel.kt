@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 // TODO PDJB-939: delete this class and its message keys when the flag is permanently on.

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.constants.enums
+package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 enum class PropertyDetailsViewType {
     LANDLORD,
