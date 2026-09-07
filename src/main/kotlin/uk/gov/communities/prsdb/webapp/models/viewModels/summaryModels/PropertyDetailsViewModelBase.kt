@@ -333,7 +333,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
-    // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
+    // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572,
     // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
