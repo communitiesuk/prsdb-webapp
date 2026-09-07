@@ -37,7 +37,7 @@ class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 
     final fun createJourneySteps(
         propertyId: Long,

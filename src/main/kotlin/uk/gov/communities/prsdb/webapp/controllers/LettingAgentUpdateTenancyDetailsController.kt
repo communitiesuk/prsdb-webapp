@@ -62,7 +62,7 @@ class LettingAgentUpdateTenancyDetailsController(
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(token) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(token) },
             dispatch = dispatch,
         )
     }
