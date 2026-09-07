@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
@@ -20,35 +21,26 @@ class PropertyComplianceViewModelFactory(
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
-        withChangeLinks: Boolean = true,
+        viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
         propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
-            if (withChangeLinks) {
-                SummaryCardActionViewModel.changeAction(
-                    UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
-                )
-            } else {
-                null
-            }
+            changeActionsForViewType(
+                viewType,
+                UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
+            )
 
         val electricalSafetyChangeActions =
-            if (withChangeLinks) {
-                SummaryCardActionViewModel.changeAction(
-                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
-                )
-            } else {
-                null
-            }
+            changeActionsForViewType(
+                viewType,
+                UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+            )
 
         val gasSafetyChangeActions =
-            if (withChangeLinks) {
-                SummaryCardActionViewModel.changeAction(
-                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
-                )
-            } else {
-                null
-            }
+            changeActionsForViewType(
+                viewType,
+                UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+            )
 
         val gasSafetyInsetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
         val gasSafetySummaryCard =
@@ -103,4 +95,19 @@ class PropertyComplianceViewModelFactory(
             isAllValid = isAllValid,
         )
     }
+
+    // Mirrors PropertyDetailsViewModelBase.rowWithViewTypeSpecificChangeLink: a compliance change link is only shown for
+    // the view types that can edit compliance. Landlords always can; local councils never can; letting agents can only
+    // once their compliance update journeys supply a route (TODO PDJB-1577, PDJB-1578, PDJB-1579), so until then the
+    // letting-agent view renders the cards without change links.
+    private fun changeActionsForViewType(
+        viewType: PropertyDetailsViewType,
+        landlordRoute: String,
+        lettingAgentRoute: String? = null,
+    ): List<SummaryCardActionViewModel>? =
+        when (viewType) {
+            PropertyDetailsViewType.LANDLORD -> SummaryCardActionViewModel.changeAction(landlordRoute)
+            PropertyDetailsViewType.LOCAL_COUNCIL -> null
+            PropertyDetailsViewType.LETTING_AGENT -> lettingAgentRoute?.let { SummaryCardActionViewModel.changeAction(it) }
+        }
 }

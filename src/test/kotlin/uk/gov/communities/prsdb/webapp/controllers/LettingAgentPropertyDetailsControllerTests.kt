@@ -15,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.ElectricalSafetyViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.EpcViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.GasSafetyViewModelFactory
@@ -82,7 +83,7 @@ class LettingAgentPropertyDetailsControllerTests(
             EpcViewModelFactory(messageSource, mock()),
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
-            withChangeLinks = false,
+            viewType = PropertyDetailsViewType.LETTING_AGENT,
             propertyOwnershipId = 1L,
         )
     }

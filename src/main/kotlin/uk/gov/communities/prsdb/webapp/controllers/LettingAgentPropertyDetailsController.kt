@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LettingAgentPropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -67,8 +68,7 @@ class LettingAgentPropertyDetailsController(
             "complianceDetails",
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                // TODO PDJB-1577, PDJB-1578, PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building this with withChangeLinks = true.
-                withChangeLinks = false,
+                viewType = PropertyDetailsViewType.LETTING_AGENT,
                 propertyOwnershipId = propertyOwnership.id,
             ),
         )
