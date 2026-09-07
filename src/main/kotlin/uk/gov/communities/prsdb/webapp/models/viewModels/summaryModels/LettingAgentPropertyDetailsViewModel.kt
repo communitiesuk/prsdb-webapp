@@ -4,8 +4,6 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 
 class LettingAgentPropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -19,16 +17,10 @@ class LettingAgentPropertyDetailsViewModel(
     }
 
     val showProvideDetailsInset: Boolean =
-        isLicensingProvideLater ||
-            isTenancyProvideLater ||
-            !ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
+        hasBeenOccupiedSinceRegistration && (isLicensingProvideLater || isTenancyProvideLater)
 
     val provideDetailsInsetText: String =
-        if (hasBeenOccupiedSinceRegistration) {
-            getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")
-        } else {
-            messageSource.getMessageForKey("propertyDetails.lettingAgentView.provideDetailsInsetNoDeadline")
-        }
+        getProvideLaterDeadlineText("propertyDetails.lettingAgentView.provideDetailsInset")
 
     // TODO PDJB-1571, PDJB-1572, PDJB-1573, PDJB-1574, PDJB-1575, PDJB-1576: letting agents will get change links on
     //  these rows (pointing at letting-agent update journeys) once those journeys are built. The shared section

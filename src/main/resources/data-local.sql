@@ -400,7 +400,7 @@ VALUES (39, true, 1, 0, 0, 79, 47, current_date - INTERVAL '7 days', current_dat
         1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', null, true),
        (42, true, 1, 1, 2, 74, 50, '05/02/25', '05/02/25', null, 1,
         1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', true, null),
-       (43, true, 1, 0, 0, 75, 51, '05/02/25', '05/02/25', null, 1,
+       (43, true, 1, 0, 0, 75, 51, current_date - INTERVAL '7 days', current_date - INTERVAL '7 days', null, 1,
         1, null, null, null, null, null, null, null, false, true, current_date - INTERVAL '7 days', true, true),
        (44, true, 1, 1, 2, 76, 52, '05/02/25', '05/02/25', null, 1,
         1, null, null, 2, 1, null, 123.12, null, false, true, current_date - INTERVAL '7 days', false, false),
