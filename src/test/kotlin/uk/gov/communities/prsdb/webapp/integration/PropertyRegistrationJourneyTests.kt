@@ -82,6 +82,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
@@ -2060,6 +2061,43 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
                 assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
             }
+        }
+
+        @Test
+        fun `manual address selection is cached when an address search returns no results`(page: Page) {
+            val existingIncompletePropertyIds = incompletePropertiesRepository.findAll().map { it.id }.toSet()
+
+            val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+            registerPropertyStartPage.startButton.clickAndWait()
+            val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            taskListPage.clickAboutYourPropertyTaskWithName("Property details")
+            val addressLookupPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+            addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA9 9ZZ", "999")
+
+            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+            noAddressFoundPage.form.submit()
+
+            val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+            manualAddressPage.submitAddress(
+                addressLineOne = "999 Test Road",
+                townOrCity = "Testville",
+                postcode = "FA9 9ZZ",
+            )
+
+            val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
+            selectLocalCouncilPage.submitLocalCouncil(
+                "BATH AND NORTH EAST SOMERSET COUNCIL",
+                "BATH AND NORTH EAST SOMERSET COUNCIL",
+            )
+            assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+
+            val savedState =
+                incompletePropertiesRepository
+                    .findAll()
+                    .single { it.id !in existingIncompletePropertyIds }
+                    .savedJourneyState.serializedState
+            assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
         }
     }
 
