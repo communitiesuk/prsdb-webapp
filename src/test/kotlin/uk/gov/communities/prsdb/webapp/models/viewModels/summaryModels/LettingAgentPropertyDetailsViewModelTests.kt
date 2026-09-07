@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
@@ -294,6 +296,43 @@ class LettingAgentPropertyDetailsViewModelTests {
                 "/${HouseholdStep.ROUTE_SEGMENT}",
             tenancyRow.actions.single().url,
         )
+    }
+
+    @Test
+    fun `the rent-frequency row has a change link to the letting-agent update-rent-frequency-and-amount journey`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertEquals(
+            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(token) +
+                "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            rentFrequencyRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `the rent-frequency row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertTrue(rentFrequencyRow.actions.isEmpty())
     }
 
     @Test
