@@ -23,8 +23,10 @@ class PropertyUpdateEmailService(
         propertyId: Long,
         updatedBullets: List<String>,
     ) {
+        // TODO: PDJB-1581: Send update emails when a letting agent makes the update. A letting agent is not signed in as
+        //  a landlord, so there is no acting landlord and no emails are sent for now.
+        val actingLandlord = userToLandlordService.getCurrentLandlordForUserOrNull() ?: return
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
-        val actingLandlord = userToLandlordService.getCurrentLandlordForUser()
         val registrationNumber =
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
 

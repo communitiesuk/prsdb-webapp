@@ -75,7 +75,7 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
@@ -99,7 +99,7 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
@@ -126,11 +126,22 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
 
         notifier.sendUpdateEmails(propertyId, bullets)
 
+        verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendUpdateEmails sends no emails when there is no current landlord (letting agent)`() {
+        // TODO: PDJB-1581: Letting agent updates should send emails; for now no acting landlord means no emails.
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+
+        notifier.sendUpdateEmails(propertyId, bullets)
+
+        verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
     }
 
