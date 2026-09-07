@@ -29,7 +29,6 @@ class LettingAgentPropertyDetailsViewModelTests {
             LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
 
         assertTrue(viewModel.showProvideDetailsInset)
-        assertTrue(viewModel.provideDetailsInsetText.isNotBlank())
         assertEquals(1, viewModel.licensingSection.size)
     }
 

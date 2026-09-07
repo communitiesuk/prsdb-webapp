@@ -46,19 +46,18 @@ class LettingAgentPropertyDetailsController(
             lettingAgentAccessService.getInvitationByTokenOrNull(token)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
 
-        val propertyOwnershipId = lettingAgentAccess.propertyOwnership.id
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(lettingAgentAccess.propertyOwnership.id)
 
         if (!lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Property ownership $propertyOwnershipId does not have a letting agent",
+                "Property ownership ${propertyOwnership.id} does not have a letting agent",
             )
         }
 
         val propertyCompliance =
-            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
-                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
+                ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
 
         model.addAttribute(
             "propertyDetails",
@@ -70,7 +69,7 @@ class LettingAgentPropertyDetailsController(
                 propertyCompliance = propertyCompliance,
                 // TODO PDJB-1577, PDJB-1578, PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building this with withChangeLinks = true.
                 withChangeLinks = false,
-                propertyOwnershipId = propertyOwnershipId,
+                propertyOwnershipId = propertyOwnership.id,
             ),
         )
 

@@ -273,27 +273,17 @@ abstract class PropertyDetailsViewModelBase(
                 }
         }
 
-    protected fun row(
-        key: String,
-        value: Any?,
-        actionText: String? = null,
-        actionLink: String? = null,
-        withActionLink: Boolean = true,
-        withoutBottomBorder: Boolean = false,
-        withAriaLabelForAction: String? = null,
-    ): SummaryListRowViewModel =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    key = key,
-                    value = value,
-                    actionText = actionText,
-                    actionLink = actionLink,
-                    withActionLink = withActionLink,
-                    withoutBottomBorder = withoutBottomBorder,
-                    withAriaLabelForAction = withAriaLabelForAction,
-                )
-            }.single()
+    protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
+        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
+        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+        return messageSource.getMessageForKey(deadlineMessageKey, arrayOf<Any>(deadline.format(PROVIDE_LATER_DATE_FORMATTER)))
+    }
+
+    private fun getIsTenantedKey(isOccupied: Boolean): String =
+        when (isOccupied) {
+            true -> "propertyDetails.occupationStatus.occupied"
+            false -> "propertyDetails.occupationStatus.unoccupied"
+        }
 
     // Builds a row whose change link is shown only where the current view type has a route to link to:
     //  - Landlord: always linked, using the landlord update route.
@@ -328,17 +318,27 @@ abstract class PropertyDetailsViewModelBase(
         )
     }
 
-    protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
-        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
-        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-        return messageSource.getMessageForKey(deadlineMessageKey, arrayOf<Any>(deadline.format(PROVIDE_LATER_DATE_FORMATTER)))
-    }
-
-    private fun getIsTenantedKey(isOccupied: Boolean): String =
-        when (isOccupied) {
-            true -> "propertyDetails.occupationStatus.occupied"
-            false -> "propertyDetails.occupationStatus.unoccupied"
-        }
+    protected fun row(
+        key: String,
+        value: Any?,
+        actionText: String? = null,
+        actionLink: String? = null,
+        withActionLink: Boolean = true,
+        withoutBottomBorder: Boolean = false,
+        withAriaLabelForAction: String? = null,
+    ): SummaryListRowViewModel =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    key = key,
+                    value = value,
+                    actionText = actionText,
+                    actionLink = actionLink,
+                    withActionLink = withActionLink,
+                    withoutBottomBorder = withoutBottomBorder,
+                    withAriaLabelForAction = withAriaLabelForAction,
+                )
+            }.single()
 
     companion object {
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
