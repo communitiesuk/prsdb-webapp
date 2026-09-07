@@ -2,9 +2,6 @@ package uk.gov.communities.prsdb.webapp.testHelpers
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.springframework.beans.factory.annotation.Value
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.JsonDeserializationKeys
 
 @Serializable
 data class EmailTemplateMetadata(
@@ -14,19 +11,10 @@ data class EmailTemplateMetadata(
     val bodyLocation: String,
 )
 
-@PrsdbWebService
 class EmailTemplateMetadataFactory(
-    @Value("\${notify.use-production-notify}")
-    useProductionNotify: Boolean?,
+    notifyEnvironment: NotifyEnvironment?,
 ) {
-    private val testIdName: String? =
-        useProductionNotify?.let {
-            if (it) {
-                JsonDeserializationKeys.PRODUCTION_NOTIFY_ID_KEY
-            } else {
-                JsonDeserializationKeys.TEST_NOTIFY_ID_KEY
-            }
-        }
+    private val templateIdJsonKey: String? = notifyEnvironment?.templateIdJsonKey
 
     val json: Json = Json { ignoreUnknownKeys = true }
 
@@ -35,7 +23,7 @@ class EmailTemplateMetadataFactory(
             javaClass
                 .getResource("/emails/emailTemplates.json")
                 ?.readText()
-                ?.replace("\"$testIdName\"", "\"id\"")
+                ?.replace("\"$templateIdJsonKey\"", "\"id\"")
                 ?: "",
         )
 }

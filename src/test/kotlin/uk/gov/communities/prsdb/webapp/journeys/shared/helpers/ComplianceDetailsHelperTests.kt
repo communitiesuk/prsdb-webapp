@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -47,9 +49,12 @@ class ComplianceDetailsHelperTests {
     @Mock
     lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
+    @Mock
+    lateinit var mockFeatureFlagManager: FeatureFlagManager
+
     private val mockUploadService: UploadService = mock()
 
-    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider, mockUploadService) }
+    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider, mockUploadService, mockFeatureFlagManager) }
 
     @Nested
     inner class GetGasSafetyCyaContent {
@@ -229,6 +234,46 @@ class ComplianceDetailsHelperTests {
             @Suppress("UNCHECKED_CAST")
             val nonEpcRows = content["nonEpcRows"] as List<SummaryListRowViewModel>
             assertTrue(nonEpcRows.isNotEmpty())
+        }
+
+        @Test
+        fun `skipped occupied with restructure and skipping disabled returns provideEpcLaterOccupied value`() {
+            whenever(mockEpcDetailsTask.startEpcStep).thenReturn(mockStartEpcStep)
+            whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
+            whenever(mockEpcDetailsTask.isOccupied).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
+
+            val content = helper.getEpcCyaContent(mockCyaState, mockState)
+
+            @Suppress("UNCHECKED_CAST")
+            val nonEpcRows = content["nonEpcRows"] as List<SummaryListRowViewModel>
+            assertEquals(1, nonEpcRows.size)
+            assertEquals(
+                "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied",
+                nonEpcRows.first().fieldValue,
+            )
+        }
+
+        @Test
+        fun `skipped occupied with restructure and skipping enabled returns provideThisLaterOccupied value`() {
+            whenever(mockEpcDetailsTask.startEpcStep).thenReturn(mockStartEpcStep)
+            whenever(mockEpcDetailsTask.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
+            whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
+            whenever(mockEpcDetailsTask.isOccupied).thenReturn(true)
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+
+            val content = helper.getEpcCyaContent(mockCyaState, mockState)
+
+            @Suppress("UNCHECKED_CAST")
+            val nonEpcRows = content["nonEpcRows"] as List<SummaryListRowViewModel>
+            assertEquals(1, nonEpcRows.size)
+            assertEquals(
+                "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideThisLaterOccupied",
+                nonEpcRows.first().fieldValue,
+            )
         }
     }
 }

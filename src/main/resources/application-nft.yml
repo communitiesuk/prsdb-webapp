@@ -1,4 +1,5 @@
 features:
+  overrides-enabled: true
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: true
@@ -7,7 +8,7 @@ features:
       enabled: true
       expiry-date: "2027-03-30"
     - name: "pdjb-1097-organisation-landlord-registration"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
@@ -15,3 +16,14 @@ features:
     - name: "pdjb-1053-dashboard-nav-link"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "pdjb-1022-delegate-to-letting-agent"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1664-password-benchmark-endpoint"
+      enabled: true
+      expiry-date: "2026-12-31"
+
+argon2:
+  iterations: 2
+  memory: 16384
+  parallelism: 1

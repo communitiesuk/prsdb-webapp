@@ -2,6 +2,8 @@ errorSummary:
   heading: There is a problem
 errorMessage:
   prefix: 'Error: '
+passwordInput:
+  showPassword: Show
 buttons:
   startNow: Start now
   saveAndContinue: Save and continue
@@ -15,6 +17,7 @@ buttons:
   confirmAndSubmitUpdate: Confirm and submit update
   uploadAndContinue: Upload and continue
   provideThisLater: Provide this later
+  provideDetailsLater: Provide details later
   iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
@@ -552,6 +555,9 @@ hmoShared:
       two: 'tenants share toilet, bathroom or kitchen facilities'
 checkPropertyAnswers:
   headingPrefix: 'Check your answers for:'
+  warning: Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.
+  aboutYourProperty:
+    heading: About your property
   propertyDetails:
     heading: Property details
     address: Property address
@@ -561,10 +567,19 @@ checkPropertyAnswers:
     ownership: Ownership type
     licensingType: Licensing type
     noLicensing: None
+    restructureAndSkipping:
+      noLicensing: This property does not need a licence
     licensingProvideLater: Provide this later
+    licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+  ownershipAndLandlords:
+    heading: Ownership and landlords
   occupancy:
     heading: Tell us if your property’s occupied
     question: Is this property occupied by tenants?
+  rentedOut:
+    heading: How your property’s rented out
+    licensing:
+      heading: Tell us if the property needs a license
   tenancyDetails:
     restructureAndSkipping:
       heading: Tenancy details
@@ -573,6 +588,8 @@ checkPropertyAnswers:
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later
+    provideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    unoccupiedBodyText: We’ll ask for tenancy details when your property becomes occupied.
     people: Number of tenants
     bedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills
@@ -584,8 +601,23 @@ checkPropertyAnswers:
   jointLandlordsDetails:
     heading: Invite joint landlords
     invitations: Invitations
+    jointLandlordInvitations: Joint landlord invitations
     areThereJointLandlords: Are there any other landlords for this property?
-    noJointLandlords: No, I am the only landlord
+    noJointLandlords: No, I am the only landlord for this property
+  lettingAgentDelegation:
+    heading: How your property’s rented out
+    subheading: Who will provide these details
+    bodyText: "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:"
+    values:
+      landlord:
+        label: I will provide these details
+      lettingAgent:
+        label: My letting agent or property manager
+    rows:
+      whoWillProvide:
+        label: Who will provide this property’s rental details?
+      agentEmail:
+        label: Letting agent or property manager’s email address
 update:
   email:
     fieldSetHeading: What is your updated email address?
@@ -600,6 +632,12 @@ update:
   occupancy:
     occupied:
       fieldSetHeading: Update whether your property is occupied by tenants
+    lettingAgentInterruption:
+      heading: Are you sure you want to change this?
+      paragraph:
+        one: You’ve changed this property to being unoccupied.
+        two: This means your letting agent or property manager will be removed from this registration. They will no longer be able to provide or update any details.
+        three: You can go back to undo this change.
   numberOfHouseholds:
     fieldSetHeading: Update how many households live in your property
   numberOfPeople:
@@ -623,6 +661,8 @@ update:
       fieldSetHeading: Update your monthly rent
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
+  checkCharity:
+    summaryName: Charity details
   checkLicensing:
     update:
       summaryName: You have updated the property licence
@@ -637,20 +677,6 @@ update:
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
 warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
-areYouSure:
-  landlordDeregistration:
-    noProperties:
-      fieldSetHeading: Are you sure you want to delete your account?
-      radios:
-        error:
-          missing: Select whether you want to delete your account
-    hasProperties:
-      fieldSetHeading: Are you sure you want to delete your account and all your properties?
-      fieldSetHint: 'By deleting your account, you are also deleting your properties.'
-    withProperties:
-      radios:
-        error:
-          missing: Select whether you want to delete your landlord record and properties
 reason:
   landlordDeregistration:
     fieldSetHeading: Why are you deleting your account? (optional)

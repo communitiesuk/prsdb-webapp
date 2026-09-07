@@ -5,12 +5,18 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
+import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -30,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyBillsIncludedFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFurnishedStatusFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyNumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyNumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyNumberOfPeopleFormPagePropertyDetailsUpdate
@@ -41,9 +48,18 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentFrequencyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.OccupancyLettingAgentInterruptionStep
+import java.util.UUID
 import kotlin.test.assertContains
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @Autowired
+    lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+
+    @Autowired
+    lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
+
     private val propertyOwnershipId = 1L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
 
@@ -284,6 +300,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             @Nested
             inner class OccupancyUpdates {
+                @BeforeEach
+                fun disableDelegateToLettingAgentFlag() {
+                    // Without delegation the redesigned occupancy journey is a single page with no check answers page
+                    featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+                }
+
                 @Test
                 fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
                     // Details page
@@ -299,6 +321,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // Update occupancy to vacant and submit directly (single-page update, no check answers page)
                     assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
                     updateOccupancyPage.submitIsVacant()
+
                     propertyDetailsPage =
                         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
@@ -326,6 +349,208 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                     // The occupancy status is updated and the property defaults to providing tenancy details later
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
                     assertThat(propertyDetailsPage.propertyDetailsSummaryList.tenancyRow.value).containsText("Provide")
+                }
+            }
+
+            @Nested
+            inner class OccupancyUpdatesWithLettingAgentDelegation {
+                private val undelegatedPropertyOwnershipId = 4L
+                private val undelegatedPropertyUrlArguments =
+                    mapOf("propertyOwnershipId" to undelegatedPropertyOwnershipId.toString())
+
+                @BeforeEach
+                fun enableDelegateToLettingAgentFlag() {
+                    featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+                }
+
+                @Test
+                fun `making a delegated property vacant shows the interruption and removes the delegation`(page: Page) {
+                    // The property starts occupied and delegated to a letting agent
+                    var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+
+                    // Occupancy question page, then the interruption page and the check answers page (only shown
+                    // when delegation is enabled)
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                    updateOccupancyPage.submitIsVacant()
+                    val interruptionPage =
+                        assertPageIs(
+                            page,
+                            OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+                    assertThat(interruptionPage.body)
+                        .containsText("your letting agent or property manager will be removed from this registration")
+
+                    interruptionPage.submit()
+                    val checkAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    checkAnswersPage.confirm()
+
+                    // Back on the property record: occupancy is updated and the delegation has been removed
+                    propertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                    // The property is now vacant, so neither the remove nor the delegate letting agent link is shown
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).hasCount(0)
+                    assertThat(propertyDetailsPage.delegateToLettingAgentLink.locator).hasCount(0)
+                }
+
+                @Test
+                fun `keeping a delegated property occupied shows the check answers page and retains the delegation`(page: Page) {
+                    var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                    updateOccupancyPage.submitIsOccupied()
+                    val checkAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    checkAnswersPage.confirm()
+
+                    // The property is still occupied, so the delegation is retained
+                    propertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                }
+
+                @Test
+                fun `going back from the interruption returns to the occupancy page without saving the change`(page: Page) {
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                    updateOccupancyPage.submitIsVacant()
+                    val interruptionPage =
+                        assertPageIs(
+                            page,
+                            OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+
+                    interruptionPage.goBackLink.clickAndWait()
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                    // The change was never confirmed, so the property is still occupied and still delegated
+                    val unchangedPropertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                    assertThat(unchangedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(unchangedPropertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                }
+
+                @Test
+                fun `making an undelegated property vacant skips the interruption`(page: Page) {
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
+
+                    updateOccupancyPage.submitIsVacant()
+
+                    val checkAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            undelegatedPropertyUrlArguments,
+                        )
+                    checkAnswersPage.confirm()
+
+                    val updatedPropertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
+                    assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("No")
+                }
+
+                @Test
+                fun `navigating directly to the interruption for an undelegated property redirects to the property record`(page: Page) {
+                    navigator.navigate(
+                        UpdateOccupancyController.getUpdateOccupancyRoute(undelegatedPropertyOwnershipId) +
+                            "/${OccupancyLettingAgentInterruptionStep.ROUTE_SEGMENT}",
+                    )
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, undelegatedPropertyUrlArguments)
+                }
+
+                @Test
+                fun `a property delegated after the journey started still shows the interruption`(page: Page) {
+                    // Start the journey while the property has no letting agent, so any cached delegation would be false
+                    val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(undelegatedPropertyOwnershipId)
+                    propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
+                    val updateOccupancyPage =
+                        assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, undelegatedPropertyUrlArguments)
+
+                    // The property is delegated elsewhere while the journey is in flight
+                    delegatePropertyToLettingAgent(undelegatedPropertyOwnershipId)
+
+                    updateOccupancyPage.submitIsVacant()
+
+                    // The interruption is shown, because the delegation is read live rather than from the journey state
+                    assertPageIs(
+                        page,
+                        OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate::class,
+                        undelegatedPropertyUrlArguments,
+                    )
+                }
+
+                @Test
+                fun `the occupancy answer can be changed from the check answers page`(page: Page) {
+                    // The property starts occupied and delegated; make it vacant to reach the check answers page
+                    navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                        .propertyDetailsSummaryList.occupancyRow
+                        .clickFirstActionLinkAndWait()
+
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                        .submitIsVacant()
+                    // Making a delegated property vacant shows the interruption before the check answers page
+                    assertPageIs(
+                        page,
+                        OccupancyLettingAgentInterruptionPagePropertyDetailsUpdate::class,
+                        occupiedPropertyUrlArguments,
+                    ).submit()
+                    val checkAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    assertThat(checkAnswersPage.summaryList.occupancyRow.value).containsText("No")
+
+                    // Change the answer back to occupied; keeping it occupied does not show the interruption
+                    checkAnswersPage.clickChangeOccupancy()
+                    assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                        .submitIsOccupied()
+                    val updatedCheckAnswersPage =
+                        assertPageIs(
+                            page,
+                            UpdateOccupancyCheckYourAnswersPagePropertyDetailsUpdate::class,
+                            occupiedPropertyUrlArguments,
+                        )
+                    assertThat(updatedCheckAnswersPage.summaryList.occupancyRow.value).containsText("Yes")
+
+                    // Submitting keeps the property occupied and retains the delegation
+                    updatedCheckAnswersPage.confirm()
+                    val propertyDetailsPage =
+                        assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+                    assertThat(propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.value).containsText("Yes")
+                    assertThat(propertyDetailsPage.removeLettingAgentLink.locator).isVisible()
+                }
+
+                private fun delegatePropertyToLettingAgent(propertyOwnershipId: Long) {
+                    val propertyOwnership = propertyOwnershipRepository.findById(propertyOwnershipId).get()
+                    lettingAgentAccessRepository.save(
+                        LettingAgentAccess(UUID.randomUUID(), "letting.agent@example.com", propertyOwnership),
+                    )
                 }
             }
 

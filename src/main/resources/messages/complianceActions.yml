@@ -18,6 +18,7 @@ status:
     epc: No valid energy performance certificate (EPC)
   expired: Expired on {0}
   provideLater: Provide this later (before {0})
+  provideLaterNoDeadline: Provide this later (within 28 days of the property being occupied)
 none:
   inset: The certificates for your occupied properties are up to date.
 inset:

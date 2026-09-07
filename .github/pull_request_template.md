@@ -18,7 +18,7 @@ controller that accepts a `UploadFileRequest` and uses the `fileUploadService` t
 Include e.g. anything unusual about the PR, where there was some debate over how to implement it, or anywhere you were
 unsure of the approach to take and would like specific feedback.
 
-## Checklist
+## PR Checklist
 
 Delete any that are not applicable, and add explanation below for any that are applicable but haven't been done
 
@@ -36,8 +36,13 @@ Delete any that are not applicable, and add explanation below for any that are a
   mention that here
 - [ ] Seed data has been updated as needed for your feature to be tested without having to e.g. register a new property
 - [ ] `NftDataSeeder` has been updated to reflect any changes to the database schema
-- [ ] Any special release instructions (e.g. the database will need resetting, emails to be added/removed) have been to the relevant release
-  ticket on the Jira board, referencing your ticket number
-- [ ] QA instructions have been added to the ticket (particularly if this is the last PR required to complete the ticket)
 - [ ] This feature is behind a feature flag. I've checked that there will be no change in function if the feature flag is disabled
 - [ ] This feature is not behind a feature flag. I've checked that this is appropriate and we're happy with this code becoming live as soon as we release
+
+## Merge Checklist
+
+After approval complete these before merging.
+
+- [ ] QA instructions have been added to the ticket (particularly if this is the last PR required to complete the ticket).
+- [ ] Any special release instructions (e.g. the database will need resetting, emails to be added/removed) have been to the relevant release ticket on the Jira board, referencing your ticket number.
+- [ ] Merge main into your branch locally and check that no TODOs have been added pointing to your ticket.

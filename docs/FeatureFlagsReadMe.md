@@ -119,6 +119,42 @@ Currently, we enforce that only one of these annotations can be used on a given 
 
 The enabled/disabled value of individual flags is effectively overridden by the release setting if the flag is in a release.
 
+## Overriding flags during development
+
+In non-production environments you can override any combination of feature flags and releases for your own browser
+session, without affecting anyone else.
+
+Go to `/system-operator/feature-flags`. The page is deliberately not linked from anywhere, so that with no overrides set
+the service looks exactly as it does in production. It requires no sign-in and no role, because overrides are often
+needed while testing the registration journeys, before a user has an account.
+
+Each flag and release has a Default / On / Off control. Overrides are stored in the HTTP session and are cleared when
+the session ends, or immediately using the "Reset all overrides" button. While any override is set, a banner appears on
+every page linking back to this one.
+
+Flags are resolved in this order:
+
+1. an override on the flag's release, if one is set
+2. an override on the flag itself, if one is set
+3. the configured value, including any flipping strategy
+
+Release overrides win over flag overrides so that you cannot produce a combination that would be unreachable in a real
+deployment. A flag override still applies when the flag's release is disabled by configuration but carries no override
+of its own, which is how you switch on a single flag inside an unreleased release. Because an override short-circuits
+the check, it also supersedes any flipping strategy, so a flag can be forced on before its release date.
+
+### Configuration
+
+Overrides are controlled by `features.overrides-enabled`, which is set to `true` in `application-local.yml`,
+`application-integration.yml`, `application-test.yml` and `application-nft.yml`. It is deliberately absent from
+`application.yml` and defaults to `false`, so in production the controller bean is never registered, the route is never
+permitted by the security config, and `FeatureFlagOverrideService` returns no overrides even if a session attribute were
+somehow present.
+
+Overrides are not persisted to the database. `FeatureFlagOverrideService` is the only component that knows where they
+are stored, so adding persistence later means changing that class alone. It would also need gating on the user being
+signed in and holding a role, so that there is a `prsdb_user` record to attach the overrides to.
+
 ## Flipping strategies
 
 The strategy on individual flags is overridden by the release strategy if the flag is in a release with a strategy.
@@ -177,4 +213,3 @@ Our current workflow for managing feature flags is:
 1. When developing the feature, add a new feature flag for the feature or add it to an existing feature flag.
 2. When testing, the feature flag can be toggled on or off per environment.
 3. Once the feature is ready for release, the feature flag can be added to a release and managed by the release config.
-

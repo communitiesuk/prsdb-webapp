@@ -22,7 +22,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (18, '3/26/25', 1006001036, 0),
        (19, '3/26/25', 1006001038, 0),
        (20, '3/26/25', 1006001040, 0),
-       (21, '3/26/25', 1006001042, 0);
+       (21, '3/26/25', 1006001042, 0),
+       (22, '3/26/25', 1006001044, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
@@ -46,7 +47,8 @@ VALUES  (1, '09/13/24', '09/13/24', 1, '1 Landlord Address', 2, 'EG1 1EG'),
         (18, '09/13/24', '09/13/24', 18, 'EPC No EPC Required Occupied', 2, 'EG1 1EG'),
         (19, '09/13/24', '09/13/24', 19, 'EPC No EPC Required Unoccupied', 2, 'EG1 1EG'),
         (20, '09/13/24', '09/13/24', 20, 'EPC No EPC Not Required Occupied', 2, 'EG1 1EG'),
-        (21, '09/13/24', '09/13/24', 21, 'EPC No EPC Not Required Unoccupied', 2, 'EG1 1EG');
+        (21, '09/13/24', '09/13/24', 21, 'EPC No EPC Not Required Unoccupied', 2, 'EG1 1EG'),
+        (22, '09/13/24', '09/13/24', 22, 'EPC Provide Later Occupied After Registration', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
@@ -79,6 +81,12 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.
        (19, true, 1, 1, 2, 20, 20, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date, true),
        (20, true, 1, 0, 0, 21, 21, current_date, 1, null, null, null, null, null, null, null, null, false);
 
+-- 21: occupied AFTER registration (created_date in the past, last_occupied_date = current_date), so the provide-later
+-- deadline has no dated deadline and shows the "within 28 days" message when the flag is on.
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, last_occupied_date, is_occupied)
+VALUES (21, true, 1, 1, 2, 22, 22, current_date - 100, 1, 1, null, null, 2, 1, null, 123.12, current_date, true);
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),
@@ -99,7 +107,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 17, '2025-01-15'),
        (1, 18, '2025-01-15'),
        (1, 19, '2025-01-15'),
-       (1, 20, '2025-01-15');
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15');
 
 -- Gas: occupied=HAS_FAULTS (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
 -- EICR: all valid (expiry in future) so it doesn't interfere
@@ -145,4 +154,6 @@ VALUES
        -- 19: No EPC, not required (has exemption), occupied
        (19, 19, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
        -- 20: No EPC, not required (has exemption), unoccupied
-       (20, 20, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null);
+       (20, 20, '01/01/25', '01/01/25', current_date - 366, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true, null, null, null),
+       -- 21: Provide later, occupied after registration (no dated deadline)
+       (21, 21, '01/01/25', '01/01/25', null, true, current_date + 365, null, null, null, null, null, null, null, true, true, true, null, null, true);

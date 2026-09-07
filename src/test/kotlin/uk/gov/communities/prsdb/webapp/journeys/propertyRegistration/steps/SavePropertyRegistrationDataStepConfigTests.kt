@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doThrow
@@ -19,6 +20,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -43,10 +45,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.WhoProvidesDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
@@ -170,6 +174,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = eq(true),
             gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
@@ -188,6 +193,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = eq(false),
             licenseProvideLater = eq(false),
             tenancyProvideLater = any(),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -221,6 +227,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
@@ -239,6 +246,67 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = eq(true),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
+        )
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `afterStepIsReached passes all provide-later fields as true when delegating to a letting agent`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
+        val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
+        val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
+        whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
+        whenever(mockWhoProvidesDetailsTask.lettingAgentEmailStep).thenReturn(mockLettingAgentEmailStep)
+        whenever(mockLettingAgentEmailStep.formModel).thenReturn(
+            AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
+        )
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = anyOrNull(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = eq("letting.agent@example.com"),
+            markedJointLandlord = any(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = eq(true),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = eq(true),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = eq(true),
+            licenseProvideLater = eq(true),
+            tenancyProvideLater = eq(true),
+            isDelegatedToLettingAgent = eq(true),
         )
     }
 
@@ -270,6 +338,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
@@ -288,6 +357,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = any(),
+            isDelegatedToLettingAgent = any(),
         )
 
         // Act
@@ -325,6 +395,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
@@ -343,6 +414,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -376,6 +448,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
@@ -394,6 +467,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
         )
     }
 
@@ -427,6 +501,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = isNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
@@ -445,6 +520,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             epcProvideLater = anyOrNull(),
             licenseProvideLater = anyOrNull(),
             tenancyProvideLater = eq(true),
+            isDelegatedToLettingAgent = any(),
         )
     }
 

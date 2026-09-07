@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -14,22 +15,20 @@ class AreYouSureStepConfig :
     override val formModelClass = LandlordDeregistrationAreYouSureFormModel::class
 
     override fun getStepSpecificContent(state: LandlordDeregistrationJourneyState): Map<String, Any?> {
-        val content =
-            mutableMapOf<String, Any?>(
-                "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            )
+        val content = mutableMapOf<String, Any?>()
 
         if (!state.userHasRegisteredProperties) {
-            content["fieldSetHeading"] = "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading"
+            content["radioOptions"] = RadiosViewModel.yesOrNoRadios()
+            content["fieldSetHeading"] = "deregisterLandlord.areYouSure.noProperties.fieldSetHeading"
         } else {
-            content["fieldSetHeading"] = "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading"
-            content["fieldSetHint"] = "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHint"
+            content["cancelLinkUrl"] = LANDLORD_DETAILS_FOR_LANDLORD_ROUTE
         }
 
         return content
     }
 
-    override fun chooseTemplate(state: LandlordDeregistrationJourneyState) = "forms/areYouSureForm"
+    override fun chooseTemplate(state: LandlordDeregistrationJourneyState) =
+        if (state.userHasRegisteredProperties) "forms/landlordDeregistrationAreYouSure" else "forms/areYouSureForm"
 
     override fun enrichSubmittedDataBeforeValidation(
         state: LandlordDeregistrationJourneyState,
@@ -37,12 +36,21 @@ class AreYouSureStepConfig :
     ): FormData {
         val enrichedData = formData.toMutableMap()
         enrichedData[LandlordDeregistrationAreYouSureFormModel::userHasRegisteredProperties.name] = state.userHasRegisteredProperties
+        if (state.userHasRegisteredProperties) {
+            enrichedData[LandlordDeregistrationAreYouSureFormModel::wantsToProceed.name] = true
+        }
         return enrichedData
     }
 
     override fun mode(state: LandlordDeregistrationJourneyState): AreYouSureMode? =
-        getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
-            if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
+        getFormModelFromStateOrNull(state)?.let { formModel ->
+            if (state.userHasRegisteredProperties) {
+                AreYouSureMode.WANTS_TO_PROCEED
+            } else {
+                formModel.wantsToProceed?.let {
+                    if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
+                }
+            }
         }
 }
 

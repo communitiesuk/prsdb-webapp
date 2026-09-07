@@ -1,12 +1,13 @@
-Hello,
+Dear ((fullName))
 
-You're no longer registered as a landlord on the Register your rental property service.
+You’re no longer registered as a landlord on the Register your rental property service.
 
-You'll need to register a new account if you become a landlord again.
+We have:
 
-## Rental property registrations now deleted:
+• deleted all property registrations where you were the only landlord
+• removed you as a joint landlord from any properties
 
-((property list))
+You’ll need to register a new account if you become a landlord again.
 
 ---
 This is an automated email - do not reply.

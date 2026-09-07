@@ -37,6 +37,11 @@ data class TaskStatusViewModel(
                     "taskList.status.notRequired",
                     colour = TAG_COLOUR_GREY,
                 )
+
+                TaskStatus.NOT_NEEDED_YET -> return TaskStatusViewModel(
+                    "taskList.status.notNeededYet",
+                    colour = TAG_COLOUR_GREY,
+                )
             }
         }
     }

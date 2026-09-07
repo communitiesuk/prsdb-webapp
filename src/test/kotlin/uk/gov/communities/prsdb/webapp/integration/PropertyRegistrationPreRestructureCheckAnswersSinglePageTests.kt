@@ -62,10 +62,21 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
+        fun `before property registration restructure CYA page uses the expected heading hierarchy`() {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredHeading)
+                .containsText("Check your answers for:")
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredPropertyDetailsHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.beforePropertyRegistrationRestructuredGasSafetyHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.restructuredHeading).isHidden()
+        }
+
+        @Test
         fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-            checkAnswersPage.summaryList.ownershipRow.actions.firstActionLink
+            checkAnswersPage.summaryList.beforePropertyRegistrationRestructuredOwnershipRow.actions.firstActionLink
                 .clickAndWait()
             val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
@@ -154,7 +165,7 @@ class PropertyRegistrationPreRestructureCheckAnswersSinglePageTests : Integratio
     @Nested
     inner class ConfirmMissingComplianceStep {
         @Test
-        fun `Submitting with no option selected returns an error`(page: Page) {
+        fun `Submitting with no option selected returns an error`() {
             val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
             confirmPage.form.submit()
             assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this registration")
