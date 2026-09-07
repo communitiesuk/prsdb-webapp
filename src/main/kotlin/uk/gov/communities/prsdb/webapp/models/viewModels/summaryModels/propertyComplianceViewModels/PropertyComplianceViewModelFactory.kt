@@ -96,10 +96,6 @@ class PropertyComplianceViewModelFactory(
         )
     }
 
-    // Mirrors PropertyDetailsViewModelBase.rowWithViewTypeSpecificChangeLink: a compliance change link is only shown for
-    // the view types that can edit compliance. Landlords always can; local councils never can; letting agents can only
-    // once their compliance update journeys supply a route (TODO PDJB-1577, PDJB-1578, PDJB-1579), so until then the
-    // letting-agent view renders the cards without change links.
     private fun changeActionsForViewType(
         viewType: PropertyDetailsViewType,
         landlordRoute: String,

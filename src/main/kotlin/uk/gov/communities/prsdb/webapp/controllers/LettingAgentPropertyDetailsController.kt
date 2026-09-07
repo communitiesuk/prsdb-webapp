@@ -73,12 +73,10 @@ class LettingAgentPropertyDetailsController(
             ),
         )
 
-        return LETTING_AGENT_PROPERTY_DETAILS_VIEW
+        return "propertyDetailsLettingAgentView"
     }
 
     companion object {
-        const val LETTING_AGENT_PROPERTY_DETAILS_VIEW = "propertyDetailsLettingAgentView"
-
         const val LETTING_AGENT_PROPERTY_DETAILS_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}"
 

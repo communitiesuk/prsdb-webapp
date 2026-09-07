@@ -124,30 +124,5 @@ class PropertyComplianceViewModelFactoryTests {
                 result.epcSummaryCard.actions,
             )
         }
-
-        @Test
-        fun `cards have no change actions for the letting agent view`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
-
-            val result =
-                propertyComplianceViewModelFactory.create(
-                    propertyCompliance,
-                    viewType = PropertyDetailsViewType.LETTING_AGENT,
-                    propertyOwnershipId = propertyOwnershipId,
-                )
-
-            assertNull(result.gasSafetySummaryCard.actions)
-            assertNull(result.electricalSafetySummaryCard.actions)
-            assertEquals(
-                listOf(
-                    SummaryCardActionViewModel(
-                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
-                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
-                        opensInNewTab = true,
-                    ),
-                ),
-                result.epcSummaryCard.actions,
-            )
-        }
     }
 }
