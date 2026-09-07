@@ -20,7 +20,8 @@ import java.util.UUID
 import kotlin.test.assertContains
 
 class LettingAgentUpdateLicensingJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+    // Property 40 has an existing licence for the removal scenario.
+    private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222d")
     private val urlArguments = mapOf("token" to token.toString())
 
     @BeforeEach

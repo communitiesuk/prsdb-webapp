@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.DelegateToLettingAgentInvitationWithDeadlineEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordDelegateToLettingAgentNotificationEmail
+import java.util.UUID
 
 @PrsdbWebService
 class DelegateToLettingAgentEmailService(
@@ -61,15 +62,17 @@ class DelegateToLettingAgentEmailService(
         landlordName: String,
         lettingAgentEmail: String,
         deadlineDate: String? = null,
+        invitationToken: UUID,
     ) {
+        val invitationLink = absoluteUrlProvider.buildLettingAgentInvitationUri(invitationToken.toString()).toString()
+
         if (deadlineDate != null) {
             invitationWithDeadlineEmailService.sendEmail(
                 lettingAgentEmail,
                 DelegateToLettingAgentInvitationWithDeadlineEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    // TODO: PDJB-1661: Update this link to the letA journey
-                    invitationLink = "https://example.com",
+                    invitationLink = invitationLink,
                     deadlineDate = deadlineDate,
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
@@ -80,8 +83,7 @@ class DelegateToLettingAgentEmailService(
                 DelegateToLettingAgentInvitationEmail(
                     landlordName = landlordName,
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-                    // TODO: PDJB-1661: Update this link to the letA journey
-                    invitationLink = "https://example.com",
+                    invitationLink = invitationLink,
                     singleLineAddress = propertyOwnership.address.singleLineAddress,
                 ),
             )

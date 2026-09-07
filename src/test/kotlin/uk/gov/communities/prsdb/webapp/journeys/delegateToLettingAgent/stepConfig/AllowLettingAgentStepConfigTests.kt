@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class AllowLettingAgentStepConfigTests {
@@ -75,6 +76,7 @@ class AllowLettingAgentStepConfigTests {
         val stepConfig = createStepConfig()
         val landlord = MockLandlordData.createIndividualLandlord()
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val lettingAgentAccess = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
 
         whenever(mockJourneyState.getStepData(AllowLettingAgentStep.ROUTE_SEGMENT))
             .thenReturn(mapOf("emailAddress" to "agent@example.com"))
@@ -82,6 +84,7 @@ class AllowLettingAgentStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID))
             .thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, "agent@example.com")).thenReturn(lettingAgentAccess)
 
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
@@ -94,19 +97,28 @@ class AllowLettingAgentStepConfigTests {
         val stepConfig = createStepConfig()
         val landlord = MockLandlordData.createIndividualLandlord(name = "Wallis Smith")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = PROPERTY_OWNERSHIP_ID)
+        val expectedToken = UUID.randomUUID()
+        val lettingAgentAccess =
+            MockLettingAgentData.createLettingAgentAccess(token = expectedToken, propertyOwnership = propertyOwnership)
 
         whenever(mockJourneyState.getStepData(AllowLettingAgentStep.ROUTE_SEGMENT))
             .thenReturn(mapOf("emailAddress" to "agent@example.com"))
         whenever(mockJourneyState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID)).thenReturn(propertyOwnership)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockLettingAgentAccessService.createInvitation(propertyOwnership, "agent@example.com")).thenReturn(lettingAgentAccess)
 
         stepConfig.afterStepDataIsAdded(mockJourneyState)
 
         verify(mockDelegateToLettingAgentEmailService).sendDelegationEmailToLandlords(PROPERTY_OWNERSHIP_ID, "agent@example.com")
         verify(
             mockDelegateToLettingAgentEmailService,
-        ).sendDelegationEmailToLettingAgent(propertyOwnership, "Wallis Smith", "agent@example.com")
+        ).sendDelegationEmailToLettingAgent(
+            propertyOwnership,
+            "Wallis Smith",
+            "agent@example.com",
+            invitationToken = expectedToken,
+        )
     }
 
     @Test

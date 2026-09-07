@@ -4,7 +4,6 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
@@ -271,60 +270,61 @@ abstract class PropertyDetailsViewModelBase(
     // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
     // views show a provide-later row (with a change link only where rowWithViewTypeSpecificChangeLink supplies a route for the view type).
     protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
-        when {
-            !isLicensingProvideLater -> listOfNotNull(licensingTypeRow(), licensingNumberRow())
-            viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> emptyList()
-            else -> listOf(licensingProvideLaterRow())
-        }
-
-    protected fun buildTenancySection(): List<SummaryListRowViewModel> =
-        when {
-            !isOccupied -> {
-                emptyList()
-            }
-
-            isTenancyProvideLater && viewType == PropertyDetailsViewType.LOCAL_COUNCIL -> {
-                emptyList()
-            }
-
-            isTenancyProvideLater -> {
-                listOf(tenancyProvideLaterRow())
-            }
-
-            else -> {
-                buildList {
-                    add(householdsRow())
-                    add(tenantsRow())
-                    add(rentIncludesBillsRow())
-                    if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
-                    add(furnishedStatusRow())
-                    add(rentFrequencyRow(withoutBottomBorder = true))
-                    add(rentAmountRow(includeChangeLink = false))
+        when (viewType) {
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+                if (isLicensingProvideLater) {
+                    listOf(licensingProvideLaterRow())
+                } else {
+                    listOfNotNull(licensingTypeRow(), licensingNumberRow())
                 }
-            }
+            PropertyDetailsViewType.LOCAL_COUNCIL ->
+                if (isLicensingProvideLater) {
+                    emptyList()
+                } else {
+                    listOfNotNull(licensingTypeRow(), licensingNumberRow())
+                }
         }
 
-    protected fun row(
-        key: String,
-        value: Any?,
-        actionText: String? = null,
-        actionLink: String? = null,
-        withActionLink: Boolean = true,
-        withoutBottomBorder: Boolean = false,
-        withAriaLabelForAction: String? = null,
-    ): SummaryListRowViewModel =
-        mutableListOf<SummaryListRowViewModel>()
-            .apply {
-                addRow(
-                    key = key,
-                    value = value,
-                    actionText = actionText,
-                    actionLink = actionLink,
-                    withActionLink = withActionLink,
-                    withoutBottomBorder = withoutBottomBorder,
-                    withAriaLabelForAction = withAriaLabelForAction,
-                )
-            }.single()
+    protected fun buildTenancySection(): List<SummaryListRowViewModel> {
+        if (!isOccupied) return emptyList()
+        return when (viewType) {
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+                if (isTenancyProvideLater) {
+                    listOf(tenancyProvideLaterRow())
+                } else {
+                    buildOccupiedTenancyRows()
+                }
+            PropertyDetailsViewType.LOCAL_COUNCIL ->
+                if (isTenancyProvideLater) {
+                    emptyList()
+                } else {
+                    buildOccupiedTenancyRows()
+                }
+        }
+    }
+
+    private fun buildOccupiedTenancyRows(): List<SummaryListRowViewModel> =
+        buildList {
+            add(householdsRow())
+            add(tenantsRow())
+            add(rentIncludesBillsRow())
+            if (propertyOwnership.rentIncludesBills) add(billsIncludedRow(includeChangeLink = false))
+            add(furnishedStatusRow())
+            add(rentFrequencyRow(withoutBottomBorder = true))
+            add(rentAmountRow(includeChangeLink = false))
+        }
+
+    protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
+        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
+        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+        return messageSource.getMessageForKey(deadlineMessageKey, arrayOf<Any>(deadline.format(PROVIDE_LATER_DATE_FORMATTER)))
+    }
+
+    private fun getIsTenantedKey(isOccupied: Boolean): String =
+        when (isOccupied) {
+            true -> "propertyDetails.occupationStatus.occupied"
+            false -> "propertyDetails.occupationStatus.unoccupied"
+        }
 
     // Builds a row whose change link is shown only where the current view type has a route to link to:
     //  - Landlord: always linked, using the landlord update route.
@@ -359,19 +359,35 @@ abstract class PropertyDetailsViewModelBase(
         )
     }
 
-    protected fun getProvideLaterDeadlineText(deadlineMessageKey: String): String {
-        // Occupied-at-registration properties anchor the 28-day deadline to their registration date.
-        val deadline = registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-        return messageSource.getMessageForKey(deadlineMessageKey, arrayOf<Any>(deadline.format(PROVIDE_LATER_DATE_FORMATTER)))
-    }
-
-    private fun getIsTenantedKey(isOccupied: Boolean): String =
-        when (isOccupied) {
-            true -> "propertyDetails.occupationStatus.occupied"
-            false -> "propertyDetails.occupationStatus.unoccupied"
-        }
+    protected fun row(
+        key: String,
+        value: Any?,
+        actionText: String? = null,
+        actionLink: String? = null,
+        withActionLink: Boolean = true,
+        withoutBottomBorder: Boolean = false,
+        withAriaLabelForAction: String? = null,
+    ): SummaryListRowViewModel =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                addRow(
+                    key = key,
+                    value = value,
+                    actionText = actionText,
+                    actionLink = actionLink,
+                    withActionLink = withActionLink,
+                    withoutBottomBorder = withoutBottomBorder,
+                    withAriaLabelForAction = withAriaLabelForAction,
+                )
+            }.single()
 
     companion object {
         private val PROVIDE_LATER_DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
     }
+}
+
+enum class PropertyDetailsViewType {
+    LANDLORD,
+    LOCAL_COUNCIL,
+    LETTING_AGENT,
 }

@@ -19,7 +19,6 @@ lettingAgentView:
   title: Property details
   caption: Provide details for a landlord’s rental property
   provideDetailsInset: Provide all details before <strong>{0}</strong> to keep this property registered.
-  provideDetailsInsetNoDeadline: Provide all details within 28 days of the property being occupied to keep this property registered.
   licensing:
     heading: Property licensing
   tenancy:

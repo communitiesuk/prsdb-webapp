@@ -4,7 +4,9 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -46,7 +48,6 @@ class LettingAgentInvitationJourneyFactory(
                 nextStep { journey.hasPasswordStep }
             }
             step(journey.hasPasswordStep) {
-                routeSegment(HasPasswordStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.isComplete() }
                 nextStep { status ->
                     when (status) {
@@ -58,11 +59,6 @@ class LettingAgentInvitationJourneyFactory(
             step(journey.setPasswordStep) {
                 routeSegment(SetPasswordStep.ROUTE_SEGMENT)
                 parents { journey.hasPasswordStep.hasOutcome(PasswordStatus.NO_PASSWORD) }
-                nextStep { journey.confirmationStep }
-            }
-            step(journey.confirmationStep) {
-                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
-                parents { journey.setPasswordStep.isComplete() }
                 nextStep { journey.storeAccessStep }
             }
             step(journey.enterPasswordStep) {
@@ -74,14 +70,40 @@ class LettingAgentInvitationJourneyFactory(
                 routeSegment(StoreAccessStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.confirmationStep.isComplete(),
+                        journey.setPasswordStep.isComplete(),
                         journey.enterPasswordStep.isComplete(),
                     )
                 }
                 nextDestination {
-                    val token = UUID.fromString(journey.invitationToken)
+                    val propertyDetailsDestination =
+                        Destination.ExternalUrl(
+                            LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(
+                                UUID.fromString(journey.invitationToken),
+                            ),
+                        )
+                    when (journey.hasPasswordStep.outcome) {
+                        PasswordStatus.NO_PASSWORD -> Destination(journey.confirmationStep)
+                        PasswordStatus.HAS_PASSWORD -> propertyDetailsDestination
+                        null -> throw PrsdbWebException(
+                            "hasExistingPassword outcome is missing, so the next destination cannot be determined",
+                        )
+                    }
+                }
+            }
+            step(journey.confirmationStep) {
+                routeSegment(ConfirmationStep.ROUTE_SEGMENT)
+                parents {
+                    AndParents(
+                        journey.storeAccessStep.isComplete(),
+                        journey.hasPasswordStep.hasOutcome(PasswordStatus.NO_PASSWORD),
+                    )
+                }
+                backDestination { Destination.Nowhere() }
+                nextDestination {
                     Destination.ExternalUrl(
-                        LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token),
+                        LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(
+                            UUID.fromString(journey.invitationToken),
+                        ),
                     )
                 }
             }
@@ -107,6 +129,9 @@ class LettingAgentInvitationJourney(
 ) : AbstractJourneyState(journeyStateService),
     LettingAgentInvitationJourneyState {
     override var invitationToken: String? by delegateProvider.nullableDelegate("invitationToken")
+    override var hasExistingPassword: Boolean? by delegateProvider.nullableDelegate("hasExistingPassword")
+    override var hasSetNewPassword: Boolean? by delegateProvider.nullableDelegate("hasSetNewPassword")
+    override var hasEnteredPassword: Boolean? by delegateProvider.nullableDelegate("hasEnteredPassword")
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? UUID
@@ -125,4 +150,11 @@ interface LettingAgentInvitationJourneyState : JourneyState {
     val enterPasswordStep: EnterPasswordStep
     val storeAccessStep: StoreAccessStep
     var invitationToken: String?
+    var hasExistingPassword: Boolean?
+
+    // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
+    var hasSetNewPassword: Boolean?
+
+    // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
+    var hasEnteredPassword: Boolean?
 }

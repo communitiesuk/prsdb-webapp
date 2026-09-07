@@ -494,6 +494,7 @@ class JointLandlordInvitationServiceTests {
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+
             whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnershipId(123L))
                 .thenReturn(listOf(MockJointLandlordData.createJointLandlordInvitation(email = "already.invited@example.com")))
 
@@ -651,6 +652,83 @@ class JointLandlordInvitationServiceTests {
             verify(mockNotifyExistingEmailSender).sendEmail(eq("existing@example.com"), emailModelCaptor.capture())
             assertEquals("Existing Org", emailModelCaptor.firstValue.recipientName)
             assertEquals(listOf("new@example.com"), emailModelCaptor.firstValue.jointLandlordEmails)
+        }
+
+        @Test
+        fun `sendInvitationEmails hides a pre-existing expired invitation for the same email`() {
+            val jointLandlordEmails = listOf("expired@example.com")
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L)
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 999L,
+                    email = "expired@example.com",
+                    propertyOwnership = propertyOwnership,
+                    createdDate =
+                        Instant
+                            .now()
+                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+            val mockUri = URI("https://example.com/invite/test-token")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(expiredInvitation))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            assertTrue(expiredInvitation.isHidden)
+            verify(mockJointLandlordInvitationRepository, times(1)).save(expiredInvitation)
+        }
+
+        @Test
+        fun `sendInvitationEmails does not hide expired invitations for a different email`() {
+            val jointLandlordEmails = listOf("new@example.com")
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L)
+            val unrelatedExpiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 999L,
+                    email = "unrelated@example.com",
+                    propertyOwnership = propertyOwnership,
+                    createdDate =
+                        Instant
+                            .now()
+                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+            val mockUri = URI("https://example.com/invite/test-token")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(unrelatedExpiredInvitation))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            assertFalse(unrelatedExpiredInvitation.isHidden)
+            verify(mockJointLandlordInvitationRepository, times(0)).save(unrelatedExpiredInvitation)
+        }
+
+        @Test
+        fun `sendInvitationEmails hides expired invitation for the same email ignoring case`() {
+            val jointLandlordEmails = listOf("Expired@Example.com")
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L)
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 999L,
+                    email = "expired@example.com",
+                    propertyOwnership = propertyOwnership,
+                    createdDate =
+                        Instant
+                            .now()
+                            .minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+            val mockUri = URI("https://example.com/invite/test-token")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(expiredInvitation))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            assertTrue(expiredInvitation.isHidden)
         }
     }
 
@@ -941,7 +1019,7 @@ class JointLandlordInvitationServiceTests {
     @Nested
     inner class GetExistingInvitedEmailsTests {
         @Test
-        fun `getExistingInvitedEmails returns emails from pending and expired invitations`() {
+        fun `getExistingInvitedEmails returns emails from pending invitations only`() {
             val pendingInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     email = "pending@example.com",
@@ -967,7 +1045,7 @@ class JointLandlordInvitationServiceTests {
 
             val result = invitationService.getExistingInvitedEmails(1L)
 
-            assertEquals(listOf("pending@example.com", "expired@example.com"), result)
+            assertEquals(listOf("pending@example.com"), result)
         }
 
         @Test

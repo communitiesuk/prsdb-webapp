@@ -1,69 +1,85 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.HasPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import java.net.URI
 
 class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    private val validToken = "3334abcd-5678-abcd-1234-567abcd1111a"
+    private val tokenWithoutPassword = "3334abcd-5678-abcd-1234-567abcd1111a"
+
+    private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
+    private val invitationLink = "http://localhost/letting-agent/invitation?token=$tokenWithoutPassword"
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @BeforeEach
+    fun setup() {
+        whenever(absoluteUrlProvider.buildLettingAgentInvitationUri(any())).thenReturn(URI(invitationLink))
+    }
+
+    private val seededPassword = "Password123!" // pragma: allowlist secret
 
     @Test
     fun `user who does not have a password can walk the set password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(validToken)
-        // TODO PDJB-1658: Update when validate token step is implemented
+        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithoutPassword)
+        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
         assertPageIs(page, ValidateTokenPage::class)
         validateTokenPage.form.submit()
 
-        val hasPasswordPage = assertPageIs(page, HasPasswordPage::class)
-        // TODO PDJB-1658: Remove this step from the journey test
-        hasPasswordPage.submitNoPassword()
-
-        // TODO PDJB-1566: Update when set password page is implemented
+        val rawPassword = "password1" // pragma: allowlist secret
         val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
-        setPasswordPage.form.submit()
+        setPasswordPage.submitPasswords(rawPassword, rawPassword)
 
-        // TODO PDJB-1567: Update when password creation confirmation page is implemented
-        val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
-        confirmationPage.form.submit()
-
-        // TODO PDJB-1659: Remove this step from the journey test
+        // TODO PDJB-1659: Remove this step from the journey test once store-access becomes a silent step
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to validToken))
+        val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
+            .containsText("Property password created")
+        assertThat(confirmationPage.backLink.locator).hasCount(0)
+        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", invitationLink)
+        assertThat(confirmationPage.updateLink.locator).hasText(invitationLink)
+        confirmationPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithoutPassword))
     }
 
     @Test
     fun `user who has a password can walk the enter password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(validToken)
-        // TODO PDJB-1658: Update when validate token step is implemented
+        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithPassword)
+        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
         assertPageIs(page, ValidateTokenPage::class)
         validateTokenPage.form.submit()
 
-        val hasPasswordPage = assertPageIs(page, HasPasswordPage::class)
-        // TODO PDJB-1658: Remove this step from the journey test
-        hasPasswordPage.submitHasPassword()
-
-        // TODO PDJB-1568: Update when enter password page is implemented
         val enterPasswordPage = assertPageIs(page, EnterPasswordPage::class)
-        enterPasswordPage.form.submit()
+        enterPasswordPage.submitPassword(seededPassword)
 
         // TODO PDJB-1659: Remove this step from the journey test
         val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
         storeAccessPage.form.submit()
 
-        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to validToken))
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithPassword))
     }
 }

@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingCo
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController.Companion.LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.HasPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
@@ -43,12 +42,8 @@ class LettingAgentSecurityConfig {
                         "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",
                     ).anonymous()
                     .requestMatchers(
-                        // TODO: PDJB-1660: Remove when validate token step becomes an internal step
+                        // TODO: PDJB-1659: Remove when validate token step is replaced by an interceptor
                         "$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1658: Remove when check password set step becomes an internal step
-                        "$LETTING_AGENT_INVITATION_ROUTE/${HasPasswordStep.ROUTE_SEGMENT}",
                     ).anonymous()
                     .requestMatchers(
                         "$LETTING_AGENT_INVITATION_ROUTE/${SetPasswordStep.ROUTE_SEGMENT}",

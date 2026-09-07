@@ -12,14 +12,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import java.util.UUID
 
 class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("data-local.sql") {
-    // See data-local.sql: PO 39 (token ...2222a) has all details (licensing, tenancy, compliance) marked "provide later".
     private val allDetailsDelegatedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222a")
 
-    // PO 43 (token ...2222c) has licensing and tenancy marked "provide later" but valid, in-date compliance certificates.
     private val licensingAndTenancyOutstandingToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
 
-    // PO 40 (token ...2222b) has all details provided and valid, in-date compliance certificates.
-    private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+    private val allDetailsProvidedToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222d")
 
     @BeforeEach
     fun enableFeatureFlag() {

@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LettingAgentPropertyDetailsViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -46,19 +47,18 @@ class LettingAgentPropertyDetailsController(
             lettingAgentAccessService.getInvitationByTokenOrNull(token)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
 
-        val propertyOwnershipId = lettingAgentAccess.propertyOwnership.id
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(lettingAgentAccess.propertyOwnership.id)
 
         if (!lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Property ownership $propertyOwnershipId does not have a letting agent",
+                "Property ownership ${propertyOwnership.id} does not have a letting agent",
             )
         }
 
         val propertyCompliance =
-            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
-                ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+            propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
+                ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
 
         model.addAttribute(
             "propertyDetails",
@@ -68,18 +68,15 @@ class LettingAgentPropertyDetailsController(
             "complianceDetails",
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                // TODO PDJB-1577, PDJB-1578, PDJB-1579: Re-enable the compliance change links (gas, electrical, EPC) by building this with withChangeLinks = true.
-                withChangeLinks = false,
-                propertyOwnershipId = propertyOwnershipId,
+                viewType = PropertyDetailsViewType.LETTING_AGENT,
+                propertyOwnershipId = propertyOwnership.id,
             ),
         )
 
-        return LETTING_AGENT_PROPERTY_DETAILS_VIEW
+        return "propertyDetailsLettingAgentView"
     }
 
     companion object {
-        const val LETTING_AGENT_PROPERTY_DETAILS_VIEW = "propertyDetailsLettingAgentView"
-
         const val LETTING_AGENT_PROPERTY_DETAILS_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}"
 
