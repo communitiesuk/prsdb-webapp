@@ -88,13 +88,13 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initialiseJourneyState(eq(token))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -155,7 +155,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -166,7 +166,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initialiseJourneyState(eq(token))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
