@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -10,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateRentIncludesBillsController::class)
-class UpdateRentIncludesBillsControllerTests(
+@WebMvcTest(LandlordUpdateRentIncludesBillsController::class)
+class LandlordUpdateRentIncludesBillsControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -26,13 +28,13 @@ class UpdateRentIncludesBillsControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnershipId) +
+        LandlordUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnershipId) +
             "/${RentIncludesBillsStep.ROUTE_SEGMENT}"
 
     override val formContent = "rentIncludesBills=true"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
             .thenReturn(mapOf(RentIncludesBillsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }
