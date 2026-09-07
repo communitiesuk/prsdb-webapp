@@ -24,9 +24,9 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun createJourneySteps(
+    final fun createJourneySteps(
         propertyId: Long,
-        propertyDetailsUrl: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
@@ -42,21 +42,21 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyDetailsUrl)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyDetailsUrl)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyDetailsRoute: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 withAdditionalContentProperty {
@@ -66,7 +66,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons()
         }
@@ -74,10 +74,10 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyDetailsRoute: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"

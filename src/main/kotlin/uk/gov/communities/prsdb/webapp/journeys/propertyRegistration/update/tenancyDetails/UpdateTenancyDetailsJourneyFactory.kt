@@ -39,9 +39,9 @@ class UpdateTenancyDetailsJourneyFactory(
 ) {
     fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 
-    fun createJourneySteps(
+    final fun createJourneySteps(
         propertyId: Long,
-        propertyDetailsUrl: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
@@ -57,24 +57,24 @@ class UpdateTenancyDetailsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyDetailsUrl)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyDetailsUrl)
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateTenancyDetailsJourney,
-        propertyDetailsRoute: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
             }
@@ -94,7 +94,7 @@ class UpdateTenancyDetailsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateTenancyDetailsCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons(state)
         }
@@ -102,10 +102,10 @@ class UpdateTenancyDetailsJourneyFactory(
     private fun checkYourAnswersJourneyMap(
         state: UpdateTenancyDetailsJourney,
         checkingAnswersFor: String,
-        propertyDetailsRoute: String,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }

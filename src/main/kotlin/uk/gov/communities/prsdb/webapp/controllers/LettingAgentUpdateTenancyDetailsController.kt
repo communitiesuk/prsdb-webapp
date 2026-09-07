@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.http.HttpStatus
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -37,59 +36,42 @@ class LettingAgentUpdateTenancyDetailsController(
     fun getUpdateStep(
         @PathVariable token: UUID,
         @PathVariable stepPath: String,
-    ): ModelAndView = dispatchJourneyStep(token, stepPath) { getStepModelAndView() }
+    ): ModelAndView = dispatchJourneyStep(stepPath, token) { getStepModelAndView() }
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
-        model: Model,
         @PathVariable token: UUID,
         @PathVariable stepPath: String,
         @RequestParam formData: FormData,
-    ): ModelAndView = dispatchJourneyStep(token, stepPath) { postStepModelAndView(formData) }
+    ): ModelAndView = dispatchJourneyStep(stepPath, token) { postStepModelAndView(formData) }
 
     private fun dispatchJourneyStep(
-        token: UUID,
         stepPath: String,
+        token: UUID,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView {
-        val propertyOwnershipId = resolveOccupiedPropertyOwnershipId(token)
+        val propertyOwnershipId =
+            lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership?.id
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
+
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
-        val propertyDetailsUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
+
+        val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
+
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, propertyDetailsUrl) },
+            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl) },
             initialiseJourney = { journeyFactory.initializeJourneyState(token) },
             dispatch = dispatch,
         )
-    }
-
-    private fun resolveOccupiedPropertyOwnershipId(token: UUID): Long {
-        val lettingAgentAccess =
-            lettingAgentAccessService.getInvitationByTokenOrNull(token)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
-
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(lettingAgentAccess.propertyOwnership.id)
-
-        if (!propertyOwnership.isOccupied) {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Property ownership ${propertyOwnership.id} is not occupied so cannot be updated by a letting agent",
-            )
-        }
-
-        return propertyOwnership.id
     }
 
     companion object {
         const val LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-tenancy-details"
 
-        fun getBaseRoute(token: UUID): String = UriTemplate(LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE).expand(token).toASCIIString()
-
-        fun getRoute(
-            token: UUID,
-            stepSegment: String,
-        ): String = "${getBaseRoute(token)}/$stepSegment"
+        fun getUpdateTenancyDetailsRoute(token: UUID): String =
+            UriTemplate(LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE).expand(token).toASCIIString()
     }
 }

@@ -11,8 +11,7 @@ class CheckHouseholdsAnswersPageLettingAgentUpdate(
     urlArguments: Map<String, String>,
 ) : CheckOccupancyAnswersFormPage(
         page,
-        LettingAgentUpdateHouseholdsAndTenantsController.getRoute(
+        LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(
             UUID.fromString(urlArguments["token"]!!),
-            UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT,
-        ),
+        ) + "/${UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT}",
     )

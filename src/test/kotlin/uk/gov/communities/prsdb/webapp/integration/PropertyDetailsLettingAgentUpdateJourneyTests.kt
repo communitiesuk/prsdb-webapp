@@ -63,7 +63,7 @@ class PropertyDetailsLettingAgentUpdateJourneyTests : IntegrationTestWithMutable
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(tenancyProvideLaterToken)
         detailsPage.summaryList.tenancyRow.clickFirstActionLinkAndWait()
 
-        assertContains(page.url(), LettingAgentUpdateTenancyDetailsController.getBaseRoute(tenancyProvideLaterToken))
+        assertContains(page.url(), LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(tenancyProvideLaterToken))
     }
 
     @Test
@@ -71,7 +71,8 @@ class PropertyDetailsLettingAgentUpdateJourneyTests : IntegrationTestWithMutable
         featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
 
         navigator.navigate(
-            LettingAgentUpdateHouseholdsAndTenantsController.getRoute(allDetailsProvidedToken, HouseholdStep.ROUTE_SEGMENT),
+            LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(allDetailsProvidedToken) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
         )
 
         val errorPage = createValidPage(page, ErrorPage::class)

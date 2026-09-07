@@ -200,7 +200,8 @@ class LettingAgentPropertyDetailsViewModelTests {
                 it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName"
             }
         assertEquals(
-            LettingAgentUpdateHouseholdsAndTenantsController.getRoute(token, HouseholdStep.ROUTE_SEGMENT),
+            LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(token) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
             householdsRow.actions.single().url,
         )
     }
@@ -289,7 +290,8 @@ class LettingAgentPropertyDetailsViewModelTests {
 
         val tenancyRow = viewModel.tenancySection.single()
         assertEquals(
-            LettingAgentUpdateTenancyDetailsController.getRoute(token, HouseholdStep.ROUTE_SEGMENT),
+            LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(token) +
+                "/${HouseholdStep.ROUTE_SEGMENT}",
             tenancyRow.actions.single().url,
         )
     }

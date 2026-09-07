@@ -11,8 +11,7 @@ class HouseholdsNumberOfPeopleFormPageLettingAgentUpdate(
     urlArguments: Map<String, String>,
 ) : NumberOfPeopleFormPage(
         page,
-        LettingAgentUpdateHouseholdsAndTenantsController.getRoute(
+        LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(
             UUID.fromString(urlArguments["token"]!!),
-            TenantsStep.ROUTE_SEGMENT,
-        ),
+        ) + "/${TenantsStep.ROUTE_SEGMENT}",
     )

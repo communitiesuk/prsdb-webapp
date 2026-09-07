@@ -131,7 +131,7 @@ abstract class PropertyDetailsViewModelBase(
                     "/${HouseholdStep.ROUTE_SEGMENT}",
             lettingAgentActionLink =
                 lettingAgentAccessToken?.let {
-                    LettingAgentUpdateHouseholdsAndTenantsController.getBaseRoute(it) +
+                    LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(it) +
                         "/${HouseholdStep.ROUTE_SEGMENT}"
                 },
             withoutBottomBorder = true,
@@ -264,7 +264,7 @@ abstract class PropertyDetailsViewModelBase(
                     "/${HouseholdStep.ROUTE_SEGMENT}",
             lettingAgentActionLink =
                 lettingAgentAccessToken?.let {
-                    LettingAgentUpdateTenancyDetailsController.getBaseRoute(it) +
+                    LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(it) +
                         "/${HouseholdStep.ROUTE_SEGMENT}"
                 },
         )
