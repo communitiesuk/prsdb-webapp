@@ -2118,6 +2118,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
+        fun `The back link on the which bills are included page returns to the CYA page when reached from there`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+
+            checkAnswersPage.summaryList.billsIncludedRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
+            val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
+            billsIncludedPage.backLink.clickAndWait()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(

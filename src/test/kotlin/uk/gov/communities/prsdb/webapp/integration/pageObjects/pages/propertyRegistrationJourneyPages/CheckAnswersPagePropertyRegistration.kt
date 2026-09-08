@@ -96,6 +96,7 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
+        val billsIncludedRow = getRow("Which bills are included")
 
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
