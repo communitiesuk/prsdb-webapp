@@ -138,7 +138,7 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
         whenever(landlord.id).thenReturn(7L)
     }
 
