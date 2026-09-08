@@ -42,7 +42,7 @@ abstract class AbstractLettingAgentUpdateController(
 
     protected abstract fun initialiseJourneyState(token: UUID): String
 
-    private fun dispatchJourneyStep(
+    protected fun dispatchJourneyStep(
         stepPath: String,
         token: UUID,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
