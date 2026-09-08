@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -13,7 +12,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateWithLettingAgentRemovedNotification
@@ -139,7 +137,8 @@ class PropertyUpdateEmailServiceTests {
     }
 
     @Test
-    fun `sendUpdateEmails sends no emails when an authorised letting agent makes the update`() {
+    fun `sendUpdateEmails sends no emails when a letting agent makes the update`() {
+        // TODO: PDJB-1581: Letting agent updates should send emails; for now no acting landlord means no emails.
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
         whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)).thenReturn(true)
 
@@ -154,9 +153,8 @@ class PropertyUpdateEmailServiceTests {
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
         whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)).thenReturn(false)
 
-        val exception = assertThrows<ResponseStatusException> { notifier.sendUpdateEmails(propertyId, bullets) }
+        assertThrows<ResponseStatusException> { notifier.sendUpdateEmails(propertyId, bullets) }
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
         verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
     }

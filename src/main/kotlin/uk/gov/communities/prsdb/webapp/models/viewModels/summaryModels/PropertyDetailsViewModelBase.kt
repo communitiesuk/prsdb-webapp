@@ -4,17 +4,19 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -125,8 +127,14 @@ abstract class PropertyDetailsViewModelBase(
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
-            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = true,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
@@ -263,8 +271,14 @@ abstract class PropertyDetailsViewModelBase(
             } else {
                 "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
-            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
         )
 
     // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
@@ -331,7 +345,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
-    // This lets the letting-agent update journeys be built in parallel (PDJB-1572, PDJB-1573,
+    // This lets the letting-agent update journeys be built in parallel (
     // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
