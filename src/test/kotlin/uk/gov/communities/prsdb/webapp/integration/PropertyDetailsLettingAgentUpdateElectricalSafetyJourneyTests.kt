@@ -1,0 +1,67 @@
+package uk.gov.communities.prsdb.webapp.integration
+
+import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.HasElectricalCertFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
+import java.util.UUID
+
+class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    // PO 50 (token ...2222c) has an electrical safety compliance record, so the electrical safety card shows a change link.
+    private val propertyWithComplianceToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
+    private val urlArguments = mapOf("token" to propertyWithComplianceToken.toString())
+
+    @BeforeEach
+    fun enableFeatureFlag() {
+        featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
+    }
+
+    @Test
+    fun `the electrical safety change link runs the update journey with Continue buttons and returns to the property record`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(propertyWithComplianceToken)
+        detailsPage.electricalSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
+
+        val hasElectricalCertPage =
+            assertPageIs(page, HasElectricalCertFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        assertThat(hasElectricalCertPage.form.submitButton).hasText("Continue")
+        hasElectricalCertPage.submitHasNoCert()
+
+        val missingPage =
+            assertPageIs(page, ElectricalCertMissingFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        missingPage.form.submit()
+
+        val checkAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        assertThat(checkAnswersPage.form.submitButton).hasText("Continue")
+        checkAnswersPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
+    }
+
+    @Test
+    fun `a not found page is returned for the electrical safety update route when the flag is disabled`(page: Page) {
+        featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
+
+        navigator.navigate(
+            LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(propertyWithComplianceToken) +
+                "/${HasElectricalCertStep.ROUTE_SEGMENT}",
+        )
+
+        val errorPage = createValidPage(page, ErrorPage::class)
+        assertThat(errorPage.heading).containsText("Page not found")
+    }
+}
