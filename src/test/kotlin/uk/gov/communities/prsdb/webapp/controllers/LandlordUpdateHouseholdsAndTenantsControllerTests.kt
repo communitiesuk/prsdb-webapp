@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateHouseholdsAndTenantsController::class)
-class UpdateHouseholdsAndTenantsControllerTests(
+@WebMvcTest(LandlordUpdateHouseholdsAndTenantsController::class)
+class LandlordUpdateHouseholdsAndTenantsControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -27,7 +27,7 @@ class UpdateHouseholdsAndTenantsControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnershipId) +
+        LandlordUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnershipId) +
             "/${HouseholdStep.ROUTE_SEGMENT}"
 
     override val formContent = "numberOfHouseholds=2"

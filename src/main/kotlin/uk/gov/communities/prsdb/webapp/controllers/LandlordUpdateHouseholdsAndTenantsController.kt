@@ -10,7 +10,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController.Companion.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController.Companion.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -21,7 +21,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateHouseholdsAndTenantsController(
+class LandlordUpdateHouseholdsAndTenantsController(
     private val journeyFactory: UpdateHouseholdsAndTenantsJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {

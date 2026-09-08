@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
@@ -11,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentInclude
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
@@ -127,7 +127,7 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
             landlordActionLink =
-                UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                LandlordUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
                     "/${HouseholdStep.ROUTE_SEGMENT}",
             lettingAgentActionLink =
                 lettingAgentAccessToken?.let {

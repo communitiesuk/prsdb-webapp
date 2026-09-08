@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
@@ -15,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Co
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
@@ -251,7 +251,7 @@ class PlausibleMetricsService(
                     UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(
-                    UpdateHouseholdsAndTenantsController.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE,
+                    LandlordUpdateHouseholdsAndTenantsController.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE,
                     UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT,
                 ),
             )
