@@ -411,6 +411,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationLicensingType()
                 .withLicensing(LicensingType.SELECTIVE_LICENCE, "SL-12345")
                 .withOccupancyStatus(false)
+                .withBedrooms()
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
@@ -477,6 +478,7 @@ class PropertyStateSessionBuilder(
             .withEpcLowEnergyRating()
             .withHasMeesExemption(true)
             .withMeesExemptionReason(exemptionReason)
+            .withCheckEpcAnswersComplete()
 
         fun beforePropertyRegistrationCheckAnswersEpcExpiredInDateAtTenancyStart() =
             beforePropertyRegistrationOccupancy()
