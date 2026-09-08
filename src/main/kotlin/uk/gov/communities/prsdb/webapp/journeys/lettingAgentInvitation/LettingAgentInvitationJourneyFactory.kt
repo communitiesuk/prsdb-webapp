@@ -143,10 +143,6 @@ interface LettingAgentInvitationJourneyState : JourneyState {
     var invitationToken: String?
     var hasExistingPassword: Boolean?
 
-    // PDJB-1659: These flags are server-side journey state (Redis-backed) set only after a genuine
-    // set/verify. The store-access step additionally re-checks the persisted password before granting
-    // session access, so a forged flag cannot by itself authorise a session. A non-boolean completion
-    // signal is deferred to a future ticket.
     var hasSetNewPassword: Boolean?
 
     var hasEnteredPassword: Boolean?

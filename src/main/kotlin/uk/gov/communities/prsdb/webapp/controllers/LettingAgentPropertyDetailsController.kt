@@ -39,8 +39,6 @@ class LettingAgentPropertyDetailsController(
         @PathVariable token: UUID,
         model: Model,
     ): String {
-        // Access control (valid, session-authorised token) is enforced by LettingAgentAccessInterceptor
-        // before this handler runs. The guards below remain as defence in depth.
         val lettingAgentAccess =
             lettingAgentAccessService.getInvitationByTokenOrNull(token)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")

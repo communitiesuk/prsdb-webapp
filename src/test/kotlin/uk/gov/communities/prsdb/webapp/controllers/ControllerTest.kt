@@ -55,8 +55,6 @@ abstract class ControllerTest(
     @MockitoBean
     lateinit var backLinkStorageService: BackUrlStorageService
 
-    // Required because LettingAgentAccessInterceptorConfig (a WebMvcConfigurer) is loaded into every
-    // @WebMvcTest slice and depends on this service. Subclasses can stub it as needed.
     @MockitoBean
     lateinit var lettingAgentAccessService: LettingAgentAccessService
 

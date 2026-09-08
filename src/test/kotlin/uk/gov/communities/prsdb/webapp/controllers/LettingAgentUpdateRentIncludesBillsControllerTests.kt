@@ -58,10 +58,8 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
     }
 
-    // Allow requests past LettingAgentAccessInterceptor (loaded into every @WebMvcTest slice) so these
-    // tests exercise the controller. Interceptor deny paths are covered by LettingAgentAccessInterceptorTests.
     @BeforeEach
-    fun allowLettingAgentAccessInterceptor() {
+    fun allowPastLettingAgentAccessInterceptor() {
         whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
         whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
@@ -145,10 +143,6 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     @Test
     @WithMockUser(username = "letting-agent-user")
     fun `getUpdateStep returns 403 for an authenticated user because letting agent access is session-based, not login-based`() {
-        // Letting agents are not logged-in One Login users: access is a session permission (a validated
-        // invitation token held in the session) enforced by LettingAgentAccessInterceptor, so any authenticated
-        // principal is denied by the anonymous-only security rule. Session-token deny paths are covered by
-        // LettingAgentAccessInterceptorTests and the integration suite.
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }
         }

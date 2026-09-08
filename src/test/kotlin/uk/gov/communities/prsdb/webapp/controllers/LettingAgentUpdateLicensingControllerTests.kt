@@ -55,10 +55,8 @@ class LettingAgentUpdateLicensingControllerTests(
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
     }
 
-    // Allow requests past LettingAgentAccessInterceptor (loaded into every @WebMvcTest slice) so these
-    // tests exercise the controller. Interceptor deny paths are covered by LettingAgentAccessInterceptorTests.
     @BeforeEach
-    fun allowLettingAgentAccessInterceptor() {
+    fun allowPastLettingAgentAccessInterceptor() {
         whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
         whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }

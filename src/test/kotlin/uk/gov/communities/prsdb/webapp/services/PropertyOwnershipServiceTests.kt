@@ -14,10 +14,8 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.dao.QueryTimeoutException
@@ -552,25 +550,24 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetCurrentUserIsAuthorizedToEditRecord {
         @Test
-        fun `returns true if isCurrentUserLandlord returns true`() {
-            val propertyOwnershipId = 1L
-            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(true).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
+        fun `returns true if the current user is a landlord for the property`() {
+            val landlord = MockLandlordData.createIndividualLandlord(baseUser = MockLandlordData.createPrsdbUser("baseUserId"))
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
+            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)
 
             assertTrue(result)
-            verify(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
         }
 
         @Test
         fun `returns false if the user is not a landlord and the letting agent feature flag is disabled`() {
             val propertyOwnershipId = 1L
-            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(false).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
 
-            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
+            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
             assertFalse(result)
         }
@@ -578,12 +575,11 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns false if the user is not a landlord and the property has no letting agent token`() {
             val propertyOwnershipId = 1L
-            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(false).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockLettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId)).thenReturn(null)
 
-            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
+            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
             assertFalse(result)
         }
@@ -592,13 +588,12 @@ class PropertyOwnershipServiceTests {
         fun `returns true if the user is not a landlord but the property's token is authorised in the session`() {
             val propertyOwnershipId = 1L
             val token = UUID.randomUUID()
-            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(false).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockLettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId)).thenReturn(token)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
 
-            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
+            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
             assertTrue(result)
         }
@@ -607,13 +602,12 @@ class PropertyOwnershipServiceTests {
         fun `returns false if the user is not a landlord and the property's token is not authorised in the session`() {
             val propertyOwnershipId = 1L
             val token = UUID.randomUUID()
-            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
-            doReturn(false).whenever(propertyOwnershipServiceSpy).isCurrentUserLandlord(propertyOwnershipId)
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockLettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId)).thenReturn(token)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(false)
 
-            val result = propertyOwnershipServiceSpy.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
+            val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
             assertFalse(result)
         }

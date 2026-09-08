@@ -44,10 +44,6 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
-    // LettingAgentAccessInterceptor is a WebMvcConfigurer bean, so @WebMvcTest loads it and it guards this
-    // route. We stub the interceptor's session/token checks to allow requests through here, so these tests
-    // exercise the controller's own not-found guards and view rendering. Interceptor behaviour (invalid or
-    // unauthorised tokens) is covered by LettingAgentAccessInterceptorTests and the integration suite.
     @BeforeEach
     fun allowLettingAgentAccessInterceptor() {
         whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)

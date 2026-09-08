@@ -38,7 +38,7 @@ class LettingAgentAccessInterceptorTests {
     private fun callPreHandle() = interceptor.preHandle(mockRequest, mockResponse, handler = Any())
 
     @Test
-    fun `preHandle allows a valid token that is authorised in the session`() {
+    fun `preHandle allows a request to property details with a valid token that is authorised in the session`() {
         mockRequest.requestURI = propertyDetailsUri
         whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
         whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(token.toString())).thenReturn(true)
