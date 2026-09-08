@@ -6,17 +6,17 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController.Companion.LETTING_AGENT_UPDATE_LICENSING_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController.Companion.LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.util.UUID
 
 @PrsdbController
-@RequestMapping(LETTING_AGENT_UPDATE_LICENSING_ROUTE)
-class LettingAgentUpdateLicensingController(
-    private val journeyFactory: UpdateLicensingJourneyFactory,
+@RequestMapping(LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE)
+class LettingAgentUpdateHouseholdsAndTenantsController(
+    private val journeyFactory: UpdateHouseholdsAndTenantsJourneyFactory,
     lettingAgentAccessService: LettingAgentAccessService,
     propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractLettingAgentUpdateController(lettingAgentAccessService, propertyOwnershipService) {
@@ -25,12 +25,13 @@ class LettingAgentUpdateLicensingController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initializeJourneyState(token)
+    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initialiseJourneyState(token)
 
     companion object {
-        const val LETTING_AGENT_UPDATE_LICENSING_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-licensing"
+        const val LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-households-and-tenants"
 
-        fun getUpdateLicensingRoute(token: UUID): String = UriTemplate(LETTING_AGENT_UPDATE_LICENSING_ROUTE).expand(token).toASCIIString()
+        fun getUpdateHouseholdsAndTenantsRoute(token: UUID): String =
+            UriTemplate(LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE).expand(token).toASCIIString()
     }
 }

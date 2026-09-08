@@ -141,7 +141,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     @Test
     @WithMockUser(username = "letting-agent-user")
     fun `getUpdateStep returns 403 when a letting agent with access to a different property is logged in`() {
-        // TODO: PDJB-1683: Ensure this test works & checks the accesses in the session correctly
+        // TODO: PDJB-1659: Ensure this test works & checks the accesses in the session correctly
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }
         }
