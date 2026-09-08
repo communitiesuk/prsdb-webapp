@@ -16,9 +16,6 @@ import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.util.UUID
 
-// Shared request handling for the letting-agent property-details update journeys. Each concrete controller supplies
-// its class-level @RequestMapping (with the {token} path segment) and delegates the journey factory operations to its
-// own factory; the GET/POST dispatch, token resolution, authorization and return-url wiring are common to all of them.
 abstract class AbstractLettingAgentUpdateController(
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val propertyOwnershipService: PropertyOwnershipService,
