@@ -22,7 +22,7 @@ import java.util.UUID
 class LettingAgentPropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
 
-    private val token: UUID = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+    private val tokenForActionLink: UUID = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
 
     // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date,
     // which is what starts the 28-day provide-later deadline.
@@ -192,7 +192,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
-                token = token,
+                token = tokenForActionLink,
             )
 
         val householdsRow =
@@ -200,7 +200,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName"
             }
         assertEquals(
-            LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(token) +
+            LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(tokenForActionLink) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",
             householdsRow.actions.single().url,
         )
@@ -231,7 +231,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
-                token = token,
+                token = tokenForActionLink,
             )
 
         val tenantsRow =
@@ -250,7 +250,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
-                token = token,
+                token = tokenForActionLink,
             )
 
         val rentIncludesBillsRow =
@@ -258,7 +258,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName"
             }
         val actionUrl = rentIncludesBillsRow.actions.singleOrNull()?.url
-        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl != null && actionUrl.contains(tokenForActionLink.toString()))
         assertTrue(actionUrl!!.endsWith("/rent-includes-bills"))
     }
 
@@ -285,12 +285,12 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
-                token = token,
+                token = tokenForActionLink,
             )
 
         val tenancyRow = viewModel.tenancySection.single()
         assertEquals(
-            LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(token) +
+            LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(tokenForActionLink) +
                 "/${HouseholdStep.ROUTE_SEGMENT}",
             tenancyRow.actions.single().url,
         )

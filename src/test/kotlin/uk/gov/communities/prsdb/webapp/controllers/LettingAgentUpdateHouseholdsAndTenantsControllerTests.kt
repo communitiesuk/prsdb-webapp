@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.ServletException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
@@ -93,6 +97,21 @@ class LettingAgentUpdateHouseholdsAndTenantsControllerTests(
 
         mvc.get(updateStepRoute).andExpect {
             status { isNotFound() }
+        }
+    }
+
+    @Test
+    fun `getUpdateStep surfaces an error when the journey state propertyId does not match the token's property`() {
+        val propertyOwnership = createOccupiedPropertyOwnership()
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
+        val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
+        doThrow(PrsdbWebException("Journey state propertyId does not match provided propertyId"))
+            .whenever(journeyFactory)
+            .createJourneySteps(eq(propertyOwnership.id), eq(returnUrl))
+
+        assertThrows<ServletException> {
+            mvc.get(updateStepRoute)
         }
     }
 
