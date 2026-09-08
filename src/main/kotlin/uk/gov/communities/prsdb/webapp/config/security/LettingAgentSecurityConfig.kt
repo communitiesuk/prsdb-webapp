@@ -13,8 +13,6 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Com
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -27,24 +25,10 @@ class LettingAgentSecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(
-                        // The whole letting-agent invitation journey (start, set/enter password,
-                        // confirmation, invalid-link, and any future step) is pre-authentication: the
-                        // letting agent is not a logged-in One Login user, so these are anonymous-only.
-                        LETTING_AGENT_INVITATION_ROUTE,
-                        "$LETTING_AGENT_INVITATION_ROUTE/**",
-                    ).anonymous()
-                    .requestMatchers(
-                        // PDJB-1659: Left anonymous deliberately. Access to letting-agent property pages is
-                        // a session permission (a validated invitation token held in the session) enforced
-                        // by LettingAgentAccessInterceptor, not a Spring role. No ROLE_LETTING_AGENT is granted.
-                        // The /** matcher covers property-details sub-routes (e.g. update journeys), which the
-                        // interceptor also guards; without it Spring Security would block anonymous agents there.
-                        LETTING_AGENT_PROPERTY_DETAILS_ROUTE,
-                        "$LETTING_AGENT_PROPERTY_DETAILS_ROUTE/**",
-                    ).anonymous()
+                    // Letting agent routes are only available to anonymous users (as login is not implemented for letting agents)
+                    // Restricting which letting agent routes are available is handled by the LettingAgentAccessInterceptor and its config.
                     .anyRequest()
-                    .authenticated()
+                    .anonymous()
             }.headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->
