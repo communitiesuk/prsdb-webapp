@@ -96,7 +96,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
                         certificateType = "Gas safety certificate",
-                        recipientName = "Recipient Name",
+                        recipientName = "Jane Smith",
                         propertyAddress = "1 Street Name, Town, Country, AB1 2CD",
                         landlordDashboardUrl = URI("dashboardUrl"),
                     ),
