@@ -9,10 +9,6 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationControl
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
-// PDJB-1659: Access is granted to the SESSION (a validated invitation token held in the session), not
-// to a Spring Authentication / ROLE_LETTING_AGENT, because the letting agent is not a distinct system
-// user. This interceptor is the enforcement point for every letting-agent route except the invitation
-// (set/enter password) journey, which is excluded in LettingAgentAccessInterceptorConfig.
 class LettingAgentAccessInterceptor(
     private val lettingAgentAccessService: LettingAgentAccessService,
 ) : HandlerInterceptor {
