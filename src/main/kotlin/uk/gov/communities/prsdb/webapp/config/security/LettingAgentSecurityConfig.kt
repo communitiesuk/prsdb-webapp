@@ -21,7 +21,7 @@ class LettingAgentSecurityConfig {
     @Order(2)
     fun lettingAgentSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
-            .securityMatcher("/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/**")
+            .securityMatcher(LETTING_AGENT_ROUTES_PATTERN)
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
@@ -41,5 +41,9 @@ class LettingAgentSecurityConfig {
             }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
+    }
+
+    companion object {
+        const val LETTING_AGENT_ROUTES_PATTERN = "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/**"
     }
 }
