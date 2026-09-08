@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -11,6 +13,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateWithLettingAgentRemovedNotification
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
@@ -75,7 +79,7 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
@@ -99,7 +103,7 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor, other))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
@@ -126,11 +130,34 @@ class PropertyUpdateEmailServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(actor))
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(actor)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(actor)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://dashboard"))
 
         notifier.sendUpdateEmails(propertyId, bullets)
 
+        verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendUpdateEmails sends no emails when an authorised letting agent makes the update`() {
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+        whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)).thenReturn(true)
+
+        notifier.sendUpdateEmails(propertyId, bullets)
+
+        verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
+        verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendUpdateEmails throws when there is no acting landlord and the current user is not authorised to edit`() {
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+        whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)).thenReturn(false)
+
+        val exception = assertThrows<ResponseStatusException> { notifier.sendUpdateEmails(propertyId, bullets) }
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+        verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
     }
 

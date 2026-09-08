@@ -60,7 +60,7 @@ class LettingAgentPropertyDetailsController(
 
         model.addAttribute(
             "propertyDetails",
-            LettingAgentPropertyDetailsViewModel(propertyOwnership, propertyCompliance, messageSource),
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, propertyCompliance, messageSource, token),
         )
         model.addAttribute(
             "complianceDetails",

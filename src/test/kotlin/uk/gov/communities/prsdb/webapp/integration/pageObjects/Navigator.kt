@@ -1364,6 +1364,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
+        storeLettingAgentAccessInSession(token)
         navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
         return createValidPage(
             page,
@@ -1658,6 +1659,16 @@ class Navigator(
                 RequestOptions.create().setData(StoreInvitationTokenRequestModel(token)),
             )
         assertTrue(response.ok(), "Failed to store invitation token. Received status code: ${response.status()}")
+        response.dispose()
+    }
+
+    private fun storeLettingAgentAccessInSession(token: UUID) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_LETTING_AGENT_ACCESS_ROUTE}",
+                RequestOptions.create().setData(StoreInvitationTokenRequestModel(token)),
+            )
+        assertTrue(response.ok(), "Failed to store letting agent access. Received status code: ${response.status()}")
         response.dispose()
     }
 
