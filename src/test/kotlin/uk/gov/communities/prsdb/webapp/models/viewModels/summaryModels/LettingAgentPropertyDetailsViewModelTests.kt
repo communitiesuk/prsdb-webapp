@@ -307,7 +307,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 propertyOwnership,
                 validCompliance(propertyOwnership),
                 mockMessageSource,
-                token = token,
+                token = tokenForActionLink,
             )
 
         val rentFrequencyRow =
@@ -315,7 +315,7 @@ class LettingAgentPropertyDetailsViewModelTests {
                 it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
             }
         assertEquals(
-            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(token) +
+            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(tokenForActionLink) +
                 "/${RentFrequencyStep.ROUTE_SEGMENT}",
             rentFrequencyRow.actions.single().url,
         )
