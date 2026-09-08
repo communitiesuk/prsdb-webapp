@@ -44,20 +44,12 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     fun `when all details are delegated every outstanding field shows provide-later text`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
 
-        // The inset prompts the letting agent to provide the outstanding details.
         assertThat(detailsPage.provideDetailsInset).containsText("Provide all details")
-
-        // Licensing and tenancy are outstanding.
         assertThat(detailsPage.summaryList.licensingRow.value).containsText("Provide this later")
         assertThat(detailsPage.summaryList.tenancyRow.value).containsText("Provide this later")
-
-        // Gas safety shows an outstanding certificate rather than defaulting the gas-supply answer to "No"
-        // and hiding the provide-later row.
         // TODO PDJB-1665: the "Does the property have a gas supply..." row should be removed for gas "provide this
         //  later"; update/remove the hasGasSupply placeholder assertions here when that row is hidden.
         assertThat(detailsPage.gasSafetyCard.summaryList.hasCertRow.value).containsText("Provide this later")
-
-        // Electrical safety and EPC are outstanding.
         assertThat(detailsPage.electricalSafetyCard).containsText("Provide this later")
         assertThat(detailsPage.epcCard).containsText("Provide this later")
     }
