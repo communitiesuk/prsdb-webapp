@@ -4,13 +4,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
@@ -20,22 +18,21 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
 
-@WebMvcTest(LettingAgentUpdateRentIncludesBillsController::class)
-class LettingAgentUpdateRentIncludesBillsControllerTests(
+@WebMvcTest(LettingAgentUpdateLicensingController::class)
+class LettingAgentUpdateLicensingControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var journeyFactory: UpdateRentIncludesBillsJourneyFactory
+    private lateinit var journeyFactory: UpdateLicensingJourneyFactory
 
     @MockitoBean
     private lateinit var lettingAgentAccessService: LettingAgentAccessService
@@ -52,10 +49,10 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     private val token: UUID = UUID.randomUUID()
 
     private val updateStepRoute =
-        LettingAgentUpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(token) +
-            "/${RentIncludesBillsStep.ROUTE_SEGMENT}"
+        LettingAgentUpdateLicensingController.getUpdateLicensingRoute(token) +
+            "/${LicensingTypeStep.ROUTE_SEGMENT}"
 
-    private val formContent = "rentIncludesBills=true"
+    private val formContent = "licensingType=NO_LICENSING"
 
     @BeforeEach
     fun enableFeatureFlag() {
@@ -67,7 +64,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), any()))
-            .thenReturn(mapOf(RentIncludesBillsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
     @Test
@@ -79,24 +76,6 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
         mvc.get(updateStepRoute).andExpect {
             status { isOk() }
         }
-    }
-
-    @Test
-    fun `getUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-        val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
-            .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
-
-        mvc.get(updateStepRoute).andExpect {
-            status { is3xxRedirection() }
-        }
-
-        verify(journeyFactory).initialiseJourneyState(eq(token))
-        verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
     @Test
@@ -131,31 +110,6 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "landlord-user")
-    fun `getUpdateStep returns 403 when a landlord is logged in`() {
-        mvc.get(updateStepRoute).andExpect {
-            status { isForbidden() }
-        }
-    }
-
-    @Test
-    @WithMockUser(username = "letting-agent-user")
-    fun `getUpdateStep returns 403 when a letting agent with access to a different property is logged in`() {
-        // TODO: PDJB-1659: Ensure this test works & checks the accesses in the session correctly
-        mvc.get(updateStepRoute).andExpect {
-            status { isForbidden() }
-        }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"], username = "council-user")
-    fun `getUpdateStep returns 403 when a local council user is logged in`() {
-        mvc.get(updateStepRoute).andExpect {
-            status { isForbidden() }
-        }
-    }
-
-    @Test
     fun `postUpdateStep redirects for a valid token`() {
         stubValidTokenForOccupiedProperty()
         val redirectUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
@@ -171,29 +125,6 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl(redirectUrl)
             }
-    }
-
-    @Test
-    fun `postUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-        val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
-            .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-            }
-
-        verify(journeyFactory).initialiseJourneyState(eq(token))
-        verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
     @Test

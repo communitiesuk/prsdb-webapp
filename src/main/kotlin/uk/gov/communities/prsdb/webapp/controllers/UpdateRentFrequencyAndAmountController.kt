@@ -55,7 +55,7 @@ class UpdateRentFrequencyAndAmountController(
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(propertyOwnershipId, principal) },
             dispatch = dispatch,
         )
 

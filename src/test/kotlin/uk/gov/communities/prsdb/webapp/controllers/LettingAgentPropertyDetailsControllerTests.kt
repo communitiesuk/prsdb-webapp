@@ -47,7 +47,7 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
-    // TODO PDJB-1683 - update so getLettingAgentPropertyDetails is NOT be accessible without authentication
+    // TODO PDJB-1659 - update so getLettingAgentPropertyDetails is NOT be accessible without authentication
     @Test
     fun `getLettingAgentPropertyDetails is accessible without authentication and renders the letting agent view`() {
         val token = UUID.randomUUID()

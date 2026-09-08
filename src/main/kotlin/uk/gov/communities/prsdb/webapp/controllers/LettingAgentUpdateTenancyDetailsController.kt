@@ -6,17 +6,17 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController.Companion.LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController.Companion.LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tenancyDetails.UpdateTenancyDetailsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.util.UUID
 
 @PrsdbController
-@RequestMapping(LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE)
-class LettingAgentUpdateRentIncludesBillsController(
-    private val journeyFactory: UpdateRentIncludesBillsJourneyFactory,
+@RequestMapping(LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE)
+class LettingAgentUpdateTenancyDetailsController(
+    private val journeyFactory: UpdateTenancyDetailsJourneyFactory,
     lettingAgentAccessService: LettingAgentAccessService,
     propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractLettingAgentUpdateController(lettingAgentAccessService, propertyOwnershipService) {
@@ -28,10 +28,10 @@ class LettingAgentUpdateRentIncludesBillsController(
     override fun initialiseJourneyState(token: UUID): String = journeyFactory.initialiseJourneyState(token)
 
     companion object {
-        const val LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-rent-includes-bills"
+        const val LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-tenancy-details"
 
-        fun getUpdateRentIncludesBillsRoute(token: UUID): String =
-            UriTemplate(LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE).expand(token).toASCIIString()
+        fun getUpdateTenancyDetailsRoute(token: UUID): String =
+            UriTemplate(LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE).expand(token).toASCIIString()
     }
 }

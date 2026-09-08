@@ -8,22 +8,23 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController.Companion.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.UPDATE_LICENSING_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE)
+@RequestMapping(UPDATE_LICENSING_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateHouseholdsAndTenantsController(
-    private val journeyFactory: UpdateHouseholdsAndTenantsJourneyFactory,
+class LandlordUpdateLicensingController(
+    private val journeyFactory: UpdateLicensingJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{*stepPath}")
@@ -56,16 +57,21 @@ class UpdateHouseholdsAndTenantsController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
     companion object {
-        const val UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-households-and-tenants"
+        const val UPDATE_LICENSING_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-licensing"
 
-        fun getUpdateHouseholdsAndTenantsRoute(propertyOwnershipId: Long): String =
-            UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+        fun getUpdateLicensingBaseRoute(propertyOwnershipId: Long): String =
+            UriTemplate(UPDATE_LICENSING_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }
