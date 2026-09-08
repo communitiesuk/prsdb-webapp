@@ -29,7 +29,7 @@
     <details  id="details" th:replace="~{fragments/details :: details(#{forms.numberOfPeople.details.summary}, ~{::#details/content()})}" >
         <div class="govuk-details__text" th:text="#{forms.numberOfPeople.details.text}"></div>
     </details>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </th:block>
 
 </html>
