@@ -4,10 +4,11 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -174,8 +175,14 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
-            UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
-                "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
+                    "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(it) +
+                        "/${FurnishedStatusStep.ROUTE_SEGMENT}"
+                },
         )
 
     protected fun rentFrequencyRow(withoutBottomBorder: Boolean = false): SummaryListRowViewModel =
@@ -320,7 +327,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
     // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
-    // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
+    // PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
         key: String,

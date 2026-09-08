@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController.Companion.UPDATE_FURNISHED_STATUS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateFurnishedStatusController.Companion.UPDATE_FURNISHED_STATUS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -22,7 +22,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_FURNISHED_STATUS_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateFurnishedStatusController(
+class LandlordUpdateFurnishedStatusController(
     private val journeyFactory: UpdateFurnishedStatusJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
@@ -56,8 +56,13 @@ class UpdateFurnishedStatusController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 

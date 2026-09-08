@@ -212,4 +212,40 @@ class LettingAgentPropertyDetailsViewModelTests {
             }
         assertTrue(rentIncludesBillsRow.actions.isEmpty())
     }
+
+    @Test
+    fun `the furnished status row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        val actionUrl = furnishedStatusRow.actions.singleOrNull()?.url
+        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl!!.endsWith("/property-furnished"))
+    }
+
+    @Test
+    fun `the furnished status row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        assertTrue(furnishedStatusRow.actions.isEmpty())
+    }
 }
