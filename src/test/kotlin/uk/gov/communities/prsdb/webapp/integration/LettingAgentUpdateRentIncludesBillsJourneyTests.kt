@@ -28,6 +28,22 @@ class LettingAgentUpdateRentIncludesBillsJourneyTests : IntegrationTestWithMutab
     }
 
     @Test
+    fun `The rent-includes-bills update journey shows Continue buttons rather than Save and continue`(page: Page) {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLettingAgentView(token)
+        propertyDetailsPage.summaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+
+        val rentIncludesBillsFormPage =
+            assertPageIs(page, RentIncludesBillsFormPageLettingAgentUpdate::class, urlArguments)
+        assertThat(rentIncludesBillsFormPage.form.submitButton).hasText("Continue")
+
+        rentIncludesBillsFormPage.submitIsIncluded()
+
+        val billsIncludedFormPage =
+            assertPageIs(page, BillsIncludedFormPageLettingAgentUpdate::class, urlArguments)
+        assertThat(billsIncludedFormPage.form.submitButton).hasText("Continue")
+    }
+
+    @Test
     fun `A letting agent can update a property's rent-includes-bills status`(page: Page) {
         var propertyDetailsPage = navigator.goToPropertyDetailsLettingAgentView(token)
         assertThat(propertyDetailsPage.summaryList.rentIncludesBillsRow.value).not().containsText("Yes")

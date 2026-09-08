@@ -4,12 +4,12 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -19,14 +19,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.House
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateHouseholdsAndTenantsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -41,22 +43,21 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyId: Long,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withDependencies { HouseHoldsAndTenantsDependencies(false) }
                 withAdditionalContentProperty {
@@ -66,70 +67,58 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
-            configureStep(journey.householdsAndTenantsTask.households) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-                }
-            }
-            configureStep(journey.householdsAndTenantsTask.tenants) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-                }
-            }
+            replaceHeadingsAndButtons()
         }
     }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
-        propertyId: Long,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            when (state.checkingAnswersFor) {
-                TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
-                    configureStep(journey.householdsAndTenantsTask.tenants) {
-                        backDestination { journey.returnToCyaPageDestination }
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-                        }
-                    }
-                }
-
-                else -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
-                    configureStep(journey.householdsAndTenantsTask.households) {
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-                        }
-                    }
-                    configureStep(journey.householdsAndTenantsTask.tenants) {
-                        withAdditionalContentProperty {
-                            "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-                        }
-                    }
+            checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(false) })
+            if (state.checkingAnswersFor == TenantsStep.ROUTE_SEGMENT) {
+                configureStep(journey.householdsAndTenantsTask.tenants) {
+                    backDestination { journey.returnToCyaPageDestination }
                 }
             }
             step(journey.finishCyaStep) {
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
+            replaceHeadingsAndButtons()
         }
     }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    private fun JourneyBuilder<UpdateHouseholdsAndTenantsJourney>.replaceHeadingsAndButtons() {
+        configureStep(journey.householdsAndTenantsTask.households) {
+            withAdditionalContentProperty {
+                "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
+        }
+        configureStep(journey.householdsAndTenantsTask.tenants) {
+            withAdditionalContentProperty {
+                "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+            }
+            withAdditionalContentProperty {
+                "submitButtonText" to "forms.buttons.continue"
+            }
+        }
+    }
+
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent
@@ -139,10 +128,9 @@ class UpdateHouseholdsAndTenantsJourney(
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
     journeyStateService: JourneyStateService,
-    journeyName: String = "households and tenants",
     override val finishCyaStep: FinishCyaJourneyStep,
-    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourneyState>,
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
+    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "households and tenants"),
     UpdateHouseholdsAndTenantsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")

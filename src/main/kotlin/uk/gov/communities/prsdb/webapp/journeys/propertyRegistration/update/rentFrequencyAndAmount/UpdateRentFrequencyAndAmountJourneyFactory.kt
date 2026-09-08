@@ -119,7 +119,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(
+    fun initialiseJourneyState(
         ownershipId: Long,
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
