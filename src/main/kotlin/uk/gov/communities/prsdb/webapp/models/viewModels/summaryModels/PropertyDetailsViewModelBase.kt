@@ -229,6 +229,7 @@ abstract class PropertyDetailsViewModelBase(
                 getUpdateLicensingBaseRoute(propertyOwnership.id) +
                     "/${LicensingTypeStep.ROUTE_SEGMENT}",
             lettingAgentActionLink = lettingAgentLicensingTypeLink,
+            withoutBottomBorder = propertyOwnership.licenseType != LicensingType.NO_LICENSING,
         )
 
     protected fun licensingNumberRow(): SummaryListRowViewModel? =
@@ -285,35 +286,41 @@ abstract class PropertyDetailsViewModelBase(
     // views show a provide-later row (with a change link only where rowWithViewTypeSpecificChangeLink supplies a route for the view type).
     protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
         when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
                 if (isLicensingProvideLater) {
                     listOf(licensingProvideLaterRow())
                 } else {
                     listOfNotNull(licensingTypeRow(), licensingNumberRow())
                 }
-            PropertyDetailsViewType.LOCAL_COUNCIL ->
+            }
+
+            PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 if (isLicensingProvideLater) {
                     emptyList()
                 } else {
                     listOfNotNull(licensingTypeRow(), licensingNumberRow())
                 }
+            }
         }
 
     protected fun buildTenancySection(): List<SummaryListRowViewModel> {
         if (!isOccupied) return emptyList()
         return when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
                 if (isTenancyProvideLater) {
                     listOf(tenancyProvideLaterRow())
                 } else {
                     buildOccupiedTenancyRows()
                 }
-            PropertyDetailsViewType.LOCAL_COUNCIL ->
+            }
+
+            PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 if (isTenancyProvideLater) {
                     emptyList()
                 } else {
                     buildOccupiedTenancyRows()
                 }
+            }
         }
     }
 
