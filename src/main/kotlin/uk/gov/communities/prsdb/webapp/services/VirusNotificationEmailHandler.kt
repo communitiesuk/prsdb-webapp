@@ -113,7 +113,7 @@ class VirusNotificationEmailHandler(
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
             certificateType = certificateDescriptionForBody(certificateType),
-            // TODO PDJB-1701 - Remove recipientName and landlordDashboardUrl once Notify template V3 is live
+            // TODO PDJB-1701: Remove recipientName and landlordDashboardUrl once Notify template V3 is live
             recipientName = recipientName,
             propertyAddress = singleLineAddress,
             landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
