@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
@@ -16,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
@@ -241,7 +241,7 @@ class PlausibleMetricsService(
                 ),
                 updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, UpdateCheckEpcAnswersStep.ROUTE_SEGMENT),
                 updateReferrerRegex(UpdateOccupancyController.UPDATE_OCCUPANCY_ROUTE, UpdateOccupancyCyaStep.ROUTE_SEGMENT),
-                updateReferrerRegex(UpdateLicensingController.UPDATE_LICENSING_ROUTE, UpdateLicensingCyaStep.ROUTE_SEGMENT),
+                updateReferrerRegex(LandlordUpdateLicensingController.UPDATE_LICENSING_ROUTE, UpdateLicensingCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
                     UpdateRentFrequencyAndAmountController.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE,
                     UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT,

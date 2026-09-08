@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -10,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateLicensingController::class)
-class UpdateLicensingControllerTests(
+@WebMvcTest(LandlordUpdateLicensingController::class)
+class LandlordUpdateLicensingControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -26,13 +28,13 @@ class UpdateLicensingControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateLicensingController.getUpdateLicensingBaseRoute(propertyOwnershipId) +
+        LandlordUpdateLicensingController.getUpdateLicensingBaseRoute(propertyOwnershipId) +
             "/${LicensingTypeStep.ROUTE_SEGMENT}"
 
     override val formContent = "licensingType=NO_LICENSING"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
             .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }
