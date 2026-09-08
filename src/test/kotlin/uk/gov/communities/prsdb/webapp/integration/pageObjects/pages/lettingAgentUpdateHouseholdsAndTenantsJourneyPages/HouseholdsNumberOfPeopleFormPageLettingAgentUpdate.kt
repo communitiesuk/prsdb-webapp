@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateHouseholdsAndTenantsJourneyPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
