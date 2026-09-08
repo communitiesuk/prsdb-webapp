@@ -67,7 +67,7 @@
     "test_id": "688a6c9e-b137-4082-9037-cb850f1aeae7",
     "prod_id": "0e58af06-f5f2-4f89-b802-4e2e42369e75",
     "enumName": "VIRUS_SCAN_UNSUCCESSFUL",
-    "subject": "Your ((certificate type)) failed our virus scan",
+    "subject": "There was a problem with a compliance certificate",
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   },
   {

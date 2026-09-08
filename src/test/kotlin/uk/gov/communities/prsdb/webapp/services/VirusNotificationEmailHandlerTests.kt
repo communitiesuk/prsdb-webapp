@@ -18,43 +18,42 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
-import java.net.URI
 import java.util.Optional
 
 class VirusNotificationEmailHandlerTests {
     private lateinit var virusNotificationEmailHandler: VirusNotificationEmailHandler
 
     private lateinit var emailNotificationService: EmailNotificationService<EmailTemplateModel>
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
     private lateinit var individualLandlordRepository: IndividualLandlordRepository
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
+    private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
 
     private val virusMonitoringEmail = "support@example.com"
-
-    private val monitoringTeamRecipientName = "Monitoring Team"
 
     @BeforeEach
     fun setup() {
         emailNotificationService = mock()
-        absoluteUrlProvider = mock()
         propertyOwnershipRepository = mock()
         individualLandlordRepository = mock()
         savedJourneyStateRepository = mock()
+        lettingAgentAccessRepository = mock()
         virusNotificationEmailHandler =
             VirusNotificationEmailHandler(
                 emailNotificationService,
-                absoluteUrlProvider,
                 propertyOwnershipRepository,
                 individualLandlordRepository,
                 savedJourneyStateRepository,
+                lettingAgentAccessRepository,
                 virusMonitoringEmail,
             )
     }
@@ -80,7 +79,7 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(listOf(virusMonitoringEmail), expectedEmail.copy(recipientName = monitoringTeamRecipientName))
+        assertEmailSentToAddress(listOf(virusMonitoringEmail), expectedEmail)
     }
 
     @ParameterizedTest
@@ -105,11 +104,33 @@ class VirusNotificationEmailHandlerTests {
         assertEmailSentToAddress(landlordEmails, expectedEmail)
     }
 
-    private val dashboardUri = URI("https://landlord.example.com/dashboard")
+    @Test
+    fun `handleCallback for send owner email sends email to landlords and letting agent if present`() {
+        // Arrange
+        val landlordEmails = listOf("landlord1@example.com")
+        val lettingAgentEmail = "agent@example.com"
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                landlordEmails,
+            )
+        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = lettingAgentEmail))
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToAddress(listOf("landlord1@example.com", lettingAgentEmail), expectedEmail)
+    }
 
     private fun expectedCertType(certType: CertificateType) =
         when (certType) {
-            CertificateType.GasSafetyCert -> "gas safety certificate"
+            CertificateType.GasSafetyCert -> "Gas safety certificate"
             CertificateType.Eicr -> "EICR"
             CertificateType.Eic -> "EIC"
         }
@@ -130,12 +151,9 @@ class VirusNotificationEmailHandlerTests {
         whenever(savedJourneyStateRepository.findByJourneyIdAndUser_Id("journey-1", "subject-1")).thenReturn(
             savedJourneyState,
         )
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
         return VirusScanUnsuccessfulEmail(
             certificateType = expectedCertType(certType),
-            recipientName = "Jane Smith",
             propertyAddress = "1 Main St, Anytown",
-            landlordDashboardUrl = dashboardUri,
         )
     }
 
@@ -175,7 +193,7 @@ class VirusNotificationEmailHandlerTests {
         val addressCaptor = argumentCaptor<String>()
         verify(emailNotificationService).sendEmail(addressCaptor.capture(), emailCaptor.capture())
         assertEquals(virusMonitoringEmail, addressCaptor.firstValue)
-        assertEquals(expectedEmail.copy(recipientName = monitoringTeamRecipientName), emailCaptor.firstValue)
+        assertEquals(expectedEmail, emailCaptor.firstValue)
     }
 
     @Test
@@ -203,16 +221,13 @@ class VirusNotificationEmailHandlerTests {
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
             )
 
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
 
         return Pair(
             ownership.id,
             VirusScanUnsuccessfulEmail(
                 certificateType = bodyCertificateType,
-                recipientName = "name",
                 propertyAddress = "123 Main St, Anytown",
-                landlordDashboardUrl = dashboardUri,
             ),
         )
     }
