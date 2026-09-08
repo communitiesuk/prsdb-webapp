@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -68,16 +69,7 @@ class UpdateRentIncludesBillsJourneyFactory(
                 parents { journey.rentIncludesBillsTask.isComplete() }
                 nextUrl { returnUrl }
             }
-            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-                }
-            }
-            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-                }
-            }
+            replaceHeadingsAndButtons()
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -108,22 +100,32 @@ class UpdateRentIncludesBillsJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-                }
-            }
-            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-                }
-            }
+            replaceHeadingsAndButtons()
             configure {
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
         }
+
+    private fun JourneyBuilder<UpdateRentIncludesBillsJourney>.replaceHeadingsAndButtons() {
+        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
+            withAdditionalContentProperties {
+                mapOf(
+                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading",
+                    "submitButtonText" to "forms.buttons.continue",
+                )
+            }
+        }
+        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
+            withAdditionalContentProperties {
+                mapOf(
+                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading",
+                    "submitButtonText" to "forms.buttons.continue",
+                )
+            }
+        }
+    }
 
     fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
