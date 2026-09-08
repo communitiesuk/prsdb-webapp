@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.GasSafetySummaryCard
 import java.util.UUID
 
 class PropertyDetailsPageLettingAgentView(
@@ -19,7 +20,7 @@ class PropertyDetailsPageLettingAgentView(
     ) {
     val summaryList = LettingAgentSummaryList(page)
 
-    val gasSafetyCard = SummaryCard(page, "Gas safety certificate")
+    val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
     val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
 
