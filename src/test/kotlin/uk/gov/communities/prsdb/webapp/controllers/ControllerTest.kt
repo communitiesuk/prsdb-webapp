@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfi
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
@@ -53,6 +54,11 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var backLinkStorageService: BackUrlStorageService
+
+    // Required because LettingAgentAccessInterceptorConfig (a WebMvcConfigurer) is loaded into every
+    // @WebMvcTest slice and depends on this service. Subclasses that need to stub it can redeclare it.
+    @MockitoBean
+    lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     lateinit var mockClientRegistrationRepository: ClientRegistrationRepository

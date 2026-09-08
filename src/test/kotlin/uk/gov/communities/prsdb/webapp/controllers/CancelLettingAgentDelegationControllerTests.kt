@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.CancelLettingAgentDelegationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.cancelLettingAgentDelegation.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.assertEquals
@@ -42,9 +41,6 @@ class CancelLettingAgentDelegationControllerTests(
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator

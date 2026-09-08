@@ -138,7 +138,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
@@ -1698,11 +1697,18 @@ class Navigator(
         )
     }
 
-    fun goToLettingAgentInvitationJourney(token: String): ValidateTokenPage {
+    fun goToLettingAgentInvitationSetPasswordJourney(token: String): SetPasswordPage {
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
         )
-        return createValidPage(page, ValidateTokenPage::class)
+        return createValidPage(page, SetPasswordPage::class)
+    }
+
+    fun goToLettingAgentInvitationEnterPasswordJourney(token: String): EnterPasswordPage {
+        navigate(
+            "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, EnterPasswordPage::class)
     }
 
     fun skipToLettingAgentInvitationSetPasswordPage(token: String): SetPasswordPage {

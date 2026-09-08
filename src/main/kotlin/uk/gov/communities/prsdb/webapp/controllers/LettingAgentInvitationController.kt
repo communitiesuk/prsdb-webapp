@@ -92,11 +92,12 @@ class LettingAgentInvitationController(
             getRedirect = { ModelAndView("redirect:$LETTING_AGENT_INVITATION_ROUTE") },
         )
 
-    private fun redirectToInvalidLink(): ModelAndView =
-        ModelAndView("redirect:$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT")
+    private fun redirectToInvalidLink(): ModelAndView = ModelAndView("redirect:$LETTING_AGENT_INVALID_LINK_ROUTE")
 
     companion object {
         const val LETTING_AGENT_INVITATION_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT"
+
+        const val LETTING_AGENT_INVALID_LINK_ROUTE = "$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }

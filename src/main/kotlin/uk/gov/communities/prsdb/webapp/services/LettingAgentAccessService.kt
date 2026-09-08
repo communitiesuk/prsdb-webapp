@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_AUTHORISED_ACCESS_TOKENS
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
@@ -43,6 +44,36 @@ class LettingAgentAccessService(
     fun getTokenByPropertyOwnershipId(propertyOwnershipId: Long): UUID? =
         // TODO PDJB-1687: commonise this check with any other has LetA checks
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)?.token
+
+    fun getTokenIsValid(token: String): Boolean {
+        val uuid =
+            try {
+                UUID.fromString(token)
+            } catch (_: IllegalArgumentException) {
+                return false
+            }
+        return lettingAgentAccessRepository.findByToken(uuid) != null
+    }
+
+    fun addAuthorisedTokenToSession(token: String) {
+        val tokens = getAuthorisedTokensFromSession()
+        tokens.add(token)
+        session.setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, tokens)
+    }
+
+    fun isTokenAuthorisedInSession(token: String): Boolean = token in getAuthorisedTokensFromSession()
+
+    fun removeAuthorisedTokenFromSession(token: String) {
+        val tokens = getAuthorisedTokensFromSession()
+        if (tokens.remove(token)) {
+            session.setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, tokens)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun getAuthorisedTokensFromSession(): MutableSet<String> =
+        session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS) as MutableSet<String>?
+            ?: mutableSetOf()
 
     @Transactional
     fun deleteDelegationByPropertyOwnershipId(propertyOwnershipId: Long) {

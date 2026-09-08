@@ -21,8 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
 
@@ -32,9 +30,6 @@ class LettingAgentInvitationControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: LettingAgentInvitationJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -129,11 +124,11 @@ class LettingAgentInvitationControllerTests(
         @Test
         fun `getJourneyStep is accessible without authentication`() {
             whenever(journeyFactory.createJourneySteps())
-                .thenReturn(mapOf(ValidateTokenStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(StartStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { isOk() }
                 }
@@ -144,7 +139,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}")
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -155,7 +150,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}")
                 .andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(LETTING_AGENT_INVITATION_ROUTE)
@@ -170,7 +165,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -183,7 +178,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -196,7 +191,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {

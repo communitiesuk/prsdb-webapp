@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -65,9 +64,6 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager

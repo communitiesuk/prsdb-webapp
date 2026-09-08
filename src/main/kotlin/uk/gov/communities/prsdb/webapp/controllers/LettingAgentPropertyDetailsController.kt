@@ -36,13 +36,11 @@ class LettingAgentPropertyDetailsController(
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping
     fun getLettingAgentPropertyDetails(
-        // TODO: PDJB-1659: Check that the interceptor will direct this to the invalid link page instead of showing a 404
-        //  if this is not parseable as a UUID.
-        //  It might be a case of making this a string then checking the validity with the same method the interceptor uses.
         @PathVariable token: UUID,
         model: Model,
     ): String {
-        // TODO: PDJB-1659: Authorise that the letting agent stored in the session has access to this property.
+        // Access control (valid, session-authorised token) is enforced by LettingAgentAccessInterceptor
+        // before this handler runs. The guards below remain as defence in depth.
         val lettingAgentAccess =
             lettingAgentAccessService.getInvitationByTokenOrNull(token)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")

@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.Pas
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
 import java.util.UUID
 
 @PrsdbWebService
@@ -40,15 +39,10 @@ class LettingAgentInvitationJourneyFactory(
             step(journey.startStep) {
                 routeSegment(StartStep.ROUTE_SEGMENT)
                 initialStep()
-                nextStep { journey.validateTokenStep }
-            }
-            step(journey.validateTokenStep) {
-                routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
-                parents { journey.startStep.isComplete() }
                 nextStep { journey.hasPasswordStep }
             }
             step(journey.hasPasswordStep) {
-                parents { journey.validateTokenStep.isComplete() }
+                parents { journey.startStep.isComplete() }
                 nextStep { status ->
                     when (status) {
                         PasswordStatus.HAS_PASSWORD -> journey.enterPasswordStep
@@ -67,7 +61,6 @@ class LettingAgentInvitationJourneyFactory(
                 nextStep { journey.storeAccessStep }
             }
             step(journey.storeAccessStep) {
-                routeSegment(StoreAccessStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.setPasswordStep.isComplete(),
@@ -119,7 +112,6 @@ class LettingAgentInvitationJourneyFactory(
 @JourneyFrameworkComponent("lettingAgentInvitationJourney")
 class LettingAgentInvitationJourney(
     override val startStep: StartStep,
-    override val validateTokenStep: ValidateTokenStep,
     override val hasPasswordStep: HasPasswordStep,
     override val setPasswordStep: SetPasswordStep,
     override val confirmationStep: ConfirmationStep,
@@ -143,7 +135,6 @@ class LettingAgentInvitationJourney(
 
 interface LettingAgentInvitationJourneyState : JourneyState {
     val startStep: StartStep
-    val validateTokenStep: ValidateTokenStep
     val hasPasswordStep: HasPasswordStep
     val setPasswordStep: SetPasswordStep
     val confirmationStep: ConfirmationStep
@@ -152,9 +143,11 @@ interface LettingAgentInvitationJourneyState : JourneyState {
     var invitationToken: String?
     var hasExistingPassword: Boolean?
 
-    // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
+    // PDJB-1659: These flags are server-side journey state (Redis-backed) set only after a genuine
+    // set/verify. The store-access step additionally re-checks the persisted password before granting
+    // session access, so a forged flag cannot by itself authorise a session. A non-boolean completion
+    // signal is deferred to a future ticket.
     var hasSetNewPassword: Boolean?
 
-    // TODO: PDJB-1659: Store something more secure to the state than a boolean, this may be faked
     var hasEnteredPassword: Boolean?
 }

@@ -11,17 +11,10 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfig
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
-import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StoreAccessStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
 
 @PrsdbWebConfiguration
 @EnableMethodSecurity
@@ -34,34 +27,21 @@ class LettingAgentSecurityConfig {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(LETTING_AGENT_INVITATION_ROUTE)
-                    .anonymous()
                     .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}",
+                        // The whole letting-agent invitation journey (start, set/enter password,
+                        // confirmation, invalid-link, and any future step) is pre-authentication: the
+                        // letting agent is not a logged-in One Login user, so these are anonymous-only.
+                        LETTING_AGENT_INVITATION_ROUTE,
+                        "$LETTING_AGENT_INVITATION_ROUTE/**",
                     ).anonymous()
                     .requestMatchers(
-                        // TODO: PDJB-1659: Remove when validate token step is replaced by an interceptor
-                        "$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${SetPasswordStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${ConfirmationStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/${EnterPasswordStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1659: Remove when store access set step becomes an internal step
-                        "$LETTING_AGENT_INVITATION_ROUTE/${StoreAccessStep.ROUTE_SEGMENT}",
-                    ).anonymous()
-                    .requestMatchers(
-                        "$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT",
-                    ).anonymous()
-                    .requestMatchers(
-                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
+                        // PDJB-1659: Left anonymous deliberately. Access to letting-agent property pages is
+                        // a session permission (a validated invitation token held in the session) enforced
+                        // by LettingAgentAccessInterceptor, not a Spring role. No ROLE_LETTING_AGENT is granted.
+                        // The /** matcher covers property-details sub-routes (e.g. update journeys), which the
+                        // interceptor also guards; without it Spring Security would block anonymous agents there.
                         LETTING_AGENT_PROPERTY_DETAILS_ROUTE,
+                        "$LETTING_AGENT_PROPERTY_DETAILS_ROUTE/**",
                     ).anonymous()
                     .anyRequest()
                     .authenticated()
