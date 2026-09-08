@@ -373,13 +373,18 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        val currentLandlord = userToLandlordService.getCurrentLandlordForUser()
-        val landlord =
-            propertyOwnership.landlords
-                .singleOrNull { it.id == currentLandlord.id }
-                ?: throw PrsdbWebException(
-                    "Current landlord ${currentLandlord.id} is not a landlord of property ${propertyOwnership.id}",
-                )
+        val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        val actingLandlord =
+            currentLandlord?.let { current ->
+                propertyOwnership.landlords
+                    .singleOrNull { it.id == current.id }
+                    ?: throw PrsdbWebException(
+                        "Current landlord ${current.id} is not a landlord of property ${propertyOwnership.id}",
+                    )
+            }
+        // When there is no acting landlord (e.g. an update made by a letting agent) notify the property's landlords,
+        // treating the first as the primary recipient.
+        val landlord = actingLandlord ?: propertyOwnership.landlords.first()
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         complianceUpdateConfirmationSender.sendEmail(
@@ -399,7 +404,7 @@ class PropertyComplianceService(
         )
 
         val otherLandlords =
-            propertyOwnership.landlords.filter { it.id != currentLandlord.id }
+            propertyOwnership.landlords.filter { it.id != landlord.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
             complianceUpdateConfirmationSender.sendEmail(

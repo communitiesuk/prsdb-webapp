@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -234,7 +234,7 @@ class PlausibleMetricsService(
         // The eight check-answers property updates are detected by their final check-answers step as the Flow referrer.
         private val PROPERTY_UPDATE_REFERRER_REGEXES =
             listOf(
-                updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
+                updateReferrerRegex(LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
                     UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
                     UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,

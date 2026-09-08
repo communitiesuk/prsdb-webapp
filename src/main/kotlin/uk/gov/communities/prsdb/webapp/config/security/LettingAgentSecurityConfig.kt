@@ -6,9 +6,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CsrfFilter
+import org.springframework.security.web.csrf.CsrfTokenRepository
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
@@ -16,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController.Companion.LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController.Companion.LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
@@ -68,8 +73,14 @@ class LettingAgentSecurityConfig {
                         // TODO: PDJB-1683: Restrict to the letting agent with session access to this property.
                         "$LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE/**",
                     ).anonymous()
+                    .requestMatchers(
+                        // TODO: PDJB-1683: Restrict to the letting agent with session access to this property.
+                        "$LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE/**",
+                    ).anonymous()
                     .anyRequest()
                     .authenticated()
+            }.csrf { requests ->
+                requests.csrfTokenRepository(lettingAgentCsrfTokenRepository())
             }.headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->
@@ -80,7 +91,11 @@ class LettingAgentSecurityConfig {
                             .policy(PERMISSIONS_POLICY_DIRECTIVES)
                     }
             }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
+                .addFilterBefore(MultipartFormDataFilter(lettingAgentCsrfTokenRepository()), CsrfFilter::class.java)
 
         return http.build()
     }
+
+    @Bean
+    fun lettingAgentCsrfTokenRepository(): CsrfTokenRepository = HttpSessionCsrfTokenRepository()
 }

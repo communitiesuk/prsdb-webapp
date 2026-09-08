@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -40,7 +41,10 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
+            val landlordId =
+                userToLandlordService.getCurrentLandlordForUserOrNull()?.id
+                    ?: state.gasCertUploadLandlordIdOverride
+                    ?: throw PrsdbWebException("No landlord could be resolved for the gas certificate upload")
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,

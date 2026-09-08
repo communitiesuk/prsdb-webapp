@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -19,14 +18,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateGasSafetyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateGasSafetyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -39,6 +40,7 @@ class UpdateGasSafetyJourneyFactory(
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
             state.previousUploadIds = propertyCompliance.gasSafetyFileUploads.map { it.id }
             state.isOccupied = propertyOwnership.isOccupied
+            state.gasCertUploadLandlordIdOverride = propertyOwnership.landlords.firstOrNull()?.id
             state.isStateInitialized = true
         }
 
@@ -48,24 +50,22 @@ class UpdateGasSafetyJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateGasSafetyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             task(journey.gasSafetyDetailsTask) {
                 withDependencies { journey }
                 initialStep()
-                backUrl { propertyComplianceRoute }
+                backUrl { returnUrl }
                 nextStep { journey.updateCheckGasSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
@@ -86,19 +86,16 @@ class UpdateGasSafetyJourneyFactory(
             }
             step(journey.completeGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
-                nextUrl { propertyComplianceRoute }
+                nextUrl { returnUrl }
             }
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateGasSafetyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperties {
                     mapOf(
@@ -118,12 +115,8 @@ class UpdateGasSafetyJourneyFactory(
                 nextDestination { Destination.Nowhere() }
             }
         }
-    }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent
@@ -149,6 +142,7 @@ class UpdateGasSafetyJourney(
     override val cyaStep get() = updateCheckGasSafetyAnswersStep
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
+    override var gasCertUploadLandlordIdOverride: Long? by delegateProvider.nullableDelegate("gasCertUploadLandlordIdOverride")
     override val allowProvideCertificateLaterRoute: Boolean = false
 }
 

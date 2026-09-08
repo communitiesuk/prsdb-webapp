@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -62,7 +63,7 @@ class LettingAgentPropertyDetailsControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
             .thenReturn(complianceViewModel)
 
         mvc

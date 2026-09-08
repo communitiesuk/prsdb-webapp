@@ -120,7 +120,7 @@ class PropertyComplianceServiceTests {
     }
 
     private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
     }
 
     @Test

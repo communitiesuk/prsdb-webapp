@@ -70,6 +70,7 @@ class LettingAgentPropertyDetailsController(
                 propertyCompliance = propertyCompliance,
                 viewType = PropertyDetailsViewType.LETTING_AGENT,
                 propertyOwnershipId = propertyOwnership.id,
+                lettingAgentAccessToken = token,
             ),
         )
 

@@ -1,15 +1,18 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import java.util.UUID
 
 private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc"
 
@@ -23,6 +26,7 @@ class PropertyComplianceViewModelFactory(
         propertyCompliance: PropertyCompliance,
         viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
         propertyOwnershipId: Long,
+        lettingAgentAccessToken: UUID? = null,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             changeActionsForViewType(
@@ -39,7 +43,11 @@ class PropertyComplianceViewModelFactory(
         val gasSafetyChangeActions =
             changeActionsForViewType(
                 viewType,
-                UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                LandlordUpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateGasSafetyController.getUpdateGasSafetyRoute(it) +
+                        "/${HasGasSupplyStep.ROUTE_SEGMENT}"
+                },
             )
 
         val gasSafetyInsetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
