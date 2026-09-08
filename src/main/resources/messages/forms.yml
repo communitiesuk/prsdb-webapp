@@ -2,6 +2,8 @@ errorSummary:
   heading: There is a problem
 errorMessage:
   prefix: 'Error: '
+passwordInput:
+  showPassword: Show
 buttons:
   startNow: Start now
   saveAndContinue: Save and continue
@@ -10,7 +12,6 @@ buttons:
   confirm: Confirm
   confirmAndContinue: Confirm and continue
   completeRegistration: Complete registration
-  continueToPayment: Continue to payment
   useThisAddress: Use this address
   submit: Submit
   confirmAndSubmitUpdate: Confirm and submit update

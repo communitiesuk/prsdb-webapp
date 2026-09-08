@@ -25,12 +25,20 @@ class OccupancyDetailsHelper {
         val occupiedStep = state.occupied
         val isOccupied = occupiedStep.formModel.occupied ?: false
         return listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "forms.checkPropertyAnswers.occupancy.question",
+            getOccupancyStatusRow(
                 isOccupied,
-                Destination.VisitableStep(occupiedStep, state.getCyaJourneyId(occupiedStep)),
+                occupiedStep,
+                state.getCyaJourneyId(occupiedStep),
+                "forms.checkPropertyAnswers.occupancy.question",
             ),
         )
+    }
+
+    fun <T> getOccupancyStatusSummaryList(
+        state: T,
+    ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState {
+        val isOccupied = state.occupied.formModel.occupied ?: false
+        return listOf(getOccupancyStatusRow(isOccupied, state.occupied, state.getCyaJourneyId(state.occupied)))
     }
 
     fun <T> getCheckYourAnswersSummaryList(
@@ -175,9 +183,10 @@ class OccupancyDetailsHelper {
         isOccupied: Boolean,
         occupiedStep: RequestableStep<*, *, *>,
         childJourneyId: String,
+        labelKey: String = "forms.checkPropertyAnswers.tenancyDetails.occupied",
     ): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
-            "forms.checkPropertyAnswers.tenancyDetails.occupied",
+            labelKey,
             isOccupied,
             Destination.VisitableStep(occupiedStep, childJourneyId),
         )
