@@ -4,12 +4,13 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
@@ -216,8 +217,10 @@ abstract class PropertyDetailsViewModelBase(
             propertyOwnership.license?.let {
                 MessageKeyConverter.convert(it.licenseType)
             } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-            getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink = lettingAgentLicensingTypeLink,
         )
 
     protected fun licensingNumberRow(): SummaryListRowViewModel? =
@@ -239,9 +242,18 @@ abstract class PropertyDetailsViewModelBase(
             } else {
                 "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
             },
-            getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink = lettingAgentLicensingTypeLink,
         )
+
+    private val lettingAgentLicensingTypeLink: String?
+        get() =
+            lettingAgentAccessToken?.let {
+                LettingAgentUpdateLicensingController.getUpdateLicensingRoute(it) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}"
+            }
 
     protected fun tenancyProvideLaterRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
@@ -319,7 +331,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
-    // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
+    // This lets the letting-agent update journeys be built in parallel (PDJB-1572, PDJB-1573,
     // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
