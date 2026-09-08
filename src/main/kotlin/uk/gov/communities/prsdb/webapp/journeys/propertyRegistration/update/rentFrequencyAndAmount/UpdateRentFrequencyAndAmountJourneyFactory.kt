@@ -69,10 +69,16 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 withAdditionalContentProperty {
                     "heading" to "forms.update.rentFrequency.heading"
                 }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
+                }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
                     "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
                 }
             }
         }
@@ -96,10 +102,16 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 withAdditionalContentProperty {
                     "heading" to "forms.update.rentFrequency.heading"
                 }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
+                }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
                     "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
                 }
             }
         }
