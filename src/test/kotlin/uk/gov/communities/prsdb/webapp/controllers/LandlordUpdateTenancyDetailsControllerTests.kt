@@ -1,21 +1,22 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.tenancyDetails.UpdateTenancyDetailsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateLicensingController::class)
-class UpdateLicensingControllerTests(
+@WebMvcTest(LandlordUpdateTenancyDetailsController::class)
+class LandlordUpdateTenancyDetailsControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
-    private lateinit var journeyFactory: UpdateLicensingJourneyFactory
+    private lateinit var journeyFactory: UpdateTenancyDetailsJourneyFactory
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -26,13 +27,17 @@ class UpdateLicensingControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateLicensingController.getUpdateLicensingBaseRoute(propertyOwnershipId) +
-            "/${LicensingTypeStep.ROUTE_SEGMENT}"
+        LandlordUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnershipId) +
+            "/${HouseholdStep.ROUTE_SEGMENT}"
 
-    override val formContent = "licensingType=NO_LICENSING"
+    override val formContent = "numberOfHouseholds=2"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+        whenever(
+            journeyFactory.createJourneySteps(
+                eq(propertyOwnershipId),
+                eq(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)),
+            ),
+        ).thenReturn(mapOf(HouseholdStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }
