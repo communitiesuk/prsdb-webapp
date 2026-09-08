@@ -56,19 +56,25 @@ class UploadElectricalCertStepConfig(
             state.getElectricalCertificateTypeAsCertificateType()
                 ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
-            virusScanCallbackService.saveEmailForJourney(
-                state.journeyId,
-                fileUploadId,
-                certificateType,
-                landlordId,
-            )
-            virusScanCallbackService.saveEmailToMonitoringTeam(
-                state.journeyId,
-                fileUploadId,
-                certificateType,
-                landlordId,
-            )
+            val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
+            if (landlordId != null) {
+                virusScanCallbackService.saveEmailForJourney(
+                    state.journeyId,
+                    fileUploadId,
+                    certificateType,
+                    landlordId,
+                )
+                virusScanCallbackService.saveEmailToMonitoringTeam(
+                    state.journeyId,
+                    fileUploadId,
+                    certificateType,
+                    landlordId,
+                )
+            } else {
+                // The current user is not a landlord, so they must be a letting agent acting on the property.
+                // TODO PDJB-1659: Assert the letting agent token is present in the session, and throw if it is not.
+                // TODO PDJB-1582: Register a letting-agent virus-scan callback email (no landlordId is available here).
+            }
 
             val formModel = getFormModelFromState(state)
 

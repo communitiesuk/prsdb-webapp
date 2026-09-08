@@ -373,7 +373,15 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        val currentLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        if (currentLandlord == null) {
+            // The current user is not a landlord, so they must be a letting agent acting on the property.
+            // TODO PDJB-1659: Assert the letting agent token is present in the session, and throw if it is not.
+            // TODO PDJB-1581: Notify all property landlords using the joint-landlord email variant - there is no
+            //  "you updated" recipient when a letting agent makes the change.
+            return
+        }
+
         val landlord =
             propertyOwnership.landlords
                 .singleOrNull { it.id == currentLandlord.id }

@@ -2,18 +2,24 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalCertUploadsFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.HasElectricalCertFormPageLettingAgentUpdateElectricalSafety
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.UploadElectricalCertFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import java.util.UUID
 
@@ -47,6 +53,39 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
         val checkAnswersPage =
             assertPageIs(page, CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
         assertThat(checkAnswersPage.form.submitButton).hasText("Continue")
+        checkAnswersPage.form.submit()
+
+        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
+    }
+
+    @Test
+    fun `uploading an electrical certificate as a letting agent saves it and returns to the property record`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(propertyWithComplianceToken)
+        detailsPage.electricalSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
+
+        val hasElectricalCertPage =
+            assertPageIs(page, HasElectricalCertFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        hasElectricalCertPage.submitHasEicr()
+
+        val expiryDate = DateTimeHelper().getCurrentDateInUK().plus(DatePeriod(years = 1))
+        val expiryDatePage =
+            assertPageIs(page, ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        assertThat(expiryDatePage.form.submitButton).hasText("Continue")
+        expiryDatePage.submitDate(expiryDate)
+
+        val uploadPage =
+            assertPageIs(page, UploadElectricalCertFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        uploadPage.uploadCertificate("validFile.png")
+
+        val checkUploadsPage =
+            assertPageIs(page, CheckElectricalCertUploadsFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage.form.submit()
+
+        val checkAnswersPage =
+            assertPageIs(page, CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
         checkAnswersPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
