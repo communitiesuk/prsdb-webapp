@@ -93,9 +93,9 @@ class UpdateLicensingJourneyFactory(
                         withAdditionalContentProperty {
                             "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                         }
+                        withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
                     }
                 }
-                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
             }
             configureStep(journey.licensingTask.selectiveLicenceStep) {
                 withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
