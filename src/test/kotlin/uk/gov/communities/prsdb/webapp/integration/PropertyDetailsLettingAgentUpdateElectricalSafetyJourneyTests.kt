@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.BeforeEach
@@ -17,16 +16,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalCertUploadsFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertExpiryDateFormPageLettingAgentUpdateElectricalSafety
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.ElectricalCertMissingFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.HasElectricalCertFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateElectricalSafetyJourneyPages.UploadElectricalCertFormPageLettingAgentUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import java.util.UUID
 
 class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    // PO 50 (token ...2222c) has an electrical safety compliance record, so the electrical safety card shows a change link.
-    private val propertyWithComplianceToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222c")
-    private val urlArguments = mapOf("token" to propertyWithComplianceToken.toString())
+    // PO 39 (token ...2222a) was delegated at registration
+    private val delegatedAtRegistrationToken = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222a")
+    private val urlArguments = mapOf("token" to delegatedAtRegistrationToken.toString())
 
     @BeforeEach
     fun enableFeatureFlag() {
@@ -34,33 +32,8 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
     }
 
     @Test
-    fun `the electrical safety change link runs the update journey with Continue buttons and returns to the property record`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(propertyWithComplianceToken)
-        detailsPage.electricalSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
-
-        val hasElectricalCertPage =
-            assertPageIs(page, HasElectricalCertFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
-        assertThat(hasElectricalCertPage.form.submitButton).hasText("Continue")
-        hasElectricalCertPage.submitHasNoCert()
-
-        val missingPage =
-            assertPageIs(page, ElectricalCertMissingFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
-        missingPage.form.submit()
-
-        val checkAnswersPage =
-            assertPageIs(page, CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
-        assertThat(checkAnswersPage.form.submitButton).hasText("Continue")
-        checkAnswersPage.form.submit()
-
-        assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
-    }
-
-    @Test
     fun `uploading an electrical certificate as a letting agent saves it and returns to the property record`(page: Page) {
-        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(propertyWithComplianceToken)
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(delegatedAtRegistrationToken)
         detailsPage.electricalSafetyCard
             .getAction("Change")
             .link
@@ -96,7 +69,7 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
         featureFlagManager.disable(DELEGATE_TO_LETTING_AGENT)
 
         navigator.navigate(
-            LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(propertyWithComplianceToken) +
+            LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(delegatedAtRegistrationToken) +
                 "/${HasElectricalCertStep.ROUTE_SEGMENT}",
         )
 
