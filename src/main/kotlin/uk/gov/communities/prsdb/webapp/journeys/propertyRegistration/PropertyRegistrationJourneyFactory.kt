@@ -272,6 +272,9 @@ class PropertyRegistrationJourneyFactory(
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
@@ -425,6 +428,9 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
                 }
                 task(journey.epcTask) {
                     withDependencies { journey }
@@ -626,6 +632,9 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
                 }
             }
             section {

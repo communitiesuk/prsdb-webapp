@@ -75,6 +75,9 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backStep { journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
+            }
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -120,6 +123,9 @@ class UpdateElectricalSafetyJourneyFactory(
                 else -> {
                     checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
                 }
+            }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backDestination { journey.returnToCyaPageDestination }
             }
 
             step(journey.finishCyaStep) {
