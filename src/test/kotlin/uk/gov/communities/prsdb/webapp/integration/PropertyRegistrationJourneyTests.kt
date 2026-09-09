@@ -1883,9 +1883,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `restructured occupied journey completes full flow and shows answers on check answers`(page: Page) {
-            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+            navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
