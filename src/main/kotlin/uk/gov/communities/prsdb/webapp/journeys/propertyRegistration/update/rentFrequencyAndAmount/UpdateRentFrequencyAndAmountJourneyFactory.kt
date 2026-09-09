@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -18,14 +17,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentF
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateRentFrequencyAndAmountJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateRentFrequencyAndAmountJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -40,23 +41,21 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateRentFrequencyAndAmountJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             task(journey.rentFrequencyAndAmountTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
@@ -65,30 +64,33 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
                 withAdditionalContentProperty {
                     "heading" to "forms.update.rentFrequency.heading"
+                }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
                 }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                 withAdditionalContentProperty {
                     "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
                 }
+                withAdditionalContentProperty {
+                    "submitButtonText" to "forms.buttons.continue"
+                }
             }
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateRentFrequencyAndAmountJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
@@ -100,6 +102,9 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                         withAdditionalContentProperty {
                             "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
                         }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
                     }
                 }
 
@@ -109,6 +114,17 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                         withAdditionalContentProperty {
                             "heading" to "forms.update.rentFrequency.heading"
                         }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
+                    }
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        withAdditionalContentProperty {
+                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                        }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
                     }
                 }
             }
@@ -117,12 +133,8 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 nextDestination { Destination.Nowhere() }
             }
         }
-    }
 
-    fun initialiseJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent
