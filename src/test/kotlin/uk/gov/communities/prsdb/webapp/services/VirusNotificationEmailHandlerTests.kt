@@ -11,9 +11,12 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -39,6 +42,7 @@ class VirusNotificationEmailHandlerTests {
     private lateinit var individualLandlordRepository: IndividualLandlordRepository
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
     private lateinit var lettingAgentAccessRepository: LettingAgentAccessRepository
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     private val virusMonitoringEmail = "support@example.com"
 
@@ -50,6 +54,8 @@ class VirusNotificationEmailHandlerTests {
         individualLandlordRepository = mock()
         savedJourneyStateRepository = mock()
         lettingAgentAccessRepository = mock()
+        featureFlagManager = mock()
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("https://www.prsd.gov.uk/landlord/dashboard"))
         virusNotificationEmailHandler =
@@ -60,6 +66,7 @@ class VirusNotificationEmailHandlerTests {
                 individualLandlordRepository,
                 savedJourneyStateRepository,
                 lettingAgentAccessRepository,
+                featureFlagManager,
                 virusMonitoringEmail,
             )
     }
@@ -145,6 +152,30 @@ class VirusNotificationEmailHandlerTests {
 
         assertEquals(lettingAgentEmail, emailAddressCaptor.allValues[1])
         assertEquals(expectedEmail.copy(recipientName = lettingAgentEmail), emailModelCaptor.allValues[1])
+    }
+
+    @Test
+    fun `handleCallback does not email letting agent when delegation feature is disabled`() {
+        // Arrange
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord1@example.com"),
+            )
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "agent@example.com"))
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToAddress(listOf("landlord1@example.com"), expectedEmail)
+        verify(lettingAgentAccessRepository, never()).findByPropertyOwnershipId(ownershipId)
     }
 
     private fun expectedCertType(certType: CertificateType) =
