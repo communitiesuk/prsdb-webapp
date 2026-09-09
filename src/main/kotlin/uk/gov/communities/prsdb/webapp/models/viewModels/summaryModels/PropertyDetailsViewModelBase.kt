@@ -229,7 +229,13 @@ abstract class PropertyDetailsViewModelBase(
                 getUpdateLicensingBaseRoute(propertyOwnership.id) +
                     "/${LicensingTypeStep.ROUTE_SEGMENT}",
             lettingAgentActionLink = lettingAgentLicensingTypeLink,
-            withoutBottomBorder = propertyOwnership.licenseType != LicensingType.NO_LICENSING,
+            withoutBottomBorder =
+                listOf(
+                    LicensingType.SELECTIVE_LICENCE,
+                    LicensingType.HMO_MANDATORY_LICENCE,
+                    LicensingType.HMO_ADDITIONAL_LICENCE,
+                    LicensingType.PROVIDE_LATER,
+                ).contains(propertyOwnership.licenseType),
         )
 
     protected fun licensingNumberRow(): SummaryListRowViewModel? =
