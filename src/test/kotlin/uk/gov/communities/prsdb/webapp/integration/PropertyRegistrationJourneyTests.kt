@@ -2025,7 +2025,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The back link on the gas certificate issue date page returns to the CYA page when reached from there`(page: Page) {
+        fun `The back link on the gas certificate issue date page returns to the start of the gas safety task when reached from CYA`(
+            page: Page,
+        ) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
 
             checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.actions
@@ -2033,7 +2035,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .clickAndWait()
             val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
             gasCertIssueDatePage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `changing an expired gas certificate issue date reaches the expired certificate page before returning to CYA`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
+
+            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
+            val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+            gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
+            assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
         }
 
         @Test

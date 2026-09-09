@@ -265,9 +265,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.gasSafetyTask.gasSafetyDetailsTask, journey) {
-                        checkAnswerStep(task.gasCertIssueDateStep, GasCertIssueDateStep.ROUTE_SEGMENT)
-                    }
+                    checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
