@@ -5,12 +5,15 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -79,7 +82,7 @@ class PropertyComplianceViewModelFactoryTests {
                 listOf(
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                        LandlordUpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
                     ),
                 )
 
@@ -98,6 +101,47 @@ class PropertyComplianceViewModelFactoryTests {
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
             assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
             assertEquals(expectedEpcActions, result.epcSummaryCard.actions)
+        }
+
+        @Test
+        fun `the electrical safety card links to the letting agent update journey when a token is provided`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val propertyOwnershipId = propertyCompliance.propertyOwnership.id
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyOwnershipId,
+                    lettingAgentToken = token,
+                )
+
+            val expectedElectricalSafetyActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(token) +
+                            "/${HasElectricalCertStep.ROUTE_SEGMENT}",
+                    ),
+                )
+
+            assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
+        }
+
+        @Test
+        fun `the electrical safety card has no change action for the letting agent view without a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val propertyOwnershipId = propertyCompliance.propertyOwnership.id
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertNull(result.electricalSafetySummaryCard.actions)
         }
 
         @Test

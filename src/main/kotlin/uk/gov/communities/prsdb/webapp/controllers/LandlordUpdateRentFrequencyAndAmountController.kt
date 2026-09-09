@@ -10,7 +10,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController.Companion.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController.Companion.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -21,7 +21,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateRentFrequencyAndAmountController(
+class LandlordUpdateRentFrequencyAndAmountController(
     private val journeyFactory: UpdateRentFrequencyAndAmountJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
@@ -54,8 +54,13 @@ class UpdateRentFrequencyAndAmountController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
