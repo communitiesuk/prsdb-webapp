@@ -56,6 +56,9 @@ class UploadElectricalCertStepConfig(
             state.getElectricalCertificateTypeAsCertificateType()
                 ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
+            // TODO: PDJB-1582: When a virus scan fails, all parties (landlords and letting agents) should be notified,
+            //  regardless of who uploaded the certificate. Currently only the uploading landlord's callback emails are
+            //  registered, and none are registered when a letting agent uploads the certificate.
             val actingLandlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
             if (actingLandlordId != null) {
                 virusScanCallbackService.saveEmailForJourney(
@@ -70,8 +73,6 @@ class UploadElectricalCertStepConfig(
                     certificateType,
                     actingLandlordId,
                 )
-            } else {
-                // TODO: PDJB-1582: Register virus-scan callback emails when a letting agent uploads the certificate.
             }
 
             val formModel = getFormModelFromState(state)
