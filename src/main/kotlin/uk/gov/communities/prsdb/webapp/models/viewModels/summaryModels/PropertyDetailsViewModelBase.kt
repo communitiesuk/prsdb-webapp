@@ -234,7 +234,6 @@ abstract class PropertyDetailsViewModelBase(
                     LicensingType.SELECTIVE_LICENCE,
                     LicensingType.HMO_MANDATORY_LICENCE,
                     LicensingType.HMO_ADDITIONAL_LICENCE,
-                    LicensingType.PROVIDE_LATER,
                 ).contains(propertyOwnership.licenseType),
         )
 
