@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController
@@ -15,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -236,7 +236,7 @@ class PlausibleMetricsService(
             listOf(
                 updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
-                    UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
+                    LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
                     UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, UpdateCheckEpcAnswersStep.ROUTE_SEGMENT),
