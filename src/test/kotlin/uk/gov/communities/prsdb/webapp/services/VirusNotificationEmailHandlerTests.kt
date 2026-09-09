@@ -50,7 +50,8 @@ class VirusNotificationEmailHandlerTests {
         individualLandlordRepository = mock()
         savedJourneyStateRepository = mock()
         lettingAgentAccessRepository = mock()
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
+            .thenReturn(URI("https://www.prsd.gov.uk/landlord/dashboard"))
         virusNotificationEmailHandler =
             VirusNotificationEmailHandler(
                 emailNotificationService,
@@ -173,7 +174,7 @@ class VirusNotificationEmailHandlerTests {
             certificateType = expectedCertType(certType),
             recipientName = "Jane Smith",
             propertyAddress = "1 Main St, Anytown",
-            landlordDashboardUrl = URI("https://example.com/dashboard"),
+            landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
         )
     }
 
@@ -250,7 +251,7 @@ class VirusNotificationEmailHandlerTests {
                 certificateType = bodyCertificateType,
                 recipientName = recipientName,
                 propertyAddress = "123 Main St, Anytown",
-                landlordDashboardUrl = URI("https://example.com/dashboard"),
+                landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
             ),
         )
     }
