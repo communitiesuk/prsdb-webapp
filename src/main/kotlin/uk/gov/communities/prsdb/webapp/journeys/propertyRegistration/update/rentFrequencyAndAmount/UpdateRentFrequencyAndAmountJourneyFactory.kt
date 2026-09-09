@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -94,7 +95,9 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             }
             when (state.checkingAnswersFor) {
                 RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    fromTask(journey.rentFrequencyAndAmountTask) {
+                        checkAnswerStep(task.rentAmount, RentAmountStep.ROUTE_SEGMENT)
+                    }
                     configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
                         backDestination { journey.returnToCyaPageDestination }
                         withAdditionalContentProperty {
