@@ -6,9 +6,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CsrfFilter
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
@@ -16,8 +19,10 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController.Companion.LETTING_AGENT_UPDATE_ELECTRICAL_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController.Companion.LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController.Companion.LETTING_AGENT_UPDATE_LICENSING_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController.Companion.LETTING_AGENT_UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController.Companion.LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController.Companion.LETTING_AGENT_UPDATE_TENANCY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ConfirmationStep
@@ -83,9 +88,18 @@ class LettingAgentSecurityConfig {
                         // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
                         "$LETTING_AGENT_UPDATE_LICENSING_ROUTE/**",
                     ).anonymous()
+                    .requestMatchers(
+                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
+                        "$LETTING_AGENT_UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE/**",
+                    ).anonymous()
+                    .requestMatchers(
+                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
+                        "$LETTING_AGENT_UPDATE_ELECTRICAL_SAFETY_ROUTE/**",
+                    ).anonymous()
                     .anyRequest()
                     .authenticated()
-            }.headers { headers ->
+            }.addFilterBefore(MultipartFormDataFilter(HttpSessionCsrfTokenRepository()), CsrfFilter::class.java)
+            .headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->
                         csp

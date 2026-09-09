@@ -62,7 +62,7 @@ class LettingAgentPropertyDetailsControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
         val complianceViewModel = createComplianceViewModel()
-        whenever(propertyComplianceViewModelFactory.create(any(), any(), any()))
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), any()))
             .thenReturn(complianceViewModel)
 
         mvc
