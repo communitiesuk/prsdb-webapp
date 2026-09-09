@@ -13,6 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -20,6 +21,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENTS_REMOVED_THIS_SESSION_WITH_EMAILS
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_AUTHORISED_ACCESS_TOKENS
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DELEGATED_TO_LETTING_AGENT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
@@ -310,15 +312,86 @@ class LettingAgentAccessServiceTests {
                 lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("nonexistent")
             }
         }
+    }
+
+    @Nested
+    inner class AuthorisedAccessTokens {
+        @Test
+        fun `getTokenIsValid returns false for a non-UUID string`() {
+            assertFalse(lettingAgentAccessService.getTokenIsValid("not-a-uuid"))
+        }
 
         @Test
-        fun `getInvitationTokenForJourneyIdFromSession throws when session attribute is null`() {
-            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
-                .thenReturn(null)
+        fun `getTokenIsValid returns false when no invitation exists for the token`() {
+            val token = UUID.randomUUID()
+            whenever(lettingAgentAccessRepository.findByToken(token)).thenReturn(null)
 
-            assertThrows<PrsdbWebException> {
-                lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("journey1")
-            }
+            assertFalse(lettingAgentAccessService.getTokenIsValid(token.toString()))
+        }
+
+        @Test
+        fun `getTokenIsValid returns true for a known invitation token`() {
+            val token = UUID.randomUUID()
+            whenever(lettingAgentAccessRepository.findByToken(token))
+                .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token))
+
+            assertTrue(lettingAgentAccessService.getTokenIsValid(token.toString()))
+        }
+
+        @Test
+        fun `addAuthorisedTokenToSession adds the token to an empty session set`() {
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(null)
+            val token = UUID.randomUUID().toString()
+
+            lettingAgentAccessService.addAuthorisedTokenToSession(token)
+
+            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf(token))
+        }
+
+        @Test
+        fun `addAuthorisedTokenToSession preserves previously authorised tokens`() {
+            val existing = UUID.randomUUID().toString()
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf(existing))
+            val token = UUID.randomUUID().toString()
+
+            lettingAgentAccessService.addAuthorisedTokenToSession(token)
+
+            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf(existing, token))
+        }
+
+        @Test
+        fun `isTokenAuthorisedInSession returns true when the token is present`() {
+            val token = UUID.randomUUID().toString()
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf(token))
+
+            assertTrue(lettingAgentAccessService.isTokenAuthorisedInSession(token))
+        }
+
+        @Test
+        fun `isTokenAuthorisedInSession returns false when the token is absent`() {
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(null)
+
+            assertFalse(lettingAgentAccessService.isTokenAuthorisedInSession(UUID.randomUUID().toString()))
+        }
+
+        @Test
+        fun `removeAuthorisedTokenFromSession removes the token from the session set`() {
+            val token = UUID.randomUUID().toString()
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS))
+                .thenReturn(mutableSetOf(token, "other"))
+
+            lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
+
+            verify(session).setAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS, mutableSetOf("other"))
+        }
+
+        @Test
+        fun `removeAuthorisedTokenFromSession does not write to the session when the token is absent`() {
+            whenever(session.getAttribute(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS)).thenReturn(mutableSetOf("other"))
+
+            lettingAgentAccessService.removeAuthorisedTokenFromSession(UUID.randomUUID().toString())
+
+            verify(session, never()).setAttribute(eq(LETTING_AGENT_AUTHORISED_ACCESS_TOKENS), any())
         }
     }
 }

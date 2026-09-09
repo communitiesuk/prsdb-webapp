@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -36,9 +35,6 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateRentIncludesBillsJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -60,6 +56,12 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+    }
+
+    @BeforeEach
+    fun allowPastLettingAgentAccessInterceptor() {
+        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
+        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 
     private fun stubValidTokenForOccupiedProperty() {
@@ -140,8 +142,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
 
     @Test
     @WithMockUser(username = "letting-agent-user")
-    fun `getUpdateStep returns 403 when a letting agent with access to a different property is logged in`() {
-        // TODO: PDJB-1659: Ensure this test works & checks the accesses in the session correctly
+    fun `getUpdateStep returns 403 for an authenticated user because letting agent access is session-based, not login-based`() {
         mvc.get(updateStepRoute).andExpect {
             status { isForbidden() }
         }

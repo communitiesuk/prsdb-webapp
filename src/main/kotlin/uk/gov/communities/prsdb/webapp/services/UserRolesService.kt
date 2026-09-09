@@ -14,6 +14,10 @@ class UserRolesService(
     val systemOperatorRepository: SystemOperatorRepository,
     val userToLandlordService: UserToLandlordService,
 ) {
+    // Note: there is no ROLE_LETTING_AGENT, because the letting agent is not a distinct system user.
+    // Letting agents are instead granted access to a particular property during the session
+    // when they use their access link to set/enter the property password
+    // This is handled by the LettingAgentAccessInterceptor
     fun getLandlordRolesForSubjectId(subjectId: String): List<String> {
         val roles = mutableListOf<String>()
 

@@ -138,7 +138,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
@@ -1365,6 +1364,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
+        storeLettingAgentAccessInSession(token)
         navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
         return createValidPage(
             page,
@@ -1662,6 +1662,16 @@ class Navigator(
         response.dispose()
     }
 
+    private fun storeLettingAgentAccessInSession(token: UUID) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_LETTING_AGENT_ACCESS_ROUTE}",
+                RequestOptions.create().setData(StoreInvitationTokenRequestModel(token)),
+            )
+        assertTrue(response.ok(), "Failed to store letting agent access. Received status code: ${response.status()}")
+        response.dispose()
+    }
+
     fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
@@ -1698,11 +1708,18 @@ class Navigator(
         )
     }
 
-    fun goToLettingAgentInvitationJourney(token: String): ValidateTokenPage {
+    fun goToLettingAgentInvitationSetPasswordJourney(token: String): SetPasswordPage {
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
         )
-        return createValidPage(page, ValidateTokenPage::class)
+        return createValidPage(page, SetPasswordPage::class)
+    }
+
+    fun goToLettingAgentInvitationEnterPasswordJourney(token: String): EnterPasswordPage {
+        navigate(
+            "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, EnterPasswordPage::class)
     }
 
     fun skipToLettingAgentInvitationSetPasswordPage(token: String): SetPasswordPage {

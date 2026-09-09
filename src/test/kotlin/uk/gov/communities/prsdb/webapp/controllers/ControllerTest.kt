@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.config.security.LocalCouncilSecurityConfi
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.DashboardUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
+import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @Import(
@@ -53,6 +54,9 @@ abstract class ControllerTest(
 
     @MockitoBean
     lateinit var backLinkStorageService: BackUrlStorageService
+
+    @MockitoBean
+    lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     lateinit var mockClientRegistrationRepository: ClientRegistrationRepository
