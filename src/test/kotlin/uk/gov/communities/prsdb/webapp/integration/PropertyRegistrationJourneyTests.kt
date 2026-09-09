@@ -2087,9 +2087,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The back link on the registered energy efficiency exemption pages returns to the CYA page when reached from there`(
-            page: Page,
-        ) {
+        fun `The back link on the registered energy efficiency exemption answer page returns to the EPC details page`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
 
             checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.actions
@@ -2097,7 +2095,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .clickAndWait()
             val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
             hasMeesExemptionPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `The back link on the registered energy efficiency exemption reason page returns to the CYA page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
 
             checkAnswersPage.complianceSummaryList.meesExemptionRow.actions
                 .getActionLink("Change")
@@ -2105,6 +2108,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
             meesExemptionPage.backLink.clickAndWait()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `changing the registered energy efficiency exemption answer to yes reaches the exemption reason page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
+
+            checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.actions
+                .getActionLink("Change")
+                .clickAndWait()
+            val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
+            hasMeesExemptionPage.submitHasMeesExemption()
+            assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
         }
 
         @Test

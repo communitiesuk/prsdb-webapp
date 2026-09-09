@@ -300,9 +300,7 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 HasMeesExemptionStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.epcTask.epcDetailsTask, journey) {
-                        checkAnswerStep(task.hasMeesExemptionStep, HasMeesExemptionStep.ROUTE_SEGMENT)
-                    }
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                 }
 
                 MeesExemptionStep.ROUTE_SEGMENT -> {
