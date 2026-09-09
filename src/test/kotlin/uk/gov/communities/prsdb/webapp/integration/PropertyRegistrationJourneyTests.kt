@@ -2090,8 +2090,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `PDJB-1698 clears compliance certificate values after delegating rental details from CYA`(page: Page) {
+        fun `compliance certificate values are cleared after delegating rental details from CYA`(page: Page) {
             val gasUpload =
                 fileUploadRepository.save(
                     FileUpload(
@@ -2148,13 +2147,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     ?: error("Property compliance was not saved")
             val gasSafetyFileUploadIds =
                 jdbcTemplate.queryForList(
-                    "SELECT gas_safety_file_uploads_id FROM gas_safety_uploads WHERE property_compliance_id = ? ORDER BY gas_safety_file_uploads_id",
+                    "SELECT gas_safety_file_uploads_id FROM gas_safety_uploads" +
+                        " WHERE property_compliance_id = ? ORDER BY gas_safety_file_uploads_id",
                     Long::class.java,
                     propertyCompliance.id,
                 )
             val electricalSafetyFileUploadIds =
                 jdbcTemplate.queryForList(
-                    "SELECT electrical_safety_file_uploads_id FROM electrical_safety_uploads WHERE property_compliance_id = ? ORDER BY electrical_safety_file_uploads_id",
+                    "SELECT electrical_safety_file_uploads_id FROM electrical_safety_uploads" +
+                        " WHERE property_compliance_id = ? ORDER BY electrical_safety_file_uploads_id",
                     Long::class.java,
                     propertyCompliance.id,
                 )
