@@ -71,10 +71,7 @@ class UploadElectricalCertStepConfig(
                     actingLandlordId,
                 )
             } else {
-                // The acting user is a letting agent, not a landlord (their authorisation to edit this property is
-                // already enforced by the controller before this step runs).
                 // TODO: PDJB-1582: Register virus-scan callback emails when a letting agent uploads the certificate.
-                //  No emails are saved yet.
             }
 
             val formModel = getFormModelFromState(state)

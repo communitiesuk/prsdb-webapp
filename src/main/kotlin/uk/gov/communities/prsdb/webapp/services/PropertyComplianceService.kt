@@ -375,10 +375,7 @@ class PropertyComplianceService(
 
         val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
         if (currentLandlord == null) {
-            // The acting user is a letting agent, not a landlord (their authorisation to edit this property is
-            // already enforced by the controller before this update runs).
-            // TODO PDJB-1581: Notify all property landlords using the joint-landlord email variant - there is no
-            //  "you updated" recipient when a letting agent makes the change.
+            // TODO: PDJB-1581: Send update emails when a letting agent makes the update. No emails are sent yet.
             return
         }
 
