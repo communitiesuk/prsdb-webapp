@@ -120,6 +120,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileDownloader
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
@@ -168,6 +169,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @MockitoBean
+    private lateinit var fileDownloader: FileDownloader
 
     @BeforeEach
     fun setup() {
@@ -2091,6 +2095,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `compliance certificate values are cleared after delegating rental details from CYA`(page: Page) {
+            whenever(fileDownloader.isFileDownloadable(any())).thenReturn(true)
+            whenever(fileDownloader.getDownloadUrl(any(), any())).thenReturn("/download/cert.pdf")
             val gasUpload =
                 fileUploadRepository.save(
                     FileUpload(
