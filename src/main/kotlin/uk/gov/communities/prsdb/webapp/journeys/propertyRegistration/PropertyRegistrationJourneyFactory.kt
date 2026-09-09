@@ -281,19 +281,33 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
-                StartEpcStep.ROUTE_SEGMENT,
-                HasEpcStep.ROUTE_SEGMENT,
-                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
-                IsEpcRequiredStep.ROUTE_SEGMENT,
-                EpcExemptionStep.ROUTE_SEGMENT,
-                -> {
+                StartEpcStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                }
+
+                HasEpcStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasEpcStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                     configureStep(journey.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
+                }
+
+                IsEpcRequiredStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                     configureStep(journey.epcTask.epcDetailsTask.isEpcRequiredStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
+                }
+
+                EpcExemptionStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
                     configureStep(journey.epcTask.epcDetailsTask.epcExemptionStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
