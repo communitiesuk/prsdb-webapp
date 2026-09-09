@@ -186,6 +186,41 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `when delegating to a letting agent, the EPC row shows provide this later and no is-epc-required row`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            assertThat(checkAnswersPage.complianceSummaryList.isEpcRequiredRow.key).hasCount(0)
+        }
+
+        @Test
+        fun `when delegating to a letting agent after entering an EPC, the EPC card is not shown and the row shows provide this later`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent()
+                        .withCompliantEpc()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            assertThat(page.locator("main").getByText("Your EPC")).hasCount(0)
+        }
+
+        @Test
         fun `rented out section appears after occupied and before licensing when landlord provides details`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(

@@ -127,5 +127,6 @@ class CheckAnswersPagePropertyRegistration(
         val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
         val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
         val hasEpcRow = getRow("Do you have an EPC for this property?")
+        val isEpcRequiredRow = getRow("Is an EPC required to let this property?")
     }
 }
