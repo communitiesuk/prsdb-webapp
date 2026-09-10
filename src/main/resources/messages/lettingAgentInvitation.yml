@@ -1,5 +1,11 @@
 title: Set up your letting agent account
 caption: Provide details for a landlord’s rental property
+invalidLink:
+  heading: There was a problem with this link
+  checkLink: Check the link is correct.
+  usedBefore:
+    heading: If you’ve used this link before
+    body: The landlord may have removed your access. Speak to the landlord if you were not expecting this.
 setPassword:
   heading: Set your password for this property
   intro: "A landlord has given you access to provide details for this rental property:"
