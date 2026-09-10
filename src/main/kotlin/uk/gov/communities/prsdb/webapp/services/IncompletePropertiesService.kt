@@ -57,11 +57,11 @@ class IncompletePropertiesService(
                         PageRequest.of(0, MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE),
                     )
 
-            if (!incompletePropertiesBatch.isEmpty()) {
+            if (incompletePropertiesBatch.isNotEmpty()) {
                 val journeyStatesToDelete = incompletePropertiesBatch.map { it.savedJourneyState }
+                incompletePropertiesRepository.deleteAll(incompletePropertiesBatch)
+                journeyStatesToDelete.forEach { it.reminderEmailSent = null }
                 savedJourneyStateRepository.deleteAll(journeyStatesToDelete)
-                // Because of cascade settings, deleting the SavedJourneyState will also delete this page
-                // of LandlordIncompleteProperties records
                 totalDeleted += journeyStatesToDelete.size
             }
         } while (incompletePropertiesBatch.count() == MAX_INCOMPLETE_PROPERTIES_FROM_DATABASE)
