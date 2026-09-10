@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.InvalidLinkPageLettingAgentInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
@@ -133,6 +134,20 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
 
             // TODO PDJB-1659: Assert the letting agent's access has been stored
             assertPageIs(page, StoreAccessPage::class)
+        }
+    }
+
+    @Nested
+    inner class InvalidLink {
+        @Test
+        fun `navigating with an invalid token redirects to the invalid link page`(page: Page) {
+            val invalidToken = "1234abcd-5678-abcd-1234-567abcd9999z"
+
+            navigator.navigateToLettingAgentInvitationWithInvalidToken(invalidToken)
+
+            val invalidLinkPage = assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
+            BaseComponent.assertThat(invalidLinkPage.heading).containsText("There was a problem with this link")
+            assertThat(invalidLinkPage.description).containsText("Check the link is correct.")
         }
     }
 }
