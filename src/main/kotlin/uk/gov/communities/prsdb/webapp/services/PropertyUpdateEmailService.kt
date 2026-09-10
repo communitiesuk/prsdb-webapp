@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateWithLettingAgentRemovedNotification
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateWithLettingAgentRemovedConfirmation
 
@@ -20,6 +21,7 @@ class PropertyUpdateEmailService(
     private val jointLandlordLettingAgentRemovedEmailService: EmailNotificationService<
         JointLandlordPropertyUpdateWithLettingAgentRemovedNotification,
         >,
+    private val lettingAgentUpdateEmailService: EmailNotificationService<LettingAgentPropertyUpdateNotificationEmail>,
 ) {
     fun sendUpdateEmails(
         propertyId: Long,
@@ -27,8 +29,10 @@ class PropertyUpdateEmailService(
     ) {
         val actingLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
         if (actingLandlord == null) {
-            // TODO: PDJB-1581: Send update emails when a letting agent makes the update. No emails are sent yet.
-            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)) return
+            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)) {
+                sendLettingAgentUpdateEmails(propertyId, updatedBullets)
+                return
+            }
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "No acting landlord was found for the update to property ownership $propertyId",
@@ -64,6 +68,29 @@ class PropertyUpdateEmailService(
                     ),
                 )
             }
+        }
+    }
+
+    private fun sendLettingAgentUpdateEmails(
+        propertyId: Long,
+        updatedBullets: List<String>,
+    ) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
+        val registrationNumber =
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
+        val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        propertyOwnership.landlords.forEach { landlord ->
+            lettingAgentUpdateEmailService.sendEmail(
+                landlord.email,
+                LettingAgentPropertyUpdateNotificationEmail(
+                    recipientName = landlord.name,
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = registrationNumber,
+                    updatedBullets = updatedBullets,
+                    propertyRecordUrl = propertyRecordUrl,
+                ),
+            )
         }
     }
 

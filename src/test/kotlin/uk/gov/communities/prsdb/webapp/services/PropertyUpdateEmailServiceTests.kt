@@ -15,6 +15,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordPropertyUpdateWithLettingAgentRemovedNotification
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentPropertyUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateWithLettingAgentRemovedConfirmation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -45,6 +46,10 @@ class PropertyUpdateEmailServiceTests {
     private lateinit var mockJointLandlordLettingAgentRemovedEmailService:
         EmailNotificationService<JointLandlordPropertyUpdateWithLettingAgentRemovedNotification>
 
+    @Mock
+    private lateinit var mockLettingAgentUpdateEmailService:
+        EmailNotificationService<LettingAgentPropertyUpdateNotificationEmail>
+
     private val propertyId = 123L
     private val bullets = listOf("The ownership type")
     private val updatedMessage = "The property was made unoccupied"
@@ -62,6 +67,7 @@ class PropertyUpdateEmailServiceTests {
                 mockNotificationEmailService,
                 mockLettingAgentRemovedEmailService,
                 mockJointLandlordLettingAgentRemovedEmailService,
+                mockLettingAgentUpdateEmailService,
             )
     }
 
@@ -137,13 +143,26 @@ class PropertyUpdateEmailServiceTests {
     }
 
     @Test
-    fun `sendUpdateEmails sends no emails when a letting agent makes the update`() {
-        // TODO: PDJB-1581: Letting agent updates should send emails; for now no acting landlord means no emails.
+    fun `sendUpdateEmails notifies all landlords when a letting agent makes the update`() {
+        val landlordOne = MockLandlordData.createIndividualLandlord(name = "James", email = "one@example.com")
+        val landlordTwo = MockLandlordData.createIndividualLandlord(name = "Lois", email = "two@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(landlordOne, landlordTwo))
         whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
         whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)).thenReturn(true)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyId)).thenReturn(URI("http://property"))
 
         notifier.sendUpdateEmails(propertyId, bullets)
 
+        verify(mockLettingAgentUpdateEmailService).sendEmail(
+            eq(landlordOne.email),
+            argThat<LettingAgentPropertyUpdateNotificationEmail> {
+                this.recipientName == landlordOne.name && this.updatedBullets == bullets &&
+                    this.propertyRecordUrl == "http://property"
+            },
+        )
+        verify(mockLettingAgentUpdateEmailService).sendEmail(eq(landlordTwo.email), any())
         verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
     }
@@ -157,6 +176,7 @@ class PropertyUpdateEmailServiceTests {
 
         verify(mockConfirmationEmailService, never()).sendEmail(any(), any())
         verify(mockNotificationEmailService, never()).sendEmail(any(), any())
+        verify(mockLettingAgentUpdateEmailService, never()).sendEmail(any(), any())
     }
 
     @Test

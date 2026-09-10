@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor.captor
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
@@ -45,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
@@ -74,6 +74,9 @@ class PropertyComplianceServiceTests {
     private lateinit var mockComplianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>
 
     @Mock
+    private lateinit var mockLettingAgentComplianceUpdateSender: EmailNotificationService<LettingAgentComplianceUpdateNotificationEmail>
+
+    @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
@@ -85,7 +88,6 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
-    @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
@@ -108,6 +110,19 @@ class PropertyComplianceServiceTests {
 
     @BeforeEach
     fun setup() {
+        propertyComplianceService =
+            PropertyComplianceService(
+                mockPropertyComplianceRepository,
+                mockPropertyOwnershipRepository,
+                fileUploadRepository,
+                mockVirusScanCallbackService,
+                mockComplianceUpdateConfirmationSender,
+                mockLettingAgentComplianceUpdateSender,
+                mockAbsoluteUrlProvider,
+                mockUserToLandlordService,
+                mockPropertyOwnershipService,
+                mockFeatureFlagManager,
+            )
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("https://test.example.com"))
@@ -885,6 +900,84 @@ class PropertyComplianceServiceTests {
                     ),
                 ),
             )
+        }
+
+        @Test
+        fun `sends letting agent compliance notification to all landlords when a letting agent adds a certificate`() {
+            val landlordOne = mockLoggedInLandlord
+            val landlordTwo =
+                MockLandlordData.createIndividualLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
+                    name = "Other Landlord",
+                    email = "other@example.com",
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlordOne, landlordTwo))
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val issueDate = LocalDate.now()
+
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)).thenReturn(URI("http://property"))
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1"))
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
+                eq(landlordOne.email),
+                eq(
+                    LettingAgentComplianceUpdateNotificationEmail(
+                        recipientName = landlordOne.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        propertyRecordUrl = "http://property",
+                    ),
+                ),
+            )
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(eq(landlordTwo.email), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+        }
+
+        @Test
+        fun `does not send a letting agent compliance notification when the added certificate is already expired`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiredIssueDate = LocalDate.now().minusYears(2)
+
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1"))
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = expiredIssueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockLettingAgentComplianceUpdateSender, never()).sendEmail(any(), any())
         }
 
         @Test
