@@ -167,12 +167,26 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
-                LicensingTypeStep.ROUTE_SEGMENT,
-                SelectiveLicenceStep.ROUTE_SEGMENT,
-                HmoMandatoryLicenceStep.ROUTE_SEGMENT,
-                HmoAdditionalLicenceStep.ROUTE_SEGMENT,
-                -> {
+                LicensingTypeStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.licensingTask, { journey })
+                }
+
+                SelectiveLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.selectiveLicenceStep, SelectiveLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoMandatoryLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoMandatoryLicenceStep, HmoMandatoryLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoAdditionalLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoAdditionalLicenceStep, HmoAdditionalLicenceStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 ProvideTenancyDetailsLaterStep.ROUTE_SEGMENT -> {
@@ -189,8 +203,15 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                HouseholdStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                }
+
+                TenantsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask, { HouseHoldsAndTenantsDependencies(true) })
+                    configureStep(journey.householdsAndTenantsTask.tenants) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 BedroomsStep.ROUTE_SEGMENT -> {
@@ -211,40 +232,96 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
                 }
 
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
+                RentFrequencyStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasJointLandlordsStep.ROUTE_SEGMENT,
                 CheckJointLandlordsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.ownershipAndLandlordsTask.jointLandlordsTask, { journey })
+                    configureStep(journey.ownershipAndLandlordsTask.jointLandlordsTask.inviteJointLandlordsTask.checkJointLandlordsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasGasSupplyStep.ROUTE_SEGMENT,
                 HasGasCertStep.ROUTE_SEGMENT,
-                GasCertIssueDateStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
+                    checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                GasCertIssueDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
-                ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
                 CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
-                StartEpcStep.ROUTE_SEGMENT,
-                HasEpcStep.ROUTE_SEGMENT,
-                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
-                HasMeesExemptionStep.ROUTE_SEGMENT,
-                MeesExemptionStep.ROUTE_SEGMENT,
-                IsEpcRequiredStep.ROUTE_SEGMENT,
-                EpcExemptionStep.ROUTE_SEGMENT,
-                -> {
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyTask.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                StartEpcStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                }
+
+                HasEpcStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasEpcStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                IsEpcRequiredStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.isEpcRequiredStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                EpcExemptionStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.epcExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                HasMeesExemptionStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                }
+
+                MeesExemptionStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.epcTask.epcDetailsTask, journey) {
+                        checkAnswerStep(task.meesExemptionStep, MeesExemptionStep.ROUTE_SEGMENT)
+                    }
                 }
 
                 else -> {
@@ -349,6 +426,9 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
                 }
                 task(journey.epcTask) {
                     withDependencies { journey }
@@ -550,6 +630,9 @@ class PropertyRegistrationJourneyFactory(
                     backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
+                }
+                configureStep(journey.electricalSafetyTask.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                    backStep { journey.electricalSafetyTask.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
                 }
             }
             section {

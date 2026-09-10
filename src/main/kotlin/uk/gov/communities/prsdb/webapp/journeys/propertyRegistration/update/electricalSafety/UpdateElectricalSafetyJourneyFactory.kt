@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
@@ -74,6 +75,9 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backStep { journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
+            }
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -108,10 +112,21 @@ class UpdateElectricalSafetyJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(
-                journey.electricalSafetyDetailsTask,
-                { journey },
-            )
+            when (state.checkingAnswersFor) {
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                }
+            }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
 
             step(journey.finishCyaStep) {
                 initialStep()
