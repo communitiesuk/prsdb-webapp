@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -80,6 +81,7 @@ class UpdateGasSafetyJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
+                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
@@ -87,6 +89,7 @@ class UpdateGasSafetyJourneyFactory(
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
                 nextUrl { returnUrl }
             }
+            replaceButtons()
         }
 
     private fun checkYourAnswersJourneyMap(
@@ -113,7 +116,29 @@ class UpdateGasSafetyJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
+            replaceButtons()
         }
+
+    private fun JourneyBuilder<UpdateGasSafetyJourney>.replaceButtons() {
+        configureStep(journey.gasSafetyDetailsTask.hasGasSupplyStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.hasGasCertStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.gasCertIssueDateStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.checkGasCertUploadsStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.gasCertExpiredStep) {
+            withAdditionalContentProperty {
+                "submitButtonText" to
+                    if (journey.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
+            }
+        }
+    }
 
     fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }

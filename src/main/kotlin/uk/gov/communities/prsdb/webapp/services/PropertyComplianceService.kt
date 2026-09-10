@@ -411,7 +411,7 @@ class PropertyComplianceService(
         )
 
         val otherLandlords =
-            propertyOwnership.landlords.filter { it.id != landlord.id }
+            propertyOwnership.landlords.filter { it.id != currentLandlord.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
             complianceUpdateConfirmationSender.sendEmail(

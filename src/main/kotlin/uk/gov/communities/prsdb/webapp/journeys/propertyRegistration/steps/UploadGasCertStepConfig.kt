@@ -40,6 +40,9 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
+            // TODO: PDJB-1582: When a virus scan fails, all parties (landlords and letting agents) should be notified,
+            //  regardless of who uploaded the certificate. Currently only the uploading landlord's callback emails are
+            //  registered, and none are registered when a letting agent uploads the certificate.
             val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
 
             if (landlordId != null) {

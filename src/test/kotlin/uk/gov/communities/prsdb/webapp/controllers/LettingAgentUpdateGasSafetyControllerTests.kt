@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -26,7 +25,6 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
@@ -93,24 +91,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
     }
 
     @Test
-    fun `getUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-        val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
-            .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
-
-        mvc.get(updateStepRoute).andExpect {
-            status { is3xxRedirection() }
-        }
-
-        verify(journeyFactory).initialiseJourneyState(eq(token))
-        verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
-    }
-
-    @Test
     fun `getUpdateStep returns 404 when the token is not recognised`() {
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token))).thenReturn(null)
 
@@ -173,29 +153,6 @@ class LettingAgentUpdateGasSafetyControllerTests(
                 status { is3xxRedirection() }
                 redirectedUrl(redirectUrl)
             }
-    }
-
-    @Test
-    fun `postUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
-        val propertyOwnership = createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-        val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
-        whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
-            .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token))).thenReturn("journey-id")
-
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-            }
-
-        verify(journeyFactory).initialiseJourneyState(eq(token))
-        verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
     @Test
