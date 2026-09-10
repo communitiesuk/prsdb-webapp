@@ -1245,6 +1245,38 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationCheckAnswersPageGasCertUploaded(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersGasCertUploaded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcExpiredInDateAtTenancyStart().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersElectricalCertUploaded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcLowRatingWithExemption().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     private fun navigateToPropertyRegistrationJourneyStep(segment: String? = "") =
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
 
@@ -1703,6 +1735,10 @@ class Navigator(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
         )
         return createValidPage(page, ValidateTokenPage::class)
+    }
+
+    fun navigateToLettingAgentInvitationWithInvalidToken(token: String) {
+        navigate("${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token")
     }
 
     fun skipToLettingAgentInvitationSetPasswordPage(token: String): SetPasswordPage {

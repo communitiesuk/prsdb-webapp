@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -20,10 +22,12 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.VirusMonit
 @PrsdbTaskService
 class VirusNotificationEmailHandler(
     private val emailNotificationService: EmailNotificationService<EmailTemplateModel>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val individualLandlordRepository: IndividualLandlordRepository,
     private val savedJourneyStateRepository: SavedJourneyStateRepository,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
+    private val featureFlagManager: FeatureFlagManager,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
     fun handleCallback(callback: VirusScanCallback) =
@@ -44,22 +48,29 @@ class VirusNotificationEmailHandler(
         if (monitoringEmailAddress != null) {
             emailNotificationService.sendEmail(
                 monitoringEmailAddress,
-                buildAlertEmail(notification.certificateType, ownership.address.singleLineAddress),
+                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.singleLineAddress),
             )
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
                 emailNotificationService.sendEmail(
                     landlord.email,
-                    buildAlertEmail(notification.certificateType, ownership.address.singleLineAddress),
+                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.singleLineAddress),
                 )
             }
 
-            lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)?.let { lettingAgentAccess ->
-                emailNotificationService.sendEmail(
-                    lettingAgentAccess.invitedEmail,
-                    buildAlertEmail(notification.certificateType, ownership.address.singleLineAddress),
-                )
+            // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
+            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)?.let { lettingAgentAccess ->
+                    emailNotificationService.sendEmail(
+                        lettingAgentAccess.invitedEmail,
+                        buildAlertEmail(
+                            notification.certificateType,
+                            lettingAgentAccess.invitedEmail,
+                            ownership.address.singleLineAddress,
+                        ),
+                    )
+                }
             }
         }
     }
@@ -80,6 +91,7 @@ class VirusNotificationEmailHandler(
             monitoringEmailAddress ?: landlord.email,
             buildAlertEmail(
                 notification.certificateType,
+                if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
                 savedJourneyState.getPropertyRegistrationSingleLineAddress(),
             ),
         )
@@ -106,11 +118,15 @@ class VirusNotificationEmailHandler(
 
     private fun buildAlertEmail(
         certificateType: CertificateType,
+        recipientName: String,
         singleLineAddress: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
             certificateType = certificateDescriptionForBody(certificateType),
+            // TODO PDJB-1701: Remove recipientName and landlordDashboardUrl once Notify template V3 is live
+            recipientName = recipientName,
             propertyAddress = singleLineAddress,
+            landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
@@ -119,4 +135,8 @@ class VirusNotificationEmailHandler(
             CertificateType.Eicr -> "EICR"
             CertificateType.Eic -> "EIC"
         }
+
+    companion object {
+        private const val MONITORING_TEAM_RECIPIENT_NAME = "Monitoring Team"
+    }
 }

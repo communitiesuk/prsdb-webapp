@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{lettingAgentInvitation.invalidLink.heading}, ~{::main}, false)}">
+<main class="govuk-main-wrapper">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <header>
+                <span class="govuk-caption-l" th:text="#{lettingAgentInvitation.caption}">
+                    lettingAgentInvitation.caption
+                </span>
+                <h1 class="govuk-heading-l" th:text="#{lettingAgentInvitation.invalidLink.heading}">
+                    invalidLink.heading
+                </h1>
+            </header>
+            <section>
+                <p class="govuk-body" th:text="#{lettingAgentInvitation.invalidLink.checkLink}">
+                    invalidLink.checkLink
+                </p>
+                <h2 class="govuk-heading-m" th:text="#{lettingAgentInvitation.invalidLink.usedBefore.heading}">
+                    invalidLink.usedBefore.heading
+                </h2>
+                <p class="govuk-body" th:text="#{lettingAgentInvitation.invalidLink.usedBefore.body}">
+                    invalidLink.usedBefore.body
+                </p>
+            </section>
+        </div>
+    </div>
+</main>
+</html>
