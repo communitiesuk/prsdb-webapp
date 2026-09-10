@@ -16,7 +16,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -48,7 +47,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
         return GasSafetyViewModelFactory(
             uploadService,
             messageSource,
-            mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = false),
+            mockFeatureFlagManager(delegateToLettingAgentEnabled = false),
         ).fromEntity(propertyCompliance)
     }
 
@@ -96,7 +95,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 messageSource,
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = true),
+                mockFeatureFlagManager(delegateToLettingAgentEnabled = true),
             )
         val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
 
@@ -122,7 +121,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 mock(),
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+                mockFeatureFlagManager(delegateToLettingAgentEnabled = true),
             )
         val rows = factory.fromEntity(missingUnoccupiedProvideLater)
 
@@ -143,7 +142,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             GasSafetyViewModelFactory(
                 mock(),
                 mock(),
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+                mockFeatureFlagManager(delegateToLettingAgentEnabled = true),
             )
         val rows = factory.fromEntity(missingOccupiedNoCert)
 
@@ -177,7 +176,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 GasSafetyViewModelFactory(
                     mock(),
                     messageSource,
-                    mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = false),
+                    mockFeatureFlagManager(delegateToLettingAgentEnabled = false),
                 )
             val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
 
@@ -207,7 +206,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 GasSafetyViewModelFactory(
                     mock(),
                     mock(),
-                    mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = false),
+                    mockFeatureFlagManager(delegateToLettingAgentEnabled = false),
                 )
             val rows = factory.fromEntity(missingUnoccupiedProvideLater)
 
@@ -226,17 +225,15 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             )
         }
     }
-
+    
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkGasSafety.provideThisLater.occupiedWithDeadline"
 
         private fun mockFeatureFlagManager(
-            registrationDateDeadlineEnabled: Boolean,
             delegateToLettingAgentEnabled: Boolean,
         ): FeatureFlagManager =
             mock {
-                on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn registrationDateDeadlineEnabled
                 on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateToLettingAgentEnabled
             }
 

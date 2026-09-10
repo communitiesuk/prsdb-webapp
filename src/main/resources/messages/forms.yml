@@ -560,15 +560,12 @@ checkPropertyAnswers:
     heading: About your property
   propertyDetails:
     heading: Property details
-    address: Property address
     localCouncil: Local council
     type: Property type
     bedrooms: Number of bedrooms
-    ownership: Ownership type
     licensingType: Licensing type
-    noLicensing:
-      old: None
-      restructureAndSkipping: This property does not need a licence
+    noLicensing: None
+    noLicensingRequired: This property does not need a licence
     licensingProvideLater: Provide this later
     licensingProvideLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
   ownershipAndLandlords:
@@ -581,10 +578,8 @@ checkPropertyAnswers:
     licensing:
       heading: Tell us if the property needs a license
   tenancyDetails:
-    restructureAndSkipping:
-      heading: Tenancy details
-      tenancyDetailsRow: Tenancy details
-    heading: Tenancy and rental information
+    heading: Tenancy details
+    tenancyDetailsRow: Tenancy details
     occupied: Occupied by tenants
     households: Number of households
     provideLater: Provide this later

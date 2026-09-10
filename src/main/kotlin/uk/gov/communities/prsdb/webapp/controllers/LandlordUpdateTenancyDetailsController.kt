@@ -7,11 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController.Companion.UPDATE_TENANCY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -28,7 +26,6 @@ class LandlordUpdateTenancyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     fun getUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
@@ -39,7 +36,6 @@ class LandlordUpdateTenancyDetailsController(
     }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     fun postUpdateStep(
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,

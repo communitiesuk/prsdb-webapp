@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -54,7 +53,6 @@ class SavePropertyRegistrationDataStepConfig(
 
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val lettingAgentEmail =
             if (isDelegatedToLettingAgent) {
@@ -105,13 +103,9 @@ class SavePropertyRegistrationDataStepConfig(
                     0
                 },
             numBedrooms =
-                if (isSkippingEnabled || shouldRequireTenancyDetails) {
-                    state.bedrooms.formModel
-                        .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        .toInt()
-                } else {
-                    null
-                },
+                state.bedrooms.formModel
+                    .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                    .toInt(),
             billsIncludedList = if (shouldRequireTenancyDetails) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (shouldRequireTenancyDetails) billsIncludedDataModel?.customBillsIncluded else null,
             furnishedStatus = if (shouldRequireTenancyDetails) state.furnishedStatus.formModel.furnishedStatus else null,

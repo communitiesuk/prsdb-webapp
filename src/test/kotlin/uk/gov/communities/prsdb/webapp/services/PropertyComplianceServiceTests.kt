@@ -25,7 +25,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -321,7 +320,6 @@ class PropertyComplianceServiceTests {
                 .withGasSafetyCertProvideLater()
                 .build()
 
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(
             mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
                 landlord.id,
@@ -356,7 +354,6 @@ class PropertyComplianceServiceTests {
                 .withGasSafetyCertProvideLater()
                 .build()
 
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(
             mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
                 landlord.id,

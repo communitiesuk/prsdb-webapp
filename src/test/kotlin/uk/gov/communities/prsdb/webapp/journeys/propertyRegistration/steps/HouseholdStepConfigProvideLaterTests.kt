@@ -11,7 +11,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
@@ -20,12 +19,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 
 @ExtendWith(MockitoExtension::class)
 class HouseholdStepConfigProvideLaterTests {
-    private val realFeatureFlagManager =
-        FeatureFlagManager(
-            uk.gov.communities.prsdb.webapp.config
-                .FeatureFlipStrategyInitialiser(),
-        )
-
     private val routeSegment = HouseholdStep.ROUTE_SEGMENT
 
     @Mock
@@ -35,7 +28,7 @@ class HouseholdStepConfigProvideLaterTests {
     lateinit var dependencies: HouseHoldsAndTenantsDependencies
 
     private fun setupStepConfig(): HouseholdStepConfig {
-        val stepConfig = HouseholdStepConfig(realFeatureFlagManager)
+        val stepConfig = HouseholdStepConfig()
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
@@ -14,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 class PropertyRegistrationOccupancyChangeInterruptionSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
     fun enableRestructureAndSkippingAndDelegateFlags() {
-        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
