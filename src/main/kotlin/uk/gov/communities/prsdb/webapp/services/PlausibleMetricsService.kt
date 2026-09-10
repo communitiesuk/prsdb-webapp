@@ -18,13 +18,11 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateCheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateCheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateCheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsCyaStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentFrequencyAndAmount.UpdateRentFrequencyAndAmountCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
@@ -240,7 +238,6 @@ class PlausibleMetricsService(
                     UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, UpdateCheckEpcAnswersStep.ROUTE_SEGMENT),
-                updateReferrerRegex(UpdateOccupancyController.UPDATE_OCCUPANCY_ROUTE, UpdateOccupancyCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(LandlordUpdateLicensingController.UPDATE_LICENSING_ROUTE, UpdateLicensingCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
                     LandlordUpdateRentFrequencyAndAmountController.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE,

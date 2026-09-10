@@ -4,7 +4,6 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
@@ -30,21 +29,9 @@ class PropertyRegistrationCyaStepConfig(
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
-    // TODO PDJB-1340: Remove the legacy template branch when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    override fun chooseTemplate(state: PropertyRegistrationJourneyState): String =
-        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            "forms/restructureAndSkipping/propertyRegistrationCheckAnswersForm"
-        } else {
-            "forms/restructureAndSkipping/propertyRegistrationCheckAnswersFormLegacy"
-        }
+    override fun chooseTemplate(state: PropertyRegistrationJourneyState): String = "forms/propertyRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val isRestructureAndSkippingEnabled =
-            featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        if (!isRestructureAndSkippingEnabled) {
-            return getLegacyContent(state)
-        }
-
         val isLettingAgentEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         if (!isLettingAgentEnabled) {
             return getRestructuredContent(state)
@@ -55,20 +42,6 @@ class PropertyRegistrationCyaStepConfig(
         } else {
             getLettingAgentRestructuredContent(state)
         }
-    }
-
-    private fun getLegacyContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        return getBaseContent(
-            state = state,
-            submitButtonText = "forms.buttons.completeRegistration",
-            warningTextKey = "forms.warning",
-            insetText = true,
-            propertyDetails = getPropertyDetailsSummaryList(state),
-            licensingDetails = getLicensingDetailsForState(state, isOccupied, false),
-            occupancyDetails = null,
-            tenancyDetails = getTenancyDetails(state),
-        ) + getComplianceContent(state)
     }
 
     private fun getRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
@@ -88,7 +61,7 @@ class PropertyRegistrationCyaStepConfig(
         delegationContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val licensingDetails = getLicensingDetailsForState(state, isOccupied, true)
+        val licensingDetails = getLicensingDetailsForState(state, isOccupied)
         val tenancyDetails = getRestructuredTenancyDetails(state)
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
         val gasSafetyContent = complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask)
@@ -118,7 +91,7 @@ class PropertyRegistrationCyaStepConfig(
             )
         val tenancyDetails =
             getMockProvideLaterSummaryList(
-                "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
+                "forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow",
                 getProvideLaterMessageKey(isOccupied),
             )
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
@@ -190,11 +163,6 @@ class PropertyRegistrationCyaStepConfig(
         tenancyDetails,
     )
 
-    private fun getComplianceContent(state: PropertyRegistrationJourneyState) =
-        complianceDetailsHelper.getGasSafetyCyaContent(state, state.gasSafetyTask) +
-            complianceDetailsHelper.getElectricalSafetyCyaContent(state, state.electricalSafetyTask) +
-            complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
-
     private fun getRestructuredContentSections(
         state: PropertyRegistrationJourneyState,
         isOccupied: Boolean,
@@ -215,16 +183,13 @@ class PropertyRegistrationCyaStepConfig(
             "rentedOutGasHeadingKey" to "checkGasSafety.heading",
             "rentedOutElectricalHeadingKey" to "checkElectricalSafety.heading",
             "rentedOutEpcHeadingKey" to "propertyCompliance.epcTask.checkEpcAnswers.heading",
-            "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.heading",
+            "rentedOutTenancyHeadingKey" to "forms.checkPropertyAnswers.tenancyDetails.heading",
             "rentedOutLicensingRows" to licensingDetails,
             "rentedOutTenancyRows" to tenancyDetails,
             "occupancyDetails" to occupancyDetails,
             "tenancyUnoccupiedBodyTextKey" to if (!isOccupied) "forms.checkPropertyAnswers.tenancyDetails.unoccupiedBodyText" else null,
         )
     }
-
-    private fun getTenancyDetails(state: PropertyRegistrationJourneyState): List<SummaryListRowViewModel> =
-        occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource)
 
     private fun getRestructuredTenancyDetails(state: PropertyRegistrationJourneyState) =
         occupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(
@@ -285,16 +250,6 @@ class PropertyRegistrationCyaStepConfig(
                 actionUrl = null,
             ),
         )
-
-    private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(
-            state,
-            "forms.checkPropertyAnswers.propertyDetails.address",
-            // TODO PDJB-1340: Remove this legacy address format when the restructure and skipping flag is removed.
-            multiLineAddress = false,
-        ) +
-            getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state, "forms.checkPropertyAnswers.propertyDetails.ownership")
 
     private fun getRestructuredPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(
@@ -403,16 +358,15 @@ class PropertyRegistrationCyaStepConfig(
     private fun getLicensingDetailsForState(
         state: PropertyRegistrationJourneyState,
         isOccupied: Boolean,
-        isSkippingEnabled: Boolean,
     ): List<SummaryListRowViewModel> {
         val licensingTask = state.licensingTask
         val licensingType = licensingTask.getLicensingType()
 
-        if (isSkippingEnabled && licensingType == LicensingType.NO_LICENSING) {
+        if (licensingType == LicensingType.NO_LICENSING) {
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )

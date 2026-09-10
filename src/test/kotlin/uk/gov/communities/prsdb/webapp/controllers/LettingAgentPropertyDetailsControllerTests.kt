@@ -78,9 +78,9 @@ class LettingAgentPropertyDetailsControllerTests(
         val messageSource = mock<MessageSource>()
         whenever(messageSource.getMessage(any(), any(), any())).thenReturn("")
         return PropertyComplianceViewModelFactory(
-            GasSafetyViewModelFactory(mock(), messageSource, mock()),
-            ElectricalSafetyViewModelFactory(mock(), messageSource, mock()),
-            EpcViewModelFactory(messageSource, mock()),
+            GasSafetyViewModelFactory(mock(), messageSource),
+            ElectricalSafetyViewModelFactory(mock(), messageSource),
+            EpcViewModelFactory(messageSource),
         ).create(
             propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts(),
             viewType = PropertyDetailsViewType.LETTING_AGENT,

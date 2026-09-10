@@ -8,9 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
@@ -20,9 +18,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 class LicensingTypeStepConfigTests {
     @Mock
     lateinit var mockState: LicensingState
-
-    @Mock
-    lateinit var featureFlagManager: FeatureFlagManager
 
     val routeSegment = LicensingTypeStep.ROUTE_SEGMENT
 
@@ -59,10 +54,9 @@ class LicensingTypeStepConfigTests {
     }
 
     @Test
-    fun `mode returns PROVIDE_LATER when action is provideThisLater and route is allowed and FF is on`() {
+    fun `mode returns PROVIDE_LATER when action is provideThisLater and route is allowed`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.allowProvideLicensingLaterRoute).thenReturn(true)
-        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockState.getStepData(routeSegment))
             .thenReturn(mapOf("licensingType" to null, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME))
 
@@ -82,20 +76,8 @@ class LicensingTypeStepConfigTests {
         assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
     }
 
-    @Test
-    fun `mode throws UnrecoverableJourneyStateException when action is provideThisLater but FF is off`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.allowProvideLicensingLaterRoute).thenReturn(true)
-        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.getStepData(routeSegment))
-            .thenReturn(mapOf("licensingType" to null, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME))
-
-        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
-    }
-
     private fun setupStepConfig(): LicensingTypeStepConfig {
-        val stepConfig = LicensingTypeStepConfig(featureFlagManager)
+        val stepConfig = LicensingTypeStepConfig()
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

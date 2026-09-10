@@ -227,7 +227,7 @@ class OccupancyDetailsHelperTests {
         val rows = helper.getRestructuredCheckYourAnswersSummaryList(mockOccupationState, mockMessageSource)
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
     }
 
@@ -240,7 +240,7 @@ class OccupancyDetailsHelperTests {
         val rows = helper.getCheckYourTenancyDetailsAnswersSummaryList(mockTenancyState, mockMessageSource)
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
     }
 
     @Test
@@ -256,7 +256,7 @@ class OccupancyDetailsHelperTests {
             )
 
         assertEquals(1, rows.size)
-        assertEquals("forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow", rows[0].fieldHeading)
+        assertEquals("forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow", rows[0].fieldHeading)
         assertEquals("forms.checkPropertyAnswers.tenancyDetails.provideLater", rows[0].fieldValue)
         assertEquals(true, rows[0].actions[0].url.contains("journeyId=journey-123"))
     }

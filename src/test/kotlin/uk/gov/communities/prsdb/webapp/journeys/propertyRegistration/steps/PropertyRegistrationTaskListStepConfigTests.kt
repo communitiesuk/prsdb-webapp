@@ -15,7 +15,6 @@ import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -64,7 +63,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     inner class WhoProvidesDetailsTaskListItemTests {
         @BeforeEach
         fun enableRestructureAndStubState() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             stubRestructuredState()
         }
 
@@ -122,7 +120,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details as NOT_REQUIRED for an unoccupied property when delegation is disabled`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(false)
         stubRestructuredState()
@@ -143,7 +140,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details as NOT_NEEDED_YET for an unoccupied property when delegation is enabled`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockState.cachedOccupied).thenReturn(false)
         stubRestructuredState()
@@ -164,7 +160,6 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Test
     fun `getTaskListViewModel shows tenancy details task for an occupied property`() {
         // Arrange
-        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(true)
         stubRestructuredState()

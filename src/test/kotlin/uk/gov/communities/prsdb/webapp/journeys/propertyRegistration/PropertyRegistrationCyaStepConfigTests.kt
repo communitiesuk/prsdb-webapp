@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -16,7 +15,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.WhoProvidesRentalDetails
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -237,14 +235,13 @@ class PropertyRegistrationCyaStepConfigTests {
     inner class RestructuredContentWithoutLettingAgents {
         @BeforeEach
         fun enableRestructureAndSkippingFlagWithoutLettingAgents() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         }
 
         @Test
         fun `chooseTemplate returns restructured CYA template`() {
             assertEquals(
-                "forms/restructureAndSkipping/propertyRegistrationCheckAnswersForm",
+                "forms/propertyRegistrationCheckAnswersForm",
                 stepConfig.chooseTemplate(mockState),
             )
         }
@@ -304,7 +301,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val licensingRows = content["licensingDetails"] as List<SummaryListRowViewModel>
             assertEquals(
-                "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                "forms.checkPropertyAnswers.propertyDetails.noLicensingRequired",
                 licensingRows.first().fieldValue,
             )
         }
@@ -422,102 +419,9 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class RestructureAndSkippingDisabled {
-        @BeforeEach
-        fun disableRestructureAndSkippingFlag() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
-        }
-
-        @Test
-        fun `chooseTemplate returns legacy CYA template`() {
-            assertEquals(
-                "forms/restructureAndSkipping/propertyRegistrationCheckAnswersFormLegacy",
-                stepConfig.chooseTemplate(mockState),
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent puts null for occupancyDetails`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertNull(content["occupancyDetails"])
-        }
-
-        @Test
-        fun `getStepSpecificContent puts tenancyDetails from getCheckYourAnswersSummaryList`() {
-            val expectedTenancyDetails = listOf<SummaryListRowViewModel>()
-            whenever(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(expectedTenancyDetails)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals(expectedTenancyDetails, content["tenancyDetails"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button and legacy warning text`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
-            assertEquals("forms.warning", content["warningTextKey"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses Property address heading for legacy property details row`() {
-            whenever(mockAddressTask.getAddress()).thenReturn(
-                AddressDataModel.fromManualAddressData(
-                    addressLineOne = "1 Example Road",
-                    addressLineTwo = "Example estate",
-                    townOrCity = "Example town",
-                    county = "Exampleshire",
-                    postcode = "AB1 2CD",
-                    localCouncilId = 1,
-                ),
-            )
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
-
-            val addressRow =
-                propertyDetailsRows.single { it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.address" }
-            assertEquals(
-                "1 Example Road, Example estate, Example town, Exampleshire, AB1 2CD",
-                addressRow.fieldValue,
-            )
-            assertTrue(
-                addressRow.fieldValue is String,
-                "Legacy address should remain a single comma-separated string, not a multi-line list",
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses ownership type heading for legacy property details row`() {
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
-
-            assertTrue(
-                propertyDetailsRows.any { it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.ownership" },
-            )
-        }
-
-        @Test
-        fun `getStepSpecificContent uses noJointLandlords wording for legacy jointLandlordsDetails row`() {
-            whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-            val jointLandlordsDetailsRow = content["jointLandlordsDetails"] as SummaryListRowViewModel
-
-            assertEquals(
-                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
-                jointLandlordsDetailsRow.fieldValue,
-            )
-        }
-    }
-
-    @Nested
     inner class LettingAgentRestructuredContent {
         @BeforeEach
         fun enableLettingAgentFlags() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
         }
@@ -549,7 +453,6 @@ class PropertyRegistrationCyaStepConfigTests {
     inner class DelegatedRestructuredContent {
         @BeforeEach
         fun enableDelegationFlags() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
         }

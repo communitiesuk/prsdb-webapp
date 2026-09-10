@@ -266,46 +266,6 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
-    // TODO(PDJB-1340): delete this method when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed. It is only
-    // used by the old (flag-off) occupancy update check-your-answers step (UpdateOccupancyCyaConfig); the
-    // redesigned single-page update persists via updateIsOccupied instead.
-    @Transactional
-    fun updateOccupancy(
-        id: Long,
-        isOccupied: Boolean,
-        numberOfHouseholds: Int,
-        numberOfPeople: Int,
-        numBedrooms: Int?,
-        billsIncludedList: String?,
-        customBillsIncluded: String?,
-        furnishedStatus: FurnishedStatus?,
-        rentFrequency: RentFrequency?,
-        customRentFrequency: String?,
-        rentAmount: BigDecimal?,
-        initialLastModifiedDate: Instant,
-    ) {
-        val propertyOwnership = getPropertyOwnership(id)
-        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
-        val wasOccupied = propertyOwnership.isOccupied
-        propertyOwnership.currentNumHouseholds = numberOfHouseholds
-        propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnership.isOccupied = isOccupied
-        propertyOwnership.numBedrooms = numBedrooms
-        propertyOwnership.billsIncludedList = billsIncludedList
-        propertyOwnership.customBillsIncluded = customBillsIncluded
-        propertyOwnership.furnishedStatus = furnishedStatus
-        propertyOwnership.rentFrequency = rentFrequency
-        propertyOwnership.customRentFrequency = customRentFrequency
-        propertyOwnership.rentAmount = rentAmount
-        if (!wasOccupied && propertyOwnership.isOccupied) {
-            propertyOwnership.lastOccupiedDate = LocalDate.now(DateTimeHelper.UK_ZONE)
-        }
-        if (!propertyOwnership.isOccupied) {
-            propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
-        }
-        propertyOwnershipRepository.save(propertyOwnership)
-    }
-
     @Transactional
     fun updateIsOccupied(
         id: Long,

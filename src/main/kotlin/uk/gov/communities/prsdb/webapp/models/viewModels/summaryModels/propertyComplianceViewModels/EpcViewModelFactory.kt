@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -17,8 +16,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 @PrsdbWebService
 class EpcViewModelFactory(
     messageSource: MessageSource,
-    featureFlagManager: FeatureFlagManager,
-) : ComplianceViewModelFactoryBase(messageSource, featureFlagManager) {
+) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
     override val provideLaterNoDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoDeadline"
     override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
