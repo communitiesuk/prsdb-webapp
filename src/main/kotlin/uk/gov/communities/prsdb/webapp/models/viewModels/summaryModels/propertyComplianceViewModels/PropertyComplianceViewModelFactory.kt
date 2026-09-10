@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
@@ -37,7 +39,11 @@ class PropertyComplianceViewModelFactory(
         val electricalSafetyChangeActions =
             changeActionsForViewType(
                 viewType,
-                UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                LandlordUpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(it) +
+                        "/${HasElectricalCertStep.ROUTE_SEGMENT}"
+                },
             )
 
         val gasSafetyChangeActions =

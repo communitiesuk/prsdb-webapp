@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -13,19 +12,25 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateLicensingJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateLicensingJourney>,
     private val ownershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -42,40 +47,86 @@ class UpdateLicensingJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state)
+            mainJourneyMap(state, returnUrl)
         } else {
             checkYourAnswersJourneyMap(state)
         }
     }
 
-    private fun checkYourAnswersJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
-        journey(state) {
+    private fun checkYourAnswersJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> {
+        val isCheckingSingleLicenceStep =
+            state.checkingAnswersFor in
+                listOf(
+                    SelectiveLicenceStep.ROUTE_SEGMENT,
+                    HmoMandatoryLicenceStep.ROUTE_SEGMENT,
+                    HmoAdditionalLicenceStep.ROUTE_SEGMENT,
+                )
+
+        return journey(state) {
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(journey.licensingTask, { journey })
-            configureStep(journey.licensingTask.licensingTypeStep) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
+            when (state.checkingAnswersFor) {
+                SelectiveLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.selectiveLicenceStep, SelectiveLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoMandatoryLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoMandatoryLicenceStep, HmoMandatoryLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                HmoAdditionalLicenceStep.ROUTE_SEGMENT -> {
+                    fromTask(journey.licensingTask, journey) {
+                        checkAnswerStep(task.hmoAdditionalLicenceStep, HmoAdditionalLicenceStep.ROUTE_SEGMENT)
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.licensingTask, { journey })
+                    configureStep(journey.licensingTask.licensingTypeStep) {
+                        withAdditionalContentProperty {
+                            "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
+                        }
+                        withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+                    }
                 }
             }
+            configureStep(journey.licensingTask.selectiveLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
+            configureStep(journey.licensingTask.hmoMandatoryLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
+            configureStep(journey.licensingTask.hmoAdditionalLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
             step(journey.finishCyaStep) {
-                parents { journey.licensingTask.isComplete() }
+                if (isCheckingSingleLicenceStep) {
+                    initialStep()
+                } else {
+                    parents { journey.licensingTask.isComplete() }
+                }
                 nextDestination { Destination.Nowhere() }
             }
         }
+    }
 
-    private fun mainJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
+    private fun mainJourneyMap(
+        state: UpdateLicensingJourney,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(journey.propertyId)
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             task(journey.licensingTask) {
                 withDependencies { journey }
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
@@ -84,19 +135,26 @@ class UpdateLicensingJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateLicensingCyaStep.ROUTE_SEGMENT)
                 parents { journey.licensingTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
             configureStep(journey.licensingTask.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                 }
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
+            configureStep(journey.licensingTask.selectiveLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
+            configureStep(journey.licensingTask.hmoMandatoryLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+            }
+            configureStep(journey.licensingTask.hmoAdditionalLicenceStep) {
+                withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
             }
         }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent

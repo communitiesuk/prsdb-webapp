@@ -80,6 +80,9 @@ class PropertyComplianceServiceTests {
     private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks

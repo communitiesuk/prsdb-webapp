@@ -4,16 +4,21 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateFurnishedStatusController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateFurnishedStatusController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -124,8 +129,14 @@ abstract class PropertyDetailsViewModelBase(
         rowWithViewTypeSpecificChangeLink(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
             propertyOwnership.currentNumHouseholds,
-            UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = true,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
@@ -174,8 +185,14 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
-            UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
-                "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
+                    "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(it) +
+                        "/${FurnishedStatusStep.ROUTE_SEGMENT}"
+                },
         )
 
     protected fun rentFrequencyRow(withoutBottomBorder: Boolean = false): SummaryListRowViewModel =
@@ -183,8 +200,14 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
-            UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
-                "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
+                    "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(it) +
+                        "/${RentFrequencyStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = withoutBottomBorder,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
@@ -202,8 +225,14 @@ abstract class PropertyDetailsViewModelBase(
             rowWithViewTypeSpecificChangeLink(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
                 value,
-                UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
-                    "/${RentAmountStep.ROUTE_SEGMENT}",
+                landlordActionLink =
+                    LandlordUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
+                        "/${RentAmountStep.ROUTE_SEGMENT}",
+                lettingAgentActionLink =
+                    lettingAgentAccessToken?.let {
+                        LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(it) +
+                            "/${RentAmountStep.ROUTE_SEGMENT}"
+                    },
             )
         } else {
             row("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount", value, withActionLink = false)
@@ -216,8 +245,16 @@ abstract class PropertyDetailsViewModelBase(
             propertyOwnership.license?.let {
                 MessageKeyConverter.convert(it.licenseType)
             } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
-            getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink = lettingAgentLicensingTypeLink,
+            withoutBottomBorder =
+                listOf(
+                    LicensingType.SELECTIVE_LICENCE,
+                    LicensingType.HMO_MANDATORY_LICENCE,
+                    LicensingType.HMO_ADDITIONAL_LICENCE,
+                ).contains(propertyOwnership.licenseType),
         )
 
     protected fun licensingNumberRow(): SummaryListRowViewModel? =
@@ -239,9 +276,18 @@ abstract class PropertyDetailsViewModelBase(
             } else {
                 "propertyDetails.propertyRecord.licensing.provideLaterNoDeadline"
             },
-            getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                getUpdateLicensingBaseRoute(propertyOwnership.id) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink = lettingAgentLicensingTypeLink,
         )
+
+    private val lettingAgentLicensingTypeLink: String?
+        get() =
+            lettingAgentAccessToken?.let {
+                LettingAgentUpdateLicensingController.getUpdateLicensingRoute(it) +
+                    "/${LicensingTypeStep.ROUTE_SEGMENT}"
+            }
 
     protected fun tenancyProvideLaterRow(): SummaryListRowViewModel =
         rowWithViewTypeSpecificChangeLink(
@@ -251,43 +297,55 @@ abstract class PropertyDetailsViewModelBase(
             } else {
                 "propertyDetails.propertyRecord.tenancy.provideLaterNoDeadline"
             },
-            UpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
-                "/${HouseholdStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(propertyOwnership.id) +
+                    "/${HouseholdStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateTenancyDetailsController.getUpdateTenancyDetailsRoute(it) +
+                        "/${HouseholdStep.ROUTE_SEGMENT}"
+                },
         )
 
     // The local council view hides provide-later rows and shows an explanatory paragraph instead; all other
     // views show a provide-later row (with a change link only where rowWithViewTypeSpecificChangeLink supplies a route for the view type).
     protected fun buildLicensingSection(): List<SummaryListRowViewModel> =
         when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
                 if (isLicensingProvideLater) {
                     listOf(licensingProvideLaterRow())
                 } else {
                     listOfNotNull(licensingTypeRow(), licensingNumberRow())
                 }
-            PropertyDetailsViewType.LOCAL_COUNCIL ->
+            }
+
+            PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 if (isLicensingProvideLater) {
                     emptyList()
                 } else {
                     listOfNotNull(licensingTypeRow(), licensingNumberRow())
                 }
+            }
         }
 
     protected fun buildTenancySection(): List<SummaryListRowViewModel> {
         if (!isOccupied) return emptyList()
         return when (viewType) {
-            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT ->
+            PropertyDetailsViewType.LANDLORD, PropertyDetailsViewType.LETTING_AGENT -> {
                 if (isTenancyProvideLater) {
                     listOf(tenancyProvideLaterRow())
                 } else {
                     buildOccupiedTenancyRows()
                 }
-            PropertyDetailsViewType.LOCAL_COUNCIL ->
+            }
+
+            PropertyDetailsViewType.LOCAL_COUNCIL -> {
                 if (isTenancyProvideLater) {
                     emptyList()
                 } else {
                     buildOccupiedTenancyRows()
                 }
+            }
         }
     }
 
@@ -319,8 +377,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
-    // This lets the letting-agent update journeys be built in parallel (PDJB-1571, PDJB-1572, PDJB-1573,
-    // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
+    // PDJB-1576 will wire up lettingAgentActionLink for its remaining row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
         key: String,

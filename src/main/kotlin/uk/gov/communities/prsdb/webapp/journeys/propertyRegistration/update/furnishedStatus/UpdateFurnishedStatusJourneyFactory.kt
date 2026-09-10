@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.fur
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -15,14 +14,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Furn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateFurnishedStatusJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateFurnishedStatusJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -35,13 +36,11 @@ class UpdateFurnishedStatusJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { returnUrl }
             step(journey.furnishedStatus) {
                 routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.completeFurnishedStatusUpdateStep }
                 initialStep()
                 withAdditionalContentProperties {
@@ -56,15 +55,12 @@ class UpdateFurnishedStatusJourneyFactory(
             }
             step(journey.completeFurnishedStatusUpdateStep) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
         }
     }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent
