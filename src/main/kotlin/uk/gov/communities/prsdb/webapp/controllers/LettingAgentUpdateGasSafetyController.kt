@@ -106,7 +106,6 @@ class LettingAgentUpdateGasSafetyController(
         const val LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{token}/update-gas-safety"
 
-        fun getUpdateGasSafetyRoute(token: UUID): String =
-            UriTemplate(LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE).expand(token).toASCIIString()
+        fun getUpdateGasSafetyRoute(token: UUID): String = UriTemplate(LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE).expand(token).toASCIIString()
     }
 }
