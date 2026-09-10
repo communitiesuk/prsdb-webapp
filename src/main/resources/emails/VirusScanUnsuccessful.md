@@ -1,6 +1,8 @@
-Hello ((recipient name)),
+This certificate failed our virus scan. It has not been added to the property’s registration.
 
-There was a problem uploading the ((certificate type)) for this property.
+# Certificate
+
+((certificate type))
 
 # Property
 
@@ -11,8 +13,6 @@ There was a problem uploading the ((certificate type)) for this property.
 Check the file and try uploading it again.
 
 If the file fails the virus scan again, upload a different version of the file.
-
-[Sign in to your account](((dashboard url)))
 
 ---
 
