@@ -1440,6 +1440,49 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `sends letting agent electrical notification with a plain certificate label when a letting agent adds the certificate`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiryDate = LocalDate.now().plusYears(1)
+
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)).thenReturn(URI("http://property"))
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1"))
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate,
+                electricalSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    LettingAgentComplianceUpdateNotificationEmail(
+                        recipientName = mockLoggedInLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate",
+                        expiryDate = expiryDate.format(dateFormatter),
+                        propertyRecordUrl = "http://property",
+                    ),
+                ),
+            )
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+        }
+
+        @Test
         fun `sends expired unoccupied electrical safety confirmation email when certificate is expired and property is unoccupied`() {
             setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")

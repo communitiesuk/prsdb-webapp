@@ -9,11 +9,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateRentIncludesBillsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<UpdateRentIncludesBillsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateRentIncludesBillsJourneyState): Map<String, Any> =
@@ -40,6 +42,10 @@ class UpdateRentIncludesBillsCyaConfig(
             state.deleteJourney()
             throw ex
         }
+        propertyUpdateEmailService.sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            state.propertyId,
+            listOf("Whether the rent includes bills"),
+        )
     }
 }
 

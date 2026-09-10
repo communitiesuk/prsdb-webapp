@@ -11,11 +11,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateRentFrequencyAndAmountCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<UpdateRentFrequencyAndAmountJourneyState>() {
     override fun getStepSpecificContent(state: UpdateRentFrequencyAndAmountJourneyState): Map<String, Any> =
@@ -47,6 +49,10 @@ class UpdateRentFrequencyAndAmountCyaConfig(
             state.deleteJourney()
             throw ex
         }
+        propertyUpdateEmailService.sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            state.propertyId,
+            listOf("How often the rent is charged", "The amount of rent charged"),
+        )
     }
 }
 

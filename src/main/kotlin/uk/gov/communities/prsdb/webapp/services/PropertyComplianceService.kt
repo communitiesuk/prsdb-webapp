@@ -300,6 +300,7 @@ class PropertyComplianceService(
                 certificateType = "electrical safety certificate",
                 certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
                 expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                lettingAgentCertificateTypeLabel = "Electrical safety certificate",
             )
         }
     }
@@ -352,6 +353,7 @@ class PropertyComplianceService(
         expiryDate: LocalDate?,
         expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+        lettingAgentCertificateTypeLabel: String = certificateTypeLabel,
     ) {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
         val updateType =
@@ -389,7 +391,7 @@ class PropertyComplianceService(
                     sendLettingAgentComplianceUpdateEmails(
                         propertyOwnership = propertyOwnership,
                         certificateType = certificateType,
-                        certificateTypeLabel = certificateTypeLabel,
+                        certificateTypeLabel = lettingAgentCertificateTypeLabel,
                         expiryDate = formattedExpiryDate,
                     )
                 }

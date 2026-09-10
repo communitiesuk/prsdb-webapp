@@ -94,6 +94,23 @@ class PropertyUpdateEmailService(
         }
     }
 
+    fun sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+        propertyId: Long,
+        updatedBullets: List<String>,
+    ) {
+        val actingLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        if (actingLandlord != null) {
+            return
+        }
+        if (!propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyId)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No acting landlord was found for the update to property ownership $propertyId",
+            )
+        }
+        sendLettingAgentUpdateEmails(propertyId, updatedBullets)
+    }
+
     fun sendUpdateWithLettingAgentRemovedEmails(
         propertyId: Long,
         updatedMessage: String,

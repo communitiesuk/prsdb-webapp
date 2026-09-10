@@ -18,12 +18,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rent
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 
 @ExtendWith(MockitoExtension::class)
 class UpdateRentIncludesBillsCyaConfigTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateRentIncludesBillsJourneyState
@@ -53,6 +57,7 @@ class UpdateRentIncludesBillsCyaConfigTests {
             UpdateRentIncludesBillsCyaConfig(
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
                 messageSource = mockMessageSource,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -72,6 +77,10 @@ class UpdateRentIncludesBillsCyaConfigTests {
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+        verify(mockPropertyUpdateEmailService).sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            propertyId,
+            listOf("Whether the rent includes bills"),
         )
     }
 
