@@ -63,7 +63,7 @@ class LandlordUpdateLicensingController(
                     PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal), propertyOwnershipId) },
             dispatch = dispatch,
         )
 

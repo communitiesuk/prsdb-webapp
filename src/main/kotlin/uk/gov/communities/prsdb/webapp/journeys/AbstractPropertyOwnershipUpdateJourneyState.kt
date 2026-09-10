@@ -4,10 +4,21 @@ import java.security.Principal
 import java.util.UUID
 
 abstract class AbstractPropertyOwnershipUpdateJourneyState(
-    journeyStateService: JourneyStateService,
+    private val journeyStateService: JourneyStateService,
     private val updateJourneyName: String,
 ) : AbstractJourneyState(journeyStateService) {
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+
+    fun discardIfLastModifiedDateChanged(
+        seed: Any?,
+        currentLastModifiedDate: String,
+    ) {
+        val journeyId = generateJourneyId(seed)
+        val storedLastModifiedDate = journeyStateService.getStoredStringValueOrNull(journeyId, LAST_MODIFIED_DATE_KEY)
+        if (storedLastModifiedDate != null && storedLastModifiedDate != currentLastModifiedDate) {
+            journeyStateService.discardJourney(journeyId)
+        }
+    }
 
     override fun generateJourneyId(seed: Any?): String {
         val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
@@ -16,6 +27,7 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
             when {
                 ownershipUserPair != null ->
                     generateSeedForPropertyOwnershipAndUser(ownershipUserPair.first, ownershipUserPair.second, updateJourneyName)
+
                 token != null -> generateSeedForToken(token, updateJourneyName)
                 else -> null
             }
@@ -34,6 +46,8 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
     private fun convertSeedToTokenOrNull(seed: Any?): UUID? = seed as? UUID
 
     companion object {
+        const val LAST_MODIFIED_DATE_KEY = "lastModifiedDate"
+
         fun generateSeedForPropertyOwnershipAndUser(
             ownershipId: Long,
             user: Principal,

@@ -64,7 +64,7 @@ class LandlordUpdateTenancyDetailsController(
                     PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal), propertyOwnershipId) },
             dispatch = dispatch,
         )
 

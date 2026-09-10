@@ -25,7 +25,10 @@ class LettingAgentUpdateLicensingController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initializeJourneyState(token)
+    override fun initialiseJourneyState(
+        token: UUID,
+        propertyOwnershipId: Long,
+    ): String = journeyFactory.initializeJourneyState(token, propertyOwnershipId)
 
     companion object {
         const val LETTING_AGENT_UPDATE_LICENSING_ROUTE =

@@ -112,7 +112,17 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any,
+        propertyId: Long,
+    ): String {
+        val state = stateFactory.getObject()
+        state.discardIfLastModifiedDateChanged(
+            seed,
+            propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
+        )
+        return state.initializeOrRestoreState(seed)
+    }
 }
 
 @JourneyFrameworkComponent
@@ -127,7 +137,7 @@ class UpdateHouseholdsAndTenantsJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "households and tenants"),
     UpdateHouseholdsAndTenantsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 

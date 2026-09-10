@@ -101,7 +101,7 @@ class LandlordUpdateElectricalSafetyController(
                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal), propertyOwnershipId) },
             dispatch = dispatch,
         )
 

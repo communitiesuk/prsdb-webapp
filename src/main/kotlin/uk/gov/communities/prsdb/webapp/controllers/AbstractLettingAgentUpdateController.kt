@@ -40,7 +40,10 @@ abstract class AbstractLettingAgentUpdateController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator>
 
-    protected abstract fun initialiseJourneyState(token: UUID): String
+    protected abstract fun initialiseJourneyState(
+        token: UUID,
+        propertyOwnershipId: Long,
+    ): String
 
     protected fun dispatchJourneyStep(
         stepPath: String,
@@ -58,7 +61,7 @@ abstract class AbstractLettingAgentUpdateController(
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { createJourneySteps(propertyOwnershipId, returnUrl) },
-            initialiseJourney = { initialiseJourneyState(token) },
+            initialiseJourney = { initialiseJourneyState(token, propertyOwnershipId) },
             dispatch = dispatch,
         )
     }

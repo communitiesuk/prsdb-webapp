@@ -37,7 +37,17 @@ class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any,
+        propertyId: Long,
+    ): String {
+        val state = stateFactory.getObject()
+        state.discardIfLastModifiedDateChanged(
+            seed,
+            propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
+        )
+        return state.initializeOrRestoreState(seed)
+    }
 
     final fun createJourneySteps(
         propertyId: Long,
@@ -193,7 +203,7 @@ class UpdateTenancyDetailsJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 }
 
 interface UpdateTenancyDetailsJourneyState :

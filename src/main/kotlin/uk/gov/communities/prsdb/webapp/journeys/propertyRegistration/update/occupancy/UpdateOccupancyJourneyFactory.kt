@@ -325,7 +325,14 @@ class UpdateOccupancyJourneyFactory(
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    ): String {
+        val state = stateFactory.getObject()
+        state.discardIfLastModifiedDateChanged(
+            Pair(ownershipId, user),
+            propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
+        )
+        return state.initializeOrRestoreState(Pair(ownershipId, user))
+    }
 
     // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
@@ -432,7 +439,7 @@ class UpdateOccupancyJourney(
 
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 
     override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 

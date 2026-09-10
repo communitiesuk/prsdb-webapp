@@ -123,7 +123,17 @@ class UpdateGasSafetyJourneyFactory(
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    ): String {
+        val state = stateFactory.getObject()
+        val propertyCompliance =
+            propertyOwnershipService.getPropertyOwnership(ownershipId).propertyCompliance
+                ?: throw PrsdbWebException("Property ownership $ownershipId does not have a compliance record")
+        state.discardIfLastModifiedDateChanged(
+            Pair(ownershipId, user),
+            propertyCompliance.getMostRecentlyUpdated().toString(),
+        )
+        return state.initializeOrRestoreState(Pair(ownershipId, user))
+    }
 }
 
 @JourneyFrameworkComponent
@@ -138,7 +148,7 @@ class UpdateGasSafetyJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateGasSafetyJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")

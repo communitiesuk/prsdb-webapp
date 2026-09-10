@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Clock
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.springframework.web.context.request.RequestContextHolder
@@ -122,8 +123,10 @@ class JourneyStateService(
         journeyStateMetadataStore += metadata.copy(lastUpdated = Clock.System.now())
     }
 
-    fun deleteState() {
-        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyId }
+    fun deleteState() = discardJourney(journeyId)
+
+    fun discardJourney(journeyIdToDiscard: String) {
+        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyIdToDiscard }
 
         dependentJourneys.forEach {
             session.removeAttribute(it.journeyId)
@@ -131,11 +134,22 @@ class JourneyStateService(
             journeyStateMetadataStore -= it.journeyId
         }
 
-        session.removeAttribute(journeyId)
+        session.removeAttribute(journeyIdToDiscard)
 
-        persistenceService.deleteJourneyStateData(journeyId)
+        persistenceService.deleteJourneyStateData(journeyIdToDiscard)
 
-        journeyStateMetadataStore -= journeyId
+        journeyStateMetadataStore -= journeyIdToDiscard
+    }
+
+    // Peeks only the live HTTP-session state (not DB-persisted state), which is sufficient because property update
+    // journeys are session-only. If an update journey ever became DB-backed, a stale state restored from the DB on
+    // re-entry would not be seen here.
+    fun getStoredStringValueOrNull(
+        journeyId: String,
+        key: String,
+    ): String? {
+        val storedValue = objectToStringKeyedMap(session.getAttribute(journeyId))?.get(key) as? String ?: return null
+        return runCatching { Json.decodeFromString<String>(storedValue) }.getOrNull()
     }
 
     fun initialiseJourneyWithId(

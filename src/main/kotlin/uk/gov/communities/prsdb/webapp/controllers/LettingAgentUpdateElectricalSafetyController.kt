@@ -43,7 +43,10 @@ class LettingAgentUpdateElectricalSafetyController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initialiseJourneyState(token)
+    override fun initialiseJourneyState(
+        token: UUID,
+        propertyOwnershipId: Long,
+    ): String = journeyFactory.initialiseJourneyState(token, propertyOwnershipId)
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

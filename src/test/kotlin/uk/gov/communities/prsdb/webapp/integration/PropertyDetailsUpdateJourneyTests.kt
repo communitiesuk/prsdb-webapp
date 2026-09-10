@@ -90,6 +90,40 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
 
         @Nested
+        inner class ResumingAbandonedUpdateAfterCompletingAnother {
+            @Test
+            fun `resuming an abandoned update after completing another update on the same property starts fresh without a conflict`(
+                page: Page,
+            ) {
+                val newNumberOfBedrooms = 4
+
+                // Start (but abandon) a bedrooms update - this stores the property's current last-modified date in the session
+                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+                assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
+
+                // Complete a different update (ownership type) on the same property, bumping its last-modified date
+                propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
+                val updateOwnershipTypePage =
+                    assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
+                updateOwnershipTypePage.submitOwnershipType(OwnershipType.LEASEHOLD)
+                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+
+                // Re-enter the abandoned bedrooms update via the change link and submit it
+                propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+                val updateNumberOfBedroomsPage =
+                    assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, urlArguments)
+                updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
+
+                // The update completes without an update-conflict error and the change is applied
+                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                    .containsText(newNumberOfBedrooms.toString())
+            }
+        }
+
+        @Nested
         inner class LicenceUpdates {
             // Property 1 is licensing-provide-later, so the standard layout shows a "Provide this later" row rather than an
             // editable "Licensing type" row. These update-an-existing-licence tests use property 7, which has a real licence.

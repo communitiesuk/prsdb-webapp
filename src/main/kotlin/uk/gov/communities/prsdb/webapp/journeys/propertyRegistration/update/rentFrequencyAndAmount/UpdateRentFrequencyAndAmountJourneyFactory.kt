@@ -112,7 +112,14 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
     fun initialiseJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    ): String {
+        val state = stateFactory.getObject()
+        state.discardIfLastModifiedDateChanged(
+            Pair(ownershipId, user),
+            propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
+        )
+        return state.initializeOrRestoreState(Pair(ownershipId, user))
+    }
 }
 
 @JourneyFrameworkComponent
@@ -128,7 +135,7 @@ class UpdateRentFrequencyAndAmountJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateRentFrequencyAndAmountJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
