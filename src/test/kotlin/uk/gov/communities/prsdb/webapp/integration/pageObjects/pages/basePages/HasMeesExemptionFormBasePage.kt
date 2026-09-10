@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
@@ -10,6 +11,7 @@ open class HasMeesExemptionFormBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
     val form = HasMeesExemptionForm(page)
     val sectionHeader = SectionHeader(page.locator("main"))
