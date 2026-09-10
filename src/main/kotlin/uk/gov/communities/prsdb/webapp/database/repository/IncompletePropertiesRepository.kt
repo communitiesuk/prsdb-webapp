@@ -5,9 +5,10 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertiesId
 import java.time.Instant
 
-interface IncompletePropertiesRepository : JpaRepository<LandlordIncompleteProperties, Long> {
+interface IncompletePropertiesRepository : JpaRepository<LandlordIncompleteProperties, LandlordIncompletePropertiesId> {
     @Suppress("ktlint:standard:function-naming")
     fun findBySavedJourneyState_CreatedDateBefore(
         cutoffDate: Instant,
