@@ -1737,6 +1737,10 @@ class Navigator(
         return createValidPage(page, ValidateTokenPage::class)
     }
 
+    fun navigateToLettingAgentInvitationWithInvalidToken(token: String) {
+        navigate("${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token")
+    }
+
     fun skipToLettingAgentInvitationSetPasswordPage(token: String): SetPasswordPage {
         setJourneyStateInSession(
             LettingAgentInvitationStateSessionBuilder.beforeSetPassword(token).build(),
