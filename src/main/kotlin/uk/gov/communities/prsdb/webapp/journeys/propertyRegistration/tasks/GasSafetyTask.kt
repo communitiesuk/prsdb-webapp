@@ -39,8 +39,4 @@ class GasSafetyTask(
 interface GasSafetyDependencies {
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
-
-    // The landlord to notify about a gas certificate upload when there is no logged-in landlord (e.g. the letting
-    // agent journey). Null when the current user's landlord should be used (landlord and registration journeys).
-    val gasCertUploadLandlordIdOverride: Long?
 }

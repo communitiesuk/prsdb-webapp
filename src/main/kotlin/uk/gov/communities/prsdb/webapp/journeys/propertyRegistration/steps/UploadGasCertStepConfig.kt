@@ -41,22 +41,22 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId =
-                userToLandlordService.getCurrentLandlordForUserOrNull()?.id
-                    ?: state.gasCertUploadLandlordIdOverride
-                    ?: throw PrsdbWebException("No landlord could be resolved for the gas certificate upload")
-            virusScanCallbackService.saveEmailForJourney(
-                state.journeyId,
-                fileUploadId,
-                CertificateType.GasSafetyCert,
-                landlordId,
-            )
-            virusScanCallbackService.saveEmailToMonitoringTeam(
-                state.journeyId,
-                fileUploadId,
-                CertificateType.GasSafetyCert,
-                landlordId,
-            )
+            val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
+
+            if (landlordId != null) {
+                virusScanCallbackService.saveEmailForJourney(
+                    state.journeyId,
+                    fileUploadId,
+                    CertificateType.GasSafetyCert,
+                    landlordId,
+                )
+                virusScanCallbackService.saveEmailToMonitoringTeam(
+                    state.journeyId,
+                    fileUploadId,
+                    CertificateType.GasSafetyCert,
+                    landlordId,
+                )
+            }
 
             val formModel = getFormModelFromState(state)
 

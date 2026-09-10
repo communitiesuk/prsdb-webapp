@@ -40,7 +40,6 @@ class UpdateGasSafetyJourneyFactory(
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
             state.previousUploadIds = propertyCompliance.gasSafetyFileUploads.map { it.id }
             state.isOccupied = propertyOwnership.isOccupied
-            state.gasCertUploadLandlordIdOverride = propertyOwnership.landlords.firstOrNull()?.id
             state.isStateInitialized = true
         }
 
@@ -142,7 +141,6 @@ class UpdateGasSafetyJourney(
     override val cyaStep get() = updateCheckGasSafetyAnswersStep
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
-    override var gasCertUploadLandlordIdOverride: Long? by delegateProvider.nullableDelegate("gasCertUploadLandlordIdOverride")
     override val allowProvideCertificateLaterRoute: Boolean = false
 }
 

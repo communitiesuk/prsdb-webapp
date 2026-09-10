@@ -750,7 +750,6 @@ class PropertyRegistrationJourney(
 
     override val allowProvideCertificateLaterRoute: Boolean = true
     override val allowProvideLicensingLaterRoute: Boolean = true
-    override val gasCertUploadLandlordIdOverride: Long? = null
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

@@ -46,8 +46,6 @@ class GasSafetyDetailsTask(
         get() = dependencies.isOccupied
     override val allowProvideCertificateLaterRoute: Boolean
         get() = dependencies.allowProvideCertificateLaterRoute
-    override val gasCertUploadLandlordIdOverride: Long?
-        get() = dependencies.gasCertUploadLandlordIdOverride
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
