@@ -147,7 +147,7 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
 
             val invalidLinkPage = assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
             BaseComponent.assertThat(invalidLinkPage.heading).containsText("There was a problem with this link")
-            assertThat(invalidLinkPage.description).containsText("Check the link is correct.")
+            assertThat(invalidLinkPage.checkLinkText).containsText("Check the link is correct.")
         }
     }
 }
