@@ -218,12 +218,12 @@ class LettingAgentInvitationControllerTests(
         }
 
         @Test
-        fun `invalidLink returns the todoNoButton view`() {
+        fun `invalidLink returns the invalidLettingAgentInvitationLink view`() {
             mvc
                 .get("$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT")
                 .andExpect {
                     status { isOk() }
-                    view { name("forms/todoNoButton") }
+                    view { name("invalidLettingAgentInvitationLink") }
                 }
         }
     }
