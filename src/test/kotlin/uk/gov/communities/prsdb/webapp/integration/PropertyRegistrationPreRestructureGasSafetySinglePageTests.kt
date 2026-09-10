@@ -31,7 +31,7 @@ class PropertyRegistrationPreRestructureGasSafetySinglePageTests : IntegrationTe
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
-            hasGasSupplyPage.form.submit()
+            hasGasSupplyPage.form.submitPrimaryButton()
             assertThat(
                 hasGasSupplyPage.form.getErrorMessage(),
             ).containsText("Select whether you have a gas supply or any gas appliances")
@@ -50,7 +50,7 @@ class PropertyRegistrationPreRestructureGasSafetySinglePageTests : IntegrationTe
         @Test
         fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
             val hasGasSafetyCertPage = navigator.skipToPropertyRegistrationHasGasCertPage()
-            hasGasSafetyCertPage.form.submitPrimaryButton()
+            hasGasSafetyCertPage.form.submit()
             assertThat(
                 hasGasSafetyCertPage.form.getErrorMessage(),
             ).containsText("Select whether you have a gas safety certificate")
@@ -128,13 +128,13 @@ class PropertyRegistrationPreRestructureGasSafetySinglePageTests : IntegrationTe
         }
 
         @Test
-        fun `Provide later - gas cert change link navigates to has gas cert page`(page: Page) {
+        fun `Provide later - gas cert change link navigates to has gas supply page`(page: Page) {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
                 )
             cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
         }
 
         @Test
