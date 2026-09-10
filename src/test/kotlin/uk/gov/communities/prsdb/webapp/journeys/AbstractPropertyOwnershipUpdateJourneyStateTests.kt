@@ -6,7 +6,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.util.UUID
 
 class AbstractPropertyOwnershipUpdateJourneyStateTests {
     @Test
@@ -14,7 +13,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val journeyState = TestPropertyOwnershipUpdateJourneyState(journeyStateService)
-        val seed = UUID.randomUUID()
+        val seed = PropertyOwnershipUpdateJourneySeed(1L)
         val journeyId = journeyState.generateJourneyId(seed)
         whenever(journeyStateService.getStoredStringValueOrNull(journeyId, "lastModifiedDate")).thenReturn("t0")
 
@@ -30,7 +29,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val journeyState = TestPropertyOwnershipUpdateJourneyState(journeyStateService)
-        val seed = UUID.randomUUID()
+        val seed = PropertyOwnershipUpdateJourneySeed(1L)
         val journeyId = journeyState.generateJourneyId(seed)
         whenever(journeyStateService.getStoredStringValueOrNull(journeyId, "lastModifiedDate")).thenReturn("t1")
 
@@ -46,7 +45,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         // Arrange
         val journeyStateService: JourneyStateService = mock()
         val journeyState = TestPropertyOwnershipUpdateJourneyState(journeyStateService)
-        val seed = UUID.randomUUID()
+        val seed = PropertyOwnershipUpdateJourneySeed(1L)
         val journeyId = journeyState.generateJourneyId(seed)
         whenever(journeyStateService.getStoredStringValueOrNull(journeyId, "lastModifiedDate")).thenReturn(null)
 

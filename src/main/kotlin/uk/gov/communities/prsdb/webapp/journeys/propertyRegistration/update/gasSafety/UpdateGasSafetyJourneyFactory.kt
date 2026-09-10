@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJ
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -129,10 +130,10 @@ class UpdateGasSafetyJourneyFactory(
             propertyOwnershipService.getPropertyOwnership(ownershipId).propertyCompliance
                 ?: throw PrsdbWebException("Property ownership $ownershipId does not have a compliance record")
         state.discardIfLastModifiedDateChanged(
-            Pair(ownershipId, user),
+            PropertyOwnershipUpdateJourneySeed(ownershipId, user),
             propertyCompliance.getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(Pair(ownershipId, user))
+        return state.initializeOrRestoreState(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
     }
 }
 

@@ -82,20 +82,20 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     }
 
     @Test
-    fun `getUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
+    fun `getUpdateStep seeds the journey and returns to the letting agent property details page if journey not found`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.id))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyStateForLettingAgent(eq(propertyOwnership.id))).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.id))
+        verify(journeyFactory).initialiseJourneyStateForLettingAgent(eq(propertyOwnership.id))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -174,14 +174,14 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
     }
 
     @Test
-    fun `postUpdateStep seeds the journey with the token and returns to the letting agent property details page if journey not found`() {
+    fun `postUpdateStep seeds the journey and returns to the letting agent property details page if journey not found`() {
         val propertyOwnership = createOccupiedPropertyOwnership()
         whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.id))).thenReturn("journey-id")
+        whenever(journeyFactory.initialiseJourneyStateForLettingAgent(eq(propertyOwnership.id))).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -192,7 +192,7 @@ class LettingAgentUpdateRentIncludesBillsControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.id))
+        verify(journeyFactory).initialiseJourneyStateForLettingAgent(eq(propertyOwnership.id))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 

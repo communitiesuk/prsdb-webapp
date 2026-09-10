@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -20,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.security.Principal
 
 @PrsdbWebService
 class UpdateRentIncludesBillsJourneyFactory(
@@ -127,14 +129,19 @@ class UpdateRentIncludesBillsJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(
-        seed: Any,
-        propertyId: Long,
-    ): String {
+    fun initialiseJourneyStateForLandlord(
+        ownershipId: Long,
+        user: Principal,
+    ): String = discardAndInitialise(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
+
+    fun initialiseJourneyStateForLettingAgent(ownershipId: Long): String =
+        discardAndInitialise(PropertyOwnershipUpdateJourneySeed(ownershipId))
+
+    private fun discardAndInitialise(seed: PropertyOwnershipUpdateJourneySeed): String {
         val state = stateFactory.getObject()
         state.discardIfLastModifiedDateChanged(
             seed,
-            propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
+            propertyOwnershipService.getPropertyOwnership(seed.ownershipId).getMostRecentlyUpdated().toString(),
         )
         return state.initializeOrRestoreState(seed)
     }

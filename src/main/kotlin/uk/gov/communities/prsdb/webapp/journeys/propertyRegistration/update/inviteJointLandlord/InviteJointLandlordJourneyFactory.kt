@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -162,7 +163,7 @@ class InviteJointLandlordJourneyFactory(
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    ): String = stateFactory.getObject().initializeOrRestoreState(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
 }
 
 @JourneyFrameworkComponent

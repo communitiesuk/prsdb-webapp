@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -67,10 +68,10 @@ class UpdateBedroomsJourneyFactory(
     ): String {
         val state = stateFactory.getObject()
         state.discardIfLastModifiedDateChanged(
-            Pair(ownershipId, user),
+            PropertyOwnershipUpdateJourneySeed(ownershipId, user),
             propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(Pair(ownershipId, user))
+        return state.initializeOrRestoreState(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
     }
 }
 

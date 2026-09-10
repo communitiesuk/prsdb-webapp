@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.security.Principal
 
 @PrsdbWebService
 class UpdateLicensingJourneyFactory(
@@ -116,14 +118,19 @@ class UpdateLicensingJourneyFactory(
             }
         }
 
-    fun initializeJourneyState(
-        seed: Any,
-        propertyId: Long,
-    ): String {
+    fun initializeJourneyStateForLandlord(
+        ownershipId: Long,
+        user: Principal,
+    ): String = discardAndInitialise(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
+
+    fun initializeJourneyStateForLettingAgent(ownershipId: Long): String =
+        discardAndInitialise(PropertyOwnershipUpdateJourneySeed(ownershipId))
+
+    private fun discardAndInitialise(seed: PropertyOwnershipUpdateJourneySeed): String {
         val state = stateFactory.getObject()
         state.discardIfLastModifiedDateChanged(
             seed,
-            ownershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
+            ownershipService.getPropertyOwnership(seed.ownershipId).getMostRecentlyUpdated().toString(),
         )
         return state.initializeOrRestoreState(seed)
     }

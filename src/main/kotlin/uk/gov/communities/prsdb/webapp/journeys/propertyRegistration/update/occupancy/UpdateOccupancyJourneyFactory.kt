@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.PropertyOwnershipUpdateJourneySeed
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
@@ -328,10 +329,10 @@ class UpdateOccupancyJourneyFactory(
     ): String {
         val state = stateFactory.getObject()
         state.discardIfLastModifiedDateChanged(
-            Pair(ownershipId, user),
+            PropertyOwnershipUpdateJourneySeed(ownershipId, user),
             propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(Pair(ownershipId, user))
+        return state.initializeOrRestoreState(PropertyOwnershipUpdateJourneySeed(ownershipId, user))
     }
 
     // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
