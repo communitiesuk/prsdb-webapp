@@ -6,9 +6,6 @@ import {initAll as initMoJDS} from '@ministryofjustice/frontend'
 import {initFilterToggleButton} from "./filterToggleButton"
 import {initPlausibleEventButtons} from "./plausibleTransactionEvent"
 import '../resources/css/custom.scss'
-import {setJsEnabled} from "#main-javascript/setJsEnabled.js";
-
-setJsEnabled()
 
 initGDS()
 

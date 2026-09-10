@@ -54,7 +54,7 @@ jobs:
       - name: Run tests for shard ${{ matrix.shard }}
         env:
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-          EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
+          EMAILNOTIFICATIONS_PRODUCTION_APIKEY: ${{ secrets.NOTIFY_PRODUCTION_KEY }}
         run: ./gradlew clean test --no-daemon -PshardIndex=${{ matrix.shard }} -PshardCount=4
 
   lint:

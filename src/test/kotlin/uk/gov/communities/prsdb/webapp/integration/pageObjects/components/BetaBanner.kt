@@ -11,6 +11,6 @@ class BetaBanner(
     val giveFeedbackLink = Link.byText(parentLocator, "feedback")
 
     companion object {
-        const val SELECTOR = ".govuk-phase-banner"
+        const val SELECTOR = "#banner.govuk-phase-banner"
     }
 }

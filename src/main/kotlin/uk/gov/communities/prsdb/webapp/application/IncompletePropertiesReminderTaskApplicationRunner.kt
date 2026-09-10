@@ -32,10 +32,11 @@ class IncompletePropertiesReminderTaskApplicationRunner(
     override fun run(args: ApplicationArguments?) {
         println("Executing incomplete properties reminder scheduled task")
 
-        taskLogic.sendIncompletePropertyReminders()
+        val failureCount = taskLogic.sendIncompletePropertyReminders()
 
+        val exitCode = if (failureCount > 0) 1 else 0
         val code =
-            SpringApplication.exit(context, { 0 }).also {
+            SpringApplication.exit(context, { exitCode }).also {
                 println("Scheduled task executed. Application will exit now.")
             }
         exitProcess(code)
@@ -50,7 +51,7 @@ class IncompletePropertiesReminderTaskLogic(
     private val landlordUserEmailService: LandlordUserEmailService,
 ) {
     @Transactional
-    fun sendIncompletePropertyReminders() {
+    fun sendIncompletePropertyReminders(): Int {
         val prsdUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
         val cutoffDate =
             DateTimeHelper.getJavaInstantFromLocalDate(
@@ -59,6 +60,9 @@ class IncompletePropertiesReminderTaskLogic(
 
         val pagesOfProperties =
             incompletePropertiesService.getNumberOfPagesOfIncompletePropertiesOlderThanDate(cutoffDate)
+
+        var sentCount = 0
+        var failureCount = 0
 
         for (page in 0..<pagesOfProperties) {
             val incompleteProperties =
@@ -72,6 +76,7 @@ class IncompletePropertiesReminderTaskLogic(
                         "No email address found for the user who started incomplete property with savedJourneyStateId: " +
                             property.savedJourneyState.id,
                     )
+                    failureCount++
                     return@forEach
                 }
                 try {
@@ -92,25 +97,33 @@ class IncompletePropertiesReminderTaskLogic(
                     println("Email sent for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}")
 
                     incompletePropertiesService.recordReminderEmailSent(property.savedJourneyState)
+                    sentCount++
                 } catch (ex: PersistentEmailSendException) {
                     printMessagesForFailedTask(
                         ex,
                         "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
                     )
+                    failureCount++
                 } catch (ex: TransientEmailSentException) {
                     printMessagesForFailedTask(
                         ex,
                         "Failed to send reminder email for incomplete property with savedJourneyStateId: ${property.savedJourneyState.id}",
                     )
+                    failureCount++
                 } catch (ex: TrackEmailSentException) {
                     printMessagesForFailedTask(
                         ex,
                         "Failed to record reminder email sent for incomplete property with savedJourneyStateId: " +
                             property.savedJourneyState.id,
                     )
+                    failureCount++
                 }
             }
         }
+
+        println("Incomplete property reminder task complete. Emails sent: $sentCount. Failures: $failureCount.")
+
+        return failureCount
     }
 
     private fun printMessagesForFailedTask(

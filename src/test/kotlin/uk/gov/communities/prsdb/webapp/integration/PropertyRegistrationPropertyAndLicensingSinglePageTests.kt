@@ -87,7 +87,8 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
                         .withBedrooms()
                         .withOwnershipType()
                         .withHasNoJointLandlords()
-                        .withOccupancyStatus(true),
+                        .withOccupancyStatus(true)
+                        .withLandlordProvidesRentalDetails(),
                 )
             taskListPage.clickRentedOutTaskWithName("Tell us if your property needs a license")
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)

@@ -28,7 +28,7 @@ class ResumePropertyRegistrationJourneyTests :
         val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         assertFalse(
-            taskListPage.taskHasStatus("Property address", "Not started"),
+            taskListPage.taskHasStatus("Property address", "Not\u00A0started"),
             "Property address task should not be 'Not started' after restoring saved journey state",
         )
     }

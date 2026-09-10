@@ -1,0 +1,49 @@
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{delegateToLettingAgent.title}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <h1 class="govuk-heading-l" th:text="#{delegateToLettingAgent.allowLettingAgent.heading}">
+        delegateToLettingAgent.allowLettingAgent.heading
+    </h1>
+
+    <p class="govuk-body" th:text="#{delegateToLettingAgent.allowLettingAgent.body.canProvide}">
+        delegateToLettingAgent.allowLettingAgent.body.canProvide
+    </p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{delegateToLettingAgent.allowLettingAgent.bulletList.license}">delegateToLettingAgent.allowLettingAgent.bulletList.license</li>
+        <li th:text="#{delegateToLettingAgent.allowLettingAgent.bulletList.compliance}">delegateToLettingAgent.allowLettingAgent.bulletList.compliance</li>
+        <li th:text="#{delegateToLettingAgent.allowLettingAgent.bulletList.tenancy}">delegateToLettingAgent.allowLettingAgent.bulletList.tenancy</li>
+    </ul>
+
+    <p class="govuk-body" th:text="#{delegateToLettingAgent.allowLettingAgent.body.alsoKeepUpdated}">
+        delegateToLettingAgent.allowLettingAgent.body.alsoKeepUpdated
+    </p>
+
+    <h2 class="govuk-heading-m" th:text="#{delegateToLettingAgent.allowLettingAgent.subheading.responsible}">
+        delegateToLettingAgent.allowLettingAgent.subheading.responsible
+    </h2>
+
+    <p class="govuk-body" th:text="#{delegateToLettingAgent.allowLettingAgent.body.checkCorrect}">
+        delegateToLettingAgent.allowLettingAgent.body.checkCorrect
+    </p>
+
+    <div class="govuk-inset-text" th:text="#{delegateToLettingAgent.allowLettingAgent.insetText}">
+        delegateToLettingAgent.allowLettingAgent.insetText
+    </div>
+
+    <p class="govuk-body" th:text="#{delegateToLettingAgent.allowLettingAgent.body.canRemove}">
+        delegateToLettingAgent.allowLettingAgent.body.canRemove
+    </p>
+
+    <div th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#email-input/content()}, fieldName='emailAddress', fieldSetHeading=#{delegateToLettingAgent.allowLettingAgent.emailLabel}, fieldSetHint=#{delegateToLettingAgent.allowLettingAgent.emailHint})}">
+        <th:block id="email-input">
+            <div th:replace="~{fragments/forms/emailInput :: emailInput(null, 'emailAddress', null)}"></div>
+        </th:block>
+    </div>
+
+    <input type="hidden" th:field="*{landlordEmail}">
+
+    <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{delegateToLettingAgent.allowLettingAgent.submitButton})}"></button>
+</html>

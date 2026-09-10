@@ -80,7 +80,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Nested
-        inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-unverified-landlord.sql") {
+        inner class LandlordWithoutProperties : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-no-properties.sql") {
             @Test
             fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
                 val detailsPage = navigator.goToLandlordDetails()

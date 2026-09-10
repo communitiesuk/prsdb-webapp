@@ -194,6 +194,23 @@ class ComplianceActionViewModelBuilderTests {
         }
 
         @Test
+        fun `occupied property with provide later status but no deadline shows gas row with undated provide later message`() {
+            val viewModel =
+                ComplianceActionViewModelBuilder.fromDataModel(
+                    buildDataModel(
+                        gasSafetyStatus = ComplianceCertStatus.PROVIDE_LATER,
+                        isOccupied = true,
+                        provideLaterDeadline = null,
+                    ),
+                )
+
+            val gasSafetyRow = getGasSafetyRow(viewModel)
+            assertNotNull(gasSafetyRow)
+            assertEquals("complianceActions.status.provideLaterNoDeadline", gasSafetyRow.fieldValue)
+            assertNull(gasSafetyRow.optionalFieldValueParam)
+        }
+
+        @Test
         fun `unoccupied property with provide later status does not show gas row`() {
             val viewModel =
                 ComplianceActionViewModelBuilder.fromDataModel(
@@ -376,6 +393,23 @@ class ComplianceActionViewModelBuilderTests {
         }
 
         @Test
+        fun `occupied property with provide later status but no deadline shows eicr row with undated provide later message`() {
+            val viewModel =
+                ComplianceActionViewModelBuilder.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.PROVIDE_LATER,
+                        isOccupied = true,
+                        provideLaterDeadline = null,
+                    ),
+                )
+
+            val eicrRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(eicrRow)
+            assertEquals("complianceActions.status.provideLaterNoDeadline", eicrRow.fieldValue)
+            assertNull(eicrRow.optionalFieldValueParam)
+        }
+
+        @Test
         fun `unoccupied property with provide later status does not show eicr row`() {
             val viewModel =
                 ComplianceActionViewModelBuilder.fromDataModel(
@@ -531,6 +565,23 @@ class ComplianceActionViewModelBuilderTests {
                 provideLaterDeadline.format(ComplianceActionViewModelBuilder.DATE_FORMATTER),
                 epcRow.optionalFieldValueParam,
             )
+        }
+
+        @Test
+        fun `occupied property with provide later status but no deadline shows epc row with undated provide later message`() {
+            val viewModel =
+                ComplianceActionViewModelBuilder.fromDataModel(
+                    buildDataModel(
+                        epcStatus = ComplianceCertStatus.PROVIDE_LATER,
+                        isOccupied = true,
+                        provideLaterDeadline = null,
+                    ),
+                )
+
+            val epcRow = getEpcRow(viewModel)
+            assertNotNull(epcRow)
+            assertEquals("complianceActions.status.provideLaterNoDeadline", epcRow.fieldValue)
+            assertNull(epcRow.optionalFieldValueParam)
         }
 
         @Test

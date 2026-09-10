@@ -9,6 +9,11 @@ import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationExpiryEmail
 
+data class JointLandlordInvitationExpiryEmailResult(
+    val sentIds: List<Long>,
+    val failedIds: List<Long>,
+)
+
 @PrsdbTaskService
 class JointLandlordInvitationExpiryEmailService(
     private val invitationRepository: JointLandlordInvitationRepository,
@@ -16,28 +21,31 @@ class JointLandlordInvitationExpiryEmailService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
-    fun sendExpiryEmailsForExpiredInvitations(): List<Long> {
+    fun sendExpiryEmailsForExpiredInvitations(): JointLandlordInvitationExpiryEmailResult {
         val expiredInvitations =
             invitationRepository
                 .findAllByInvitationExpiredEmailSentFalse()
                 .filter { it.status == JointLandlordInvitationStatus.EXPIRED }
-        val expiredIds = mutableListOf<Long>()
+        val sentIds = mutableListOf<Long>()
+        val failedIds = mutableListOf<Long>()
 
         expiredInvitations.forEach { invitation ->
             try {
                 sendExpiryEmailsForInvitation(invitation)
                 invitation.markAsExpiredEmailSent()
                 invitationRepository.save(invitation)
-                expiredIds.add(invitation.id)
                 swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(invitation.registeredOwnership)
+                sentIds.add(invitation.id)
             } catch (ex: PersistentEmailSendException) {
                 printFailureMessage(ex, invitation)
+                failedIds.add(invitation.id)
             } catch (ex: TransientEmailSentException) {
                 printFailureMessage(ex, invitation)
+                failedIds.add(invitation.id)
             }
         }
 
-        return expiredIds
+        return JointLandlordInvitationExpiryEmailResult(sentIds, failedIds)
     }
 
     private fun sendExpiryEmailsForInvitation(invitation: JointLandlordInvitation) {

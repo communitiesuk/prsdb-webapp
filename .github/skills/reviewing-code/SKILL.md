@@ -102,6 +102,21 @@ Entity properties that should not be set externally should use `private set`.
 - Methods that write to the database should be annotated with `@Transactional`
 - Service methods should not catch and silently swallow exceptions from repository calls
 
+## Scheduled Tasks
+
+Scheduled tasks (`application/`, `ApplicationRunner` implementations annotated with `@PrsdbScheduledTask` /
+`@PrsdbTask`) run as ephemeral ECS tasks, and the infrastructure alarms on a non-zero exit code. Any error during
+execution **must** result in a non-zero exit code, otherwise the failure is silent.
+
+Review points:
+
+- A task that catches an exception only to log it, then exits 0, is a review finding — the error must either be
+  re-thrown (fail fast) or tracked so the runner sets a non-zero exit code.
+- For batch tasks that deliberately continue past per-item failures (e.g. sending many emails), check that the
+  failures are counted and surfaced as a non-zero exit code rather than swallowed.
+- Prefer returning a failure count over throwing out of a `@Transactional` method — throwing rolls back successful
+  work in a partially-completed batch.
+
 ## Feature Flags
 
 Feature flags use FF4J. The patterns are:

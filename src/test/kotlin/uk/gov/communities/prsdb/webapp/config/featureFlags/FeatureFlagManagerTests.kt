@@ -24,6 +24,8 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.flipStrategies.CombinedFlipStrategy
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagOverrides
+import uk.gov.communities.prsdb.webapp.services.FeatureFlagOverrideService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFeatureFlagConfig
 import java.time.LocalDate
 
@@ -285,6 +287,98 @@ class FeatureFlagManagerTests {
             val captor = captor<String>()
             verify(featureFlagManager).disableGroup(captor.capture())
             assertEquals(releaseName, captor.value)
+        }
+    }
+
+    @Nested
+    inner class FeatureFlagOverrideTests {
+        private fun managerWithOverrides(overrides: FeatureFlagOverrides): FeatureFlagManager {
+            val featureFlagOverrideService = mock<FeatureFlagOverrideService>()
+            whenever(featureFlagOverrideService.getOverrides()).thenReturn(overrides)
+            return FeatureFlagManager(featureFlipStrategyInitialiser, featureFlagOverrideService)
+        }
+
+        @Test
+        fun `checkFeature returns the configured value when no overrides are set`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides())
+            manager.createFeature(MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = false))
+
+            assertFalse(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature returns the flag override when one is set`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides(flags = mapOf("a-flag" to true)))
+            manager.createFeature(MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = false))
+
+            assertTrue(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature returns the configured value for a flag that is not itself overridden`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides(flags = mapOf("another-flag" to true)))
+            manager.createFeature(MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = false))
+            manager.createFeature(MockFeatureFlagConfig.createFeature(name = "another-flag", enabled = false))
+
+            assertFalse(manager.checkFeature("a-flag"))
+            assertTrue(manager.checkFeature("another-flag"))
+        }
+
+        @Test
+        fun `checkFeature returns the configured value for a flag whose release is not overridden`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides(releases = mapOf("another-release" to false)))
+            manager.createFeature(
+                MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = true, release = "a-release"),
+            )
+
+            assertTrue(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature returns the release override in preference to the flag override`() {
+            val manager =
+                managerWithOverrides(
+                    FeatureFlagOverrides(
+                        flags = mapOf("a-flag" to true),
+                        releases = mapOf("a-release" to false),
+                    ),
+                )
+            manager.createFeature(
+                MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = true, release = "a-release"),
+            )
+
+            assertFalse(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature applies a flag override inside a disabled release with no release override`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides(flags = mapOf("a-flag" to true)))
+            manager.createFeature(
+                MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = false, release = "a-release"),
+            )
+            manager.disableFeatureRelease("a-release")
+
+            assertTrue(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature override supersedes a flipping strategy that would otherwise suppress the flag`() {
+            val manager = managerWithOverrides(FeatureFlagOverrides(flags = mapOf("a-flag" to true)))
+            val unreleasedStrategy =
+                ReleaseDateFlipStrategy(DateTimeHelper.getJavaDateFromLocalDate(LocalDate.now().plusYears(1)))
+            manager.createFeature(
+                MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = true, flippingStrategy = unreleasedStrategy),
+            )
+
+            assertTrue(manager.checkFeature("a-flag"))
+        }
+
+        @Test
+        fun `checkFeature returns the configured value when no override service is available`() {
+            val manager = FeatureFlagManager(featureFlipStrategyInitialiser, null)
+            manager.createFeature(MockFeatureFlagConfig.createFeature(name = "a-flag", enabled = true))
+
+            assertTrue(manager.checkFeature("a-flag"))
         }
     }
 }

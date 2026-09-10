@@ -25,6 +25,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -76,6 +78,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockUserToLandlordService: UserToLandlordService
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -225,7 +230,11 @@ class PropertyComplianceServiceTests {
 
         val expectedNonCompliantProperties =
             nonCompliantProperties.map { compliance ->
-                ComplianceStatusDataModel.fromPropertyCompliance(compliance)
+                ComplianceStatusDataModel.fromPropertyCompliance(
+                    compliance,
+                    provideLaterDeadline =
+                        compliance.propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+                )
             }
 
         // Act
@@ -274,6 +283,73 @@ class PropertyComplianceServiceTests {
 
         // Assert
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
+    }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun `getNonCompliantPropertiesForLandlord anchors the provide-later deadline to the registration date when the flag is enabled and the property was occupied since registration`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val registrationDate = LocalDate.of(2025, 3, 1)
+        val propertyOwnership =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate,
+            )
+        val compliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(propertyOwnership)
+                .withHasGasSupply()
+                .withGasSafetyCertProvideLater()
+                .build()
+
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
+        ).thenReturn(listOf(compliance))
+
+        // Act
+        val returnedProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlord, 0)
+
+        // Assert
+        assertEquals(
+            registrationDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+            returnedProperties.content.single().provideLaterDeadline,
+        )
+    }
+
+    @Suppress("ktlint:standard:max-line-length")
+    @Test
+    fun `getNonCompliantPropertiesForLandlord leaves the provide-later deadline null when the flag is enabled and the property was occupied after registration`() {
+        // Arrange
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val registrationDate = LocalDate.of(2025, 3, 1)
+        val propertyOwnership =
+            MockLandlordData.createOccupiedPropertyOwnership(
+                createdDate = registrationDate.atStartOfDay(DateTimeHelper.UK_ZONE).toInstant(),
+                lastOccupiedDate = registrationDate.plusDays(30),
+            )
+        val compliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(propertyOwnership)
+                .withHasGasSupply()
+                .withGasSafetyCertProvideLater()
+                .build()
+
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_IdAndPropertyOwnership_IsActiveTrue(
+                landlord.id,
+            ),
+        ).thenReturn(listOf(compliance))
+
+        // Act
+        val returnedProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlord, 0)
+
+        // Assert
+        assertNull(returnedProperties.content.single().provideLaterDeadline)
     }
 
     private fun createOccupiedPropertyOwnership() =

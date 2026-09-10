@@ -1,0 +1,15 @@
+title: Remove letting agent or property manager
+areYouSure:
+  fieldSetHeading: 'Are you sure you want to remove {0}?'
+  fieldSetHint: They will no longer be able to provide details for this property record
+  confirmButton: Confirm
+  radios:
+    error:
+      missing: Select if you want to remove this letting agent or property manager
+confirmation:
+  banner:
+    heading: Letting agent or property manager can no longer provide details
+  paragraph:
+    one: "You have removed this letting agent or property manager:"
+    two: "This means they can no longer provide and update details for:"
+    three: "We’ve sent you a confirmation email. We’ve also told the letting agent or property manager."

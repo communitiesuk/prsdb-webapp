@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 
 class AbsoluteUrlProviderTests {
     @Test
@@ -48,6 +50,17 @@ class AbsoluteUrlProviderTests {
         val uri = provider.buildJointLandlordInvitationUri("token-123")
 
         assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT?token=token-123")
+    }
+
+    @Test
+    fun `buildLettingAgentInvitationUri prepends https when configured base URL has no scheme`() {
+        val provider = createProvider(landlordBaseUrl = "example.test/landlord")
+
+        val uri = provider.buildLettingAgentInvitationUri("token-abc")
+
+        assertThat(
+            uri.toString(),
+        ).isEqualTo("https://example.test/landlord/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT?token=token-abc")
     }
 
     private fun createProvider(

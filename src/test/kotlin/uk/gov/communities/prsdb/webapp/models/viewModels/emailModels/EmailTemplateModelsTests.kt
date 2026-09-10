@@ -73,22 +73,25 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordNoPropertiesDeregistrationConfirmationEmail(),
+                    LandlordNoPropertiesDeregistrationConfirmationEmail("Alexander Smith"),
                     "/emails/LandlordNoPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordWithPropertiesDeregistrationConfirmationEmail(
-                        PropertyDetailsEmailSectionList(
-                            listOf(
-                                PropertyDetailsEmailSection(
-                                    propertyNumber = 1,
-                                    "P-WWW-XXX",
-                                    "1 Fake Street, Mirageville",
+                        fullName = "Alexander Smith",
+                        propertyListMarkdown =
+                            PropertyDetailsEmailSectionList(
+                                listOf(
+                                    PropertyDetailsEmailSection(
+                                        propertyNumber = 1,
+                                        "P-WWW-XXX",
+                                        "1 Fake Street, Mirageville",
+                                    ),
                                 ),
                             ),
-                        ),
                     ),
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
@@ -319,6 +322,88 @@ class EmailTemplateModelsTests {
                         propertyRecordUrl = "https://example.com/property",
                     ),
                     "/emails/SwapToIndividualNudge.md",
+                ),
+                EmailTemplateTestData(
+                    CancelDelegationLandlordConfirmationEmail(
+                        landlordName = "Alice",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/CancelDelegationLandlordConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    CancelDelegationJointLandlordNotificationEmail(
+                        jointLandlordName = "Bob",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/CancelDelegationJointLandlordNotification.md",
+                ),
+                EmailTemplateTestData(
+                    CancelDelegationLettingAgentNotificationEmail(
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        singleLineAddress = "Flat 1, 11 Elm Street, London, NW1 1AA",
+                    ),
+                    "/emails/CancelDelegationLettingAgentNotification.md",
+                ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentConfirmationEmail(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent-1@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/DelegateToLettingAgentConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordDelegateToLettingAgentNotificationEmail(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        lettingAgentEmail = "agent-1@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/JointLandlordDelegateToLettingAgentNotification.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyUpdateWithLettingAgentRemovedConfirmation(
+                        name = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedMessage = "The property was made unoccupied",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/PropertyUpdateWithLettingAgentRemovedConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordPropertyUpdateWithLettingAgentRemovedNotification(
+                        recipientName = "James",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedMessage = "The property was made unoccupied",
+                        lettingAgentEmail = "agent@example.com",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/JointLandlordPropertyUpdateWithLettingAgentRemovedNotification.md",
+                ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentInvitationEmail(
+                        landlordName = "Wallis Smith",
+                        propertyAddress = "11 Street\nTown\nPostcode",
+                        invitationLink = "https://example.com/start/abc123",
+                        singleLineAddress = "11 Street, Town, Postcode",
+                    ),
+                    "/emails/DelegateToLettingAgentInvitation.md",
+                ),
+                EmailTemplateTestData(
+                    DelegateToLettingAgentInvitationWithDeadlineEmail(
+                        landlordName = "Wallis Smith",
+                        propertyAddress = "11 Street\nTown\nPostcode",
+                        invitationLink = "https://example.com/start/abc123",
+                        deadlineDate = "13 June 2026",
+                        singleLineAddress = "11 Street, Town, Postcode",
+                    ),
+                    "/emails/DelegateToLettingAgentInvitationWithDeadline.md",
                 ),
             )
     }

@@ -17,6 +17,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
@@ -75,6 +76,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LettingAgentEmailPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
@@ -83,6 +85,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
@@ -103,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -156,6 +160,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
+        whenever(
+            absoluteUrlProvider.buildLettingAgentInvitationUri(any()),
+        ).thenReturn(URI("http://localhost/letting-agent/invitation?token=test-token"))
     }
 
     @Nested
@@ -262,6 +269,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             assertThat(occupancyPage.form.sectionHeader).containsText(occupiedSectionHeader)
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             // Licensing type - render page
@@ -489,7 +498,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check answers - render page
             assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
-            assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
+            assertThat(checkAnswersPage.rentedOutHeading).isVisible()
             assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
             assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
             assertThat(checkAnswersPage.epcHeading).isVisible()
@@ -507,6 +516,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertTrue(propertyOwnershipCaptor.value.isOccupied)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
+            assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -1478,6 +1489,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
             assertEquals(
                 listOf(
+                    "Who will provide these details",
                     "Tell us if your property needs a license",
                     "Gas safety certificate",
                     "Electrical safety certificate",
@@ -1497,38 +1509,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
-            val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
-
-            // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
-            assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
-            assertEquals(
-                "We’ll ask for tenancy details when your property becomes occupied",
-                tenancyDetailsTask.hintText.trim(),
-            )
-            assertFalse(tenancyDetailsTask.hasLink)
-
-            val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertTrue(checkAndSubmitTask.hasLink)
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
-            assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
-        }
-
-        @Test
-        fun `restructured CYA does not show tenancy details section when the property is unoccupied`(page: Page) {
+        fun `restructured CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
             val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).isHidden()
+            assertThat(checkAnswersPage.restructuredTenancyHeading).isVisible()
+            assertThat(checkAnswersPage.restructuredTenancyUnoccupiedBodyText).isVisible()
+            assertEquals(emptyList<String>(), checkAnswersPage.restructuredTenancyRowHeadings())
         }
 
         @Test
-        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`(page: Page) {
+        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -1585,6 +1577,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
             occupancyPage.submitIsOccupied()
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+            whoProvidesRentalDetailsPage.submitLandlordProvidesDetails()
             val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
             assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
             licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
@@ -1673,7 +1667,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`(page: Page) {
+        fun `Task list shows Tenancy detail task as complete after landlord has chosen to provide this later`() {
             val provideTenancyDetailsLaterPage = navigator.skipToTenancyDetailsProvideTenancyDetailsLaterPage()
             provideTenancyDetailsLaterPage.form.submit()
 
@@ -1682,7 +1676,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
@@ -1816,31 +1810,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
             val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
-            assertEquals("Not started", propertyDetailsTask.statusText.trim())
+            assertEquals("Not\u00A0started", propertyDetailsTask.statusText.trim())
             assertTrue(propertyDetailsTask.hasLink)
 
             val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
-            assertEquals("Cannot start yet", ownershipTask.statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", ownershipTask.statusText.trim())
             assertFalse(ownershipTask.hasLink)
 
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
 
         @Test
-        fun `restructured task list shows a grouping task as in progress when it is partially completed`(page: Page) {
+        fun `restructured task list shows a grouping task as in progress when it is partially completed`() {
             // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
             // grouping task (which now contains all three) is partway through.
             val taskListPage =
@@ -1850,22 +1844,22 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim(),
             )
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim(),
             )
-            assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+            assertEquals("Cannot\u00A0start\u00A0yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
             assertEquals(
-                "Cannot start yet",
+                "Cannot\u00A0start\u00A0yet",
                 taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
             )
         }
 
         @Test
-        fun `restructured task list shows grouping tasks as complete when their answers are provided`(page: Page) {
+        fun `restructured task list shows grouping tasks as complete when their answers are provided`() {
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
@@ -1881,7 +1875,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
 
             val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
-            assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+            assertEquals("Not\u00A0started", checkAndSubmitTask.statusText.trim())
             assertTrue(checkAndSubmitTask.hasLink)
         }
 
@@ -1894,7 +1888,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -1910,7 +1904,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `CYA does not show Which bills are included row when rent does not include bills`(page: Page) {
+        fun `CYA does not show Which bills are included row when rent does not include bills`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
             assertFalse(checkAnswersPage.restructuredTenancyRowHeadings().contains("Which bills are included"))
@@ -1942,6 +1936,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
@@ -1961,6 +1956,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
+            assertThat(checkAnswersPage.summaryList.occupancyQuestionRow.key).isVisible()
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
@@ -1984,6 +1982,244 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
             assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOccupancy()
+                        .withOccupancyStatus(true)
+                        .withBedrooms()
+                        .withHasNoJointLandlords(),
+                )
+
+            taskListPage.clickRentedOutTaskWithName("Who will provide these details")
+            val whoProvidesRentalDetailsPage = assertPageIs(page, WhoProvidesRentalDetailsFormPagePropertyRegistration::class)
+
+            whoProvidesRentalDetailsPage.submitLettingAgentProvidesDetails()
+
+            val lettingAgentEmailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
+            lettingAgentEmailPage.submitEmail("agent@example.com")
+
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+            assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
+        }
+
+        // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
+        @Nested
+        inner class DelegateToLettingAgentDisabled {
+            @BeforeEach
+            fun disableDelegateToLettingAgentFlag() {
+                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
+            }
+
+            @Test
+            fun `occupied journey routes straight from occupancy to licensing without asking who provides the details`(page: Page) {
+                val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+                occupancyPage.submitIsOccupied()
+
+                assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            }
+
+            @Test
+            fun `who provides details task is absent from the rented out section`() {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                    )
+
+                assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
+            }
+
+            @Test
+            fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
+                val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+                val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
+
+                // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
+                assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
+                assertEquals(
+                    "We’ll ask for tenancy details when your property becomes occupied",
+                    tenancyDetailsTask.hintText.trim(),
+                )
+                assertFalse(tenancyDetailsTask.hasLink)
+
+                val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+                assertTrue(checkAndSubmitTask.hasLink)
+                taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+                val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+                // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
+                assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
+            }
+        }
+    }
+
+    @Nested
+    inner class RestructureAndSkippingWithDelegateToLettingAgentEnabled {
+        @BeforeEach
+        fun enableRestructureAndSkippingAndDelegateFlags() {
+            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `changing occupancy to unoccupied from CYA for a delegated property shows the interruption card and Go back returns to the occupancy page`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+
+            occupancyPage.submitIsVacant()
+            val interruptionPage = assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class)
+            assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
+
+            interruptionPage.goBackLink.clickAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `continuing with the change from the interruption removes the delegation and returns to the task list with downstream tasks reset`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            occupancyPage.submitIsVacant()
+            val interruptionPage = assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class)
+
+            interruptionPage.submit()
+            val updatedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            assertEquals(
+                "Not\u00A0needed\u00A0yet",
+                updatedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0started",
+                updatedTaskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                updatedTaskListPage.getRentedOutTask("Gas safety certificate").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                updatedTaskListPage.getRentedOutTask("Electrical safety certificate").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                updatedTaskListPage.getRentedOutTask("Energy performance certificate (EPC)").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0needed\u00A0yet",
+                updatedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                updatedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+            )
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `after removing the delegation switching the property back to occupied restores the previous letting agent answer and the CYA page`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsVacant()
+            assertPageIs(page, OccupancyChangeInterruptionPagePropertyRegistration::class).submit()
+            val unoccupiedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            // Switch the property back to occupied. Because the delegation was hidden rather than cleared, the previous
+            // "letting agent provides" answer resurfaces: the who-provides task is complete again and the tenancy task
+            // returns to "Not required", so the registration is complete and the CYA page is reachable once more.
+            unoccupiedTaskListPage.clickAboutYourPropertyTaskWithName("Tell us if your property’s occupied")
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
+
+            val reoccupiedTaskListPage = navigator.goToPropertyRegistrationTaskList()
+            assertEquals(
+                "Completed",
+                reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0required",
+                reoccupiedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+
+            navigator.navigateToPropertyRegistrationCheckYourAnswers()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        @Suppress("ktlint:standard:max-line-length")
+        fun `changing occupancy from unoccupied to occupied from the CYA page returns to the task list because the rented out details are no longer complete`(
+            page: Page,
+        ) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class).submitIsOccupied()
+
+            // The property now has tenants, so the who-provides and tenancy-details questions must be answered before
+            // the registration is complete. As they are not, the CYA page is unreachable and the user is returned to
+            // the task list rather than being shown a partially-complete check-your-answers page.
+            val reoccupiedTaskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+            // The who-provides question is now answerable but unanswered. The tenancy-details task becomes answerable
+            // too but is unanswered, and the CYA/submit task cannot be reached until both are complete.
+            assertEquals(
+                "Not\u00A0started",
+                reoccupiedTaskListPage.getRentedOutTask("Who will provide these details").statusText.trim(),
+            )
+            assertEquals(
+                "Not\u00A0started",
+                reoccupiedTaskListPage.getRentedOutTask("Tenancy details").statusText.trim(),
+            )
+            assertEquals(
+                "Cannot\u00A0start\u00A0yet",
+                reoccupiedTaskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim(),
+            )
+
+            // Navigating straight to the CYA page is not possible while the registration is incomplete: the user is
+            // bounced back to the task list.
+            navigator.navigateToPropertyRegistrationCheckYourAnswers()
+            assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
     }
 
@@ -3373,7 +3609,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`() {
             val checkAnswersPage =
                 navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
                     households = 2,
@@ -3393,7 +3629,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
 
             val changeLink =
-                checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
+                checkAnswersPage.summaryList.beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow.actions
                     .getActionLink("Change")
             assertThat(changeLink).isVisible()
 
@@ -3405,6 +3641,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            assertThat(checkAnswersPage.summaryList.jointLandlordsAreThereRow.value)
+                .containsText("No, I am the only landlord for this property")
 
             val changeLink =
                 checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions

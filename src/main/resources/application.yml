@@ -78,6 +78,11 @@ management:
         namespace: ${METRICS_CLOUDWATCH_NAMESPACE}
         step: 1m
 
+argon2:
+  iterations: 2
+  memory: 16384
+  parallelism: 1
+
 base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-council: ${LOCAL_COUNCIL_BASE_URL}
@@ -116,6 +121,7 @@ ff4j:
     enabled: false
 
 features:
+  overrides-enabled: false
   feature-flags:
     - name: "failover-test-endpoints"
       enabled: false
@@ -130,6 +136,12 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1053-dashboard-nav-link"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1022-delegate-to-letting-agent"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: false
       expiry-date: "2026-12-31"
 
