@@ -3,7 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
@@ -22,11 +25,23 @@ class StartStepConfigTests {
     fun `afterStepIsReached populates the invitation token from the session for this journey`() {
         val journeyId = "journey-123"
         val token = UUID.randomUUID().toString()
+        whenever(mockState.isStateInitialized).thenReturn(false)
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
 
         StartStepConfig(mockLettingAgentAccessService).afterStepIsReached(mockState)
 
         verify(mockState).invitationToken = token
+        verify(mockState).isStateInitialized = true
+    }
+
+    @Test
+    fun `afterStepIsReached does not overwrite the invitation token once the state is initialised`() {
+        whenever(mockState.isStateInitialized).thenReturn(true)
+
+        StartStepConfig(mockLettingAgentAccessService).afterStepIsReached(mockState)
+
+        verify(mockState, never()).invitationToken = any()
+        verifyNoInteractions(mockLettingAgentAccessService)
     }
 }

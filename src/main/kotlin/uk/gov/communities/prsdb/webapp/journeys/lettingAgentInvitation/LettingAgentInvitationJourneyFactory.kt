@@ -120,7 +120,8 @@ class LettingAgentInvitationJourney(
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     LettingAgentInvitationJourneyState {
-    override var invitationToken: String? by delegateProvider.nullableDelegate("invitationToken")
+    override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
+    override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var hasExistingPassword: Boolean? by delegateProvider.nullableDelegate("hasExistingPassword")
     override var hasSetNewPassword: Boolean? by delegateProvider.nullableDelegate("hasSetNewPassword")
     override var hasEnteredPassword: Boolean? by delegateProvider.nullableDelegate("hasEnteredPassword")
@@ -140,7 +141,8 @@ interface LettingAgentInvitationJourneyState : JourneyState {
     val confirmationStep: ConfirmationStep
     val enterPasswordStep: EnterPasswordStep
     val storeAccessStep: StoreAccessStep
-    var invitationToken: String?
+    var invitationToken: String
+    var isStateInitialized: Boolean
     var hasExistingPassword: Boolean?
 
     var hasSetNewPassword: Boolean?

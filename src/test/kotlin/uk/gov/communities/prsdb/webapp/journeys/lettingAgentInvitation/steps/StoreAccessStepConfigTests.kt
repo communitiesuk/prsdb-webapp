@@ -69,10 +69,9 @@ class StoreAccessStepConfigTests {
     @Test
     fun `resolveNextDestination returns the default destination when the invitation is found`() {
         val token = UUID.randomUUID()
-        val invitation = MockLettingAgentData.createLettingAgentAccess(token = token)
         val defaultDestination = Destination.ExternalUrl("/default-destination")
         whenever(mockState.invitationToken).thenReturn(token.toString())
-        whenever(mockLettingAgentAccessService.getInvitationByTokenOrNull(token)).thenReturn(invitation)
+        whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
 
         val result = setupStepConfig().resolveNextDestination(mockState, defaultDestination)
 
@@ -84,7 +83,7 @@ class StoreAccessStepConfigTests {
         val token = UUID.randomUUID()
         val defaultDestination = Destination.ExternalUrl("/default-destination")
         whenever(mockState.invitationToken).thenReturn(token.toString())
-        whenever(mockLettingAgentAccessService.getInvitationByTokenOrNull(token)).thenReturn(null)
+        whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(false)
 
         val result = setupStepConfig().resolveNextDestination(mockState, defaultDestination)
 

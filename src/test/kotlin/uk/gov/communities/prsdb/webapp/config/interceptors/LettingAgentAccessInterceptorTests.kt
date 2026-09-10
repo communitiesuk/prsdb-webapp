@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
+import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import java.util.UUID
 import kotlin.test.assertFalse
@@ -80,6 +81,43 @@ class LettingAgentAccessInterceptorTests {
     @Test
     fun `preHandle redirects to invalid-link when the URL has no property-details token segment`() {
         mockRequest.requestURI = "/landlord/letting-agent/property-details"
+
+        assertFalse(callPreHandle())
+        verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+    }
+
+    @Test
+    fun `preHandle allows an invitation-journey step whose journey token is still valid`() {
+        val journeyId = "journey-123"
+        mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
+        mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
+        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
+        whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(true)
+
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
+    }
+
+    @Test
+    fun `preHandle redirects an invitation-journey step to invalid-link when the journey token has been revoked`() {
+        val journeyId = "journey-123"
+        mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
+        mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
+        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(token.toString())
+        whenever(mockLettingAgentAccessService.getTokenIsValid(token.toString())).thenReturn(false)
+
+        assertFalse(callPreHandle())
+        verify(mockLettingAgentAccessService).removeAuthorisedTokenFromSession(token.toString())
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+    }
+
+    @Test
+    fun `preHandle redirects an invitation-journey step to invalid-link when no token is held for the journey`() {
+        val journeyId = "journey-123"
+        mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"
+        mockRequest.setParameter(JourneyIdProvider.PARAMETER_NAME, journeyId)
+        whenever(mockLettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)).thenReturn(null)
 
         assertFalse(callPreHandle())
         verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())

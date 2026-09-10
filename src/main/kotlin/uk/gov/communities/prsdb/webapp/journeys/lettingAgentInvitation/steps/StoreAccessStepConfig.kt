@@ -19,7 +19,7 @@ class StoreAccessStepConfig(
     override fun mode(state: LettingAgentInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
-        val token = requireNotNull(state.invitationToken) { "Invitation token is missing from the journey state" }
+        val token = state.invitationToken
         val invitation = lettingAgentAccessService.getInvitationByTokenOrNull(UUID.fromString(token)) ?: return
         if (lettingAgentPasswordService.hasPasswordBeenSet(invitation)) {
             lettingAgentAccessService.addAuthorisedTokenToSession(token)
@@ -30,8 +30,8 @@ class StoreAccessStepConfig(
         state: LettingAgentInvitationJourneyState,
         defaultDestination: Destination,
     ): Destination {
-        val token = requireNotNull(state.invitationToken) { "Invitation token is missing from the journey state" }
-        return if (lettingAgentAccessService.getInvitationByTokenOrNull(UUID.fromString(token)) == null) {
+        val token = state.invitationToken
+        return if (!lettingAgentAccessService.getTokenIsValid(token)) {
             Destination.ExternalUrl(LettingAgentInvitationController.LETTING_AGENT_INVALID_LINK_ROUTE)
         } else {
             defaultDestination

@@ -123,8 +123,11 @@ class LettingAgentAccessService(
     }
 
     fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String =
-        getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
+        getInvitationTokenForJourneyIdFromSessionOrNull(journeyId)
             ?: throw PrsdbWebException("Invitation token not found in session for journey $journeyId")
+
+    fun getInvitationTokenForJourneyIdFromSessionOrNull(journeyId: String): String? =
+        getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
 
     @Suppress("UNCHECKED_CAST")
     private fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

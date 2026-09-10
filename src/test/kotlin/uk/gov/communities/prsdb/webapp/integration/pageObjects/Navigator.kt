@@ -290,6 +290,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberData
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettingAgentJourneyTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
@@ -1672,6 +1673,22 @@ class Navigator(
         response.dispose()
     }
 
+    private fun storeLettingAgentInvitationJourneyToken(
+        journeyId: String,
+        token: String,
+    ) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_LETTING_AGENT_JOURNEY_TOKEN_ROUTE}",
+                RequestOptions.create().setData(StoreLettingAgentJourneyTokenRequestModel(journeyId, token)),
+            )
+        assertTrue(
+            response.ok(),
+            "Failed to store letting agent journey token. Received status code: ${response.status()}",
+        )
+        response.dispose()
+    }
+
     fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
@@ -1726,6 +1743,7 @@ class Navigator(
         setJourneyStateInSession(
             LettingAgentInvitationStateSessionBuilder.beforeSetPassword(token).build(),
         )
+        storeLettingAgentInvitationJourneyToken(TEST_JOURNEY_ID, token)
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}/${SetPasswordStep.ROUTE_SEGMENT}" +
                 "?journeyId=$TEST_JOURNEY_ID",
@@ -1737,6 +1755,7 @@ class Navigator(
         setJourneyStateInSession(
             LettingAgentInvitationStateSessionBuilder.beforeEnterPassword(token).build(),
         )
+        storeLettingAgentInvitationJourneyToken(TEST_JOURNEY_ID, token)
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}/${EnterPasswordStep.ROUTE_SEGMENT}" +
                 "?journeyId=$TEST_JOURNEY_ID",

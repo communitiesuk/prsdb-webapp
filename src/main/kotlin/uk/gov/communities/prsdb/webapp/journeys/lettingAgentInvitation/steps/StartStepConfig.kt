@@ -25,7 +25,10 @@ class StartStepConfig(
     override fun mode(state: LettingAgentInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
-        state.invitationToken = lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
+        if (!state.isStateInitialized) {
+            state.invitationToken = lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
+            state.isStateInitialized = true
+        }
     }
 }
 

@@ -312,6 +312,15 @@ class LettingAgentAccessServiceTests {
                 lettingAgentAccessService.getInvitationTokenForJourneyIdFromSession("nonexistent")
             }
         }
+
+        @Test
+        fun `getInvitationTokenForJourneyIdFromSessionOrNull returns null when journey id does not exist`() {
+            val pairs = mutableListOf(Pair("journey1", "token1"))
+            whenever(session.getAttribute(LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS))
+                .thenReturn(pairs)
+
+            assertNull(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull("nonexistent"))
+        }
     }
 
     @Nested
