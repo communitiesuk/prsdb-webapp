@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
@@ -17,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
@@ -44,7 +44,6 @@ class LandlordRegistrationTransactionEventTests : IntegrationTestWithImmutableDa
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
-        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 
     @Test
@@ -70,6 +69,10 @@ class LandlordRegistrationTransactionEventTests : IntegrationTestWithImmutableDa
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         phoneNumPage.submitPhoneNumber("07123456789")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
+        landlordTypePage.submitIndividual()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
@@ -142,11 +145,6 @@ class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutable
 class AcceptJointLandlordInvitationTransactionEventTests :
     IntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
-
-    @BeforeEach
-    fun setup() {
-        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
 
     @Test
     fun `only the confirm-you-are-a-landlord commit button is tagged for the Plausible Transaction event`(page: Page) {

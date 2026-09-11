@@ -2,11 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.ORGANISATION_CONTACTS_FRAGMENT
@@ -55,11 +53,6 @@ import kotlin.test.assertEquals
 
 @WithOrgLandlordProfile
 class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    @BeforeEach
-    fun setup() {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
-
     @Test
     fun `An organisation landlord can update organisation name from landlord details and return to details page`(page: Page) {
         val orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
@@ -516,11 +509,6 @@ class OrganisationLandlordUpdateJourneyTests : IntegrationTestWithMutableData("d
 
     @Nested
     inner class RemovingTrustUpdates : NestedIntegrationTestWithMutableData("data-org-landlord-trust.sql") {
-        @BeforeEach
-        fun setup() {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-        }
-
         @Test
         fun `An organisation landlord can remove trust from their organisation type without re-walking trustee details`(page: Page) {
             var orgLandlordDetailsPage = navigator.goToOrgLandlordDetails()
