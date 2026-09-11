@@ -225,14 +225,12 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             )
         }
     }
-    
+
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkGasSafety.provideThisLater.occupiedWithDeadline"
 
-        private fun mockFeatureFlagManager(
-            delegateToLettingAgentEnabled: Boolean,
-        ): FeatureFlagManager =
+        private fun mockFeatureFlagManager(delegateToLettingAgentEnabled: Boolean): FeatureFlagManager =
             mock {
                 on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateToLettingAgentEnabled
             }
