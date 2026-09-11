@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationControl
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController.Companion.LETTING_AGENT_UPDATE_ELECTRICAL_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateFurnishedStatusController.Companion.LETTING_AGENT_UPDATE_FURNISHED_STATUS_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController.Companion.LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController.Companion.LETTING_AGENT_UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController.Companion.LETTING_AGENT_UPDATE_LICENSING_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController.Companion.LETTING_AGENT_UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE
@@ -78,7 +79,11 @@ class LettingAgentSecurityConfig {
                         "$LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE/**",
                     ).anonymous()
                     .requestMatchers(
-                        // TODO: PDJB-1683: Restrict to the letting agent with session access to this property.
+                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
+                        "$LETTING_AGENT_UPDATE_GAS_SAFETY_ROUTE/**",
+                    ).anonymous()
+                    .requestMatchers(
+                        // TODO: PDJB-1659: Restrict to the letting agent with session access to this property.
                         "$LETTING_AGENT_UPDATE_FURNISHED_STATUS_ROUTE/**",
                     ).anonymous()
                     .requestMatchers(

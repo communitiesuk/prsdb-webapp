@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateCheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateCheckEpcAnswersStep
@@ -232,7 +234,10 @@ class PlausibleMetricsService(
         // The eight check-answers property updates are detected by their final check-answers step as the Flow referrer.
         private val PROPERTY_UPDATE_REFERRER_REGEXES =
             listOf(
-                updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
+                updateReferrerRegex(
+                    LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE,
+                    UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT,
+                ),
                 updateReferrerRegex(
                     LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
                     UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,
