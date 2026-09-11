@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyDataExtensions
 
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import kotlin.test.assertEquals
@@ -41,5 +42,41 @@ class SavedJourneyDataExtensionsTests {
 
         // Assert
         assertEquals(expectedSingleLineAddress, result)
+    }
+
+    @Test
+    fun `getPropertyRegistrationMultiLineAddress retrieves a selected address as multiple lines from the SavedJourneyState`() {
+        // Arrange
+        val singleLineAddress = "1 Example Road, EG1 2AB"
+        val savedJourneyState =
+            MockSavedJourneyStateData.createSavedJourneyState(
+                serializedState = MockSavedJourneyStateData.createSerialisedStateWithSingleLineAddress(singleLineAddress),
+            )
+
+        // Act
+        val result = savedJourneyState.getPropertyRegistrationMultiLineAddress()
+
+        // Assert
+        assertEquals("1 Example Road\nEG1 2AB", result)
+    }
+
+    @Test
+    fun `getPropertyRegistrationMultiLineAddress returns a manual address as multiple lines from the SavedJourneyState`() {
+        // Arrange
+        val savedJourneyState =
+            MockSavedJourneyStateData.createSavedJourneyState(
+                serializedState =
+                    MockSavedJourneyStateData.createSerialisedStateWithManualAddress(
+                        addressLineOne = "1 Example Road",
+                        townOrCity = "TownVille",
+                        postcode = "EG1 2AB",
+                    ),
+            )
+
+        // Act
+        val result = savedJourneyState.getPropertyRegistrationMultiLineAddress()
+
+        // Assert
+        assertEquals("1 Example Road\nTownVille\nEG1 2AB", result)
     }
 }

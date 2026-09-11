@@ -331,7 +331,7 @@ class VirusNotificationEmailHandlerTests {
         return VirusScanUnsuccessfulEmail(
             certificateType = expectedCertType(certType),
             recipientName = "Jane Smith",
-            propertyAddress = "1 Main St, Anytown",
+            propertyAddress = "1 Main St\nAnytown",
             landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
         )
     }
@@ -419,7 +419,7 @@ class VirusNotificationEmailHandlerTests {
             VirusScanUnsuccessfulEmail(
                 certificateType = bodyCertificateType,
                 recipientName = recipientName,
-                propertyAddress = "123 Main St, Anytown",
+                propertyAddress = "123 Main St\nAnytown",
                 landlordDashboardUrl = URI("https://www.prsd.gov.uk/landlord/dashboard"),
             ),
         )
