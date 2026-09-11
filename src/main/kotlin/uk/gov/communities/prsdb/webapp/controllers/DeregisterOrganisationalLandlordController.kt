@@ -9,12 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_ORGANISATIONAL_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterOrganisationalLandlordController.Companion.ORGANISATIONAL_LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
@@ -32,14 +30,12 @@ class DeregisterOrganisationalLandlordController(
     private val userToLandlordService: UserToLandlordService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
-    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
         @PathVariable stepPath: String,
     ): ModelAndView = dispatchJourneyStep(stepPath) { getStepModelAndView() }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     @PostMapping("/{*stepPath}")
     fun postJourneyData(
         @PathVariable stepPath: String,
@@ -59,7 +55,6 @@ class DeregisterOrganisationalLandlordController(
 
     // No @PreAuthorize: after deregistration the user no longer holds the LANDLORD role, so the
     // success page must remain reachable to an authenticated user without that role.
-    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(): ModelAndView {
         if (!landlordDeregistrationService.hasOrganisationDeregisteredInThisSession()) {

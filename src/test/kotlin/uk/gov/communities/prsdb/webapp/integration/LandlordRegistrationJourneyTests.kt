@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.ORG_LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
@@ -101,7 +100,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
-        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 
     @Test
@@ -124,6 +122,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         phoneNumPage.submitPhoneNumber("07123456789")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitUk()
@@ -182,6 +183,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
         phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
 
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
         countryOfResidencePage.submitUk()
 
@@ -219,11 +223,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `User can navigate the whole journey selecting individual landlord type when feature flag is enabled (verified, selected address)`(
+    fun `User can navigate the whole journey selecting individual landlord type (verified, selected address)`(
         page: Page,
     ) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 
@@ -276,8 +278,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `User can navigate the whole journey to register as an organisation`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 
@@ -377,8 +377,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for individual flow`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+    fun `Unverified identity asks for email and phone before landlord type for individual flow`(page: Page) {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
@@ -409,8 +408,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `Unverified identity with feature flag enabled asks for email and phone before landlord type for organisation flow`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+    fun `Unverified identity asks for email and phone before landlord type for organisation flow`(page: Page) {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
@@ -442,8 +440,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `Selecting trust on org type shows lead trustee questions before proceeding to charity`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
         orgTypePage.selectTrust()
         orgTypePage.form.submit()
@@ -472,8 +468,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation name change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationNameRow.clickNamedActionLinkAndWait("Change")
 
@@ -486,8 +480,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The landlord type change link returns to the org check answers page when the organisation type is kept`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.landlordTypeRow.clickNamedActionLinkAndWait("Change")
 
@@ -499,8 +491,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The registered charity change link re-walks the charity questions and returns to the org check answers page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.registeredCharityRow.clickNamedActionLinkAndWait("Change")
 
@@ -521,8 +511,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The lead trustee card change link re-walks the trustee section and returns to the org check answers page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.leadTrusteeCard
             .getAction("Change")
@@ -553,8 +541,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation address change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationAddressRow.clickNamedActionLinkAndWait("Change")
 
@@ -570,8 +556,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation email change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationEmailRow.clickNamedActionLinkAndWait("Change")
 
@@ -584,8 +568,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation phone number change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationPhoneRow.clickNamedActionLinkAndWait("Change")
 
@@ -598,8 +580,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The governing body member card change link re-walks the member list and returns to the org check answers page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.governingBodyMemberCard
             .getAction("Change")
@@ -614,8 +594,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The main contact change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.mainContactCard
             .getAction("Change")
@@ -631,8 +609,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The landlord type change link routes into the individual journey when switching to individual`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.landlordTypeRow.clickNamedActionLinkAndWait("Change")
 
@@ -644,8 +620,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The landlord type change link routes into the organisation journey when switching to organisation`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage =
             navigator.skipToLandlordRegistrationCheckAnswersPage(
                 LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
@@ -660,8 +634,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation type change link returns to the org check answers page with the updated value`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationTypeRow.clickNamedActionLinkAndWait("Change")
 
@@ -677,8 +649,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The organisation type change link shows interruption pages when trust status changes`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         var checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.organisationTypeRow.clickNamedActionLinkAndWait("Change")
 
@@ -732,8 +702,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The Companies House change link routes into the companies house update flow`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
         checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
 
@@ -742,8 +710,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `The company number change link opens the company number page and returns to check answers`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.companiesHouseNumberRow.clickNamedActionLinkAndWait("Change")
 
@@ -755,8 +721,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `Keeping the same Companies House answer returns straight to check answers`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
 
@@ -770,8 +734,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Changing the Companies House answer to no routes through the governing body member flow before returning to check answers`(
         page: Page,
     ) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val checkAnswersPage = navigator.skipToLandlordRegistrationOrgCheckAnswersPageForRegisteredCompany()
         checkAnswersPage.landlordDetails.registeredWithCompaniesHouseRow.clickNamedActionLinkAndWait("Change")
 
@@ -790,8 +752,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `Selecting no on companies house skips the company number question and goes to the governing body journey`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
         val companiesHousePage = assertPageIs(page, OrgIsRegisteredCompanyFormPageLandlordRegistration::class)
         companiesHousePage.submitNo()
@@ -842,8 +802,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `Selecting no on charity skips the charity questions and goes to the companies house page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
         val orgIsRegisteredCharityPage = assertPageIs(page, OrgIsRegisteredCharityFormPageLandlordRegistration::class)
         orgIsRegisteredCharityPage.submitNo()
@@ -855,8 +813,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun `Selecting no regulator on charity registered with skips the charity number question and goes to the companies house page`(
         page: Page,
     ) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
         val charityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         charityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.NONE)
@@ -866,8 +822,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `adding another governing body member from the list page completes the flow and shows both members`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(1 to createTestGovBodyMember("Alice Smith")),
@@ -898,8 +852,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `changing a governing body member updates their details in the list`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -937,8 +889,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `removing governing body members one by one updates the list correctly`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -970,8 +920,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `pressing back after starting to edit resets editing state and allows adding a new member`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(1 to createTestGovBodyMember("Alice Smith")),
@@ -1012,8 +960,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `editing a governing body member pre-fills all questions including looked-up address`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -1064,8 +1010,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `editing a governing body member pre-fills manual address`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         val memberListPage =
             navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                 mapOf(
@@ -1124,8 +1068,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `the back link on the org check answers page returns to the main contact page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToLandlordRegistrationOrgCheckAnswersPage()
 
         BackLink.default(page).clickAndWait()
@@ -1135,8 +1077,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `the back link on the individual check answers page returns to the select address page`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToLandlordRegistrationCheckAnswersPage(
             LandlordStateSessionBuilder.beforeCheckAnswers().withLandlordType(LandlordType.INDIVIDUAL),
         )
@@ -1148,8 +1088,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `the back link on the main contact page returns to the governing body member list page when not a registered company`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToOrgLandlordRegistrationMainContactPage()
 
         BackLink.default(page).clickAndWait()
@@ -1159,8 +1097,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @Test
     fun `the back link on the main contact page returns to the company number page when a registered company`(page: Page) {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
         navigator.skipToOrgLandlordRegistrationMainContactPage(
             LandlordStateSessionBuilder.beforeOrgCompanyNumber().withOrgCompanyNumber(),
         )
