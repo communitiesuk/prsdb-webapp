@@ -30,8 +30,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasS
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateGasSafetyController::class)
-class UpdateGasSafetyControllerTests(
+@WebMvcTest(LandlordUpdateGasSafetyController::class)
+class LandlordUpdateGasSafetyControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -49,12 +49,12 @@ class UpdateGasSafetyControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId)
+        LandlordUpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId)
 
     override val formContent = "hasGasSupply=true"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
             .thenReturn(mapOf(HasGasSupplyStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
@@ -62,7 +62,7 @@ class UpdateGasSafetyControllerTests(
     private val redirectUrl = "any-url"
 
     private val validFileUploadUrl =
-        UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
+        LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
             "/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
@@ -79,7 +79,7 @@ class UpdateGasSafetyControllerTests(
 
         @BeforeEach
         fun setUp() {
-            whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+            whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
                 .thenReturn(mapOf(UploadGasCertStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         }
 

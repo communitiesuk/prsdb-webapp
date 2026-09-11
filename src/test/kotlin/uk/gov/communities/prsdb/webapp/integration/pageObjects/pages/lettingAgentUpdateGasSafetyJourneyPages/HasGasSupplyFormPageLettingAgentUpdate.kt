@@ -1,16 +1,16 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateGasSafetyJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.HasGasSupplyFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import java.util.UUID
 
-class HasGasSupplyFormPageUpdateGasSafety(
+class HasGasSupplyFormPageLettingAgentUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : HasGasSupplyFormBasePage(
         page,
-        LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
-            .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
+        LettingAgentUpdateGasSafetyController.getUpdateGasSafetyRoute(UUID.fromString(urlArguments["token"]!!)) +
             "/${HasGasSupplyStep.ROUTE_SEGMENT}",
     )
