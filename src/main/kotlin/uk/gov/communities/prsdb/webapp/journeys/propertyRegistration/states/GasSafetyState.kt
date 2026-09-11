@@ -38,6 +38,7 @@ interface GasSafetyDetailState : JourneyState {
 
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long?
 
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->

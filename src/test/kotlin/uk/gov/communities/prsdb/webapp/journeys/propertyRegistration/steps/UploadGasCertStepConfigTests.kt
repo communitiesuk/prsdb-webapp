@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.verifyNoInteractions
@@ -12,11 +11,9 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyDetailState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
@@ -25,9 +22,9 @@ import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class UploadElectricalCertStepConfigTests {
+class UploadGasCertStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyDetailState
+    lateinit var mockState: GasSafetyDetailState
 
     @Mock
     lateinit var virusScanCallbackService: VirusScanCallbackService
@@ -45,51 +42,30 @@ class UploadElectricalCertStepConfigTests {
     lateinit var landlord: Landlord
 
     @Mock
-    lateinit var uploadElectricalCertStep: UploadElectricalCertStep
+    lateinit var uploadGasCertStep: UploadGasCertStep
 
     @Test
-    fun `getStepSpecificContent returns EIC heading when EIC is selected`() {
+    fun `getStepSpecificContent returns the gas safety heading`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EIC)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals("forms.uploadCertificate.eic.fieldSetHeading", content["fieldSetHeading"])
+        assertEquals("forms.uploadCertificate.gasSafety.fieldSetHeading", content["fieldSetHeading"])
         verify(fileUploadCookieService).addFileUploadCookieToResponse()
     }
 
     @Test
-    fun `getStepSpecificContent returns EICR heading when EICR is selected`() {
+    fun `mode returns COMPLETE when gasUploadMap is non-empty`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(HasElectricalSafetyCertificate.HAS_EICR)
-
-        val content = stepConfig.getStepSpecificContent(mockState)
-
-        assertEquals("forms.uploadCertificate.eicr.fieldSetHeading", content["fieldSetHeading"])
-    }
-
-    @Test
-    fun `getStepSpecificContent throws exception when certificate type is null`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getElectricalCertificateType()).thenReturn(null)
-
-        assertThrows<PrsdbWebException> {
-            stepConfig.getStepSpecificContent(mockState)
-        }
-    }
-
-    @Test
-    fun `mode returns COMPLETE when electricalUploadMap is non-empty`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+        whenever(mockState.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
     }
 
     @Test
-    fun `mode returns null when electricalUploadMap is empty`() {
+    fun `mode returns null when gasUploadMap is empty`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
+        whenever(mockState.gasUploadMap).thenReturn(mapOf())
 
         assertNull(stepConfig.mode(mockState))
     }
@@ -97,11 +73,11 @@ class UploadElectricalCertStepConfigTests {
     @Test
     fun `afterStepDataIsAdded updates the upload map and triggers virus scan callbacks`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadGasCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
+        whenever(mockState.gasUploadMap).thenReturn(mapOf())
+        whenever(mockState.getNextGasUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
         stubStateForAfterStepDataIsAdded()
 
@@ -110,30 +86,29 @@ class UploadElectricalCertStepConfigTests {
         verify(virusScanCallbackService).saveVirusScanFailureEmail(
             journeyId = "test-journey-id",
             fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
+            certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = null,
             landlordId = 7L,
         )
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
-        verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
+        verify(mockState).gasUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(42L, "cert.pdf"), updatedMapCaptor.firstValue[1])
-        verify(mockState).highestAssignedElectricalMemberId = 1
-        verify(uploadElectricalCertStep).clearFormData()
+        verify(mockState).highestAssignedGasMemberId = 1
+        verify(uploadGasCertStep).clearFormData()
     }
 
     @Test
     fun `afterStepDataIsAdded uses the property ownership id when the upload is on an update journey`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadGasCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
+        whenever(mockState.gasUploadMap).thenReturn(mapOf())
+        whenever(mockState.getNextGasUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
+        whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -141,7 +116,7 @@ class UploadElectricalCertStepConfigTests {
         verify(virusScanCallbackService).saveVirusScanFailureEmail(
             journeyId = "test-journey-id",
             fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
+            certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = 99L,
             landlordId = null,
         )
@@ -151,15 +126,14 @@ class UploadElectricalCertStepConfigTests {
     @Test
     fun `afterStepDataIsAdded saves nothing extra when there is no property ownership id and no acting landlord`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadGasCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
+        whenever(mockState.gasUploadMap).thenReturn(mapOf())
+        whenever(mockState.getNextGasUploadMemberId()).thenReturn(1)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
+        whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
         whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
 
@@ -168,45 +142,44 @@ class UploadElectricalCertStepConfigTests {
         verify(virusScanCallbackService).saveVirusScanFailureEmail(
             journeyId = "test-journey-id",
             fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
+            certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = null,
             landlordId = null,
         )
-        verify(mockState).highestAssignedElectricalMemberId = 1
-        verify(uploadElectricalCertStep).clearFormData()
+        verify(mockState).highestAssignedGasMemberId = 1
+        verify(uploadGasCertStep).clearFormData()
     }
 
     @Test
     fun `afterStepDataIsAdded updates existing entry when memberIdService returns a key`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
+        whenever(mockState.getStepData(UploadGasCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "updated.pdf", "fileUploadId" to "55"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(3 to CertificateUpload(10L, "old.pdf")))
+        whenever(mockState.gasUploadMap).thenReturn(mapOf(3 to CertificateUpload(10L, "old.pdf")))
         whenever(memberIdService.getParameterOrNull()).thenReturn(3)
         stubStateForAfterStepDataIsAdded()
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
-        verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
+        verify(mockState).gasUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(55L, "updated.pdf"), updatedMapCaptor.firstValue[3])
-        verify(mockState).highestAssignedElectricalMemberId = 3
+        verify(mockState).highestAssignedGasMemberId = 3
     }
 
     private fun stubStateForAfterStepDataIsAdded() {
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
+        whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
         whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
         whenever(landlord.id).thenReturn(7L)
     }
 
-    private fun setupStepConfig(): UploadElectricalCertStepConfig {
+    private fun setupStepConfig(): UploadGasCertStepConfig {
         val stepConfig =
-            UploadElectricalCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService, userToLandlordService)
-        stepConfig.urlPath = UploadElectricalCertStep.ROUTE_SEGMENT
+            UploadGasCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService, userToLandlordService)
+        stepConfig.urlPath = UploadGasCertStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

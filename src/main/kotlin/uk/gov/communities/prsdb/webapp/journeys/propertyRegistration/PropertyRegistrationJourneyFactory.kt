@@ -862,6 +862,9 @@ interface PropertyRegistrationJourneyState :
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 
+    // No property ownership exists yet during registration.
+    override val propertyOwnershipId: Long? get() = null
+
     // Journey-structure tasks (the two alternative flows)
     // Legacy journey only (flag-off) — remove with the old journey
     val occupationTask: OccupationTask
