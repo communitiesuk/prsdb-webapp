@@ -1,19 +1,19 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateGasSafetyJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration.CheckUploadsForm
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import java.util.UUID
 
-class CheckGasCertUploadsFormPageUpdateGasSafety(
+class CheckGasCertUploadsFormPageLettingAgentUpdate(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
-            .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
+        LettingAgentUpdateGasSafetyController.getUpdateGasSafetyRoute(UUID.fromString(urlArguments["token"]!!)) +
             "/${CheckGasCertUploadsStep.ROUTE_SEGMENT}",
     ) {
     val table = Table(page)
