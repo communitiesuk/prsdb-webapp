@@ -3,9 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
@@ -42,7 +40,6 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordRegistrationCyaStepConfig(
     private val landlordRegistrationService: LandlordRegistrationService,
     private val securityContextService: SecurityContextService,
-    private val featureFlagManager: FeatureFlagManager,
     private val messageSource: MessageSource,
     private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
@@ -166,12 +163,11 @@ class LandlordRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination = defaultDestination
 
-    private fun isOrgLandlord(state: LandlordRegistrationState) =
-        featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
-            state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
+    private fun isOrgLandlord(state: LandlordRegistrationState): Boolean {
+        return state.landlordTypeStep.outcome == LandlordTypeMode.ORGANISATION
+    }
 
     // Individual landlord content
-
     private fun getIndividualStepContent(state: LandlordRegistrationState): Map<String, Any?> =
         mapOf(
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
@@ -188,9 +184,7 @@ class LandlordRegistrationCyaStepConfig(
             getAddressRows(state)
 
     private fun getLandlordTypeRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
-        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION) &&
-            state.landlordTypeStep.outcome == LandlordTypeMode.INDIVIDUAL
-        ) {
+        if (state.landlordTypeStep.outcome == LandlordTypeMode.INDIVIDUAL) {
             listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "registerAsALandlord.checkAnswers.rowHeading.landlordType",

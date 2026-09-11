@@ -3,8 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -57,7 +55,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgAddressTask
 
 @JourneyFrameworkComponent
 class LandlordRegistrationTask(
-    private val featureFlagManager: FeatureFlagManager,
     override val identityTask: IdentityTask,
     override val emailStep: EmailStep,
     override val phoneNumberStep: PhoneNumberStep,
@@ -89,46 +86,7 @@ class LandlordRegistrationTask(
 
     override val taskState get() = this
 
-    override fun makeSubJourney(state: LandlordRegistrationState) =
-        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-            makeRestructuredLandlordSubJourney(state)
-        } else {
-            makeLegacyLandlordSubJourney(state)
-        }
-
-    private fun makeLegacyLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
-        subJourney(state) {
-            step(journey.privacyNoticeStep) {
-                routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
-                nextStep { journey.identityTask.firstStep }
-            }
-            task(journey.identityTask) {
-                parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.emailStep }
-            }
-            step(journey.emailStep) {
-                routeSegment(EmailStep.ROUTE_SEGMENT)
-                parents { journey.identityTask.isComplete() }
-                nextStep { journey.phoneNumberStep }
-            }
-            step(journey.phoneNumberStep) {
-                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                parents { journey.emailStep.isComplete() }
-                nextStep { journey.individualLandlordLocationTask.firstStep }
-            }
-            task(journey.individualLandlordLocationTask) {
-                parents { journey.phoneNumberStep.isComplete() }
-                nextStep { journey.cyaStep }
-            }
-            step(journey.cyaStep) {
-                routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.individualLandlordLocationTask.isComplete() }
-                nextStep { exitStep }
-            }
-            exitStep {
-                parents { journey.cyaStep.isComplete() }
-            }
-        }
+    override fun makeSubJourney(state: LandlordRegistrationState) = makeRestructuredLandlordSubJourney(state)
 
     private fun makeRestructuredLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
         subJourney(state) {
