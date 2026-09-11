@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
@@ -18,6 +19,7 @@ class CheckJointLandlordsFormPagePropertyRegistration(
     ) {
     val title = Heading(page.locator("h1"))
 
+    val backLink = BackLink.default(page)
     val form = CheckJointLandlordsForm(page)
     val sectionHeader = SectionHeader(page.locator("main"))
 

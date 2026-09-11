@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
@@ -13,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 class CheckElectricalCertUploadsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckElectricalCertUploadsStep.ROUTE_SEGMENT}") {
+    val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
 
     val form = CheckUploadsForm(page)

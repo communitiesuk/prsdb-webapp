@@ -113,6 +113,7 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
+        val billsIncludedRow = getRow("Which bills are included")
 
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
@@ -125,8 +126,17 @@ class CheckAnswersPagePropertyRegistration(
         page: Page,
     ) : SummaryList(page) {
         val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
+        val validGasCertRow = getRow("Do you have a valid gas safety certificate for this property?")
+        val gasCertIssueDateRow = getRow("Issue date")
+        val gasCertUploadRow = getRow("Your certificate")
         val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
+        val electricalCertExpiryDateRow = getRow("Expiry date")
+        val electricalCertUploadRow = getRow("Your certificate")
         val hasEpcRow = getRow("Do you have an EPC for this property?")
+        val epcTenancyCheckRow = getRow("Was the EPC still in date when the current tenancy began?")
         val isEpcRequiredRow = getRow("Is an EPC required to let this property?")
+        val epcExemptionRow = getRow("Why does this property not need an EPC?")
+        val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
+        val meesExemptionRow = getRow("Registered exemption")
     }
 }
