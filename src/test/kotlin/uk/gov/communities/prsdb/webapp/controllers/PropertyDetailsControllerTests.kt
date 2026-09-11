@@ -2,8 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
@@ -17,7 +15,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
@@ -65,7 +62,6 @@ class PropertyDetailsControllerTests(
 
     @BeforeEach
     fun setUp() {
-        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
         whenever(
@@ -77,8 +73,6 @@ class PropertyDetailsControllerTests(
                 any(),
             ),
         ).thenReturn(PropertyDetailsNotificationBannerViewModel.fromState(true, false, false, false, emptyList()))
-        whenever(notificationBannerViewModelService.getBeforePdjb939NotificationBanner(anyOrNull(), any()))
-            .thenReturn(emptyList())
     }
 
     @Nested
@@ -159,32 +153,21 @@ class PropertyDetailsControllerTests(
             verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
 
-        @ParameterizedTest(name = "when the provide later feature is {0}")
-        @ValueSource(booleans = [true, false])
+        @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `getPropertyDetails selects the view matching the provide later feature`(isFeatureEnabled: Boolean) {
+        fun `getPropertyDetails selects the property details view`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
-            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(
-                isFeatureEnabled,
-            )
-
-            val expectedView =
-                if (isFeatureEnabled) {
-                    PropertyDetailsController.PROPERTY_DETAILS_VIEW
-                } else {
-                    PropertyDetailsController.PROPERTY_DETAILS_BEFORE_PDJB939_VIEW
-                }
 
             mvc
                 .get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false))
                 .andExpect {
                     status { isOk() }
-                    view { name(expectedView) }
+                    view { name(PropertyDetailsController.PROPERTY_DETAILS_VIEW) }
                 }
         }
 

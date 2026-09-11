@@ -288,8 +288,6 @@ epcTask:
     error:
       missing: Select if you have an EPC for this property
     fieldSetHeading: Do you have an EPC for this property?
-    buttons:
-      provideEpcDetailsLater: Provide EPC details later
     radios:
       option:
         'no':

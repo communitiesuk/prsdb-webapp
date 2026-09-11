@@ -38,15 +38,7 @@ abstract class NumberOfHouseholdsFormBasePage(
         val householdsInput = TextInput.textByFieldName(locator, "numberOfHouseholds")
         val fieldsetLegend = FieldsetLegend(locator)
 
-        // TODO PDJB-1340: Tidy up when the PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING Feature Flag is removed
-        fun submitForm() {
-            val submitButtonForAction = locator.locator("button[type='submit'][value='continue']")
-            if (submitButtonForAction.count() > 0) {
-                submitPrimaryButton()
-            } else {
-                SubmitButton(locator).clickAndWait()
-            }
-        }
+        fun submitForm() = submitPrimaryButton()
 
         fun submitPrimaryButton(buttonAction: String = CONTINUE_BUTTON_ACTION_NAME) = submitSelectedButton(buttonAction)
 

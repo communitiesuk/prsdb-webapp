@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
@@ -15,30 +14,20 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseHoldsAndTenantsDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -66,14 +55,7 @@ class UpdateOccupancyJourneyFactory(
         }
 
         val checkingAnswersFor = state.checkingAnswersFor
-        val isRedesigned = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        return if (isRedesigned) {
-            journeyMap(state, checkingAnswersFor, propertyId)
-        } else if (checkingAnswersFor == null) {
-            beforePdjb939MainJourneyMap(state, propertyId)
-        } else {
-            beforePdjb939CheckYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
-        }
+        return journeyMap(state, checkingAnswersFor, propertyId)
     }
 
     private fun isDelegatedToLettingAgent(propertyId: Long): Boolean =
@@ -239,149 +221,15 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun beforePdjb939MainJourneyMap(
-        state: UpdateOccupancyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
-            task(journey.occupationTask.inJourney(journey)) {
-                initialStep()
-                backUrl { propertyDetailsRoute }
-                nextStep { journey.beforePdjb939CyaStep }
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
-            }
-            step(journey.beforePdjb939CyaStep) {
-                routeSegment(UpdateOccupancyCyaStep.ROUTE_SEGMENT)
-                parents { journey.occupationTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
-            }
-            replaceHeadings(state)
-        }
-    }
-
-    // TODO(PDJB-1340): delete this old (flag-off) journey when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun beforePdjb939CheckYourAnswersJourneyMap(
-        state: UpdateOccupancyJourney,
-        checkingAnswersFor: String,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
-            configure {
-                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
-            }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            when (checkingAnswersFor) {
-                OccupiedStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.occupationTask.inJourney(journey))
-                }
-
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.householdsAndTenantsTask)
-                }
-
-                BedroomsStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
-                }
-
-                RentIncludesBillsStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentIncludesBillsTask)
-                }
-
-                BillsIncludedStep.ROUTE_SEGMENT -> {
-                    fromTask(journey.rentIncludesBillsTask) {
-                        checkAnswerStep(task.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
-                    }
-                }
-
-                FurnishedStatusStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                }
-
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                }
-
-                else -> {
-                    throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
-                }
-            }
-            replaceHeadings(state)
-            step(journey.finishCyaStep) {
-                initialStep()
-                nextDestination { Destination.Nowhere() }
-            }
-        }
-    }
-
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
-
-    // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
-    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
-        configureStep(journey.occupied) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.occupancy.occupied.fieldSetHeading"
-            }
-        }
-        configureStep(journey.householdsAndTenantsTask.households) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
-            }
-        }
-        configureStep(journey.householdsAndTenantsTask.tenants) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
-            }
-        }
-        configureStep(journey.bedrooms) {
-            withAdditionalContentProperty {
-                "heading" to "forms.update.numberOfBedrooms.heading"
-            }
-        }
-        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-            }
-        }
-        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-            }
-        }
-        configureStep(journey.furnishedStatus) {
-            withAdditionalContentProperty {
-                "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading"
-            }
-        }
-        configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-            withAdditionalContentProperty {
-                "heading" to "forms.update.rentFrequency.heading"
-            }
-        }
-        configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-            withAdditionalContentProperty {
-                "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-            }
-        }
-    }
 }
 
 @JourneyFrameworkComponent
 class UpdateOccupancyJourney(
     // Occupancy task
-    override val occupationTask: OccupationTask,
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
@@ -391,9 +239,6 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     // Nested rent frequency and amount task
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
-    // TODO(PDJB-1340): delete these old (flag-off) check-your-answers steps when
-    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed (the redesigned update is a single page).
-    override val beforePdjb939CyaStep: UpdateOccupancyCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Completion step for the redesigned single-page update
     override val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep,
@@ -404,25 +249,15 @@ class UpdateOccupancyJourney(
     // Check-your-answers step for the redesigned update (included when DELEGATE_TO_LETTING_AGENT is enabled -
     // see journeyMap)
     override val checkYourAnswersStep: UpdateOccupancyCheckYourAnswersStep,
-    private val featureFlagManager: FeatureFlagManager,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
     override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    // Only the redesigned update with letting agent delegation has its own check-your-answers page, so cyaStep
-    // resolves to the new step when both flags are on. Otherwise it falls back to the legacy step used by the old
-    // flag-off journey. (The redesigned single-page update with delegation off has no check-your-answers page, so it
-    // never reads this.)
+    // Only the redesigned update with letting agent delegation has its own check-your-answers page. The redesigned
+    // single-page update with delegation off has no check-your-answers page, so it never reads this.
     override val cyaStep: JourneyStep.RequestableStep<*, *, *>
-        get() =
-            if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
-                featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
-            ) {
-                checkYourAnswersStep
-            } else {
-                beforePdjb939CyaStep
-            }
+        get() = checkYourAnswersStep
 
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
@@ -444,8 +279,6 @@ class UpdateOccupancyJourney(
 interface UpdateOccupancyJourneyState :
     OccupationState,
     CheckYourAnswersJourneyState {
-    val occupationTask: OccupationTask
-    val beforePdjb939CyaStep: UpdateOccupancyCyaStep
     val completeOccupancyUpdateStep: CompleteOccupancyUpdateStep
     val occupancyUpdateRoutingStep: OccupancyUpdateRoutingStep
     val lettingAgentInterruptionStep: OccupancyLettingAgentInterruptionStep

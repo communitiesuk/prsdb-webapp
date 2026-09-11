@@ -11,7 +11,6 @@ abstract class PropertyDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = PropertyDetailsTabs(page)
-    val beforePdjb939SummaryList = PropertyDetailsBeforePdjb939SummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = ElectricalSafetySummaryCard(page, "Electrical safety certificate")
@@ -51,24 +50,6 @@ abstract class PropertyDetailsBasePage(
         fun goToComplianceInformation() {
             goToTab("Compliance information")
         }
-    }
-
-    class PropertyDetailsBeforePdjb939SummaryList(
-        page: Page,
-    ) : SummaryList(page) {
-        val propertyTypeRow = getRow("Property type")
-        val ownershipTypeRow = getRow("Ownership type")
-        val occupancyRow = getRow("Occupied by tenants")
-        val numberOfHouseholdsRow = getRow("Number of households")
-        val numberOfPeopleRow = getRow("Number of tenants")
-        val numberOfBedroomsRow = getRow("Number of bedrooms")
-        val rentIncludesBillsRow = getRow("Rent includes bills")
-        val billsIncludedRow = getRow("Which bills are included")
-        val furnishedStatusRow = getRow("Furniture provided")
-        val rentFrequencyRow = getRow("When rent is paid")
-        val rentAmountRow = getRow("Rent amount")
-        val licensingTypeRow = getRow("Licensing type")
-        val licensingNumberRow = getRow("Licensing number")
     }
 
     class PropertyDetailsSummaryList(

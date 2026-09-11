@@ -151,7 +151,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDer
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
@@ -296,7 +295,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitati
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOrganisationTypeJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -1417,24 +1415,6 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
-    fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
-        propertyOwnershipId: Long,
-    ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyStateInSession(
-            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
-        )
-        return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
-    }
-
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
             UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
@@ -1443,18 +1423,6 @@ class Navigator(
         return createValidPage(
             page,
             OccupancyFormPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        navigate(
-            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-                "/${PropertyRegistrationCyaStep.ROUTE_SEGMENT}",
-        )
-        return createValidPage(
-            page,
-            CheckOccupancyAnswersPagePropertyDetailsUpdate::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

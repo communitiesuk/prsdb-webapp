@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -121,11 +120,7 @@ class RegisterPropertyController(
             }
 
         // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
-        val lettingAgentFeatureEnabled =
-            featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-                // We should release the prop reg restructures first, but just to be sure make sure it's released too.
-                // TODO: PDJB-1340: Remove this when we remove PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING flag
-                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val lettingAgentFeatureEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
         model.addAttribute("lettingAgentFeatureEnabled", lettingAgentFeatureEnabled)
 
         val delegatedToLettingAgent =

@@ -374,7 +374,7 @@ UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
 -- =============================================================================
 -- PDJB-1048 provide-later property record QA properties (landlord 1), ids 18-25.
 -- For manual QA of the new-layout notification banners and "Provide this later"
--- rows behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING. Each property takes one
+-- rows in the restructured property record. Each property takes one
 -- of the reserved QA addresses seeded at the top of this file, selected by rn. Occupied
 -- properties set last_occupied_date so the "within 28 days" deadline renders.
 -- Fixed ids + ON CONFLICT DO NOTHING keep this idempotent under sql.init mode: always.

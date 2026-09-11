@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -15,15 +13,12 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
 @JourneyFrameworkComponent
-class LicensingTypeStepConfig(
-    private val featureFlagManager: FeatureFlagManager,
-) : AbstractRequestableStepConfig<LicensingTypeMode, LicensingTypeFormModel, LicensingState>() {
+class LicensingTypeStepConfig :
+    AbstractRequestableStepConfig<LicensingTypeMode, LicensingTypeFormModel, LicensingState>() {
     override val formModelClass = LicensingTypeFormModel::class
 
     override fun getStepSpecificContent(state: LicensingState): Map<String, Any?> {
-        val showProvideThisLater =
-            state.allowProvideLicensingLaterRoute &&
-                featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+        val showProvideThisLater = state.allowProvideLicensingLaterRoute
         return mapOf(
             "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
             "fieldSetHint" to "forms.licensingType.fieldSetHint",
@@ -63,9 +58,7 @@ class LicensingTypeStepConfig(
     override fun mode(state: LicensingState) =
         getFormModelFromStateOrNull(state)?.let { formModel ->
             if (formModel.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                if (state.allowProvideLicensingLaterRoute &&
-                    featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-                ) {
+                if (state.allowProvideLicensingLaterRoute) {
                     LicensingTypeMode.PROVIDE_LATER
                 } else {
                     throw UnrecoverableJourneyStateException(
