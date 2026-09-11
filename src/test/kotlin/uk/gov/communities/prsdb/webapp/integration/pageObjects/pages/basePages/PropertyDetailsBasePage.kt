@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
 
 abstract class PropertyDetailsBasePage(
     page: Page,
@@ -20,8 +20,7 @@ abstract class PropertyDetailsBasePage(
 
     val backLink = BackLink.default(page)
 
-    val lettingAgentPanel: Locator
-        get() = page.locator(".moj-ticket-panel")
+    val lettingAgentPanel = TicketPanel(page)
 
     val propertyDetailsSummaryList = PropertyDetailsSummaryList(page)
 
