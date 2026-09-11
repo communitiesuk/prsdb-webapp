@@ -57,8 +57,13 @@ class UpdateEpcController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
