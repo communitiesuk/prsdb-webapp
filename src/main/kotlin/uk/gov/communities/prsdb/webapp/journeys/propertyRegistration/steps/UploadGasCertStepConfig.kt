@@ -40,19 +40,25 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
-            virusScanCallbackService.saveEmailForJourney(
-                state.journeyId,
-                fileUploadId,
-                CertificateType.GasSafetyCert,
-                landlordId,
-            )
-            virusScanCallbackService.saveEmailToMonitoringTeam(
-                state.journeyId,
-                fileUploadId,
-                CertificateType.GasSafetyCert,
-                landlordId,
-            )
+            // TODO: PDJB-1582: When a virus scan fails, all parties (landlords and letting agents) should be notified,
+            //  regardless of who uploaded the certificate. Currently only the uploading landlord's callback emails are
+            //  registered, and none are registered when a letting agent uploads the certificate.
+            val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
+
+            if (landlordId != null) {
+                virusScanCallbackService.saveEmailForJourney(
+                    state.journeyId,
+                    fileUploadId,
+                    CertificateType.GasSafetyCert,
+                    landlordId,
+                )
+                virusScanCallbackService.saveEmailToMonitoringTeam(
+                    state.journeyId,
+                    fileUploadId,
+                    CertificateType.GasSafetyCert,
+                    landlordId,
+                )
+            }
 
             val formModel = getFormModelFromState(state)
 
