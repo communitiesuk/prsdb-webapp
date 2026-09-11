@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LettingAgentComplianceUpdateNotificationEmail
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -38,6 +39,7 @@ class PropertyComplianceService(
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val lettingAgentComplianceUpdateSender: EmailNotificationService<LettingAgentComplianceUpdateNotificationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
@@ -298,6 +300,7 @@ class PropertyComplianceService(
                 certificateType = "electrical safety certificate",
                 certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
                 expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                lettingAgentCertificateTypeLabel = "Electrical safety certificate",
             )
         }
     }
@@ -350,6 +353,7 @@ class PropertyComplianceService(
         expiryDate: LocalDate?,
         expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+        lettingAgentCertificateTypeLabel: String = certificateTypeLabel,
     ) {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
         val updateType =
@@ -378,8 +382,17 @@ class PropertyComplianceService(
 
         val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
         if (currentLandlord == null) {
-            // TODO: PDJB-1581: Send update emails when a letting agent makes the update. No emails are sent yet.
-            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)) return
+            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)) {
+                if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
+                    sendLettingAgentComplianceUpdateEmails(
+                        propertyOwnership = propertyOwnership,
+                        certificateType = certificateType,
+                        certificateTypeLabel = lettingAgentCertificateTypeLabel,
+                        expiryDate = formattedExpiryDate,
+                    )
+                }
+                return
+            }
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "No acting landlord was found for the update to property ownership ${propertyOwnership.id}",
@@ -428,6 +441,31 @@ class PropertyComplianceService(
                     expiryDate = formattedExpiryDate,
                     deadlineDate = formattedDeadlineDate,
                     isJointLandlord = true,
+                ),
+            )
+        }
+    }
+
+    private fun sendLettingAgentComplianceUpdateEmails(
+        propertyOwnership: PropertyOwnership,
+        certificateType: String,
+        certificateTypeLabel: String,
+        expiryDate: String?,
+    ) {
+        val registrationNumber =
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
+        val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+        propertyOwnership.landlords.forEach { landlord ->
+            lettingAgentComplianceUpdateSender.sendEmail(
+                landlord.email,
+                LettingAgentComplianceUpdateNotificationEmail(
+                    recipientName = landlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = registrationNumber,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = expiryDate ?: "",
+                    propertyRecordUrl = propertyRecordUrl,
                 ),
             )
         }

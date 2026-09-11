@@ -350,5 +350,19 @@
     "enumName": "DELEGATE_TO_LETTING_AGENT_INVITATION_WITH_DEADLINE_EMAIL",
     "subject": "You can provide details for ((single line address))",
     "bodyLocation": "/emails/DelegateToLettingAgentInvitationWithDeadline.md"
+  },
+  {
+    "test_id": "eadf7eaa-e7c0-4248-8346-1eda09044d80",
+    "prod_id": "11bb66e7-f171-4981-b699-c8e7d6805406",
+    "enumName": "LETTING_AGENT_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
+    "subject": "Your letting agent or property manager made an update to a property record",
+    "bodyLocation": "/emails/LettingAgentPropertyUpdateNotification.md"
+  },
+  {
+    "test_id": "489f94c7-3b9b-4aa4-827b-1ea7107ae555",
+    "prod_id": "588efdce-6e44-4496-b6fe-2af09bbec9a6",
+    "enumName": "LETTING_AGENT_COMPLIANCE_UPDATE_NOTIFICATION_EMAIL",
+    "subject": "A letting agent or property manager added a new ((certificate type)) to a property record",
+    "bodyLocation": "/emails/LettingAgentComplianceUpdateNotification.md"
   }
 ]
