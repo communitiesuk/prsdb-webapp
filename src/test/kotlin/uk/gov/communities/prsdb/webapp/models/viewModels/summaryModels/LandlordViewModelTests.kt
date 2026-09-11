@@ -49,6 +49,7 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.registrationDate",
                 "landlordDetails.personalDetails.lrn",
+                "landlordDetails.personalDetails.landlordType",
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.oneLoginVerified",
@@ -79,6 +80,7 @@ class LandlordViewModelTests {
             listOf(
                 "landlordDetails.personalDetails.registrationDate",
                 "landlordDetails.personalDetails.lrn",
+                "landlordDetails.personalDetails.landlordType",
                 "landlordDetails.personalDetails.name",
                 "landlordDetails.personalDetails.dateOfBirth",
                 "landlordDetails.personalDetails.oneLoginVerified",
