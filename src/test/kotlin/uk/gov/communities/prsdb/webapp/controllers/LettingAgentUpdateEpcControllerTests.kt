@@ -14,9 +14,11 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -39,6 +41,7 @@ import java.util.UUID
 
 @WebMvcTest(LettingAgentUpdateEpcController::class)
 @Import(LettingAgentUpdateEpcControllerTests.FeatureFlagMappingConfiguration::class)
+@ActiveProfiles(LettingAgentUpdateEpcControllerTests.FEATURE_FLAG_ROUTING_PROFILE)
 class LettingAgentUpdateEpcControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -248,6 +251,10 @@ class LettingAgentUpdateEpcControllerTests(
         verifyNoInteractions(lettingAgentAccessService, propertyOwnershipService, journeyFactory, stepLifecycleOrchestrator)
     }
 
+    // FeatureFlagConfig declares an unfiltered @ComponentScan over uk.gov.communities.prsdb.webapp, which bypasses
+    // Spring Boot's TypeExcludeFilter and so also scans @TestConfiguration classes from the test classpath. The
+    // profile guard keeps this configuration out of every other test context (see PrsdbTaskApplicationTests).
+    @Profile(FEATURE_FLAG_ROUTING_PROFILE)
     @TestConfiguration(proxyBeanMethods = false)
     class FeatureFlagMappingConfiguration {
         @Bean
@@ -258,5 +265,9 @@ class LettingAgentUpdateEpcControllerTests(
                 override fun getRequestMappingHandlerMapping() =
                     PrsdbWebMvcRegistration(featureFlagManager).getRequestMappingHandlerMapping()
             }
+    }
+
+    companion object {
+        const val FEATURE_FLAG_ROUTING_PROFILE = "feature-flag-routing"
     }
 }
