@@ -8,10 +8,12 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -185,6 +187,79 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertNull(result.electricalSafetySummaryCard.actions)
+        }
+
+        @Test
+        fun `the EPC card includes view and change actions for the letting agent with a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                    lettingAgentAccessToken = token,
+                )
+
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        requireNotNull(propertyCompliance.epcUrl),
+                        opensInNewTab = true,
+                    ),
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${StartEpcStep.ROUTE_SEGMENT}",
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
+        }
+
+        @Test
+        fun `the EPC card retains the view action without a change action for the letting agent without a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
+
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        requireNotNull(propertyCompliance.epcUrl),
+                        opensInNewTab = true,
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
+        }
+
+        @Test
+        fun `the EPC card has a change action for the letting agent when the certificate is missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts()
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                    lettingAgentAccessToken = token,
+                )
+
+            assertEquals(
+                SummaryCardActionViewModel.changeAction(
+                    LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${StartEpcStep.ROUTE_SEGMENT}",
+                ),
+                result.epcSummaryCard.actions,
+            )
         }
 
         @Test
