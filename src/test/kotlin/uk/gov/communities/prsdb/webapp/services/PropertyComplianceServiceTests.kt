@@ -1816,6 +1816,47 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `sends letting agent EPC notification when a letting agent adds the certificate`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiryDate = LocalDate.now().plusYears(5)
+
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)).thenReturn(URI("http://property"))
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateEpc(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                epcExpiryDate = expiryDate,
+                epcEnergyRating = "C",
+            )
+
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    LettingAgentComplianceUpdateNotificationEmail(
+                        recipientName = mockLoggedInLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                        certificateType = "energy performance certificate (EPC)",
+                        certificateTypeLabel = "Energy performance certificate (EPC)",
+                        expiryDate = expiryDate.format(dateFormatter),
+                        propertyRecordUrl = "http://property",
+                    ),
+                ),
+            )
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
+        }
+
+        @Test
         fun `sends valid EPC confirmation email when EPC URL is provided and not expired`() {
             setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
