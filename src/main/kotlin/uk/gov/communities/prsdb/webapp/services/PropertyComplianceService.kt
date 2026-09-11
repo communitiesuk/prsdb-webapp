@@ -383,10 +383,6 @@ class PropertyComplianceService(
         val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
         if (currentLandlord == null) {
             if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)) {
-                // Letting agent made the update. Only the "certificate added" case is notified; expired
-                // cases are covered by the existing expiry emails to landlords.
-                // TODO: PDJB-1577 (gas) / PDJB-1579 (EPC): letting-agent journeys for these certificate
-                //  types are not yet built, so this currently only fires for electrical certificate additions.
                 if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
                     sendLettingAgentComplianceUpdateEmails(
                         propertyOwnership = propertyOwnership,
