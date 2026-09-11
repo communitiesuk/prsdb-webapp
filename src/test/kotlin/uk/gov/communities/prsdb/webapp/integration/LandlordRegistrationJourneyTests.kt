@@ -223,9 +223,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `User can navigate the whole journey selecting individual landlord type (verified, selected address)`(
-        page: Page,
-    ) {
+    fun `User can navigate the whole journey selecting individual landlord type (verified, selected address)`(page: Page) {
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 
