@@ -27,6 +27,9 @@ class PropertyDetailsPageLettingAgentView(
     val provideDetailsInset: Locator
         get() = page.locator("#provide-details-inset")
 
+    val updateSuccessBanner: Locator
+        get() = page.locator("#update-success-banner")
+
     val complianceCertificates: Locator
         get() = page.locator("#compliance-certificates")
 

@@ -7,7 +7,7 @@
             <div class="govuk-grid-column-two-thirds">
                 <th:block th:if="${showUpdateSuccessBanner}" th:with="isSuccess=true">
                     <div id="update-success-banner"
-                         th:replace="~{fragments/banners/notificationBanner ::
+                         th:insert="~{fragments/banners/notificationBanner ::
                         notificationBanner(#{propertyDetails.updateSuccessBanner.title}, ~{::#update-success-banner/content()})}"
                          th:with="isSuccess=true">
                         <p class="govuk-notification-banner__heading" th:text="#{${updateSuccessBannerMessageKey}}">
