@@ -51,12 +51,14 @@ class ComplianceDetailsHelper(
     fun getEpcCyaContent(
         cyaState: CheckYourAnswersJourneyState,
         epcState: EpcState,
+        isDelegatedToLettingAgent: Boolean = false,
     ): Map<String, Any?> {
         val factory =
             EpcRegistrationCyaSummaryRowsFactory(
                 epcCertificateUrlProvider,
                 epcState.epcDetailsTask,
                 featureFlagManager,
+                isDelegatedToLettingAgent,
             ) { step ->
                 Destination.VisitableStep(step, cyaState.getCyaJourneyId(step))
             }

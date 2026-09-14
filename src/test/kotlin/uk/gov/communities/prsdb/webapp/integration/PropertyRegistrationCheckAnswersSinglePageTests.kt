@@ -179,6 +179,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     "Tell us if your property’s occupied",
                     "How your property’s rented out",
                     "Who will provide these details",
+                    "Energy performance certificate (EPC)",
                 ),
                 headings,
             )

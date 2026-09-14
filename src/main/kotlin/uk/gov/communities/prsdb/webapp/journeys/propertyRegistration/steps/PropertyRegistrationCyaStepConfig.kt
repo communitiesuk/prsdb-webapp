@@ -134,16 +134,8 @@ class PropertyRegistrationCyaStepConfig(
                 "gasInsetTextKey" to null,
                 "electricalRows" to emptyList<SummaryListRowViewModel>(),
                 "electricalInsetTextKey" to null,
-                "epcCardTitle" to null,
-                "epcCardActions" to null,
-                "epcCardRows" to emptyList<SummaryListRowViewModel>(),
-                "epcExpiredTextKey" to null,
-                "tenancyCheckRows" to emptyList<SummaryListRowViewModel>(),
-                "lowRatingTextKey" to null,
-                "exemptionReasonRows" to emptyList<SummaryListRowViewModel>(),
-                "nonEpcRows" to emptyList<SummaryListRowViewModel>(),
-                "epcInsetTextKey" to null,
             ) +
+            complianceDetailsHelper.getEpcCyaContent(state, state.epcTask, isDelegatedToLettingAgent = true) +
             getRestructuredContentSections(
                 state,
                 isOccupied,
