@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
@@ -18,7 +18,7 @@ class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
-) : AbstractCompleteJourneyStepConfig<UpdateLicensingJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -66,7 +66,7 @@ class UpdateLicensingCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateLicensingCyaStep(
     stepConfig: UpdateLicensingCyaConfig,
-) : AbstractCompleteJourneyStep<UpdateLicensingJourneyState>(stepConfig) {
+) : AbstractCheckYourAnswersStep<UpdateLicensingJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-licensing-answers"
     }
