@@ -3,18 +3,14 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.PERSONAL_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.assertEquals
 
@@ -22,14 +18,14 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class LandlordDetailsView {
         @Test
-        fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
+        fun `the landlord details page loads with the landlords personal details tab selected by default`() {
             val detailsPage = navigator.goToLandlordDetails()
 
             assertEquals(detailsPage.tabs.activeTabPanelId, PERSONAL_DETAILS_FRAGMENT)
         }
 
         @Test
-        fun `the registered properties tab contains the registered properties table when the landlord has properties`(page: Page) {
+        fun `the registered properties tab contains the registered properties table when the landlord has properties`() {
             val detailsPage = navigator.goToLandlordDetails()
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -61,22 +57,11 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `the personal details tab shows landlord type row when the org landlord flag is enabled`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the personal details tab shows the landlord type row`() {
             val detailsPage = navigator.goToLandlordDetails()
 
             assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).isVisible()
             assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).containsText("Individual")
-        }
-
-        @Test
-        fun `the personal details tab does not show landlord type row when the org landlord flag is disabled`(page: Page) {
-            featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
-
-            val detailsPage = navigator.goToLandlordDetails()
-
-            assertThat(detailsPage.personalDetailsSummaryList.landlordTypeRow).isHidden()
         }
 
         @Nested
@@ -111,14 +96,14 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class LandlordDetailsLocalCouncilView {
         @Test
-        fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
+        fun `the landlord details page loads with the landlords personal details tab selected by default`() {
             val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             assertEquals(detailsPage.tabs.activeTabPanelId, PERSONAL_DETAILS_FRAGMENT)
         }
 
         @Test
-        fun `the registered properties tab shows the landlord's registered properties table if they have properties`(page: Page) {
+        fun `the registered properties tab shows the landlord's registered properties table if they have properties`() {
             val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -133,7 +118,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `the registered properties table doesn't appear if the landlord has no properties`(page: Page) {
+        fun `the registered properties table doesn't appear if the landlord has no properties`() {
             val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(3)
 
             detailsPage.tabs.goToRegisteredProperties()
@@ -145,7 +130,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
+        fun `loading the landlord details page shows the last time the landlords record was updated`() {
             val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
             assertThat(detailsPage.insetText).containsText("updated these details on")
@@ -178,9 +163,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         private val orgLandlordId = 36L
 
         @Test
-        fun `the org landlord details page loads with the organisation details tab selected and no delete link`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the org landlord details page loads with the organisation details tab selected and no delete link`() {
             val detailsPage = navigator.goToOrgLandlordDetailsAsALocalCouncilUser(orgLandlordId)
 
             assertEquals("organisation-details", detailsPage.tabs.activeTabPanelId)
@@ -188,9 +171,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `the organisation details tab shows the organisation's details with no change links`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the organisation details tab shows the organisation's details with no change links`() {
             val detailsPage = navigator.goToOrgLandlordDetailsAsALocalCouncilUser(orgLandlordId)
             val summaryList = detailsPage.organisationDetailsSummaryList
 
@@ -209,9 +190,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `the organisation contacts tab shows the contact cards with no change actions`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the organisation contacts tab shows the contact cards with no change actions`() {
             val detailsPage = navigator.goToOrgLandlordDetailsAsALocalCouncilUser(orgLandlordId)
             detailsPage.tabs.goToOrganisationContacts()
 
@@ -222,9 +201,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         }
 
         @Test
-        fun `the registered properties tab shows the local council properties table`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the registered properties tab shows the local council properties table`() {
             val detailsPage = navigator.goToOrgLandlordDetailsAsALocalCouncilUser(orgLandlordId)
             detailsPage.tabs.goToRegisteredProperties()
 
@@ -235,16 +212,6 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(3)).containsText("Licensing type")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(4)).containsText("Tenanted")
         }
-
-        @Test
-        fun `the org landlord details page returns a not found page when the org landlord flag is disabled`(page: Page) {
-            featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
-
-            navigator.navigate(LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(orgLandlordId))
-
-            val errorPage = createValidPage(page, ErrorPage::class)
-            assertThat(errorPage.heading).containsText("Page not found")
-        }
     }
 
     @Nested
@@ -254,9 +221,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         private val trustOrgLandlordId = 1L
 
         @Test
-        fun `the organisation contacts tab shows the lead trustee and governing body members with no change links`(page: Page) {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-
+        fun `the organisation contacts tab shows the lead trustee and governing body members with no change links`() {
             val detailsPage = navigator.goToOrgLandlordDetailsAsALocalCouncilUser(trustOrgLandlordId)
             detailsPage.tabs.goToOrganisationContacts()
 

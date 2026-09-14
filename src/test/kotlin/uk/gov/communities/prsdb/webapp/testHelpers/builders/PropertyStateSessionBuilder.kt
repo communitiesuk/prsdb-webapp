@@ -463,6 +463,7 @@ class PropertyStateSessionBuilder(
                 .withEic()
                 .withElectricalCertExpiryDate()
                 .withElectricalCertUploads()
+                .withCheckElectricalSafetyAnswersComplete()
                 .withPropertyHasNoEpc()
                 .withIsEpcNotRequired()
                 .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
