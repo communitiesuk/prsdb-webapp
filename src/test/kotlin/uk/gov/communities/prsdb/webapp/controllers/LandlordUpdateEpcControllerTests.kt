@@ -63,7 +63,7 @@ class LandlordUpdateEpcControllerTests(
                 PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
             ),
         ).thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(any(), any())).thenReturn("journey-id")
+        whenever(journeyFactory.initializeJourneyState(any<Long>(), any<Principal>())).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
@@ -71,12 +71,8 @@ class LandlordUpdateEpcControllerTests(
         }
 
         verify(journeyFactory).initializeJourneyState(
-            argThat {
-                this is Pair<*, *> &&
-                    first == propertyOwnershipId &&
-                    (second as? Principal)?.name == LANDLORD_USER
-            },
             eq(propertyOwnershipId),
+            argThat<Principal> { name == LANDLORD_USER },
         )
     }
 }

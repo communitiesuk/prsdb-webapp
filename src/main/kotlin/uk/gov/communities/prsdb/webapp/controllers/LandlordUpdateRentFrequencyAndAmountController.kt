@@ -60,7 +60,7 @@ class LandlordUpdateRentFrequencyAndAmountController(
                     PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal), propertyOwnershipId) },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(propertyOwnershipId, principal) },
             dispatch = dispatch,
         )
 

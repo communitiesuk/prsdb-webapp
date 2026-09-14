@@ -31,12 +31,18 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.security.Principal
 
 @PrsdbWebService
 class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
+    fun initialiseJourneyState(
+        ownershipId: Long,
+        user: Principal,
+    ): String = initialiseJourneyState(Pair(ownershipId, user), ownershipId)
+
     fun initialiseJourneyState(
         seed: Any,
         propertyId: Long,

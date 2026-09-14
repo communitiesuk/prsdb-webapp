@@ -63,7 +63,7 @@ class LandlordUpdateEpcController(
                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal), propertyOwnershipId) },
+            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
             dispatch = dispatch,
         )
 
