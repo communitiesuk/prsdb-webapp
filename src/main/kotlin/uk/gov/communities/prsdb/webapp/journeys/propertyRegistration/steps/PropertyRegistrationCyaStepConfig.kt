@@ -136,8 +136,20 @@ class PropertyRegistrationCyaStepConfig(
                 "gasInsetTextKey" to null,
                 "electricalRows" to electricalRows,
                 "electricalInsetTextKey" to null,
-            ) +
-                complianceDetailsHelper.getEpcCyaContent(state, state.epcTask)
+                "epcCardTitle" to null,
+                "epcCardActions" to null,
+                "epcCardRows" to null,
+                "epcExpiredTextKey" to null,
+                "tenancyCheckRows" to emptyList<SummaryListRowViewModel>(),
+                "lowRatingTextKey" to null,
+                "exemptionReasonRows" to emptyList<SummaryListRowViewModel>(),
+                "nonEpcRows" to
+                    getMockProvideLaterSummaryList(
+                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
+                        getProvideLaterMessageKey(isOccupied),
+                    ),
+                "epcInsetTextKey" to null,
+            )
         val whoProvides =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
         return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
