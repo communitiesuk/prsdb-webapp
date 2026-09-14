@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -9,11 +11,14 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class ProvideGasCertLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyDetailState>() {
+class ProvideGasCertLaterStepConfig(
+    private val featureFlagManager: FeatureFlagManager,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyDetailState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
+            "isOccupied" to state.isOccupied,
             "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
             "submitButtonText" to
                 if (state.isOccupied == true) "forms.buttons.continue" else "forms.buttons.saveAndContinue",
@@ -21,7 +26,9 @@ class ProvideGasCertLaterStepConfig : AbstractRequestableStepConfig<Complete, No
 
     override fun chooseTemplate(state: GasSafetyDetailState) =
         state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
+            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                "forms/provideGasSafetyDetailsLater"
+            } else if (isOccupied) {
                 "forms/provideGasCertificateLaterForOccupiedProperty"
             } else {
                 "forms/provideGasCertificateLaterForUnoccupiedProperty"
