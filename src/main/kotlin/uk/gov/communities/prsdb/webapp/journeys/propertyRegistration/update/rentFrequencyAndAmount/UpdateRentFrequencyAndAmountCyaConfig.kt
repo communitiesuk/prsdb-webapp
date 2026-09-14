@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
@@ -19,7 +19,7 @@ class UpdateRentFrequencyAndAmountCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val messageSource: MessageSource,
-) : AbstractCheckYourAnswersStepConfig<UpdateRentFrequencyAndAmountJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateRentFrequencyAndAmountJourneyState>() {
     override fun getStepSpecificContent(state: UpdateRentFrequencyAndAmountJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -59,7 +59,7 @@ class UpdateRentFrequencyAndAmountCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateRentFrequencyAndAmountCyaStep(
     stepConfig: UpdateRentFrequencyAndAmountCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateRentFrequencyAndAmountJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateRentFrequencyAndAmountJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "rent-frequency-and-amount-check-your-answers"
     }

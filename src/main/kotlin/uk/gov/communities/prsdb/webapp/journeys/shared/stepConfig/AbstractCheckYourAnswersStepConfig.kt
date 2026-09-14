@@ -9,6 +9,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
+/**
+ * Renders a "check your answers" page and validates the submitted data has not
+ * changed since page load. Does NOT delete the journey on submission — journeys
+ * that should be deleted immediately after their CYA step must extend
+ * [AbstractCompleteJourneyStepConfig] instead, or defer deletion to a later step.
+ */
 abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourneyState> :
     AbstractRequestableStepConfig<Complete, CheckAnswersFormModel, TState>() {
     override val formModelClass = CheckAnswersFormModel::class
@@ -34,10 +40,7 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
     override fun resolveNextDestination(
         state: TState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 
     private fun checkJourneyNotModifiedSincePageLoad(
         state: TState,
@@ -58,3 +61,23 @@ abstract class AbstractCheckYourAnswersStep<TState : CheckYourAnswersJourneyStat
         const val ROUTE_SEGMENT = "check-answers"
     }
 }
+
+/**
+ * A "check your answers" step whose submission both persists the final answers
+ * (via subclass [AbstractCheckYourAnswersStepConfig.afterStepDataIsAdded] overrides)
+ * and deletes the journey state immediately — i.e. it represents the true, final
+ * completion of the journey, not just answer confirmation.
+ */
+abstract class AbstractCompleteJourneyStepConfig<TState : CheckYourAnswersJourneyState> : AbstractCheckYourAnswersStepConfig<TState>() {
+    override fun resolveNextDestination(
+        state: TState,
+        defaultDestination: Destination,
+    ): Destination {
+        state.deleteJourney()
+        return defaultDestination
+    }
+}
+
+abstract class AbstractCompleteJourneyStep<TState : CheckYourAnswersJourneyState>(
+    stepConfig: AbstractCompleteJourneyStepConfig<TState>,
+) : AbstractCheckYourAnswersStep<TState>(stepConfig)

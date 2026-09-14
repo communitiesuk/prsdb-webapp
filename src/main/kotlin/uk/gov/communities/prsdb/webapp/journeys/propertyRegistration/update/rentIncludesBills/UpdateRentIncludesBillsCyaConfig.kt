@@ -6,8 +6,8 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
@@ -17,7 +17,7 @@ class UpdateRentIncludesBillsCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
     private val messageSource: MessageSource,
-) : AbstractCheckYourAnswersStepConfig<UpdateRentIncludesBillsJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateRentIncludesBillsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateRentIncludesBillsJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -52,7 +52,7 @@ class UpdateRentIncludesBillsCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateRentIncludesBillsCyaStep(
     stepConfig: UpdateRentIncludesBillsCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateRentIncludesBillsJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateRentIncludesBillsJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "rent-includes-bills-check-your-answers"
     }

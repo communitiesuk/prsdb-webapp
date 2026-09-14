@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.lea
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 @JourneyFrameworkComponent
-class UpdateLeadTrusteeCyaStepConfig : AbstractCheckYourAnswersStepConfig<UpdateLeadTrusteeJourneyState>() {
+class UpdateLeadTrusteeCyaStepConfig : AbstractCompleteJourneyStepConfig<UpdateLeadTrusteeJourneyState>() {
     override fun chooseTemplate(state: UpdateLeadTrusteeJourneyState) = "forms/checkLeadTrusteeAnswersForm"
 
     override fun getStepSpecificContent(state: UpdateLeadTrusteeJourneyState): Map<String, Any?> =
@@ -85,7 +85,7 @@ class UpdateLeadTrusteeCyaStepConfig : AbstractCheckYourAnswersStepConfig<Update
 @JourneyFrameworkComponent
 final class UpdateLeadTrusteeCyaStep(
     stepConfig: UpdateLeadTrusteeCyaStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateLeadTrusteeJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateLeadTrusteeJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "lead-trustee-check-your-answers"
     }

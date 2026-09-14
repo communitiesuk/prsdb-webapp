@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -18,7 +18,7 @@ class UpdateHouseholdsAndTenantsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
-) : AbstractCheckYourAnswersStepConfig<UpdateHouseholdsAndTenantsJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateHouseholdsAndTenantsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState): Map<String, Any> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -68,7 +68,7 @@ class UpdateHouseholdsAndTenantsCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateHouseholdsAndTenantsCyaStep(
     stepConfig: UpdateHouseholdsAndTenantsCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateHouseholdsAndTenantsJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateHouseholdsAndTenantsJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "households-tenants-check-your-answers"
     }

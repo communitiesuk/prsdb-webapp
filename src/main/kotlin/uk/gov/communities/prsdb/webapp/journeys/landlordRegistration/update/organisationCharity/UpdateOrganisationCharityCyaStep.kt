@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgCharityTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberNorthernIrelandFormModel
@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 @JourneyFrameworkComponent
 class UpdateOrganisationCharityCyaStepConfig(
     private val landlordService: LandlordService,
-) : AbstractCheckYourAnswersStepConfig<UpdateOrganisationCharityJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateOrganisationCharityJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOrganisationCharityJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "landlordDetails.update.title",
@@ -162,7 +162,7 @@ class UpdateOrganisationCharityCyaStepConfig(
 @JourneyFrameworkComponent
 final class UpdateOrganisationCharityCyaStep(
     stepConfig: UpdateOrganisationCharityCyaStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateOrganisationCharityJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateOrganisationCharityJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-charity-check-your-answers"
     }
