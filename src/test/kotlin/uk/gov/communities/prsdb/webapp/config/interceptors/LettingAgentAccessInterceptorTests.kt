@@ -88,6 +88,15 @@ class LettingAgentAccessInterceptorTests {
     }
 
     @Test
+    fun `preHandle redirects to invalid-link for a letting-agent route that is neither invitation nor property-details`() {
+        mockRequest.requestURI = "/landlord/letting-agent/not-a-route"
+
+        assertFalse(callPreHandle())
+        verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+    }
+
+    @Test
     fun `preHandle allows an invitation-journey step whose journey token is still valid`() {
         val journeyId = "journey-123"
         mockRequest.requestURI = "$LETTING_AGENT_INVITATION_ROUTE/enter-password"

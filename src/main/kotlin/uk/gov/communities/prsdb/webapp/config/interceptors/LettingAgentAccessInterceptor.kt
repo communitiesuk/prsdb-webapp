@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.config.interceptors
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.servlet.HandlerInterceptor
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVALID_LINK_ROUTE
@@ -18,10 +20,11 @@ class LettingAgentAccessInterceptor(
         response: HttpServletResponse,
         handler: Any,
     ): Boolean =
-        if (isInvitationJourneyRoute(request.requestURI)) {
-            handleInvitationJourneyRequest(request, response)
-        } else {
-            handlePropertyAccessRequest(request, response)
+        when {
+            isInvitationJourneyRoute(request.requestURI) -> handleInvitationJourneyRequest(request, response)
+            isPropertyAccessRoute(request.requestURI) -> handlePropertyAccessRequest(request, response)
+            // Any other letting agent route is not one we recognise, so we send the user to the invalid-link page.
+            else -> redirectToInvalidLink(response)
         }
 
     // The invitation journey (set/enter password) does not require the session to be authorised yet, but we
@@ -34,7 +37,7 @@ class LettingAgentAccessInterceptor(
         val journeyId = request.getParameter(JourneyIdProvider.PARAMETER_NAME)
         val token = journeyId?.let { lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
 
-        return !redirectToInvalidLinkIfTokenInvalid(token, response)
+        return allowIfTokenValid(token, response)
     }
 
     // Property-details pages carry the token in the URL and require the session to have been authorised for it.
@@ -44,7 +47,7 @@ class LettingAgentAccessInterceptor(
     ): Boolean {
         val token = extractToken(request.requestURI)
 
-        if (redirectToInvalidLinkIfTokenInvalid(token, response)) {
+        if (!allowIfTokenValid(token, response)) {
             return false
         }
 
@@ -56,24 +59,30 @@ class LettingAgentAccessInterceptor(
         return false
     }
 
-    // Returns true (and redirects to the invalid-link page) if the token is missing or no longer valid, having
-    // first pruned it from the session's authorised tokens. Returns false if the token is valid.
-    private fun redirectToInvalidLinkIfTokenInvalid(
+    // Returns true if the token is present and valid, so the request may proceed. Otherwise it prunes the
+    // token from the session's authorised tokens, redirects to the invalid-link page, and returns false.
+    private fun allowIfTokenValid(
         token: String?,
         response: HttpServletResponse,
     ): Boolean {
-        if (token == null || !lettingAgentAccessService.getTokenIsValid(token)) {
-            if (token != null) {
-                lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
-            }
-            response.sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        if (token != null && lettingAgentAccessService.getTokenIsValid(token)) {
             return true
         }
+        if (token != null) {
+            lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
+        }
+        return redirectToInvalidLink(response)
+    }
+
+    private fun redirectToInvalidLink(response: HttpServletResponse): Boolean {
+        response.sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
         return false
     }
 
     private fun isInvitationJourneyRoute(requestUri: String): Boolean =
         requestUri == LETTING_AGENT_INVITATION_ROUTE || requestUri.startsWith("$LETTING_AGENT_INVITATION_ROUTE/")
+
+    private fun isPropertyAccessRoute(requestUri: String): Boolean = requestUri.startsWith(PROPERTY_DETAILS_ROUTE_PREFIX)
 
     // The token is the path segment immediately following the property-details segment. This covers both
     // /property-details/{token} and /property-details/{token}/update-.../{*stepPath} routes.
@@ -84,5 +93,10 @@ class LettingAgentAccessInterceptor(
             return null
         }
         return segments[detailsIndex + 1]
+    }
+
+    companion object {
+        private const val PROPERTY_DETAILS_ROUTE_PREFIX =
+            "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/"
     }
 }
