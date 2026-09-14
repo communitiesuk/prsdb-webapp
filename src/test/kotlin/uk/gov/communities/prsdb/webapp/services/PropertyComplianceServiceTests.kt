@@ -80,6 +80,9 @@ class PropertyComplianceServiceTests {
     private lateinit var mockUserToLandlordService: UserToLandlordService
 
     @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @InjectMocks
@@ -120,7 +123,7 @@ class PropertyComplianceServiceTests {
     }
 
     private fun setMockPrincipal(landlord: Landlord = mockLoggedInLandlord) {
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
     }
 
     @Test

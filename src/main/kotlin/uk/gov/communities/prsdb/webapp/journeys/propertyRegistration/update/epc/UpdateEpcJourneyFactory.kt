@@ -4,13 +4,13 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -19,14 +19,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDe
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateEpcJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateEpcJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -48,24 +50,22 @@ class UpdateEpcJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateEpcJourney,
-        propertyId: Long,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
         return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+            unreachableStepUrl { returnUrl }
             task(journey.epcDetailsTask) {
                 withDependencies { journey }
                 initialStep()
-                backUrl { propertyComplianceRoute }
+                backUrl { returnUrl }
                 nextStep { journey.updateCheckEpcAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
@@ -81,24 +81,24 @@ class UpdateEpcJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
+                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
             step(journey.completeEpcUpdateStep) {
                 parents { journey.updateCheckEpcAnswersStep.isComplete() }
-                nextUrl { propertyComplianceRoute }
+                nextUrl { returnUrl }
             }
+            replaceButtons()
         }
     }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateEpcJourney,
-        propertyId: Long,
+        returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
         return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperties {
                     mapOf(
@@ -117,13 +117,38 @@ class UpdateEpcJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
+            replaceButtons()
         }
     }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    private fun JourneyBuilder<UpdateEpcJourney>.replaceButtons() {
+        configureStep(journey.epcDetailsTask.hasEpcStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.checkUprnMatchedEpcStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.confirmEpcDetailsRetrievedByCertificateNumberStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.isEpcRequiredStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.epcExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.hasMeesExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.meesExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+    }
+
+    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent

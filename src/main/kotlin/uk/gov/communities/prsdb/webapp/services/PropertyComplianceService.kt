@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
@@ -38,6 +40,7 @@ class PropertyComplianceService(
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val userToLandlordService: UserToLandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
@@ -373,7 +376,16 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        val currentLandlord = userToLandlordService.getCurrentLandlordForUser()
+        val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
+        if (currentLandlord == null) {
+            // TODO: PDJB-1581: Send update emails when a letting agent makes the update. No emails are sent yet.
+            if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)) return
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "No acting landlord was found for the update to property ownership ${propertyOwnership.id}",
+            )
+        }
+
         val landlord =
             propertyOwnership.landlords
                 .singleOrNull { it.id == currentLandlord.id }

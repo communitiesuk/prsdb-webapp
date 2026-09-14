@@ -71,15 +71,7 @@ class LettingAgentInvitationController(
 
     @GetMapping("/$INVALID_LINK_PAGE_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
-    fun invalidLink(): ModelAndView {
-        // TODO PDJB-1854: Replace the invalid-link placeholder with final content.
-        return ModelAndView(
-            "forms/todoNoButton",
-            mapOf(
-                "todoComment" to "TODO: PDJB-1854: Invalid link page",
-            ),
-        )
-    }
+    fun invalidLink(): ModelAndView = ModelAndView("invalidLettingAgentInvitationLink")
 
     private fun dispatchJourneyStep(
         stepPath: String,
@@ -92,11 +84,13 @@ class LettingAgentInvitationController(
             getRedirect = { ModelAndView("redirect:$LETTING_AGENT_INVITATION_ROUTE") },
         )
 
-    private fun redirectToInvalidLink(): ModelAndView =
-        ModelAndView("redirect:$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT")
+    private fun redirectToInvalidLink(): ModelAndView = ModelAndView("redirect:$LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE")
 
     companion object {
         const val LETTING_AGENT_INVITATION_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$LETTING_AGENT_PATH_SEGMENT/$LETTING_AGENT_INVITATION_PATH_SEGMENT"
+
+        const val LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE =
+            "$LETTING_AGENT_INVITATION_ROUTE/$INVALID_LINK_PAGE_PATH_SEGMENT"
     }
 }

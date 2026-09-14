@@ -91,12 +91,20 @@ class Address() : ModifiableAuditableEntity() {
         listOfNotNull(
             organisation,
             subBuilding,
-            listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
-            buildingName,
+            *buildingAndStreetLines(),
             locality,
             townName,
             postcode,
         ).joinToString("\n")
+
+    private fun buildingAndStreetLines(): Array<String> =
+        if (buildingName != null) {
+            listOfNotNull(buildingNumber, buildingName, streetName).toTypedArray()
+        } else {
+            listOfNotNull(
+                listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
+            ).toTypedArray()
+        }
 
     companion object {
         const val SINGLE_LINE_ADDRESS_LENGTH = 1000

@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOrganisationLandlordCharityController.Companion.UPDATE_ORG_CHARITY_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.OrganisationalLandlord
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -31,7 +29,6 @@ class UpdateOrganisationLandlordCharityController(
     private val userToLandlordService: UserToLandlordService,
 ) {
     @GetMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     fun getUpdateStep(
         principal: Principal,
         @PathVariable stepPath: String,
@@ -41,7 +38,6 @@ class UpdateOrganisationLandlordCharityController(
     }
 
     @PostMapping("/{*stepPath}")
-    @AvailableWhenFeatureEnabled(ORGANISATION_LANDLORD_REGISTRATION)
     fun postUpdateStep(
         principal: Principal,
         @PathVariable stepPath: String,

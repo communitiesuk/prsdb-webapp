@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
@@ -8,6 +9,7 @@ abstract class LicenceNumberFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    val backLink = BackLink.default(page)
     val form = LicenceNumberForm(page)
 
     fun submitLicenseNumber(licenceNumber: String) {
