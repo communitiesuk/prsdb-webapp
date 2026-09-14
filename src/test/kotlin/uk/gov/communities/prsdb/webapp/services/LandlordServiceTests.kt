@@ -115,6 +115,27 @@ class LandlordServiceTests {
     }
 
     @Test
+    fun `getRenewalDate returns the landlord's renewal date`() {
+        val landlord = createIndividualLandlord()
+        val renewalDate = LocalDate.of(2024, 3, 1)
+        landlord.setRenewalDateIfAbsent(renewalDate)
+        whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+        val result = landlordService.getRenewalDate(landlord.id)
+
+        assertEquals(renewalDate, result)
+    }
+
+    @Test
+    fun `getRenewalDate returns null when the landlord does not exist`() {
+        whenever(mockLandlordRepository.findById(999L)).thenReturn(Optional.empty())
+
+        val result = landlordService.getRenewalDate(999L)
+
+        assertNull(result)
+    }
+
+    @Test
     fun `retrieveLandlordById returns an individual landlord`() {
         val landlord = createIndividualLandlord()
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))

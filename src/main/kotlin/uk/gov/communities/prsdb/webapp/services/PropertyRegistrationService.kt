@@ -104,6 +104,8 @@ class PropertyRegistrationService(
                 licenseProvideLater = licenseProvideLater,
             )
 
+        landlord.setRenewalDateIfAbsent(propertyOwnership.registrationDate)
+
         if (lettingAgentEmail != null) {
             val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
             val deadlineDate =

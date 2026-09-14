@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
 import jakarta.persistence.Entity
@@ -13,6 +14,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import java.time.LocalDate
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -42,4 +44,14 @@ abstract class Landlord : ModifiableAuditableEntity() {
     private var ownershipLinks: MutableSet<OwnershipLink> = mutableSetOf()
 
     val landlordships: Set<PropertyOwnership> get() = ownershipLinks.map { it.propertyOwnership }.toSet()
+
+    @Column(name = "renewal_date")
+    open var renewalDate: LocalDate? = null
+        protected set
+
+    fun setRenewalDateIfAbsent(date: LocalDate) {
+        if (renewalDate == null) {
+            renewalDate = date
+        }
+    }
 }

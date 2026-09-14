@@ -47,6 +47,8 @@ class LandlordService(
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
+    fun getRenewalDate(landlordId: Long): LocalDate? = retrieveLandlordById(landlordId)?.renewalDate
+
     @Transactional
     fun createIndividualLandlord(
         baseUser: PrsdbUser,
