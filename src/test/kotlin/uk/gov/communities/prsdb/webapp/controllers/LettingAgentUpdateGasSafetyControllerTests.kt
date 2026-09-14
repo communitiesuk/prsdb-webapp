@@ -30,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -39,12 +38,9 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateGasSafetyController::class)
 class LettingAgentUpdateGasSafetyControllerTests(
     @Autowired webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateGasSafetyJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
