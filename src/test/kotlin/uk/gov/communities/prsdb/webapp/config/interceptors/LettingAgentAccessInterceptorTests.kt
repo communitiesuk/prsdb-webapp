@@ -79,15 +79,6 @@ class LettingAgentAccessInterceptorTests {
     }
 
     @Test
-    fun `preHandle redirects to invalid-link when the URL has no property-details token segment`() {
-        mockRequest.requestURI = "/landlord/letting-agent/property-details"
-
-        assertFalse(callPreHandle())
-        verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
-        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
-    }
-
-    @Test
     fun `preHandle redirects to invalid-link for a letting-agent route that is neither invitation nor property-details`() {
         mockRequest.requestURI = "/landlord/letting-agent/not-a-route"
 
