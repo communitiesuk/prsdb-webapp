@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.InternalStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
@@ -23,18 +21,6 @@ class StoreAccessStepConfig(
         val invitation = lettingAgentAccessService.getInvitationByTokenOrNull(UUID.fromString(token)) ?: return
         if (lettingAgentPasswordService.hasPasswordBeenSet(invitation)) {
             lettingAgentAccessService.addAuthorisedTokenToSession(token)
-        }
-    }
-
-    override fun resolveNextDestination(
-        state: LettingAgentInvitationJourneyState,
-        defaultDestination: Destination,
-    ): Destination {
-        val token = state.invitationToken
-        return if (!lettingAgentAccessService.getTokenIsValid(token)) {
-            Destination.ExternalUrl(LettingAgentInvitationController.LETTING_AGENT_INVALID_LINK_ROUTE)
-        } else {
-            defaultDestination
         }
     }
 }
