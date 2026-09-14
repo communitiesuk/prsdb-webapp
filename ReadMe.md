@@ -301,6 +301,8 @@ Currently, there isn't a profile which connects to AWS with an otherwise local b
 
 ## Releasing
 
+Note that the process of raising release PRs is handled by the `creating-release-prs` skill.
+
 ### Release flows
 
 There are 3 release pathways we manage:
@@ -404,6 +406,18 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge the hotfix branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+#### Merge conflicts with feature flags
+
+Sometimes, we perform a hotfix to a branch to release a feature flag.
+This may cause a merge conflict if the change was merged back to main with a squash commit, which is common.
+In this case, special care is needed next time we release to the hotfix branch, as the two identical changes to feature flags causes a merge conflict:
+
+- Branch a release branch off the destination branch
+- Merge the source branch into the release branch, resolving any conflicts
+- Raise a PR to merge the release branch into the destination branch using a normal merge commit (the default)
+
+This will replace the current PR branch. Note that the `creating-release-prs` skill should handle this by default.
 
 ### Feature releases
 
