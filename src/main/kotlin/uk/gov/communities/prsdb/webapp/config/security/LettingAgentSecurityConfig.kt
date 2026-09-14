@@ -6,9 +6,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CsrfFilter
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
+import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -29,7 +32,8 @@ class LettingAgentSecurityConfig {
                     // Restricting which letting agent routes are available is handled by the LettingAgentAccessInterceptor and its config.
                     .anyRequest()
                     .anonymous()
-            }.headers { headers ->
+            }.addFilterBefore(MultipartFormDataFilter(HttpSessionCsrfTokenRepository()), CsrfFilter::class.java)
+            .headers { headers ->
                 headers
                     .contentSecurityPolicy { csp ->
                         csp

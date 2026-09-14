@@ -6,19 +6,19 @@ import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper.Companion.UK_ZONE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateCheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateCheckEpcAnswersStep
@@ -236,14 +236,14 @@ class PlausibleMetricsService(
             listOf(
                 updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
-                    UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
+                    LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
                     UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, UpdateCheckEpcAnswersStep.ROUTE_SEGMENT),
                 updateReferrerRegex(UpdateOccupancyController.UPDATE_OCCUPANCY_ROUTE, UpdateOccupancyCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(LandlordUpdateLicensingController.UPDATE_LICENSING_ROUTE, UpdateLicensingCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
-                    UpdateRentFrequencyAndAmountController.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE,
+                    LandlordUpdateRentFrequencyAndAmountController.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE,
                     UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(

@@ -1,15 +1,18 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
+import java.util.UUID
 
 private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc"
 
@@ -23,6 +26,7 @@ class PropertyComplianceViewModelFactory(
         propertyCompliance: PropertyCompliance,
         viewType: PropertyDetailsViewType = PropertyDetailsViewType.LANDLORD,
         propertyOwnershipId: Long,
+        lettingAgentToken: UUID? = null,
     ): PropertyComplianceViewModel {
         val epcChangeActions =
             changeActionsForViewType(
@@ -33,7 +37,11 @@ class PropertyComplianceViewModelFactory(
         val electricalSafetyChangeActions =
             changeActionsForViewType(
                 viewType,
-                UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                LandlordUpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                lettingAgentToken?.let {
+                    LettingAgentUpdateElectricalSafetyController.getUpdateElectricalSafetyRoute(it) +
+                        "/${HasElectricalCertStep.ROUTE_SEGMENT}"
+                },
             )
 
         val gasSafetyChangeActions =

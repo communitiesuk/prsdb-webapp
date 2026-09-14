@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,19 +11,19 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController.Companion.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateFurnishedStatusController.Companion.UPDATE_FURNISHED_STATUS_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentFrequencyAndAmount.UpdateRentFrequencyAndAmountJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
-@RequestMapping(UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE)
+@RequestMapping(UPDATE_FURNISHED_STATUS_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateRentFrequencyAndAmountController(
-    private val journeyFactory: UpdateRentFrequencyAndAmountJourneyFactory,
+class LandlordUpdateFurnishedStatusController(
+    private val journeyFactory: UpdateFurnishedStatusJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @GetMapping("/{*stepPath}")
@@ -37,6 +38,7 @@ class UpdateRentFrequencyAndAmountController(
 
     @PostMapping("/{*stepPath}")
     fun postUpdateStep(
+        model: Model,
         principal: Principal,
         @PathVariable propertyOwnershipId: Long,
         @PathVariable stepPath: String,
@@ -54,16 +56,21 @@ class UpdateRentFrequencyAndAmountController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
     companion object {
-        const val UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE =
-            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-rent-frequency-and-amount"
+        const val UPDATE_FURNISHED_STATUS_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-furnished-status"
 
-        fun getUpdateRentFrequencyAndAmountRoute(propertyOwnershipId: Long): String =
-            UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+        fun getUpdateFurnishedStatusRoute(propertyOwnershipId: Long): String =
+            UPDATE_FURNISHED_STATUS_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
     }
 }

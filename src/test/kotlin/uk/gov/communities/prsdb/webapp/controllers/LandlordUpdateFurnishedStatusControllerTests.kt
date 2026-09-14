@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -10,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateFurnishedStatusController::class)
-class UpdateFurnishedStatusControllerTests(
+@WebMvcTest(LandlordUpdateFurnishedStatusController::class)
+class LandlordUpdateFurnishedStatusControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -26,13 +28,13 @@ class UpdateFurnishedStatusControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnershipId) +
+        LandlordUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnershipId) +
             "/${FurnishedStatusStep.ROUTE_SEGMENT}"
 
     override val formContent = "furnishedStatus=FURNISHED"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
             .thenReturn(mapOf(FurnishedStatusStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }

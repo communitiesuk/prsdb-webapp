@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController.Companion.UPDATE_ELECTRICAL_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController.Companion.UPDATE_ELECTRICAL_SAFETY_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -34,7 +34,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_ELECTRICAL_SAFETY_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateElectricalSafetyController(
+class LandlordUpdateElectricalSafetyController(
     private val journeyFactory: UpdateElectricalSafetyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
@@ -95,8 +95,13 @@ class UpdateElectricalSafetyController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 

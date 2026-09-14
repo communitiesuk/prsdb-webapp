@@ -27,8 +27,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.elec
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateElectricalSafetyController::class)
-class UpdateElectricalSafetyControllerTests(
+@WebMvcTest(LandlordUpdateElectricalSafetyController::class)
+class LandlordUpdateElectricalSafetyControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -46,12 +46,13 @@ class UpdateElectricalSafetyControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId)
+        LandlordUpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId)
 
     override val formContent = "electricalCertType=HAS_EIC"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+        val returnUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), eq(returnUrl)))
             .thenReturn(mapOf(HasElectricalCertStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
@@ -59,7 +60,7 @@ class UpdateElectricalSafetyControllerTests(
     private val redirectUrl = "any-url"
 
     private val validFileUploadUrl =
-        UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE
+        LandlordUpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
             "/${UploadElectricalCertStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
@@ -76,7 +77,8 @@ class UpdateElectricalSafetyControllerTests(
 
         @BeforeEach
         fun setUp() {
-            whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+            val returnUrl = PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId)
+            whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), eq(returnUrl)))
                 .thenReturn(mapOf(UploadElectricalCertStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         }
 
