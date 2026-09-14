@@ -6,11 +6,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
@@ -99,7 +99,7 @@ class PropertyComplianceViewModelFactoryTests {
                     ),
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
+                        LandlordUpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
                     ),
                 )
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)

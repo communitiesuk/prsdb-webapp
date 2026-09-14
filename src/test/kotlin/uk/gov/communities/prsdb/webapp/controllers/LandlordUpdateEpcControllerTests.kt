@@ -19,8 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
-@WebMvcTest(UpdateEpcController::class)
-class UpdateEpcControllerTests(
+@WebMvcTest(LandlordUpdateEpcController::class)
+class LandlordUpdateEpcControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -35,7 +35,7 @@ class UpdateEpcControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateEpcController.getUpdateEpcRoute(propertyOwnershipId) + "/${HasEpcStep.ROUTE_SEGMENT}"
+        LandlordUpdateEpcController.getUpdateEpcRoute(propertyOwnershipId) + "/${HasEpcStep.ROUTE_SEGMENT}"
 
     override val formContent = "hasCert=true"
 
