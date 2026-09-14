@@ -12,8 +12,6 @@ const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
 const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
 
-const val ORGANISATION_LANDLORD_REGISTRATION = "pdjb-1097-organisation-landlord-registration"
-
 const val PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING = "pdjb-939-property-registration-restructure-and-skipping"
 
 const val DASHBOARD_NAV_LINK = "pdjb-1053-dashboard-nav-link"
@@ -26,7 +24,6 @@ val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
         SUBJECT_IDENTIFIER_PAGE,
-        ORGANISATION_LANDLORD_REGISTRATION,
         PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING,
         DASHBOARD_NAV_LINK,
         DELEGATE_TO_LETTING_AGENT,
