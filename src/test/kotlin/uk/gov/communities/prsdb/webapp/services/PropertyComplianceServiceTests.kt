@@ -954,7 +954,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `does not send a letting agent compliance notification when the added certificate is already expired`() {
+        fun `sends a letting agent compliance notification when the added certificate is already expired`() {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
             val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
@@ -964,6 +964,7 @@ class PropertyComplianceServiceTests {
 
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)).thenReturn(URI("http://property"))
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
             whenever(fileUploadRepository.getReferenceById(10L))
@@ -977,7 +978,21 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockLettingAgentComplianceUpdateSender, never()).sendEmail(any(), any())
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    LettingAgentComplianceUpdateNotificationEmail(
+                        recipientName = mockLoggedInLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = expiredIssueDate.plusYears(1).format(dateFormatter),
+                        propertyRecordUrl = "http://property",
+                    ),
+                ),
+            )
         }
 
         @Test

@@ -383,14 +383,12 @@ class PropertyComplianceService(
         val currentLandlord = userToLandlordService.getCurrentLandlordForUserOrNull()
         if (currentLandlord == null) {
             if (propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)) {
-                if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
-                    sendLettingAgentComplianceUpdateEmails(
-                        propertyOwnership = propertyOwnership,
-                        certificateType = certificateType,
-                        certificateTypeLabel = lettingAgentCertificateTypeLabel,
-                        expiryDate = formattedExpiryDate,
-                    )
-                }
+                sendLettingAgentComplianceUpdateEmails(
+                    propertyOwnership = propertyOwnership,
+                    certificateType = certificateType,
+                    certificateTypeLabel = lettingAgentCertificateTypeLabel,
+                    expiryDate = expiryDate?.format(DATE_FORMATTER),
+                )
                 return
             }
             throw ResponseStatusException(
