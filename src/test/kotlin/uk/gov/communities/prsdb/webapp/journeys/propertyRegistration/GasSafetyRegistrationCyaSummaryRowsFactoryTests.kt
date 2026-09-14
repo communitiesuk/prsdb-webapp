@@ -14,6 +14,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
@@ -138,6 +139,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
         @Test
         fun `factory returns correct content for provide this later when occupied`() {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
@@ -158,6 +160,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
         @Test
         fun `factory returns correct content for provide this later when unoccupied`() {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
             whenever(mockState.isOccupied).thenReturn(false)
@@ -168,6 +171,32 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
             assertEquals(2, gasSupplyRows.size)
             assertEquals(true, gasSupplyRows[0].fieldValue)
             assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[1].fieldValue)
+
+            val certRows = factory.createCertRows()
+            assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
+
+            assertNull(factory.getInsetTextKey())
+        }
+
+        @Test
+        fun `factory returns correct content for legacy provide this later on gas cert step`() {
+            setupCommonStateMocks()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+            whenever(mockState.isOccupied).thenReturn(true)
+
+            val destinationSteps = mutableListOf<Any>()
+            val factory =
+                GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService, destinationProvider = {
+                    destinationSteps.add(it)
+                    Destination(it)
+                })
+
+            val gasSupplyRows = factory.createGasSupplyRows()
+            assertEquals(2, gasSupplyRows.size)
+            assertEquals(true, gasSupplyRows[0].fieldValue)
+            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[1].fieldValue)
+            assertEquals(mockHasGasCertStep, destinationSteps[1])
 
             val certRows = factory.createCertRows()
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)

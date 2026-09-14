@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.any
@@ -255,6 +256,58 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = anyOrNull(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = eq(true),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = eq(true),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached passes true when user chose provide later on legacy gas cert step`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -679,6 +732,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
 
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        whenever(gasSafetyTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
+
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
         whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
@@ -744,6 +801,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(gasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        lenient().`when`(gasSafetyDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        lenient().`when`(mockHasGasCertStep.outcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)

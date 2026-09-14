@@ -96,7 +96,14 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = getProvideLaterKey(),
-            destination = destinationProvider(state.hasGasSupplyStep),
+            destination =
+                destinationProvider(
+                    if (state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) {
+                        state.hasGasCertStep
+                    } else {
+                        state.hasGasSupplyStep
+                    },
+                ),
         )
 
     private fun getNoCertRow(): SummaryListRowViewModel =
@@ -122,6 +129,10 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         return when (state.hasGasCertStep.outcome) {
             HasGasCertMode.NO_CERTIFICATE -> {
                 GasSafetyScenario.NO_CERT
+            }
+
+            HasGasCertMode.PROVIDE_THIS_LATER -> {
+                GasSafetyScenario.PROVIDE_LATER
             }
 
             HasGasCertMode.HAS_CERTIFICATE -> {

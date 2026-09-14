@@ -28,6 +28,7 @@ class HasMissingComplianceStepConfig(
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
             if (state.gasSafetyDetailsTask.hasGasSupplyStep.outcome != HasGasSupplyMode.HAS_SUPPLY) return false
+            if (state.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
             val isOutdated = state.gasSafetyDetailsTask.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }

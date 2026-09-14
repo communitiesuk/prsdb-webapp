@@ -146,7 +146,8 @@ class SavePropertyRegistrationDataStepConfig(
                 isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome.let {
                         it == HasGasSupplyMode.HAS_SUPPLY || it == HasGasSupplyMode.PROVIDE_LATER
-                    },
+                    } ||
+                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             gasSafetyCertIssueDate =
                 state.gasSafetyTask.gasSafetyDetailsTask
                     .getGasSafetyCertificateIssueDateIfReachable()
@@ -154,7 +155,8 @@ class SavePropertyRegistrationDataStepConfig(
             gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater =
                 isDelegatedToLettingAgent ||
-                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER,
+                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER ||
+                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
             electricalSafetyExpiryDate =
                 state.electricalSafetyTask.electricalSafetyDetailsTask

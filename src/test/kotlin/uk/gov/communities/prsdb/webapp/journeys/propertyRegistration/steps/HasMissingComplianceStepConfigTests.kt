@@ -160,6 +160,7 @@ class HasMissingComplianceStepConfigTests {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailsTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
             whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
             val mockGasSafetyTask: GasSafetyTask = mock()
@@ -172,6 +173,7 @@ class HasMissingComplianceStepConfigTests {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockDetailsTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
             whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
 
             val mockGasSafetyTask: GasSafetyTask = mock()
@@ -302,8 +304,10 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns true when has gas supply and cert is missing`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+            val mockHasGasCertStep = mock<HasGasCertStep>()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
             assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -312,8 +316,10 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns true when has gas supply and cert is outdated`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+            val mockHasGasCertStep = mock<HasGasCertStep>()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
             assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -322,9 +328,23 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns false when has gas supply and cert is valid`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+            val mockHasGasCertStep = mock<HasGasCertStep>()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
+
+            assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
+        }
+
+        @Test
+        fun `returns false when has gas supply and user chose provide this later on legacy gas cert step`() {
+            val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+            val mockHasGasCertStep = mock<HasGasCertStep>()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+            whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
 
             assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
         }

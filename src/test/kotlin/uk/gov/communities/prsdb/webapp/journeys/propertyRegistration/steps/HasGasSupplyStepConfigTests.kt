@@ -11,6 +11,8 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
@@ -20,6 +22,9 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 class HasGasSupplyStepConfigTests {
     @Mock
     lateinit var mockJourneyState: GasSafetyDetailState
+
+    @Mock
+    lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     val routeSegment = HasGasSupplyStep.ROUTE_SEGMENT
 
@@ -81,10 +86,11 @@ class HasGasSupplyStepConfigTests {
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = [true, false])
-    fun `mode returns PROVIDE_LATER when action is provideThisLater and allowProvideCertificateLaterRoute is true`(
+    fun `mode returns PROVIDE_LATER when action is provideThisLater, allowProvideCertificateLaterRoute is true and flag is on`(
         hasGasSupply: Boolean?,
     ) {
         whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
         // Arrange
         val stepConfig = setupStepConfig()
@@ -114,8 +120,24 @@ class HasGasSupplyStepConfigTests {
         assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
+    @Test
+    fun `mode throws an error when action is provideThisLater, allowProvideCertificateLaterRoute is true but flag is off`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
+        whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf("hasGasSupply" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+        )
+
+        // Act, assert
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
+    }
+
     private fun setupStepConfig(): HasGasSupplyStepConfig {
-        val stepConfig = HasGasSupplyStepConfig()
+        val stepConfig = HasGasSupplyStepConfig(mockFeatureFlagManager)
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
