@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FurnishedStatusState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -55,6 +57,9 @@ class UpdateFurnishedStatusJourneyFactory(
             }
             step(journey.applyFurnishedStatusUpdateStep) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
                 nextUrl { returnUrl }
             }
         }
@@ -70,6 +75,7 @@ class UpdateFurnishedStatusJourneyFactory(
 class UpdateFurnishedStatusJourney(
     override val furnishedStatus: FurnishedStatusStep,
     override val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "furnished status",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -80,8 +86,12 @@ class UpdateFurnishedStatusJourney(
 
 interface UpdateFurnishedStatusJourneyState :
     JourneyState,
-    FurnishedStatusState {
+    FurnishedStatusState,
+    HasPropertyId {
     val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep
-    val propertyId: Long
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.furnishedStatus"
 }

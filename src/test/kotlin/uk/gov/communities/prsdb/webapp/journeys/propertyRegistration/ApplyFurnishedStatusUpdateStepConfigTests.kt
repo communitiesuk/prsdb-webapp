@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -101,11 +102,11 @@ class ApplyFurnishedStatusUpdateStepConfigTests {
     }
 
     @Test
-    fun `resolveNextDestination calls deleteJourney on state`() {
+    fun `resolveNextDestination does not delete the journey`() {
         // Act
         stepConfig.resolveNextDestination(mockState, Destination.ExternalUrl("redirect"))
 
         // Assert
-        verify(mockState).deleteJourney()
+        verify(mockState, never()).deleteJourney()
     }
 }

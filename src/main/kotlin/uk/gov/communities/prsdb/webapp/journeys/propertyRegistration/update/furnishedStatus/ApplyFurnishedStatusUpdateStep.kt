@@ -40,10 +40,7 @@ class ApplyFurnishedStatusUpdateStepConfig(
     override fun resolveNextDestination(
         state: UpdateFurnishedStatusJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent
