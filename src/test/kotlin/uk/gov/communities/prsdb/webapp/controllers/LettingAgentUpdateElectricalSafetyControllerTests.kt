@@ -36,7 +36,7 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateElectricalSafetyController::class)
 class LettingAgentUpdateElectricalSafetyControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateElectricalSafetyJourneyFactory
 
@@ -61,12 +61,6 @@ class LettingAgentUpdateElectricalSafetyControllerTests(
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
-
-    @BeforeEach
-    fun allowPastLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 
     @Test

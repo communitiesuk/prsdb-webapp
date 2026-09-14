@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.ServletException
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
@@ -34,7 +33,7 @@ import java.util.UUID
 @Import(MessageSourceConfig::class)
 class LettingAgentPropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -43,12 +42,6 @@ class LettingAgentPropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
-
-    @BeforeEach
-    fun allowLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
-    }
 
     @Test
     fun `getLettingAgentPropertyDetails renders the letting agent view for a valid token`() {

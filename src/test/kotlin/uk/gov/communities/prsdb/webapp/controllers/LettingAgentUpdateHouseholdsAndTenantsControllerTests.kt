@@ -32,7 +32,7 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateHouseholdsAndTenantsController::class)
 class LettingAgentUpdateHouseholdsAndTenantsControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateHouseholdsAndTenantsJourneyFactory
 
@@ -54,12 +54,6 @@ class LettingAgentUpdateHouseholdsAndTenantsControllerTests(
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
-
-    @BeforeEach
-    fun allowPastLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 
     @Test

@@ -29,7 +29,7 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateLicensingController::class)
 class LettingAgentUpdateLicensingControllerTests(
     @Autowired webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateLicensingJourneyFactory
 
@@ -53,12 +53,6 @@ class LettingAgentUpdateLicensingControllerTests(
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
-
-    @BeforeEach
-    fun allowPastLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 
     private fun stubValidTokenForOccupiedProperty() {

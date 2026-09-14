@@ -31,7 +31,7 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateRentFrequencyAndAmountController::class)
 class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
     @Autowired webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateRentFrequencyAndAmountJourneyFactory
 
@@ -55,12 +55,6 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
     @BeforeEach
     fun enableFeatureFlag() {
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-    }
-
-    @BeforeEach
-    fun allowPastLettingAgentAccessInterceptor() {
-        whenever(lettingAgentAccessService.getTokenIsValid(any())).thenReturn(true)
-        whenever(lettingAgentAccessService.isTokenAuthorisedInSession(any())).thenReturn(true)
     }
 
     private fun stubValidTokenForOccupiedProperty() {
