@@ -4,19 +4,21 @@ import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateLicensingController.Companion.getUpdateLicensingBaseRoute
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateTenancyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateLicensingController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -183,8 +185,14 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
-            UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
-                "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
+                    "/${FurnishedStatusStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(it) +
+                        "/${FurnishedStatusStep.ROUTE_SEGMENT}"
+                },
         )
 
     protected fun rentFrequencyRow(withoutBottomBorder: Boolean = false): SummaryListRowViewModel =
@@ -192,8 +200,14 @@ abstract class PropertyDetailsViewModelBase(
             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
             // TODO PDJB-548 remove not-null assertion !! once tenancyDetails is embedded in PropertyOwnership
             RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
-            UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
-                "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            landlordActionLink =
+                LandlordUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
+                    "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            lettingAgentActionLink =
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(it) +
+                        "/${RentFrequencyStep.ROUTE_SEGMENT}"
+                },
             withoutBottomBorder = withoutBottomBorder,
             withAriaLabelForAction =
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
@@ -211,8 +225,14 @@ abstract class PropertyDetailsViewModelBase(
             rowWithViewTypeSpecificChangeLink(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
                 value,
-                UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
-                    "/${RentAmountStep.ROUTE_SEGMENT}",
+                landlordActionLink =
+                    LandlordUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
+                        "/${RentAmountStep.ROUTE_SEGMENT}",
+                lettingAgentActionLink =
+                    lettingAgentAccessToken?.let {
+                        LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(it) +
+                            "/${RentAmountStep.ROUTE_SEGMENT}"
+                    },
             )
         } else {
             row("propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount", value, withActionLink = false)
@@ -357,8 +377,7 @@ abstract class PropertyDetailsViewModelBase(
     //  - Local council: never linked - the council view is read-only.
     //  - Letting agent: linked only once the relevant update journey supplies a letting-agent route via
     //    lettingAgentActionLink; until then the row renders without a link.
-    // This lets the letting-agent update journeys be built in parallel (
-    // PDJB-1575, PDJB-1576): each ticket wires up lettingAgentActionLink for its own row(s)
+    // PDJB-1576 will wire up lettingAgentActionLink for its remaining row(s)
     // independently, without turning on (or pointing at the wrong route for) any of the others.
     protected fun rowWithViewTypeSpecificChangeLink(
         key: String,

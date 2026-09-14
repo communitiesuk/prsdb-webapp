@@ -3,12 +3,10 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationalLandlordDeregistrationJourneyPages.AreYouSureFormPageOrganisationalLandlordDeregistration
@@ -19,11 +17,6 @@ import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailServic
 class OrganisationalLandlordDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
-
-    @BeforeEach
-    fun enableOrgLandlordFlag() {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
 
     @Test
     fun `an organisational landlord can complete the deregistration journey`(

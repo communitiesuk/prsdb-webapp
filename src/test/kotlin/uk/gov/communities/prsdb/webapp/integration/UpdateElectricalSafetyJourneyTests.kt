@@ -105,4 +105,41 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.electricalSafetyCard.summaryList.certificateStatusRow.value).containsText("Expired")
     }
+
+    @Test
+    fun `The back link on the electrical cert expiry date and certificate pages returns to the check answers page when reached from there`(
+        page: Page,
+    ) {
+        // Reach the check answers page with a valid electrical certificate uploaded
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
+
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        hasElectricalCertPage.submitHasEicr()
+
+        val expiryDate = currentDate.plus(DatePeriod(years = 1))
+        val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        expiryDatePage.submitDate(expiryDate)
+
+        val uploadPage = assertPageIs(page, UploadElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        uploadPage.uploadCertificate("validFile.png")
+
+        var checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage.form.submit()
+
+        var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+
+        // Change the expiry date from the check answers page, then check the back link returns there
+        checkAnswersPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+        val expiryDatePageFromCya = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        expiryDatePageFromCya.backLink.clickAndWait()
+        checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+
+        // Change the certificate from the check answers page, then check the back link returns there
+        checkAnswersPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+        checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
+        checkUploadsPage.backLink.clickAndWait()
+        assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+    }
 }

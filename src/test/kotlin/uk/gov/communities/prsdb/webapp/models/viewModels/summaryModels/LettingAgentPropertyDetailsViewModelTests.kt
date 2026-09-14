@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateHouseholdsAndTenantsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateTenancyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
@@ -297,6 +299,43 @@ class LettingAgentPropertyDetailsViewModelTests {
     }
 
     @Test
+    fun `the rent-frequency row has a change link to the letting-agent update-rent-frequency-and-amount journey`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = tokenForActionLink,
+            )
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertEquals(
+            LettingAgentUpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(tokenForActionLink) +
+                "/${RentFrequencyStep.ROUTE_SEGMENT}",
+            rentFrequencyRow.actions.single().url,
+        )
+    }
+
+    @Test
+    fun `the rent-frequency row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val rentFrequencyRow =
+            viewModel.tenancySection.single {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName"
+            }
+        assertTrue(rentFrequencyRow.actions.isEmpty())
+    }
+
+    @Test
     fun `the licensing type row has a change link pointing to the letting-agent update route when a token is supplied`() {
         val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
         val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
@@ -353,5 +392,41 @@ class LettingAgentPropertyDetailsViewModelTests {
                 it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType"
             }
         assertTrue(licensingTypeRow.actions.isEmpty())
+    }
+
+    @Test
+    fun `the furnished status row has a change link pointing to the letting-agent update route when a token is supplied`() {
+        val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(
+                propertyOwnership,
+                validCompliance(propertyOwnership),
+                mockMessageSource,
+                token = token,
+            )
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        val actionUrl = furnishedStatusRow.actions.singleOrNull()?.url
+        assertTrue(actionUrl != null && actionUrl.contains(token.toString()))
+        assertTrue(actionUrl!!.endsWith("/property-furnished"))
+    }
+
+    @Test
+    fun `the furnished status row has no change link when no token is supplied`() {
+        val propertyOwnership = createOccupiedPropertyOwnership(licenseProvideLater = false, tenancyProvideLater = false)
+
+        val viewModel =
+            LettingAgentPropertyDetailsViewModel(propertyOwnership, validCompliance(propertyOwnership), mockMessageSource)
+
+        val furnishedStatusRow =
+            viewModel.tenancySection.first {
+                it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus"
+            }
+        assertTrue(furnishedStatusRow.actions.isEmpty())
     }
 }

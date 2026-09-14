@@ -19,6 +19,6 @@
             </p>
             <th:block th:replace="~{fragments/forms/radios :: radios(null, 'epcRequired', null, ${radioOptions})}"></th:block>
         </th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
     </th:block>
 </html>
