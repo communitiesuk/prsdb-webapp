@@ -13,99 +13,112 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.CompleteElectricalSafetyUpdateStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.ApplyGasSafetyUpdateStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @ExtendWith(MockitoExtension::class)
-class CompleteElectricalSafetyUpdateStepConfigTests {
+class ApplyGasSafetyUpdateStepConfigTests {
     @Mock
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Mock
-    private lateinit var mockState: UpdateElectricalSafetyJourneyState
-
-    @Mock
-    private lateinit var mockElectricalSafetyDetailsTask: ElectricalSafetyDetailsTask
+    private lateinit var mockState: UpdateGasSafetyJourneyState
 
     @Mock
     private lateinit var mockUploadService: UploadService
 
-    private lateinit var stepConfig: CompleteElectricalSafetyUpdateStepConfig
+    private lateinit var stepConfig: ApplyGasSafetyUpdateStepConfig
 
     private val propertyId = 123L
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteElectricalSafetyUpdateStepConfig(mockPropertyComplianceService, mockUploadService)
+        stepConfig = ApplyGasSafetyUpdateStepConfig(mockPropertyComplianceService, mockUploadService)
     }
 
     @Nested
     inner class AfterStepIsReached {
+        @Mock
+        private lateinit var mockDetailTask: GasSafetyDetailsTask
+
         @BeforeEach
         fun setUp() {
             whenever(mockState.propertyId).thenReturn(propertyId)
-            whenever(mockState.electricalSafetyDetailsTask).thenReturn(mockElectricalSafetyDetailsTask)
+            whenever(mockState.gasSafetyDetailsTask).thenReturn(mockDetailTask)
         }
 
         @Test
-        fun `calls updateElectricalSafety with expiry date and upload ids`() {
-            val expiryDate = LocalDate(2026, 6, 15)
+        fun `calls updateGasSafety with gas supply, issue date and upload ids`() {
+            val issueDate = LocalDate(2025, 6, 15)
             val uploadIds = listOf(1L, 2L)
 
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
-            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(uploadIds)
+            whenever(mockDetailTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(issueDate)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(uploadIds)
 
             stepConfig.afterStepIsReached(mockState)
 
-            verify(mockPropertyComplianceService).updateElectricalSafety(
+            verify(mockPropertyComplianceService).updateGasSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = expiryDate.toJavaLocalDate(),
-                electricalSafetyCertUploadIds = uploadIds,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate.toJavaLocalDate(),
+                gasSafetyCertUploadIds = uploadIds,
             )
         }
 
         @Test
-        fun `calls updateElectricalSafety with null expiry date and empty uploads`() {
+        fun `calls updateGasSafety with no gas supply and null issue date`() {
             whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+            whenever(mockDetailTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 
-            verify(mockPropertyComplianceService).updateElectricalSafety(
+            verify(mockPropertyComplianceService).updateGasSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
-                electricalCertType = null,
-                electricalSafetyExpiryDate = null,
-                electricalSafetyCertUploadIds = emptyList(),
+                hasGasSupply = false,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertUploadIds = emptyList(),
             )
+        }
+
+        @Test
+        fun `throws NotNullFormModelValueIsNullException when hasGasSupply is null`() {
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockDetailTask.gasSupplyOutcome).thenReturn(null)
+
+            assertThrows<NotNullFormModelValueIsNullException> {
+                stepConfig.afterStepIsReached(mockState)
+            }
         }
 
         @Test
         fun `deletes the journey then rethrows when it gets an UpdateConflictException`() {
             // Arrange
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockDetailTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
 
             whenever(
-                mockPropertyComplianceService.updateElectricalSafety(
+                mockPropertyComplianceService.updateGasSafety(
                     propertyOwnershipId = propertyId,
                     initialLastModifiedDate = initialLastModifiedDate,
-                    electricalSafetyExpiryDate = null,
-                    electricalSafetyCertUploadIds = emptyList(),
+                    hasGasSupply = false,
+                    gasSafetyCertIssueDate = null,
+                    gasSafetyCertUploadIds = emptyList(),
                 ),
             ).thenThrow(UpdateConflictException::class.java)
 
@@ -120,9 +133,9 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
 
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-            whenever(mockElectricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-            whenever(mockElectricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
+            whenever(mockDetailTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
+            whenever(mockDetailTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockDetailTask.gasUploadIds).thenReturn(emptyList())
 
             stepConfig.afterStepIsReached(mockState)
 

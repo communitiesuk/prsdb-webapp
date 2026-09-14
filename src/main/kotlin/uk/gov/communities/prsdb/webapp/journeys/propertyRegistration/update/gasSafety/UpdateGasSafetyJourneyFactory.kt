@@ -77,14 +77,14 @@ class UpdateGasSafetyJourneyFactory(
             step(journey.updateCheckGasSafetyAnswersStep) {
                 routeSegment(UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.gasSafetyDetailsTask.isComplete() }
-                nextStep { journey.completeGasSafetyUpdateStep }
+                nextStep { journey.applyGasSafetyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                     )
                 }
             }
-            step(journey.completeGasSafetyUpdateStep) {
+            step(journey.applyGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
                 nextUrl { returnUrl }
             }
@@ -157,7 +157,7 @@ class UpdateGasSafetyJourney(
     journeyName: String = "gasSafety",
     override val gasSafetyDetailsTask: GasSafetyDetailsTask,
     val updateCheckGasSafetyAnswersStep: UpdateCheckGasSafetyAnswersStep,
-    override val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep,
+    override val applyGasSafetyUpdateStep: ApplyGasSafetyUpdateStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateGasSafetyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -186,5 +186,5 @@ interface UpdateGasSafetyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
+    val applyGasSafetyUpdateStep: ApplyGasSafetyUpdateStep
 }

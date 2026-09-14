@@ -81,14 +81,14 @@ class UpdateElectricalSafetyJourneyFactory(
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
-                nextStep { journey.completeElectricalSafetyUpdateStep }
+                nextStep { journey.applyElectricalSafetyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                     )
                 }
             }
-            step(journey.completeElectricalSafetyUpdateStep) {
+            step(journey.applyElectricalSafetyUpdateStep) {
                 parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
                 nextUrl { returnUrl }
             }
@@ -164,7 +164,7 @@ class UpdateElectricalSafetyJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "electricalSafety",
     val updateCheckElectricalSafetyAnswersStep: UpdateCheckElectricalSafetyAnswersStep,
-    override val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep,
+    override val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep,
     override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateElectricalSafetyJourneyState>,
@@ -194,5 +194,5 @@ interface UpdateElectricalSafetyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep
+    val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep
 }

@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
-class CompleteFurnishedStatusUpdateStepConfig(
+class ApplyFurnishedStatusUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateFurnishedStatusJourneyState>() {
@@ -47,6 +47,6 @@ class CompleteFurnishedStatusUpdateStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CompleteFurnishedStatusUpdateStep(
-    stepConfig: CompleteFurnishedStatusUpdateStepConfig,
+class ApplyFurnishedStatusUpdateStep(
+    stepConfig: ApplyFurnishedStatusUpdateStepConfig,
 ) : JourneyStep.InternalStep<Complete, UpdateFurnishedStatusJourneyState>(stepConfig)

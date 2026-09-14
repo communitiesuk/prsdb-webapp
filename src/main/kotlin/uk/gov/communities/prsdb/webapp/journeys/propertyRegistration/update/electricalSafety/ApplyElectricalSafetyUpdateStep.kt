@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class CompleteElectricalSafetyUpdateStepConfig(
+class ApplyElectricalSafetyUpdateStepConfig(
     private val propertyComplianceService: PropertyComplianceService,
     private val uploadService: UploadService,
 ) : AbstractInternalStepConfig<Complete, UpdateElectricalSafetyJourneyState>() {
@@ -50,6 +50,6 @@ class CompleteElectricalSafetyUpdateStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CompleteElectricalSafetyUpdateStep(
-    stepConfig: CompleteElectricalSafetyUpdateStepConfig,
+class ApplyElectricalSafetyUpdateStep(
+    stepConfig: ApplyElectricalSafetyUpdateStepConfig,
 ) : JourneyStep.InternalStep<Complete, UpdateElectricalSafetyJourneyState>(stepConfig)

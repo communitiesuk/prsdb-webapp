@@ -41,7 +41,7 @@ class UpdateFurnishedStatusJourneyFactory(
             step(journey.furnishedStatus) {
                 routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 backUrl { returnUrl }
-                nextStep { journey.completeFurnishedStatusUpdateStep }
+                nextStep { journey.applyFurnishedStatusUpdateStep }
                 initialStep()
                 withAdditionalContentProperties {
                     mapOf(
@@ -53,7 +53,7 @@ class UpdateFurnishedStatusJourneyFactory(
                     )
                 }
             }
-            step(journey.completeFurnishedStatusUpdateStep) {
+            step(journey.applyFurnishedStatusUpdateStep) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
                 nextUrl { returnUrl }
             }
@@ -69,7 +69,7 @@ class UpdateFurnishedStatusJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateFurnishedStatusJourney(
     override val furnishedStatus: FurnishedStatusStep,
-    override val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep,
+    override val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "furnished status",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -81,7 +81,7 @@ class UpdateFurnishedStatusJourney(
 interface UpdateFurnishedStatusJourneyState :
     JourneyState,
     FurnishedStatusState {
-    val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep
+    val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep
     val propertyId: Long
     val lastModifiedDate: String
 }
