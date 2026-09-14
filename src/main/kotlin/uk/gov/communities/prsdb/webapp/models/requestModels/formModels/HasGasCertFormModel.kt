@@ -19,5 +19,4 @@ class HasGasCertFormModel : FormModel {
     var hasCert: Boolean? = null
 
     var action: String? = null
-
 }

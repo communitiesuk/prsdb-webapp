@@ -21,6 +21,8 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         val gasSupplyRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
+                // TODO PDJB-1720/PDJB-1721: PROVIDE_LATER currently marks the property as having gas supply
+                //  indefinitely. Revisit once those tickets clarify how a deferred answer should be represented here.
                 fieldValue =
                     state.hasGasSupplyStep.outcome == HasGasSupplyMode.HAS_SUPPLY ||
                         state.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER,
@@ -126,6 +128,8 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             HasGasSupplyMode.PROVIDE_LATER -> return GasSafetyScenario.PROVIDE_LATER
             HasGasSupplyMode.HAS_SUPPLY, null -> Unit
         }
+        // TODO PDJB-1720/PDJB-1721: falling through from the gas-supply check to the gas-cert check reads awkwardly.
+        //  Revisit once gas-supply/provide-later semantics are cleaned up.
         return when (state.hasGasCertStep.outcome) {
             HasGasCertMode.NO_CERTIFICATE -> {
                 GasSafetyScenario.NO_CERT
