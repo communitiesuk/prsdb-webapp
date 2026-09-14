@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -67,6 +69,9 @@ class UpdateRentIncludesBillsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentIncludesBillsTask.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
                 nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons()
@@ -139,6 +144,7 @@ class UpdateRentIncludesBillsJourney(
     override val rentIncludesBillsTask: RentIncludesBillsTask,
     // Check your answers step
     override val cyaStep: UpdateRentIncludesBillsCyaStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "rent includes bills",
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -154,9 +160,14 @@ class UpdateRentIncludesBillsJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
-interface UpdateRentIncludesBillsJourneyState : CheckYourAnswersJourneyState {
+interface UpdateRentIncludesBillsJourneyState :
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val rentIncludesBillsTask: RentIncludesBillsTask
     override val cyaStep: UpdateRentIncludesBillsCyaStep
-    val propertyId: Long
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.rentIncludesBills"
 }
