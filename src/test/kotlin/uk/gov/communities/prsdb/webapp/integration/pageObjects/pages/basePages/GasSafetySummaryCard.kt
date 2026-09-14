@@ -16,6 +16,7 @@ class GasSafetySummaryList(
     locator: Locator,
 ) : SummaryList(locator) {
     val hasGasSupplyRow = getRow("Does the property have a gas supply")
+    val hasCertRow = getRow("Do you have a gas safety certificate for this property")
     val hasValidCertRow = getRow("Do you have a valid gas safety certificate")
     val certificateStatusRow = getRow("Certificate status")
     val issueDateRow = getRow("Issue date")

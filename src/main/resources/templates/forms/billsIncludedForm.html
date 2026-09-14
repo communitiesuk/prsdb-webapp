@@ -12,6 +12,6 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='basicAndCustomBillsIncluded', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=#{${fieldSetHint}}, conditionalFieldName='customBillsIncluded')}">
         <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null,'billsIncluded',null, ${checkboxOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </th:block>
 </html>

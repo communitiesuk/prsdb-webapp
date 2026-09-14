@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
@@ -74,10 +75,15 @@ class LettingAgentInvitationJourneyFactory(
                     )
                 }
                 nextDestination {
+                    val propertyDetailsDestination =
+                        Destination.ExternalUrl(
+                            LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(
+                                UUID.fromString(journey.invitationToken),
+                            ),
+                        )
                     when (journey.hasPasswordStep.outcome) {
                         PasswordStatus.NO_PASSWORD -> Destination(journey.confirmationStep)
-                        // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
-                        PasswordStatus.HAS_PASSWORD -> Destination.ExternalUrl("/")
+                        PasswordStatus.HAS_PASSWORD -> propertyDetailsDestination
                         null -> throw PrsdbWebException(
                             "hasExistingPassword outcome is missing, so the next destination cannot be determined",
                         )
@@ -93,8 +99,13 @@ class LettingAgentInvitationJourneyFactory(
                     )
                 }
                 backDestination { Destination.Nowhere() }
-                // TODO PDJB-1570: Replace the homepage placeholder with the letting-agent destination.
-                nextDestination { Destination.ExternalUrl("/") }
+                nextDestination {
+                    Destination.ExternalUrl(
+                        LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(
+                            UUID.fromString(journey.invitationToken),
+                        ),
+                    )
+                }
             }
         }
     }

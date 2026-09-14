@@ -289,7 +289,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             jointLandlordEmails = anyOrNull(),
             lettingAgentEmail = eq("letting.agent@example.com"),
             markedJointLandlord = any(),
-            hasGasSupply = anyOrNull(),
+            hasGasSupply = eq(true),
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             gasSafetyCertProvideLater = eq(true),

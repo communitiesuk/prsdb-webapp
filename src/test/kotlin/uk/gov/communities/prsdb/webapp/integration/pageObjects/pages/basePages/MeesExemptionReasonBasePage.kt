@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 
@@ -9,6 +10,7 @@ open class MeesExemptionReasonBasePage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    val backLink = BackLink.default(page)
     val form = MeesExemptionReasonForm(page)
 
     fun submitExemptionReason(exemptionReason: MeesExemptionReason) {

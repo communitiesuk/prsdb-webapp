@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
@@ -81,6 +82,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MetricsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OrgLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
@@ -1243,6 +1245,38 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationCheckAnswersPageGasCertUploaded(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersGasCertUploaded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcExpiredInDateAtTenancyStart().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersElectricalCertUploaded().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcLowRatingWithExemption().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     private fun navigateToPropertyRegistrationJourneyStep(segment: String? = "") =
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
 
@@ -1359,6 +1393,15 @@ class Navigator(
             page,
             PropertyDetailsPageLocalCouncilView::class,
             mapOf("propertyOwnershipId" to id.toString()),
+        )
+    }
+
+    fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
+        navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+        return createValidPage(
+            page,
+            PropertyDetailsPageLettingAgentView::class,
+            mapOf("token" to token.toString()),
         )
     }
 
@@ -1692,6 +1735,10 @@ class Navigator(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
         )
         return createValidPage(page, ValidateTokenPage::class)
+    }
+
+    fun navigateToLettingAgentInvitationWithInvalidToken(token: String) {
+        navigate("${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token")
     }
 
     fun skipToLettingAgentInvitationSetPasswordPage(token: String): SetPasswordPage {

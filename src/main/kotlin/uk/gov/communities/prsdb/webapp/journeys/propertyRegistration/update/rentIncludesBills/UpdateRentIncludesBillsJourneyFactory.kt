@@ -4,12 +4,12 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -20,14 +20,16 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateRentIncludesBillsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateRentIncludesBillsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -42,23 +44,21 @@ class UpdateRentIncludesBillsJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateRentIncludesBillsJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             task(journey.rentIncludesBillsTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { returnUrl }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
@@ -67,30 +67,18 @@ class UpdateRentIncludesBillsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentIncludesBillsTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
+                nextUrl { returnUrl }
             }
-            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-                }
-            }
-            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-                }
-            }
+            replaceHeadingsAndButtons()
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateRentIncludesBillsJourney,
         checkingAnswersFor: String,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
 
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
@@ -112,28 +100,34 @@ class UpdateRentIncludesBillsJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
-                }
-            }
-            configureStep(journey.rentIncludesBillsTask.billsIncluded) {
-                withAdditionalContentProperty {
-                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
-                }
-            }
+            replaceHeadingsAndButtons()
             configure {
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
         }
+
+    private fun JourneyBuilder<UpdateRentIncludesBillsJourney>.replaceHeadingsAndButtons() {
+        configureStep(journey.rentIncludesBillsTask.rentIncludesBills) {
+            withAdditionalContentProperties {
+                mapOf(
+                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading",
+                    "submitButtonText" to "forms.buttons.continue",
+                )
+            }
+        }
+        configureStep(journey.rentIncludesBillsTask.billsIncluded) {
+            withAdditionalContentProperties {
+                mapOf(
+                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading",
+                    "submitButtonText" to "forms.buttons.continue",
+                )
+            }
+        }
     }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
 }
 
 @JourneyFrameworkComponent
