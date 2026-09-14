@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -19,4 +20,6 @@ class HasGasCertFormModel : FormModel {
     var hasCert: Boolean? = null
 
     var action: String? = null
+
+    fun hasCertIsValidForAction(): Boolean = action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME || hasCert != null
 }
