@@ -140,6 +140,7 @@ class UpdateLicensingJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             configureStep(journey.licensingTask.licensingTypeStep) {

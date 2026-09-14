@@ -60,6 +60,7 @@ class UpdateFurnishedStatusJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.applyFurnishedStatusUpdateStep.hasOutcome(Complete.COMPLETE) }
                 nextUrl { returnUrl }
             }
         }

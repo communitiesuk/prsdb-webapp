@@ -91,6 +91,7 @@ class UpdateGasSafetyJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.applyGasSafetyUpdateStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceButtons()

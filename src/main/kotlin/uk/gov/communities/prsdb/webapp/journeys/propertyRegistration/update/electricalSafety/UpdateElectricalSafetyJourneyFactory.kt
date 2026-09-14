@@ -95,6 +95,7 @@ class UpdateElectricalSafetyJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.applyElectricalSafetyUpdateStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceButtons()

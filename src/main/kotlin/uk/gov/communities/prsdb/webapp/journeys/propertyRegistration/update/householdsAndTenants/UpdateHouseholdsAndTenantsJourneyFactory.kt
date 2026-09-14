@@ -72,6 +72,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons()

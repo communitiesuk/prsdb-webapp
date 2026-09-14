@@ -69,6 +69,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 nextStep { journey.completePropertyUpdateStep }
             }
             step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
