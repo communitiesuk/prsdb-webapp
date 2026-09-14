@@ -102,7 +102,6 @@ class ElectricalSafetyDetailsTask(
                 routeSegment(CheckElectricalCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadElectricalCertStep.isComplete() }
                 nextStep { exitStep }
-                backStep { journey.electricalCertExpiryDateStep }
                 savable()
             }
             step(journey.removeElectricalCertUploadStep) {

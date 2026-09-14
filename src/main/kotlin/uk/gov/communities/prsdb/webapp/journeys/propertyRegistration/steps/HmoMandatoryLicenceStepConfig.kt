@@ -17,6 +17,7 @@ class HmoMandatoryLicenceStepConfig : AbstractRequestableStepConfig<Complete, Hm
             "fieldSetHeading" to "forms.hmoMandatoryLicence.fieldSetHeading",
             "label" to "forms.hmoMandatoryLicence.label",
             "detailSummary" to "forms.hmoMandatoryLicence.detail.summary",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
             "detailAdditionalContent" to
                 HMOAdditionalDetailModel(
                     "forms.hmoMandatoryLicence.detail.paragraph.two",

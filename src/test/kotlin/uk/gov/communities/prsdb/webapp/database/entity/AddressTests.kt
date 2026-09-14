@@ -39,7 +39,7 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("123 Test Street\nThe Manor House\nLondon\nSW1A 1AA", result)
+        assertEquals("123\nThe Manor House\nTest Street\nLondon\nSW1A 1AA", result)
     }
 
     @Test
@@ -104,5 +104,127 @@ class AddressTests {
         val result = address.toMultiLineAddress()
 
         assertEquals("The Manor House\nLondon\nSW1A 1AA", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress combines building number and street name on one line when there is no building name`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "10 Sample Street, Sampleton, AB1 2CD",
+                buildingNumber = "10",
+                streetName = "Sample Street",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("10 Sample Street\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress orders building number then building name then street name`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "3, Willow Court, Meadow Lane, Sampleton, AB1 2CD",
+                buildingNumber = "3",
+                buildingName = "Willow Court",
+                streetName = "Meadow Lane",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress shows building name then street name when there is no building number`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "Willow Court, Meadow Lane, Sampleton, AB1 2CD",
+                buildingName = "Willow Court",
+                streetName = "Meadow Lane",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("Willow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress includes sub-building before building number, name and street`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "Flat 2, 3, Willow Court, Meadow Lane, Sampleton, AB1 2CD",
+                subBuilding = "Flat 2",
+                buildingNumber = "3",
+                buildingName = "Willow Court",
+                streetName = "Meadow Lane",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("Flat 2\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress includes organisation before building number, name and street`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "Sample Org, 3, Willow Court, Meadow Lane, Sampleton, AB1 2CD",
+                organisation = "Sample Org",
+                buildingNumber = "3",
+                buildingName = "Willow Court",
+                streetName = "Meadow Lane",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("Sample Org\n3\nWillow Court\nMeadow Lane\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress includes locality between street and town when present`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "3, Willow Court, Meadow Lane, Sample Locality, Sampleton, AB1 2CD",
+                buildingNumber = "3",
+                buildingName = "Willow Court",
+                streetName = "Meadow Lane",
+                locality = "Sample Locality",
+                townName = "Sampleton",
+                postcode = "AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("3\nWillow Court\nMeadow Lane\nSample Locality\nSampleton\nAB1 2CD", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress falls back to splitting singleLineAddress for manually entered addresses`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "12 Sample Road, Sample District, Sampleton, AB1 2CD",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("12 Sample Road\nSample District\nSampleton\nAB1 2CD", result)
     }
 }

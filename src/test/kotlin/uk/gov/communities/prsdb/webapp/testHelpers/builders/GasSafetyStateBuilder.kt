@@ -55,6 +55,15 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withGasSafetyTaskCompletedWithUploadedCert(): SelfType {
+        withGasSupply()
+        withGasCertificate()
+        withGasCertIssueDate()
+        withGasCertUploads()
+        withSubmittedValue(CheckGasSafetyAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     fun withGasCertificate(): SelfType {
         val hasGasCertificateFormModel =
             HasGasCertFormModel().apply {

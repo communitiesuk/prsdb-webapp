@@ -96,7 +96,9 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY', '2026-08-13 00:00:00+00'),          -- Aimie Robinson
        ('836eb184ab487b6d745de607ad4fbdad2de29d33c31168672073b75262194cf2', '2026-08-13 00:00:00+00'),          -- Aimie Robinson
        ('urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '2026-08-25 00:00:00+00'),          -- Katrina.DiMuro@communities.gov.uk
-       ('2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', '2026-08-25 00:00:00+00')           -- Katrina.DiMuro@communities.gov.uk
+       ('2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', '2026-08-25 00:00:00+00'),          -- Katrina.DiMuro@communities.gov.uk
+       ('urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E', '2026-09-09 00:00:00+00'),          -- Victoria.Greenwell@communities.gov.uk
+       ('782a604de0129b1a297f6b557d342b3a677ed786b93ddebe703583fa2f8307b5', '2026-09-09 00:00:00+00')           -- Victoria.Greenwell@communities.gov.uk
     ON CONFLICT DO NOTHING;
 
 
@@ -152,7 +154,9 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (42, '2026-08-13 00:00:00+00', null, '836eb184ab487b6d745de607ad4fbdad2de29d33c31168672073b75262194cf2', true, 2,
         'Aimie.Robinson@communities.gov.uk', 'Aimie Robinson', true),
        (43, '2026-08-25 00:00:00+00', null, '2336926fc37be0f0d3e7e6a50409fd7f14e6b5e3f23463859813ed3d3a2b286f', true, 2,
-        'Katrina.DiMuro@communities.gov.uk', 'Katrina DiMuro', true) ON CONFLICT DO NOTHING;
+        'Katrina.DiMuro@communities.gov.uk', 'Katrina DiMuro', true),
+       (44, '2026-09-09 00:00:00+00', null, '782a604de0129b1a297f6b557d342b3a677ed786b93ddebe703583fa2f8307b5', true, 2,
+        'Victoria.Greenwell@communities.gov.uk', 'Victoria Greenwell', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -210,7 +214,8 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (51, '2026-07-21 00:00:00+00', 210000000051, 1), -- Mobin Ibrahim Patel
        (52, '2026-07-21 00:00:00+00', 210000000052, 1), -- Sarah Warren
        (53, '2026-08-13 00:00:00+00', 210000000053, 1), -- Aimie Robinson
-       (54, '2026-08-25 00:00:00+00', 210000000054, 1) ON CONFLICT DO NOTHING; -- Katrina DiMuro
+       (54, '2026-08-25 00:00:00+00', 210000000054, 1), -- Katrina DiMuro
+       (55, '2026-09-09 00:00:00+00', 210000000055, 1) ON CONFLICT DO NOTHING; -- Victoria Greenwell
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -232,8 +237,8 @@ SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(i
 INSERT INTO landlord (id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
                       last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
                       individual_has_accepted_privacy_notice)
-VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', null, true, '2025-02-25 16:17:18.075473+00', 'PRSD Landlord',
-        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13', 'England or Wales', false, true),
+SELECT * FROM (VALUES (1, 1, 1, '2024-10-15 00:00:00+00'::timestamptz, 'Team-PRSDB+landlord@softwire.com', null::varchar, true, '2025-02-25 16:17:18.075473+00'::timestamptz, 'PRSD Landlord',
+        '+447123456789', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '1950-05-13'::date, 'England or Wales', false, true),
        (2, 2, 1, '2025-02-19 08:23:57.279777+00', 'travis.woodward@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
         '07777777777', 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', '1973-03-14', 'England or Wales', true, true),
        (3, 3, 1, '2025-02-19 13:41:13.861504+00', 'alexander.read@softwire.com', null, true, '2025-03-11 13:38:00.36893+00',
@@ -305,7 +310,20 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
         true),
        (38, 54, 1, '2026-08-25 00:00:00+00', 'Katrina.DiMuro@communities.gov.uk', null, true, null, 'Katrina DiMuro',
         '07777777777', 'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4', '1990-01-01', 'England or Wales', true,
-        true) ON CONFLICT DO NOTHING;
+        true),
+       (39, 55, 1, '2026-09-09 00:00:00+00', 'Victoria.Greenwell@communities.gov.uk', null, true, null, 'Victoria Greenwell',
+        '07777777777', 'urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E', '1990-01-01', 'England or Wales', true,
+        true)) AS v (
+                                   id, registration_number_id, individual_address_id, created_date, individual_email, individual_non_england_or_wales_address, individual_is_active,
+                                   last_modified_date, individual_name, individual_phone_number, individual_subject_identifier, individual_date_of_birth, individual_country_of_residence, individual_is_verified,
+                                   individual_has_accepted_privacy_notice)
+-- Skip seeding these individual landlords for any user who is already registered as an organisation landlord user,
+-- otherwise the same user would be linked to two landlords and UserToLandlordService would fail with "Multiple landlords were found".
+WHERE NOT EXISTS (
+    SELECT 1 FROM organisational_landlord_user olu
+    WHERE olu.subject_identifier = v.individual_subject_identifier
+)
+ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
@@ -408,7 +426,7 @@ ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 1, '2025-01-15'),
+SELECT * FROM (VALUES (1, 1, '2025-01-15'::timestamp),
        (1, 2, '2025-01-15'),
        (1, 3, '2025-01-15'),
        (1, 4, '2025-01-15'),
@@ -426,11 +444,16 @@ VALUES (1, 1, '2025-01-15'),
        (1, 16, '2025-01-15'),
        (1, 17, '2025-01-15'),
        (10, 1, '2025-01-15'),
-       (11, 1, '2025-01-15') ON CONFLICT DO NOTHING;
+       (11, 1, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded, so that a landlord skipped above
+-- (because the user is now an organisation landlord) drops only its own links rather than aborting
+-- the whole statement with a foreign key violation.
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 -- PDJB-1048 / PDJB-1305 QA (landlord 1): ownership links for property_ownership 18-26
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
-VALUES (1, 18, '2025-01-15'),
+SELECT * FROM (VALUES (1, 18, '2025-01-15'::timestamp),
        (1, 19, '2025-01-15'),
        (1, 20, '2025-01-15'),
        (1, 21, '2025-01-15'),
@@ -438,7 +461,10 @@ VALUES (1, 18, '2025-01-15'),
        (1, 23, '2025-01-15'),
        (1, 24, '2025-01-15'),
        (1, 25, '2025-01-15'),
-       (1, 26, '2025-01-15') ON CONFLICT DO NOTHING;
+       (1, 26, '2025-01-15')) AS v (landlord_id, landlordship_id, created_date)
+-- Only insert links for landlords that were actually seeded (see note above).
+WHERE EXISTS (SELECT 1 FROM landlord l WHERE l.id = v.landlord_id)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
@@ -576,7 +602,9 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null,
        (33, '2026-08-13 00:00:00+00', null,
         'urn:fdc:gov.uk:2022:9AAN88nNjxaMnuEL0mN45HoEITVd_aMBsrG05AFcdzY'), -- Aimie Robinson
        (34, '2026-08-25 00:00:00+00', null,
-        'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4')  -- Katrina DiMuro
+        'urn:fdc:gov.uk:2022:HWihy8O1bH7nvqzL8zTP1RYQrPU3CxK6g6vYQvZ6tm4'), -- Katrina DiMuro
+       (35, '2026-09-09 00:00:00+00', null,
+        'urn:fdc:gov.uk:2022:lGpMoDhAAg0pe72lmsNzg_oFLH1qna1wyya5nSV-F2E')  -- Victoria Greenwell
     ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));

@@ -33,6 +33,9 @@ repositories {
 
 // Override Spring Boot 3.5.16 managed versions to pick up security fixes ahead of the next Spring Boot release.
 extra["commons-lang3.version"] = "3.18.0"
+// CVE-2026-65182 / GHSA-gcx9-497g-6cp6, CVE-2026-65905 / GHSA-9xv2-5v5q-p794,
+// CVE-2026-68525 / GHSA-h3x4-894j-xpx5: Tomcat authentication vulnerabilities (fixed in 10.1.58; 10.1.59 is available).
+extra["tomcat.version"] = "10.1.59"
 // GHSA-jhq6-gfmj-v8fx: logback object injection via HardenedObjectInputStream (fixed in 1.5.35).
 extra["logback.version"] = "1.5.35"
 // CVE-2026-54515 / GHSA-5jmj-h7xm-6q6v: jackson-databind case-insensitive @JsonIgnoreProperties bypass (fixed in 2.21.5).

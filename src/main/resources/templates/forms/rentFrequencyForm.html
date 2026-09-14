@@ -31,6 +31,6 @@
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#fieldset-content/content()}, fieldName='rentFrequency', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=null, conditionalFieldName='customRentFrequency')}">
         <th:block th:replace="~{fragments/forms/radios :: radios(#{${label}},'rentFrequency',null, ${radioOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </th:block>
 </html>

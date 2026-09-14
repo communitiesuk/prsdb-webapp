@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyD
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsNotificationBannerViewModel.NotificationMessage
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModelBase
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.NotificationBannerViewModelService
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -74,7 +75,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = true,
+                viewType = PropertyDetailsViewType.LANDLORD,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
@@ -214,7 +215,7 @@ class PropertyDetailsController(
         val propertyComplianceDetails =
             propertyComplianceViewModelFactory.create(
                 propertyCompliance = propertyCompliance,
-                landlordView = false,
+                viewType = PropertyDetailsViewType.LOCAL_COUNCIL,
                 propertyOwnershipId = propertyOwnershipId,
             )
 
