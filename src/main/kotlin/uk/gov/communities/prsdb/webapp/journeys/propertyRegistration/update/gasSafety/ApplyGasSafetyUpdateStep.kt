@@ -48,10 +48,7 @@ class ApplyGasSafetyUpdateStepConfig(
     override fun resolveNextDestination(
         state: UpdateGasSafetyJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent
