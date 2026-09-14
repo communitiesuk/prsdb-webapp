@@ -43,6 +43,7 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
+    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Test
     fun `getLettingAgentPropertyDetails renders the letting agent view for a valid token`() {
         val token = UUID.randomUUID()

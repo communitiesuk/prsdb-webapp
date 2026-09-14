@@ -39,6 +39,7 @@ class LettingAgentInvitationControllerTests(
     private val journeyId = "test-journey-id"
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
 
+    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Nested
     inner class StartJourney {
         @Test
