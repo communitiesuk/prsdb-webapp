@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateSuccessBannerService
 import java.util.UUID
 
 @PrsdbController
@@ -31,6 +32,7 @@ class LettingAgentPropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
+    private val propertyUpdateSuccessBannerService: PropertyUpdateSuccessBannerService,
     private val messageSource: MessageSource,
 ) {
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
@@ -55,6 +57,12 @@ class LettingAgentPropertyDetailsController(
         val propertyCompliance =
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
+
+        val updateSuccessBannerMessageKey = propertyUpdateSuccessBannerService.consumeSuccess(propertyOwnership.id)
+        if (updateSuccessBannerMessageKey != null) {
+            model.addAttribute("showUpdateSuccessBanner", true)
+            model.addAttribute("updateSuccessBannerMessageKey", updateSuccessBannerMessageKey)
+        }
 
         model.addAttribute(
             "propertyDetails",

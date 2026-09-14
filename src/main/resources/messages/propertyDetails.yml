@@ -256,6 +256,7 @@ resendInvitation:
   successBanner:
     title: Success
     heading: New invitation email sent to {0}
+    body: They have 28 days to accept this invitation.
 updateSuccessBanner:
   furnishedStatus: You’ve updated the property’s furnished status.
   gasSafety: You’ve updated the property’s gas safety certificate.
@@ -265,4 +266,3 @@ updateSuccessBanner:
   rentIncludesBills: You’ve updated whether the property’s rent includes bills.
   rentFrequencyAndAmount: You’ve updated the property’s rent frequency and amount.
   licensing: You’ve updated the property’s licensing information.
-    body: They have 28 days to accept this invitation.
