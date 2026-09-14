@@ -5,7 +5,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.interceptors.LettingAgentAccessInterceptor
 import uk.gov.communities.prsdb.webapp.config.security.LettingAgentSecurityConfig.Companion.LETTING_AGENT_ROUTES_PATTERN
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVALID_LINK_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 
@@ -22,7 +22,7 @@ class LettingAgentAccessInterceptorConfig(
             // step page is still intercepted so a token revoked mid-journey is caught on the password pages.
             .excludePathPatterns(
                 LETTING_AGENT_INVITATION_ROUTE,
-                LETTING_AGENT_INVALID_LINK_ROUTE,
+                LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE,
             )
     }
 }

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVALID_LINK_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
@@ -75,7 +75,7 @@ class LettingAgentAccessInterceptor(
     }
 
     private fun redirectToInvalidLink(response: HttpServletResponse): Boolean {
-        response.sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        response.sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
         return false
     }
 

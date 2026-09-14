@@ -67,6 +67,11 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
         return self()
     }
 
+    fun withCheckElectricalSafetyAnswersComplete(): SelfType {
+        withSubmittedValue(CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     fun withProvideElectricalCertLater(): SelfType {
         val hasElectricalCertFormModel =
             HasElectricalCertFormModel().apply {

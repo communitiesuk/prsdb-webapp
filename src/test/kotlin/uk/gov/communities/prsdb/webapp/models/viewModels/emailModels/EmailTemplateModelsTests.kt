@@ -95,12 +95,13 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
-                        certificateType = "gas safety certificate",
+                        certificateType = "Gas safety certificate",
                         recipientName = "Jane Smith",
                         propertyAddress = "1 Street Name, Town, Country, AB1 2CD",
                         landlordDashboardUrl = URI("dashboardUrl"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(

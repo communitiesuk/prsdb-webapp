@@ -11,7 +11,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpServletRequest
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVALID_LINK_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController.Companion.LETTING_AGENT_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -75,7 +75,7 @@ class LettingAgentAccessInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockLettingAgentAccessService).removeAuthorisedTokenFromSession(token.toString())
-        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
     @Test
@@ -84,7 +84,7 @@ class LettingAgentAccessInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
-        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
     @Test
@@ -109,7 +109,7 @@ class LettingAgentAccessInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockLettingAgentAccessService).removeAuthorisedTokenFromSession(token.toString())
-        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 
     @Test
@@ -121,6 +121,6 @@ class LettingAgentAccessInterceptorTests {
 
         assertFalse(callPreHandle())
         verify(mockLettingAgentAccessService, never()).removeAuthorisedTokenFromSession(anyString())
-        verify(mockResponse).sendRedirect(LETTING_AGENT_INVALID_LINK_ROUTE)
+        verify(mockResponse).sendRedirect(LETTING_AGENT_INVITATION_INVALID_LINK_ROUTE)
     }
 }
