@@ -35,7 +35,9 @@ class LettingAgentAccessInterceptor(
         response: HttpServletResponse,
     ): Boolean {
         val journeyId = request.getParameter(JourneyIdProvider.PARAMETER_NAME)
-        val token = journeyId?.let { lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
+        val token =
+            journeyId?.let { lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(it) }
+                ?: return redirectToInvalidLink(response)
 
         return allowIfTokenValid(token, response)
     }
@@ -45,13 +47,13 @@ class LettingAgentAccessInterceptor(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ): Boolean {
-        val token = extractToken(request.requestURI)
+        val token = extractToken(request.requestURI) ?: return redirectToInvalidLink(response)
 
         if (!allowIfTokenValid(token, response)) {
             return false
         }
 
-        if (lettingAgentAccessService.isTokenAuthorisedInSession(token!!)) {
+        if (lettingAgentAccessService.isTokenAuthorisedInSession(token)) {
             return true
         }
 
@@ -59,18 +61,16 @@ class LettingAgentAccessInterceptor(
         return false
     }
 
-    // Returns true if the token is present and valid, so the request may proceed. Otherwise it prunes the
-    // token from the session's authorised tokens, redirects to the invalid-link page, and returns false.
+    // Returns true if the token is valid, so the request may proceed. Otherwise it prunes the token from the
+    // session's authorised tokens, redirects to the invalid-link page, and returns false.
     private fun allowIfTokenValid(
-        token: String?,
+        token: String,
         response: HttpServletResponse,
     ): Boolean {
-        if (token != null && lettingAgentAccessService.getTokenIsValid(token)) {
+        if (lettingAgentAccessService.getTokenIsValid(token)) {
             return true
         }
-        if (token != null) {
-            lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
-        }
+        lettingAgentAccessService.removeAuthorisedTokenFromSession(token)
         return redirectToInvalidLink(response)
     }
 
