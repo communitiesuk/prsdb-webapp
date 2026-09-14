@@ -1,7 +1,7 @@
 ---
 name: creating-release-prs
 description: Use when asked to create release PRs, prepare releases, or deploy to test or nft environments for prsdb repositories.
-allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr list) shell(gh pr view) shell(gh pr create) shell(gh pr edit)'
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git branch -D) shell(git switch) shell(git checkout) shell(git merge) shell(git add) shell(git commit) shell(git push) shell(git fetch) shell(git rev-parse) shell(gh pr list) shell(gh pr view) shell(gh pr create) shell(gh pr edit)'
 ---
 
 # Creating Release PRs
@@ -16,6 +16,7 @@ Create release PRs for main -> test and main -> nft branches in **both repositor
 2. **Check commits** between branches using `git log origin/{target}..origin/main --oneline`.
 3. **Find previous release PRs** to determine the next release number and follow the existing format.
 4. **Create or update PRs** with release notes summarising the changes.
+5. **Check the PR for merge conflicts** after it is created or updated. If any are present, follow the [Handling merge conflicts](#handling-merge-conflicts) fallback below.
 
 ## Release Notes Format
 
@@ -68,3 +69,54 @@ gh pr create --base nft --head main --title "Release main to nft #N" --body "## 
 - When updating a draft PR, preserve any existing special release instructions that were added manually.
 - Repeat the process for both `prsdb-infra` and `prsdb-webapp` repositories.
 - All release PRs made at the same time should use the same release number for consistency. This may lead to infra skipping a release. This is fine.
+
+## Handling merge conflicts
+
+**Detect the conflict** on the PR you just raised or updated. `gh pr view` exposes the merge
+state:
+
+```bash
+gh pr view <pr-number> --repo communitiesuk/<repo> --json mergeable,mergeStateStatus \
+  --jq '{mergeable, mergeStateStatus}'
+```
+
+`mergeable: "CONFLICTING"` (or `mergeStateStatus: "DIRTY"`) means the fallback below is required.
+`mergeable: "MERGEABLE"` (or `mergeStateStatus: "CLEAN"`/`"BLOCKED"`/`"UNSTABLE"`) means the
+default `main -> {target}` PR is fine — merge it normally.
+
+If `mergeable` is `"UNKNOWN"`, GitHub has not finished computing the state yet; wait a few seconds
+and re-run the command until it resolves.
+
+### Fallback workflow (destination = target env branch, source = `main`)
+
+1. Branch a release branch off the **destination** (target env) branch, e.g. `release/main-to-nft-N`
+   where `N` matches the release number of the original PR.
+2. Merge the **source** (`main`) branch into the release branch locally and resolve any conflicts.
+3. Push the release branch and **close the original `main -> {target}` PR**. Raise a new PR
+   merging the release branch into the destination branch, reusing the same title
+   (`Release main to {target} #N`) and release notes.
+
+Commands:
+
+```bash
+git fetch origin
+
+# 1. Branch off the destination
+git switch -c release/main-to-nft-N origin/nft
+
+# 2. Merge main in and resolve conflicts
+git merge origin/main
+# ... resolve conflicts, git add <files>, git commit ...
+
+# 3. Push and swap the PR
+git push -u origin release/main-to-nft-N
+gh pr close <original-pr-number> --repo communitiesuk/<repo> \
+  --comment "Superseded by a release branch to resolve merge conflicts."
+gh pr create --repo communitiesuk/<repo> \
+  --base nft --head release/main-to-nft-N \
+  --title "Release main to nft #N" \
+  --body "<same release notes as the original PR>"
+```
+
+After the release branch PR merges, delete the release branch. Do not raise a follow-up PR into
+`main`.
