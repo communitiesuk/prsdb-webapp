@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -80,6 +81,7 @@ class UpdateEpcJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
+                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
@@ -87,6 +89,7 @@ class UpdateEpcJourneyFactory(
                 parents { journey.updateCheckEpcAnswersStep.isComplete() }
                 nextUrl { returnUrl }
             }
+            replaceButtons()
         }
     }
 
@@ -114,6 +117,34 @@ class UpdateEpcJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
+            replaceButtons()
+        }
+    }
+
+    private fun JourneyBuilder<UpdateEpcJourney>.replaceButtons() {
+        configureStep(journey.epcDetailsTask.hasEpcStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.checkUprnMatchedEpcStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.confirmEpcDetailsRetrievedByCertificateNumberStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.epcInDateAtStartOfTenancyCheckStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.isEpcRequiredStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.epcExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.hasMeesExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.epcDetailsTask.meesExemptionStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
     }
 
