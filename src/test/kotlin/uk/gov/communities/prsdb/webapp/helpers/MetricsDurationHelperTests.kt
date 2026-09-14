@@ -7,6 +7,7 @@ import java.time.Duration
 import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class MetricsDurationHelperTests {
     // Echoes back "<amount> <unit>" so assertions can verify which key (singular vs plural) and
@@ -42,6 +43,7 @@ class MetricsDurationHelperTests {
         val duration = Duration.ofDays(1).plusHours(6).plusMinutes(22)
 
         assertEquals("1 day, 6 hours, 22 minutes", formatDuration(duration, messageSource))
+        fail("Intentional failure for QA: remove after verifying test failure reporting.")
     }
 
     @Test
