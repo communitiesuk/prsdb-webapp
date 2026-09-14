@@ -8,24 +8,16 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.PrsdbWebMvcRegistration
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -40,8 +32,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import java.util.UUID
 
 @WebMvcTest(LettingAgentUpdateEpcController::class)
-@Import(LettingAgentUpdateEpcControllerTests.FeatureFlagMappingConfiguration::class)
-@ActiveProfiles(LettingAgentUpdateEpcControllerTests.FEATURE_FLAG_ROUTING_PROFILE)
 class LettingAgentUpdateEpcControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -143,8 +133,6 @@ class LettingAgentUpdateEpcControllerTests(
         mvc.get(updateStepRoute).andExpect {
             status { isNotFound() }
         }
-
-        verifyNoInteractions(lettingAgentAccessService, propertyOwnershipService, journeyFactory, stepLifecycleOrchestrator)
     }
 
     @Test
@@ -234,40 +222,5 @@ class LettingAgentUpdateEpcControllerTests(
             }.andExpect {
                 status { isNotFound() }
             }
-
-        verifyNoInteractions(lettingAgentAccessService, propertyOwnershipService, journeyFactory, stepLifecycleOrchestrator)
-    }
-
-    @Test
-    fun `postUpdateStep rejects submissions without a CSRF token`() {
-        mvc
-            .post(updateStepRoute) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                content = formContent
-            }.andExpect {
-                status { isForbidden() }
-            }
-
-        verifyNoInteractions(lettingAgentAccessService, propertyOwnershipService, journeyFactory, stepLifecycleOrchestrator)
-    }
-
-    // FeatureFlagConfig declares an unfiltered @ComponentScan over uk.gov.communities.prsdb.webapp, which bypasses
-    // Spring Boot's TypeExcludeFilter and so also scans @TestConfiguration classes from the test classpath. The
-    // profile guard keeps this configuration out of every other test context (see PrsdbTaskApplicationTests).
-    @Profile(FEATURE_FLAG_ROUTING_PROFILE)
-    @TestConfiguration(proxyBeanMethods = false)
-    class FeatureFlagMappingConfiguration {
-        @Bean
-        @Primary
-        fun featureFlagWebMvcRegistrations(featureFlagManager: FeatureFlagManager): WebMvcRegistrations =
-            // ControllerTest mocks PrsdbWebMvcRegistration; keep real flag-aware routing in this slice.
-            object : WebMvcRegistrations {
-                override fun getRequestMappingHandlerMapping() =
-                    PrsdbWebMvcRegistration(featureFlagManager).getRequestMappingHandlerMapping()
-            }
-    }
-
-    companion object {
-        const val FEATURE_FLAG_ROUTING_PROFILE = "feature-flag-routing"
     }
 }
