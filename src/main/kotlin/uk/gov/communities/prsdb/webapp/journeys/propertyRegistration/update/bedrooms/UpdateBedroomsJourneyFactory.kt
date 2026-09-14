@@ -64,14 +64,11 @@ class UpdateBedroomsJourneyFactory(
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String {
-        val state = stateFactory.getObject()
-        state.discardIfLastModifiedDateChanged(
+    ): String =
+        stateFactory.getObject().initialiseWithDiscard(
             Pair(ownershipId, user),
             propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(Pair(ownershipId, user))
-    }
 }
 
 @JourneyFrameworkComponent

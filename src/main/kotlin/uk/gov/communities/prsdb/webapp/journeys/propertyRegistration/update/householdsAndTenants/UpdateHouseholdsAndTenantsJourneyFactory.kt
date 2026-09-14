@@ -127,14 +127,11 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     fun initialiseJourneyState(
         seed: Any,
         propertyId: Long,
-    ): String {
-        val state = stateFactory.getObject()
-        state.discardIfLastModifiedDateChanged(
+    ): String =
+        stateFactory.getObject().initialiseWithDiscard(
             seed,
             propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(seed)
-    }
 }
 
 @JourneyFrameworkComponent

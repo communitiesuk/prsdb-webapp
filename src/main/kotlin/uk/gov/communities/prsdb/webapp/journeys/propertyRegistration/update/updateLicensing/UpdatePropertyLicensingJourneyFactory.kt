@@ -163,14 +163,11 @@ class UpdateLicensingJourneyFactory(
     fun initializeJourneyState(
         seed: Any,
         propertyId: Long,
-    ): String {
-        val state = stateFactory.getObject()
-        state.discardIfLastModifiedDateChanged(
+    ): String =
+        stateFactory.getObject().initialiseWithDiscard(
             seed,
             ownershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(seed)
-    }
 }
 
 @JourneyFrameworkComponent

@@ -20,6 +20,14 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
         }
     }
 
+    fun initialiseWithDiscard(
+        seed: Any,
+        currentLastModifiedDate: String,
+    ): String {
+        discardIfLastModifiedDateChanged(seed, currentLastModifiedDate)
+        return initializeOrRestoreState(seed)
+    }
+
     override fun generateJourneyId(seed: Any?): String {
         val ownershipUserPair: Pair<Long, Principal>? = convertSeedToOwnershipUserPairOrNull(seed)
         val token: UUID? = convertSeedToTokenOrNull(seed)

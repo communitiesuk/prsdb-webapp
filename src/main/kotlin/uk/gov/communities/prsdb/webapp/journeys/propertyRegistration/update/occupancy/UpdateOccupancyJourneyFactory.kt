@@ -325,14 +325,11 @@ class UpdateOccupancyJourneyFactory(
     fun initializeJourneyState(
         ownershipId: Long,
         user: Principal,
-    ): String {
-        val state = stateFactory.getObject()
-        state.discardIfLastModifiedDateChanged(
+    ): String =
+        stateFactory.getObject().initialiseWithDiscard(
             Pair(ownershipId, user),
             propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
         )
-        return state.initializeOrRestoreState(Pair(ownershipId, user))
-    }
 
     // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
