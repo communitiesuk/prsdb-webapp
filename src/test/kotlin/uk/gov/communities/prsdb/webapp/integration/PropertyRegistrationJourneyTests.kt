@@ -2046,9 +2046,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The back link on the gas certificate issue date page returns to the start of the gas safety task when reached from CYA`(
-            page: Page,
-        ) {
+        fun `The back link on the gas certificate issue date page returns to the CYA page when reached from there`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
 
             checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.actions
@@ -2056,7 +2054,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .clickAndWait()
             val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
             gasCertIssueDatePage.backLink.clickAndWait()
-            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test
@@ -2108,7 +2106,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The back link on the registered energy efficiency exemption answer page returns to the EPC details page`(page: Page) {
+        fun `The back link on the registered energy efficiency exemption answer page returns to the CYA page when reached from there`(
+            page: Page,
+        ) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
 
             checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.actions
@@ -2116,7 +2116,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .clickAndWait()
             val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
             hasMeesExemptionPage.backLink.clickAndWait()
-            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
         @Test
