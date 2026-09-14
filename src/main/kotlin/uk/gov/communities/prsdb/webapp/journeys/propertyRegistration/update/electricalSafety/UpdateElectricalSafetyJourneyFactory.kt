@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -90,6 +92,9 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             step(journey.applyElectricalSafetyUpdateStep) {
                 parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
                 nextUrl { returnUrl }
             }
             replaceButtons()
@@ -165,6 +170,7 @@ class UpdateElectricalSafetyJourney(
     journeyName: String = "electricalSafety",
     val updateCheckElectricalSafetyAnswersStep: UpdateCheckElectricalSafetyAnswersStep,
     override val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateElectricalSafetyJourneyState>,
@@ -189,10 +195,14 @@ class UpdateElectricalSafetyJourney(
 interface UpdateElectricalSafetyJourneyState :
     JourneyState,
     ElectricalSafetyDependencies,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
-    val propertyId: Long
+    override val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
     val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.electricalSafety"
 }

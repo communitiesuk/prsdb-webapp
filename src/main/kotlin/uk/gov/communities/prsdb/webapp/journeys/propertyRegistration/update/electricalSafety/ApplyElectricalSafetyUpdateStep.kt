@@ -43,10 +43,7 @@ class ApplyElectricalSafetyUpdateStepConfig(
     override fun resolveNextDestination(
         state: UpdateElectricalSafetyJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent

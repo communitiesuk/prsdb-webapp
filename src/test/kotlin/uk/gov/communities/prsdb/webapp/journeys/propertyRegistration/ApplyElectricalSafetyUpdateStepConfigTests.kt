@@ -11,6 +11,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -132,12 +133,12 @@ class ApplyElectricalSafetyUpdateStepConfigTests {
     }
 
     @Test
-    fun `resolveNextDestination calls deleteJourney on state and returns the default destination`() {
+    fun `resolveNextDestination returns the default destination without deleting the journey`() {
         val defaultDestination = Destination.ExternalUrl("redirect")
 
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
 
-        verify(mockState).deleteJourney()
+        verify(mockState, never()).deleteJourney()
         assert(result == defaultDestination)
     }
 }
