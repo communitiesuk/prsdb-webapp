@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -25,7 +26,10 @@ import java.sql.Connection
 import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -37,6 +41,22 @@ class NftDataSeeder(
     private val addressRepository: AddressRepository,
     @Value("\${epc.certificate-base-url}")
     private val epcCertificateBaseUrl: String,
+    @Value("\${nft-seed.system-operators}")
+    private val numOfSystemOperators: Int,
+    @Value("\${nft-seed.local-council-users}")
+    private val numOfLcUsers: Int,
+    @Value("\${nft-seed.landlords}")
+    private val numOfLandlords: Int,
+    @Value("\${nft-seed.properties}")
+    private val numOfProperties: Int,
+    @Value("\${nft-seed.batch-size}")
+    private val batchSize: Int,
+    @Value("\${nft-seed.random-seed}")
+    private val randomSeed: Long,
+    @Value("\${nft-seed.reference-date:}")
+    private val referenceDate: String,
+    @Value("\${nft-seed.generated-addresses}")
+    private val numOfGeneratedAddresses: Int,
 ) {
     private lateinit var nftDataSeederDao: NftDataSeederDao
 
@@ -46,12 +66,14 @@ class NftDataSeeder(
     private val incompletePropertyAddressGenerator = AddressGenerator(restrictToAvailable = true)
 
     fun seedDatabase() {
+        NftDataFaker.reset(seed = randomSeed, reference = resolveReferenceInstant())
         val statelessSession = sessionFactory.openStatelessSession()
         statelessSession.use { session ->
             val transaction = session.beginTransaction()
             try {
                 session.doWork { connection: Connection ->
                     nftDataSeederDao = NftDataSeederDao(session, connection)
+                    seedGeneratedAddressData()
                     seedSystemOperatorData()
                     seedLocalCouncilData()
                     seedLandlordData()
@@ -65,6 +87,80 @@ class NftDataSeeder(
         }
     }
 
+    /**
+     * Generated dates are relative to this instant. Leaving `nft-seed.reference-date` blank uses the current time,
+     * which keeps data realistic; setting it to an ISO date (e.g. 2026-01-01) makes a run fully reproducible.
+     */
+    private fun resolveReferenceInstant(): Instant =
+        if (referenceDate.isBlank()) {
+            Instant.now()
+        } else {
+            LocalDate.parse(referenceDate).atStartOfDay(ZoneOffset.UTC).toInstant()
+        }
+
+    /**
+     * Generates fictional addresses so the seeder can run without the real NGD address data, which requires an OS API
+     * key and a large download. Deployed NFT leaves `nft-seed.generated-addresses` at 0 and uses the NGD data instead.
+     */
+    private fun seedGeneratedAddressData() {
+        if (numOfGeneratedAddresses <= 0) return
+
+        log("Starting to seed generated address data")
+
+        val addressStmt = nftDataSeederDao.prepareAddressStatement()
+
+        try {
+            val localCouncilIds = localCouncilRepository.findAllId()
+            check(localCouncilIds.isNotEmpty()) { "Cannot generate addresses: no local councils exist." }
+
+            var addressesAdded = 0
+            var uprn = GENERATED_UPRN_BASE + nftDataSeederDao.countAddresses()
+
+            while (addressesAdded < numOfGeneratedAddresses) {
+                val street = NftDataFaker.generateFakeStreet()
+                val localCouncilId = NftDataFaker.pickOne(localCouncilIds)
+                val addressesOnStreet =
+                    min(NftDataFaker.generateNumberOfAddressesOnStreet(), numOfGeneratedAddresses - addressesAdded)
+
+                for (buildingNumber in 1..addressesOnStreet) {
+                    addAddressToBatch(addressStmt, uprn++, buildingNumber, street, localCouncilId)
+                    addressesAdded++
+
+                    if (addressesAdded % batchSize == 0) {
+                        addressStmt.executeBatch()
+                        log("Seeded $addressesAdded addresses")
+                    }
+                }
+            }
+
+            addressStmt.executeBatch()
+
+            log("Finished seeding generated address data: $addressesAdded addresses in total")
+        } finally {
+            addressStmt.close()
+        }
+    }
+
+    private fun addAddressToBatch(
+        addressStmt: PreparedStatement,
+        uprn: Long,
+        buildingNumber: Int,
+        street: NftDataFaker.FakeStreet,
+        localCouncilId: Int,
+    ) {
+        val createdDate = NftDataFaker.generateCreatedDate()
+        addressStmt.setTimestamp(1, createdDate)
+        addressStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
+        addressStmt.setLong(3, uprn)
+        addressStmt.setString(4, NftDataFaker.buildSingleLineAddress(buildingNumber, street))
+        addressStmt.setString(5, buildingNumber.toString())
+        addressStmt.setString(6, street.streetName)
+        addressStmt.setString(7, street.townName)
+        addressStmt.setString(8, street.postcode)
+        addressStmt.setInt(9, localCouncilId)
+        addressStmt.addBatch()
+    }
+
     private fun seedSystemOperatorData() {
         log("Starting to seed system operator data")
 
@@ -72,12 +168,12 @@ class NftDataSeeder(
         val systemOperatorStmt = nftDataSeederDao.prepareSystemOperatorStatement()
 
         try {
-            repeat(NUM_OF_SYSTEM_OPERATORS) { addSystemOperatorToBatch(prsdbUserStmt, systemOperatorStmt) }
+            repeat(numOfSystemOperators) { addSystemOperatorToBatch(prsdbUserStmt, systemOperatorStmt) }
 
             prsdbUserStmt.executeBatch()
             systemOperatorStmt.executeBatch()
 
-            log("Seeded $NUM_OF_SYSTEM_OPERATORS system operators")
+            log("Seeded $numOfSystemOperators system operators")
         } finally {
             prsdbUserStmt.close()
             systemOperatorStmt.close()
@@ -96,9 +192,9 @@ class NftDataSeeder(
         try {
             val localCouncilIds = localCouncilRepository.findAllId()
 
-            repeat(NUM_OF_LC_USERS) {
+            repeat(numOfLcUsers) {
                 val isManager = NftDataFaker.generateBoolean(probabilityTrue = 0.2)
-                val localCouncilId = localCouncilIds.random()
+                val localCouncilId = NftDataFaker.pickOne(localCouncilIds)
 
                 val hasUserRegistered = NftDataFaker.generateBoolean(probabilityTrue = 0.75)
                 if (hasUserRegistered) {
@@ -112,7 +208,7 @@ class NftDataSeeder(
             localCouncilUserStmt.executeBatch()
             localCouncilInvitationStmt.executeBatch()
 
-            log("Seeded $NUM_OF_LC_USERS local council users/invitations")
+            log("Seeded $numOfLcUsers local council users/invitations")
         } finally {
             prsdbUserStmt.close()
             localCouncilUserStmt.close()
@@ -127,15 +223,14 @@ class NftDataSeeder(
 
         val prsdbUserStmt = nftDataSeederDao.preparePrsdbUserStatement()
         val registrationNumberStmt = nftDataSeederDao.prepareRegistrationNumberStatement()
-        val landlordStmt = nftDataSeederDao.prepareLandlordStatement()
+        val individualLandlordStmt = nftDataSeederDao.prepareIndividualLandlordStatement()
+        val organisationLandlordStmt = nftDataSeederDao.prepareOrganisationLandlordStatement()
+        val organisationalLandlordUserStmt = nftDataSeederDao.prepareOrganisationalLandlordUserStatement()
+        val organisationGoverningBodyMemberStmt = nftDataSeederDao.prepareOrganisationGoverningBodyMemberStatement()
 
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
         val landlordMembershipStmt = nftDataSeederDao.prepareLandlordshipMembersStatement()
-
-        val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
-        val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
-        val electricalSafetyFileUploadsStmt = nftDataSeederDao.prepareElectricalSafetyFileUploadsStatement()
         val propertyComplianceStmt = nftDataSeederDao.preparePropertyComplianceStatement()
 
         val reminderEmailSentStmt = nftDataSeederDao.prepareReminderEmailSentStatement()
@@ -147,8 +242,6 @@ class NftDataSeeder(
 
             var licencesAdded = 0
             var propertyOwnershipsAdded = 0
-
-            var fileUploadsAdded = 0
             var complianceRecordsAdded = 0
 
             var reminderEmailsAdded = 0
@@ -156,16 +249,19 @@ class NftDataSeeder(
 
             fun propertyRegistrationsAdded() = propertyOwnershipsAdded + incompletePropertiesAdded
 
-            val numOfLandlordBatches = ceil(NUM_OF_LANDLORDS.toFloat() / BATCH_SIZE).toInt()
+            val numOfLandlordBatches = ceil(numOfLandlords.toFloat() / batchSize).toInt()
             for (landlordBatchNum in 1..numOfLandlordBatches) {
-                val landlordIdRange = ((landlordBatchNum - 1) * BATCH_SIZE + 1)..min(landlordBatchNum * BATCH_SIZE, NUM_OF_LANDLORDS)
+                val landlordIdRange = ((landlordBatchNum - 1) * batchSize + 1)..min(landlordBatchNum * batchSize, numOfLandlords)
                 val coreDetailsForLandlords = NftDataFaker.generateCoreDetailsForLandlords(landlordIdRange.toList())
 
                 coreDetailsForLandlords.forEach {
                     addLandlordToBatch(
                         prsdbUserStmt,
                         registrationNumberStmt,
-                        landlordStmt,
+                        individualLandlordStmt,
+                        organisationLandlordStmt,
+                        organisationalLandlordUserStmt,
+                        organisationGoverningBodyMemberStmt,
                         it,
                         registrationNumberId = (++registrationNumbersAdded).toLong(),
                     )
@@ -173,21 +269,22 @@ class NftDataSeeder(
 
                 prsdbUserStmt.executeBatch()
                 registrationNumberStmt.executeBatch()
-                landlordStmt.executeBatch()
+                individualLandlordStmt.executeBatch()
+                organisationLandlordStmt.executeBatch()
+                organisationalLandlordUserStmt.executeBatch()
+                organisationGoverningBodyMemberStmt.executeBatch()
                 registrationNumberGenerator.forgetUsedValues()
                 landlordAddressGenerator.forgetUsedValues()
 
                 log("Seeded ${landlordIdRange.last} landlords")
 
                 coreDetailsForLandlords.forEach { landlord ->
-                    val numOfPropertiesLeft = NUM_OF_PROPERTIES - propertyRegistrationsAdded()
+                    val numOfPropertiesLeft = numOfProperties - propertyRegistrationsAdded()
                     val numOfPropertiesForLandlord = NftDataFaker.generateNumberOfPropertiesForLandlord().coerceAtMost(numOfPropertiesLeft)
 
                     repeat(numOfPropertiesForLandlord) {
-                        val isRegistrationComplete = NftDataFaker.generateBoolean(probabilityTrue = 0.9)
-                        if (isRegistrationComplete) {
-                            val isOccupied = NftDataFaker.generateBoolean(probabilityTrue = 0.8)
-                            val hasLicence = NftDataFaker.generateBoolean(probabilityTrue = 0.2)
+                        val scenario = NftDataFaker.generatePropertyScenario()
+                        if (scenario.isRegistrationComplete) {
                             val propertyOwnershipId = (++propertyOwnershipsAdded).toLong()
 
                             val propertyOwnershipCreatedDate =
@@ -196,29 +293,22 @@ class NftDataSeeder(
                                     propertyOwnershipStmt,
                                     landlordMembershipStmt,
                                     licenceStmt,
-                                    isOccupied,
+                                    scenario.isOccupied,
                                     registrationNumberId = (++registrationNumbersAdded).toLong(),
-                                    licenceIdIfHasLicence = if (hasLicence) (++licencesAdded).toLong() else null,
+                                    licenceIdIfHasLicence = if (scenario.hasLicence) (++licencesAdded).toLong() else null,
                                     propertyOwnershipId,
                                     landlord,
-                                    licenseProvideLater = if (!hasLicence) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
-                                    tenancyProvideLater = if (isOccupied) NftDataFaker.generateBoolean(probabilityTrue = 0.4) else null,
+                                    licenseProvideLater = scenario.licenseProvideLater,
+                                    tenancyProvideLater = scenario.tenancyProvideLater,
                                 )
-
-                            val complianceId = (++complianceRecordsAdded).toLong()
-                            fileUploadsAdded =
-                                addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
-                                    fileUploadStmt,
-                                    gasSafetyFileUploadsStmt,
-                                    electricalSafetyFileUploadsStmt,
-                                    propertyComplianceStmt,
-                                    complianceId,
-                                    propertyOwnershipId,
-                                    propertyOwnershipCreatedDate,
-                                    fileUploadsAdded,
-                                )
+                            addEmptyPropertyComplianceToBatch(
+                                propertyComplianceStmt,
+                                complianceId = (++complianceRecordsAdded).toLong(),
+                                propertyOwnershipId = propertyOwnershipId,
+                                createdDate = propertyOwnershipCreatedDate,
+                            )
                         } else {
-                            val hasReminderEmailBeenSent = NftDataFaker.generateBoolean(probabilityTrue = 0.25)
+                            val hasReminderEmailBeenSent = NftDataFaker.generateReminderEmailSent()
                             addIncompletePropertyToBatch(
                                 reminderEmailSentStmt,
                                 savedJourneyStateStmt,
@@ -229,44 +319,52 @@ class NftDataSeeder(
                             )
                         }
 
-                        if (propertyOwnershipsAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
+                        if (propertyOwnershipsAdded % batchSize == 0 || propertyRegistrationsAdded() == numOfProperties) {
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
                             landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
                             propertyOwnershipAddressGenerator.forgetUsedValues()
-
-                            fileUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
-                            gasSafetyFileUploadsStmt.executeBatch()
-                            electricalSafetyFileUploadsStmt.executeBatch()
                         }
-                        if (incompletePropertiesAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
+                        if (incompletePropertiesAdded % batchSize == 0 || propertyRegistrationsAdded() == numOfProperties) {
                             reminderEmailSentStmt.executeBatch()
                             savedJourneyStateStmt.executeBatch()
                             incompletePropertyStmt.executeBatch()
                             incompletePropertyAddressGenerator.forgetUsedValues()
                         }
 
-                        if (propertyRegistrationsAdded() % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
+                        if (propertyRegistrationsAdded() % batchSize == 0 || propertyRegistrationsAdded() == numOfProperties) {
                             log("Seeded ${propertyRegistrationsAdded()} property ownerships/incomplete properties")
                         }
                     }
                 }
             }
+
+            // The per-iteration flushes above only fire on exact batch boundaries or when the property target is
+            // reached. If the landlords run out first, the trailing partial batches would never be sent.
+            registrationNumberStmt.executeBatch()
+            licenceStmt.executeBatch()
+            propertyOwnershipStmt.executeBatch()
+            landlordMembershipStmt.executeBatch()
+            propertyComplianceStmt.executeBatch()
+            reminderEmailSentStmt.executeBatch()
+            savedJourneyStateStmt.executeBatch()
+            incompletePropertyStmt.executeBatch()
+
+            log("Finished seeding landlord data: ${propertyRegistrationsAdded()} property ownerships/incomplete properties in total")
         } finally {
             prsdbUserStmt.close()
             registrationNumberStmt.close()
-            landlordStmt.close()
+            individualLandlordStmt.close()
+            organisationLandlordStmt.close()
+            organisationalLandlordUserStmt.close()
+            organisationGoverningBodyMemberStmt.close()
 
             licenceStmt.close()
             propertyOwnershipStmt.close()
             landlordMembershipStmt.close()
-
-            fileUploadStmt.close()
-            gasSafetyFileUploadsStmt.close()
-            electricalSafetyFileUploadsStmt.close()
             propertyComplianceStmt.close()
 
             reminderEmailSentStmt.close()
@@ -335,7 +433,10 @@ class NftDataSeeder(
     private fun addLandlordToBatch(
         prsdbUserStmt: PreparedStatement,
         registrationNumberStmt: PreparedStatement,
-        landlordStmt: PreparedStatement,
+        individualLandlordStmt: PreparedStatement,
+        organisationLandlordStmt: PreparedStatement,
+        organisationalLandlordUserStmt: PreparedStatement,
+        organisationGoverningBodyMemberStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
         registrationNumberId: Long,
     ) {
@@ -349,6 +450,24 @@ class NftDataSeeder(
         registrationNumberStmt.setInt(4, RegistrationNumberType.LANDLORD.ordinal)
         registrationNumberStmt.addBatch()
 
+        when (coreDetails.landlordType) {
+            LandlordType.INDIVIDUAL -> addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, registrationNumberId)
+            LandlordType.ORGANISATION ->
+                addOrganisationLandlordToBatch(
+                    organisationLandlordStmt,
+                    organisationalLandlordUserStmt,
+                    organisationGoverningBodyMemberStmt,
+                    coreDetails,
+                    registrationNumberId,
+                )
+        }
+    }
+
+    private fun addIndividualLandlordToBatch(
+        landlordStmt: PreparedStatement,
+        coreDetails: CoreLandlordDetails,
+        registrationNumberId: Long,
+    ) {
         val name = NftDataFaker.generateName()
         val isVerified = NftDataFaker.generateBoolean(probabilityTrue = 0.8)
 
@@ -364,6 +483,67 @@ class NftDataSeeder(
         landlordStmt.setLong(10, registrationNumberId)
         landlordStmt.setBoolean(11, isVerified)
         landlordStmt.addBatch()
+    }
+
+    private fun addOrganisationLandlordToBatch(
+        organisationLandlordStmt: PreparedStatement,
+        organisationalLandlordUserStmt: PreparedStatement,
+        organisationGoverningBodyMemberStmt: PreparedStatement,
+        coreDetails: CoreLandlordDetails,
+        registrationNumberId: Long,
+    ) {
+        val details =
+            requireNotNull(coreDetails.organisationDetails) {
+                "Organisation landlords must have organisation details generated for them"
+            }
+
+        organisationLandlordStmt.setLong(1, coreDetails.id)
+        organisationLandlordStmt.setTimestamp(2, coreDetails.createdDate)
+        organisationLandlordStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(coreDetails.createdDate))
+        organisationLandlordStmt.setLong(4, registrationNumberId)
+        organisationLandlordStmt.setString(5, details.name)
+        organisationLandlordStmt.setLong(6, landlordAddressGenerator.next().id)
+        organisationLandlordStmt.setString(7, details.email)
+        organisationLandlordStmt.setString(8, details.phoneNumber)
+        organisationLandlordStmt.setBoolean(9, details.isCompany)
+        organisationLandlordStmt.setBoolean(10, details.isCharity)
+        organisationLandlordStmt.setBoolean(11, details.isTrust)
+        organisationLandlordStmt.setStringOrNull(12, details.companyNumber)
+        organisationLandlordStmt.setIntOrNull(13, details.charityRegisteredWith?.ordinal)
+        organisationLandlordStmt.setStringOrNull(14, details.charityNumber)
+        organisationLandlordStmt.setStringOrNull(15, details.leadTrusteeName)
+        organisationLandlordStmt.setDateOrNull(16, details.leadTrusteeDateOfBirth)
+        organisationLandlordStmt.setStringOrNull(17, details.leadTrusteeEmail)
+        organisationLandlordStmt.setStringOrNull(18, details.leadTrusteePhone)
+        organisationLandlordStmt.setLongOrNull(19, if (details.isTrust) landlordAddressGenerator.next().id else null)
+        organisationLandlordStmt.setString(20, details.mainContactName)
+        organisationLandlordStmt.setString(21, details.mainContactEmail)
+        organisationLandlordStmt.setString(22, details.mainContactPhone)
+        organisationLandlordStmt.setString(23, details.registrantName)
+        organisationLandlordStmt.setDate(24, details.registrantDateOfBirth)
+        organisationLandlordStmt.setString(25, details.registrantEmail)
+        organisationLandlordStmt.setString(26, details.registrantPhoneNumber)
+        organisationLandlordStmt.addBatch()
+
+        organisationalLandlordUserStmt.setTimestamp(1, coreDetails.createdDate)
+        organisationalLandlordUserStmt.setLong(2, coreDetails.id)
+        organisationalLandlordUserStmt.setString(3, coreDetails.subjectId)
+        organisationalLandlordUserStmt.setString(4, details.registrantName)
+        organisationalLandlordUserStmt.setString(5, details.registrantEmail)
+        organisationalLandlordUserStmt.addBatch()
+
+        if (details.hasGoverningBody) {
+            NftDataFaker.generateGoverningBodyMembers(hasLeadTrustee = details.isTrust).forEach { member ->
+                organisationGoverningBodyMemberStmt.setTimestamp(1, coreDetails.createdDate)
+                organisationGoverningBodyMemberStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(coreDetails.createdDate))
+                organisationGoverningBodyMemberStmt.setLong(3, coreDetails.id)
+                organisationGoverningBodyMemberStmt.setInt(4, member.type.ordinal)
+                organisationGoverningBodyMemberStmt.setString(5, member.name)
+                organisationGoverningBodyMemberStmt.setDate(6, member.dateOfBirth)
+                organisationGoverningBodyMemberStmt.setLong(7, landlordAddressGenerator.next().id)
+                organisationGoverningBodyMemberStmt.addBatch()
+            }
+        }
     }
 
     private fun addPropertyOwnershipToBatchReturningCreatedDate(
@@ -435,6 +615,29 @@ class NftDataSeeder(
         membershipStmt.addBatch()
 
         return createdDate
+    }
+
+    private fun addEmptyPropertyComplianceToBatch(
+        propertyComplianceStmt: PreparedStatement,
+        complianceId: Long,
+        propertyOwnershipId: Long,
+        createdDate: Timestamp,
+    ) {
+        propertyComplianceStmt.setLong(1, complianceId)
+        propertyComplianceStmt.setTimestamp(2, createdDate)
+        propertyComplianceStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        propertyComplianceStmt.setLong(4, propertyOwnershipId)
+        propertyComplianceStmt.setDateOrNull(5, null)
+        propertyComplianceStmt.setBooleanOrNull(6, null)
+        propertyComplianceStmt.setDateOrNull(7, null)
+        propertyComplianceStmt.setIntOrNull(8, null)
+        propertyComplianceStmt.setStringOrNull(9, null)
+        propertyComplianceStmt.setDateOrNull(10, null)
+        propertyComplianceStmt.setBooleanOrNull(11, null)
+        propertyComplianceStmt.setStringOrNull(12, null)
+        propertyComplianceStmt.setIntOrNull(13, null)
+        propertyComplianceStmt.setIntOrNull(14, null)
+        propertyComplianceStmt.addBatch()
     }
 
     private fun addIncompletePropertyToBatch(
@@ -569,14 +772,6 @@ class NftDataSeeder(
         println("${LocalDateTime.now()} $message")
     }
 
-    companion object {
-        const val NUM_OF_SYSTEM_OPERATORS = 150
-        const val NUM_OF_LC_USERS = 3000
-        const val NUM_OF_LANDLORDS = 2820000
-        const val NUM_OF_PROPERTIES = 4700000
-        const val BATCH_SIZE = 10000
-    }
-
     private abstract class Generator<T> {
         protected var values = emptyList<T>()
         private var index = 0
@@ -585,7 +780,12 @@ class NftDataSeeder(
 
         fun next(): T {
             while (index == values.size) {
+                val sizeBeforeReplenish = values.size
                 replenishValues()
+                check(values.size > sizeBeforeReplenish) {
+                    "${this::class.simpleName} could not supply any new values. The configured seed volumes are too " +
+                        "large for the available source data (e.g. not enough addresses in the database)."
+                }
             }
             return values[index++]
         }
@@ -599,29 +799,40 @@ class NftDataSeeder(
     private inner class RegistrationNumberGenerator : Generator<Long>() {
         override fun replenishValues() {
             val valueSet = values.toSet()
-            val potentialNewNumbers = NftDataFaker.generateRegistrationNumbers(BATCH_SIZE * 5)
+            val potentialNewNumbers = NftDataFaker.generateRegistrationNumbers(batchSize * 5)
             val alreadyUsedNumbers = nftDataSeederDao.findRegistrationNumbersIn(potentialNewNumbers).toSet()
             val newNumbers = potentialNewNumbers - alreadyUsedNumbers
             values = (valueSet + newNumbers).toList()
         }
     }
 
-    private val addressCount by lazy { addressRepository.count().toInt() }
+    private companion object {
+        /**
+         * Generated UPRNs start well above the real NGD range so they can never collide with genuine UPRNs or with
+         * the small UPRNs used by the local development data.
+         */
+        const val GENERATED_UPRN_BASE = 900_000_000_000L
+    }
 
     private inner class AddressGenerator(
         private val restrictToAvailable: Boolean = false,
     ) : Generator<Address>() {
-        private val replenishmentSize = BATCH_SIZE * 5
+        private val replenishmentSize = batchSize * 5
 
         override fun replenishValues() {
             val valueSet = values.toSet()
+            // Recomputed on every replenishment (rather than cached) because, when restrictToAvailable is true, the
+            // number of addresses that qualify shrinks as property ownerships are seeded. Using the raw address
+            // table size here would let the offset land past the end of the real available range, returning no rows
+            // even though available addresses remain.
+            val availableAddressCount = nftDataSeederDao.countAvailableAddresses(restrictToAvailable)
             val newAddresses =
                 nftDataSeederDao.findAddresses(
                     limit = replenishmentSize,
-                    offset = NftDataFaker.generateNumberLessThan(addressCount - replenishmentSize),
+                    offset = NftDataFaker.generateNumberLessThan((availableAddressCount - replenishmentSize).coerceAtLeast(1)),
                     restrictToAvailable,
                 )
-            values = (valueSet + newAddresses.shuffled()).toList()
+            values = (valueSet + NftDataFaker.shuffle(newAddresses)).toList()
         }
     }
 }
