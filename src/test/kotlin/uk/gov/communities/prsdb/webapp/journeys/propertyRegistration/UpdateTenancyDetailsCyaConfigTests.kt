@@ -177,7 +177,7 @@ class UpdateTenancyDetailsCyaConfigTests {
                 listOf(
                     "The number of households living in this property",
                     "The number of people living in this property",
-                    "rent details (amount, how often it's paid, bills and furnishing)",
+                    "rent details (amount, how often it’s paid, bills and furnishing)",
                 ),
             ),
         )
