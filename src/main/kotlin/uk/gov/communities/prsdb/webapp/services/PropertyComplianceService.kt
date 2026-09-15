@@ -389,6 +389,16 @@ class PropertyComplianceService(
                     certificateTypeLabel = lettingAgentCertificateTypeLabel,
                     expiryDate = expiryDate?.format(DATE_FORMATTER),
                 )
+                if (updateType != ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
+                    sendComplianceExpiryEmailsToLandlords(
+                        propertyOwnership = propertyOwnership,
+                        updateType = updateType,
+                        certificateType = certificateType,
+                        certificateTypeLabel = certificateTypeLabel,
+                        expiryDate = formattedExpiryDate,
+                        deadlineDate = formattedDeadlineDate,
+                    )
+                }
                 return
             }
             throw ResponseStatusException(
@@ -405,41 +415,29 @@ class PropertyComplianceService(
                 )
 
         // TODO: PDJB-1274: Update emails to account for org landlord
-        complianceUpdateConfirmationSender.sendEmail(
-            landlord.email,
-            ComplianceUpdateConfirmationEmail(
-                landlordName = landlord.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
-                complianceUpdateType = updateType,
-                certificateType = certificateType,
-                certificateTypeLabel = certificateTypeLabel,
-                expiryDate = formattedExpiryDate,
-                deadlineDate = formattedDeadlineDate,
-            ),
+        sendComplianceUpdateConfirmationEmail(
+            landlord = landlord,
+            propertyOwnership = propertyOwnership,
+            updateType = updateType,
+            certificateType = certificateType,
+            certificateTypeLabel = certificateTypeLabel,
+            expiryDate = formattedExpiryDate,
+            deadlineDate = formattedDeadlineDate,
         )
 
         val otherLandlords =
             propertyOwnership.landlords.filter { it.id != currentLandlord.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
-            complianceUpdateConfirmationSender.sendEmail(
-                otherLandlord.email,
-                ComplianceUpdateConfirmationEmail(
-                    landlordName = otherLandlord.name,
-                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                    newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
-                    complianceUpdateType = updateType,
-                    certificateType = certificateType,
-                    certificateTypeLabel = certificateTypeLabel,
-                    expiryDate = formattedExpiryDate,
-                    deadlineDate = formattedDeadlineDate,
-                    isJointLandlord = true,
-                ),
+            sendComplianceUpdateConfirmationEmail(
+                landlord = otherLandlord,
+                propertyOwnership = propertyOwnership,
+                updateType = updateType,
+                certificateType = certificateType,
+                certificateTypeLabel = certificateTypeLabel,
+                expiryDate = formattedExpiryDate,
+                deadlineDate = formattedDeadlineDate,
+                isJointLandlord = true,
             )
         }
     }
@@ -467,6 +465,56 @@ class PropertyComplianceService(
                 ),
             )
         }
+    }
+
+    private fun sendComplianceExpiryEmailsToLandlords(
+        propertyOwnership: PropertyOwnership,
+        updateType: ComplianceUpdateConfirmationEmail.UpdateType,
+        certificateType: String,
+        certificateTypeLabel: String,
+        expiryDate: String?,
+        deadlineDate: String?,
+    ) {
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        propertyOwnership.landlords.forEach { landlord ->
+            sendComplianceUpdateConfirmationEmail(
+                landlord = landlord,
+                propertyOwnership = propertyOwnership,
+                updateType = updateType,
+                certificateType = certificateType,
+                certificateTypeLabel = certificateTypeLabel,
+                expiryDate = expiryDate,
+                deadlineDate = deadlineDate,
+            )
+        }
+    }
+
+    private fun sendComplianceUpdateConfirmationEmail(
+        landlord: Landlord,
+        propertyOwnership: PropertyOwnership,
+        updateType: ComplianceUpdateConfirmationEmail.UpdateType,
+        certificateType: String,
+        certificateTypeLabel: String,
+        expiryDate: String?,
+        deadlineDate: String?,
+        isJointLandlord: Boolean = false,
+    ) {
+        complianceUpdateConfirmationSender.sendEmail(
+            landlord.email,
+            ComplianceUpdateConfirmationEmail(
+                landlordName = landlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                complianceUpdateType = updateType,
+                certificateType = certificateType,
+                certificateTypeLabel = certificateTypeLabel,
+                expiryDate = expiryDate,
+                deadlineDate = deadlineDate,
+                isJointLandlord = isJointLandlord,
+            ),
+        )
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(

@@ -954,7 +954,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `sends a letting agent compliance notification when the added certificate is already expired`() {
+        fun `sends a letting agent notification and an expiry email when a letting agent uploads an expired certificate`() {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
             val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
@@ -993,6 +993,50 @@ class PropertyComplianceServiceTests {
                     ),
                 ),
             )
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockLoggedInLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockLoggedInLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `does not send an expiry email when a letting agent uploads a valid certificate`() {
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
+            whenever(mockPropertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnership.id)).thenReturn(true)
+            whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)).thenReturn(URI("http://property"))
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>())).thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1"))
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockLettingAgentComplianceUpdateSender).sendEmail(eq(mockLoggedInLandlord.email), any())
+            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(any(), any())
         }
 
         @Test
