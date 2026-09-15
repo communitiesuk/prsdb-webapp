@@ -155,6 +155,29 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @Test
+    fun `handleCallback does not email the letting agent when the property is unoccupied`() {
+        // Arrange
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedCertType(CertificateType.GasSafetyCert),
+                listOf("landlord1@example.com"),
+                isOccupied = false,
+            )
+        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "agent@example.com"))
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToAddress(listOf("landlord1@example.com"), expectedEmail)
+    }
+
+    @Test
     fun `handleCallback does not email letting agent when delegation feature is disabled`() {
         // Arrange
         val (ownershipId, expectedEmail) =
@@ -267,11 +290,13 @@ class VirusNotificationEmailHandlerTests {
         bodyCertificateType: String,
         emailAddresses: List<String>,
         recipientName: String = "name",
+        isOccupied: Boolean = true,
     ): Pair<Long, VirusScanUnsuccessfulEmail> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 landlords = emailAddresses.mapTo(mutableSetOf()) { MockLandlordData.createIndividualLandlord(email = it) },
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
+                isOccupied = isOccupied,
             )
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)

@@ -343,7 +343,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(mock())
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(true)
 
         mvc
             .perform(
@@ -397,7 +397,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(null)
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(false)
 
         mvc
             .perform(

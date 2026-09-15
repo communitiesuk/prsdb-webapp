@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.LettingAgentAccessHelper
 import java.util.UUID
 
 @PrsdbWebService
@@ -35,15 +36,12 @@ class LettingAgentAccessService(
         getInvitationByTokenOrNull(token)
             ?: throw EntityNotFoundException("No letting agent access found for token $token")
 
+    // This shouldn't be called directly, instead use PropertyOwnershipService#getLettingAgentAccess
     fun getInvitationByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
     fun propertyHasLettingAgent(propertyOwnership: PropertyOwnership): Boolean =
-        getInvitationByPropertyOwnershipId(propertyOwnership.id) != null && propertyOwnership.isOccupied
-
-    fun getTokenByPropertyOwnershipId(propertyOwnershipId: Long): UUID? =
-        // TODO PDJB-1687: commonise this check with any other has LetA checks
-        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)?.token
+        LettingAgentAccessHelper.hasLettingAgent(propertyOwnership, getInvitationByPropertyOwnershipId(propertyOwnership.id))
 
     fun getTokenIsValid(token: String): Boolean {
         val uuid =
