@@ -85,7 +85,6 @@ class UpdateElectricalSafetyJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }

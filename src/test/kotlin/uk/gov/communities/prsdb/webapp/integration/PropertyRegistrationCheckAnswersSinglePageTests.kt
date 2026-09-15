@@ -53,6 +53,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Letti
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -169,7 +170,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when letting agent provides details, rented out section shows email row with change link`(page: Page) {
+        fun `delegated occupied property CYA displays required sections and letting agent details`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -184,12 +185,28 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
+            val headings = checkAnswersPage.restructuredSectionHeadings
+            assertEquals(
+                listOf(
+                    "About your property",
+                    "Property details",
+                    "Ownership and landlords",
+                    "Tell us if your property’s occupied",
+                    "How your property’s rented out",
+                    "Who will provide these details",
+                ),
+                headings,
+            )
+            BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("My letting agent or property manager")
+            BaseComponent.assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.actions.getActionLink("Change")).isVisible()
             assertThat(
                 checkAnswersPage.summaryList.lettingAgentEmailRow.key,
             ).containsText("Letting agent or property manager’s email address")
             assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText("letting.agent@example.com")
-            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.actions.getActionLink("Change")).isVisible()
             checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
             val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
 
@@ -201,7 +218,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when delegating to a letting agent, the EPC row shows provide this later and no is-epc-required row`(page: Page) {
+        fun `when delegating to a letting agent, the EPC section is hidden`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -211,15 +228,13 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
-            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.key).hasCount(0)
             assertThat(checkAnswersPage.complianceSummaryList.isEpcRequiredRow.key).hasCount(0)
         }
 
         @Test
-        fun `when delegating to a letting agent after entering an EPC, the EPC card is not shown and the row shows provide this later`(
-            page: Page,
-        ) {
+        fun `when delegating to a letting agent after entering an EPC, the EPC section is hidden`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -230,8 +245,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
-            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.key).hasCount(0)
             assertThat(page.locator("main").getByText("Your EPC")).hasCount(0)
         }
 
@@ -245,13 +260,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            val headings =
-                page
-                    .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
-                    .allInnerTexts()
-                    .map { it.trim() }
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            val headings = checkAnswersPage.restructuredSectionHeadings
             val occupancyIndex = headings.indexOf("Tell us if your property’s occupied")
             val rentedOutIndex = headings.indexOf("How your property’s rented out")
             val licensingIndex = headings.indexOf("Tell us if the property needs a license")
@@ -292,6 +302,28 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
 
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isHidden()
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.key).hasCount(0)
+        }
+
+        @Test
+        fun `when property is unoccupied, letting agent delegation unoccupied panel is displayed`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswers()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            BaseComponent.assertThat(checkAnswersPage.rentedOutHeading).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
+            assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.key).hasCount(0)
+            assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.key).hasCount(0)
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isHidden()
+            BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationUnoccupiedPanel).containsText(
+                "When your property becomes occupied, you can choose for your letting agent or property manager to " +
+                    "provide this section for you. They can also keep these details up to date.",
+            )
         }
 
         @Test
