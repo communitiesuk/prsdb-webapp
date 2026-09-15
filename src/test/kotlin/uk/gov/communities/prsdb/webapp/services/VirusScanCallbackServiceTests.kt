@@ -54,6 +54,141 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
+    fun `saveEmailToMonitoringTeam wraps a journey notification for the monitoring team`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveEmailToMonitoringTeam("journey-1", 42L, CertificateType.Eicr, 7L)
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository).save(captor.capture())
+        assertEquals(
+            EmailNotificationData.VirusMonitoringEmailNotification(
+                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            ),
+            Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
+        )
+    }
+
+    @Test
+    fun `saveEmailForOwnership persists an owner notification in the callback payload`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveEmailForOwnership(99L, 42L, CertificateType.Eicr)
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository).save(captor.capture())
+        assertEquals(
+            EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
+            Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
+        )
+    }
+
+    @Test
+    fun `saveEmailToMonitoringTeamForOwnership wraps an owner notification for the monitoring team`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveEmailToMonitoringTeamForOwnership(99L, 42L, CertificateType.Eicr)
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository).save(captor.capture())
+        assertEquals(
+            EmailNotificationData.VirusMonitoringEmailNotification(
+                EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
+            ),
+            Json.decodeFromString<EmailNotificationData>(captor.firstValue.encodedCallbackData),
+        )
+    }
+
+    @Test
+    fun `saveVirusScanFailureEmail saves owner-targeted callbacks when a property ownership id is present`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveVirusScanFailureEmail(
+            journeyId = "journey-1",
+            fileUploadId = 42L,
+            certificateType = CertificateType.Eicr,
+            propertyOwnershipId = 99L,
+            landlordId = 7L,
+        )
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository, times(2)).save(captor.capture())
+        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
+        assertEquals(
+            EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
+            savedData.single { it is EmailNotificationData.OwnerEmailNotification },
+        )
+        assertEquals(
+            EmailNotificationData.VirusMonitoringEmailNotification(
+                EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
+            ),
+            savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
+        )
+    }
+
+    @Test
+    fun `saveVirusScanFailureEmail saves journey-targeted callbacks when there is no property ownership id but there is a landlord`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+
+        // Act
+        virusScanCallbackService.saveVirusScanFailureEmail(
+            journeyId = "journey-1",
+            fileUploadId = 42L,
+            certificateType = CertificateType.Eicr,
+            propertyOwnershipId = null,
+            landlordId = 7L,
+        )
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository, times(2)).save(captor.capture())
+        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
+        assertEquals(
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            savedData.single { it is EmailNotificationData.IncompletePropertyEmailNotification },
+        )
+        assertEquals(
+            EmailNotificationData.VirusMonitoringEmailNotification(
+                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            ),
+            savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
+        )
+    }
+
+    @Test
+    fun `saveVirusScanFailureEmail does nothing when there is no property ownership id and no landlord`() {
+        // Act
+        virusScanCallbackService.saveVirusScanFailureEmail(
+            journeyId = "journey-1",
+            fileUploadId = 42L,
+            certificateType = CertificateType.Eicr,
+            propertyOwnershipId = null,
+            landlordId = null,
+        )
+
+        // Assert
+        verify(virusScanCallbackRepository, never()).save(any())
+    }
+
+    @Test
     fun `updateCallbacksToOwner re-points journey-target callbacks to the owner in place`() {
         // Arrange
         val directCallback =

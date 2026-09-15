@@ -43,6 +43,8 @@ class ElectricalSafetyDetailsTask(
         get() = dependencies.isOccupied
     override val allowProvideCertificateLaterRoute: Boolean
         get() = dependencies.allowProvideCertificateLaterRoute
+    override val propertyOwnershipId: Long?
+        get() = dependencies.propertyOwnershipId
 
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")

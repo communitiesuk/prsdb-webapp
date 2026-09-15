@@ -40,25 +40,15 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            // TODO: PDJB-1582: When a virus scan fails, all parties (landlords and letting agents) should be notified,
-            //  regardless of who uploaded the certificate. Currently only the uploading landlord's callback emails are
-            //  registered, and none are registered when a letting agent uploads the certificate.
-            val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
+            val propertyOwnershipId = state.propertyOwnershipId
 
-            if (landlordId != null) {
-                virusScanCallbackService.saveEmailForJourney(
-                    state.journeyId,
-                    fileUploadId,
-                    CertificateType.GasSafetyCert,
-                    landlordId,
-                )
-                virusScanCallbackService.saveEmailToMonitoringTeam(
-                    state.journeyId,
-                    fileUploadId,
-                    CertificateType.GasSafetyCert,
-                    landlordId,
-                )
-            }
+            virusScanCallbackService.saveVirusScanFailureEmail(
+                journeyId = state.journeyId,
+                fileUploadId = fileUploadId,
+                certificateType = CertificateType.GasSafetyCert,
+                propertyOwnershipId = propertyOwnershipId,
+                landlordId = actingLandlordIdForRegistrationJourney(propertyOwnershipId),
+            )
 
             val formModel = getFormModelFromState(state)
 
@@ -73,6 +63,13 @@ class UploadGasCertStepConfig(
 
             state.uploadGasCertStep.clearFormData()
         }
+    }
+
+    // Update journeys (propertyOwnershipId non-null) already resolve every landlord and the letting agent from the
+    // property ownership, so there's no need to look up the current user's landlord record in that case.
+    private fun actingLandlordIdForRegistrationJourney(propertyOwnershipId: Long?): Long? {
+        if (propertyOwnershipId != null) return null
+        return userToLandlordService.getCurrentLandlordForUserOrNull()?.id
     }
 }
 

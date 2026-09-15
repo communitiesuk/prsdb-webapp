@@ -61,6 +61,70 @@ class VirusScanCallbackService(
         )
     }
 
+    // Used when the upload happens on an update journey for a property that is already registered, so the
+    // owning property (and therefore all its landlords and its letting agent) is already known. Saving an
+    // OwnerEmailNotification directly - rather than an IncompletePropertyEmailNotification keyed on the
+    // uploading user - means the eventual failure alert always reaches every landlord and the letting agent,
+    // regardless of which of them uploaded the certificate.
+    fun saveEmailForOwnership(
+        propertyOwnershipId: Long,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
+
+        val data = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
+
+        return virusScanCallbackRepository.save(
+            VirusScanCallback(
+                upload = fileUpload,
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
+            ),
+        )
+    }
+
+    fun saveEmailToMonitoringTeamForOwnership(
+        propertyOwnershipId: Long,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
+
+        val internalData = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
+        val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
+
+        return virusScanCallbackRepository.save(
+            VirusScanCallback(
+                upload = fileUpload,
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
+            ),
+        )
+    }
+
+    // Single entry point shared by every certificate-upload step (gas safety, electrical safety, etc.) so the
+    // "which notification shape do we need?" decision is made in one place rather than duplicated per step config.
+    //
+    // - Update journeys (propertyOwnershipId non-null): the property is already registered, so we know every
+    //   landlord and the letting agent regardless of who uploaded - save an ownership-targeted notification.
+    // - Registration journeys (propertyOwnershipId null): no property ownership exists yet, so the notification
+    //   is tied to the uploading landlord's in-progress journey until the property is registered. If there is no
+    //   acting landlord (registration is always landlord-led), nothing is saved.
+    fun saveVirusScanFailureEmail(
+        journeyId: String,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+        propertyOwnershipId: Long?,
+        landlordId: Long?,
+    ) {
+        if (propertyOwnershipId != null) {
+            saveEmailForOwnership(propertyOwnershipId, fileUploadId, certificateType)
+            saveEmailToMonitoringTeamForOwnership(propertyOwnershipId, fileUploadId, certificateType)
+        } else if (landlordId != null) {
+            saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId)
+            saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId)
+        }
+    }
+
     // Re-points a submitted file's existing virus-scan callbacks from their in-progress journey target to the
     // registered property owner, updating each callback row in place rather than deleting and recreating it. The
     // update is set-based, so the scan-processor's concurrent per-row delete cannot make either side fail on a
