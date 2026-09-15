@@ -20,8 +20,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class LandlordViewModel(
     private val landlord: IndividualLandlord,
     private val withChangeLinks: Boolean = true,
-    // TODO: PDJB-1492: Delete this (landlord type row will always be visible)
-    private val withLandlordTypeRow: Boolean = false,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
@@ -44,12 +42,10 @@ class LandlordViewModel(
                     null,
                     withActionLink = withChangeLinks,
                 )
-                if (withLandlordTypeRow) {
-                    addRow(
-                        "landlordDetails.personalDetails.landlordType",
-                        "landlordDetails.personalDetails.landlordTypeValue",
-                    )
-                }
+                addRow(
+                    "landlordDetails.personalDetails.landlordType",
+                    "landlordDetails.personalDetails.landlordTypeValue",
+                )
                 addRow(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
