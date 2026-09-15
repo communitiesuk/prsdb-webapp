@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
@@ -14,6 +15,7 @@ class ConfirmMissingComplianceFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ConfirmMissingComplianceStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
     val warning = Warning.default(page)
+    val backLink = BackLink.default(page)
     val form = ConfirmMissingComplianceForm(page)
 
     class ConfirmMissingComplianceForm(
