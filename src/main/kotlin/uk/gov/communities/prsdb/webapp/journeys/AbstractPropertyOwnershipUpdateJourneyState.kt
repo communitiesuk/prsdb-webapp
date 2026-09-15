@@ -16,7 +16,7 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
         val journeyId = generateJourneyId(seed)
         val storedLastModifiedDate = journeyStateService.getStoredStringValueOrNull(journeyId, LAST_MODIFIED_DATE_KEY)
         if (storedLastModifiedDate != null && storedLastModifiedDate != currentLastModifiedDate) {
-            journeyStateService.discardJourney(journeyId)
+            journeyStateService.deleteState(journeyId)
         }
     }
 

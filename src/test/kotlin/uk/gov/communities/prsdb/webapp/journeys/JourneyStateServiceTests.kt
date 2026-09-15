@@ -623,7 +623,7 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `discardJourney removes the given journey's data, metadata and dependents without binding a journey id`() {
+    fun `deleteState removes the given journey's data, metadata and dependents without binding a journey id`() {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
@@ -640,11 +640,11 @@ class JourneyStateServiceTests {
             )
         session.setJourneyStateMetadataStore(metadataStore)
         val mockPersistenceService = mock<JourneyStatePersistenceService>()
-        // No journeyId provider set — discardJourney must not need a bound id
+        // No journeyId provider set — deleteState with an explicit id must not need a bound id
         val service = JourneyStateService(session, mock(), mockPersistenceService)
 
         // Act
-        service.discardJourney(journeyId)
+        service.deleteState(journeyId)
 
         // Assert
         assertNull(session.getAttribute(journeyId))

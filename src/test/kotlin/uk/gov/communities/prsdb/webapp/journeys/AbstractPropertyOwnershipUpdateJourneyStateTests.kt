@@ -22,7 +22,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         journeyState.discardIfLastModifiedDateChanged(seed, "t1")
 
         // Assert
-        verify(journeyStateService).discardJourney(journeyId)
+        verify(journeyStateService).deleteState(journeyId)
     }
 
     @Test
@@ -38,7 +38,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         journeyState.discardIfLastModifiedDateChanged(seed, "t1")
 
         // Assert
-        verify(journeyStateService, never()).discardJourney(any())
+        verify(journeyStateService, never()).deleteState(any())
     }
 
     @Test
@@ -54,7 +54,7 @@ class AbstractPropertyOwnershipUpdateJourneyStateTests {
         journeyState.discardIfLastModifiedDateChanged(seed, "t1")
 
         // Assert
-        verify(journeyStateService, never()).discardJourney(any())
+        verify(journeyStateService, never()).deleteState(any())
     }
 }
 

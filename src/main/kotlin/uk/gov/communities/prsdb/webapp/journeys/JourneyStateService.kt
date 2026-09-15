@@ -123,10 +123,8 @@ class JourneyStateService(
         journeyStateMetadataStore += metadata.copy(lastUpdated = Clock.System.now())
     }
 
-    fun deleteState() = discardJourney(journeyId)
-
-    fun discardJourney(journeyIdToDiscard: String) {
-        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyIdToDiscard }
+    fun deleteState(journeyIdToDelete: String = journeyId) {
+        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyIdToDelete }
 
         dependentJourneys.forEach {
             session.removeAttribute(it.journeyId)
@@ -134,11 +132,11 @@ class JourneyStateService(
             journeyStateMetadataStore -= it.journeyId
         }
 
-        session.removeAttribute(journeyIdToDiscard)
+        session.removeAttribute(journeyIdToDelete)
 
-        persistenceService.deleteJourneyStateData(journeyIdToDiscard)
+        persistenceService.deleteJourneyStateData(journeyIdToDelete)
 
-        journeyStateMetadataStore -= journeyIdToDiscard
+        journeyStateMetadataStore -= journeyIdToDelete
     }
 
     // Peeks only the live HTTP-session state (not DB-persisted state), which is sufficient because property update
