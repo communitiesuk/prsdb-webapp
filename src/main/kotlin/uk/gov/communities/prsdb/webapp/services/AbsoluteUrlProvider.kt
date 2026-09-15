@@ -10,12 +10,13 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import java.net.URI
 import java.security.Principal
+import java.util.UUID
 
 @Service
 class AbsoluteUrlProvider(
@@ -42,8 +43,8 @@ class AbsoluteUrlProvider(
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
-    fun buildLettingAgentInvitationUri(token: String): URI =
-        uriFromMethodCall(on(LettingAgentInvitationController::class.java).startJourney(token))
+    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
+        uriFromPath(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
@@ -65,18 +66,35 @@ class AbsoluteUrlProvider(
                     info,
                 ).build()
 
+        return buildAbsoluteUri(
+            methodCallUriComponents.pathSegments,
+            methodCallUriComponents.query,
+            methodCallUriComponents.fragment,
+        )
+    }
+
+    private fun uriFromPath(path: String): URI {
+        val components = UriComponentsBuilder.fromUriString(path).build()
+        return buildAbsoluteUri(components.pathSegments, components.query, components.fragment)
+    }
+
+    private fun buildAbsoluteUri(
+        pathSegments: List<String>,
+        query: String?,
+        fragment: String?,
+    ): URI {
         val baseUrl =
-            when (methodCallUriComponents.pathSegments[0]) {
+            when (pathSegments[0]) {
                 LANDLORD_PATH_SEGMENT -> landlordBaseUrl
                 LOCAL_COUNCIL_PATH_SEGMENT -> localCouncilBaseUrl
-                else -> throw IllegalArgumentException("Unknown base URL for path: ${methodCallUriComponents.path}")
+                else -> throw IllegalArgumentException("Unknown base URL for path: /${pathSegments.joinToString("/")}")
             }
 
         return UriComponentsBuilder
             .fromUriString(baseUrl)
-            .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
-            .query(methodCallUriComponents.query)
-            .fragment(methodCallUriComponents.fragment)
+            .pathSegment(*pathSegments.drop(1).toTypedArray())
+            .query(query)
+            .fragment(fragment)
             .build()
             .toUri()
     }

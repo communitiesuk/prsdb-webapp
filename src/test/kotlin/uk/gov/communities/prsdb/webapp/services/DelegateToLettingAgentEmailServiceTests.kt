@@ -156,8 +156,8 @@ class DelegateToLettingAgentEmailServiceTests {
     fun `sendDelegationEmailToLettingAgent sends no-deadline template when deadlineDate is null`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val token = UUID.randomUUID()
-        whenever(mockAbsoluteUrlProvider.buildLettingAgentInvitationUri(token.toString()))
-            .thenReturn(URI("https://example.com/letting-agent/invitation?token=$token"))
+        whenever(mockAbsoluteUrlProvider.buildLettingAgentPropertyDetailsUri(token))
+            .thenReturn(URI("https://example.com/landlord/letting-agent/property-details/$token"))
 
         emailService.sendDelegationEmailToLettingAgent(propertyOwnership, "Wallis Smith", agentEmail, invitationToken = token)
 
@@ -165,7 +165,7 @@ class DelegateToLettingAgentEmailServiceTests {
             eq(agentEmail),
             argThat<DelegateToLettingAgentInvitationEmail> {
                 this.landlordName == "Wallis Smith" &&
-                    this.invitationLink == "https://example.com/letting-agent/invitation?token=$token"
+                    this.invitationLink == "https://example.com/landlord/letting-agent/property-details/$token"
             },
         )
         verify(mockInvitationWithDeadlineEmailService, never()).sendEmail(any(), any())
@@ -175,8 +175,8 @@ class DelegateToLettingAgentEmailServiceTests {
     fun `sendDelegationEmailToLettingAgent sends with-deadline template when deadlineDate is provided`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         val token = UUID.randomUUID()
-        whenever(mockAbsoluteUrlProvider.buildLettingAgentInvitationUri(token.toString()))
-            .thenReturn(URI("https://example.com/letting-agent/invitation?token=$token"))
+        whenever(mockAbsoluteUrlProvider.buildLettingAgentPropertyDetailsUri(token))
+            .thenReturn(URI("https://example.com/landlord/letting-agent/property-details/$token"))
 
         emailService.sendDelegationEmailToLettingAgent(
             propertyOwnership,
@@ -190,7 +190,7 @@ class DelegateToLettingAgentEmailServiceTests {
             eq(agentEmail),
             argThat<DelegateToLettingAgentInvitationWithDeadlineEmail> {
                 this.landlordName == "Wallis Smith" && this.deadlineDate == "13 June 2026" &&
-                    this.invitationLink == "https://example.com/letting-agent/invitation?token=$token"
+                    this.invitationLink == "https://example.com/landlord/letting-agent/property-details/$token"
             },
         )
         verify(mockInvitationEmailService, never()).sendEmail(any(), any())
