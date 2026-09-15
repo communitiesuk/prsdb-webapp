@@ -118,7 +118,7 @@ class LettingAgentUpdateEpcJourneyTests : IntegrationTestWithMutableData("data-l
 
     private fun saveAnswers(page: Page) {
         val checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageLettingAgentUpdateEpc::class, urlArguments)
-        assertThatComponent(checkAnswersPage.form.submitButton).hasText("Continue")
+        assertThatComponent(checkAnswersPage.form.submitButton).hasText("Confirm and submit update")
         checkAnswersPage.form.submit()
     }
 
