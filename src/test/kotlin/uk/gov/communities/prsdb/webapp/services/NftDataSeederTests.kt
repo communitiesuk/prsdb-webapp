@@ -13,8 +13,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.OrganisationGoverningBodyMemberRepository
@@ -50,7 +50,7 @@ class NftDataSeederTests(
     @Autowired private val organisationalLandlordUserRepository: OrganisationalLandlordUserRepository,
     @Autowired private val organisationGoverningBodyMemberRepository: OrganisationGoverningBodyMemberRepository,
     @Autowired private val propertyOwnershipRepository: PropertyOwnershipRepository,
-    @Autowired private val incompletePropertiesRepository: IncompletePropertiesRepository,
+    @Autowired private val incompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) {
     private val numOfLandlords = 200
     private val numOfProperties = 300
