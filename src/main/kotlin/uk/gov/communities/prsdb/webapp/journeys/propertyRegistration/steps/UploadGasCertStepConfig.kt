@@ -64,7 +64,6 @@ class UploadGasCertStepConfig(
             state.uploadGasCertStep.clearFormData()
         }
     }
-
 }
 
 @JourneyFrameworkComponent

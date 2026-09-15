@@ -80,7 +80,6 @@ class UploadElectricalCertStepConfig(
             state.uploadElectricalCertStep.clearFormData()
         }
     }
-
 }
 
 @JourneyFrameworkComponent
