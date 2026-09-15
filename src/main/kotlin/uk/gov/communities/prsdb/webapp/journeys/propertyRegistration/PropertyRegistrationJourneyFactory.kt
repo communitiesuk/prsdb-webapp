@@ -264,6 +264,9 @@ class PropertyRegistrationJourneyFactory(
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
@@ -316,6 +319,9 @@ class PropertyRegistrationJourneyFactory(
 
                 HasMeesExemptionStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasMeesExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 MeesExemptionStep.ROUTE_SEGMENT -> {

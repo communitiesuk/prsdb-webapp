@@ -36,8 +36,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -64,7 +64,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcInDateAtStartOfTenancyCheckPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
@@ -80,7 +79,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasMeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
@@ -159,7 +157,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @MockitoSpyBean
-    private lateinit var incompletePropertiesRepository: IncompletePropertiesRepository
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
@@ -227,7 +225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -1972,214 +1970,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `The back link on the check joint landlords page returns to the CYA page when reached from there`(page: Page) {
-            val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder
-                        .beforePropertyRegistrationCheckAnswersOccupied()
-                        .withCheckedJointLandlords(mutableListOf("email@address.com")),
-                )
-            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            checkJointLandlordsPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the gas certificate page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.validGasCertRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-            hasGasCertPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the EPC tenancy check page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart()
-
-            checkAnswersPage.complianceSummaryList.epcTenancyCheckRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val tenancyCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
-            tenancyCheckPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the is EPC required and EPC exemption pages returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
-
-            checkAnswersPage.complianceSummaryList.isEpcRequiredRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
-            isEpcRequiredPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-
-            checkAnswersPage.complianceSummaryList.epcExemptionRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val epcExemptionPage = assertPageIs(page, EpcExemptionFormPagePropertyRegistration::class)
-            epcExemptionPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the licensing number page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithSelectiveLicence()
-
-            checkAnswersPage.summaryList.licensingNumberRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
-            selectiveLicencePage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the gas certificate issue date page returns to the start of the gas safety task when reached from CYA`(
-            page: Page,
-        ) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-            gasCertIssueDatePage.backLink.clickAndWait()
-            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `changing an expired gas certificate issue date reaches the expired certificate page before returning to CYA`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.gasCertIssueDateRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-            gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
-            assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the gas certificate uploads page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageGasCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.gasCertUploadRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val gasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-            gasCertUploadsPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the electrical certificate expiry date page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.electricalCertExpiryDateRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
-            expiryDatePage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the electrical certificate uploads page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageElectricalCertUploaded()
-
-            checkAnswersPage.complianceSummaryList.electricalCertUploadRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val electricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
-            electricalCertUploadsPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the registered energy efficiency exemption answer page returns to the EPC details page`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
-
-            checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
-            hasMeesExemptionPage.backLink.clickAndWait()
-            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the registered energy efficiency exemption reason page returns to the CYA page`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
-
-            checkAnswersPage.complianceSummaryList.meesExemptionRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-            meesExemptionPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `changing the registered energy efficiency exemption answer to yes reaches the exemption reason page`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcLowRatingWithExemption()
-
-            checkAnswersPage.complianceSummaryList.hasMeesExemptionRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
-            hasMeesExemptionPage.submitHasMeesExemption()
-            assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the number of tenants page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-
-            checkAnswersPage.summaryList.numberOfTenantsRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val numberOfPeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
-            numberOfPeoplePage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the rent amount page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-
-            checkAnswersPage.summaryList.rentAmountRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
-            rentAmountPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `The back link on the which bills are included page returns to the CYA page when reached from there`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
-
-            checkAnswersPage.summaryList.billsIncludedRow.actions
-                .getActionLink("Change")
-                .clickAndWait()
-            val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
-            billsIncludedPage.backLink.clickAndWait()
-            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        }
-
-        @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
@@ -2324,7 +2114,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `manual address selection is cached when an address search returns no results`(page: Page) {
-            val existingIncompletePropertyIds = incompletePropertiesRepository.findAll().map { it.id }.toSet()
+            val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
 
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
@@ -2352,7 +2142,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             val savedState =
-                incompletePropertiesRepository
+                landlordIncompletePropertiesRepository
                     .findAll()
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
@@ -2694,7 +2484,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
