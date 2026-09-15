@@ -16,6 +16,6 @@
             <div th:replace="~{fragments/forms/radios :: radios(null, 'exemptionReason', null, ${radioOptions})}"></div>
         </fieldset>
     </div>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText ?: 'forms.buttons.saveAndContinue'}})}"></button>
 </div>
 </html>

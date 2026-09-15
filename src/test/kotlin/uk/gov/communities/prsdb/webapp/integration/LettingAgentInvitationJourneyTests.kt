@@ -14,8 +14,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import java.net.URI
 
@@ -39,18 +37,11 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     fun `user who does not have a password can walk the set password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithoutPassword)
-        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
+        val setPasswordPage = navigator.goToLettingAgentInvitationSetPasswordJourney(tokenWithoutPassword)
 
         val rawPassword = "password1" // pragma: allowlist secret
-        val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
+        assertPageIs(page, SetPasswordPage::class)
         setPasswordPage.submitPasswords(rawPassword, rawPassword)
-
-        // TODO PDJB-1659: Remove this step from the journey test once store-access becomes a silent step
-        val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
-        storeAccessPage.form.submit()
 
         val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
         BaseComponent
@@ -68,17 +59,9 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     fun `user who has a password can walk the enter password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithPassword)
-        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
-
-        val enterPasswordPage = assertPageIs(page, EnterPasswordPage::class)
+        val enterPasswordPage = navigator.goToLettingAgentInvitationEnterPasswordJourney(tokenWithPassword)
+        assertPageIs(page, EnterPasswordPage::class)
         enterPasswordPage.submitPassword(seededPassword)
-
-        // TODO PDJB-1659: Remove this step from the journey test
-        val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
-        storeAccessPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithPassword))
     }

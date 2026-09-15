@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController.Companion.UPDATE_EPC_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController.Companion.UPDATE_EPC_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -23,7 +23,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_EPC_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateEpcController(
+class LandlordUpdateEpcController(
     private val journeyFactory: UpdateEpcJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
@@ -57,8 +57,13 @@ class UpdateEpcController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = { journeyFactory.initializeJourneyState(Pair(propertyOwnershipId, principal)) },
             dispatch = dispatch,
         )
 
