@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verify
@@ -21,8 +22,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.LettingAgentInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.StartStep
-import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.ValidateTokenStep
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.util.UUID
 
@@ -34,15 +33,13 @@ class LettingAgentInvitationControllerTests(
     private lateinit var journeyFactory: LettingAgentInvitationJourneyFactory
 
     @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
-
-    @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     private val validToken = UUID.randomUUID()
     private val journeyId = "test-journey-id"
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
 
+    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Nested
     inner class StartJourney {
         @Test
@@ -126,14 +123,21 @@ class LettingAgentInvitationControllerTests(
 
     @Nested
     inner class GetJourneyStep {
+        @BeforeEach
+        fun stubInterceptorTokenCheck() {
+            whenever(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
+                .thenReturn(validToken.toString())
+            whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
+        }
+
         @Test
         fun `getJourneyStep is accessible without authentication`() {
             whenever(journeyFactory.createJourneySteps())
-                .thenReturn(mapOf(ValidateTokenStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(StartStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { isOk() }
                 }
@@ -144,7 +148,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -155,7 +159,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
-                .get("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(LETTING_AGENT_INVITATION_ROUTE)
@@ -165,12 +169,19 @@ class LettingAgentInvitationControllerTests(
 
     @Nested
     inner class PostJourneyData {
+        @BeforeEach
+        fun stubInterceptorTokenCheck() {
+            whenever(lettingAgentAccessService.getInvitationTokenForJourneyIdFromSessionOrNull(journeyId))
+                .thenReturn(validToken.toString())
+            whenever(lettingAgentAccessService.getTokenIsValid(validToken.toString())).thenReturn(true)
+        }
+
         @Test
         fun `postJourneyData is accessible without authentication`() {
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -183,7 +194,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -196,7 +207,7 @@ class LettingAgentInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
-                .post("$LETTING_AGENT_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$LETTING_AGENT_INVITATION_ROUTE/${StartStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {

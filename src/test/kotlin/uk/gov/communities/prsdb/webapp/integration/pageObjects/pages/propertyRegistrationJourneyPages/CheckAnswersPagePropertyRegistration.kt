@@ -2,11 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import java.util.regex.Pattern
@@ -60,6 +63,19 @@ class CheckAnswersPagePropertyRegistration(
             page,
             "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
         )
+
+    val lettingAgentDelegationUnoccupiedPanel = TicketPanel(page)
+
+    val restructuredSectionHeadings: List<String>
+        get() =
+            page
+                .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
+                .allInnerTexts()
+                .map { it.trim() }
+
+    val warning = Warning.default(page)
+
+    val submitButton = Button.default(page)
 
     val complianceSummaryList = ComplianceSummaryList(page)
 

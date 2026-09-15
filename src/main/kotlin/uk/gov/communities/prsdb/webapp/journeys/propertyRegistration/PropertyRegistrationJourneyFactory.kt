@@ -127,8 +127,6 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
-                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
                         whoProvidesChangeCyaJourney()
@@ -266,6 +264,9 @@ class PropertyRegistrationJourneyFactory(
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
@@ -318,6 +319,9 @@ class PropertyRegistrationJourneyFactory(
 
                 HasMeesExemptionStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasMeesExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 MeesExemptionStep.ROUTE_SEGMENT -> {

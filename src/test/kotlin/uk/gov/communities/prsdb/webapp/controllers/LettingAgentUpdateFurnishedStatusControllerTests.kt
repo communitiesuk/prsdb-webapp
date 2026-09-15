@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -32,12 +31,9 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateFurnishedStatusController::class)
 class LettingAgentUpdateFurnishedStatusControllerTests(
     @Autowired webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateFurnishedStatusJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
