@@ -1,10 +1,10 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.junit.jupiter.api.Test
 import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class NftDataFakerTests {
     @Test

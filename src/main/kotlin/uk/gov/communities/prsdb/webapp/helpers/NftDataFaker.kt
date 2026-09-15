@@ -170,7 +170,15 @@ object NftDataFaker {
 
     // Assumption: roughly 5% of seeded landlords are organisations. This is a rough estimate not backed by real-world
     // data, documented here as agreed, and can be adjusted if a more accurate ratio becomes available.
-    fun generateLandlordType(): LandlordType = if (generateBoolean(probabilityTrue = 0.05)) LandlordType.ORGANISATION else LandlordType.INDIVIDUAL
+    fun generateLandlordType(): LandlordType =
+        if (generateBoolean(
+                probabilityTrue = 0.05,
+            )
+        ) {
+            LandlordType.ORGANISATION
+        } else {
+            LandlordType.INDIVIDUAL
+        }
 
     // A simplified, mutually-exclusive split of organisation shapes, chosen to give realistic variety without
     // modelling every combination the real registration journey allows (e.g. a charity that is also a company).
@@ -206,7 +214,10 @@ object NftDataFaker {
         val charityRegisteredWith =
             when {
                 !isCharity -> null
-                hasCharityRegistration -> pickOne(listOf(CharityRegulator.ENGLAND_AND_WALES, CharityRegulator.NORTHERN_IRELAND, CharityRegulator.SCOTLAND))
+                hasCharityRegistration ->
+                    pickOne(
+                        listOf(CharityRegulator.ENGLAND_AND_WALES, CharityRegulator.NORTHERN_IRELAND, CharityRegulator.SCOTLAND),
+                    )
                 else -> CharityRegulator.NONE
             }
         val charityNumber = if (hasCharityRegistration) faker.regexify("[0-9]{6,8}") else null
