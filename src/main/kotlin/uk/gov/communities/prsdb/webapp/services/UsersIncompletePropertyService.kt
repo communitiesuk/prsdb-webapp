@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.IncompletePropertiesDat
 @PrsdbWebService
 class UsersIncompletePropertyService(
     private val repository: SavedJourneyStateRepository,
-    private val incompletePropertiesRepository: IncompletePropertiesRepository,
+    private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) {
     fun getCurrentUsersIncompleteProperties(requestedPageIndex: Int): Page<IncompletePropertiesDataModel> {
         val principalName = SecurityContextHolder.getContext().authentication.name
@@ -27,7 +27,7 @@ class UsersIncompletePropertyService(
                 MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE,
                 Sort.by("savedJourneyState.createdDate"),
             )
-        return incompletePropertiesRepository
+        return landlordIncompletePropertiesRepository
             .findByUser_Id(principalName, pageRequest)
             .map { property ->
                 IncompletePropertiesDataModel(
@@ -40,7 +40,7 @@ class UsersIncompletePropertyService(
     }
 
     fun getCurrentUsersIncompletePropertiesCount(): Int =
-        incompletePropertiesRepository.countByUser_Id(SecurityContextHolder.getContext().authentication.name).toInt()
+        landlordIncompletePropertiesRepository.countByUser_Id(SecurityContextHolder.getContext().authentication.name).toInt()
 
     fun deleteIncompleteProperty(
         journeyId: String,
@@ -69,6 +69,6 @@ class UsersIncompletePropertyService(
                 user = state.user,
                 savedJourneyState = state,
             )
-        incompletePropertiesRepository.save(newEntry)
+        landlordIncompletePropertiesRepository.save(newEntry)
     }
 }

@@ -36,8 +36,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -157,7 +157,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @MockitoSpyBean
-    private lateinit var incompletePropertiesRepository: IncompletePropertiesRepository
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
@@ -225,7 +225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -2085,7 +2085,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `manual address selection is cached when an address search returns no results`(page: Page) {
-            val existingIncompletePropertyIds = incompletePropertiesRepository.findAll().map { it.id }.toSet()
+            val existingIncompletePropertyIds = landlordIncompletePropertiesRepository.findAll().map { it.id }.toSet()
 
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
@@ -2113,7 +2113,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             val savedState =
-                incompletePropertiesRepository
+                landlordIncompletePropertiesRepository
                     .findAll()
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
@@ -2438,7 +2438,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
             // Verify incomplete property is created at this point
-            verify(incompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
+            verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
             // Property type selection - render page
             assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
