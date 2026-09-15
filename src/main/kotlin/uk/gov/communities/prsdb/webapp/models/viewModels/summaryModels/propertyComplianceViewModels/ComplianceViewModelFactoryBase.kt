@@ -1,9 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.springframework.context.MessageSource
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -13,7 +10,6 @@ import java.util.Locale
 
 abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
     protected abstract val provideLaterNoDeadlineKey: String
@@ -57,18 +53,8 @@ abstract class ComplianceViewModelFactoryBase(
         }
 
     private fun getProvideLaterValue(propertyCompliance: PropertyCompliance): Any {
-        val propertyOwnership = propertyCompliance.propertyOwnership
-        // TODO PDJB-939: when the flag is permanently on, delete the flag-off branch (and the injected
-        //  featureFlagManager); the deadline is always propertyOwnership.provideLaterDeadline.
-        return if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            val deadline = propertyOwnership.provideLaterDeadline
-            if (deadline != null) getProvideLaterWithDeadlineText(deadline) else provideLaterNoDeadlineKey
-        } else {
-            val deadline =
-                propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                    ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
-            getProvideLaterWithDeadlineText(deadline)
-        }
+        val deadline = propertyCompliance.propertyOwnership.provideLaterDeadline
+        return if (deadline != null) getProvideLaterWithDeadlineText(deadline) else provideLaterNoDeadlineKey
     }
 
     private fun getProvideLaterWithDeadlineText(deadline: LocalDate): String {

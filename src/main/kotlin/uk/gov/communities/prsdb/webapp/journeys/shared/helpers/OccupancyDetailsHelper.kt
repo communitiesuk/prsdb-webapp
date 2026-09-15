@@ -87,7 +87,7 @@ class OccupancyDetailsHelper {
                 if (householdsStep.outcome == HouseholdMode.PROVIDE_THIS_LATER) {
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
+                            "forms.checkPropertyAnswers.tenancyDetails.tenancyDetailsRow",
                             "forms.checkPropertyAnswers.tenancyDetails.provideLater",
                             provideLaterDestination
                                 ?: Destination.VisitableStep(

@@ -8,9 +8,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -41,7 +39,6 @@ class PropertyComplianceService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val userToLandlordService: UserToLandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
@@ -214,14 +211,7 @@ class PropertyComplianceService(
             }.filter { it.shouldShowOnComplianceActionsPage }
     }
 
-    // TODO PDJB-939: when the flag is permanently on, always use propertyOwnership.provideLaterDeadline and delete
-    //  the flag-off branch (and the featureFlagManager check).
-    private fun getProvideLaterDeadline(propertyOwnership: PropertyOwnership): LocalDate? =
-        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
-            propertyOwnership.provideLaterDeadline
-        } else {
-            propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-        }
+    private fun getProvideLaterDeadline(propertyOwnership: PropertyOwnership): LocalDate? = propertyOwnership.provideLaterDeadline
 
     @Transactional
     fun updateGasSafety(

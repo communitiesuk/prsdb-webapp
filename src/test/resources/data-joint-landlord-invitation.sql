@@ -29,9 +29,8 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status,
                                 rent_frequency, custom_rent_frequency, rent_amount, is_occupied, last_occupied_date)
 
--- Both properties are occupied with no licence, so under the new registration layout
--- (PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) they render the licensing "provide later"
--- deadline, which requires last_occupied_date to be set.
+-- Both properties are occupied with no licence, so under the registration layout they render the
+-- licensing "provide later" deadline, which requires last_occupied_date to be set.
 -- property the default user is not yet invited to
 VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12, true, current_date - INTERVAL '7 days'),

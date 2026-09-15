@@ -24,15 +24,6 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
-    // TODO PDJB-1340: Delete these before-restructure heading locators when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-    val beforePropertyRegistrationRestructuredHeading = Heading(page.locator("h1.govuk-heading-l"))
-
-    val beforePropertyRegistrationRestructuredPropertyDetailsHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Property details")))
-
-    val beforePropertyRegistrationRestructuredGasSafetyHeading =
-        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
-
     val restructuredHeading = Heading(page.locator("h1.govuk-heading-xl"))
 
     val aboutYourPropertyHeading =
@@ -62,9 +53,6 @@ class CheckAnswersPagePropertyRegistration(
         )
 
     val complianceSummaryList = ComplianceSummaryList(page)
-
-    val tenancyHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
 
     val restructuredTenancyHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
@@ -100,8 +88,6 @@ class CheckAnswersPagePropertyRegistration(
     ) : SummaryList(page) {
         val ownershipRow = getRow("How do you own this property?")
 
-        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredOwnershipRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-        val beforePropertyRegistrationRestructuredOwnershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
         val occupancyQuestionRow = getRow("Is this property occupied by tenants?")
@@ -117,8 +103,6 @@ class CheckAnswersPagePropertyRegistration(
 
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
-        // TODO PDJB-1340: Delete beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
-        val beforePropertyRegistrationRestructuredJointLandlordsInvitationsRow = getRow("Invitations")
         val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 
