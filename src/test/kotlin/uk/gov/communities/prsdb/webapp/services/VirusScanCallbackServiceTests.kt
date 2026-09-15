@@ -11,6 +11,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -23,6 +25,7 @@ class VirusScanCallbackServiceTests {
     private lateinit var virusScanCallbackService: VirusScanCallbackService
     private lateinit var virusScanCallbackRepository: VirusScanCallbackRepository
     private lateinit var fileUploadRepository: FileUploadRepository
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     private val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
 
@@ -30,7 +33,9 @@ class VirusScanCallbackServiceTests {
     fun setup() {
         virusScanCallbackRepository = mock()
         fileUploadRepository = mock()
-        virusScanCallbackService = VirusScanCallbackService(virusScanCallbackRepository, fileUploadRepository)
+        featureFlagManager = mock()
+        virusScanCallbackService =
+            VirusScanCallbackService(virusScanCallbackRepository, fileUploadRepository, featureFlagManager)
     }
 
     private fun callbackFor(data: EmailNotificationData) = VirusScanCallback(fileUpload, Json.encodeToString<EmailNotificationData>(data))
@@ -116,6 +121,7 @@ class VirusScanCallbackServiceTests {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
         // Act
         virusScanCallbackService.saveVirusScanFailureEmail(
@@ -137,6 +143,38 @@ class VirusScanCallbackServiceTests {
         assertEquals(
             EmailNotificationData.VirusMonitoringEmailNotification(
                 EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
+            ),
+            savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
+        )
+    }
+
+    @Test
+    fun `saveVirusScanFailureEmail saves journey-targeted callbacks for an update when letting agent delegation is disabled`() {
+        // Arrange
+        whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
+        whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+
+        // Act
+        virusScanCallbackService.saveVirusScanFailureEmail(
+            journeyId = "journey-1",
+            fileUploadId = 42L,
+            certificateType = CertificateType.Eicr,
+            propertyOwnershipId = 99L,
+            landlordId = 7L,
+        )
+
+        // Assert
+        val captor = argumentCaptor<VirusScanCallback>()
+        verify(virusScanCallbackRepository, times(2)).save(captor.capture())
+        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
+        assertEquals(
+            EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
+            savedData.single { it is EmailNotificationData.IncompletePropertyEmailNotification },
+        )
+        assertEquals(
+            EmailNotificationData.VirusMonitoringEmailNotification(
+                EmailNotificationData.IncompletePropertyEmailNotification("journey-1", CertificateType.Eicr, 7L),
             ),
             savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
         )

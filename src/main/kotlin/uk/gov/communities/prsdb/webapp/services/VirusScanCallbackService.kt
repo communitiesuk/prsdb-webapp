@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -13,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepo
 class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun saveEmailForJourney(
         journeyId: String,
@@ -104,8 +107,10 @@ class VirusScanCallbackService(
     // Single entry point shared by every certificate-upload step (gas safety, electrical safety, etc.) so the
     // "which notification shape do we need?" decision is made in one place rather than duplicated per step config.
     //
-    // - Update journeys (propertyOwnershipId non-null): the property is already registered, so we know every
-    //   landlord and the letting agent regardless of who uploaded - save an ownership-targeted notification.
+    // - Update journeys (propertyOwnershipId non-null) when letting-agent delegation is enabled: the property is
+    //   already registered, so we know every landlord and the letting agent regardless of who uploaded - save an
+    //   ownership-targeted notification.
+    // - Update journeys when letting-agent delegation is disabled: retain the existing uploader-landlord callback.
     // - Registration journeys (propertyOwnershipId null): no property ownership exists yet, so the notification
     //   is tied to the uploading landlord's in-progress journey until the property is registered. If there is no
     //   acting landlord (registration is always landlord-led), nothing is saved.
@@ -116,7 +121,8 @@ class VirusScanCallbackService(
         propertyOwnershipId: Long?,
         landlordId: Long?,
     ) {
-        if (propertyOwnershipId != null) {
+        // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
+        if (propertyOwnershipId != null && featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             saveEmailForOwnership(propertyOwnershipId, fileUploadId, certificateType)
             saveEmailToMonitoringTeamForOwnership(propertyOwnershipId, fileUploadId, certificateType)
         } else if (landlordId != null) {

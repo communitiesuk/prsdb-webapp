@@ -47,7 +47,7 @@ class UploadGasCertStepConfig(
                 fileUploadId = fileUploadId,
                 certificateType = CertificateType.GasSafetyCert,
                 propertyOwnershipId = propertyOwnershipIdIfExists,
-                landlordId = actingLandlordIdForRegistrationJourney(propertyOwnershipIdIfExists),
+                landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id,
             )
 
             val formModel = getFormModelFromState(state)
@@ -65,12 +65,6 @@ class UploadGasCertStepConfig(
         }
     }
 
-    // Update journeys (propertyOwnershipId non-null) already resolve every landlord and the letting agent from the
-    // property ownership, so there's no need to look up the current user's landlord record in that case.
-    private fun actingLandlordIdForRegistrationJourney(propertyOwnershipId: Long?): Long? {
-        if (propertyOwnershipId != null) return null
-        return userToLandlordService.getCurrentLandlordForUserOrNull()?.id
-    }
 }
 
 @JourneyFrameworkComponent
