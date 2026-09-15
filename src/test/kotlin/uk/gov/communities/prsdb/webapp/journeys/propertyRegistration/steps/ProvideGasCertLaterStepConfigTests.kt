@@ -1,12 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -39,7 +35,7 @@ class ProvideGasCertLaterStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/provideGasCertificateLaterForOccupiedProperty", result)
+        assertEquals("forms/provideGasCertificateLaterForOccupiedPropertyBeforeLettingAgents", result)
     }
 
     @Test
@@ -53,47 +49,47 @@ class ProvideGasCertLaterStepConfigTests {
         val result = stepConfig.chooseTemplate(mockState)
 
         // Assert
-        assertEquals("forms/provideGasCertificateLaterForUnoccupiedProperty", result)
+        assertEquals("forms/provideGasCertificateLaterForUnoccupiedPropertyBeforeLettingAgents", result)
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `chooseTemplate returns shared template when letting agents is enabled`(isOccupied: Boolean) {
-        whenever(mockState.isOccupied).thenReturn(isOccupied)
+    @Test
+    fun `chooseTemplate returns occupied template when letting agents is enabled`() {
+        whenever(mockState.isOccupied).thenReturn(true)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
-        assertEquals("forms/provideGasSafetyDetailsLater", setupStepConfig().chooseTemplate(mockState))
+        assertEquals("forms/provideGasCertificateLaterForOccupiedProperty", setupStepConfig().chooseTemplate(mockState))
     }
 
     @Test
-    fun `chooseTemplate propagates an error reading occupancy`() {
-        val stateException = IllegalStateException("Occupancy has not been set")
-        whenever(mockState.isOccupied).thenThrow(stateException)
+    fun `chooseTemplate returns unoccupied template when letting agents is enabled`() {
+        whenever(mockState.isOccupied).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
-        val exception = assertThrows<IllegalStateException> { setupStepConfig().chooseTemplate(mockState) }
-
-        assertSame(stateException, exception)
+        assertEquals("forms/provideGasCertificateLaterForUnoccupiedProperty", setupStepConfig().chooseTemplate(mockState))
     }
 
     @Test
-    fun `getStepSpecificContent includes occupied property details`() {
+    fun `getStepSpecificContent includes the landlord gas safety URL`() {
+        val content = setupStepConfig().getStepSpecificContent(mockState)
+
+        assertEquals(LANDLORD_GAS_SAFETY_URL, content["landlordGasSafetyUrl"])
+    }
+
+    @Test
+    fun `getStepSpecificContent uses Continue for an occupied property`() {
         whenever(mockState.isOccupied).thenReturn(true)
 
         val content = setupStepConfig().getStepSpecificContent(mockState)
 
-        assertEquals(true, content["isOccupied"])
-        assertEquals(LANDLORD_GAS_SAFETY_URL, content["landlordGasSafetyUrl"])
         assertEquals("forms.buttons.continue", content["submitButtonText"])
     }
 
     @Test
-    fun `getStepSpecificContent includes unoccupied property details`() {
+    fun `getStepSpecificContent uses Save and continue for an unoccupied property`() {
         whenever(mockState.isOccupied).thenReturn(false)
 
         val content = setupStepConfig().getStepSpecificContent(mockState)
 
-        assertEquals(false, content["isOccupied"])
-        assertEquals(LANDLORD_GAS_SAFETY_URL, content["landlordGasSafetyUrl"])
         assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
     }
 

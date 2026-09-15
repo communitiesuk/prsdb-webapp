@@ -86,6 +86,7 @@ gasSafetyTask:
   gasSafetyCertIssueDate:
     fieldSetHeading: What’s the issue date on the gas safety certificate?
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
+  # TODO PDJB-1617: Remove these legacy messages when the letting-agent feature flag is removed.
   provideGasCertificateLater:
     title: Provide your gas safety certificate later
     heading: Provide your gas safety certificate later
@@ -124,6 +125,10 @@ gasSafetyTask:
     unoccupied:
       paragraph:
         one: If your property has a gas supply or any gas appliances, you must get a gas safety certificate before a tenant moves in.
+      learnHow:
+        beforeLink: Learn how by reading
+        link: gas safety for landlords (opens in new tab)
+        afterLink: .
       whenToProvide:
         paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and complete this section within 28 days of a tenant moving in.
 electricalSafetyTask:

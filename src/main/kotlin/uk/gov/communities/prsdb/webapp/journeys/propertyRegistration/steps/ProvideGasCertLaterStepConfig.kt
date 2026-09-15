@@ -18,7 +18,6 @@ class ProvideGasCertLaterStepConfig(
 
     override fun getStepSpecificContent(state: GasSafetyDetailState) =
         mapOf(
-            "isOccupied" to state.isOccupied,
             "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
             "submitButtonText" to
                 if (state.isOccupied == true) "forms.buttons.continue" else "forms.buttons.saveAndContinue",
@@ -26,12 +25,18 @@ class ProvideGasCertLaterStepConfig(
 
     override fun chooseTemplate(state: GasSafetyDetailState) =
         state.isOccupied?.let { isOccupied ->
+            val template =
+                if (isOccupied) {
+                    "forms/provideGasCertificateLaterForOccupiedProperty"
+                } else {
+                    "forms/provideGasCertificateLaterForUnoccupiedProperty"
+                }
+
+            // TODO PDJB-1617: Remove this flag check and the BeforeLettingAgents templates when the flag is removed.
             if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                "forms/provideGasSafetyDetailsLater"
-            } else if (isOccupied) {
-                "forms/provideGasCertificateLaterForOccupiedProperty"
+                template
             } else {
-                "forms/provideGasCertificateLaterForUnoccupiedProperty"
+                "${template}BeforeLettingAgents"
             }
         } ?: throw IllegalStateException("ProvideGasCertLaterStep should not be reachable before isOccupied is set")
 
