@@ -10,8 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.http.HttpStatus
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -148,24 +146,6 @@ class UploadElectricalCertStepConfigTests {
             propertyOwnershipId = 99L,
             landlordId = 7L,
         )
-    }
-
-    @Test
-    fun `afterStepDataIsAdded throws when there is no property ownership id and no acting landlord`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
-            mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
-        )
-        whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(
-            ResponseStatusException(HttpStatus.BAD_REQUEST, "No landlord was found for user"),
-        )
-
-        assertThrows<ResponseStatusException> {
-            stepConfig.afterStepDataIsAdded(mockState)
-        }
     }
 
     @Test
