@@ -72,10 +72,7 @@ class UpdateTenancyDetailsCyaConfig(
             listOf(
                 "The number of households living in this property",
                 "The number of people living in this property",
-                "Whether the rent includes bills",
-                "Whether the property is furnished",
-                "How often the rent is charged",
-                "The amount of rent charged",
+                "rent details (amount, how often it’s paid, bills and furnishing)",
             ),
         )
     }
