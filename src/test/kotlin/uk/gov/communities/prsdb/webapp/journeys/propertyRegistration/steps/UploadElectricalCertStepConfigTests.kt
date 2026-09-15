@@ -6,11 +6,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
@@ -135,6 +136,8 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(landlord.id).thenReturn(7L)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -143,37 +146,26 @@ class UploadElectricalCertStepConfigTests {
             fileUploadId = 42L,
             certificateType = CertificateType.Eicr,
             propertyOwnershipId = 99L,
-            landlordId = null,
+            landlordId = 7L,
         )
-        verifyNoInteractions(userToLandlordService)
     }
 
     @Test
-    fun `afterStepDataIsAdded saves nothing extra when there is no property ownership id and no acting landlord`() {
+    fun `afterStepDataIsAdded throws when there is no property ownership id and no acting landlord`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
-        whenever(memberIdService.getParameterOrNull()).thenReturn(null)
         whenever(mockState.getElectricalCertificateTypeAsCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(virusScanCallbackService).saveVirusScanFailureEmail(
-            journeyId = "test-journey-id",
-            fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
-            propertyOwnershipId = null,
-            landlordId = null,
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "No landlord was found for user"),
         )
-        verify(mockState).highestAssignedElectricalMemberId = 1
-        verify(uploadElectricalCertStep).clearFormData()
+
+        assertThrows<ResponseStatusException> {
+            stepConfig.afterStepDataIsAdded(mockState)
+        }
     }
 
     @Test
@@ -199,7 +191,7 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(landlord.id).thenReturn(7L)
     }
 

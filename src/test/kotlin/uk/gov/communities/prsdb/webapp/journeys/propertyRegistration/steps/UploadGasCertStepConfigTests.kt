@@ -3,13 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -110,6 +112,8 @@ class UploadGasCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(landlord.id).thenReturn(7L)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -118,36 +122,25 @@ class UploadGasCertStepConfigTests {
             fileUploadId = 42L,
             certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = 99L,
-            landlordId = null,
+            landlordId = 7L,
         )
-        verifyNoInteractions(userToLandlordService)
     }
 
     @Test
-    fun `afterStepDataIsAdded saves nothing extra when there is no property ownership id and no acting landlord`() {
+    fun `afterStepDataIsAdded throws when there is no property ownership id and no acting landlord`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(UploadGasCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
-        whenever(mockState.gasUploadMap).thenReturn(mapOf())
-        whenever(mockState.getNextGasUploadMemberId()).thenReturn(1)
-        whenever(memberIdService.getParameterOrNull()).thenReturn(null)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(virusScanCallbackService).saveVirusScanFailureEmail(
-            journeyId = "test-journey-id",
-            fileUploadId = 42L,
-            certificateType = CertificateType.GasSafetyCert,
-            propertyOwnershipId = null,
-            landlordId = null,
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenThrow(
+            ResponseStatusException(HttpStatus.BAD_REQUEST, "No landlord was found for user"),
         )
-        verify(mockState).highestAssignedGasMemberId = 1
-        verify(uploadGasCertStep).clearFormData()
+
+        assertThrows<ResponseStatusException> {
+            stepConfig.afterStepDataIsAdded(mockState)
+        }
     }
 
     @Test
@@ -172,7 +165,7 @@ class UploadGasCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(landlord)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
         whenever(landlord.id).thenReturn(7L)
     }
 

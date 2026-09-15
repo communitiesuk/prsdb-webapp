@@ -47,7 +47,7 @@ class UploadGasCertStepConfig(
                 fileUploadId = fileUploadId,
                 certificateType = CertificateType.GasSafetyCert,
                 propertyOwnershipId = propertyOwnershipIdIfExists,
-                landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id,
+                landlordId = userToLandlordService.getCurrentLandlordForUser().id,
             )
 
             val formModel = getFormModelFromState(state)

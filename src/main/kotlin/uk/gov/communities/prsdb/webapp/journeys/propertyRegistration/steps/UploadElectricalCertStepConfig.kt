@@ -63,7 +63,7 @@ class UploadElectricalCertStepConfig(
                 fileUploadId = fileUploadId,
                 certificateType = certificateType,
                 propertyOwnershipId = propertyOwnershipIdIfExists,
-                landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id,
+                landlordId = userToLandlordService.getCurrentLandlordForUser().id,
             )
 
             val formModel = getFormModelFromState(state)
