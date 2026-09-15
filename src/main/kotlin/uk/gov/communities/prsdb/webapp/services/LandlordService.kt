@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.IndividualL
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.OrganisationalLandlordUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.LandlordSearchResultViewModel
 import java.time.LocalDate
+import java.time.MonthDay
 import kotlin.String
 
 /**
@@ -47,7 +48,12 @@ class LandlordService(
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
-    fun getRenewalDate(landlordId: Long): LocalDate? = retrieveLandlordById(landlordId)?.renewalDate
+    fun getAnniversary(landlordId: Long): MonthDay? {
+        val landlord = retrieveLandlordById(landlordId) ?: return null
+        val day = landlord.anniversaryDay ?: return null
+        val month = landlord.anniversaryMonth ?: return null
+        return MonthDay.of(month, day)
+    }
 
     @Transactional
     fun createIndividualLandlord(

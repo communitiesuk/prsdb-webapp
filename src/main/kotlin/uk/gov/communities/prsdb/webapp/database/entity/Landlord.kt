@@ -14,7 +14,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
-import java.time.LocalDate
+import java.time.MonthDay
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -45,13 +45,18 @@ abstract class Landlord : ModifiableAuditableEntity() {
 
     val landlordships: Set<PropertyOwnership> get() = ownershipLinks.map { it.propertyOwnership }.toSet()
 
-    @Column(name = "renewal_date")
-    open var renewalDate: LocalDate? = null
+    @Column(name = "anniversary_day")
+    open var anniversaryDay: Int? = null
         protected set
 
-    fun setRenewalDateIfAbsent(date: LocalDate) {
-        if (renewalDate == null) {
-            renewalDate = date
+    @Column(name = "anniversary_month")
+    open var anniversaryMonth: Int? = null
+        protected set
+
+    fun setAnniversaryIfAbsent(monthDay: MonthDay) {
+        if (anniversaryDay == null && anniversaryMonth == null) {
+            anniversaryDay = monthDay.dayOfMonth
+            anniversaryMonth = monthDay.monthValue
         }
     }
 }

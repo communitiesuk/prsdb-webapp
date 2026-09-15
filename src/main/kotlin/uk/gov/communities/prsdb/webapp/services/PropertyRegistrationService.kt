@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.MonthDay
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -104,7 +105,7 @@ class PropertyRegistrationService(
                 licenseProvideLater = licenseProvideLater,
             )
 
-        landlord.setRenewalDateIfAbsent(propertyOwnership.registrationDate)
+        landlord.setAnniversaryIfAbsent(MonthDay.from(propertyOwnership.registrationDate))
 
         if (lettingAgentEmail != null) {
             val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)

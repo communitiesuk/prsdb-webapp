@@ -114,7 +114,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sets the registering landlord's renewal date when it is null`() {
+    fun `registerProperty sets the registering landlord's anniversary when it is null`() {
         val landlord = MockLandlordData.createIndividualLandlord()
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
@@ -170,68 +170,8 @@ class PropertyRegistrationServiceTests {
             customPropertyType = null,
         )
 
-        assertEquals(expectedPropertyOwnership.registrationDate, landlord.renewalDate)
-    }
-
-    @Test
-    fun `registerProperty does not overwrite an existing renewal date`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
-        val existingRenewalDate = LocalDate.of(2020, 1, 1)
-        landlord.setRenewalDateIfAbsent(existingRenewalDate)
-        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
-        val address = Address(addressDataModel)
-        val expectedPropertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord),
-                address = address,
-            )
-
-        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
-        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(
-            mockPropertyOwnershipService.createPropertyOwnership(
-                ownershipType = OwnershipType.FREEHOLD,
-                isOccupied = true,
-                numberOfHouseholds = 1,
-                numberOfPeople = 1,
-                landlords = mutableSetOf(landlord),
-                propertyBuildType = PropertyType.DETACHED_HOUSE,
-                customPropertyType = null,
-                address = address,
-                license = null,
-                numBedrooms = null,
-                billsIncludedList = null,
-                customBillsIncluded = null,
-                furnishedStatus = null,
-                rentFrequency = RentFrequency.MONTHLY,
-                customRentFrequency = null,
-                rentAmount = 123.toBigDecimal(),
-                licenseProvideLater = false,
-                tenancyProvideLater = null,
-            ),
-        ).thenReturn(expectedPropertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
-
-        propertyRegistrationService.registerProperty(
-            addressModel = addressDataModel,
-            propertyType = PropertyType.DETACHED_HOUSE,
-            licenseType = LicensingType.NO_LICENSING,
-            licenceNumber = "",
-            ownershipType = OwnershipType.FREEHOLD,
-            isOccupied = true,
-            numberOfHouseholds = 1,
-            numberOfPeople = 1,
-            numBedrooms = null,
-            billsIncludedList = null,
-            customBillsIncluded = null,
-            furnishedStatus = null,
-            rentFrequency = RentFrequency.MONTHLY,
-            customRentFrequency = null,
-            rentAmount = 123.toBigDecimal(),
-            customPropertyType = null,
-        )
-
-        assertEquals(existingRenewalDate, landlord.renewalDate)
+        assertEquals(10, landlord.anniversaryDay)
+        assertEquals(5, landlord.anniversaryMonth)
     }
 
     @Test

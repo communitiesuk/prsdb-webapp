@@ -55,6 +55,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOrgLandlord
 import java.net.URI
 import java.time.LocalDate
+import java.time.MonthDay
 import java.util.Optional
 import kotlin.reflect.full.hasAnnotation
 import kotlin.test.assertNull
@@ -115,22 +116,31 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `getRenewalDate returns the landlord's renewal date`() {
+    fun `getAnniversary returns the landlord's anniversary as a MonthDay`() {
         val landlord = createIndividualLandlord()
-        val renewalDate = LocalDate.of(2024, 3, 1)
-        landlord.setRenewalDateIfAbsent(renewalDate)
+        landlord.setAnniversaryIfAbsent(MonthDay.of(3, 15))
         whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
 
-        val result = landlordService.getRenewalDate(landlord.id)
+        val result = landlordService.getAnniversary(landlord.id)
 
-        assertEquals(renewalDate, result)
+        assertEquals(MonthDay.of(3, 15), result)
     }
 
     @Test
-    fun `getRenewalDate returns null when the landlord does not exist`() {
+    fun `getAnniversary returns null when the landlord has no anniversary set`() {
+        val landlord = createIndividualLandlord()
+        whenever(mockLandlordRepository.findById(landlord.id)).thenReturn(Optional.of(landlord))
+
+        val result = landlordService.getAnniversary(landlord.id)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getAnniversary returns null when the landlord does not exist`() {
         whenever(mockLandlordRepository.findById(999L)).thenReturn(Optional.empty())
 
-        val result = landlordService.getRenewalDate(999L)
+        val result = landlordService.getAnniversary(999L)
 
         assertNull(result)
     }

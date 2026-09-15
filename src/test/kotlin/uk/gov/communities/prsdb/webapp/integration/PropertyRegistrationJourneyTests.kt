@@ -2244,6 +2244,24 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
         }
 
+        @Test
+        fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+            checkAnswersPage.confirm()
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            val savedPropertyOwnership =
+                propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
+                    ?: error("Property ownership was not saved")
+
+            val registeringLandlord = savedPropertyOwnership.landlords.single()
+            val registrationDate = DateTimeHelper().getCurrentDateInUK()
+            assertEquals(registrationDate.dayOfMonth, registeringLandlord.anniversaryDay)
+            assertEquals(registrationDate.monthNumber, registeringLandlord.anniversaryMonth)
+        }
+
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
         @Nested
         inner class DelegateToLettingAgentDisabled {

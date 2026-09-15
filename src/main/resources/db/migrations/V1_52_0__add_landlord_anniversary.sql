@@ -1,7 +1,9 @@
-ALTER TABLE landlord ADD COLUMN renewal_date DATE;
+ALTER TABLE landlord ADD COLUMN anniversary_day INTEGER;
+ALTER TABLE landlord ADD COLUMN anniversary_month INTEGER;
 
 UPDATE landlord l
-SET renewal_date = sub.first_registration_date
+SET anniversary_day = EXTRACT(DAY FROM sub.first_registration_date)::int,
+    anniversary_month = EXTRACT(MONTH FROM sub.first_registration_date)::int
 FROM (
     SELECT ol.landlord_id,
            MIN((po.created_date AT TIME ZONE 'Europe/London')::date) AS first_registration_date

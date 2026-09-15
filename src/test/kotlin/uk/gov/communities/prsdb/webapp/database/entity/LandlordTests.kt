@@ -3,27 +3,27 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createIndividualLandlord
-import java.time.LocalDate
+import java.time.MonthDay
 
 class LandlordTests {
     @Test
-    fun `setRenewalDateIfAbsent sets the renewal date when it is null`() {
+    fun `setAnniversaryIfAbsent sets day and month when both are null`() {
         val landlord = createIndividualLandlord()
-        val date = LocalDate.of(2024, 1, 15)
 
-        landlord.setRenewalDateIfAbsent(date)
+        landlord.setAnniversaryIfAbsent(MonthDay.of(3, 15))
 
-        assertEquals(date, landlord.renewalDate)
+        assertEquals(15, landlord.anniversaryDay)
+        assertEquals(3, landlord.anniversaryMonth)
     }
 
     @Test
-    fun `setRenewalDateIfAbsent does not overwrite an existing renewal date`() {
+    fun `setAnniversaryIfAbsent does not overwrite an existing anniversary`() {
         val landlord = createIndividualLandlord()
-        val originalDate = LocalDate.of(2024, 1, 15)
-        landlord.setRenewalDateIfAbsent(originalDate)
+        landlord.setAnniversaryIfAbsent(MonthDay.of(3, 15))
 
-        landlord.setRenewalDateIfAbsent(LocalDate.of(2025, 6, 30))
+        landlord.setAnniversaryIfAbsent(MonthDay.of(6, 30))
 
-        assertEquals(originalDate, landlord.renewalDate)
+        assertEquals(15, landlord.anniversaryDay)
+        assertEquals(3, landlord.anniversaryMonth)
     }
 }
