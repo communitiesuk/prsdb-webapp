@@ -19,7 +19,6 @@ class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcDetailState,
     featureFlagManager: FeatureFlagManager? = null,
-    private val isDelegatedToLettingAgent: Boolean = false,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val isSkippingEnabled = featureFlagManager?.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) ?: false
@@ -28,7 +27,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
     private fun determineScenario(state: EpcDetailState): EpcScenario {
         val isOccupied = state.isOccupied == true
         return when {
-            isDelegatedToLettingAgent || state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER -> {
+            state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER -> {
                 if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
             }
 

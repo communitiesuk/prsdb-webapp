@@ -129,13 +129,7 @@ class PropertyRegistrationCyaStepConfig(
             (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
             mapOf(
                 "hideDelegatedSections" to true,
-                "gasSupplyRows" to emptyList<SummaryListRowViewModel>(),
-                "gasCertRows" to emptyList<SummaryListRowViewModel>(),
-                "gasInsetTextKey" to null,
-                "electricalRows" to emptyList<SummaryListRowViewModel>(),
-                "electricalInsetTextKey" to null,
             ) +
-            complianceDetailsHelper.getEpcCyaContent(state, state.epcTask, isDelegatedToLettingAgent = true) +
             getRestructuredContentSections(
                 state,
                 isOccupied,
