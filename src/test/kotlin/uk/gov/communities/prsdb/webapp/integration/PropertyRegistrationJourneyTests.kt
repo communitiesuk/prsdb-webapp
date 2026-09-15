@@ -2063,6 +2063,43 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, ConfirmationPagePropertyRegistration::class)
         }
 
+        @Test
+        fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationCheckAnswersOccupied()
+                        .withBedrooms(),
+                )
+            taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+            val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage.confirm()
+
+            val confirmMissingCompliancePage =
+                assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+            confirmMissingCompliancePage.form.radios.selectValue("true")
+            confirmMissingCompliancePage.form.submit()
+
+            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+            val propertyOwnershipCaptor = captor<PropertyOwnership>()
+            verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+            val savedPropertyOwnership =
+                propertyOwnershipRepository.findByRegistrationNumber_Number(propertyOwnershipCaptor.value.registrationNumber.number)
+                    ?: error("Property ownership was not saved")
+
+            val anniversary =
+                jdbcTemplate.queryForMap(
+                    "SELECT l.anniversary_day, l.anniversary_month FROM landlord l" +
+                        " JOIN ownership_link ol ON ol.landlord_id = l.id" +
+                        " WHERE ol.landlordship_id = ?",
+                    savedPropertyOwnership.id,
+                )
+            val registrationDate = DateTimeHelper().getCurrentDateInUK()
+            assertEquals(registrationDate.dayOfMonth, anniversary["anniversary_day"])
+            assertEquals(registrationDate.monthNumber, anniversary["anniversary_month"])
+        }
+
         // TODO PDJB-1022: Remove this nested class when the DELEGATE_TO_LETTING_AGENT feature flag is removed
         @Nested
         inner class DelegateToLettingAgentDisabled {
