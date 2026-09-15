@@ -25,7 +25,10 @@ class LettingAgentUpdateRentFrequencyAndAmountController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initialiseJourneyState(token)
+    override fun initialiseJourneyState(
+        token: UUID,
+        currentLastModifiedDate: String,
+    ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
 
     companion object {
         const val LETTING_AGENT_UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE =

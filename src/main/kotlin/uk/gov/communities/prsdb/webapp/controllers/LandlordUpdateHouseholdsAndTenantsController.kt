@@ -60,7 +60,12 @@ class LandlordUpdateHouseholdsAndTenantsController(
                     PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = {
+                journeyFactory.initialiseJourneyState(
+                    Pair(propertyOwnershipId, principal),
+                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated().toString(),
+                )
+            },
             dispatch = dispatch,
         )
 

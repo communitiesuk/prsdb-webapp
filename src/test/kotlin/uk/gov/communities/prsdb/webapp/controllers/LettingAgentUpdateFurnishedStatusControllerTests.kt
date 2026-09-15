@@ -84,13 +84,15 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(
+            journeyFactory.initializeJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+        ).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initializeJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -151,7 +153,9 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(eq(token))).thenReturn("journey-id")
+        whenever(
+            journeyFactory.initializeJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+        ).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -162,7 +166,7 @@ class LettingAgentUpdateFurnishedStatusControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initializeJourneyState(eq(token))
+        verify(journeyFactory).initializeJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
