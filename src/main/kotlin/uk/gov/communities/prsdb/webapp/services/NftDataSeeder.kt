@@ -289,25 +289,24 @@ class NftDataSeeder(
 
                             val propertyOwnershipCreatedDate =
                                 addPropertyOwnershipToBatchReturningCreatedDate(
-                                registrationNumberStmt,
-                                propertyOwnershipStmt,
-                                landlordMembershipStmt,
-                                licenceStmt,
-                                scenario.isOccupied,
-                                registrationNumberId = (++registrationNumbersAdded).toLong(),
-                                licenceIdIfHasLicence = if (scenario.hasLicence) (++licencesAdded).toLong() else null,
-                                propertyOwnershipId,
-                                landlord,
-                                licenseProvideLater = scenario.licenseProvideLater,
-                                tenancyProvideLater = scenario.tenancyProvideLater,
-                            )
+                                    registrationNumberStmt,
+                                    propertyOwnershipStmt,
+                                    landlordMembershipStmt,
+                                    licenceStmt,
+                                    scenario.isOccupied,
+                                    registrationNumberId = (++registrationNumbersAdded).toLong(),
+                                    licenceIdIfHasLicence = if (scenario.hasLicence) (++licencesAdded).toLong() else null,
+                                    propertyOwnershipId,
+                                    landlord,
+                                    licenseProvideLater = scenario.licenseProvideLater,
+                                    tenancyProvideLater = scenario.tenancyProvideLater,
+                                )
                             addEmptyPropertyComplianceToBatch(
                                 propertyComplianceStmt,
                                 complianceId = (++complianceRecordsAdded).toLong(),
                                 propertyOwnershipId = propertyOwnershipId,
                                 createdDate = propertyOwnershipCreatedDate,
                             )
-
                         } else {
                             val hasReminderEmailBeenSent = NftDataFaker.generateReminderEmailSent()
                             addIncompletePropertyToBatch(
@@ -814,7 +813,6 @@ class NftDataSeeder(
          */
         const val GENERATED_UPRN_BASE = 900_000_000_000L
     }
-
 
     private inner class AddressGenerator(
         private val restrictToAvailable: Boolean = false,
