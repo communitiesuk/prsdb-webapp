@@ -43,8 +43,11 @@ abstract class AbstractLettingAgentUpdateController(
 
     protected abstract fun initialiseJourneyState(
         token: UUID,
-        propertyOwnership: PropertyOwnership,
+        currentLastModifiedDate: String,
     ): String
+
+    protected open fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String =
+        propertyOwnership.getMostRecentlyUpdated().toString()
 
     protected fun dispatchJourneyStep(
         stepPath: String,
@@ -63,7 +66,7 @@ abstract class AbstractLettingAgentUpdateController(
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { createJourneySteps(propertyOwnershipId, returnUrl) },
-            initialiseJourney = { initialiseJourneyState(token, propertyOwnership) },
+            initialiseJourney = { initialiseJourneyState(token, resolveLastModifiedDate(propertyOwnership)) },
             dispatch = dispatch,
         )
     }

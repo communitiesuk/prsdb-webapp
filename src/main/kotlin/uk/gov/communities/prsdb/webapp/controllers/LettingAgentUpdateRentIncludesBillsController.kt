@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateRentIncludesBillsController.Companion.LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
@@ -28,8 +27,8 @@ class LettingAgentUpdateRentIncludesBillsController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        propertyOwnership: PropertyOwnership,
-    ): String = journeyFactory.initialiseJourneyState(token, propertyOwnership.getMostRecentlyUpdated().toString())
+        currentLastModifiedDate: String,
+    ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
 
     companion object {
         const val LETTING_AGENT_UPDATE_RENT_INCLUDES_BILLS_ROUTE =

@@ -47,12 +47,14 @@ class LettingAgentUpdateGasSafetyController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        propertyOwnership: PropertyOwnership,
-    ): String {
+        currentLastModifiedDate: String,
+    ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
+
+    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String {
         val propertyCompliance =
             propertyOwnership.propertyCompliance
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
-        return journeyFactory.initialiseJourneyState(token, propertyCompliance.getMostRecentlyUpdated().toString())
+        return propertyCompliance.getMostRecentlyUpdated().toString()
     }
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)

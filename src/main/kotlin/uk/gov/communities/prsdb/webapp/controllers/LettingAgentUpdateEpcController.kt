@@ -29,12 +29,14 @@ class LettingAgentUpdateEpcController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        propertyOwnership: PropertyOwnership,
-    ): String {
+        currentLastModifiedDate: String,
+    ): String = journeyFactory.initializeJourneyState(token, currentLastModifiedDate)
+
+    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String {
         val propertyCompliance =
             propertyOwnership.propertyCompliance
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
-        return journeyFactory.initializeJourneyState(token, propertyCompliance.getMostRecentlyUpdated().toString())
+        return propertyCompliance.getMostRecentlyUpdated().toString()
     }
 
     companion object {
