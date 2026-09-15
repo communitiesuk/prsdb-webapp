@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -68,9 +67,7 @@ class LandlordUpdateEpcControllerTests(
         ).thenThrow(NoSuchJourneyException())
         val ownership =
             createOccupiedPropertyOwnership(id = propertyOwnershipId).also {
-                val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = it)
-                ReflectionTestUtils.setField(compliance, "createdDate", it.getMostRecentlyUpdated())
-                ReflectionTestUtils.setField(it, "propertyCompliance", compliance)
+                MockPropertyComplianceData.createPropertyComplianceForOwnership(it)
             }
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(ownership)
         whenever(journeyFactory.initializeJourneyState(any(), any())).thenReturn("journey-id")

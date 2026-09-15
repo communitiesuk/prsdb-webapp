@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
@@ -55,9 +54,7 @@ class LettingAgentUpdateEpcControllerTests(
     private val token = UUID.randomUUID()
     private val propertyOwnership =
         createOccupiedPropertyOwnership().also {
-            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = it)
-            ReflectionTestUtils.setField(compliance, "createdDate", it.getMostRecentlyUpdated())
-            ReflectionTestUtils.setField(it, "propertyCompliance", compliance)
+            MockPropertyComplianceData.createPropertyComplianceForOwnership(it)
         }
     private val expectedComplianceDate get() = propertyOwnership.propertyCompliance!!.getMostRecentlyUpdated().toString()
     private val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
