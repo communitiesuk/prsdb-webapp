@@ -179,7 +179,6 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                     "Tell us if your property’s occupied",
                     "How your property’s rented out",
                     "Who will provide these details",
-                    "Energy performance certificate (EPC)",
                 ),
                 headings,
             )
@@ -204,7 +203,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when delegating to a letting agent, the EPC row shows provide this later and no is-epc-required row`(page: Page) {
+        fun `when delegating to a letting agent, the EPC section is hidden`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
@@ -214,13 +213,13 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
-            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.key).hasCount(0)
             assertThat(checkAnswersPage.complianceSummaryList.isEpcRequiredRow.key).hasCount(0)
         }
 
         @Test
-        fun `when delegating to a letting agent after entering an EPC, the EPC card is not shown and the row shows provide this later`(
+        fun `when delegating to a letting agent after entering an EPC, the EPC section is hidden`(
             page: Page,
         ) {
             val taskListPage =
@@ -233,8 +232,8 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
-            BaseComponent.assertThat(checkAnswersPage.epcHeading).isVisible()
-            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.value).containsText("Provide this later")
+            BaseComponent.assertThat(checkAnswersPage.epcHeading).isHidden()
+            assertThat(checkAnswersPage.complianceSummaryList.hasEpcRow.key).hasCount(0)
             assertThat(page.locator("main").getByText("Your EPC")).hasCount(0)
         }
 
