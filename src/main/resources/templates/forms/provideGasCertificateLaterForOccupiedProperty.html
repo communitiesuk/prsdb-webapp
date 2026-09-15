@@ -2,24 +2,19 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="landlordGasSafetyUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
-            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.heading}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.heading</h1>
         </header>
         <section>
-            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.paragraph.one}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.paragraph.one</p>
-            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.whenToUpload.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.whenToUpload.heading</h2>
-            <div class="govuk-inset-text" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.insetText}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.insetText</div>
-            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.paragraph}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.paragraph</p>
-            <p class="govuk-body">
-                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.beforeLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.beforeLink</span>
-                <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.link</a>
-                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.afterLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.afterLink</span>
-            </p>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.paragraph.one}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.paragraph.one</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.paragraph.two}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.paragraph.two</p>
+            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.whenToProvide.heading}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.whenToProvide.heading</h2>
+            <div class="govuk-inset-text" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.whenToProvide.insetText}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.whenToProvide.insetText</div>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.whenToProvide.paragraph}">propertyCompliance.gasSafetyTask.provideGasSafetyDetailsLater.occupied.whenToProvide.paragraph</p>
         </section>
     </th:block>
     <th:block id="form-content">
