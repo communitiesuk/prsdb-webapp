@@ -21,7 +21,7 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
     }
 
     fun initialiseOrRestoreStateReinitialisingIfOutdated(
-        seed: Any,
+        seed: Any?,
         currentLastModifiedDate: String,
     ): String {
         discardIfLastModifiedDateChanged(seed, currentLastModifiedDate)
@@ -35,7 +35,6 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
             when {
                 ownershipUserPair != null ->
                     generateSeedForPropertyOwnershipAndUser(ownershipUserPair.first, ownershipUserPair.second, updateJourneyName)
-
                 token != null -> generateSeedForToken(token, updateJourneyName)
                 else -> null
             }

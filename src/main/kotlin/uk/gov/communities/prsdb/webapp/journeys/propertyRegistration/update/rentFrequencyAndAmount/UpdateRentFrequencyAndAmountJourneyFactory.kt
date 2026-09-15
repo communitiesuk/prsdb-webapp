@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentF
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateRentFrequencyAndAmountJourneyFactory(
@@ -136,18 +135,9 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         }
 
     fun initialiseJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = initialiseJourneyState(Pair(ownershipId, user), ownershipId)
-
-    fun initialiseJourneyState(
-        seed: Any,
-        propertyId: Long,
-    ): String =
-        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
-            seed,
-            propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
-        )
+        seed: Any?,
+        currentLastModifiedDate: String,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent

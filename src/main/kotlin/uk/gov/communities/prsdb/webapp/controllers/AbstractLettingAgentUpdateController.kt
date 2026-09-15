@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -42,7 +43,7 @@ abstract class AbstractLettingAgentUpdateController(
 
     protected abstract fun initialiseJourneyState(
         token: UUID,
-        propertyOwnershipId: Long,
+        propertyOwnership: PropertyOwnership,
     ): String
 
     protected fun dispatchJourneyStep(
@@ -50,9 +51,10 @@ abstract class AbstractLettingAgentUpdateController(
         token: UUID,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView {
-        val propertyOwnershipId =
-            lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership?.id
+        val propertyOwnership =
+            lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
+        val propertyOwnershipId = propertyOwnership.id
 
         propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
 
@@ -61,7 +63,7 @@ abstract class AbstractLettingAgentUpdateController(
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
             createRoutingMap = { createJourneySteps(propertyOwnershipId, returnUrl) },
-            initialiseJourney = { initialiseJourneyState(token, propertyOwnershipId) },
+            initialiseJourney = { initialiseJourneyState(token, propertyOwnership) },
             dispatch = dispatch,
         )
     }

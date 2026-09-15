@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -18,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.security.Principal
 
 @WebMvcTest(LandlordUpdateEpcController::class)
@@ -63,7 +66,14 @@ class LandlordUpdateEpcControllerTests(
                 PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
             ),
         ).thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(any<Long>(), any<Principal>())).thenReturn("journey-id")
+        val ownership =
+            createOccupiedPropertyOwnership(id = propertyOwnershipId).also {
+                val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = it)
+                ReflectionTestUtils.setField(compliance, "createdDate", it.getMostRecentlyUpdated())
+                ReflectionTestUtils.setField(it, "propertyCompliance", compliance)
+            }
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(ownership)
+        whenever(journeyFactory.initializeJourneyState(any(), any())).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
@@ -71,8 +81,8 @@ class LandlordUpdateEpcControllerTests(
         }
 
         verify(journeyFactory).initializeJourneyState(
-            eq(propertyOwnershipId),
-            argThat<Principal> { name == LANDLORD_USER },
+            argThat { this is Pair<*, *> && first == propertyOwnershipId && (second as Principal).name == LANDLORD_USER },
+            eq(ownership.propertyCompliance!!.getMostRecentlyUpdated().toString()),
         )
     }
 }

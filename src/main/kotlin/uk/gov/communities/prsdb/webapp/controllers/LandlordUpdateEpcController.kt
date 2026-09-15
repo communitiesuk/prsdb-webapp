@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController.Companion.UPDATE_EPC_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -63,7 +64,15 @@ class LandlordUpdateEpcController(
                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            initialiseJourney = {
+                val propertyCompliance =
+                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).propertyCompliance
+                        ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+                journeyFactory.initializeJourneyState(
+                    Pair(propertyOwnershipId, principal),
+                    propertyCompliance.getMostRecentlyUpdated().toString(),
+                )
+            },
             dispatch = dispatch,
         )
 

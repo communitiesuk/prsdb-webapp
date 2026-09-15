@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Furn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateFurnishedStatusJourneyFactory(
@@ -62,18 +61,9 @@ class UpdateFurnishedStatusJourneyFactory(
     }
 
     fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = initializeJourneyState(Pair(ownershipId, user), ownershipId)
-
-    fun initializeJourneyState(
-        seed: Any,
-        propertyId: Long,
-    ): String =
-        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
-            seed,
-            propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
-        )
+        seed: Any?,
+        currentLastModifiedDate: String,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent

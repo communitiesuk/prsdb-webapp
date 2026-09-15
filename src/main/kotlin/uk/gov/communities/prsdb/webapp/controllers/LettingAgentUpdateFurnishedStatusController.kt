@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateFurnishedStatusController.Companion.LETTING_AGENT_UPDATE_FURNISHED_STATUS_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
@@ -27,8 +28,8 @@ class LettingAgentUpdateFurnishedStatusController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        propertyOwnershipId: Long,
-    ): String = journeyFactory.initializeJourneyState(token, propertyOwnershipId)
+        propertyOwnership: PropertyOwnership,
+    ): String = journeyFactory.initializeJourneyState(token, propertyOwnership.getMostRecentlyUpdated().toString())
 
     companion object {
         const val LETTING_AGENT_UPDATE_FURNISHED_STATUS_ROUTE =

@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateOwnershipTypeJourneyFactory(
@@ -60,13 +59,9 @@ class UpdateOwnershipTypeJourneyFactory(
     }
 
     fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String =
-        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
-            Pair(ownershipId, user),
-            propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
-        )
+        seed: Any?,
+        currentLastModifiedDate: String,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent

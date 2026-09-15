@@ -7,6 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController.Companion.LETTING_AGENT_UPDATE_EPC_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
@@ -27,8 +29,13 @@ class LettingAgentUpdateEpcController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        propertyOwnershipId: Long,
-    ): String = journeyFactory.initializeJourneyState(token, propertyOwnershipId)
+        propertyOwnership: PropertyOwnership,
+    ): String {
+        val propertyCompliance =
+            propertyOwnership.propertyCompliance
+                ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
+        return journeyFactory.initializeJourneyState(token, propertyCompliance.getMostRecentlyUpdated().toString())
+    }
 
     companion object {
         const val LETTING_AGENT_UPDATE_EPC_ROUTE =

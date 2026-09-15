@@ -88,13 +88,15 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.id))).thenReturn("journey-id")
+        whenever(
+            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+        ).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.id))
+        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -155,7 +157,9 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
         val expectedReturnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.id))).thenReturn("journey-id")
+        whenever(
+            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+        ).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -166,7 +170,7 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.id))
+        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 

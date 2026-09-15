@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateOccupancyJourneyFactory(
@@ -323,16 +322,10 @@ class UpdateOccupancyJourneyFactory(
     }
 
     fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String =
-        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
-            Pair(ownershipId, user),
-            propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
-        )
+        seed: Any?,
+        currentLastModifiedDate: String,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
-    // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
-    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
         configureStep(journey.occupied) {
             withAdditionalContentProperty {
