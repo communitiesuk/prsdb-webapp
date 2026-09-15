@@ -40,14 +40,14 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val propertyOwnershipId = state.propertyOwnershipId
+            val propertyOwnershipIdIfExists = state.propertyOwnershipId
 
             virusScanCallbackService.saveVirusScanFailureEmail(
                 journeyId = state.journeyId,
                 fileUploadId = fileUploadId,
                 certificateType = CertificateType.GasSafetyCert,
-                propertyOwnershipId = propertyOwnershipId,
-                landlordId = actingLandlordIdForRegistrationJourney(propertyOwnershipId),
+                propertyOwnershipId = propertyOwnershipIdIfExists,
+                landlordId = actingLandlordIdForRegistrationJourney(propertyOwnershipIdIfExists),
             )
 
             val formModel = getFormModelFromState(state)
