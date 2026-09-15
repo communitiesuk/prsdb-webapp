@@ -54,7 +54,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
@@ -108,7 +108,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(false)
 
         mvc
@@ -127,7 +127,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(null)

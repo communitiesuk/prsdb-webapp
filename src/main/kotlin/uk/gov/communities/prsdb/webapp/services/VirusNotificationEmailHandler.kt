@@ -61,9 +61,10 @@ class VirusNotificationEmailHandler(
 
             // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
             if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)?.let { lettingAgentAccess ->
+                val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(ownership.id)
+                if (PropertyOwnershipService.hasLettingAgent(ownership, lettingAgentAccess)) {
                     emailNotificationService.sendEmail(
-                        lettingAgentAccess.invitedEmail,
+                        lettingAgentAccess!!.invitedEmail,
                         buildAlertEmail(
                             notification.certificateType,
                             lettingAgentAccess.invitedEmail,

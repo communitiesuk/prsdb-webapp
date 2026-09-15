@@ -39,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -47,7 +46,6 @@ import java.security.Principal
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
@@ -76,9 +74,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean =
-        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId) != null
+    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean = propertyOwnershipService.hasLettingAgent(propertyId)
 
     private fun journeyMap(
         state: UpdateOccupancyJourney,

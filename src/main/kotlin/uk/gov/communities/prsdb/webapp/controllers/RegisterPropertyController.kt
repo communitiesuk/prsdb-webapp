@@ -47,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -67,7 +66,6 @@ class RegisterPropertyController(
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
@@ -130,7 +128,7 @@ class RegisterPropertyController(
 
         val delegatedToLettingAgent =
             lettingAgentFeatureEnabled &&
-                lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id) != null
+                propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
