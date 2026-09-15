@@ -234,9 +234,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `when delegating to a letting agent after entering an EPC, the EPC section is hidden`(
-            page: Page,
-        ) {
+        fun `when delegating to a letting agent after entering an EPC, the EPC section is hidden`(page: Page) {
             val taskListPage =
                 navigator.goToRestructuredPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
