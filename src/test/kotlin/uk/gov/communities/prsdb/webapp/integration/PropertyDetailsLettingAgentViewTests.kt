@@ -6,9 +6,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import java.util.UUID
 
 class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -52,6 +54,10 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
         assertThat(detailsPage.gasSafetyCard.summaryList.hasCertRow.value).containsText("Provide this later")
         assertThat(detailsPage.electricalSafetyCard).containsText("Provide this later")
         assertThat(detailsPage.epcCard).containsText("Provide this later")
+        assertThat(detailsPage.epcCard.getAction("Change").link).hasAttribute(
+            "href",
+            LettingAgentUpdateEpcController.getUpdateEpcRoute(allDetailsDelegatedToken) + "/${StartEpcStep.ROUTE_SEGMENT}",
+        )
     }
 
     @Test
@@ -78,6 +84,14 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
         assertThat(detailsPage.summaryList.rentAmountRow).isVisible()
 
         assertThat(detailsPage.sectionHeading("Compliance certificates")).isVisible()
+        assertThat(detailsPage.epcCard.getAction("Change").link).hasAttribute(
+            "href",
+            LettingAgentUpdateEpcController.getUpdateEpcRoute(allDetailsProvidedToken) + "/${StartEpcStep.ROUTE_SEGMENT}",
+        )
+        assertThat(detailsPage.epcCard.getAction("View full EPC").link).hasAttribute(
+            "href",
+            "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832",
+        )
     }
 
     @Test

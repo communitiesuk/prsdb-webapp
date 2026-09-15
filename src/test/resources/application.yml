@@ -81,9 +81,6 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-03-30"
-    - name: "pdjb-1097-organisation-landlord-registration"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "pdjb-1053-dashboard-nav-link"
       enabled: false
       expiry-date: "2026-12-31"

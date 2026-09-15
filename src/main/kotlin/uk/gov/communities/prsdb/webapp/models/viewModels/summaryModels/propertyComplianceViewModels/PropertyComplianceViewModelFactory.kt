@@ -2,13 +2,15 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
@@ -33,7 +35,10 @@ class PropertyComplianceViewModelFactory(
         val epcChangeActions =
             changeActionsForViewType(
                 viewType,
-                UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
+                LandlordUpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
+                lettingAgentAccessToken?.let {
+                    LettingAgentUpdateEpcController.getUpdateEpcRoute(it) + "/${StartEpcStep.ROUTE_SEGMENT}"
+                },
             )
 
         val electricalSafetyChangeActions =

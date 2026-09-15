@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -181,6 +182,12 @@ tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
     maxHeapSize = "2g"
+
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        showStackTraces = true
+        events("failed")
+    }
 
     if (shardIndex != null && shardCount != null) {
         // Shards run concurrently when sharding locally, so each needs its own output directories.
