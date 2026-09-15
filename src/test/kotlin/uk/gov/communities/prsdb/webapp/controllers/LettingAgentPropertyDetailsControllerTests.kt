@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.GasSafetyViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -35,10 +34,7 @@ import java.util.UUID
 @Import(MessageSourceConfig::class)
 class LettingAgentPropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
-
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -48,9 +44,9 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
-    // TODO PDJB-1659 - update so getLettingAgentPropertyDetails is NOT be accessible without authentication
+    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Test
-    fun `getLettingAgentPropertyDetails is accessible without authentication and renders the letting agent view`() {
+    fun `getLettingAgentPropertyDetails renders the letting agent view for a valid token`() {
         val token = UUID.randomUUID()
         val propertyOwnership = createOccupiedPropertyOwnership()
 

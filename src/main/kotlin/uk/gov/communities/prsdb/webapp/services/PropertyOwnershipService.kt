@@ -133,8 +133,7 @@ class PropertyOwnershipService(
 
         val lettingAgentToken =
             lettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId) ?: return false
-        // TODO PDJB-1659: Check that lettingAgentToken is in the session
-        return true
+        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentToken.toString())
     }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
