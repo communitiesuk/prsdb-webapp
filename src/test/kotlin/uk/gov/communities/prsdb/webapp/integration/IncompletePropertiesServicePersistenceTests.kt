@@ -7,14 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompletePropertiesId
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.ReminderEmailSentRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 
 class IncompletePropertiesServicePersistenceTests : IntegrationTestWithMutableData("data-old-incomplete-property-with-reminder.sql") {
     @Autowired
-    private lateinit var incompletePropertiesRepository: IncompletePropertiesRepository
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @Autowired
     private lateinit var reminderEmailSentRepository: ReminderEmailSentRepository
@@ -29,7 +29,7 @@ class IncompletePropertiesServicePersistenceTests : IntegrationTestWithMutableDa
     fun `deleting an old incomplete property also deletes its reminder email record`() {
         val service =
             IncompletePropertiesService(
-                incompletePropertiesRepository,
+                landlordIncompletePropertiesRepository,
                 reminderEmailSentRepository,
                 savedJourneyStateRepository,
             )
@@ -41,7 +41,7 @@ class IncompletePropertiesServicePersistenceTests : IntegrationTestWithMutableDa
 
         assertEquals(1L, deletedCount)
         assertFalse(
-            incompletePropertiesRepository.existsById(
+            landlordIncompletePropertiesRepository.existsById(
                 LandlordIncompletePropertiesId(USER_ID, SAVED_JOURNEY_STATE_ID),
             ),
             "Incomplete property was not deleted",
