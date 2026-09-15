@@ -522,7 +522,7 @@ class PropertyRegistrationCyaStepConfigTests {
             assertEquals(false, content["lettingAgentDelegationBodyText"], "Body text should not be shown for landlord path")
             assertEquals(
                 false,
-                content["showLettingAgentDelegationUnoccupiedInset"],
+                content["showLettingAgentDelegationUnoccupiedPanel"],
                 "Unoccupied inset should not show once whoProvides has been answered",
             )
         }
@@ -553,7 +553,7 @@ class PropertyRegistrationCyaStepConfigTests {
             assertEquals(true, content["lettingAgentDelegationBodyText"], "Body text should be shown for letting agent path")
             assertEquals(
                 false,
-                content["showLettingAgentDelegationUnoccupiedInset"],
+                content["showLettingAgentDelegationUnoccupiedPanel"],
                 "Unoccupied inset should not show once whoProvides has been answered",
             )
         }
@@ -574,7 +574,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals(true, content["showLettingAgentDelegationUnoccupiedInset"])
+            assertEquals(true, content["showLettingAgentDelegationUnoccupiedPanel"])
         }
 
         @Test
@@ -584,7 +584,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals(false, content["showLettingAgentDelegationUnoccupiedInset"])
+            assertEquals(false, content["showLettingAgentDelegationUnoccupiedPanel"])
         }
 
         @Test
@@ -594,7 +594,7 @@ class PropertyRegistrationCyaStepConfigTests {
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
-            assertEquals(false, content["showLettingAgentDelegationUnoccupiedInset"])
+            assertEquals(false, content["showLettingAgentDelegationUnoccupiedPanel"])
         }
     }
 

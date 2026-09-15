@@ -37,7 +37,7 @@
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="lettingAgentDelegation" type="java.util.List"*/-->
 <!--/*@thymesVar id="lettingAgentDelegationBodyText" type="java.lang.Boolean"*/-->
-<!--/*@thymesVar id="showLettingAgentDelegationUnoccupiedInset" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="showLettingAgentDelegationUnoccupiedPanel" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="hideDelegatedSections" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -67,7 +67,7 @@
             <p th:if="${lettingAgentDelegationBodyText == true}" class="govuk-body" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.bodyText}"></p>
             <dl th:replace="~{fragments/summaryList :: summaryList(${lettingAgentDelegation})}"></dl>
         </th:block>
-        <th:block th:if="${showLettingAgentDelegationUnoccupiedInset == true}">
+        <th:block th:if="${showLettingAgentDelegationUnoccupiedPanel == true}">
             <h3 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.lettingAgentDelegation.subheading}"></h3>
             <article id="letting-agent-delegation-unoccupied-panel"
                      th:replace="~{fragments/ticketPanel :: ticketPanel(null, ~{::#letting-agent-delegation-unoccupied-panel/content()}, null)}">

@@ -80,7 +80,7 @@ class PropertyRegistrationCyaStepConfig(
         val delegationContent = whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()
         return getRestructuredContent(state, delegationContent) +
             mapOf(
-                "showLettingAgentDelegationUnoccupiedInset" to
+                "showLettingAgentDelegationUnoccupiedPanel" to
                     (!state.occupied.formModel.notNullValue(OccupancyFormModel::occupied) && whoProvides == null),
             )
     }
