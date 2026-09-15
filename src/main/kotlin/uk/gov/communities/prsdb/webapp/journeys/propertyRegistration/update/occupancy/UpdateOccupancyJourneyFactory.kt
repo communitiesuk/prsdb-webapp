@@ -326,6 +326,8 @@ class UpdateOccupancyJourneyFactory(
         currentLastModifiedDate: String,
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
+    // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
+    // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     private fun JourneyBuilder<UpdateOccupancyJourney>.replaceHeadings(state: UpdateOccupancyJourney) {
         configureStep(journey.occupied) {
             withAdditionalContentProperty {
