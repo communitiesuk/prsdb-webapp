@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentUpdateGasSafetyJourneyPages.UploadGasCertFormPageLettingAgentUpdate
 import java.nio.file.Path
 import java.util.UUID
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
 class LettingAgentUpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val token = UUID.fromString("3334abcd-5678-abcd-1234-567abcd2222b")
@@ -59,6 +60,7 @@ class LettingAgentUpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("
         // Check gas safety answers page
         val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageLettingAgentUpdate::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
+        assertThatComponent(checkAnswersPage.form.submitButton).hasText("Confirm and submit update")
         checkAnswersPage.form.submit()
 
         // Verify we're back on the letting agent property record with the updated certificate
