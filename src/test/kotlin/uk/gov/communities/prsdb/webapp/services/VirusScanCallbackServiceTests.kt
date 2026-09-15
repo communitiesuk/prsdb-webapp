@@ -79,13 +79,13 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveEmailForOwnership persists an owner notification in the callback payload`() {
+    fun `saveEmailForUpdateJourney persists an owner notification in the callback payload`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
 
         // Act
-        virusScanCallbackService.saveEmailForOwnership(99L, 42L, CertificateType.Eicr)
+        virusScanCallbackService.saveEmailForUpdateJourney(99L, 42L, CertificateType.Eicr)
 
         // Assert
         val captor = argumentCaptor<VirusScanCallback>()
@@ -97,13 +97,13 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveEmailToMonitoringTeamForOwnership wraps an owner notification for the monitoring team`() {
+    fun `saveEmailToMonitoringTeamForUpdateJourney wraps an owner notification for the monitoring team`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
 
         // Act
-        virusScanCallbackService.saveEmailToMonitoringTeamForOwnership(99L, 42L, CertificateType.Eicr)
+        virusScanCallbackService.saveEmailToMonitoringTeamForUpdateJourney(99L, 42L, CertificateType.Eicr)
 
         // Assert
         val captor = argumentCaptor<VirusScanCallback>()

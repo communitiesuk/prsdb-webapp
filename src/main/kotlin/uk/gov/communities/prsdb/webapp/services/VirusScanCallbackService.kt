@@ -64,12 +64,8 @@ class VirusScanCallbackService(
         )
     }
 
-    // Used when the upload happens on an update journey for a property that is already registered, so the
-    // owning property (and therefore all its landlords and its letting agent) is already known. Saving an
-    // OwnerEmailNotification directly - rather than an IncompletePropertyEmailNotification keyed on the
-    // uploading user - means the eventual failure alert always reaches every landlord and the letting agent,
-    // regardless of which of them uploaded the certificate.
-    fun saveEmailForOwnership(
+    // Sends failure notifications to all landlords and the letting agent for an update journey.
+    fun saveEmailForUpdateJourney(
         propertyOwnershipId: Long,
         fileUploadId: Long,
         certificateType: CertificateType,
@@ -86,7 +82,7 @@ class VirusScanCallbackService(
         )
     }
 
-    fun saveEmailToMonitoringTeamForOwnership(
+    fun saveEmailToMonitoringTeamForUpdateJourney(
         propertyOwnershipId: Long,
         fileUploadId: Long,
         certificateType: CertificateType,
@@ -104,16 +100,8 @@ class VirusScanCallbackService(
         )
     }
 
-    // Single entry point shared by every certificate-upload step (gas safety, electrical safety, etc.) so the
-    // "which notification shape do we need?" decision is made in one place rather than duplicated per step config.
-    //
-    // - Update journeys (propertyOwnershipId non-null) when letting-agent delegation is enabled: the property is
-    //   already registered, so we know every landlord and the letting agent regardless of who uploaded - save an
-    //   ownership-targeted notification.
-    // - Update journeys when letting-agent delegation is disabled: retain the existing uploader-landlord callback.
-    // - Registration journeys (propertyOwnershipId null): no property ownership exists yet, so the notification
-    //   is tied to the uploading landlord's in-progress journey until the property is registered. If there is no
-    //   acting landlord (registration is always landlord-led), nothing is saved.
+    // Update journeys use ownership-targeted notifications when LetA is enabled;
+    // otherwise, and for registration journeys, notifications target the uploading landlord.
     fun saveVirusScanFailureEmail(
         journeyId: String,
         fileUploadId: Long,
@@ -123,8 +111,8 @@ class VirusScanCallbackService(
     ) {
         // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
         if (propertyOwnershipId != null && featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-            saveEmailForOwnership(propertyOwnershipId, fileUploadId, certificateType)
-            saveEmailToMonitoringTeamForOwnership(propertyOwnershipId, fileUploadId, certificateType)
+            saveEmailForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
+            saveEmailToMonitoringTeamForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
         } else if (landlordId != null) {
             saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId)
             saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId)
