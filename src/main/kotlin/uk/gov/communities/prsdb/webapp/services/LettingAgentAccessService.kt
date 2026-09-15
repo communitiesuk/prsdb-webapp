@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.helpers.LettingAgentAccessHelper
 import java.util.UUID
 
 @PrsdbWebService
@@ -39,9 +38,6 @@ class LettingAgentAccessService(
     // This shouldn't be called directly, instead use PropertyOwnershipService#getLettingAgentAccess
     fun getInvitationByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
-
-    fun propertyHasLettingAgent(propertyOwnership: PropertyOwnership): Boolean =
-        LettingAgentAccessHelper.hasLettingAgent(propertyOwnership, getInvitationByPropertyOwnershipId(propertyOwnership.id))
 
     fun getTokenIsValid(token: String): Boolean {
         val uuid =
