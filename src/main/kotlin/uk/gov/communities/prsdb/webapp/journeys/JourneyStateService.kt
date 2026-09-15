@@ -139,9 +139,6 @@ class JourneyStateService(
         journeyStateMetadataStore -= journeyIdToDelete
     }
 
-    // Peeks only the live HTTP-session state (not DB-persisted state), which is sufficient because property update
-    // journeys are session-only. If an update journey ever became DB-backed, a stale state restored from the DB on
-    // re-entry would not be seen here.
     fun getStoredStringValueOrNull(
         journeyId: String,
         key: String,
