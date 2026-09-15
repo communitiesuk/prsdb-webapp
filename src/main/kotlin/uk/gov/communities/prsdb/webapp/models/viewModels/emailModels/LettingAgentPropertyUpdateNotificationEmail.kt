@@ -20,7 +20,7 @@ data class LettingAgentPropertyUpdateNotificationEmail(
             recipientNameKey to recipientName,
             propertyAddressKey to propertyAddress,
             registrationNumberKey to registrationNumber,
-            updatedBulletsKey to formatAsBulletList(updatedBullets),
+            updatedBulletsKey to formatEmailList(updatedBullets),
             propertyRecordUrlKey to propertyRecordUrl,
         )
 }
