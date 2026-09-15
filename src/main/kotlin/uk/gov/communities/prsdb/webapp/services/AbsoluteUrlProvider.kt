@@ -10,12 +10,13 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
-import uk.gov.communities.prsdb.webapp.controllers.LettingAgentInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import java.net.URI
 import java.security.Principal
+import java.util.UUID
 
 @Service
 class AbsoluteUrlProvider(
@@ -42,8 +43,18 @@ class AbsoluteUrlProvider(
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
-    fun buildLettingAgentInvitationUri(token: String): URI =
-        uriFromMethodCall(on(LettingAgentInvitationController::class.java).startJourney(token))
+    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI {
+        val pathSegments =
+            UriComponentsBuilder
+                .fromUriString(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+                .build()
+                .pathSegments
+        return UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .pathSegment(*pathSegments.drop(1).toTypedArray())
+            .build()
+            .toUri()
+    }
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
