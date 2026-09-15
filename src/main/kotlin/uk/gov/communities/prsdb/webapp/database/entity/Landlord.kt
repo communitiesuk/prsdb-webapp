@@ -53,8 +53,21 @@ abstract class Landlord : ModifiableAuditableEntity() {
     open var anniversaryMonth: Int? = null
         protected set
 
+    val anniversary: MonthDay?
+        get() {
+            val day = anniversaryDay
+            val month = anniversaryMonth
+            return when {
+                day == null && month == null -> null
+                day != null && month != null -> MonthDay.of(month, day)
+                else -> throw IllegalStateException(
+                    "Landlord $id has an incomplete anniversary (day=$day, month=$month)",
+                )
+            }
+        }
+
     fun setAnniversaryIfAbsent(monthDay: MonthDay) {
-        if (anniversaryDay == null && anniversaryMonth == null) {
+        if (anniversary == null) {
             anniversaryDay = monthDay.dayOfMonth
             anniversaryMonth = monthDay.monthValue
         }

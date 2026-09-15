@@ -48,12 +48,7 @@ class LandlordService(
 ) {
     fun retrieveLandlordById(id: Long): Landlord? = landlordRepository.findById(id).orElse(null)
 
-    fun getAnniversary(landlordId: Long): MonthDay? {
-        val landlord = retrieveLandlordById(landlordId) ?: return null
-        val day = landlord.anniversaryDay ?: return null
-        val month = landlord.anniversaryMonth ?: return null
-        return MonthDay.of(month, day)
-    }
+    fun getAnniversary(landlordId: Long): MonthDay? = retrieveLandlordById(landlordId)?.anniversary
 
     @Transactional
     fun createIndividualLandlord(
