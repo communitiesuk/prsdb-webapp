@@ -67,7 +67,11 @@ class NftDataSeederTests(
             numOfProperties = numOfProperties,
             batchSize = 25,
             randomSeed = 239L,
-            referenceDate = "",
+            // A blank referenceDate resolves to Instant.now(), which makes seeding non-reproducible: the
+            // random-call sequence for date generation depends on the exact instant, so any two runs (even with
+            // the same random seed) can diverge. Use a fixed date so "seedDatabase is deterministic" actually
+            // tests what it claims to test.
+            referenceDate = "2024-01-01",
             numOfGeneratedAddresses = 2000,
         )
 
