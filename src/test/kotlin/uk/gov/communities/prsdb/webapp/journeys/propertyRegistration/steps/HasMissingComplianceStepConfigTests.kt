@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 
 @ExtendWith(MockitoExtension::class)
@@ -159,8 +158,7 @@ class HasMissingComplianceStepConfigTests {
         private fun setupGasCertMissing() {
             val mockDetailsTask: GasSafetyDetailsTask = mock()
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val gasFormModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(gasFormModel)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockDetailsTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
             whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(null)
@@ -173,8 +171,7 @@ class HasMissingComplianceStepConfigTests {
         private fun setupGasCertPresent() {
             val mockDetailsTask: GasSafetyDetailsTask = mock()
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val gasFormModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(gasFormModel)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockDetailsTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
             whenever(mockDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
@@ -233,12 +230,8 @@ class HasMissingComplianceStepConfigTests {
         private fun setupGasCertProvideLater() {
             val mockDetailsTask: GasSafetyDetailsTask = mock()
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val gasFormModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(gasFormModel)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
             whenever(mockDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            val mockHasGasCertStep = mock<HasGasCertStep>()
-            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
-            whenever(mockDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
 
             val mockGasSafetyTask: GasSafetyTask = mock()
             whenever(mockGasSafetyTask.gasSafetyDetailsTask).thenReturn(mockDetailsTask)
@@ -284,12 +277,8 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns false when user chose provide this later`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            val mockHasGasCertStep = mock<HasGasCertStep>()
-            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
-            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
 
             assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
         }
@@ -297,7 +286,7 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns false when gas supply step not reachable`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(null)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(null)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
             assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -306,8 +295,7 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns false when no gas supply`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val formModel = GasSupplyFormModel().apply { hasGasSupply = false }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.NO_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
             assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -316,10 +304,10 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns true when has gas supply and cert is missing`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
+            val mockHasGasCertStep = mock<HasGasCertStep>()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
             assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -328,10 +316,10 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns true when has gas supply and cert is outdated`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
+            val mockHasGasCertStep = mock<HasGasCertStep>()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
             assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
@@ -340,11 +328,23 @@ class HasMissingComplianceStepConfigTests {
         @Test
         fun `returns false when has gas supply and cert is valid`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-            val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
-            whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
+            val mockHasGasCertStep = mock<HasGasCertStep>()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mock<HasGasCertStep>())
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockGasSafetyDetailTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
+
+            assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
+        }
+
+        @Test
+        fun `returns false when has gas supply and user chose provide this later on legacy gas cert step`() {
+            val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+            val mockHasGasCertStep = mock<HasGasCertStep>()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
+            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+            whenever(mockGasSafetyDetailTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+            whenever(mockGasSafetyDetailTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
 
             assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockGasSafetyTask))
         }

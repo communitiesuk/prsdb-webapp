@@ -27,8 +27,8 @@ class HasMissingComplianceStepConfig(
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
-            if (state.gasSafetyDetailsTask.hasGasSupplyStep.formModelIfReachableOrNull
-                    ?.hasGasSupply != true
+            if (state.gasSafetyDetailsTask.hasGasSupplyStep.outcome in
+                listOf(HasGasSupplyMode.NO_SUPPLY, HasGasSupplyMode.PROVIDE_LATER, null)
             ) {
                 return false
             }

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.toUploadedFileUrls
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -21,7 +21,11 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         val gasSupplyRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
-                fieldValue = state.hasGasSupplyStep.outcome == YesOrNo.YES,
+                // TODO PDJB-1720/PDJB-1721: PROVIDE_LATER currently marks the property as having gas supply
+                //  indefinitely. Revisit once those tickets clarify how a deferred answer should be represented here.
+                fieldValue =
+                    state.hasGasSupplyStep.outcome == HasGasSupplyMode.HAS_SUPPLY ||
+                        state.hasGasSupplyStep.outcome == HasGasSupplyMode.PROVIDE_LATER,
                 destination = destinationProvider(state.hasGasSupplyStep),
             )
 
@@ -94,7 +98,14 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = getProvideLaterKey(),
-            destination = destinationProvider(state.hasGasCertStep),
+            destination =
+                destinationProvider(
+                    if (state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) {
+                        state.hasGasCertStep
+                    } else {
+                        state.hasGasSupplyStep
+                    },
+                ),
         )
 
     private fun getNoCertRow(): SummaryListRowViewModel =
@@ -112,14 +123,20 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         }
 
     private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario {
-        if (state.hasGasSupplyStep.outcome == YesOrNo.NO) return GasSafetyScenario.NO_GAS_SUPPLY
+        when (state.hasGasSupplyStep.outcome) {
+            HasGasSupplyMode.NO_SUPPLY -> return GasSafetyScenario.NO_GAS_SUPPLY
+            HasGasSupplyMode.PROVIDE_LATER -> return GasSafetyScenario.PROVIDE_LATER
+            HasGasSupplyMode.HAS_SUPPLY, null -> Unit
+        }
+        // TODO PDJB-1720/PDJB-1721: falling through from the gas-supply check to the gas-cert check reads awkwardly.
+        //  Revisit once gas-supply/provide-later semantics are cleaned up.
         return when (state.hasGasCertStep.outcome) {
-            HasGasCertMode.PROVIDE_THIS_LATER -> {
-                GasSafetyScenario.PROVIDE_LATER
-            }
-
             HasGasCertMode.NO_CERTIFICATE -> {
                 GasSafetyScenario.NO_CERT
+            }
+
+            HasGasCertMode.PROVIDE_THIS_LATER -> {
+                GasSafetyScenario.PROVIDE_LATER
             }
 
             HasGasCertMode.HAS_CERTIFICATE -> {

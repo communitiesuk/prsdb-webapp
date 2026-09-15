@@ -35,6 +35,7 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
         val hasGasSupplyFormModel =
             GasSupplyFormModel().apply {
                 hasGasSupply = false
+                action = CONTINUE_BUTTON_ACTION_NAME
             }
         withSubmittedValue(HasGasSupplyStep.ROUTE_SEGMENT, hasGasSupplyFormModel)
         return self()
@@ -44,6 +45,7 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
         val hasGasSupplyFormModel =
             GasSupplyFormModel().apply {
                 hasGasSupply = true
+                action = CONTINUE_BUTTON_ACTION_NAME
             }
         withSubmittedValue(HasGasSupplyStep.ROUTE_SEGMENT, hasGasSupplyFormModel)
         return self()
@@ -68,7 +70,6 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
         val hasGasCertificateFormModel =
             HasGasCertFormModel().apply {
                 hasCert = true
-                action = CONTINUE_BUTTON_ACTION_NAME
             }
         withSubmittedValue(HasGasCertStep.ROUTE_SEGMENT, hasGasCertificateFormModel)
         return self()
@@ -78,10 +79,19 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
         val hasGasCertFormModel =
             HasGasCertFormModel().apply {
                 hasCert = false
-                action = CONTINUE_BUTTON_ACTION_NAME
             }
         withSubmittedValue(HasGasCertStep.ROUTE_SEGMENT, hasGasCertFormModel)
         withSubmittedValue(GasCertMissingStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withProvideGasCertLaterFromGasSupply(): SelfType {
+        val hasGasSupplyFormModel =
+            GasSupplyFormModel().apply {
+                action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+            }
+        withSubmittedValue(HasGasSupplyStep.ROUTE_SEGMENT, hasGasSupplyFormModel)
+        withSubmittedValue(ProvideGasCertLaterStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 

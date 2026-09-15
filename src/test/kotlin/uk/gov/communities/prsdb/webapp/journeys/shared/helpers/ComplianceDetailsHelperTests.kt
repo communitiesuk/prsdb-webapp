@@ -29,12 +29,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEp
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -79,7 +79,7 @@ class ComplianceDetailsHelperTests {
         fun `no gas supply returns gasSupplyRows with 1 row, empty certRows, and noGasSupply inset text key`() {
             whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.NO)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.NO_SUPPLY)
 
             val content = helper.getGasSafetyCyaContent(mockCyaState, mockGasState)
 
@@ -103,7 +103,7 @@ class ComplianceDetailsHelperTests {
             whenever(mockGasDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockGasDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
             whenever(mockCyaState.getCyaJourneyId(any())).thenReturn("test-journey-id")
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
             whenever(mockGasDetailsTask.getGasSafetyCertificateIsOutdated()).thenReturn(false)
             whenever(mockGasDetailsTask.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
