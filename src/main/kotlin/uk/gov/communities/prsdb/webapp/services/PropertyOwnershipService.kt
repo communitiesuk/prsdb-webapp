@@ -131,14 +131,14 @@ class PropertyOwnershipService(
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
 
-        return lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
+        return lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)
     }
 
     fun hasLettingAgent(propertyOwnershipId: Long): Boolean {
         if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
 
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
+        val lettingAgentAccess = lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)
 
         return hasLettingAgent(propertyOwnership, lettingAgentAccess)
     }

@@ -36,7 +36,7 @@ class LettingAgentAccessService(
             ?: throw EntityNotFoundException("No letting agent access found for token $token")
 
     // This shouldn't be called directly, instead use PropertyOwnershipService#getLettingAgentAccess
-    fun getInvitationByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
+    fun getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
         lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
     fun getTokenIsValid(token: String): Boolean {

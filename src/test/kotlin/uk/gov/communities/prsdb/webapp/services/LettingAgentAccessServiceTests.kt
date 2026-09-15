@@ -77,20 +77,20 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `getInvitationByPropertyOwnershipId returns the invitation when it exists`() {
+    fun `getLettingAgentAccessByPropertyOwnershipId returns the invitation when it exists`() {
         val invitation = MockLettingAgentData.createLettingAgentAccess()
         whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(invitation)
 
-        val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
+        val result = lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)
 
         assertEquals(invitation, result)
     }
 
     @Test
-    fun `getInvitationByPropertyOwnershipId returns null when no invitation exists`() {
+    fun `getLettingAgentAccessByPropertyOwnershipId returns null when no invitation exists`() {
         whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
-        val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
+        val result = lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)
 
         assertNull(result)
     }
