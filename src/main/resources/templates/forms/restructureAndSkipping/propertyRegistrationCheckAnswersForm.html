@@ -75,24 +75,24 @@
             </article>
         </th:block>
         <th:block th:if="${hideDelegatedSections != true}">
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
+            <h3 class="govuk-heading-m" th:text="#{${rentedOutLicensingHeadingKey}}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${rentedOutLicensingRows})}"></dl>
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutGasHeadingKey}}"></h3>
+            <h3 class="govuk-heading-m" th:text="#{${rentedOutGasHeadingKey}}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
             <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
-                <h4 class="govuk-heading-s" th:text="#{checkGasSafety.certSubHeading}"></h4>
+                <h4 class="govuk-heading-m" th:text="#{checkGasSafety.certSubHeading}"></h4>
                 <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
             </th:block>
             <th:block th:if="${gasInsetTextKey != null}">
                 <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}"></div>
             </th:block>
-            <h3 class="govuk-heading-s" th:text="#{${rentedOutElectricalHeadingKey}}"></h3>
+            <h3 class="govuk-heading-m" th:text="#{${rentedOutElectricalHeadingKey}}"></h3>
             <dl th:replace="~{fragments/summaryList :: summaryList(${electricalRows})}"></dl>
             <th:block th:if="${electricalInsetTextKey != null}">
                 <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}"></div>
             </th:block>
         </th:block>
-        <h3 class="govuk-heading-s" th:text="#{${rentedOutEpcHeadingKey}}"></h3>
+        <h3 class="govuk-heading-m" th:text="#{${rentedOutEpcHeadingKey}}"></h3>
         <th:block th:if="${epcCardTitle != null}">
             <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
         </th:block>
@@ -112,7 +112,7 @@
         </div>
         <th:block th:if="${hideDelegatedSections != true}">
             <th:block th:if="${!#lists.isEmpty(rentedOutTenancyRows) or tenancyUnoccupiedBodyTextKey != null}">
-                <h3 class="govuk-heading-s"
+                <h3 class="govuk-heading-m"
                     th:classappend="${tenancyUnoccupiedBodyTextKey != null and #lists.isEmpty(rentedOutTenancyRows)} ? 'govuk-!-margin-bottom-0' : ''"
                     th:text="#{${rentedOutTenancyHeadingKey}}"></h3>
                 <dl th:if="${!#lists.isEmpty(rentedOutTenancyRows)}" th:replace="~{fragments/summaryList :: summaryList(${rentedOutTenancyRows})}"></dl>
