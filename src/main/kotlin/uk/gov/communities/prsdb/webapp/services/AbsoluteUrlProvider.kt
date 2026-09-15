@@ -43,8 +43,18 @@ class AbsoluteUrlProvider(
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
-    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
-        uriFromPath(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI {
+        val pathSegments =
+            UriComponentsBuilder
+                .fromUriString(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+                .build()
+                .pathSegments
+        return UriComponentsBuilder
+            .fromUriString(landlordBaseUrl)
+            .pathSegment(*pathSegments.drop(1).toTypedArray())
+            .build()
+            .toUri()
+    }
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
@@ -66,35 +76,18 @@ class AbsoluteUrlProvider(
                     info,
                 ).build()
 
-        return buildAbsoluteUri(
-            methodCallUriComponents.pathSegments,
-            methodCallUriComponents.query,
-            methodCallUriComponents.fragment,
-        )
-    }
-
-    private fun uriFromPath(path: String): URI {
-        val components = UriComponentsBuilder.fromUriString(path).build()
-        return buildAbsoluteUri(components.pathSegments, components.query, components.fragment)
-    }
-
-    private fun buildAbsoluteUri(
-        pathSegments: List<String>,
-        query: String?,
-        fragment: String?,
-    ): URI {
         val baseUrl =
-            when (pathSegments[0]) {
+            when (methodCallUriComponents.pathSegments[0]) {
                 LANDLORD_PATH_SEGMENT -> landlordBaseUrl
                 LOCAL_COUNCIL_PATH_SEGMENT -> localCouncilBaseUrl
-                else -> throw IllegalArgumentException("Unknown base URL for path: /${pathSegments.joinToString("/")}")
+                else -> throw IllegalArgumentException("Unknown base URL for path: ${methodCallUriComponents.path}")
             }
 
         return UriComponentsBuilder
             .fromUriString(baseUrl)
-            .pathSegment(*pathSegments.drop(1).toTypedArray())
-            .query(query)
-            .fragment(fragment)
+            .pathSegment(*methodCallUriComponents.pathSegments.drop(1).toTypedArray())
+            .query(methodCallUriComponents.query)
+            .fragment(methodCallUriComponents.fragment)
             .build()
             .toUri()
     }
