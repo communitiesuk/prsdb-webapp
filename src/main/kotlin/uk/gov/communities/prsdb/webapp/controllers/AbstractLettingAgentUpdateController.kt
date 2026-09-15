@@ -57,15 +57,14 @@ abstract class AbstractLettingAgentUpdateController(
         val propertyOwnership =
             lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
-        val propertyOwnershipId = propertyOwnership.id
 
-        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnership.id)
 
         val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
 
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { createJourneySteps(propertyOwnershipId, returnUrl) },
+            createRoutingMap = { createJourneySteps(propertyOwnership.id, returnUrl) },
             initialiseJourney = { initialiseJourneyState(token, resolveLastModifiedDate(propertyOwnership)) },
             dispatch = dispatch,
         )
