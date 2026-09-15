@@ -29,12 +29,14 @@ Create release PRs for main -> test and main -> nft branches in **both repositor
 
 ## When the code release conflicts
 
-Follow [Checking and resolving code-release conflicts](../../../ReadMe.md#checking-and-resolving-code-release-conflicts):
+Follow [Merge conflicts](../../../ReadMe.md#merge-conflicts):
 
 - Create a temporary branch from the **destination**, such as `release/main-to-test-{N}` from `origin/test`,
   or reuse the existing resolution branch for this release.
 - Merge the intended source revision and any newer destination changes into that branch, resolve conflicts and
   complete the normal merge commits.
+- Review flag conflicts by flag/release name rather than blindly accepting a whole config file: the destination may
+  contain a newer feature release, while the source may add or retire flags with its code changes.
 - Recheck using the temporary branch as the source, for example
   `git merge-tree --write-tree origin/test release/main-to-test-{N}`, and review its diff against the destination.
   Do not repeatedly check the original conflicting source/destination pair after resolving on the temporary branch.
@@ -45,6 +47,9 @@ Follow [Checking and resolving code-release conflicts](../../../ReadMe.md#checki
 
 Use this fallback only when the merge check reports conflicts, not for every code release. For `test -> production`,
 the same procedure uses `production` as the destination and `test` as the source.
+
+If the destination advances before the release merges, merge its latest revision into the temporary branch and
+repeat the conflict check and diff review. If more source changes are included, refresh the release notes and checks.
 
 ## Release Notes Format
 

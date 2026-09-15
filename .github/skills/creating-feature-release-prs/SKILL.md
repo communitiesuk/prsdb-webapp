@@ -75,7 +75,7 @@ there is no required ordering (a flag can be feature-released straight to produc
 Cherry-picks copy changes but not their ancestry. Later overlapping edits, including flag cleanup, can still
 conflict even though the original config changes were identical. Use `creating-release-prs` to check each code
 promotion and choose the direct PR or the
-[temporary release-branch fallback](../../../ReadMe.md#checking-and-resolving-code-release-conflicts) accordingly.
+[temporary release-branch fallback](../../../ReadMe.md#merge-conflicts) accordingly.
 Do not merge an ancestry-repair PR back into `main`.
 
 ## Branch and PR naming

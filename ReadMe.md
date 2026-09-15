@@ -356,8 +356,7 @@ The following steps of this guide will refer to the `main` -> `test` workflow, t
 
 At least once a sprint we aim to release changes into the Test environment. This process happens automatically when
 changes are merged to the `test` branch. Merges into `test`, `nft` and `production` must use normal (not squash) merges
-to preserve common git history with their source branches. Development and feature-config PRs into `main` continue
-to use the normal merge queue and squash process.
+to keep a common git history. PRs into `main` still use the merge queue and squash merges.
 
 ### Release infra before webapp
 
@@ -371,8 +370,7 @@ For the PR description add a list of all the commits that will be included and t
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
 Use the same release number between the webapp repo and infra repo.
 
-Check for [merge conflicts](#checking-and-resolving-code-release-conflicts) before choosing the PR's head branch.
-A conflict-free full code release uses the source branch directly; it does not need a temporary release branch.
+Normal code releases do not need a separate release branch unless the PR has [merge conflicts](#merge-conflicts).
 
 Go and find the release tracking Jira ticket:
 
@@ -398,48 +396,18 @@ In the rare case that there are changes on `main` that we do not want to release
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
 
-#### Checking and resolving code-release conflicts
+#### Merge conflicts
 
-After a successful `git fetch origin`, check the proposed merge before creating or updating the release PR:
+If a release PR has merge conflicts, resolve them on a separate branch rather than on the source branch:
 
-```shell
-git merge-tree --write-tree origin/test origin/main
-```
+- Create a branch from `test`, e.g. `release/main-to-test-52`
+- Merge `main` into the branch and resolve the conflicts
+- Raise a replacement PR from the branch into `test`, keeping the release title and notes. Update the link on the
+  release ticket and close the original PR
+- Merge the PR using a **normal merge, not squash**
 
-The destination is the first argument and the source is the second. Use `origin/nft origin/main` for NFT, or
-`origin/production origin/test` for production. This checks the merge without changing the working tree, index or
-branch refs.
-
-Inspect the command's exit status immediately (`$LASTEXITCODE` in PowerShell or `$?` in Bash):
-
-- `0`: no conflicts; create or update the usual direct source-to-destination PR.
-- `1`: conflicts; use the temporary release-branch procedure below.
-- Any other status: the check failed; investigate before proceeding rather than assuming the merge is clean.
-
-For a conflicted code release:
-
-1. Create a temporary release branch from the **destination** branch, for example `release/main-to-test-52` from
-   `origin/test`.
-2. Merge the intended **source** revision into that branch using a normal merge, not a squash. For test/NFT the
-   source is `main`; for production it is `test`.
-3. Resolve conflicts on the temporary branch and complete the merge commit. Review flag conflicts by flag/release
-   name rather than blindly accepting a whole config file: the destination may contain a newer feature release,
-   while the source may add or retire flags with its code changes.
-4. Recheck the merge using the **temporary branch** as the source, for example
-   `git merge-tree --write-tree origin/test release/main-to-test-52`, and review its diff against the destination.
-   The original source/destination pair can still conflict until the resolved release is merged.
-5. Raise the release PR from the temporary branch into the **destination**, keeping the release title, number and
-   notes. If a direct PR already exists, link the replacement, update the release tracking ticket and close the
-   superseded PR. Do not resolve a direct PR's conflicts on its source branch.
-6. Merge the release PR with a **normal merge commit** under the usual approvals and checks.
-
-Do not merge the resolution branch back into the source or relax `main`'s merge queue/squash policy to repair this
-history. The destination merge preserves the source revision as an ancestor, so the next code release uses an
-updated merge base without needing the resolution on the source branch. New overlapping changes can still conflict.
-
-Reuse an existing temporary release branch rather than creating another for the same release.
-If the destination advances before the release merges, merge its latest revision into the temporary branch and
-repeat the conflict check and diff review. If more source changes are included, refresh the release notes and checks.
+There is no need to merge the resolution back into `main`, because the normal merge into `test` keeps the history
+needed for the next release.
 
 #### Hotfixes
 
@@ -481,12 +449,11 @@ not exist yet, create that release and associate the flag as part of the `main` 
 To make a feature release (the example uses `test`; other environments follow the same steps):
 
 - **Make the change on `main` first.** Raise a normal PR that edits _only_ the target environment's flag file, as a
-  standalone config change, and merge it through the usual queue and squash process. This keeps the approved config
-  change on `main`. The change is inert for test/nft/production until it is released — it only takes effect immediately
-  on integration (which deploys `main`). Use a separate PR per environment so each resulting squash commit remains
-  environment-specific.
+  standalone config change, and merge it through the usual queue and squash process. The change is inert for
+  test/nft/production until it is released — it only takes effect immediately on integration (which deploys `main`).
+  Use a separate PR per environment so each config change can be cherry-picked separately.
 - Create a branch from the **target environment branch** (not `main`), e.g. `release/feature-test-3` for the 3rd feature
-  release to `test`. Feature releases always need this separate branch, even if a full code merge would be conflict-free.
+  release to `test`.
 - Cherry-pick _only_ the flag commit from `main` onto the new branch. Because the branch is based on `test`, the diff
   contains only the flag change and none of main's unreleased code.
 - Raise a PR merging the branch into `test`, named `Feature release to test #n` for the nth feature release to `test`
@@ -495,9 +462,8 @@ To make a feature release (the example uses `test`; other environments follow th
 - Merge with a normal merge (not a squash commit), as with other merges into environment branches. No merge back into
   `main` is needed — the change already originated there.
 
-Cherry-picks copy changes but do not preserve their ancestry. Identical changes can merge cleanly, but later edits
-such as flag cleanup can still conflict during a code release. Check each code promotion and use the
-[temporary release-branch procedure](#checking-and-resolving-code-release-conflicts) only when it conflicts.
+Feature releases can cause conflicts in a later code release, for example if old flags have since been removed.
+If this happens, follow the steps under [Merge conflicts](#merge-conflicts).
 
 Each environment is released independently; there is no required ordering, so a flag can be feature-released straight to
 production if it were neceesary (subject to the prod approval checks in [Feature flag releases](#feature-flag-releases) below).
