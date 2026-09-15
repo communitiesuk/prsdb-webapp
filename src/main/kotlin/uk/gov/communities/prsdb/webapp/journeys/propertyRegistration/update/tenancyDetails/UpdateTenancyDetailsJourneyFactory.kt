@@ -47,7 +47,7 @@ class UpdateTenancyDetailsJourneyFactory(
         seed: Any,
         propertyId: Long,
     ): String =
-        stateFactory.getObject().initialiseWithDiscard(
+        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
             seed,
             propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
         )

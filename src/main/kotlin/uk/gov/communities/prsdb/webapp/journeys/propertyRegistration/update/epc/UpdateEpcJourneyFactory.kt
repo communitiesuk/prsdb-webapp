@@ -161,7 +161,7 @@ class UpdateEpcJourneyFactory(
         val propertyCompliance =
             propertyOwnershipService.getPropertyOwnership(propertyId).propertyCompliance
                 ?: throw PrsdbWebException("Property ownership $propertyId does not have a compliance record")
-        return stateFactory.getObject().initialiseWithDiscard(
+        return stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
             seed,
             propertyCompliance.getMostRecentlyUpdated().toString(),
         )

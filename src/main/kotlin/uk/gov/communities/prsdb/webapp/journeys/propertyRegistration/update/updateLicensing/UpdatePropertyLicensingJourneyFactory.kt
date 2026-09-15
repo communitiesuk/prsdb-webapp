@@ -164,7 +164,7 @@ class UpdateLicensingJourneyFactory(
         seed: Any,
         propertyId: Long,
     ): String =
-        stateFactory.getObject().initialiseWithDiscard(
+        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
             seed,
             ownershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString(),
         )

@@ -20,7 +20,7 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
         }
     }
 
-    fun initialiseWithDiscard(
+    fun initialiseOrRestoreStateReinitialisingIfOutdated(
         seed: Any,
         currentLastModifiedDate: String,
     ): String {

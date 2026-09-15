@@ -65,7 +65,7 @@ class UpdateBedroomsJourneyFactory(
         ownershipId: Long,
         user: Principal,
     ): String =
-        stateFactory.getObject().initialiseWithDiscard(
+        stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(
             Pair(ownershipId, user),
             propertyOwnershipService.getPropertyOwnership(ownershipId).getMostRecentlyUpdated().toString(),
         )
