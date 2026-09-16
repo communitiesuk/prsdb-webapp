@@ -56,13 +56,11 @@ class UploadElectricalCertStepConfig(
             state.getElectricalCertificateTypeAsCertificateType()
                 ?: throw IllegalStateException("Expect electrical certificate type to be non null inside the upload step")
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            val propertyOwnershipIdIfExists = state.propertyOwnershipId
-
             virusScanCallbackService.saveVirusScanFailureEmail(
                 journeyId = state.journeyId,
                 fileUploadId = fileUploadId,
                 certificateType = certificateType,
-                propertyOwnershipId = propertyOwnershipIdIfExists,
+                propertyOwnershipId = state.propertyOwnershipId,
                 landlordId = userToLandlordService.getCurrentLandlordForUser().id,
             )
 
