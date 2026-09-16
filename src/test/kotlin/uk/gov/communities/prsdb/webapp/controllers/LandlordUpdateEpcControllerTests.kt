@@ -79,7 +79,7 @@ class LandlordUpdateEpcControllerTests(
 
         verify(journeyFactory).initializeJourneyState(
             argThat { this is Pair<*, *> && first == propertyOwnershipId && (second as Principal).name == LANDLORD_USER },
-            eq(ownership.propertyCompliance!!.getMostRecentlyUpdated().toString()),
+            eq(ownership.propertyCompliance!!.getMostRecentlyUpdated()),
         )
     }
 }

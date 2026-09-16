@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import java.security.Principal
+import java.time.Instant
 import java.util.UUID
 
 abstract class AbstractPropertyOwnershipUpdateJourneyState(
@@ -11,18 +12,21 @@ abstract class AbstractPropertyOwnershipUpdateJourneyState(
 
     fun discardIfLastModifiedDateChanged(
         seed: Any?,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ) {
         val journeyId = generateJourneyId(seed)
-        val storedLastModifiedDate = journeyStateService.getStoredStringValueOrNull(journeyId, LAST_MODIFIED_DATE_KEY)
-        if (storedLastModifiedDate != null && storedLastModifiedDate != currentLastModifiedDate) {
+        val storedLastModifiedDate = getStoredLastModifiedDateOrNull(journeyId)
+        if (storedLastModifiedDate != null && storedLastModifiedDate != currentLastModifiedDate.toString()) {
             journeyStateService.deleteState(journeyId)
         }
     }
 
+    private fun getStoredLastModifiedDateOrNull(journeyId: String): String? =
+        journeyStateService.getStoredStringValueOrNull(journeyId, LAST_MODIFIED_DATE_KEY)
+
     fun initialiseOrRestoreStateReinitialisingIfOutdated(
         seed: Any?,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ): String {
         discardIfLastModifiedDateChanged(seed, currentLastModifiedDate)
         return initializeOrRestoreState(seed)

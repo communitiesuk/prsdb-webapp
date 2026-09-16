@@ -65,7 +65,7 @@ class LandlordUpdateFurnishedStatusController(
             initialiseJourney = {
                 journeyFactory.initializeJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated().toString(),
+                    propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
                 )
             },
             dispatch = dispatch,

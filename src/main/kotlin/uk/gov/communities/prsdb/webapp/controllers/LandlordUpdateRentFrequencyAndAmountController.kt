@@ -63,7 +63,7 @@ class LandlordUpdateRentFrequencyAndAmountController(
             initialiseJourney = {
                 journeyFactory.initialiseJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated().toString(),
+                    propertyOwnershipService.getLastModifiedDate(propertyOwnershipId),
                 )
             },
             dispatch = dispatch,

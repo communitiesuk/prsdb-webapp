@@ -89,14 +89,14 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
         whenever(
-            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated())),
         ).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
         }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
+        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 
@@ -158,7 +158,7 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
         whenever(journeyFactory.createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl)))
             .thenThrow(NoSuchJourneyException())
         whenever(
-            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString())),
+            journeyFactory.initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated())),
         ).thenReturn("journey-id")
 
         mvc
@@ -170,7 +170,7 @@ class LettingAgentUpdateRentFrequencyAndAmountControllerTests(
                 status { is3xxRedirection() }
             }
 
-        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated().toString()))
+        verify(journeyFactory).initialiseJourneyState(eq(token), eq(propertyOwnership.getMostRecentlyUpdated()))
         verify(journeyFactory).createJourneySteps(eq(propertyOwnership.id), eq(expectedReturnUrl))
     }
 

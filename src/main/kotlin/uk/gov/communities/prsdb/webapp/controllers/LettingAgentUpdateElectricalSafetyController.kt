@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 @PrsdbController
@@ -47,14 +48,14 @@ class LettingAgentUpdateElectricalSafetyController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
 
-    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String {
+    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): Instant {
         val propertyCompliance =
             propertyOwnership.propertyCompliance
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
-        return propertyCompliance.getMostRecentlyUpdated().toString()
+        return propertyCompliance.getMostRecentlyUpdated()
     }
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)

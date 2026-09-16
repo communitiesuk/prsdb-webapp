@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 @PrsdbController
@@ -27,7 +28,7 @@ class LettingAgentUpdateRentIncludesBillsController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
 
     companion object {

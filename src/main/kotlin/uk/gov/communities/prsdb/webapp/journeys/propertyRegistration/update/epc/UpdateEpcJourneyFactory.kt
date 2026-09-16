@@ -150,7 +150,7 @@ class UpdateEpcJourneyFactory(
 
     fun initializeJourneyState(
         seed: Any?,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: java.time.Instant,
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 

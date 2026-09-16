@@ -70,7 +70,7 @@ class LandlordUpdateEpcController(
                         ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
                 journeyFactory.initializeJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyCompliance.getMostRecentlyUpdated().toString(),
+                    propertyCompliance.getMostRecentlyUpdated(),
                 )
             },
             dispatch = dispatch,

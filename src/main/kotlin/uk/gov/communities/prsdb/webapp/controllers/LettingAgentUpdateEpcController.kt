@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 @PrsdbController
@@ -29,14 +30,14 @@ class LettingAgentUpdateEpcController(
 
     override fun initialiseJourneyState(
         token: UUID,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ): String = journeyFactory.initializeJourneyState(token, currentLastModifiedDate)
 
-    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String {
+    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): Instant {
         val propertyCompliance =
             propertyOwnership.propertyCompliance
                 ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
-        return propertyCompliance.getMostRecentlyUpdated().toString()
+        return propertyCompliance.getMostRecentlyUpdated()
     }
 
     companion object {

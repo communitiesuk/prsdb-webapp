@@ -108,7 +108,7 @@ class LandlordUpdateGasSafetyController(
                         ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
                 journeyFactory.initialiseJourneyState(
                     Pair(propertyOwnershipId, principal),
-                    propertyCompliance.getMostRecentlyUpdated().toString(),
+                    propertyCompliance.getMostRecentlyUpdated(),
                 )
             },
             dispatch = dispatch,

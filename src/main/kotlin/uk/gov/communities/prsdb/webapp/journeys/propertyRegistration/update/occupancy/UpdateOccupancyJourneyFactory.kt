@@ -323,7 +323,7 @@ class UpdateOccupancyJourneyFactory(
 
     fun initializeJourneyState(
         seed: Any?,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: java.time.Instant,
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
     // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when

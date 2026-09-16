@@ -56,7 +56,7 @@ class LettingAgentUpdateEpcControllerTests(
         createOccupiedPropertyOwnership().also {
             MockPropertyComplianceData.createPropertyComplianceForOwnership(it)
         }
-    private val expectedComplianceDate get() = propertyOwnership.propertyCompliance!!.getMostRecentlyUpdated().toString()
+    private val expectedComplianceDate get() = propertyOwnership.propertyCompliance!!.getMostRecentlyUpdated()
     private val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
     private val updateStepRoute =
         LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${HasEpcStep.ROUTE_SEGMENT}"

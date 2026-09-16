@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 abstract class AbstractLettingAgentUpdateController(
@@ -43,11 +44,10 @@ abstract class AbstractLettingAgentUpdateController(
 
     protected abstract fun initialiseJourneyState(
         token: UUID,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: Instant,
     ): String
 
-    protected open fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): String =
-        propertyOwnership.getMostRecentlyUpdated().toString()
+    protected open fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): Instant = propertyOwnership.getMostRecentlyUpdated()
 
     protected fun dispatchJourneyStep(
         stepPath: String,

@@ -34,7 +34,7 @@ class UpdateRentIncludesBillsJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -129,7 +129,7 @@ class UpdateRentIncludesBillsJourneyFactory(
 
     fun initialiseJourneyState(
         seed: Any?,
-        currentLastModifiedDate: String,
+        currentLastModifiedDate: java.time.Instant,
     ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
