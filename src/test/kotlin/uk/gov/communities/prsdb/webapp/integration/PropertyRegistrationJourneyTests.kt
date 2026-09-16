@@ -803,12 +803,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert. Submit with no option selected
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            hasGasCertPage.submitProvideThisLater()
+            hasGasSupplyPage.submitProvideThisLater()
             val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
             // Provide Gas Cert Later - render page
@@ -880,12 +875,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert. Submit with no option selected
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(gasSafetyHeader)
-            hasGasCertPage.submitProvideThisLater()
+            hasGasSupplyPage.submitProvideThisLater()
             val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
             // Provide Gas Cert Later - render page
@@ -3228,12 +3218,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert. Submit with no option selected
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            hasGasCertPage.submitProvideThisLater()
+            hasGasSupplyPage.submitProvideThisLater()
             val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
             // Provide Gas Cert Later - render page
@@ -3305,12 +3290,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            hasGasSupplyPage.submitHasGasSupply()
-            val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-            // Has Gas Cert. Submit with no option selected
-            assertThat(hasGasCertPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            hasGasCertPage.submitProvideThisLater()
+            hasGasSupplyPage.submitProvideThisLater()
             val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
             // Provide Gas Cert Later - render page

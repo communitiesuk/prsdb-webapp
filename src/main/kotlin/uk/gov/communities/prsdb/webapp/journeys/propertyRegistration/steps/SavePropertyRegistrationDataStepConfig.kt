@@ -12,8 +12,9 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -136,13 +137,17 @@ class SavePropertyRegistrationDataStepConfig(
             jointLandlordEmails = jointLandlordEmails,
             lettingAgentEmail = lettingAgentEmail,
             markedJointLandlord = markedJointLandlord,
-            // TODO PDJB-1665: when registration is delegated to a letting agent the gas-supply question is skipped, so
-            //  we persist a placeholder hasGasSupply = true (alongside gasSafetyCertProvideLater = true) to keep the
-            //  gas cert as "provide later" rather than "not required". Revisit when the delegated gas-supply row is
-            //  hidden/handled properly.
+            // TODO PDJB-1720/PDJB-1721: when registration is delegated to a letting agent the gas-supply question is
+            //  skipped, so we persist a placeholder hasGasSupply = true (alongside gasSafetyCertProvideLater = true)
+            //  to keep the gas cert as "provide later" rather than "not required". Revisit when the delegated
+            //  gas-supply row is hidden/handled properly. Consider renaming hasGasSupply to hasGasSupplyOrProvideLater
+            //  (will require DB migration).
             hasGasSupply =
                 isDelegatedToLettingAgent ||
-                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome == YesOrNo.YES,
+                    state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome.let {
+                        it == GasSupplyOutcome.HAS_SUPPLY || it == GasSupplyOutcome.PROVIDE_LATER
+                    } ||
+                    state.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome == GasCertOutcome.PROVIDE_LATER,
             gasSafetyCertIssueDate =
                 state.gasSafetyTask.gasSafetyDetailsTask
                     .getGasSafetyCertificateIssueDateIfReachable()
@@ -150,7 +155,8 @@ class SavePropertyRegistrationDataStepConfig(
             gasSafetyFileUploadIds = state.gasSafetyTask.gasSafetyDetailsTask.gasUploadIds,
             gasSafetyCertProvideLater =
                 isDelegatedToLettingAgent ||
-                    state.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
+                    state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome == GasSupplyOutcome.PROVIDE_LATER ||
+                    state.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome == GasCertOutcome.PROVIDE_LATER,
             electricalSafetyFileUploadIds = state.electricalSafetyTask.electricalSafetyDetailsTask.electricalUploadIds,
             electricalSafetyExpiryDate =
                 state.electricalSafetyTask.electricalSafetyDetailsTask
