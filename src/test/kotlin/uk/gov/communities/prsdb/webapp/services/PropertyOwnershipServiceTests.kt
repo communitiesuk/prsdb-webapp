@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
@@ -87,6 +88,9 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockLettingAgentAccessService: LettingAgentAccessService
+
+    @Mock
+    private lateinit var mockLettingAgentAccessRepository: LettingAgentAccessRepository
 
     @Mock
     private lateinit var mockFeatureFlagManager: FeatureFlagManager
@@ -557,7 +561,7 @@ class PropertyOwnershipServiceTests {
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
 
             verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessService)
+            verifyNoInteractions(mockLettingAgentAccessRepository)
         }
 
         @Test
@@ -566,7 +570,7 @@ class PropertyOwnershipServiceTests {
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
         }
@@ -576,7 +580,7 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(null)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
         }
@@ -587,7 +591,7 @@ class PropertyOwnershipServiceTests {
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
             assertEquals(access, propertyOwnershipService.getLettingAgentAccess(1L))
         }
@@ -602,7 +606,7 @@ class PropertyOwnershipServiceTests {
             assertFalse(propertyOwnershipService.hasLettingAgent(1L))
 
             verify(mockPropertyOwnershipRepository, never()).findByIdAndIsActiveTrue(any())
-            verifyNoInteractions(mockLettingAgentAccessService)
+            verifyNoInteractions(mockLettingAgentAccessRepository)
         }
 
         @Test
@@ -611,7 +615,7 @@ class PropertyOwnershipServiceTests {
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
             assertFalse(propertyOwnershipService.hasLettingAgent(1L))
         }
@@ -621,7 +625,7 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(null)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
 
             assertFalse(propertyOwnershipService.hasLettingAgent(1L))
         }
@@ -632,7 +636,7 @@ class PropertyOwnershipServiceTests {
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(1L)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
             assertTrue(propertyOwnershipService.hasLettingAgent(1L))
         }
@@ -670,7 +674,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId))
                 .thenReturn(MockLandlordData.createOccupiedPropertyOwnership(id = propertyOwnershipId))
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)).thenReturn(null)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(null)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
 
@@ -685,7 +689,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(true)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)
@@ -701,7 +705,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockUserToLandlordService.getCurrentLandlordForUserOrNull()).thenReturn(null)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnershipId)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
+            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)).thenReturn(access)
             whenever(mockLettingAgentAccessService.isTokenAuthorisedInSession(access.token.toString())).thenReturn(false)
 
             val result = propertyOwnershipService.getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId)

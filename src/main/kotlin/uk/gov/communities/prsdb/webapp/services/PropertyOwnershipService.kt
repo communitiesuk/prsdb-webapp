@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
@@ -46,6 +47,7 @@ class PropertyOwnershipService(
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
@@ -131,14 +133,14 @@ class PropertyOwnershipService(
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
 
-        return lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)
+        return lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
     }
 
     fun hasLettingAgent(propertyOwnershipId: Long): Boolean {
         if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
 
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        val lettingAgentAccess = lettingAgentAccessService.getLettingAgentAccessByPropertyOwnershipId(propertyOwnershipId)
+        val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
 
         return hasLettingAgent(propertyOwnership, lettingAgentAccess)
     }
