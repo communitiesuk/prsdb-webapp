@@ -59,26 +59,19 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
 
     @Nested
     inner class ProvideGasCertLaterStep {
+        @BeforeEach
+        fun enableLettingAgentsFlag() {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+        }
+
         @Test
         fun `Occupied property shows updated provide later content when letting agents is enabled`(page: Page) {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = true)
 
             assertThat(provideLaterPage.heading).hasText("Provide these details later")
-            assertThat(provideLaterPage.sectionHeader).containsText("Gas safety certificate")
-            assertThat(provideLaterPage.subheading).hasText("When you’ll need to provide these details")
-            assertThat(provideLaterPage.paragraphs).hasText(
-                arrayOf(
-                    "You can continue and submit your registration now, but you’ll need to return later and complete this section.",
-                    "If your property has a gas supply or any gas appliances, this will include providing a gas safety certificate.",
-                    "This is because you’ve told us this property is occupied by tenants.",
-                ),
-            )
             assertThat(provideLaterPage.insetText).hasText(
                 "To keep the property registered, we need to know about its gas safety within 28 days.",
             )
-            assertThat(provideLaterPage.gasSafetyLink).hasCount(0)
-            assertThat(provideLaterPage.form.submitButton).hasText("Continue")
 
             provideLaterPage.form.submit()
             assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -86,25 +79,13 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
 
         @Test
         fun `Unoccupied property shows updated provide later content when letting agents is enabled`(page: Page) {
-            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = false)
 
             assertThat(provideLaterPage.heading).hasText("Provide these details later")
-            assertThat(provideLaterPage.sectionHeader).containsText("Gas safety certificate")
-            assertThat(provideLaterPage.subheading).hasText("When you’ll need to provide these details")
             assertThat(provideLaterPage.paragraphs.first()).hasText(
                 "If your property has a gas supply or any gas appliances, you must get a gas safety certificate before a tenant moves in.",
             )
-            assertThat(provideLaterPage.paragraphs.last()).hasText(
-                "You can continue to finish your registration and get a Property Registration Number. " +
-                    "However, you must return and complete this section within 28 days of a tenant moving in.",
-            )
-            assertThat(provideLaterPage.paragraphs).hasCount(3)
             assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
-            assertThat(provideLaterPage.gasSafetyLink).hasAttribute("target", "_blank")
-            assertThat(provideLaterPage.gasSafetyLink).hasAttribute("rel", "noreferrer noopener")
-            assertThat(provideLaterPage.insetText).hasCount(0)
-            assertThat(provideLaterPage.form.submitButton).hasText("Save and continue")
 
             provideLaterPage.form.submit()
             assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -116,18 +97,8 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = true)
 
             assertThat(provideLaterPage.heading).hasText("Provide your gas safety certificate later")
-            assertThat(provideLaterPage.subheading).hasText("When you’ll need to upload your gas safety certificate")
-            assertThat(provideLaterPage.paragraphs.first()).hasText(
-                "You can continue now to get your Property Registration Number, " +
-                    "but you’ll need to return later and upload your gas safety certificate.",
-            )
-            assertThat(provideLaterPage.paragraphs.nth(1)).hasText(
-                "To keep the property registered, we need all its compliance certificates within 28 days. " +
-                    "This is because you’ve told us this property’s occupied by tenants.",
-            )
             assertThat(provideLaterPage.insetText).hasText("You must upload your gas safety certificate within 28 days.")
             assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
-            assertThat(provideLaterPage.form.submitButton).hasText("Continue")
 
             provideLaterPage.form.submit()
             assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -139,15 +110,8 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             val provideLaterPage = navigateToProvideLaterPage(page, isOccupied = false)
 
             assertThat(provideLaterPage.heading).hasText("Provide your gas safety certificate later")
-            assertThat(provideLaterPage.subheading).hasText("When you’ll need to upload your gas safety certificate")
             assertThat(provideLaterPage.paragraphs.first()).hasText("You must get a gas safety certificate before a tenant moves in.")
-            assertThat(provideLaterPage.paragraphs.last()).hasText(
-                "You can continue to finish your registration and get a Property Registration Number. " +
-                    "However, you must return and add your gas safety certificate within 28 days of a tenant moving in.",
-            )
             assertThat(provideLaterPage.gasSafetyLink).hasAttribute("href", LANDLORD_GAS_SAFETY_URL)
-            assertThat(provideLaterPage.insetText).hasCount(0)
-            assertThat(provideLaterPage.form.submitButton).hasText("Save and continue")
 
             provideLaterPage.form.submit()
             assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)

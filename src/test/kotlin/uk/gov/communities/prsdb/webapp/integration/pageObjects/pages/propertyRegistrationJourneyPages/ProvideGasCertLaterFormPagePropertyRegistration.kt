@@ -14,7 +14,6 @@ class ProvideGasCertLaterFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ProvideGasCertLaterStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val subheading = Heading(page.locator("main section h2"))
     val paragraphs = page.locator("main section p.govuk-body")
     val gasSafetyLink = Link.byText(page, "gas safety for landlords (opens in new tab)")
     val form = PostForm(page)

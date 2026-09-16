@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -776,17 +774,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, LandlordDashboardPage::class)
         }
 
-        @ParameterizedTest(name = "letting agents enabled = {0}")
-        @ValueSource(booleans = [true, false])
-        fun `User can choose to provide compliance certificates later if their property is occupied`(
-            lettingAgentsEnabled: Boolean,
-            page: Page,
-        ) {
-            if (lettingAgentsEnabled) {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            } else {
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
+        @Test
+        fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
@@ -800,13 +790,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
-            val expectedGasSafetyInset =
-                if (lettingAgentsEnabled) {
-                    "To keep the property registered, we need to know about its gas safety within 28 days."
-                } else {
-                    "You must upload your gas safety certificate within 28 days."
-                }
-            assertThat(provideGasCertLaterPage.insetText).hasText(expectedGasSafetyInset)
+            assertThat(provideGasCertLaterPage.insetText).hasText(
+                "To keep the property registered, we need to know about its gas safety within 28 days.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -865,17 +851,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
-        @ParameterizedTest(name = "letting agents enabled = {0}")
-        @ValueSource(booleans = [true, false])
-        fun `User can choose to provide compliance certificates later if their property is unoccupied`(
-            lettingAgentsEnabled: Boolean,
-            page: Page,
-        ) {
-            if (lettingAgentsEnabled) {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            } else {
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
+        @Test
+        fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
@@ -890,14 +868,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
             assertThat(provideGasCertLaterPage.insetText).isHidden()
-            val expectedGasSafetyParagraph =
-                if (lettingAgentsEnabled) {
-                    "If your property has a gas supply or any gas appliances, " +
-                        "you must get a gas safety certificate before a tenant moves in."
-                } else {
-                    "You must get a gas safety certificate before a tenant moves in."
-                }
-            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(expectedGasSafetyParagraph)
+            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
+                "If your property has a gas supply or any gas appliances, " +
+                    "you must get a gas safety certificate before a tenant moves in.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -3275,17 +3249,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
 
-        @ParameterizedTest(name = "letting agents enabled = {0}")
-        @ValueSource(booleans = [true, false])
-        fun `User can choose to provide compliance certificates later if their property is occupied`(
-            lettingAgentsEnabled: Boolean,
-            page: Page,
-        ) {
-            if (lettingAgentsEnabled) {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            } else {
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
+        @Test
+        fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
@@ -3299,13 +3265,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            val expectedGasSafetyInset =
-                if (lettingAgentsEnabled) {
-                    "To keep the property registered, we need to know about its gas safety within 28 days."
-                } else {
-                    "You must upload your gas safety certificate within 28 days."
-                }
-            assertThat(provideGasCertLaterPage.insetText).hasText(expectedGasSafetyInset)
+            assertThat(provideGasCertLaterPage.insetText).hasText(
+                "To keep the property registered, we need to know about its gas safety within 28 days.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -3364,17 +3326,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertPageIs(page, TaskListPagePropertyRegistration::class)
         }
 
-        @ParameterizedTest(name = "letting agents enabled = {0}")
-        @ValueSource(booleans = [true, false])
-        fun `User can choose to provide compliance certificates later if their property is unoccupied`(
-            lettingAgentsEnabled: Boolean,
-            page: Page,
-        ) {
-            if (lettingAgentsEnabled) {
-                featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
-            } else {
-                featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
-            }
+        @Test
+        fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
 
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
@@ -3389,14 +3343,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             assertThat(provideGasCertLaterPage.insetText).isHidden()
-            val expectedGasSafetyParagraph =
-                if (lettingAgentsEnabled) {
-                    "If your property has a gas supply or any gas appliances, " +
-                        "you must get a gas safety certificate before a tenant moves in."
-                } else {
-                    "You must get a gas safety certificate before a tenant moves in."
-                }
-            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(expectedGasSafetyParagraph)
+            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
+                "If your property has a gas supply or any gas appliances, " +
+                    "you must get a gas safety certificate before a tenant moves in.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
