@@ -11,12 +11,12 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertOnlyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyOrProvideLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
@@ -102,13 +102,13 @@ class GasSafetyDetailsStateTests {
             override var gasUploadMap: Map<Int, CertificateUpload> = emptyMap()
             override var highestAssignedGasMemberId: Int? = null
             override val hasGasSupplyStep = mock<HasGasSupplyStep>()
-            override val hasGasCertStep = mock<HasGasCertStep>()
+            override val beforePdjb1022HasGasCertStep = mock<BeforePdjb1022HasGasCertStep>()
             override val hasGasSupplyOrProvideLaterStep = mock<HasGasSupplyOrProvideLaterStep>()
-            override val hasGasCertOnlyStep = mock<HasGasCertOnlyStep>()
+            override val hasGasCertStep = mock<HasGasCertStep>()
             override val gasSupplyOutcome: GasSupplyOutcome? = null
             override val gasSupplyOutcomeStep: JourneyStep.RequestableStep<*, *, *> = hasGasSupplyStep
             override val gasCertOutcome: GasCertOutcome? = null
-            override val gasCertOutcomeStep: JourneyStep.RequestableStep<*, *, *> = hasGasCertStep
+            override val gasCertOutcomeStep: JourneyStep.RequestableStep<*, *, *> = beforePdjb1022HasGasCertStep
             override val uploadGasCertStep = mock<UploadGasCertStep>()
             override val checkGasCertUploadsStep = mock<CheckGasCertUploadsStep>()
             override val removeGasCertUploadStep = mock<RemoveGasCertUploadStep>()

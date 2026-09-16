@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -71,7 +71,7 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
             HasGasCertFormModel().apply {
                 hasCert = true
             }
-        withSubmittedValue(HasGasCertStep.ROUTE_SEGMENT, hasGasCertificateFormModel)
+        withSubmittedValue(BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT, hasGasCertificateFormModel)
         return self()
     }
 
@@ -80,7 +80,7 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
             HasGasCertFormModel().apply {
                 hasCert = false
             }
-        withSubmittedValue(HasGasCertStep.ROUTE_SEGMENT, hasGasCertFormModel)
+        withSubmittedValue(BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT, hasGasCertFormModel)
         withSubmittedValue(GasCertMissingStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
@@ -100,7 +100,7 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
             HasGasCertFormModel().apply {
                 action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
             }
-        withSubmittedValue(HasGasCertStep.ROUTE_SEGMENT, hasGasCertFormModel)
+        withSubmittedValue(BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT, hasGasCertFormModel)
         withSubmittedValue(ProvideGasCertLaterStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }

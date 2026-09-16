@@ -19,9 +19,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Cert
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
@@ -33,7 +33,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
     lateinit var mockState: GasSafetyDetailState
 
     private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
-    private val mockHasGasCertStep: HasGasCertStep = mock()
+    private val mockHasGasCertStep: BeforePdjb1022HasGasCertStep = mock()
     private val mockGasCertIssueDateStep: GasCertIssueDateStep = mock()
     private val mockCheckGasCertUploadsStep: CheckGasCertUploadsStep = mock()
     private val mockUploadService: UploadService = mock()

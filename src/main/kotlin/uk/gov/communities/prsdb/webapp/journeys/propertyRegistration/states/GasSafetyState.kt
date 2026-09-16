@@ -6,13 +6,13 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertOnlyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyOrProvideLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
@@ -29,9 +29,9 @@ interface GasSafetyState : JourneyState {
 
 interface GasSafetyDetailState : JourneyState {
     val hasGasSupplyStep: HasGasSupplyStep
-    val hasGasCertStep: HasGasCertStep
+    val beforePdjb1022HasGasCertStep: BeforePdjb1022HasGasCertStep
     val hasGasSupplyOrProvideLaterStep: HasGasSupplyOrProvideLaterStep
-    val hasGasCertOnlyStep: HasGasCertOnlyStep
+    val hasGasCertStep: HasGasCertStep
     val gasCertIssueDateStep: GasCertIssueDateStep
     val uploadGasCertStep: UploadGasCertStep
     val checkGasCertUploadsStep: CheckGasCertUploadsStep
