@@ -13,6 +13,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -35,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentD
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -114,8 +116,8 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty sets the registering landlord's anniversary when it is null`() {
-        val landlord = MockLandlordData.createIndividualLandlord()
+    fun `registerProperty delegates to setAnniversaryIfAbsent with the property's registration date`() {
+        val landlord = spy(MockLandlordData.createIndividualLandlord())
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val expectedPropertyOwnership =
@@ -170,8 +172,7 @@ class PropertyRegistrationServiceTests {
             customPropertyType = null,
         )
 
-        assertEquals(10, landlord.anniversaryDay)
-        assertEquals(5, landlord.anniversaryMonth)
+        verify(landlord).setAnniversaryIfAbsent(MonthDay.of(5, 10))
     }
 
     @Test
