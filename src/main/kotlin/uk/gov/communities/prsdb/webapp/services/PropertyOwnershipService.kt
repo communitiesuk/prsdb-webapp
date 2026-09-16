@@ -523,6 +523,7 @@ class PropertyOwnershipService(
     }
 
     companion object {
+        // This static method allows non web services to perform this check
         fun hasLettingAgent(
             propertyOwnership: PropertyOwnership,
             lettingAgentAccess: LettingAgentAccess?,
