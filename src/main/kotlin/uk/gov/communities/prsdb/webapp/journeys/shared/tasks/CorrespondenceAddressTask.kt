@@ -28,7 +28,6 @@ class CorrespondenceAddressTask(
         mapOf(
             "fieldSetHeading" to "addressForms.lookupAddress.correspondence.fieldSetHeading",
             "fieldSetHint" to "addressForms.lookupAddress.correspondence.fieldSetHint",
-            "todoContent" to "TODO (PDJB-1591): this lookup page needs the rich guidance content (inset text and bullet guidance)",
         )
 
     override val selectAddressContentProperties: Map<String, Any?> =
@@ -40,7 +39,6 @@ class CorrespondenceAddressTask(
         mapOf(
             "fieldSetHeading" to "addressForms.manualAddress.correspondence.fieldSetHeading",
             "fieldSetHint" to "addressForms.manualAddress.correspondence.fieldSetHint",
-            "todoContent" to "TODO (PDJB-1589): correspondence address skeleton - this page may need content changes",
         )
 
     companion object {

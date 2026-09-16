@@ -23,7 +23,7 @@ lookupAddress:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
   correspondence:
-    fieldSetHeading: Where should the council send post about this property?
+    fieldSetHeading: 'TODO PDJB-1591: Where should the council send post about this property?'
     fieldSetHint: This must be an address in England or Wales. It must not be a PO Box.
   postcode:
     label: Postcode
@@ -80,7 +80,7 @@ manualAddress:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
   correspondence:
-    fieldSetHeading: What is the postal address?
+    fieldSetHeading: 'TODO PDJB-1589: What is the postal address?'
     fieldSetHint: This must be an address in England or Wales.
   fieldSetHint: This should be an address within England
   addressLineOne:
