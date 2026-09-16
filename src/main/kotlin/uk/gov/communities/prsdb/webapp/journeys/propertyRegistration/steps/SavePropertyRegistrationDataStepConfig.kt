@@ -54,9 +54,6 @@ class SavePropertyRegistrationDataStepConfig(
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val isSkippingEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
-        // TODO PDJB-1391: when a letting agent provides the rented-out details the landlord provides no licensing,
-        //  tenancy or compliance details, so those tasks are skipped. Persist placeholder "provide later" values
-        //  until the real delegated-details flow is implemented.
         val isDelegatedToLettingAgent = state.isDelegatedToLettingAgent(featureFlagManager)
         val lettingAgentEmail =
             if (isDelegatedToLettingAgent) {

@@ -10,7 +10,7 @@ data class LettingAgentPropertyUpdateNotificationEmail(
     private val recipientNameKey = "recipient name"
     private val propertyAddressKey = "property address"
     private val registrationNumberKey = "registration number"
-    private val updatedBulletsKey = "updated bullets"
+    private val updatedContentKey = "updated bullets"
     private val propertyRecordUrlKey = "property record url"
 
     override val template = EmailTemplate.LETTING_AGENT_PROPERTY_UPDATE_NOTIFICATION_EMAIL
@@ -20,7 +20,7 @@ data class LettingAgentPropertyUpdateNotificationEmail(
             recipientNameKey to recipientName,
             propertyAddressKey to propertyAddress,
             registrationNumberKey to registrationNumber,
-            updatedBulletsKey to formatAsBulletList(updatedBullets),
+            updatedContentKey to formatEmailList(updatedBullets),
             propertyRecordUrlKey to propertyRecordUrl,
         )
 }

@@ -20,7 +20,9 @@ const val DELEGATE_TO_LETTING_AGENT = "pdjb-1022-delegate-to-letting-agent"
 
 const val PASSWORD_BENCHMARK_ENDPOINT = "pdjb-1664-password-benchmark-endpoint"
 
-const val CORRESPONDENCE_ADDRESS = "pdjb-1589-correspondence-address"
+const val CORRESPONDENCE_ADDRESS = "pdjb-1040-correspondence-address"
+
+const val PAYMENTS = "pdjb-1009-payments"
 
 val featureFlagNames =
     listOf(
@@ -31,4 +33,5 @@ val featureFlagNames =
         DELEGATE_TO_LETTING_AGENT,
         PASSWORD_BENCHMARK_ENDPOINT,
         CORRESPONDENCE_ADDRESS,
+        PAYMENTS,
     )
