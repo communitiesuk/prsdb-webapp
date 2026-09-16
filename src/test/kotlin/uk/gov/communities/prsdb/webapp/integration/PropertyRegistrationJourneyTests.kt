@@ -2185,7 +2185,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
         }
 
-        // TODO PDJB-1589: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
+        // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
         @Nested
         inner class CorrespondenceAddressFlagDisabled {
             @BeforeEach

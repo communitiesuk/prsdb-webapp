@@ -71,9 +71,6 @@ class PropertyStateSessionBuilder(
         return this
     }
 
-    // Restructured journey only (CORRESPONDENCE_ADDRESS flag on): completes the skeleton "Who the council should
-    // contact" task (PDJB-1589) so steps after it stay reachable when building later-stage journey state. This is
-    // inert when the flag is off, as the correspondence steps do not exist in that journey.
     fun withCompletedCorrespondence(
         singleLineAddress: String = "1 Fictional Road, FA1 1AA",
         houseNameOrNumber: String = "1",

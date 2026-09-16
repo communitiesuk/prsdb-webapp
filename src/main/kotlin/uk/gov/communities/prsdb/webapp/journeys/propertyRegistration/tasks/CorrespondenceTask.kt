@@ -13,8 +13,6 @@ interface CorrespondenceState : JourneyState {
     val addressTask: CorrespondenceAddressTask
 }
 
-// Skeleton "Who the council should contact" task (PDJB-1589): a placeholder correspondence email step
-// (TODO PDJB-1590) followed by the reused postal-address flow (CorrespondenceAddressTask).
 @JourneyFrameworkComponent
 class CorrespondenceTask(
     journeyStateService: JourneyStateService,

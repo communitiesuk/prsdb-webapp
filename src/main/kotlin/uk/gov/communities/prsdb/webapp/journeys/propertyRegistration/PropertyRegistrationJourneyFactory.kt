@@ -779,7 +779,6 @@ class PropertyRegistrationJourney(
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
-    // Restructured journey only (flag-on) — correspondence address skeleton (PDJB-1589)
     override val correspondenceTask: CorrespondenceTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
@@ -895,7 +894,6 @@ interface PropertyRegistrationJourneyState :
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
 
-    // Restructured journey only (flag-on) — correspondence address skeleton (PDJB-1589)
     val correspondenceTask: CorrespondenceTask
     val tenancyDetailsTask: TenancyDetailsTask
     val whoProvidesDetailsTask: WhoProvidesDetailsTask

@@ -26,12 +26,12 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
             assert(
-                taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot\u00A0start\u00A0yet"),
+                taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot start yet"),
             )
             assert(
                 taskListPage.getAboutYourPropertyTask(
                     "Tell us if your property’s occupied",
-                ).statusText.contains("Cannot\u00A0start\u00A0yet"),
+                ).statusText.contains("Cannot start yet"),
             )
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
@@ -153,7 +153,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         }
     }
 
-    // TODO PDJB-1589: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
+    // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
     @Nested
     inner class CorrespondenceAddressTaskFlagDisabled {
         @BeforeEach
