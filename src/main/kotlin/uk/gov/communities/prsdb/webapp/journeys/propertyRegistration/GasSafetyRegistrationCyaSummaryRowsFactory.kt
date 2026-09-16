@@ -21,12 +21,17 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         val gasSupplyRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
-                fieldValue = getGasSupplyFieldValue(),
-                destination = destinationProvider(getGasSupplyRowDestination()),
+                // TODO PDJB-1720/PDJB-1721: PROVIDE_LATER currently marks the property as having gas supply
+                //  indefinitely. Revisit once those tickets clarify how a deferred answer should be represented here.
+                fieldValue =
+                    state.gasSupplyOutcome == GasSupplyOutcome.HAS_SUPPLY ||
+                        state.gasSupplyOutcome == GasSupplyOutcome.PROVIDE_LATER,
+                destination = destinationProvider(state.gasSupplyOutcomeStep),
             )
 
         val certStatusRow =
             when (scenario) {
+                GasSafetyScenario.PROVIDE_LATER -> getProvideThisLaterRow()
                 GasSafetyScenario.NO_CERT, GasSafetyScenario.CERT_EXPIRED -> getNoCertRow()
                 else -> null
             }
@@ -89,20 +94,6 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         )
     }
 
-    private fun getProvideLaterKey(): String =
-        if (state.isOccupied) {
-            "checkGasSafety.provideThisLater.occupied"
-        } else {
-            "checkGasSafety.provideThisLater.unoccupied"
-        }
-
-    private fun getGasSupplyFieldValue(): Any =
-        when (scenario) {
-            GasSafetyScenario.NO_GAS_SUPPLY -> false
-            GasSafetyScenario.PROVIDE_LATER -> getProvideLaterKey()
-            else -> true
-        }
-
     private fun getGasSupplyRowDestination(): JourneyStep.RequestableStep<*, *, *> =
         if (scenario == GasSafetyScenario.PROVIDE_LATER && state.gasCertOutcome == GasCertOutcome.PROVIDE_LATER) {
             state.gasCertOutcomeStep
@@ -110,12 +101,26 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             state.gasSupplyOutcomeStep
         }
 
+    private fun getProvideThisLaterRow(): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            fieldHeading = "checkGasSafety.gasCert.fieldHeading",
+            fieldValue = getProvideLaterKey(),
+            destination = destinationProvider(getGasSupplyRowDestination()),
+        )
+
     private fun getNoCertRow(): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = if (state.isOccupied) false else getProvideLaterKey(),
             destination = destinationProvider(state.gasCertOutcomeStep),
         )
+
+    private fun getProvideLaterKey(): String =
+        if (state.isOccupied) {
+            "checkGasSafety.provideThisLater.occupied"
+        } else {
+            "checkGasSafety.provideThisLater.unoccupied"
+        }
 
     private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario {
         when (state.gasSupplyOutcome) {

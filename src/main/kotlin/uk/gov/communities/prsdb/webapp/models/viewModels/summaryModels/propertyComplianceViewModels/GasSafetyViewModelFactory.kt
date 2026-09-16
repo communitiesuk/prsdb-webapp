@@ -40,19 +40,13 @@ class GasSafetyViewModelFactory(
             .apply {
                 val status = getStatus(propertyCompliance)
 
+                // TODO: PDJB-1722: Hide the "Does the property have a gas supply..." (hasGasSupply) row
+                //  when the gas task is "Provide this later".
                 when (status) {
                     ComplianceCertStatus.NOT_REQUIRED -> {
                         addRow(
                             key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
                             value = "commonText.no",
-                        )
-                        return@apply
-                    }
-
-                    ComplianceCertStatus.PROVIDE_LATER -> {
-                        addRow(
-                            key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                            value = getMissingCertValue(status, propertyCompliance),
                         )
                         return@apply
                     }

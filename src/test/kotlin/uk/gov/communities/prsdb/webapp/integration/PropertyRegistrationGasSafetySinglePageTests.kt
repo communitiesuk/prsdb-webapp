@@ -137,7 +137,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
                 )
-            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
         }
 
