@@ -584,7 +584,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `getLettingAgentAccess returns access for an delegated when the feature is enabled`() {
+        fun `getLettingAgentAccess returns access for a delegated property when the feature is enabled`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
