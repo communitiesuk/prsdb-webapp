@@ -145,6 +145,7 @@ class ElectricalSafetyDetailsStateTests {
     ): ElectricalSafetyDetailState =
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyDetailState {
             override val isOccupied: Boolean = true
+            override val propertyOwnershipId: Long? = null
             override var electricalUploadMap: Map<Int, CertificateUpload> = mapOf()
             override var highestAssignedElectricalMemberId: Int? = null
             override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()

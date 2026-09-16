@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRep
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
-import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationSingleLineAddress
+import uk.gov.communities.prsdb.webapp.helpers.extensions.savedJourneyStateExtensions.SavedJourneyStateExtensions.Companion.getPropertyRegistrationMultiLineAddress
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationData.IncompletePropertyEmailNotification
@@ -48,14 +48,14 @@ class VirusNotificationEmailHandler(
         if (monitoringEmailAddress != null) {
             emailNotificationService.sendEmail(
                 monitoringEmailAddress,
-                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.singleLineAddress),
+                buildAlertEmail(notification.certificateType, MONITORING_TEAM_RECIPIENT_NAME, ownership.address.toMultiLineAddress()),
             )
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
                 emailNotificationService.sendEmail(
                     landlord.email,
-                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.singleLineAddress),
+                    buildAlertEmail(notification.certificateType, landlord.name, ownership.address.toMultiLineAddress()),
                 )
             }
 
@@ -67,7 +67,7 @@ class VirusNotificationEmailHandler(
                         buildAlertEmail(
                             notification.certificateType,
                             lettingAgentAccess.invitedEmail,
-                            ownership.address.singleLineAddress,
+                            ownership.address.toMultiLineAddress(),
                         ),
                     )
                 }
@@ -92,7 +92,7 @@ class VirusNotificationEmailHandler(
             buildAlertEmail(
                 notification.certificateType,
                 if (monitoringEmailAddress != null) MONITORING_TEAM_RECIPIENT_NAME else landlord.name,
-                savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                savedJourneyState.getPropertyRegistrationMultiLineAddress(),
             ),
         )
     }
@@ -119,13 +119,13 @@ class VirusNotificationEmailHandler(
     private fun buildAlertEmail(
         certificateType: CertificateType,
         recipientName: String,
-        singleLineAddress: String,
+        multiLineAddress: String,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
             certificateType = certificateDescriptionForBody(certificateType),
             // TODO PDJB-1701: Remove recipientName and landlordDashboardUrl once Notify template V3 is live
             recipientName = recipientName,
-            propertyAddress = singleLineAddress,
+            propertyAddress = multiLineAddress,
             landlordDashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
         )
 

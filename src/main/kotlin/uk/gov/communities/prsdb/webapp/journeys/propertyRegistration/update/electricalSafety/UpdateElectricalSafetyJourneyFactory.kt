@@ -183,6 +183,7 @@ class UpdateElectricalSafetyJourney(
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val propertyOwnershipId: Long? get() = propertyId
 }
 
 interface UpdateElectricalSafetyJourneyState :
