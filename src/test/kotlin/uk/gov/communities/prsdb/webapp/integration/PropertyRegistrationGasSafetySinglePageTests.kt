@@ -129,9 +129,15 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             isOccupied: Boolean,
         ): ProvideGasCertLaterFormPagePropertyRegistration {
             val gasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = isOccupied)
-            gasSupplyPage.submitHasGasSupply()
-            val gasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-            gasCertPage.submitProvideThisLater()
+            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                // With the flag enabled, "Provide this later" is submitted directly from the has-gas-supply page
+                gasSupplyPage.submitProvideThisLater()
+            } else {
+                // With the flag disabled, "Provide this later" is only offered on the (legacy) has-gas-cert page
+                gasSupplyPage.submitHasGasSupply()
+                val gasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+                gasCertPage.submitProvideThisLater()
+            }
             return assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
         }
     }

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -15,6 +16,7 @@ class BeforePdjb1022HasGasSupplyStepConfig : AbstractRequestableStepConfig<YesOr
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
