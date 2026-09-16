@@ -26,6 +26,14 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
     }
 
     @Test
+    fun `the service navigation banner is shown with the service name`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
+
+        assertThat(detailsPage.serviceNavigation).isVisible()
+        assertThat(detailsPage.serviceNavigation.serviceName).hasText("Register your rental property")
+    }
+
+    @Test
     fun `when all details are delegated the provide-details inset and single provide-later rows are shown`(page: Page) {
         val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
 
