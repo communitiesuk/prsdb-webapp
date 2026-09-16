@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
@@ -61,6 +62,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
@@ -194,6 +198,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
         }
 
         @Test
@@ -287,6 +292,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
+
+            // TODO PDJB-1590 - update email address page (may need to include check that the landlord's email is displayed)
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
             // Occupancy - render page
@@ -639,6 +655,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
             // Occupancy - render page
@@ -1513,7 +1537,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(taskListPage.getSectionHeading(1)).hasText("How your property’s rented out")
             assertThat(taskListPage.getSectionHeading(2)).hasText("Submit your registration")
             assertEquals(
-                listOf("Property details", "Ownership and landlords", "Tell us if your property’s occupied"),
+                listOf(
+                    "Property details",
+                    "Ownership and landlords",
+                    "Who the council should contact",
+                    "Tell us if your property’s occupied",
+                ),
                 taskListPage.getAboutYourPropertyTaskNames(),
             )
             assertEquals(
@@ -1602,6 +1631,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
 
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
@@ -2234,6 +2270,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
             assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
+        }
+
+        // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
+        @Nested
+        inner class CorrespondenceAddressFlagDisabled {
+            @BeforeEach
+            fun disableCorrespondenceAddressFlag() {
+                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
+            }
+
+            @Test
+            fun `correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy(),
+                    )
+
+                assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
+            }
         }
     }
 
