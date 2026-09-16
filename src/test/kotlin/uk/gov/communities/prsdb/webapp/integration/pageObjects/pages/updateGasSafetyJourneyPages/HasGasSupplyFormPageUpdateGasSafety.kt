@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasS
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.HasGasSupplyFormBasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 
 class HasGasSupplyFormPageUpdateGasSafety(
     page: Page,
@@ -12,5 +12,5 @@ class HasGasSupplyFormPageUpdateGasSafety(
         page,
         LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
-            "/${HasGasSupplyStep.ROUTE_SEGMENT}",
+            "/${BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT}",
     )

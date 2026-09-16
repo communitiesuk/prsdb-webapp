@@ -24,7 +24,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     }
 
     @Nested
-    inner class HasGasSupplyStep {
+    inner class BeforePdjb1022HasGasSupplyStep {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
