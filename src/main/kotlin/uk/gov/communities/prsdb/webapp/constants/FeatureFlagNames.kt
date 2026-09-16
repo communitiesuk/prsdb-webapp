@@ -22,6 +22,8 @@ const val PASSWORD_BENCHMARK_ENDPOINT = "pdjb-1664-password-benchmark-endpoint"
 
 const val CORRESPONDENCE_ADDRESS = "pdjb-1040-correspondence-address"
 
+const val PAYMENTS = "pdjb-1009-payments"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -31,4 +33,5 @@ val featureFlagNames =
         DELEGATE_TO_LETTING_AGENT,
         PASSWORD_BENCHMARK_ENDPOINT,
         CORRESPONDENCE_ADDRESS,
+        PAYMENTS,
     )

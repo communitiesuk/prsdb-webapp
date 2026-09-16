@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
 import jakarta.persistence.Entity
@@ -13,6 +14,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Transient
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
+import java.time.MonthDay
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -42,4 +44,32 @@ abstract class Landlord : ModifiableAuditableEntity() {
     private var ownershipLinks: MutableSet<OwnershipLink> = mutableSetOf()
 
     val landlordships: Set<PropertyOwnership> get() = ownershipLinks.map { it.propertyOwnership }.toSet()
+
+    @Column(name = "anniversary_day")
+    open var anniversaryDay: Int? = null
+        protected set
+
+    @Column(name = "anniversary_month")
+    open var anniversaryMonth: Int? = null
+        protected set
+
+    val anniversary: MonthDay?
+        get() {
+            val day = anniversaryDay
+            val month = anniversaryMonth
+            return when {
+                day == null && month == null -> null
+                day != null && month != null -> MonthDay.of(month, day)
+                else -> throw IllegalStateException(
+                    "Landlord $id has an incomplete anniversary (day=$day, month=$month)",
+                )
+            }
+        }
+
+    fun setAnniversaryIfAbsent(monthDay: MonthDay) {
+        if (anniversary == null) {
+            anniversaryDay = monthDay.dayOfMonth
+            anniversaryMonth = monthDay.monthValue
+        }
+    }
 }

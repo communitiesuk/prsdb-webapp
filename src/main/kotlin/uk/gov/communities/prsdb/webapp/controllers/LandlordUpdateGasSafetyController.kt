@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController.Companion.UPDATE_GAS_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -101,7 +102,15 @@ class LandlordUpdateGasSafetyController(
                     PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
                 )
             },
-            initialiseJourney = { journeyFactory.initialiseJourneyState(Pair(propertyOwnershipId, principal)) },
+            initialiseJourney = {
+                val propertyCompliance =
+                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).propertyCompliance
+                        ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+                journeyFactory.initialiseJourneyState(
+                    Pair(propertyOwnershipId, principal),
+                    propertyCompliance.getMostRecentlyUpdated(),
+                )
+            },
             dispatch = dispatch,
         )
 

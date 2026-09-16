@@ -127,6 +127,8 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
+    fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
+
     fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean {
         if (isCurrentUserLandlord(propertyOwnershipId)) return true
         if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false

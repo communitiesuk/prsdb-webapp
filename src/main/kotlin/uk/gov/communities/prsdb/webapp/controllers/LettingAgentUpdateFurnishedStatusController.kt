@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 @PrsdbController
@@ -25,7 +26,10 @@ class LettingAgentUpdateFurnishedStatusController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initializeJourneyState(token)
+    override fun initialiseJourneyState(
+        token: UUID,
+        currentLastModifiedDate: Instant,
+    ): String = journeyFactory.initializeJourneyState(token, currentLastModifiedDate)
 
     companion object {
         const val LETTING_AGENT_UPDATE_FURNISHED_STATUS_ROUTE =
