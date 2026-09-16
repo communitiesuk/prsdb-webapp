@@ -123,7 +123,13 @@ class UpdateGasSafetyJourneyFactory(
         configureStep(journey.gasSafetyDetailsTask.hasGasSupplyStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
+        configureStep(journey.gasSafetyDetailsTask.hasGasSupplyOrProvideLaterStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
         configureStep(journey.gasSafetyDetailsTask.hasGasCertStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.hasGasCertOnlyStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.gasSafetyDetailsTask.gasCertIssueDateStep) {

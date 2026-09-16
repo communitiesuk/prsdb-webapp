@@ -5,13 +5,16 @@ import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertOnlyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyOrProvideLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
@@ -27,6 +30,8 @@ interface GasSafetyState : JourneyState {
 interface GasSafetyDetailState : JourneyState {
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep
+    val hasGasSupplyOrProvideLaterStep: HasGasSupplyOrProvideLaterStep
+    val hasGasCertOnlyStep: HasGasCertOnlyStep
     val gasCertIssueDateStep: GasCertIssueDateStep
     val uploadGasCertStep: UploadGasCertStep
     val checkGasCertUploadsStep: CheckGasCertUploadsStep
@@ -38,6 +43,14 @@ interface GasSafetyDetailState : JourneyState {
 
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+
+    // Unified accessors: resolve to the old (letting agent flag-off) or new (letting agent flag-on) step pair, so downstream
+    // consumers (CYA rows, save-step persistence, missing-compliance check) don't need to know which
+    // pair is active. See GasSafetyDetailsTask for the concrete implementation.
+    val gasSupplyOutcome: GasSupplyOutcome?
+    val gasSupplyOutcomeStep: JourneyStep.RequestableStep<*, *, *>
+    val gasCertOutcome: GasCertOutcome?
+    val gasCertOutcomeStep: JourneyStep.RequestableStep<*, *, *>
 
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->
@@ -60,4 +73,16 @@ interface GasSafetyDetailState : JourneyState {
     var highestAssignedGasMemberId: Int?
 
     fun getNextGasUploadMemberId(): Int = highestAssignedGasMemberId?.let { it + 1 } ?: 1
+}
+
+enum class GasSupplyOutcome {
+    HAS_SUPPLY,
+    NO_SUPPLY,
+    PROVIDE_LATER,
+}
+
+enum class GasCertOutcome {
+    HAS_CERTIFICATE,
+    NO_CERTIFICATE,
+    PROVIDE_LATER,
 }

@@ -262,6 +262,9 @@ class PropertyRegistrationJourneyFactory(
                     configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertOnlyStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {

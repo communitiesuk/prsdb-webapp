@@ -32,6 +32,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
@@ -255,7 +257,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.PROVIDE_LATER)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.PROVIDE_LATER)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -307,7 +309,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasCertOutcome).thenReturn(GasCertOutcome.PROVIDE_LATER)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -728,13 +730,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(electricalUploadIds)
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
-        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(gasSafetyTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-        whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
-
-        val mockHasGasCertStep = mock<HasGasCertStep>()
-        whenever(gasSafetyTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
-        whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
+        whenever(gasSafetyTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
+        whenever(gasSafetyTask.gasCertOutcome).thenReturn(GasCertOutcome.HAS_CERTIFICATE)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
@@ -798,13 +795,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(electricalSafetyDetailsTask.electricalUploadIds).thenReturn(emptyList())
         whenever(electricalSafetyDetailsTask.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
-        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(gasSafetyDetailsTask.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-        whenever(mockHasGasSupplyStep.outcome).thenReturn(HasGasSupplyMode.HAS_SUPPLY)
-
-        val mockHasGasCertStep = mock<HasGasCertStep>()
-        lenient().`when`(gasSafetyDetailsTask.hasGasCertStep).thenReturn(mockHasGasCertStep)
-        lenient().`when`(mockHasGasCertStep.outcome).thenReturn(null)
+        lenient().`when`(gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.HAS_SUPPLY)
+        lenient().`when`(gasSafetyDetailsTask.gasCertOutcome).thenReturn(null)
 
         val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
         whenever(electricalSafetyDetailsTask.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
