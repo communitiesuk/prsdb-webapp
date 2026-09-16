@@ -18,14 +18,22 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val scenario: GasSafetyScenario = determineScenario(state)
 
     fun createGasSupplyRows(): List<SummaryListRowViewModel> {
+        // Flag-on position: "provide this later" is answered on the gas-supply question, so the deferred answer is
+        // shown as a single row against that question rather than an implied "yes" plus a separate gas-cert row.
+        if (state.gasSupplyOutcome == GasSupplyOutcome.PROVIDE_LATER) {
+            return listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
+                    fieldValue = getProvideLaterKey(),
+                    destination = destinationProvider(state.gasSupplyOutcomeStep),
+                ),
+            )
+        }
+
         val gasSupplyRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
-                // TODO PDJB-1720/PDJB-1721: PROVIDE_LATER currently marks the property as having gas supply
-                //  indefinitely. Revisit once those tickets clarify how a deferred answer should be represented here.
-                fieldValue =
-                    state.gasSupplyOutcome == GasSupplyOutcome.HAS_SUPPLY ||
-                        state.gasSupplyOutcome == GasSupplyOutcome.PROVIDE_LATER,
+                fieldValue = state.gasSupplyOutcome == GasSupplyOutcome.HAS_SUPPLY,
                 destination = destinationProvider(state.gasSupplyOutcomeStep),
             )
 
@@ -94,18 +102,11 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         )
     }
 
-    private fun getGasSupplyRowDestination(): JourneyStep.RequestableStep<*, *, *> =
-        if (scenario == GasSafetyScenario.PROVIDE_LATER && state.gasCertOutcome == GasCertOutcome.PROVIDE_LATER) {
-            state.gasCertOutcomeStep
-        } else {
-            state.gasSupplyOutcomeStep
-        }
-
     private fun getProvideThisLaterRow(): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = getProvideLaterKey(),
-            destination = destinationProvider(getGasSupplyRowDestination()),
+            destination = destinationProvider(state.gasCertOutcomeStep),
         )
 
     private fun getNoCertRow(): SummaryListRowViewModel =
@@ -122,34 +123,24 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             "checkGasSafety.provideThisLater.unoccupied"
         }
 
-    private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario {
+    private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario =
         when (state.gasSupplyOutcome) {
-            GasSupplyOutcome.NO_SUPPLY -> return GasSafetyScenario.NO_GAS_SUPPLY
-            GasSupplyOutcome.PROVIDE_LATER -> return GasSafetyScenario.PROVIDE_LATER
-            GasSupplyOutcome.HAS_SUPPLY, null -> Unit
+            GasSupplyOutcome.NO_SUPPLY -> GasSafetyScenario.NO_GAS_SUPPLY
+            GasSupplyOutcome.PROVIDE_LATER -> GasSafetyScenario.PROVIDE_LATER
+            GasSupplyOutcome.HAS_SUPPLY, null -> determineCertScenario(state)
         }
-        // TODO PDJB-1720/PDJB-1721: falling through from the gas-supply check to the gas-cert check reads awkwardly.
-        //  Revisit once gas-supply/provide-later semantics are cleaned up.
-        return when (state.gasCertOutcome) {
-            GasCertOutcome.NO_CERTIFICATE -> {
-                GasSafetyScenario.NO_CERT
-            }
 
-            GasCertOutcome.PROVIDE_LATER -> {
-                GasSafetyScenario.PROVIDE_LATER
-            }
-
-            GasCertOutcome.HAS_CERTIFICATE -> {
+    private fun determineCertScenario(state: GasSafetyDetailState): GasSafetyScenario =
+        when (state.gasCertOutcome) {
+            GasCertOutcome.NO_CERTIFICATE -> GasSafetyScenario.NO_CERT
+            GasCertOutcome.PROVIDE_LATER -> GasSafetyScenario.PROVIDE_LATER
+            GasCertOutcome.HAS_CERTIFICATE ->
                 if (state.getGasSafetyCertificateIsOutdated() == true) {
                     GasSafetyScenario.CERT_EXPIRED
                 } else {
                     GasSafetyScenario.UPLOADED_CERTIFICATE
                 }
-            }
 
-            null -> {
-                throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasCert is answered")
-            }
+            null -> throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasCert is answered")
         }
-    }
 }

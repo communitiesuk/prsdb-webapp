@@ -213,12 +213,12 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
-        fun `Provide later - gas cert change link navigates to has gas supply page`(page: Page) {
+        fun `Provide later - gas supply change link navigates to has gas supply page`(page: Page) {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
                 )
-            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
         }
 
