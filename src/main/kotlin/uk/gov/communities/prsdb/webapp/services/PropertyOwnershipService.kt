@@ -130,6 +130,8 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
+    fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
+
     fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
         if (!hasLettingAgent(propertyOwnershipId)) return null
 
