@@ -64,7 +64,6 @@ class VirusScanCallbackService(
         )
     }
 
-    // Sends failure notifications to all landlords and the letting agent for an update journey.
     fun saveEmailForUpdateJourney(
         propertyOwnershipId: Long,
         fileUploadId: Long,
@@ -100,8 +99,6 @@ class VirusScanCallbackService(
         )
     }
 
-    // Update journeys use ownership-targeted notifications when LetA is enabled;
-    // otherwise, and for registration journeys, notifications target the uploading landlord.
     fun saveVirusScanFailureEmail(
         journeyId: String,
         fileUploadId: Long,
@@ -119,11 +116,6 @@ class VirusScanCallbackService(
         }
     }
 
-    // Re-points a submitted file's existing virus-scan callbacks from their in-progress journey target to the
-    // registered property owner, updating each callback row in place rather than deleting and recreating it. The
-    // update is set-based, so the scan-processor's concurrent per-row delete cannot make either side fail on a
-    // zero-row write, and a file whose callbacks the scan has already processed simply has no rows to update (so no
-    // orphaned callbacks are created).
     fun updateCallbacksToOwner(
         fileUploadId: Long,
         propertyOwnershipId: Long,
@@ -146,11 +138,6 @@ class VirusScanCallbackService(
     }
 }
 
-// This sealed class represents the different types of email notifications that can be triggered by a virus scan callback.
-// If, in the future, we need to add callbacks that are not email notifications, we should create a new sealed class containing
-// both this sealed class and the new types of callbacks, rather than adding non-email callback types to this class.
-// There will also be a simple refactor to create a VirusCallbackHandler that wraps the VirusNotificationEmailHandler,
-// which will allow us to handle non-email callbacks without overcomplicating the email handler.
 @Serializable
 sealed class EmailNotificationData {
     @Serializable
