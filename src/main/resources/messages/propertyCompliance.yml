@@ -86,7 +86,7 @@ gasSafetyTask:
   gasSafetyCertIssueDate:
     fieldSetHeading: What’s the issue date on the gas safety certificate?
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
-  # TODO PDJB-1617: Remove these legacy messages when the letting-agent feature flag is removed.
+  # TODO PDJB-1617: Remove the provideGasCertificateLater section when the letting-agent feature flag is removed.
   provideGasCertificateLater:
     title: Provide your gas safety certificate later
     heading: Provide your gas safety certificate later

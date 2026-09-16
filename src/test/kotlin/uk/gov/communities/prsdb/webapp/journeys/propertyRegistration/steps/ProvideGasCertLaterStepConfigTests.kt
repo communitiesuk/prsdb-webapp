@@ -25,7 +25,7 @@ class ProvideGasCertLaterStepConfigTests {
     lateinit var stepConfig: ProvideGasCertLaterStepConfig
 
     @Test
-    fun `chooseTemplate returns occupied template when letting agents is disabled`() {
+    fun `chooseTemplate returns legacy occupied template when letting agents is disabled and isOccupied is true`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(true)
@@ -39,7 +39,7 @@ class ProvideGasCertLaterStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when letting agents is disabled`() {
+    fun `chooseTemplate returns legacy unoccupied template when letting agents is disabled and isOccupied is false`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(false)
@@ -53,7 +53,7 @@ class ProvideGasCertLaterStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns occupied template when letting agents is enabled`() {
+    fun `chooseTemplate returns occupied template when letting agents is enabled and isOccupied is true`() {
         whenever(mockState.isOccupied).thenReturn(true)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
@@ -61,7 +61,7 @@ class ProvideGasCertLaterStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when letting agents is enabled`() {
+    fun `chooseTemplate returns unoccupied template when letting agents is enabled and isOccupied is false`() {
         whenever(mockState.isOccupied).thenReturn(false)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
 
@@ -76,7 +76,7 @@ class ProvideGasCertLaterStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent uses Continue for an occupied property`() {
+    fun `getStepSpecificContent uses Continue when isOccupied is true`() {
         whenever(mockState.isOccupied).thenReturn(true)
 
         val content = setupStepConfig().getStepSpecificContent(mockState)
@@ -85,7 +85,7 @@ class ProvideGasCertLaterStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent uses Save and continue for an unoccupied property`() {
+    fun `getStepSpecificContent uses Save and continue when isOccupied is false`() {
         whenever(mockState.isOccupied).thenReturn(false)
 
         val content = setupStepConfig().getStepSpecificContent(mockState)
