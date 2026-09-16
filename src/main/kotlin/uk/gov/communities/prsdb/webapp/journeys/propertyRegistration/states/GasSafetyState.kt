@@ -43,6 +43,7 @@ interface GasSafetyDetailState : JourneyState {
 
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long?
 
     // Unified accessors: resolve to the old (letting agent flag-off) or new (letting agent flag-on) step pair, so downstream
     // consumers (CYA rows, save-step persistence, missing-compliance check) don't need to know which

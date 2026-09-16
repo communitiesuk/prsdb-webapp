@@ -38,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
@@ -55,7 +54,6 @@ class PropertyDetailsController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val userToLandlordService: UserToLandlordService,
     private val featureFlagManager: FeatureFlagManager,
-    private val lettingAgentAccessService: LettingAgentAccessService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -102,7 +100,7 @@ class PropertyDetailsController(
         modelAndView.addObject("isLandlordView", true)
         if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             modelAndView.addObject("showLettingAgentPanel", true)
-            val lettingAgentAccess = lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnershipId)
+            val lettingAgentAccess = propertyOwnershipService.getLettingAgentAccess(propertyOwnershipId)
             modelAndView.addObject("delegatesToLettingAgent", lettingAgentAccess != null)
             modelAndView.addObject("propertyIsOccupied", propertyOwnership.isOccupied)
             if (propertyOwnership.isOccupied) {

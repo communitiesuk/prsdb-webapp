@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
 import kotlin.math.max
@@ -21,7 +20,6 @@ class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
     private val memberIdService: CollectionKeyParameterService,
-    private val userToLandlordService: UserToLandlordService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyDetailState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -40,25 +38,12 @@ class UploadGasCertStepConfig(
 
     override fun afterStepDataIsAdded(state: GasSafetyDetailState) {
         getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
-            // TODO: PDJB-1582: When a virus scan fails, all parties (landlords and letting agents) should be notified,
-            //  regardless of who uploaded the certificate. Currently only the uploading landlord's callback emails are
-            //  registered, and none are registered when a letting agent uploads the certificate.
-            val landlordId = userToLandlordService.getCurrentLandlordForUserOrNull()?.id
-
-            if (landlordId != null) {
-                virusScanCallbackService.saveEmailForJourney(
-                    state.journeyId,
-                    fileUploadId,
-                    CertificateType.GasSafetyCert,
-                    landlordId,
-                )
-                virusScanCallbackService.saveEmailToMonitoringTeam(
-                    state.journeyId,
-                    fileUploadId,
-                    CertificateType.GasSafetyCert,
-                    landlordId,
-                )
-            }
+            virusScanCallbackService.saveVirusScanFailureEmail(
+                journeyId = state.journeyId,
+                fileUploadId = fileUploadId,
+                certificateType = CertificateType.GasSafetyCert,
+                propertyOwnershipId = state.propertyOwnershipId,
+            )
 
             val formModel = getFormModelFromState(state)
 

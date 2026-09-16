@@ -21,14 +21,14 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     private val tokenWithoutPassword = "3334abcd-5678-abcd-1234-567abcd1111a"
 
     private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
-    private val invitationLink = "http://localhost/letting-agent/invitation?token=$tokenWithoutPassword"
+    private val propertyDetailsLink = "http://localhost/landlord/letting-agent/property-details/$tokenWithoutPassword"
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @BeforeEach
     fun setup() {
-        whenever(absoluteUrlProvider.buildLettingAgentInvitationUri(any())).thenReturn(URI(invitationLink))
+        whenever(absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any())).thenReturn(URI(propertyDetailsLink))
     }
 
     private val seededPassword = "Password123!" // pragma: allowlist secret
@@ -48,8 +48,8 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
             .assertThat(confirmationPage.confirmationBanner)
             .containsText("Property password created")
         assertThat(confirmationPage.backLink.locator).hasCount(0)
-        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", invitationLink)
-        assertThat(confirmationPage.updateLink.locator).hasText(invitationLink)
+        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", propertyDetailsLink)
+        assertThat(confirmationPage.updateLink.locator).hasText(propertyDetailsLink)
         confirmationPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithoutPassword))

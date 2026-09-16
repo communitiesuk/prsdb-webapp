@@ -19,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
@@ -61,6 +62,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceLookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceSelectAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
@@ -185,8 +189,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
         whenever(
-            absoluteUrlProvider.buildLettingAgentInvitationUri(any()),
-        ).thenReturn(URI("http://localhost/letting-agent/invitation?token=test-token"))
+            absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any()),
+        ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
     }
 
     @Nested
@@ -194,6 +198,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+            featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
         }
 
         @Test
@@ -287,6 +292,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
+
+            // TODO PDJB-1590 - update email address page (may need to include check that the landlord's email is displayed)
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
             // Occupancy - render page
@@ -639,6 +655,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
+
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
             // Occupancy - render page
@@ -775,6 +799,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -782,7 +808,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
-            assertThat(provideGasCertLaterPage.insetText).containsText("You must upload your gas safety certificate within 28 days")
+            assertThat(provideGasCertLaterPage.insetText).hasText(
+                "To keep the property registered, we need to know about its gas safety within 28 days.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -843,6 +871,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(gasSafetyHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -851,10 +881,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(gasSafetyHeader)
             assertThat(provideGasCertLaterPage.insetText).isHidden()
-            assertTrue(
-                provideGasCertLaterPage.page
-                    .content()
-                    .contains("You must get a gas safety certificate before a tenant moves in."),
+            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
+                "If your property has a gas supply or any gas appliances, " +
+                    "you must get a gas safety certificate before a tenant moves in.",
             )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -1498,7 +1527,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(taskListPage.getSectionHeading(1)).hasText("How your property’s rented out")
             assertThat(taskListPage.getSectionHeading(2)).hasText("Submit your registration")
             assertEquals(
-                listOf("Property details", "Ownership and landlords", "Tell us if your property’s occupied"),
+                listOf(
+                    "Property details",
+                    "Ownership and landlords",
+                    "Who the council should contact",
+                    "Tell us if your property’s occupied",
+                ),
                 taskListPage.getAboutYourPropertyTaskNames(),
             )
             assertEquals(
@@ -1587,6 +1621,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()
+
+            val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+            correspondenceEmailPage.submit()
+            val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
+            correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+            val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
+            correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
 
             val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
             assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
@@ -2219,6 +2260,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     .single { it.id !in existingIncompletePropertyIds }
                     .savedJourneyState.serializedState
             assertTrue(savedState.contains("\"cachedSelectedAddress\":\"\\\"MANUAL\\\"\""))
+        }
+
+        // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
+        @Nested
+        inner class CorrespondenceAddressFlagDisabled {
+            @BeforeEach
+            fun disableCorrespondenceAddressFlag() {
+                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
+            }
+
+            @Test
+            fun `correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
+                val taskListPage =
+                    navigator.goToRestructuredPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy(),
+                    )
+
+                assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
+            }
         }
     }
 
@@ -3154,6 +3214,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -3161,7 +3223,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
-            assertThat(provideGasCertLaterPage.insetText).containsText("You must upload your gas safety certificate within 28 days")
+            assertThat(provideGasCertLaterPage.insetText).hasText(
+                "To keep the property registered, we need to know about its gas safety within 28 days.",
+            )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -3222,6 +3286,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         @Test
         fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+            featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
             assertThat(hasGasSupplyPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             hasGasSupplyPage.submitProvideThisLater()
@@ -3230,10 +3296,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Provide Gas Cert Later - render page
             assertThat(provideGasCertLaterPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             assertThat(provideGasCertLaterPage.insetText).isHidden()
-            assertTrue(
-                provideGasCertLaterPage.page
-                    .content()
-                    .contains("You must get a gas safety certificate before a tenant moves in."),
+            assertThat(provideGasCertLaterPage.paragraphs.first()).hasText(
+                "If your property has a gas supply or any gas appliances, " +
+                    "you must get a gas safety certificate before a tenant moves in.",
             )
             provideGasCertLaterPage.form.submit()
             val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)

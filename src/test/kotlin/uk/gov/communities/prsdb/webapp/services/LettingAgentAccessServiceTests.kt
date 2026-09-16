@@ -77,68 +77,6 @@ class LettingAgentAccessServiceTests {
     }
 
     @Test
-    fun `getInvitationByPropertyOwnershipId returns the invitation when it exists`() {
-        val invitation = MockLettingAgentData.createLettingAgentAccess()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(invitation)
-
-        val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
-
-        assertEquals(invitation, result)
-    }
-
-    @Test
-    fun `getInvitationByPropertyOwnershipId returns null when no invitation exists`() {
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
-
-        val result = lettingAgentAccessService.getInvitationByPropertyOwnershipId(1L)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `propertyHasLettingAgent returns true when a delegation exists and the property is occupied`() {
-        val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership))
-
-        assertTrue(lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership))
-    }
-
-    @Test
-    fun `propertyHasLettingAgent returns false when no delegation exists`() {
-        val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id)).thenReturn(null)
-
-        assertFalse(lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership))
-    }
-
-    @Test
-    fun `propertyHasLettingAgent returns false when the property is not occupied`() {
-        val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership))
-
-        assertFalse(lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership))
-    }
-
-    @Test
-    fun `getTokenByPropertyOwnershipId returns the token when a delegation exists`() {
-        val token = UUID.randomUUID()
-        val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnership.id))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
-
-        assertEquals(token, lettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnership.id))
-    }
-
-    @Test
-    fun `getTokenByPropertyOwnershipId returns null when no delegation exists`() {
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(null)
-
-        assertNull(lettingAgentAccessService.getTokenByPropertyOwnershipId(1L))
-    }
-
-    @Test
     fun `deleteDelegationByPropertyOwnershipId deletes the delegation`() {
         lettingAgentAccessService.deleteDelegationByPropertyOwnershipId(1L)
 

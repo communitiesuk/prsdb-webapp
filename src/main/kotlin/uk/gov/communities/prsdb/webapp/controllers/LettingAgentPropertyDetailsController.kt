@@ -45,7 +45,7 @@ class LettingAgentPropertyDetailsController(
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(lettingAgentAccess.propertyOwnership.id)
 
-        if (!lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership)) {
+        if (!propertyOwnershipService.hasLettingAgent(propertyOwnership.id)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Property ownership ${propertyOwnership.id} does not have a letting agent",
