@@ -41,7 +41,7 @@ class VirusScanCallbackServiceTests {
     private fun callbackFor(data: EmailNotificationData) = VirusScanCallback(fileUpload, Json.encodeToString<EmailNotificationData>(data))
 
     @Test
-    fun `saveEmailForJourney persists the landlord id in the callback payload`() {
+    fun `saveEmailForJourney saves a journey notification callback`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
@@ -59,7 +59,7 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveEmailToMonitoringTeam wraps a journey notification for the monitoring team`() {
+    fun `saveEmailToMonitoringTeam saves a monitoring callback containing a journey notification`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
@@ -79,7 +79,7 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveEmailForUpdateJourney persists an owner notification in the callback payload`() {
+    fun `saveEmailForUpdateJourney saves an owner notification callback`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
@@ -97,7 +97,7 @@ class VirusScanCallbackServiceTests {
     }
 
     @Test
-    fun `saveEmailToMonitoringTeamForUpdateJourney wraps an owner notification for the monitoring team`() {
+    fun `saveEmailToMonitoringTeamForUpdateJourney saves a monitoring callback containing an owner notification`() {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
