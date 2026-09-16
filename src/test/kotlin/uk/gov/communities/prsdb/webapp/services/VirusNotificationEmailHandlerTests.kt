@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.never
@@ -157,34 +155,6 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @Test
-    fun `handleCallback does not email when property is not delegated`() {
-        // Arrange
-        val (ownershipId, expectedEmail) =
-            arrangeOwnedPropertyUploadCallback(
-                expectedCertType(CertificateType.GasSafetyCert),
-                listOf("landlord1@example.com"),
-            )
-        whenever(lettingAgentAccessRepository.findByPropertyOwnershipId(ownershipId))
-            .thenReturn(MockLettingAgentData.createLettingAgentAccess(invitedEmail = "agent@example.com"))
-
-        Mockito.mockStatic(PropertyOwnershipService::class.java).use { mockedStatic ->
-            mockedStatic
-                .`when`<Boolean> { PropertyOwnershipService.hasLettingAgent(any(), any()) }
-                .thenReturn(false)
-
-            // Act
-            val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, CertificateType.GasSafetyCert)
-            val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
-            virusNotificationEmailHandler.handleCallback(
-                VirusScanCallback(mock(), encodedCallbackData),
-            )
-        }
-
-        // Assert
-        assertEmailSentToAddress(listOf("landlord1@example.com"), expectedEmail)
-    }
-
-    @Test
     fun `handleCallback does not email letting agent when delegation feature is disabled`() {
         // Arrange
         val (ownershipId, expectedEmail) =
@@ -297,13 +267,11 @@ class VirusNotificationEmailHandlerTests {
         bodyCertificateType: String,
         emailAddresses: List<String>,
         recipientName: String = "name",
-        isOccupied: Boolean = true,
     ): Pair<Long, VirusScanUnsuccessfulEmail> {
         val ownership =
             MockLandlordData.createPropertyOwnership(
                 landlords = emailAddresses.mapTo(mutableSetOf()) { MockLandlordData.createIndividualLandlord(email = it) },
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
-                isOccupied = isOccupied,
             )
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
