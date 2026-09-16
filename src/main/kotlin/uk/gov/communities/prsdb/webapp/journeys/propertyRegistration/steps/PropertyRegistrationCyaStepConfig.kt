@@ -76,11 +76,13 @@ class PropertyRegistrationCyaStepConfig(
     }
 
     private fun getLettingAgentRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        val delegationContent =
-            state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides?.let {
-                getLettingAgentDelegationSummaryContent(state, it)
-            } ?: emptyMap()
-        return getRestructuredContent(state, delegationContent)
+        val whoProvides = state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
+        val delegationContent = whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()
+        return getRestructuredContent(state, delegationContent) +
+            mapOf(
+                "showLettingAgentDelegationUnoccupiedPanel" to
+                    (!state.occupied.formModel.notNullValue(OccupancyFormModel::occupied) && whoProvides == null),
+            )
     }
 
     private fun getRestructuredContent(
@@ -111,55 +113,28 @@ class PropertyRegistrationCyaStepConfig(
 
     private fun getDelegatedRestructuredContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-        val licensingDetails =
-            getMockProvideLaterSummaryList(
-                "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                getProvideLaterMessageKey(isOccupied),
-            )
-        val tenancyDetails =
-            getMockProvideLaterSummaryList(
-                "forms.checkPropertyAnswers.tenancyDetails.restructureAndSkipping.tenancyDetailsRow",
-                getProvideLaterMessageKey(isOccupied),
-            )
         val occupancyDetails = occupancyDetailsHelper.getRestructuredOccupancySummaryList(state)
-        val gasSupplyRows =
-            getMockProvideLaterSummaryList("checkGasSafety.gasCert.fieldHeading", getProvideLaterMessageKey(isOccupied))
-        val electricalRows =
-            getMockProvideLaterSummaryList(
-                "checkElectricalSafety.electricalCert.fieldHeading",
-                getProvideLaterMessageKey(isOccupied),
-            )
-        val complianceContent =
-            mapOf(
-                "gasSupplyRows" to gasSupplyRows,
-                "gasCertRows" to emptyList<SummaryListRowViewModel>(),
-                "gasInsetTextKey" to null,
-                "electricalRows" to electricalRows,
-                "electricalInsetTextKey" to null,
-                "epcCardTitle" to null,
-                "epcCardActions" to null,
-                "epcCardRows" to null,
-                "epcExpiredTextKey" to null,
-                "tenancyCheckRows" to emptyList<SummaryListRowViewModel>(),
-                "lowRatingTextKey" to null,
-                "exemptionReasonRows" to emptyList<SummaryListRowViewModel>(),
-                "nonEpcRows" to
-                    getMockProvideLaterSummaryList(
-                        "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
-                        getProvideLaterMessageKey(isOccupied),
-                    ),
-                "epcInsetTextKey" to null,
-            )
         val whoProvides =
             state.whoProvidesDetailsTask.whoProvidesRentalDetailsStep.formModelIfReachableOrNull?.whoProvides
-        return getRestructuredBaseContent(state, licensingDetails, tenancyDetails, occupancyDetails) +
+        return getBaseContent(
+            state = state,
+            submitButtonText = "forms.buttons.completeRegistration",
+            warningTextKey = "forms.checkPropertyAnswers.warning",
+            insetText = false,
+            propertyDetails = getRestructuredPropertyDetailsSummaryList(state),
+            licensingDetails = emptyList(),
+            occupancyDetails = occupancyDetails,
+            tenancyDetails = emptyList(),
+        ) +
             (whoProvides?.let { getLettingAgentDelegationSummaryContent(state, it) } ?: emptyMap()) +
-            complianceContent +
+            mapOf(
+                "hideDelegatedSections" to true,
+            ) +
             getRestructuredContentSections(
                 state,
                 isOccupied,
-                licensingDetails,
-                tenancyDetails,
+                licensingDetails = emptyList(),
+                tenancyDetails = emptyList(),
                 occupancyDetails,
             )
     }
@@ -283,20 +258,6 @@ class PropertyRegistrationCyaStepConfig(
             )
         }
     }
-
-    // TODO PDJB-1391: placeholder used while the letting-agent path reuses this CYA page. The relevant task is
-    //  skipped in that flow, so there is no real answer to show yet; this renders a single "provide later" row.
-    private fun getMockProvideLaterSummaryList(
-        fieldHeading: String,
-        provideLaterMessageKey: String = "forms.checkPropertyAnswers.tenancyDetails.provideLater",
-    ): List<SummaryListRowViewModel> =
-        listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading,
-                provideLaterMessageKey,
-                actionUrl = null,
-            ),
-        )
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(
@@ -424,7 +385,7 @@ class PropertyRegistrationCyaStepConfig(
             return listOf(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
-                    "forms.checkPropertyAnswers.propertyDetails.restructureAndSkipping.noLicensing",
+                    "forms.checkPropertyAnswers.propertyDetails.noLicensing.restructureAndSkipping",
                     Destination.VisitableStep(licensingTask.licensingTypeStep, state.getCyaJourneyId(licensingTask.licensingTypeStep)),
                 ),
             )
@@ -442,13 +403,6 @@ class PropertyRegistrationCyaStepConfig(
 
         return licensingHelper.getCheckYourAnswersSummaryList(state, licensingTask)
     }
-
-    private fun getProvideLaterMessageKey(isOccupied: Boolean): String =
-        if (isOccupied) {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLater"
-        } else {
-            "forms.checkPropertyAnswers.tenancyDetails.provideLaterUnoccupied"
-        }
 }
 
 @JourneyFrameworkComponent
