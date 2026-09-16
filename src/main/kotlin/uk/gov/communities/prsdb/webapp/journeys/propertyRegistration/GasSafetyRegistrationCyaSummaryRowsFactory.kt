@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyScenario
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.toUploadedFileUrls
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -15,132 +14,132 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
-    private val scenario: GasSafetyScenario = determineScenario(state)
+    private enum class Outcome {
+        NO_GAS_SUPPLY,
+        DEFERRED_ON_GAS_SUPPLY_QUESTION,
 
-    fun createGasSupplyRows(): List<SummaryListRowViewModel> {
-        // Flag-on position: "provide this later" is answered on the gas-supply question, so the deferred answer is
-        // shown as a single row against that question rather than an implied "yes" plus a separate gas-cert row.
-        if (state.gasSupplyOutcome == GasSupplyOutcome.PROVIDE_LATER) {
-            return listOf(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
-                    fieldValue = getProvideLaterKey(),
-                    destination = destinationProvider(state.gasSupplyOutcomeStep),
-                ),
-            )
-        }
-
-        val gasSupplyRow =
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
-                fieldValue = state.gasSupplyOutcome == GasSupplyOutcome.HAS_SUPPLY,
-                destination = destinationProvider(state.gasSupplyOutcomeStep),
-            )
-
-        val certStatusRow =
-            when (scenario) {
-                GasSafetyScenario.PROVIDE_LATER -> getProvideThisLaterRow()
-                GasSafetyScenario.NO_CERT, GasSafetyScenario.CERT_EXPIRED -> getNoCertRow()
-                else -> null
-            }
-
-        return listOfNotNull(gasSupplyRow, certStatusRow)
+        // TODO PDJB-1617: delete this outcome (and its branches below) when we remove the delegation feature flag -
+        //  deferring on the gas-certificate question is the flag-off (legacy) behaviour only.
+        DEFERRED_ON_GAS_CERTIFICATE_QUESTION,
+        NO_CERTIFICATE,
+        VALID_CERTIFICATE,
     }
 
+    private val outcome: Outcome = determineOutcome()
+
+    fun createGasSupplyRows(): List<SummaryListRowViewModel> =
+        when (outcome) {
+            Outcome.NO_GAS_SUPPLY -> listOf(gasSupplyRow(hasSupply = false))
+            Outcome.DEFERRED_ON_GAS_SUPPLY_QUESTION -> listOf(deferredOnGasSupplyRow())
+            Outcome.DEFERRED_ON_GAS_CERTIFICATE_QUESTION -> listOf(gasSupplyRow(hasSupply = true), deferredOnGasCertificateRow())
+            Outcome.NO_CERTIFICATE -> listOf(gasSupplyRow(hasSupply = true), noCertificateRow())
+            Outcome.VALID_CERTIFICATE -> listOf(gasSupplyRow(hasSupply = true))
+        }
+
     fun createCertRows(): List<SummaryListRowViewModel> =
-        when (scenario) {
-            GasSafetyScenario.UPLOADED_CERTIFICATE -> getUploadedCertRows()
+        when (outcome) {
+            Outcome.VALID_CERTIFICATE -> uploadedCertificateRows()
             else -> emptyList()
         }
 
     fun getInsetTextKey(): String? =
-        when (scenario) {
-            GasSafetyScenario.NO_GAS_SUPPLY -> {
-                "checkGasSafety.noGasSupplyInsetText"
-            }
-
-            GasSafetyScenario.NO_CERT -> {
-                if (state.isOccupied) "checkGasSafety.occupiedNoCertInsetText" else null
-            }
-
-            GasSafetyScenario.CERT_EXPIRED -> {
-                if (state.isOccupied) "checkGasSafety.occupiedNoCertInsetText" else null
-            }
-
-            else -> {
-                null
-            }
+        when (outcome) {
+            Outcome.NO_GAS_SUPPLY -> "checkGasSafety.noGasSupplyInsetText"
+            Outcome.NO_CERTIFICATE -> if (state.isOccupied) "checkGasSafety.occupiedNoCertInsetText" else null
+            else -> null
         }
 
-    private fun getUploadedCertRows(): List<SummaryListRowViewModel> {
-        val uploadedFiles =
-            state.gasUploadMap
-                .toList()
-                .sortedBy { it.first }
-                .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
-                .toUploadedFileUrls(
-                    downloadMessageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                    uploadService = uploadService,
-                )
-
-        return listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkGasSafety.validGasCert.fieldHeading",
-                fieldValue = true,
-                destination = destinationProvider(state.gasCertOutcomeStep),
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkGasSafety.issueDate.fieldHeading",
-                fieldValue = state.getGasSafetyCertificateIssueDateIfReachable(),
-                destination = destinationProvider(state.gasCertIssueDateStep),
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadedFiles,
-                destination = destinationProvider(state.checkGasCertUploadsStep),
-            ),
-        )
-    }
-
-    private fun getProvideThisLaterRow(): SummaryListRowViewModel =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            fieldHeading = "checkGasSafety.gasCert.fieldHeading",
-            fieldValue = getProvideLaterKey(),
-            destination = destinationProvider(state.gasCertOutcomeStep),
-        )
-
-    private fun getNoCertRow(): SummaryListRowViewModel =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            fieldHeading = "checkGasSafety.gasCert.fieldHeading",
-            fieldValue = if (state.isOccupied) false else getProvideLaterKey(),
-            destination = destinationProvider(state.gasCertOutcomeStep),
-        )
-
-    private fun getProvideLaterKey(): String =
-        if (state.isOccupied) {
-            "checkGasSafety.provideThisLater.occupied"
-        } else {
-            "checkGasSafety.provideThisLater.unoccupied"
-        }
-
-    private fun determineScenario(state: GasSafetyDetailState): GasSafetyScenario =
+    private fun determineOutcome(): Outcome =
         when (state.gasSupplyOutcome) {
-            GasSupplyOutcome.NO_SUPPLY -> GasSafetyScenario.NO_GAS_SUPPLY
-            GasSupplyOutcome.PROVIDE_LATER -> GasSafetyScenario.PROVIDE_LATER
-            GasSupplyOutcome.HAS_SUPPLY, null -> determineCertScenario(state)
+            GasSupplyOutcome.NO_SUPPLY -> Outcome.NO_GAS_SUPPLY
+            GasSupplyOutcome.PROVIDE_LATER -> Outcome.DEFERRED_ON_GAS_SUPPLY_QUESTION
+            GasSupplyOutcome.HAS_SUPPLY, null -> determineCertificateOutcome()
         }
 
-    private fun determineCertScenario(state: GasSafetyDetailState): GasSafetyScenario =
+    private fun determineCertificateOutcome(): Outcome =
         when (state.gasCertOutcome) {
-            GasCertOutcome.NO_CERTIFICATE -> GasSafetyScenario.NO_CERT
-            GasCertOutcome.PROVIDE_LATER -> GasSafetyScenario.PROVIDE_LATER
+            // TODO PDJB-1617: remove with the delegation feature flag
+            GasCertOutcome.PROVIDE_LATER -> Outcome.DEFERRED_ON_GAS_CERTIFICATE_QUESTION
+            GasCertOutcome.NO_CERTIFICATE -> Outcome.NO_CERTIFICATE
             GasCertOutcome.HAS_CERTIFICATE ->
-                if (state.getGasSafetyCertificateIsOutdated() == true) {
-                    GasSafetyScenario.CERT_EXPIRED
-                } else {
-                    GasSafetyScenario.UPLOADED_CERTIFICATE
-                }
-
+                if (state.getGasSafetyCertificateIsOutdated() == true) Outcome.NO_CERTIFICATE else Outcome.VALID_CERTIFICATE
             null -> throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasCert is answered")
         }
+
+    private fun gasSupplyRow(hasSupply: Boolean): SummaryListRowViewModel =
+        row(
+            fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
+            fieldValue = hasSupply,
+            step = state.gasSupplyOutcomeStep,
+        )
+
+    private fun deferredOnGasSupplyRow(): SummaryListRowViewModel =
+        row(
+            fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
+            fieldValue = provideLaterKey,
+            step = state.gasSupplyOutcomeStep,
+        )
+
+    // TODO PDJB-1617: remove this row builder with the delegation feature flag (flag-off/legacy behaviour only).
+    private fun deferredOnGasCertificateRow(): SummaryListRowViewModel =
+        row(
+            fieldHeading = "checkGasSafety.gasCert.fieldHeading",
+            fieldValue = provideLaterKey,
+            step = state.gasCertOutcomeStep,
+        )
+
+    private fun noCertificateRow(): SummaryListRowViewModel =
+        row(
+            fieldHeading = "checkGasSafety.gasCert.fieldHeading",
+            fieldValue = if (state.isOccupied) false else provideLaterKey,
+            step = state.gasCertOutcomeStep,
+        )
+
+    private fun uploadedCertificateRows(): List<SummaryListRowViewModel> =
+        listOf(
+            row(
+                fieldHeading = "checkGasSafety.validGasCert.fieldHeading",
+                fieldValue = true,
+                step = state.gasCertOutcomeStep,
+            ),
+            row(
+                fieldHeading = "checkGasSafety.issueDate.fieldHeading",
+                fieldValue = state.getGasSafetyCertificateIssueDateIfReachable(),
+                step = state.gasCertIssueDateStep,
+            ),
+            row(
+                fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
+                fieldValue = uploadedCertificateFileUrls(),
+                step = state.checkGasCertUploadsStep,
+            ),
+        )
+
+    private fun uploadedCertificateFileUrls() =
+        state.gasUploadMap
+            .toList()
+            .sortedBy { it.first }
+            .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
+            .toUploadedFileUrls(
+                downloadMessageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                uploadService = uploadService,
+            )
+
+    private val provideLaterKey: String
+        get() =
+            if (state.isOccupied) {
+                "checkGasSafety.provideThisLater.occupied"
+            } else {
+                "checkGasSafety.provideThisLater.unoccupied"
+            }
+
+    private fun row(
+        fieldHeading: String,
+        fieldValue: Any?,
+        step: JourneyStep.RequestableStep<*, *, *>,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            fieldHeading = fieldHeading,
+            fieldValue = fieldValue,
+            destination = destinationProvider(step),
+        )
 }
