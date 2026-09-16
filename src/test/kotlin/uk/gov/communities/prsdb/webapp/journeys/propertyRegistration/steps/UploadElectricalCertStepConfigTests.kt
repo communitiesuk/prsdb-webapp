@@ -122,7 +122,7 @@ class UploadElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded uses the property ownership id when the upload is on an update journey`() {
+    fun `afterStepDataIsAdded uses the property ownership id when known`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
