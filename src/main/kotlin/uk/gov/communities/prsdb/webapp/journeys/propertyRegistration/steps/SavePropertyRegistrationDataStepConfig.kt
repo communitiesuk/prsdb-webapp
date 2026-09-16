@@ -140,7 +140,8 @@ class SavePropertyRegistrationDataStepConfig(
             // TODO PDJB-1720/PDJB-1721: when registration is delegated to a letting agent the gas-supply question is
             //  skipped, so we persist a placeholder hasGasSupply = true (alongside gasSafetyCertProvideLater = true)
             //  to keep the gas cert as "provide later" rather than "not required". Revisit when the delegated
-            //  gas-supply row is hidden/handled properly.
+            //  gas-supply row is hidden/handled properly. Consider renaming hasGasSupply to hasGasSupplyOrProvideLater 
+            //  (will require DB migration).
             hasGasSupply =
                 isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome.let {
