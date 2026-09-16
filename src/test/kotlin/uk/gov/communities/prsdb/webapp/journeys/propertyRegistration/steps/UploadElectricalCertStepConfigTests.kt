@@ -94,7 +94,7 @@ class UploadElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded updates the upload map and triggers virus scan callbacks`() {
+    fun `afterStepDataIsAdded uses the landlord id when property ownership id is not known`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
