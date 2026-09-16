@@ -29,8 +29,6 @@ Create release PRs for main -> test and main -> nft branches in **both repositor
 
 ## When the code release conflicts
 
-Follow [Merge conflicts](../../../ReadMe.md#merge-conflicts):
-
 - Create a temporary branch from the **destination**, such as `release/main-to-test-{N}` from `origin/test`,
   or reuse the existing resolution branch for this release.
 - Merge the intended source revision and any newer destination changes into that branch, resolve conflicts and
