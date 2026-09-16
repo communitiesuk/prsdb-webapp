@@ -43,18 +43,12 @@ class AbsoluteUrlProvider(
     fun buildJointLandlordInvitationUri(token: String): URI =
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
-    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI {
-        val pathSegments =
-            UriComponentsBuilder
-                .fromUriString(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
-                .build()
-                .pathSegments
-        return UriComponentsBuilder
+    fun buildLettingAgentPropertyDetailsUri(token: UUID): URI =
+        UriComponentsBuilder
             .fromUriString(landlordBaseUrl)
-            .pathSegment(*pathSegments.drop(1).toTypedArray())
+            .replacePath(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
             .build()
             .toUri()
-    }
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
