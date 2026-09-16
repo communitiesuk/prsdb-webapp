@@ -80,7 +80,7 @@ manualAddress:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
   correspondence:
-    fieldSetHeading: 'TODO PDJB-1589: What is the postal address?'
+    fieldSetHeading: 'TODO PDJB-1592: What is the postal address?'
     fieldSetHint: This must be an address in England or Wales.
   fieldSetHint: This should be an address within England
   addressLineOne:

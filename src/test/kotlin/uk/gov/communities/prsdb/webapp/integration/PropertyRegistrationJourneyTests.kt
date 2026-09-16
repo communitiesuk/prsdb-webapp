@@ -292,11 +292,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
 
-            // Correspondence address skeleton (PDJB-1589) - placeholder email step then the reused address flow
+            // TODO PDJB-1590 - update email address page (may need to include check that the landlord's email is displayed)
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submit()
+
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
+
             val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
             correspondenceSelectPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
 
@@ -653,7 +655,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // fill in and submit
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
-            // Correspondence address skeleton (PDJB-1589) - placeholder email step then the reused address flow
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submit()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
@@ -1625,7 +1626,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
-            // Correspondence address skeleton (PDJB-1589) - placeholder email step then the reused address flow
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submit()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
