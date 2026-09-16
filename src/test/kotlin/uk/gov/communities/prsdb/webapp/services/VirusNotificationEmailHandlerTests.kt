@@ -156,7 +156,7 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @Test
-    fun `handleCallback for send owner email sends email to every joint landlord and the letting agent when both present`() {
+    fun `handleCallback for send owner email sends email to all individual joint landlords and the letting agent`() {
         // Arrange
         val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com", "landlord3@example.com")
         val lettingAgentEmail = "agent@example.com"
@@ -217,7 +217,7 @@ class VirusNotificationEmailHandlerTests {
     }
 
     @Test
-    fun `handleCallback for send owner email sends email to mixed joint landlords and the letting agent`() {
+    fun `handleCallback for send owner email sends email to individual and organisational joint landlords and the letting agent`() {
         // Arrange
         val individualLandlord = MockLandlordData.createIndividualLandlord(email = "landlord1@example.com")
         val orgLandlord = MockLandlordData.createOrgLandlord(registrantEmail = "org-registrant@example.com")
