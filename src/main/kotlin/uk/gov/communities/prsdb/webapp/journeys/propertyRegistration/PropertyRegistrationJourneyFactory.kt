@@ -893,10 +893,8 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1391: replace the placeholder "provide later" handling in the CYA/save steps with the real
-    //  delegated-details flow.
-    // Both flags must be checked before reading the step outcome: the who-provides step is only wired into the
-    // graph when restructure is also on, so reading its outcome in the legacy journey would throw.
+    // Check both flags before reading the step outcome: the who-provides step is not wired into
+    // the legacy journey, so accessing its outcome there would throw.
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
             featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
