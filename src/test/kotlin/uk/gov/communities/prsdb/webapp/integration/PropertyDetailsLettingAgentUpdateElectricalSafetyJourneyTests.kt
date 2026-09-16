@@ -59,6 +59,7 @@ class PropertyDetailsLettingAgentUpdateElectricalSafetyJourneyTests : Integratio
 
         val checkAnswersPage =
             assertPageIs(page, CheckElectricalSafetyAnswersFormPageLettingAgentUpdateElectricalSafety::class, urlArguments)
+        assertThat(checkAnswersPage.form.submitButton).hasText("Confirm and submit update")
         checkAnswersPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, urlArguments)
