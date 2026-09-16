@@ -392,7 +392,7 @@ class PropertyDetailsControllerTests(
             val lettingAgentAccess = LettingAgentAccess(UUID.randomUUID(), "agent@example.com", propertyOwnership)
 
             whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
-            whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id))
+            whenever(propertyOwnershipService.getLettingAgentAccess(propertyOwnership.id))
                 .thenReturn(lettingAgentAccess)
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(propertyOwnership.id)))
                 .thenReturn(propertyOwnership)

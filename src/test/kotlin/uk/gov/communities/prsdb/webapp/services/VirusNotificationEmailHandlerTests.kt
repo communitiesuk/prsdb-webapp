@@ -410,6 +410,7 @@ class VirusNotificationEmailHandlerTests {
             MockLandlordData.createPropertyOwnership(
                 landlords = landlords.toMutableSet(),
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
+                isOccupied = true,
             )
 
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)

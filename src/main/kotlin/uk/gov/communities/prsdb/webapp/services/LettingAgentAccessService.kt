@@ -35,16 +35,6 @@ class LettingAgentAccessService(
         getInvitationByTokenOrNull(token)
             ?: throw EntityNotFoundException("No letting agent access found for token $token")
 
-    fun getInvitationByPropertyOwnershipId(propertyOwnershipId: Long): LettingAgentAccess? =
-        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
-
-    fun propertyHasLettingAgent(propertyOwnership: PropertyOwnership): Boolean =
-        getInvitationByPropertyOwnershipId(propertyOwnership.id) != null && propertyOwnership.isOccupied
-
-    fun getTokenByPropertyOwnershipId(propertyOwnershipId: Long): UUID? =
-        // TODO PDJB-1687: commonise this check with any other has LetA checks
-        lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)?.token
-
     fun getTokenIsValid(token: String): Boolean {
         val uuid =
             try {

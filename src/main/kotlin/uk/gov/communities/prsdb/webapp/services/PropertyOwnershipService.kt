@@ -19,8 +19,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
@@ -45,6 +47,7 @@ class PropertyOwnershipService(
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
+    private val lettingAgentAccessRepository: LettingAgentAccessRepository,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
@@ -129,13 +132,26 @@ class PropertyOwnershipService(
 
     fun getLastModifiedDate(propertyOwnershipId: Long): Instant = getPropertyOwnership(propertyOwnershipId).getMostRecentlyUpdated()
 
-    fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean {
-        if (isCurrentUserLandlord(propertyOwnershipId)) return true
+    fun getLettingAgentAccess(propertyOwnershipId: Long): LettingAgentAccess? {
+        if (!hasLettingAgent(propertyOwnershipId)) return null
+
+        return lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
+    }
+
+    fun hasLettingAgent(propertyOwnershipId: Long): Boolean {
         if (!featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) return false
 
-        val lettingAgentToken =
-            lettingAgentAccessService.getTokenByPropertyOwnershipId(propertyOwnershipId) ?: return false
-        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentToken.toString())
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
+        val lettingAgentAccess = lettingAgentAccessRepository.findByPropertyOwnershipId(propertyOwnershipId)
+
+        return hasLettingAgent(propertyOwnership, lettingAgentAccess)
+    }
+
+    fun getCurrentUserIsAuthorizedToEditRecord(propertyOwnershipId: Long): Boolean {
+        if (isCurrentUserLandlord(propertyOwnershipId)) return true
+
+        val lettingAgentAccess = getLettingAgentAccess(propertyOwnershipId) ?: return false
+        return lettingAgentAccessService.isTokenAuthorisedInSession(lettingAgentAccess.token.toString())
     }
 
     fun throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId: Long) {
@@ -506,5 +522,14 @@ class PropertyOwnershipService(
                 "The property ownership record has been updated since this update session started.",
             )
         }
+    }
+
+    companion object {
+        // This static method allows non web services to perform this check
+        @JvmStatic
+        fun hasLettingAgent(
+            propertyOwnership: PropertyOwnership,
+            lettingAgentAccess: LettingAgentAccess?,
+        ): Boolean = propertyOwnership.isOccupied && lettingAgentAccess != null
     }
 }
