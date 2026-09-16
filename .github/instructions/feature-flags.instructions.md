@@ -9,7 +9,25 @@ applyTo: "**/featureFlags/**,**/annotations/**FeatureFlag**,**/annotations/**Fli
 
 ## Configuration
 
-### Define Flags in application.yml
+### Define Flags in ALL yaml files
+A flag must be added to **every** feature-flags config file, or startup validation
+(`FeatureFlagConfig`) / consistency tests will fail. Do not stop after the two base
+`application.yml` files — the environment-specific files must be updated too.
+
+| File | Typical `enabled` for a new dev flag |
+|------|--------------------------------------|
+| `src/main/resources/application.yml` (prod/default) | `false` |
+| `src/test/resources/application.yml` | `false` |
+| `src/main/resources/application-local.yml` | `true` |
+| `src/main/resources/application-integration.yml` | `true` |
+| `src/test/resources/application-integration.yml` | `true` |
+| `src/main/resources/application-test.yml` | `true` |
+| `src/main/resources/application-nft.yml` | `false` |
+
+Flags are typically on in local/integration/test and off in nft and prod, but confirm
+the intended per-environment state with the user rather than assuming.
+
+Entry format (indentation differs slightly between files — match the surrounding entries):
 ```yaml
 features:
     feature-flags:
@@ -21,6 +39,15 @@ features:
         -   name: "release-name"
             enabled: true
 ```
+
+### Naming
+Flag names follow the epic, e.g. `pdjb-1040-correspondence-address` (lowercase
+kebab-case, correct spelling). The Kotlin constant is the SCREAMING_SNAKE_CASE
+equivalent, e.g. `CORRESPONDENCE_ADDRESS`.
+
+### Reference implementation
+See PR communitiesuk/prsdb-webapp#1761 (PDJB-1397) for a complete "create a feature flag"
+change touching all the files above.
 
 ### Register Flag Names
 Add to `FeatureFlagNames.kt`:

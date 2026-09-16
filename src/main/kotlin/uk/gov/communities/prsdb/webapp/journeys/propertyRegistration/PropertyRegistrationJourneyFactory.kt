@@ -127,8 +127,6 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
-                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
                         whoProvidesChangeCyaJourney()
@@ -269,6 +267,9 @@ class PropertyRegistrationJourneyFactory(
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
@@ -321,6 +322,9 @@ class PropertyRegistrationJourneyFactory(
 
                 HasMeesExemptionStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasMeesExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 MeesExemptionStep.ROUTE_SEGMENT -> {
@@ -889,10 +893,8 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1391: replace the placeholder "provide later" handling in the CYA/save steps with the real
-    //  delegated-details flow.
-    // Both flags must be checked before reading the step outcome: the who-provides step is only wired into the
-    // graph when restructure is also on, so reading its outcome in the legacy journey would throw.
+    // Check both flags before reading the step outcome: the who-provides step is not wired into
+    // the legacy journey, so accessing its outcome there would throw.
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
             featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&
