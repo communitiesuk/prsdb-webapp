@@ -10,5 +10,6 @@ class CorrespondenceSelectAddressFormPagePropertyRegistration(
     page: Page,
 ) : SelectAddressFormPage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CorrespondenceAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+            "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
     )

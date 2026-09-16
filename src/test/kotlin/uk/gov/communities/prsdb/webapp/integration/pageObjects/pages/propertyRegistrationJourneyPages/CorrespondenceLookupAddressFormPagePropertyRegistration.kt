@@ -10,5 +10,6 @@ class CorrespondenceLookupAddressFormPagePropertyRegistration(
     page: Page,
 ) : LookupAddressFormPage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
+            "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
     )

@@ -192,7 +192,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
 
         @Test
-        fun `getTaskListViewModel includes the correspondence task between ownership and occupied when CORRESPONDENCE_ADDRESS is enabled`() {
+        fun `getTaskListViewModel includes correspondence task between ownership and occupied when flag enabled`() {
             // Arrange
             whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
 
