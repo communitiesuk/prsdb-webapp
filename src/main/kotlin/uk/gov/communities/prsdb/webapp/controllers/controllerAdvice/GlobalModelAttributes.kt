@@ -88,10 +88,6 @@ class GlobalModelAttributes(
         val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
         val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
         model.addAttribute("serviceName", serviceName)
-
-        // The authenticated header always shows the service navigation. The anonymous header only shows it on
-        // pages belonging to a specific service: LC/system operator pages, and letting agent pages (which are
-        // always anonymous because letting agents have no login).
         if (isCustomServiceName || uri.startsWith(LETTING_AGENT_ROUTES_PREFIX)) {
             model.addAttribute("showServiceNavigation", true)
         }
