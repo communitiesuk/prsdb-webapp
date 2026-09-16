@@ -23,8 +23,6 @@ class VirusScanCallbackService(
         certificateType: CertificateType,
         landlordId: Long,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val data =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
@@ -32,12 +30,7 @@ class VirusScanCallbackService(
                 landlordId = landlordId,
             )
 
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
+        return saveVirusScanCallback(fileUploadId, data)
     }
 
     fun saveEmailToMonitoringTeam(
@@ -46,8 +39,6 @@ class VirusScanCallbackService(
         certificateType: CertificateType,
         landlordId: Long,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val internalData =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
@@ -56,12 +47,7 @@ class VirusScanCallbackService(
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
+        return saveVirusScanCallback(fileUploadId, data)
     }
 
     fun saveEmailForUpdateJourney(
@@ -69,16 +55,9 @@ class VirusScanCallbackService(
         fileUploadId: Long,
         certificateType: CertificateType,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val data = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
 
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
+        return saveVirusScanCallback(fileUploadId, data)
     }
 
     fun saveEmailToMonitoringTeamForUpdateJourney(
@@ -86,10 +65,17 @@ class VirusScanCallbackService(
         fileUploadId: Long,
         certificateType: CertificateType,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val internalData = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
+
+        return saveVirusScanCallback(fileUploadId, data)
+    }
+
+    private fun saveVirusScanCallback(
+        fileUploadId: Long,
+        data: EmailNotificationData,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
 
         return virusScanCallbackRepository.save(
             VirusScanCallback(
