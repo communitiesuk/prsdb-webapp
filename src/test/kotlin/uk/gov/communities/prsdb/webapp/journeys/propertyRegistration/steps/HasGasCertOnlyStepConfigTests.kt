@@ -48,23 +48,23 @@ class HasGasCertOnlyStepConfigTests {
     }
 
     @Test
-    fun `mode returns HAS_CERTIFICATE when hasCert is true`() {
+    fun `mode returns YES when hasCert is true`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to "true"))
 
         val result = stepConfig.mode(mockJourneyState)
 
-        assertEquals(HasGasCertOnlyMode.HAS_CERTIFICATE, result)
+        assertEquals(HasGasCertOnlyMode.YES, result)
     }
 
     @Test
-    fun `mode returns NO_CERTIFICATE when hasCert is false`() {
+    fun `mode returns NO when hasCert is false`() {
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to "false"))
 
         val result = stepConfig.mode(mockJourneyState)
 
-        assertEquals(HasGasCertOnlyMode.NO_CERTIFICATE, result)
+        assertEquals(HasGasCertOnlyMode.NO, result)
     }
 
     @ParameterizedTest

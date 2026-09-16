@@ -95,8 +95,8 @@ class GasSafetyDetailsTask(
             gasSupplyProvideLaterStrategy.ifEnabledOrElse(
                 ifEnabled = {
                     when (hasGasCertOnlyStep.outcome) {
-                        HasGasCertOnlyMode.HAS_CERTIFICATE -> GasCertOutcome.HAS_CERTIFICATE
-                        HasGasCertOnlyMode.NO_CERTIFICATE -> GasCertOutcome.NO_CERTIFICATE
+                        HasGasCertOnlyMode.YES -> GasCertOutcome.HAS_CERTIFICATE
+                        HasGasCertOnlyMode.NO -> GasCertOutcome.NO_CERTIFICATE
                         null -> null
                     }
                 },
@@ -137,8 +137,8 @@ class GasSafetyDetailsTask(
                         parents { journey.hasGasSupplyOrProvideLaterStep.hasOutcome(HasGasSupplyOrProvideLaterMode.HAS_SUPPLY) }
                         nextStep { mode ->
                             when (mode) {
-                                HasGasCertOnlyMode.HAS_CERTIFICATE -> journey.gasCertIssueDateStep
-                                HasGasCertOnlyMode.NO_CERTIFICATE -> journey.gasCertMissingStep
+                                HasGasCertOnlyMode.YES -> journey.gasCertIssueDateStep
+                                HasGasCertOnlyMode.NO -> journey.gasCertMissingStep
                             }
                         }
                         savable()
@@ -174,7 +174,7 @@ class GasSafetyDetailsTask(
                 routeSegment(GasCertIssueDateStep.ROUTE_SEGMENT)
                 parents {
                     gasSupplyProvideLaterStrategy.ifEnabledOrElse(
-                        ifEnabled = { journey.hasGasCertOnlyStep.hasOutcome(HasGasCertOnlyMode.HAS_CERTIFICATE) },
+                        ifEnabled = { journey.hasGasCertOnlyStep.hasOutcome(HasGasCertOnlyMode.YES) },
                         ifDisabled = { journey.hasGasCertStep.hasOutcome(HasGasCertMode.HAS_CERTIFICATE) },
                     )
                 }
@@ -242,7 +242,7 @@ class GasSafetyDetailsTask(
                 routeSegment(GasCertMissingStep.ROUTE_SEGMENT)
                 parents {
                     gasSupplyProvideLaterStrategy.ifEnabledOrElse(
-                        ifEnabled = { journey.hasGasCertOnlyStep.hasOutcome(HasGasCertOnlyMode.NO_CERTIFICATE) },
+                        ifEnabled = { journey.hasGasCertOnlyStep.hasOutcome(HasGasCertOnlyMode.NO) },
                         ifDisabled = { journey.hasGasCertStep.hasOutcome(HasGasCertMode.NO_CERTIFICATE) },
                     )
                 }

@@ -30,8 +30,8 @@ class HasGasCertOnlyStepConfig : AbstractRequestableStepConfig<HasGasCertOnlyMod
     override fun mode(state: GasSafetyDetailState) =
         getFormModelFromStateOrNull(state)?.let {
             when (it.hasCert) {
-                true -> HasGasCertOnlyMode.HAS_CERTIFICATE
-                false -> HasGasCertOnlyMode.NO_CERTIFICATE
+                true -> HasGasCertOnlyMode.YES
+                false -> HasGasCertOnlyMode.NO
                 null -> null
             }
         }
@@ -47,6 +47,6 @@ final class HasGasCertOnlyStep(
 }
 
 enum class HasGasCertOnlyMode {
-    HAS_CERTIFICATE,
-    NO_CERTIFICATE,
+    YES,
+    NO,
 }
