@@ -567,10 +567,8 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `getLettingAgentAccess returns null when the property is unoccupied`() {
             val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership(id = 1L)
-            val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(1L)).thenReturn(propertyOwnership)
-            whenever(mockLettingAgentAccessRepository.findByPropertyOwnershipId(1L)).thenReturn(access)
 
             assertNull(propertyOwnershipService.getLettingAgentAccess(1L))
         }
@@ -586,7 +584,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `getLettingAgentAccess returns access for an occupied property when the feature is enabled`() {
+        fun `getLettingAgentAccess returns access for an delegated when the feature is enabled`() {
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1L)
             val access = MockLettingAgentData.createLettingAgentAccess(propertyOwnership = propertyOwnership)
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
