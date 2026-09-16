@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
@@ -26,6 +27,7 @@ class VirusScanCallbackServiceTests {
     private lateinit var virusScanCallbackRepository: VirusScanCallbackRepository
     private lateinit var fileUploadRepository: FileUploadRepository
     private lateinit var featureFlagManager: FeatureFlagManager
+    private lateinit var userToLandlordService: UserToLandlordService
 
     private val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
 
@@ -34,8 +36,14 @@ class VirusScanCallbackServiceTests {
         virusScanCallbackRepository = mock()
         fileUploadRepository = mock()
         featureFlagManager = mock()
+        userToLandlordService = mock()
         virusScanCallbackService =
-            VirusScanCallbackService(virusScanCallbackRepository, fileUploadRepository, featureFlagManager)
+            VirusScanCallbackService(
+                virusScanCallbackRepository,
+                fileUploadRepository,
+                featureFlagManager,
+                userToLandlordService,
+            )
     }
 
     private fun callbackFor(data: EmailNotificationData) = VirusScanCallback(fileUpload, Json.encodeToString<EmailNotificationData>(data))
@@ -129,7 +137,6 @@ class VirusScanCallbackServiceTests {
             fileUploadId = 42L,
             certificateType = CertificateType.Eicr,
             propertyOwnershipId = 99L,
-            landlordId = 7L,
         )
 
         // Assert
@@ -154,6 +161,9 @@ class VirusScanCallbackServiceTests {
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        val landlord = mock<Landlord>()
+        whenever(landlord.id).thenReturn(7L)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         virusScanCallbackService.saveVirusScanFailureEmail(
@@ -161,7 +171,6 @@ class VirusScanCallbackServiceTests {
             fileUploadId = 42L,
             certificateType = CertificateType.Eicr,
             propertyOwnershipId = 99L,
-            landlordId = 7L,
         )
 
         // Assert
@@ -185,6 +194,9 @@ class VirusScanCallbackServiceTests {
         // Arrange
         whenever(fileUploadRepository.getReferenceById(42L)).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.save(any())).thenAnswer { it.arguments[0] }
+        val landlord = mock<Landlord>()
+        whenever(landlord.id).thenReturn(7L)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
 
         // Act
         virusScanCallbackService.saveVirusScanFailureEmail(
@@ -192,7 +204,6 @@ class VirusScanCallbackServiceTests {
             fileUploadId = 42L,
             certificateType = CertificateType.Eicr,
             propertyOwnershipId = null,
-            landlordId = 7L,
         )
 
         // Assert
@@ -209,21 +220,6 @@ class VirusScanCallbackServiceTests {
             ),
             savedData.single { it is EmailNotificationData.VirusMonitoringEmailNotification },
         )
-    }
-
-    @Test
-    fun `saveVirusScanFailureEmail does nothing when there is no property ownership id and no landlord`() {
-        // Act
-        virusScanCallbackService.saveVirusScanFailureEmail(
-            journeyId = "journey-1",
-            fileUploadId = 42L,
-            certificateType = CertificateType.Eicr,
-            propertyOwnershipId = null,
-            landlordId = null,
-        )
-
-        // Assert
-        verify(virusScanCallbackRepository, never()).save(any())
     }
 
     @Test

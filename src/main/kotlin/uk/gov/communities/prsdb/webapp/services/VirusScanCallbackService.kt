@@ -16,6 +16,7 @@ class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
     private val featureFlagManager: FeatureFlagManager,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     fun saveEmailForJourney(
         journeyId: String,
@@ -90,13 +91,13 @@ class VirusScanCallbackService(
         fileUploadId: Long,
         certificateType: CertificateType,
         propertyOwnershipId: Long?,
-        landlordId: Long?,
     ) {
         // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
         if (propertyOwnershipId != null && featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
             saveEmailForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
             saveEmailToMonitoringTeamForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
-        } else if (landlordId != null) {
+        } else {
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
             saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId)
             saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId)
         }

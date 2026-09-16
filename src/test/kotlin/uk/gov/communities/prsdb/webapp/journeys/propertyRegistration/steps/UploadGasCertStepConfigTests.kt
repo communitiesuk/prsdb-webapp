@@ -10,13 +10,11 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyDetailState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -33,12 +31,6 @@ class UploadGasCertStepConfigTests {
 
     @Mock
     lateinit var memberIdService: CollectionKeyParameterService
-
-    @Mock
-    lateinit var userToLandlordService: UserToLandlordService
-
-    @Mock
-    lateinit var landlord: Landlord
 
     @Mock
     lateinit var uploadGasCertStep: UploadGasCertStep
@@ -87,7 +79,6 @@ class UploadGasCertStepConfigTests {
             fileUploadId = 42L,
             certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = null,
-            landlordId = 7L,
         )
 
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
@@ -109,9 +100,6 @@ class UploadGasCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(99L)
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(landlord.id).thenReturn(7L)
-
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(virusScanCallbackService).saveVirusScanFailureEmail(
@@ -119,7 +107,6 @@ class UploadGasCertStepConfigTests {
             fileUploadId = 42L,
             certificateType = CertificateType.GasSafetyCert,
             propertyOwnershipId = 99L,
-            landlordId = 7L,
         )
     }
 
@@ -145,13 +132,15 @@ class UploadGasCertStepConfigTests {
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadGasCertStep).thenReturn(uploadGasCertStep)
         whenever(mockState.propertyOwnershipId).thenReturn(null)
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(landlord.id).thenReturn(7L)
     }
 
     private fun setupStepConfig(): UploadGasCertStepConfig {
         val stepConfig =
-            UploadGasCertStepConfig(virusScanCallbackService, fileUploadCookieService, memberIdService, userToLandlordService)
+            UploadGasCertStepConfig(
+                virusScanCallbackService,
+                fileUploadCookieService,
+                memberIdService,
+            )
         stepConfig.urlPath = UploadGasCertStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
