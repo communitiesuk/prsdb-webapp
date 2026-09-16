@@ -137,10 +137,12 @@ class SavePropertyRegistrationDataStepConfig(
             jointLandlordEmails = jointLandlordEmails,
             lettingAgentEmail = lettingAgentEmail,
             markedJointLandlord = markedJointLandlord,
-            // TODO PDJB-1665: when registration is delegated to a letting agent the gas-supply question is skipped, so
-            //  we persist a placeholder hasGasSupply = true (alongside gasSafetyCertProvideLater = true) to keep the
-            //  gas cert as "provide later" rather than "not required". Revisit when the delegated gas-supply row is
-            //  hidden/handled properly.
+            // TODO PDJB-1665: hasGasSupply is set to true here for both a delegated property and a "provide later"
+            //  answer, which is misleading since it doesn't reflect the actual gas-supply answer. A follow-up PR
+            //  will rename this field to hasGasSupplyOrProvideLater (with a DB migration) to make the semantics
+            //  clearer. The CYA/property record display already correctly shows the provide-later text on the
+            //  gas-supply row rather than "yes" (see GasSafetyRegistrationCyaSummaryRowsFactory and
+            //  GasSafetyViewModelFactory), so this is a naming-only issue.
             hasGasSupply =
                 isDelegatedToLettingAgent ||
                     state.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome.let {

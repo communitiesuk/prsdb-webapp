@@ -49,9 +49,7 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
         assertThat(detailsPage.provideDetailsInset).containsText("Provide all details")
         assertThat(detailsPage.summaryList.licensingRow.value).containsText("Provide this later")
         assertThat(detailsPage.summaryList.tenancyRow.value).containsText("Provide this later")
-        // TODO PDJB-1665: the "Does the property have a gas supply..." row should be removed for gas "provide this
-        //  later"; update/remove the hasGasSupply placeholder assertions here when that row is hidden.
-        assertThat(detailsPage.gasSafetyCard.summaryList.hasCertRow.value).containsText("Provide this later")
+        assertThat(detailsPage.gasSafetyCard.summaryList.hasGasSupplyRow.value).containsText("Provide this later")
         assertThat(detailsPage.electricalSafetyCard).containsText("Provide this later")
         assertThat(detailsPage.epcCard).containsText("Provide this later")
         assertThat(detailsPage.epcCard.getAction("Change").link).hasAttribute(

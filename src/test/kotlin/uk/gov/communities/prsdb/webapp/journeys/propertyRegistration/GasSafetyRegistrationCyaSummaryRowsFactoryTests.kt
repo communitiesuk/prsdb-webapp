@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -52,9 +53,9 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
     }
 
     private fun setupCommonStateMocks() {
-        whenever(mockState.gasSupplyOutcomeStep).thenReturn(mockHasGasSupplyStep)
+        lenient().`when`(mockState.gasSupplyOutcomeStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockState.gasCertOutcomeStep).thenReturn(mockHasGasCertStep)
-        whenever(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
+        lenient().`when`(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockHasGasCertStep.currentJourneyId).thenReturn("test-journey-id")
     }
 
@@ -146,9 +147,8 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
             val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val gasSupplyRows = factory.createGasSupplyRows()
-            assertEquals(2, gasSupplyRows.size)
-            assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[1].fieldValue)
+            assertEquals(1, gasSupplyRows.size)
+            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[0].fieldValue)
 
             val certRows = factory.createCertRows()
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
@@ -166,9 +166,8 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
             val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
             val gasSupplyRows = factory.createGasSupplyRows()
-            assertEquals(2, gasSupplyRows.size)
-            assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[1].fieldValue)
+            assertEquals(1, gasSupplyRows.size)
+            assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[0].fieldValue)
 
             val certRows = factory.createCertRows()
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
@@ -191,10 +190,9 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
                 })
 
             val gasSupplyRows = factory.createGasSupplyRows()
-            assertEquals(2, gasSupplyRows.size)
-            assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[1].fieldValue)
-            assertEquals(mockHasGasCertStep, destinationSteps[1])
+            assertEquals(1, gasSupplyRows.size)
+            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[0].fieldValue)
+            assertEquals(mockHasGasCertStep, destinationSteps[0])
 
             val certRows = factory.createCertRows()
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)

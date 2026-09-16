@@ -65,10 +65,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             listOf(
                 SummaryListRowViewModel(
                     "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "commonText.yes",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasCert",
                     "Provide this later (before $expectedDeadline)",
                 ),
             ),
@@ -411,10 +407,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                            "commonText.yes",
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.hasCert",
                             "Provide this later (before ${
                                 occupiedAtRegistrationDate
                                     .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
@@ -431,10 +423,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                            "commonText.yes",
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.hasCert",
                             "checkGasSafety.provideThisLater.occupiedNoDeadline",
                         ),
                     ),
