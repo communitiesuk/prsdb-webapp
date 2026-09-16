@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -73,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -542,13 +544,24 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
             }
+            val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
                 task(journey.ownershipAndLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.propertyDetailsTask.isComplete() }
-                    nextStep { journey.occupied }
+                    nextStep { if (correspondenceEnabled) journey.correspondenceTask.firstStep else journey.occupied }
                     saveProgress()
+                }
+            }
+            if (correspondenceEnabled) {
+                section {
+                    withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
+                    task(journey.correspondenceTask) {
+                        parents { journey.ownershipAndLandlordsTask.isComplete() }
+                        nextStep { journey.occupied }
+                        saveProgress()
+                    }
                 }
             }
             val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
@@ -556,7 +569,13 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
-                    parents { journey.ownershipAndLandlordsTask.isComplete() }
+                    parents {
+                        if (correspondenceEnabled) {
+                            journey.correspondenceTask.isComplete()
+                        } else {
+                            journey.ownershipAndLandlordsTask.isComplete()
+                        }
+                    }
                     nextStep { occupancy ->
                         if (delegateEnabled) {
                             when (occupancy) {
@@ -760,6 +779,8 @@ class PropertyRegistrationJourney(
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
+    // Restructured journey only (flag-on) — correspondence address skeleton (PDJB-1589)
+    override val correspondenceTask: CorrespondenceTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
     // Gas safety task
@@ -873,6 +894,9 @@ interface PropertyRegistrationJourneyState :
     // Restructured journey only (flag-on)
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+    // Restructured journey only (flag-on) — correspondence address skeleton (PDJB-1589)
+    val correspondenceTask: CorrespondenceTask
     val tenancyDetailsTask: TenancyDetailsTask
     val whoProvidesDetailsTask: WhoProvidesDetailsTask
     override val finishCyaStep: FinishCyaJourneyStep

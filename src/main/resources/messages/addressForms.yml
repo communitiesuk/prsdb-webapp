@@ -22,6 +22,9 @@ lookupAddress:
   organisationLandlordRegistration:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
+  correspondence:
+    fieldSetHeading: Where should the council send post about this property?
+    fieldSetHint: This must be an address in England or Wales. It must not be a PO Box.
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'
@@ -38,6 +41,8 @@ selectAddress:
     fieldSetHeading: Select their address
   organisationLandlordRegistration:
     fieldSetHeading: Select your organisation’s address
+  correspondence:
+    fieldSetHeading: Select a postal address
   fieldSetHint:
     beforePostcode: '{0,,addressCount} addresses found for'
     beforeHouseNameOrNumber: and
@@ -74,6 +79,9 @@ manualAddress:
   organisationLandlordRegistration:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
+  correspondence:
+    fieldSetHeading: What is the postal address?
+    fieldSetHint: This must be an address in England or Wales.
   fieldSetHint: This should be an address within England
   addressLineOne:
     label: Address line 1
