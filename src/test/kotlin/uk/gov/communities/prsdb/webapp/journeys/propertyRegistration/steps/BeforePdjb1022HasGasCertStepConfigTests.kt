@@ -17,11 +17,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class HasGasSupplyStepConfigTests {
+class BeforePdjb1022HasGasCertStepConfigTests {
     @Mock
     lateinit var mockJourneyState: GasSafetyDetailState
 
-    val routeSegment = HasGasSupplyStep.ROUTE_SEGMENT
+    val routeSegment = BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT
 
     @Test
     fun `mode returns null when form model is not present`() {
@@ -37,11 +37,11 @@ class HasGasSupplyStepConfigTests {
     }
 
     @Test
-    fun `mode returns null when hasGasSupply is null and action is not provideThisLater`() {
+    fun `mode returns null when hasCert is null and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("hasGasSupply" to null, "action" to "saveAndContinue"))
+            .thenReturn(mapOf("hasCert" to null, "action" to "saveAndContinue"))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
@@ -51,52 +51,50 @@ class HasGasSupplyStepConfigTests {
     }
 
     @Test
-    fun `mode returns HAS_SUPPLY when hasGasSupply is true and action is not provideThisLater`() {
+    fun `mode returns HAS_CERTIFICATE when hasCert is true and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("hasGasSupply" to "true", "action" to "saveAndContinue"))
+            .thenReturn(mapOf("hasCert" to "true", "action" to "saveAndContinue"))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
 
         // Assert
-        assertEquals(HasGasSupplyMode.HAS_SUPPLY, result)
+        assertEquals(BeforePdjb1022HasGasCertMode.HAS_CERTIFICATE, result)
     }
 
     @Test
-    fun `mode returns NO_SUPPLY when hasGasSupply is false and action is not provideThisLater`() {
+    fun `mode returns NO_CERTIFICATE when hasCert is false and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("hasGasSupply" to "false", "action" to "saveAndContinue"))
+            .thenReturn(mapOf("hasCert" to "false", "action" to "saveAndContinue"))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
 
         // Assert
-        assertEquals(HasGasSupplyMode.NO_SUPPLY, result)
+        assertEquals(BeforePdjb1022HasGasCertMode.NO_CERTIFICATE, result)
     }
 
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = [true, false])
-    fun `mode returns PROVIDE_LATER when action is provideThisLater and allowProvideCertificateLaterRoute is true`(
-        hasGasSupply: Boolean?,
-    ) {
+    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater and allowProvideCertificateLaterRoute is true`(hasCert: Boolean?) {
         whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
 
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
-            mapOf("hasGasSupply" to hasGasSupply, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+            mapOf("hasCert" to hasCert, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
 
         // Assert
-        assertEquals(HasGasSupplyMode.PROVIDE_LATER, result)
+        assertEquals(BeforePdjb1022HasGasCertMode.PROVIDE_THIS_LATER, result)
     }
 
     @Test
@@ -107,15 +105,15 @@ class HasGasSupplyStepConfigTests {
         whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
         whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
-            mapOf("hasGasSupply" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+            mapOf("hasCert" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
         // Act, assert
         assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
-    private fun setupStepConfig(): HasGasSupplyStepConfig {
-        val stepConfig = HasGasSupplyStepConfig()
+    private fun setupStepConfig(): BeforePdjb1022HasGasCertStepConfig {
+        val stepConfig = BeforePdjb1022HasGasCertStepConfig()
         stepConfig.urlPath = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

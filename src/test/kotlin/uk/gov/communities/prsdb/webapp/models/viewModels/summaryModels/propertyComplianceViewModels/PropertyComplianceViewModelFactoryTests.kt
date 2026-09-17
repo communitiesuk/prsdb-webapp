@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyContro
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -126,7 +126,7 @@ class PropertyComplianceViewModelFactoryTests {
                     SummaryCardActionViewModel(
                         "forms.links.change",
                         LettingAgentUpdateGasSafetyController.getUpdateGasSafetyRoute(token) +
-                            "/${HasGasSupplyStep.ROUTE_SEGMENT}",
+                            "/${BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT}",
                     ),
                 )
 

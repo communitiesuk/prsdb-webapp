@@ -27,11 +27,11 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
     }
 
     @Nested
-    inner class HasGasSupplyStep {
+    inner class BeforePdjb1022HasGasSupplyStep {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
-            hasGasSupplyPage.form.submit()
+            hasGasSupplyPage.form.submitPrimaryButton()
             assertThat(
                 hasGasSupplyPage.form.getErrorMessage(),
             ).containsText("Select whether you have a gas supply or any gas appliances")
@@ -43,6 +43,13 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             hasGasSupplyPage.submitHasNoGasSupply()
             assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
         }
+
+        @Test
+        fun `Submitting Provide this later navigates to the provide gas cert later page`(page: Page) {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+            hasGasSupplyPage.submitProvideThisLater()
+            assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
+        }
     }
 
     @Nested
@@ -50,7 +57,7 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         @Test
         fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
             val hasGasSafetyCertPage = navigator.skipToPropertyRegistrationHasGasCertPage()
-            hasGasSafetyCertPage.form.submitPrimaryButton()
+            hasGasSafetyCertPage.form.submit()
             assertThat(
                 hasGasSafetyCertPage.form.getErrorMessage(),
             ).containsText("Select whether you have a gas safety certificate")
@@ -122,9 +129,15 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
             isOccupied: Boolean,
         ): ProvideGasCertLaterFormPagePropertyRegistration {
             val gasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = isOccupied)
-            gasSupplyPage.submitHasGasSupply()
-            val gasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-            gasCertPage.submitProvideThisLater()
+            if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+                // With the flag enabled, "Provide this later" is submitted directly from the has-gas-supply page
+                gasSupplyPage.submitProvideThisLater()
+            } else {
+                // With the flag disabled, "Provide this later" is only offered on the (legacy) has-gas-cert page
+                gasSupplyPage.submitHasGasSupply()
+                val gasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+                gasCertPage.submitProvideThisLater()
+            }
             return assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
         }
     }
@@ -200,13 +213,13 @@ class PropertyRegistrationGasSafetySinglePageTests : IntegrationTestWithImmutabl
         }
 
         @Test
-        fun `Provide later - gas cert change link navigates to has gas cert page`(page: Page) {
+        fun `Provide later - gas cert change link navigates to has gas supply page`(page: Page) {
             val cyaPage =
                 navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
                 )
             cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
-            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
         }
 
         @Test

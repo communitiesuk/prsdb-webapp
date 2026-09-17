@@ -7,7 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSupplyOutcome
 
 @JourneyFrameworkComponent
 class HasMissingComplianceStepConfig(
@@ -27,12 +29,12 @@ class HasMissingComplianceStepConfig(
 
     companion object {
         fun isGasCertInvalid(state: GasSafetyState): Boolean {
-            if (state.gasSafetyDetailsTask.hasGasSupplyStep.formModelIfReachableOrNull
-                    ?.hasGasSupply != true
+            if (state.gasSafetyDetailsTask.gasSupplyOutcome in
+                listOf(GasSupplyOutcome.NO_SUPPLY, GasSupplyOutcome.PROVIDE_LATER, null)
             ) {
                 return false
             }
-            if (state.gasSafetyDetailsTask.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
+            if (state.gasSafetyDetailsTask.gasCertOutcome == GasCertOutcome.PROVIDE_LATER) return false
             val isOutdated = state.gasSafetyDetailsTask.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }

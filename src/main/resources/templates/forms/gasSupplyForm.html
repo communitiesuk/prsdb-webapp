@@ -4,6 +4,10 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showSecondarySubmitButton" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
@@ -13,22 +17,33 @@
         <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.gasSafetyTask.gasSupply.detail.summary}, ~{::#details-content/content()})}">
             <div class="govuk-details__text">
                 <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading</h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.paragraph}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.paragraph</p>
                 <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading</h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.paragraph}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.paragraph</p>
                 <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.one}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.one</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.two}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.two</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.three}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.three</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.four}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.four</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.five}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.bullet.five</li>
                 </ul>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion</p>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.heading}">propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.one}">propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.one</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.two}">propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.two</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.three}">propertyCompliance.gasSafetyTask.gasSupply.detail.portableAppliances.paragraph.three</p>
             </div>
         </details>
     </th:block>
     <th:block id="form-content">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasGasSupply', null, ${radioOptions})}"></th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+        <th:block th:if="${showSecondarySubmitButton}">
+            <div class="govuk-button-group">
+                <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+                <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
+            </div>
+        </th:block>
+        <th:block th:unless="${showSecondarySubmitButton}">
+            <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+        </th:block>
     </th:block>
 </html>
