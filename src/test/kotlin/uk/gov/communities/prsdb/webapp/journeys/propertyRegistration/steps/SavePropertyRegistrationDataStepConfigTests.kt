@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -253,7 +254,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached passes hasGasSupply and gasSafetyCertProvideLater as true when the user provides gas safety later`() {
+    fun `afterStepIsReached passes hasGasSupply as null and gasSafetyCertProvideLater as true when the user provides gas safety later`() {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
@@ -283,10 +284,62 @@ class SavePropertyRegistrationDataStepConfigTests {
             jointLandlordEmails = anyOrNull(),
             lettingAgentEmail = anyOrNull(),
             markedJointLandlord = any(),
-            hasGasSupply = eq(true),
+            hasGasSupply = isNull(),
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             gasSafetyCertProvideLater = eq(true),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = anyOrNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+            epcProvideLater = anyOrNull(),
+            licenseProvideLater = anyOrNull(),
+            tenancyProvideLater = eq(false),
+            isDelegatedToLettingAgent = any(),
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached passes hasGasSupply as false and gasSafetyCertProvideLater as false when the property has no gas supply`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(GasSupplyOutcome.NO_SUPPLY)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = anyOrNull(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            isOccupied = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            lettingAgentEmail = anyOrNull(),
+            markedJointLandlord = any(),
+            hasGasSupply = eq(false),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            gasSafetyCertProvideLater = eq(false),
             electricalSafetyFileUploadIds = any(),
             electricalSafetyExpiryDate = anyOrNull(),
             electricalCertType = anyOrNull(),
@@ -363,6 +416,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupStateForComplianceDataWithNullValues()
         whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(true)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
         val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
         val mockLettingAgentEmailStep = mock<LettingAgentEmailStep>()
         whenever(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
@@ -395,7 +449,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             jointLandlordEmails = anyOrNull(),
             lettingAgentEmail = eq("letting.agent@example.com"),
             markedJointLandlord = any(),
-            hasGasSupply = eq(true),
+            hasGasSupply = isNull(),
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             gasSafetyCertProvideLater = eq(true),
@@ -414,6 +468,19 @@ class SavePropertyRegistrationDataStepConfigTests {
             tenancyProvideLater = eq(true),
             isDelegatedToLettingAgent = eq(true),
         )
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    fun `afterStepIsReached throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceDataWithNullValues()
+        whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
+        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
+
+        // Act & Assert
+        assertThrows<IllegalStateException> { stepConfig.afterStepIsReached(mockState) }
     }
 
     @Test
