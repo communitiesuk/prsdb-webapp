@@ -17,12 +17,12 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
     private enum class Outcome {
         NO_GAS_SUPPLY,
         DEFERRED_ON_GAS_SUPPLY_QUESTION,
+        NO_CERTIFICATE,
+        VALID_CERTIFICATE,
 
         // TODO PDJB-1617: delete this outcome (and its branches below) when we remove the delegation feature flag -
         //  deferring on the gas-certificate question is the flag-off (legacy) behaviour only.
         DEFERRED_ON_GAS_CERTIFICATE_QUESTION,
-        NO_CERTIFICATE,
-        VALID_CERTIFICATE,
     }
 
     private val outcome: Outcome = determineOutcome()
@@ -53,7 +53,8 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         when (state.gasSupplyOutcome) {
             GasSupplyOutcome.NO_SUPPLY -> Outcome.NO_GAS_SUPPLY
             GasSupplyOutcome.PROVIDE_LATER -> Outcome.DEFERRED_ON_GAS_SUPPLY_QUESTION
-            GasSupplyOutcome.HAS_SUPPLY, null -> determineCertificateOutcome()
+            GasSupplyOutcome.HAS_SUPPLY -> determineCertificateOutcome()
+            null -> throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasSupply is answered")
         }
 
     private fun determineCertificateOutcome(): Outcome =
