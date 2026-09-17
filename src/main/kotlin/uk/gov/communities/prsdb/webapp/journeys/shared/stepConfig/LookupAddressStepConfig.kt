@@ -24,7 +24,7 @@ class LookupAddressStepConfig(
             "submitButtonText" to "forms.buttons.findAddress",
         )
 
-    override fun chooseTemplate(state: AddressSearchState) = "forms/lookupAddressForm"
+    override fun chooseTemplate(state: AddressSearchState) = template
 
     override fun resolvePageContent(
         state: AddressSearchState,
@@ -39,6 +39,7 @@ class LookupAddressStepConfig(
     }
 
     companion object {
+        const val DEFAULT_TEMPLATE = "forms/lookupAddressForm"
         const val PREFILL_POSTCODE = "lookupPrefillPostcode"
         const val PREFILL_HOUSE_NAME_OR_NUMBER = "lookupPrefillHouseNameOrNumber"
     }
@@ -62,6 +63,16 @@ class LookupAddressStepConfig(
 
     fun restrictToEngland(): LookupAddressStepConfig {
         this.restrictToEngland = true
+        return this
+    }
+
+    private var template: String = DEFAULT_TEMPLATE
+
+    // Lets a task render this step with its own template (e.g. the correspondence address page, which adds guidance
+    // content around the standard lookup fields). Safe as per-instance state because @JourneyFrameworkComponent is
+    // @Scope("prototype"), so each task owns its own step config instance.
+    fun withTemplate(template: String): LookupAddressStepConfig {
+        this.template = template
         return this
     }
 }

@@ -299,9 +299,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             correspondenceEmailPage.submit()
 
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(
-                correspondenceLookupPage.form.fieldsetHeading,
-            ).containsText("Where should the council send post about this property?")
+            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+
             correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
 
             val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
@@ -664,9 +663,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submit()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(
-                correspondenceLookupPage.form.fieldsetHeading,
-            ).containsText("Where should the council send post about this property?")
+            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+
             correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
             val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")
@@ -1643,9 +1641,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
             correspondenceEmailPage.submit()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
-            assertThat(
-                correspondenceLookupPage.form.fieldsetHeading,
-            ).containsText("Where should the council send post about this property?")
+            assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
+
             correspondenceLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
             val correspondenceSelectPage = assertPageIs(page, CorrespondenceSelectAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceSelectPage.form.fieldsetHeading).containsText("Select a postal address")

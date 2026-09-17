@@ -71,12 +71,19 @@ class PropertyStateSessionBuilder(
         return this
     }
 
+    // Restructured journey only (CORRESPONDENCE_ADDRESS flag on): completes only the placeholder correspondence
+    // email step, leaving the postal address flow unanswered.
+    fun withSubmittedCorrespondenceEmail(): PropertyStateSessionBuilder {
+        withSubmittedValue(CorrespondenceEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        return this
+    }
+
     fun withCompletedCorrespondence(
         singleLineAddress: String = "1 Fictional Road, FA1 1AA",
         houseNameOrNumber: String = "1",
         postcode: String = "FA1 1AA",
     ): PropertyStateSessionBuilder {
-        withSubmittedValue(CorrespondenceEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedCorrespondenceEmail()
 
         val addressScope = CorrespondenceAddressTask.ROUTE_SEGMENT
         val lookupAddressFormModel =
@@ -143,6 +150,17 @@ class PropertyStateSessionBuilder(
                 .withBedrooms()
                 .withOwnershipType()
                 .withHasNoJointLandlords()
+
+        // The correspondence lookup address step: everything before the correspondence task is complete and the
+        // placeholder email step is answered, but the postal address itself is not. Deliberately does not chain off
+        // beforePropertyRegistrationOwnershipType, as that completes the whole correspondence task.
+        fun beforePropertyRegistrationCorrespondenceLookupAddress() =
+            beforePropertyRegistrationPropertyType()
+                .withPropertyType()
+                .withBedrooms()
+                .withOwnershipType()
+                .withHasNoJointLandlords()
+                .withSubmittedCorrespondenceEmail()
 
         fun beforePropertyRegistrationRentedOutSelectiveLicence() =
             beforePropertyRegistrationOccupiedLicensingType().withLicensingType(LicensingType.SELECTIVE_LICENCE)

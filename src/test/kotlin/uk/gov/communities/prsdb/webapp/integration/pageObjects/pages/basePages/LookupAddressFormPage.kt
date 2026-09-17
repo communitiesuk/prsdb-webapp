@@ -29,5 +29,6 @@ abstract class LookupAddressFormPage(
     ) : FormWithSectionHeader(page) {
         val postcodeInput = TextInput.textByFieldName(locator, "postcode")
         val houseNameOrNumberInput = TextInput.textByFieldName(locator, "houseNameOrNumber")
+        val fieldsetLegend = FieldsetLegend(locator)
     }
 }
