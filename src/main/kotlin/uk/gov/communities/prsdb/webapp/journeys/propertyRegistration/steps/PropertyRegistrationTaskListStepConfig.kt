@@ -165,14 +165,17 @@ class PropertyRegistrationTaskListStepConfig(
                 },
             ),
             TaskSectionViewModel(
-                if (featureFlagManager.checkFeature(PAYMENTS)) {
-                    "registerProperty.taskList.submitYourRegistration.headingWithPayment"
-                } else {
-                    "registerProperty.taskList.submitYourRegistration.heading"
-                },
+                "registerProperty.taskList.submitYourRegistration.heading",
                 "submit-your-registration",
                 listOf(
-                    TaskListItemViewModel.fromStep("registerProperty.taskList.checkAndSubmit.checkAnswers", state.cyaStep),
+                    TaskListItemViewModel.fromStep(
+                        if (featureFlagManager.checkFeature(PAYMENTS)) {
+                            "registerProperty.taskList.checkAndSubmit.checkAnswersWithPayment"
+                        } else {
+                            "registerProperty.taskList.checkAndSubmit.checkAnswers"
+                        },
+                        state.cyaStep,
+                    ),
                 ),
             ),
         )

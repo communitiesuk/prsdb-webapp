@@ -102,6 +102,7 @@ taskList:
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers
+    checkAnswersWithPayment: Submit and pay
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
 checkAnswers:
