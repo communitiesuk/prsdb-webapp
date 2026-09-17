@@ -13,7 +13,8 @@ class PaymentSummaryStepConfig :
     override val formModelClass = NoInputFormModel::class
 
     // TODO PDJB-996: Replace this stub with the real payment summary page (shows the amount the user has to pay).
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) = mapOf("todoComment" to "Payment summary (TODO PDJB-996)")
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        mapOf("todoComment" to "Payment summary (TODO PDJB-996)")
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todo"
 

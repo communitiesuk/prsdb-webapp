@@ -12,7 +12,7 @@ class NonRetryablePaymentFailedStepConfig :
     override val formModelClass = NoInputFormModel::class
 
     // TODO PDJB-1703: Replace this stub with the real non-retryable payment failed page (terminal, cannot retry).
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
         mapOf("todoComment" to "Payment failed - non-retryable (TODO PDJB-1703)")
 
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/todoNoButton"

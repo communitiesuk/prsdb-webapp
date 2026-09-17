@@ -762,22 +762,6 @@ class PropertyRegistrationJourneyFactory(
                         }
                     }
                 }
-                step(journey.savePropertyRegistrationDataStep) {
-                    parents {
-                        paymentsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) }
-                            ifDisabled {
-                                OrParents(
-                                    journey.hasMissingComplianceStep.hasOutcome(
-                                        ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
-                                    ),
-                                    journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                                )
-                            }
-                        }
-                    }
-                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
-                }
                 paymentsStrategy.ifEnabled {
                     step(journey.paymentSummaryStep) {
                         routeSegment(PaymentSummaryStep.ROUTE_SEGMENT)
@@ -811,6 +795,22 @@ class PropertyRegistrationJourneyFactory(
                         parents { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.NON_RETRYABLE_FAILURE) }
                         noNextDestination()
                     }
+                }
+                step(journey.savePropertyRegistrationDataStep) {
+                    parents {
+                        paymentsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) }
+                            ifDisabled {
+                                OrParents(
+                                    journey.hasMissingComplianceStep.hasOutcome(
+                                        ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
+                                    ),
+                                    journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                                )
+                            }
+                        }
+                    }
+                    nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
