@@ -13,6 +13,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -87,12 +88,135 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
         assertEquals(expectedKey, insetTextKey)
     }
 
+    @Test
+    fun `flag on - occupied provide-later renders a single gas-supply row with the deadline value and no cert row`() {
+        val messageSource = mock<MessageSource>()
+        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
+            .thenAnswer { invocation ->
+                val args = invocation.getArgument<Array<Any>>(1)
+                "Provide this later (before ${args[0]})"
+            }
+        val factory =
+            GasSafetyViewModelFactory(
+                mock(),
+                messageSource,
+                mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = true),
+            )
+        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+
+        val expectedDeadline =
+            occupiedAtRegistrationDate
+                .plusDays(30)
+                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .format(DATE_FORMATTER)
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                    "Provide this later (before $expectedDeadline)",
+                ),
+            ),
+            rows,
+        )
+    }
+
+    @Test
+    fun `flag on - unoccupied provide-later renders a single gas-supply row with the no-date value and no cert row`() {
+        val factory =
+            GasSafetyViewModelFactory(
+                mock(),
+                mock(),
+                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+            )
+        val rows = factory.fromEntity(missingUnoccupiedProvideLater)
+
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                    "checkGasSafety.provideThisLater.unoccupied",
+                ),
+            ),
+            rows,
+        )
+    }
+
+    @Test
+    fun `flag off - occupied provide-later still renders both gas-supply and cert rows`() {
+        val messageSource = mock<MessageSource>()
+        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
+            .thenAnswer { invocation ->
+                val args = invocation.getArgument<Array<Any>>(1)
+                "Provide this later (before ${args[0]})"
+            }
+        val factory =
+            GasSafetyViewModelFactory(
+                mock(),
+                messageSource,
+                mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = false),
+            )
+        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+
+        val expectedDeadline =
+            occupiedAtRegistrationDate
+                .plusDays(30)
+                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                .format(DATE_FORMATTER)
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                    "commonText.yes",
+                ),
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasCert",
+                    "Provide this later (before $expectedDeadline)",
+                ),
+            ),
+            rows,
+        )
+    }
+
+    @Test
+    fun `flag on - occupied no-cert (HAS_FAULTS) is unaffected and renders both rows`() {
+        val factory =
+            GasSafetyViewModelFactory(
+                mock(),
+                mock(),
+                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+            )
+        val rows = factory.fromEntity(missingOccupiedNoCert)
+
+        assertEquals(
+            listOf(
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                    "commonText.yes",
+                ),
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.gasSafety.hasCert",
+                    "commonText.no",
+                ),
+            ),
+            rows,
+        )
+    }
+
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkGasSafety.provideThisLater.occupiedWithDeadline"
 
         private fun mockFeatureFlagManager(registrationDateDeadlineEnabled: Boolean): FeatureFlagManager =
             mock { on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn registrationDateDeadlineEnabled }
+
+        private fun mockFeatureFlagManager(
+            registrationDateDeadlineEnabled: Boolean,
+            delegateToLettingAgentEnabled: Boolean,
+        ): FeatureFlagManager =
+            mock {
+                on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn registrationDateDeadlineEnabled
+                on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateToLettingAgentEnabled
+            }
 
         // A property "occupied when registered" has a lastOccupiedDate matching its registration (created) date.
         private val occupiedAtRegistrationDate = LocalDate.of(2025, 1, 1)
@@ -145,6 +269,12 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(false)
                 .withHasGasSupply(true)
+                .build()
+        private val missingUnoccupiedProvideLater =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCertProvideLater()
                 .build()
         private val missingOccupiedProvideLater =
             PropertyComplianceBuilder()
