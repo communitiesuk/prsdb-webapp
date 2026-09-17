@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -25,6 +26,11 @@ class NoAddressFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInput
     override fun chooseTemplate(state: AddressState) = "forms/noAddressFoundForm"
 
     override fun mode(state: AddressState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    override fun afterStepDataIsAdded(state: AddressState) {
+        // this is also set via 'Enter manually' radio on the select address page
+        state.cachedSelectedAddress = MANUAL_ADDRESS_CHOSEN
+    }
 
     private var restrictToEngland: Boolean = false
 

@@ -2,10 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -17,15 +15,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateOrgan
 
 @WithOrgLandlordProfile
 class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @BeforeEach
-    fun setup() {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
-
     @Nested
     inner class AddingTrustInterruption {
         @Test
-        fun `shows the adding trust page when adding trust to organisation type`(page: Page) {
+        fun `shows the adding trust page when adding trust to organisation type`() {
             val interruptionPage = navigator.skipToUpdateOrgTypeTrustInterruptionPage(listOf(OrgType.TRUST))
 
             assertThat(interruptionPage.heading).containsText("You must provide trustee details")
@@ -34,13 +27,8 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
 
     @Nested
     inner class RemovingTrustInterruption : NestedIntegrationTestWithImmutableData("data-org-landlord-trust.sql") {
-        @BeforeEach
-        fun setup() {
-            featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-        }
-
         @Test
-        fun `shows the removing trust page when removing trust from organisation type`(page: Page) {
+        fun `shows the removing trust page when removing trust from organisation type`() {
             val interruptionPage = navigator.skipToUpdateOrgTypeTrustInterruptionPage(listOf(OrgType.COMPANY))
 
             assertThat(interruptionPage.heading).containsText("Are you sure you want to change this?")
@@ -48,7 +36,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
         }
 
         @Test
-        fun `shows comma-separated org types when multiple are selected`(page: Page) {
+        fun `shows comma-separated org types when multiple are selected`() {
             val interruptionPage = navigator.skipToUpdateOrgTypeTrustInterruptionPage(listOf(OrgType.COMPANY, OrgType.CHARITY))
 
             assertThat(interruptionPage.body).containsText("from a trust to company, charity")
@@ -159,7 +147,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
     @Nested
     inner class TrustUnchangedCya {
         @Test
-        fun `CYA page shows organisation type only when trust status is unchanged`(page: Page) {
+        fun `CYA page shows organisation type only when trust status is unchanged`() {
             val cyaPage = navigator.skipToUpdateOrgTypeCyaPageTrustUnchanged(listOf(OrgType.CHARITY))
 
             assertThat(cyaPage.summaryList.organisationTypeRow.value).containsText("Charity")
@@ -178,7 +166,7 @@ class OrganisationLandlordUpdateSinglePageTests : IntegrationTestWithImmutableDa
     @Nested
     inner class AddingTrustCya {
         @Test
-        fun `CYA page shows organisation type and lead trustee details when adding trust`(page: Page) {
+        fun `CYA page shows organisation type and lead trustee details when adding trust`() {
             val cyaPage =
                 navigator.skipToUpdateOrgTypeCyaPageAddingTrust(
                     trusteeName = LEAD_TRUSTEE_NAME,

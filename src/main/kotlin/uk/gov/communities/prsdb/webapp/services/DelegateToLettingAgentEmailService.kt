@@ -64,7 +64,7 @@ class DelegateToLettingAgentEmailService(
         deadlineDate: String? = null,
         invitationToken: UUID,
     ) {
-        val invitationLink = absoluteUrlProvider.buildLettingAgentInvitationUri(invitationToken.toString()).toString()
+        val invitationLink = absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(invitationToken).toString()
 
         if (deadlineDate != null) {
             invitationWithDeadlineEmailService.sendEmail(

@@ -6,10 +6,14 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateEpcController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
+import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -74,7 +78,7 @@ class PropertyComplianceViewModelFactoryTests {
                 listOf(
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                        LandlordUpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                     ),
                 )
 
@@ -95,12 +99,53 @@ class PropertyComplianceViewModelFactoryTests {
                     ),
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
+                        LandlordUpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
                     ),
                 )
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
             assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
             assertEquals(expectedEpcActions, result.epcSummaryCard.actions)
+        }
+
+        @Test
+        fun `the gas safety card has a letting agent change action when a token is supplied`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val propertyOwnershipId = propertyCompliance.propertyOwnership.id
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyOwnershipId,
+                    lettingAgentAccessToken = token,
+                )
+
+            val expectedGasSafetyActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        LettingAgentUpdateGasSafetyController.getUpdateGasSafetyRoute(token) +
+                            "/${BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT}",
+                    ),
+                )
+
+            assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
+        }
+
+        @Test
+        fun `the gas safety card has no change action for the letting agent view without a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val propertyOwnershipId = propertyCompliance.propertyOwnership.id
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertNull(result.gasSafetySummaryCard.actions)
         }
 
         @Test
@@ -114,7 +159,7 @@ class PropertyComplianceViewModelFactoryTests {
                     propertyCompliance,
                     viewType = PropertyDetailsViewType.LETTING_AGENT,
                     propertyOwnershipId = propertyOwnershipId,
-                    lettingAgentToken = token,
+                    lettingAgentAccessToken = token,
                 )
 
             val expectedElectricalSafetyActions =
@@ -142,6 +187,79 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertNull(result.electricalSafetySummaryCard.actions)
+        }
+
+        @Test
+        fun `the EPC card includes view and change actions for the letting agent with a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                    lettingAgentAccessToken = token,
+                )
+
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        requireNotNull(propertyCompliance.epcUrl),
+                        opensInNewTab = true,
+                    ),
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${StartEpcStep.ROUTE_SEGMENT}",
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
+        }
+
+        @Test
+        fun `the EPC card retains the view action without a change action for the letting agent without a token`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
+
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        requireNotNull(propertyCompliance.epcUrl),
+                        opensInNewTab = true,
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
+        }
+
+        @Test
+        fun `the EPC card has a change action for the letting agent when the certificate is missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts()
+            val token = UUID.randomUUID()
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    viewType = PropertyDetailsViewType.LETTING_AGENT,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                    lettingAgentAccessToken = token,
+                )
+
+            assertEquals(
+                SummaryCardActionViewModel.changeAction(
+                    LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${StartEpcStep.ROUTE_SEGMENT}",
+                ),
+                result.epcSummaryCard.actions,
+            )
         }
 
         @Test

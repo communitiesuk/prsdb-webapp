@@ -4,13 +4,13 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -19,14 +19,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateGasSafetyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateGasSafetyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
+    final fun createJourneySteps(
+        propertyId: Long,
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -48,24 +50,22 @@ class UpdateGasSafetyJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, returnUrl)
         } else {
-            checkYourAnswersJourneyMap(state, propertyId)
+            checkYourAnswersJourneyMap(state, returnUrl)
         }
     }
 
     private fun mainJourneyMap(
         state: UpdateGasSafetyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             task(journey.gasSafetyDetailsTask) {
                 withDependencies { journey }
                 initialStep()
-                backUrl { propertyComplianceRoute }
+                backUrl { returnUrl }
                 nextStep { journey.updateCheckGasSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
@@ -86,19 +86,17 @@ class UpdateGasSafetyJourneyFactory(
             }
             step(journey.completeGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
-                nextUrl { propertyComplianceRoute }
+                nextUrl { returnUrl }
             }
+            replaceButtons()
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateGasSafetyJourney,
-        propertyId: Long,
-    ): Map<String, StepLifecycleOrchestrator> {
-        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
-
-        return journey(state) {
-            unreachableStepUrl { propertyComplianceRoute }
+        returnUrl: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperties {
                     mapOf(
@@ -117,13 +115,40 @@ class UpdateGasSafetyJourneyFactory(
                 initialStep()
                 nextDestination { Destination.Nowhere() }
             }
+            replaceButtons()
+        }
+
+    private fun JourneyBuilder<UpdateGasSafetyJourney>.replaceButtons() {
+        configureStep(journey.gasSafetyDetailsTask.beforePdjb1022HasGasSupplyStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.hasGasSupplyStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.beforePdjb1022HasGasCertStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.hasGasCertStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.gasCertIssueDateStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.checkGasCertUploadsStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.gasCertExpiredStep) {
+            withAdditionalContentProperty {
+                "submitButtonText" to
+                    if (journey.isOccupied) "forms.buttons.continueWithoutGasSafety" else "forms.buttons.continue"
+            }
         }
     }
 
-    fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -138,7 +163,7 @@ class UpdateGasSafetyJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateGasSafetyJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -150,6 +175,7 @@ class UpdateGasSafetyJourney(
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val propertyOwnershipId: Long? get() = propertyId
 }
 
 interface UpdateGasSafetyJourneyState :

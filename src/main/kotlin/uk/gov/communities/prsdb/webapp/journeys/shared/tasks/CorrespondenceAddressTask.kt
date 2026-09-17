@@ -1,0 +1,46 @@
+package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+
+// TODO PDJB-1591 update the lookup page
+// TODO PDJB-1592 - update the rest of this address task
+@JourneyFrameworkComponent
+class CorrespondenceAddressTask(
+    journeyStateService: JourneyStateService,
+    lookupAddressStep: LookupAddressStep,
+    selectAddressStep: SelectAddressStep,
+    noAddressFoundStep: NoAddressFoundStep,
+    manualAddressStep: ManualAddressStep,
+) : AddressTask(
+        journeyStateService,
+        lookupAddressStep,
+        selectAddressStep,
+        noAddressFoundStep,
+        manualAddressStep,
+    ) {
+    override val lookupAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "addressForms.lookupAddress.correspondence.fieldSetHeading",
+            "fieldSetHint" to "addressForms.lookupAddress.correspondence.fieldSetHint",
+        )
+
+    override val selectAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "addressForms.selectAddress.correspondence.fieldSetHeading",
+        )
+
+    override val manualAddressContentProperties: Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "addressForms.manualAddress.correspondence.fieldSetHeading",
+            "fieldSetHint" to "addressForms.manualAddress.correspondence.fieldSetHint",
+        )
+
+    companion object {
+        const val ROUTE_SEGMENT = "correspondence-address"
+    }
+}

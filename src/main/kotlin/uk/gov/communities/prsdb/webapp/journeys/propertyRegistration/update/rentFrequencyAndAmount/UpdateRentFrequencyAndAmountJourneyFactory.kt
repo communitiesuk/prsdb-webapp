@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -30,7 +31,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -93,30 +94,50 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
-            checkAnswerTask(journey.rentFrequencyAndAmountTask)
+            when (state.checkingAnswersFor) {
+                RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        backDestination { journey.returnToCyaPageDestination }
+                        withAdditionalContentProperty {
+                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                        }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                    configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
+                        withAdditionalContentProperty {
+                            "heading" to "forms.update.rentFrequency.heading"
+                        }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
+                    }
+                    configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
+                        withAdditionalContentProperty {
+                            "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
+                        }
+                        withAdditionalContentProperty {
+                            "submitButtonText" to "forms.buttons.continue"
+                        }
+                    }
+                }
+            }
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
-            configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
-                withAdditionalContentProperty {
-                    "heading" to "forms.update.rentFrequency.heading"
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
-            }
-            configureStep(journey.rentFrequencyAndAmountTask.rentAmount) {
-                withAdditionalContentProperty {
-                    "heading" to state.rentFrequencyAndAmountTask.getUpdateRentAmountHeading()
-                }
-                withAdditionalContentProperty {
-                    "submitButtonText" to "forms.buttons.continue"
-                }
-            }
         }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -132,7 +153,7 @@ class UpdateRentFrequencyAndAmountJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateRentFrequencyAndAmountJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")

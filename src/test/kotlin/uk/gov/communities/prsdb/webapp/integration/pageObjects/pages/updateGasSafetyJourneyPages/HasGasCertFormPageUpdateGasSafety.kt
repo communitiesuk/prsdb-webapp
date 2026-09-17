@@ -3,18 +3,18 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasS
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.HasGasCertFormBasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
 
 class HasGasCertFormPageUpdateGasSafety(
     page: Page,
     urlArguments: Map<String, String>,
 ) : HasGasCertFormBasePage(
         page,
-        UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
+        LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", urlArguments["propertyOwnershipId"]!!) +
-            "/${HasGasCertStep.ROUTE_SEGMENT}",
+            "/${BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT}",
     ) {
     val provideThisLaterButton: Locator =
         page.locator("button[name='action'][value='$PROVIDE_THIS_LATER_BUTTON_ACTION_NAME']")

@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLettingAgentView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.InvalidLinkPageLettingAgentInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
 
 class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("data-local.sql") {
     private val validToken = "3334abcd-5678-abcd-1234-567abcd1111a"
@@ -65,10 +66,6 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
             val setPasswordPage = navigator.skipToLettingAgentInvitationSetPasswordPage(validToken)
 
             setPasswordPage.submitPasswords("password1", "password1")
-
-            // TODO PDJB-1659: Remove this step once store-access becomes a silent step
-            val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
-            storeAccessPage.form.submit()
 
             assertPageIs(page, PasswordCreationConfirmationPage::class)
         }
@@ -131,8 +128,22 @@ class LettingAgentInvitationSinglePageTests : IntegrationTestWithMutableData("da
 
             enterPasswordPage.submitPassword(seededPassword)
 
-            // TODO PDJB-1659: Assert the letting agent's access has been stored
-            assertPageIs(page, StoreAccessPage::class)
+            // store-access runs silently and grants session access, then redirects to the property details page
+            assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithPassword))
+        }
+    }
+
+    @Nested
+    inner class InvalidLink {
+        @Test
+        fun `navigating with an invalid token redirects to the invalid link page`(page: Page) {
+            val invalidToken = "1234abcd-5678-abcd-1234-567abcd9999z"
+
+            navigator.navigateToLettingAgentInvitationWithInvalidToken(invalidToken)
+
+            val invalidLinkPage = assertPageIs(page, InvalidLinkPageLettingAgentInvitation::class)
+            BaseComponent.assertThat(invalidLinkPage.heading).containsText("There was a problem with this link")
+            assertThat(invalidLinkPage.checkLinkText).containsText("Check the link is correct.")
         }
     }
 }

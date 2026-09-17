@@ -4,10 +4,8 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.constants.enums.GoverningBodyMemberType
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -28,15 +26,10 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberData
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
-    @BeforeEach
-    fun enableOrgLandlordFlag() {
-        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
-    }
-
     @Nested
     inner class LandlordTypeStep {
         @Test
-        fun `the landlord type page renders the caption, heading, partnership details and radio options`(page: Page) {
+        fun `the landlord type page renders the caption, heading, partnership details and radio options`() {
             val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             assertThat(landlordTypePage.page.locator("#section-header")).containsText("Register as a landlord")
@@ -53,7 +46,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the legend text is not shown as a header when there is no error`(page: Page) {
+        fun `the legend text is not shown as a header when there is no error`() {
             val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             assertThat(landlordTypePage.page.locator(".govuk-fieldset__legend")).hasCount(0)
@@ -61,7 +54,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no landlord type selected returns an error`(page: Page) {
+        fun `submitting with no landlord type selected returns an error`() {
             val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             landlordTypePage.form.submit()
@@ -74,7 +67,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgNameStep {
         @Test
-        fun `submitting an empty organisation name returns an error`(page: Page) {
+        fun `submitting an empty organisation name returns an error`() {
             val orgNamePage = navigator.skipToOrgLandlordRegistrationOrgNamePage()
             orgNamePage.submitName("")
             assertThat(orgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
@@ -84,14 +77,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgAddressStep {
         @Test
-        fun `the organisation address lookup page renders the heading`(page: Page) {
+        fun `the organisation address lookup page renders the heading`() {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
             assertThat(orgAddressPage.form.fieldsetHeading).containsText("What is your organisation’s address?")
         }
 
         @Test
-        fun `submitting without a postcode returns the missing postcode error`(page: Page) {
+        fun `submitting without a postcode returns the missing postcode error`() {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
             orgAddressPage.submitPostcodeAndBuildingNameOrNumber("", "1")
@@ -100,7 +93,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting without a house name or number returns the missing error`(page: Page) {
+        fun `submitting without a house name or number returns the missing error`() {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
             orgAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AB", "")
@@ -130,7 +123,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgManualAddressStep {
         @Test
-        fun `submitting without an address line 1 returns the missing address line 1 error`(page: Page) {
+        fun `submitting without an address line 1 returns the missing address line 1 error`() {
             val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
 
             manualAddressPage.submitAddress(townOrCity = "Exampleton", postcode = "EG1 2AB")
@@ -140,7 +133,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting without a town or city returns the missing town or city error`(page: Page) {
+        fun `submitting without a town or city returns the missing town or city error`() {
             val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
 
             manualAddressPage.submitAddress(addressLineOne = "1 Example Street", postcode = "EG1 2AB")
@@ -149,7 +142,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting without a postcode returns the missing postcode error`(page: Page) {
+        fun `submitting without a postcode returns the missing postcode error`() {
             val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
 
             manualAddressPage.submitAddress(addressLineOne = "1 Example Street", townOrCity = "Exampleton")
@@ -158,7 +151,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting all required fields empty returns all three missing errors`(page: Page) {
+        fun `submitting all required fields empty returns all three missing errors`() {
             val manualAddressPage = navigator.skipToOrgLandlordRegistrationManualAddressPage()
 
             manualAddressPage.form.submit()
@@ -173,7 +166,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgMainContactStep {
         @Test
-        fun `the main contact page renders the heading and the three field labels`(page: Page) {
+        fun `the main contact page renders the heading and the three field labels`() {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
             assertThat(mainContactPage.pageHeader).containsText("Who is the main contact for your organisation?")
@@ -183,7 +176,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting all fields empty returns missing errors for each field`(page: Page) {
+        fun `submitting all fields empty returns missing errors for each field`() {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
             mainContactPage.submit(name = "", email = "", phoneNumber = "")
@@ -195,7 +188,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an invalid email returns an email format error`(page: Page) {
+        fun `submitting an invalid email returns an email format error`() {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
             mainContactPage.submit(name = "Jane Doe", email = "not-an-email", phoneNumber = "07123456789")
@@ -205,7 +198,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an invalid phone number returns a phone format error`(page: Page) {
+        fun `submitting an invalid phone number returns a phone format error`() {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
             mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "not-a-phone")
@@ -215,7 +208,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting valid details advances past the main contact step`(page: Page) {
+        fun `submitting valid details advances past the main contact step`() {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
             mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "07123456789")
@@ -257,14 +250,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgEmailStep {
         @Test
-        fun `the org email page renders the heading as a label`(page: Page) {
+        fun `the org email page renders the heading as a label`() {
             val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
 
             assertThat(orgEmailPage.page.locator("h1 label")).containsText("What is your organisation’s email address?")
         }
 
         @Test
-        fun `submitting an empty email address returns an error`(page: Page) {
+        fun `submitting an empty email address returns an error`() {
             val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
             orgEmailPage.submitEmail("")
             assertThat(orgEmailPage.form.getErrorMessage())
@@ -272,7 +265,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an invalid email address returns an error`(page: Page) {
+        fun `submitting an invalid email address returns an error`() {
             val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
             orgEmailPage.submitEmail("not-an-email")
             assertThat(orgEmailPage.form.getErrorMessage())
@@ -421,7 +414,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgTypeStep {
         @Test
-        fun `submitting with nothing selected returns an error`(page: Page) {
+        fun `submitting with nothing selected returns an error`() {
             val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
 
             orgTypePage.form.submit()
@@ -431,7 +424,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting None with another option returns an error`(page: Page) {
+        fun `submitting None with another option returns an error`() {
             val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
 
             orgTypePage.selectCompany()
@@ -446,7 +439,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgIsRegisteredCompanyStep {
         @Test
-        fun `the companies house page renders the heading and yes no radio options`(page: Page) {
+        fun `the companies house page renders the heading and yes no radio options`() {
             val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             assertThat(companiesHousePage.form.fieldsetHeading)
@@ -456,7 +449,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no option selected returns a validation error`(page: Page) {
+        fun `submitting with no option selected returns a validation error`() {
             val companiesHousePage = navigator.skipToOrgLandlordRegistrationIsRegisteredCompanyPage()
 
             companiesHousePage.form.submit()
@@ -469,7 +462,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCompanyNumberStep {
         @Test
-        fun `the company number page renders the heading, hint, details and input`(page: Page) {
+        fun `the company number page renders the heading, hint, details and input`() {
             val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
 
             assertThat(companyNumberPage.form.sectionHeader).containsText("Register as a landlord")
@@ -483,7 +476,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no company number returns a missing error`(page: Page) {
+        fun `submitting with no company number returns a missing error`() {
             val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
 
             companyNumberPage.form.submit()
@@ -493,7 +486,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a company number with fewer than 8 characters returns a length error`(page: Page) {
+        fun `submitting a company number with fewer than 8 characters returns a length error`() {
             val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
 
             companyNumberPage.submitCompanyNumber("1234567")
@@ -503,7 +496,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a company number with more than 8 characters returns a length error`(page: Page) {
+        fun `submitting a company number with more than 8 characters returns a length error`() {
             val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
 
             companyNumberPage.submitCompanyNumber("123456789")
@@ -513,7 +506,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting a company number with invalid characters returns an invalid characters error`(page: Page) {
+        fun `submitting a company number with invalid characters returns an invalid characters error`() {
             val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
 
             companyNumberPage.submitCompanyNumber("SC12/*1+")
@@ -546,7 +539,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgIsRegisteredCharityStep {
         @Test
-        fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
+        fun `the org charity page renders the caption, heading, hint and radio options`() {
             val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
             assertThat(orgIsRegisteredCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
@@ -561,7 +554,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no option selected returns an error`(page: Page) {
+        fun `submitting with no option selected returns an error`() {
             val orgIsRegisteredCharityPage = navigator.skipToOrgLandlordRegistrationIsRegisteredCharityPage()
 
             orgIsRegisteredCharityPage.form.submit()
@@ -574,7 +567,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityRegisteredWithStep {
         @Test
-        fun `the charity registered with page renders the heading`(page: Page) {
+        fun `the charity registered with page renders the heading`() {
             val charityRegisteredWithPage = navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
 
             assertThat(charityRegisteredWithPage.heading)
@@ -582,7 +575,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no option selected returns an error`(page: Page) {
+        fun `submitting with no option selected returns an error`() {
             val charityRegisteredWithPage = navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
 
             charityRegisteredWithPage.form.submit()
@@ -595,7 +588,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityNumberEnglandAndWalesTests {
         @Test
-        fun `the charity number page renders the England & Wales charity register link`(page: Page) {
+        fun `the charity number page renders the England & Wales charity register link`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
 
             assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
@@ -605,21 +598,21 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an empty charity number returns an error`(page: Page) {
+        fun `submitting an empty charity number returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
             charityNumberPage.submitCharityNumber("")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
         }
 
         @Test
-        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+        fun `submitting a non-numeric charity number returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
             charityNumberPage.submitCharityNumber("abc*/-d+")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
         }
 
         @Test
-        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+        fun `submitting a charity number with wrong length returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
             charityNumberPage.submitCharityNumber("123456")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 7 or 8 digit number")
@@ -629,7 +622,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityNumberNorthernIrelandTests {
         @Test
-        fun `the charity number page renders with the Northern Ireland charity register link`(page: Page) {
+        fun `the charity number page renders with the Northern Ireland charity register link`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
 
             assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
@@ -637,21 +630,21 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an empty charity number returns an error`(page: Page) {
+        fun `submitting an empty charity number returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
             charityNumberPage.submitCharityNumber("")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
         }
 
         @Test
-        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+        fun `submitting a non-numeric charity number returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
             charityNumberPage.submitCharityNumber("abcdef")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
         }
 
         @Test
-        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+        fun `submitting a charity number with wrong length returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
             charityNumberPage.submitCharityNumber("12345")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6 digit charity number")
@@ -661,7 +654,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityNumberScotlandTests {
         @Test
-        fun `the charity number page renders with the Scottish charity register link`(page: Page) {
+        fun `the charity number page renders with the Scottish charity register link`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
 
             assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
@@ -669,21 +662,21 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting an empty charity number returns an error`(page: Page) {
+        fun `submitting an empty charity number returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
             charityNumberPage.submitCharityNumber("")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
         }
 
         @Test
-        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+        fun `submitting a charity number with wrong length returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
             charityNumberPage.submitCharityNumber("1234567")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter an 8 character charity number, like SC001234")
         }
 
         @Test
-        fun `submitting a charity number with invalid characters returns an error`(page: Page) {
+        fun `submitting a charity number with invalid characters returns an error`() {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
             charityNumberPage.submitCharityNumber("SC-0123!")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
@@ -693,7 +686,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgGovBodyDetailsStep {
         @Test
-        fun `org governing body details page renders the expected content`(page: Page) {
+        fun `org governing body details page renders the expected content`() {
             val govBodyDetailsPage = navigator.skipToOrgLandlordRegistrationGovBodyDetailsPage()
 
             assertThat(govBodyDetailsPage.heading)
@@ -722,7 +715,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgGovBodyWhoToProvideStep {
         @Test
-        fun `the who to provide page renders the heading`(page: Page) {
+        fun `the who to provide page renders the heading`() {
             val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
 
             assertThat(whoToProvidePage.form.fieldsetHeading)
@@ -730,7 +723,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting with no option selected returns a validation error`(page: Page) {
+        fun `submitting with no option selected returns a validation error`() {
             val whoToProvidePage = navigator.skipToOrgLandlordRegistrationGovBodyWhoToProvidePage()
 
             whoToProvidePage.form.submit()
@@ -743,14 +736,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class GovBodyMemberNameStep {
         @Test
-        fun `the governing body member name page renders the caption and heading`(page: Page) {
+        fun `the governing body member name page renders the caption and heading`() {
             val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
 
             assertThat(govBodyMemberNamePage.header).containsText("What is their full name?")
         }
 
         @Test
-        fun `submitting an empty governing body member name returns an error`(page: Page) {
+        fun `submitting an empty governing body member name returns an error`() {
             val govBodyMemberNamePage = navigator.skipToOrgLandlordRegistrationGovBodyMemberNamePage()
 
             govBodyMemberNamePage.submitName("")
@@ -822,7 +815,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class GovBodyMemberListStep {
         @Test
-        fun `the member list page shows the correct heading for one member`(page: Page) {
+        fun `the member list page shows the correct heading for one member`() {
             val memberListPage =
                 navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                     mapOf(1 to createTestMember("Alice Smith")),
@@ -832,7 +825,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the member list page shows the correct heading for multiple members`(page: Page) {
+        fun `the member list page shows the correct heading for multiple members`() {
             val memberListPage =
                 navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                     mapOf(
@@ -845,7 +838,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the member list page shows member names in the summary list`(page: Page) {
+        fun `the member list page shows member names in the summary list`() {
             val memberListPage =
                 navigator.skipToOrgLandlordRegistrationGovBodyMemberListPage(
                     mapOf(
@@ -870,7 +863,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class CheckAnswersStep {
         @Test
-        fun `the check answers page renders every card for a trust organisation`(page: Page) {
+        fun `the check answers page renders every card for a trust organisation`() {
             val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
 
             assertThat(checkAnswersPage.sectionHeader).containsText("Register as a landlord")
@@ -883,7 +876,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the landlord details card shows the organisation's answers`(page: Page) {
+        fun `the landlord details card shows the organisation's answers`() {
             val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
 
             assertThat(checkAnswersPage.landlordDetails.landlordTypeRow.value).containsText("Organisation")
@@ -896,7 +889,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the main contact card shows the submitted main contact details`(page: Page) {
+        fun `the main contact card shows the submitted main contact details`() {
             val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
 
             assertThat(checkAnswersPage.mainContactCard).containsText("Jane Doe")
@@ -904,7 +897,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the lead trustee card is not shown for a non-trust organisation`(page: Page) {
+        fun `the lead trustee card is not shown for a non-trust organisation`() {
             val checkAnswersPage =
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder.beforeOrgCheckAnswers().withOrgType(listOf(OrgType.COMPANY)),
@@ -915,7 +908,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the organisation type row shows Other when no organisation types are selected`(page: Page) {
+        fun `the organisation type row shows Other when no organisation types are selected`() {
             val checkAnswersPage =
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder.beforeOrgCheckAnswers().withOrgType(listOf(OrgType.NONE)),
@@ -925,9 +918,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the charity and companies house detail rows are hidden for a non-charity organisation not registered with companies house`(
-            page: Page,
-        ) {
+        fun `the charity and companies house detail rows are hidden for a non-charity organisation not registered with companies house`() {
             val checkAnswersPage = navigator.skipToOrgLandlordRegistrationCheckAnswersPage()
 
             assertThat(checkAnswersPage.landlordDetails.charityCommissionRow.value).hasCount(0)
@@ -936,7 +927,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the charity commission and number rows are shown for a charity registered with a regulator`(page: Page) {
+        fun `the charity commission and number rows are shown for a charity registered with a regulator`() {
             val checkAnswersPage =
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
@@ -953,7 +944,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the charity commission row is shown but the number row is hidden for a charity not registered with a regulator`(page: Page) {
+        fun `the charity commission row is shown but the number row is hidden for a charity not registered with a regulator`() {
             val checkAnswersPage =
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder
@@ -968,7 +959,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `the companies house number row is shown when registered with companies house`(page: Page) {
+        fun `the companies house number row is shown when registered with companies house`() {
             val checkAnswersPage =
                 navigator.skipToOrgLandlordRegistrationCheckAnswersPage(
                     LandlordStateSessionBuilder

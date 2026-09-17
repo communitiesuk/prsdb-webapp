@@ -95,12 +95,13 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
-                        certificateType = "gas safety certificate",
+                        certificateType = "Gas safety certificate",
                         recipientName = "Jane Smith",
                         propertyAddress = "1 Street Name, Town, Country, AB1 2CD",
                         landlordDashboardUrl = URI("dashboardUrl"),
                     ),
                     "/emails/VirusScanUnsuccessful.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(
@@ -404,6 +405,28 @@ class EmailTemplateModelsTests {
                         singleLineAddress = "11 Street, Town, Postcode",
                     ),
                     "/emails/DelegateToLettingAgentInvitationWithDeadline.md",
+                ),
+                EmailTemplateTestData(
+                    LettingAgentPropertyUpdateNotificationEmail(
+                        recipientName = "James Smithson",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        registrationNumber = "P-XXXX-YYYY",
+                        updatedBullets = listOf("The licensing information"),
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/LettingAgentPropertyUpdateNotification.md",
+                ),
+                EmailTemplateTestData(
+                    LettingAgentComplianceUpdateNotificationEmail(
+                        recipientName = "James Smithson",
+                        multiLineAddress = "Flat 1\n11 Elm Street\nLondon\nNE1 2EB",
+                        registrationNumber = "P-XXXX-YYYY",
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = "1 November 2026",
+                        propertyRecordUrl = "https://example.com/property/1",
+                    ),
+                    "/emails/LettingAgentComplianceUpdateNotification.md",
                 ),
             )
     }

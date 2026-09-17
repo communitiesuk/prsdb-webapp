@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 import com.microsoft.playwright.Page
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.number
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
@@ -11,6 +12,7 @@ abstract class DateFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
+    val backLink = BackLink.default(page)
     open val heading = Heading(page.locator("h1"))
     val form = DateForm(page)
 

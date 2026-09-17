@@ -43,6 +43,8 @@ class ElectricalSafetyDetailsTask(
         get() = dependencies.isOccupied
     override val allowProvideCertificateLaterRoute: Boolean
         get() = dependencies.allowProvideCertificateLaterRoute
+    override val propertyOwnershipId: Long?
+        get() = dependencies.propertyOwnershipId
 
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
@@ -102,7 +104,6 @@ class ElectricalSafetyDetailsTask(
                 routeSegment(CheckElectricalCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadElectricalCertStep.isComplete() }
                 nextStep { exitStep }
-                backStep { journey.electricalCertExpiryDateStep }
                 savable()
             }
             step(journey.removeElectricalCertUploadStep) {

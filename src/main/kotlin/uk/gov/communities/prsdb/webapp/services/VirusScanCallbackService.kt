@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -13,6 +15,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepo
 class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
+    private val featureFlagManager: FeatureFlagManager,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     fun saveEmailForJourney(
         journeyId: String,
@@ -20,8 +24,6 @@ class VirusScanCallbackService(
         certificateType: CertificateType,
         landlordId: Long,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val data =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
@@ -29,12 +31,7 @@ class VirusScanCallbackService(
                 landlordId = landlordId,
             )
 
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
+        return saveVirusScanCallback(fileUploadId, data)
     }
 
     fun saveEmailToMonitoringTeam(
@@ -43,8 +40,6 @@ class VirusScanCallbackService(
         certificateType: CertificateType,
         landlordId: Long,
     ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
         val internalData =
             EmailNotificationData.IncompletePropertyEmailNotification(
                 journeyId = journeyId,
@@ -52,6 +47,36 @@ class VirusScanCallbackService(
                 landlordId = landlordId,
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
+
+        return saveVirusScanCallback(fileUploadId, data)
+    }
+
+    fun saveEmailForUpdateJourney(
+        propertyOwnershipId: Long,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val data = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
+
+        return saveVirusScanCallback(fileUploadId, data)
+    }
+
+    fun saveEmailToMonitoringTeamForUpdateJourney(
+        propertyOwnershipId: Long,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val internalData = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
+        val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
+
+        return saveVirusScanCallback(fileUploadId, data)
+    }
+
+    private fun saveVirusScanCallback(
+        fileUploadId: Long,
+        data: EmailNotificationData,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
 
         return virusScanCallbackRepository.save(
             VirusScanCallback(
@@ -61,11 +86,23 @@ class VirusScanCallbackService(
         )
     }
 
-    // Re-points a submitted file's existing virus-scan callbacks from their in-progress journey target to the
-    // registered property owner, updating each callback row in place rather than deleting and recreating it. The
-    // update is set-based, so the scan-processor's concurrent per-row delete cannot make either side fail on a
-    // zero-row write, and a file whose callbacks the scan has already processed simply has no rows to update (so no
-    // orphaned callbacks are created).
+    fun saveVirusScanFailureEmail(
+        journeyId: String,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+        propertyOwnershipId: Long?,
+    ) {
+        // TODO: PDJB-1617: Remove feature flag check when we remove the DELEGATE_TO_LETTING_AGENT flag
+        if (propertyOwnershipId != null && featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
+            saveEmailForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
+            saveEmailToMonitoringTeamForUpdateJourney(propertyOwnershipId, fileUploadId, certificateType)
+        } else {
+            val landlordId = userToLandlordService.getCurrentLandlordForUser().id
+            saveEmailForJourney(journeyId, fileUploadId, certificateType, landlordId)
+            saveEmailToMonitoringTeam(journeyId, fileUploadId, certificateType, landlordId)
+        }
+    }
+
     fun updateCallbacksToOwner(
         fileUploadId: Long,
         propertyOwnershipId: Long,
@@ -88,11 +125,6 @@ class VirusScanCallbackService(
     }
 }
 
-// This sealed class represents the different types of email notifications that can be triggered by a virus scan callback.
-// If, in the future, we need to add callbacks that are not email notifications, we should create a new sealed class containing
-// both this sealed class and the new types of callbacks, rather than adding non-email callback types to this class.
-// There will also be a simple refactor to create a VirusCallbackHandler that wraps the VirusNotificationEmailHandler,
-// which will allow us to handle non-email callbacks without overcomplicating the email handler.
 @Serializable
 sealed class EmailNotificationData {
     @Serializable

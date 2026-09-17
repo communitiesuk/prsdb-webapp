@@ -17,14 +17,15 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController.Companion.UPDATE_GAS_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateGasSafetyController.Companion.UPDATE_GAS_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
@@ -34,7 +35,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(UPDATE_GAS_SAFETY_ROUTE)
 @PreAuthorize("hasRole('LANDLORD')")
-class UpdateGasSafetyController(
+class LandlordUpdateGasSafetyController(
     private val journeyFactory: UpdateGasSafetyJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val certificateUploadHelper: CertificateUploadHelper,
@@ -95,8 +96,21 @@ class UpdateGasSafetyController(
     ): ModelAndView =
         JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { journeyFactory.createJourneySteps(propertyOwnershipId) },
-            initialiseJourney = { journeyFactory.initializeJourneyState(propertyOwnershipId, principal) },
+            createRoutingMap = {
+                journeyFactory.createJourneySteps(
+                    propertyOwnershipId,
+                    PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
+                )
+            },
+            initialiseJourney = {
+                val propertyCompliance =
+                    propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).propertyCompliance
+                        ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
+                journeyFactory.initialiseJourneyState(
+                    Pair(propertyOwnershipId, principal),
+                    propertyCompliance.getMostRecentlyUpdated(),
+                )
+            },
             dispatch = dispatch,
         )
 
@@ -105,6 +119,6 @@ class UpdateGasSafetyController(
 
         fun getUpdateGasSafetyFirstStepRoute(propertyOwnershipId: Long): String =
             UPDATE_GAS_SAFETY_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
-                "/${HasGasSupplyStep.ROUTE_SEGMENT}"
+                "/${BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT}"
     }
 }

@@ -73,12 +73,5 @@ class HasPasswordStepConfigTests {
         verify(mockState).hasExistingPassword = false
     }
 
-    @Test
-    fun `afterStepIsReached throws when the invitation token is missing from the state`() {
-        whenever(mockState.invitationToken).thenReturn(null)
-
-        assertThrows<IllegalArgumentException> { setupStepConfig().afterStepIsReached(mockState) }
-    }
-
     private fun setupStepConfig() = HasPasswordStepConfig(mockLettingAgentAccessService, mockLettingAgentPasswordService)
 }

@@ -2,11 +2,14 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TicketPanel
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Warning
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import java.util.regex.Pattern
@@ -61,6 +64,19 @@ class CheckAnswersPagePropertyRegistration(
             "After you’ve paid, we’ll ask your letting agent or property manager to provide the remaining details:",
         )
 
+    val lettingAgentDelegationUnoccupiedPanel = TicketPanel(page)
+
+    val restructuredSectionHeadings: List<String>
+        get() =
+            page
+                .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
+                .allInnerTexts()
+                .map { it.trim() }
+
+    val warning = Warning.default(page)
+
+    val submitButton = Button.default(page)
+
     val complianceSummaryList = ComplianceSummaryList(page)
 
     val tenancyHeading =
@@ -113,6 +129,7 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
+        val billsIncludedRow = getRow("Which bills are included")
 
         val jointLandlordsInvitationsRow = getRow("Joint landlord invitations")
 
@@ -125,7 +142,17 @@ class CheckAnswersPagePropertyRegistration(
         page: Page,
     ) : SummaryList(page) {
         val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
+        val validGasCertRow = getRow("Do you have a valid gas safety certificate for this property?")
+        val gasCertIssueDateRow = getRow("Issue date")
+        val gasCertUploadRow = getRow("Your certificate")
         val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
+        val electricalCertExpiryDateRow = getRow("Expiry date")
+        val electricalCertUploadRow = getRow("Your certificate")
         val hasEpcRow = getRow("Do you have an EPC for this property?")
+        val epcTenancyCheckRow = getRow("Was the EPC still in date when the current tenancy began?")
+        val isEpcRequiredRow = getRow("Is an EPC required to let this property?")
+        val epcExemptionRow = getRow("Why does this property not need an EPC?")
+        val hasMeesExemptionRow = getRow("Do you have a registered energy efficiency exemption for this property?")
+        val meesExemptionRow = getRow("Registered exemption")
     }
 }

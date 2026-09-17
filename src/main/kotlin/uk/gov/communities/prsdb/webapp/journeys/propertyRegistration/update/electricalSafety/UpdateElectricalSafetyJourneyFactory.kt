@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
@@ -74,6 +75,9 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backStep { journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep }
+            }
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
@@ -81,7 +85,6 @@ class UpdateElectricalSafetyJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
@@ -108,10 +111,21 @@ class UpdateElectricalSafetyJourneyFactory(
                 }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            checkAnswerTask(
-                journey.electricalSafetyDetailsTask,
-                { journey },
-            )
+            when (state.checkingAnswersFor) {
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                    configureStep(journey.electricalSafetyDetailsTask.electricalCertExpiryDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
+                }
+
+                else -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask, { journey })
+                }
+            }
+            configureStep(journey.electricalSafetyDetailsTask.checkElectricalCertUploadsStep) {
+                backDestination { journey.returnToCyaPageDestination }
+            }
 
             step(journey.finishCyaStep) {
                 initialStep()
@@ -139,7 +153,10 @@ class UpdateElectricalSafetyJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -154,7 +171,7 @@ class UpdateElectricalSafetyJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateElectricalSafetyJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -166,6 +183,7 @@ class UpdateElectricalSafetyJourney(
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val propertyOwnershipId: Long? get() = propertyId
 }
 
 interface UpdateElectricalSafetyJourneyState :

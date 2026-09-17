@@ -81,9 +81,6 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-03-30"
-    - name: "pdjb-1097-organisation-landlord-registration"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "pdjb-939-property-registration-restructure-and-skipping"
       enabled: false
       expiry-date: "2026-12-31"
@@ -95,4 +92,10 @@ features:
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
       enabled: true
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1040-correspondence-address"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1009-payments"
+      enabled: false
       expiry-date: "2026-12-31"

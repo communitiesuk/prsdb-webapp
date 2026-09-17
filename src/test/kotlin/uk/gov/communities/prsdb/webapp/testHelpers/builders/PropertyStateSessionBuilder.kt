@@ -10,11 +10,18 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CorrespondenceEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
@@ -64,6 +71,33 @@ class PropertyStateSessionBuilder(
         return this
     }
 
+    fun withCompletedCorrespondence(
+        singleLineAddress: String = "1 Fictional Road, FA1 1AA",
+        houseNameOrNumber: String = "1",
+        postcode: String = "FA1 1AA",
+    ): PropertyStateSessionBuilder {
+        withSubmittedValue(CorrespondenceEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+
+        val addressScope = CorrespondenceAddressTask.ROUTE_SEGMENT
+        val lookupAddressFormModel =
+            LookupAddressFormModel().apply {
+                this.houseNameOrNumber = houseNameOrNumber
+                this.postcode = postcode
+            }
+        withSubmittedValue("$addressScope/${LookupAddressStep.ROUTE_SEGMENT}", lookupAddressFormModel)
+        additionalDataMap["$addressScope/cachedAddresses"] =
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = null, uprn = null)))
+
+        val selectAddressFormModel =
+            SelectAddressFormModel().apply {
+                address = singleLineAddress
+            }
+        withSubmittedValue("$addressScope/${SelectAddressStep.ROUTE_SEGMENT}", selectAddressFormModel)
+        additionalDataMap["$addressScope/cachedSelectedAddress"] = Json.encodeToString(serializer(), singleLineAddress)
+
+        return this
+    }
+
     companion object {
         fun beforePropertyRegistrationSelectAddress(customLookedUpAddresses: List<AddressDataModel>? = null) =
             if (customLookedUpAddresses != null) {
@@ -80,7 +114,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationPropertyType() = PropertyStateSessionBuilder().withLookupAddress().withSelectedAddress()
 
-        fun beforePropertyRegistrationOwnershipType() = beforePropertyRegistrationPropertyType().withPropertyType()
+        fun beforePropertyRegistrationOwnershipType() =
+            beforePropertyRegistrationPropertyType().withPropertyType().withCompletedCorrespondence()
 
         fun beforePropertyRegistrationLicensingType() = beforePropertyRegistrationOwnershipType().withOwnershipType()
 
@@ -173,7 +208,11 @@ class PropertyStateSessionBuilder(
                 .withGasCertIssueDate()
                 .withGasCertUploads()
 
-        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLater() = beforePropertyRegistrationHasGasCert().withProvideGasCertLater()
+        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLater() =
+            beforePropertyRegistrationHasGasSupply().withProvideGasCertLaterFromGasSupply()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert() =
+            beforePropertyRegistrationHasGasCert().withProvideGasCertLater()
 
         fun beforePropertyRegistrationCheckGasSafetyAnswersNoCert() = beforePropertyRegistrationHasGasCert().withNoGasCertificate()
 
@@ -411,6 +450,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationLicensingType()
                 .withLicensing(LicensingType.SELECTIVE_LICENCE, "SL-12345")
                 .withOccupancyStatus(false)
+                .withBedrooms()
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
@@ -443,9 +483,60 @@ class PropertyStateSessionBuilder(
             .withElectricalSafetyCertificateMissing()
             .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersGasCertUploaded() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithUploadedCert()
+                .withElectricalSafetyCertificateMissing()
+                .withCompliantEpc()
+
+        fun beforePropertyRegistrationCheckAnswersElectricalCertUploaded() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withEic()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+                .withCheckElectricalSafetyAnswersComplete()
+                .withPropertyHasNoEpc()
+                .withIsEpcNotRequired()
+                .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
+                .withCheckEpcAnswersComplete()
+
+        fun beforePropertyRegistrationCheckAnswersEpcLowRatingWithExemption(
+            exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+        ) = beforePropertyRegistrationOccupancy()
+            .withOccupancyStatus(false)
+            .withBedrooms()
+            .withHasNoJointLandlords()
+            .withGasSafetyTaskCompletedWithNoGasSupply()
+            .withElectricalSafetyCertificateMissing()
+            .withEpcLowEnergyRating()
+            .withHasMeesExemption(true)
+            .withMeesExemptionReason(exemptionReason)
+            .withCheckEpcAnswersComplete()
+
+        fun beforePropertyRegistrationCheckAnswersEpcExpiredInDateAtTenancyStart() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(true)
+                .withLandlordProvidesRentalDetails()
+                .withProvideTenancyDetailsLater()
+                .withBedrooms()
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
+                .withEpcInDateAtTenancyStart(true)
+                .withCheckEpcAnswersComplete()
+
         fun beforePropertyRegistrationCheckAnswersNoEpcExempt() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
+                .withBedrooms()
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
