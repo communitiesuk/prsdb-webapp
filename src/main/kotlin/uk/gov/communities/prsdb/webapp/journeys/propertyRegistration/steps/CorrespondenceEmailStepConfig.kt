@@ -1,22 +1,40 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
-// TODO PDJB-1590: replace this placeholder with the real correspondence email question
-//  (email input, validation and persistence). Rendered with the shared forms/todo placeholder page.
 @JourneyFrameworkComponent
-class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class CorrespondenceEmailStepConfig(
+    private val userToLandlordService: UserToLandlordService,
+) : AbstractRequestableStepConfig<Complete, CorrespondenceEmailFormModel, JourneyState>() {
+    override val formModelClass = CorrespondenceEmailFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> =
-        mapOf("todoComment" to "TODO (PDJB-1590): Correspondence email question - content, input and validation to be added")
+        mapOf(
+            "radioOptions" to
+                listOf(
+                    RadiosButtonViewModel(
+                        value = CorrespondenceEmailOption.ACCOUNT_EMAIL,
+                        labelMsgKey = "registerProperty.correspondenceEmail.radios.option.accountEmail.label",
+                        // TODO: PDJB-1738: Use the current organisational sub-user's email rather than the organisation's email.
+                        hintValue = userToLandlordService.getCurrentLandlordForUser().email,
+                    ),
+                    RadiosButtonViewModel(
+                        value = CorrespondenceEmailOption.DIFFERENT_EMAIL,
+                        labelMsgKey = "registerProperty.correspondenceEmail.radios.option.differentEmail.label",
+                        conditionalFragment = "differentCorrespondenceEmailInput",
+                    ),
+                ),
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/correspondenceEmailForm"
 
     override fun mode(state: JourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -24,7 +42,7 @@ class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, No
 @JourneyFrameworkComponent
 final class CorrespondenceEmailStep(
     stepConfig: CorrespondenceEmailStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, CorrespondenceEmailFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "correspondence-email"
     }
