@@ -39,15 +39,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import java.security.Principal
 
 @PrsdbWebService
 class UpdateOccupancyJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOccupancyJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val lettingAgentAccessService: LettingAgentAccessService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
@@ -76,9 +73,7 @@ class UpdateOccupancyJourneyFactory(
         }
     }
 
-    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean =
-        featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
-            lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyId) != null
+    private fun isDelegatedToLettingAgent(propertyId: Long): Boolean = propertyOwnershipService.hasLettingAgent(propertyId)
 
     private fun journeyMap(
         state: UpdateOccupancyJourney,
@@ -323,9 +318,9 @@ class UpdateOccupancyJourneyFactory(
     }
 
     fun initializeJourneyState(
-        ownershipId: Long,
-        user: Principal,
-    ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
     // TODO(PDJB-1340): delete this helper (only used by the old flag-off journeys above) when
     // PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
@@ -432,7 +427,7 @@ class UpdateOccupancyJourney(
 
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 
     override var propertyIsOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
 

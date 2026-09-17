@@ -18,7 +18,7 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
-import uk.gov.communities.prsdb.webapp.database.repository.IncompletePropertiesRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
@@ -30,7 +30,7 @@ class UsersIncompletePropertyServiceTests {
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
     @Mock
-    private lateinit var incompletePropertiesRepository: IncompletePropertiesRepository
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @InjectMocks
     private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
@@ -53,7 +53,7 @@ class UsersIncompletePropertyServiceTests {
         usersIncompletePropertyService.addIncompletePropertyForUser(savedJourneyState)
 
         // Assert
-        verify(incompletePropertiesRepository).save(captor.capture())
+        verify(landlordIncompletePropertiesRepository).save(captor.capture())
 
         val savedEntry = captor.firstValue
         assertEquals(expectedNewEntry.user, savedEntry.user)
@@ -70,7 +70,7 @@ class UsersIncompletePropertyServiceTests {
             PageRequest.of(0, MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE, Sort.by("savedJourneyState.createdDate"))
         setMockPrincipal(principalName)
 
-        whenever(incompletePropertiesRepository.findByUser_Id(principalName, pageRequest))
+        whenever(landlordIncompletePropertiesRepository.findByUser_Id(principalName, pageRequest))
             .thenReturn(PageImpl(listOf(lip), pageRequest, 1))
 
         val result = usersIncompletePropertyService.getCurrentUsersIncompleteProperties(0)
@@ -89,20 +89,20 @@ class UsersIncompletePropertyServiceTests {
             PageRequest.of(0, MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE, Sort.by("savedJourneyState.createdDate"))
         setMockPrincipal(requestingUserId)
 
-        whenever(incompletePropertiesRepository.findByUser_Id(requestingUserId, pageRequest))
+        whenever(landlordIncompletePropertiesRepository.findByUser_Id(requestingUserId, pageRequest))
             .thenReturn(PageImpl(listOf(lip), pageRequest, 1))
 
         val result = usersIncompletePropertyService.getCurrentUsersIncompleteProperties(0)
 
         assertEquals(1, result.totalElements)
-        verify(incompletePropertiesRepository).findByUser_Id(requestingUserId, pageRequest)
+        verify(landlordIncompletePropertiesRepository).findByUser_Id(requestingUserId, pageRequest)
     }
 
     @Test
     fun `getCurrentUsersIncompletePropertiesCount returns the count from the repository for the logged in user`() {
         val userId = "user-123"
         setMockPrincipal(userId)
-        whenever(incompletePropertiesRepository.countByUser_Id(userId)).thenReturn(3L)
+        whenever(landlordIncompletePropertiesRepository.countByUser_Id(userId)).thenReturn(3L)
 
         val result = usersIncompletePropertyService.getCurrentUsersIncompletePropertiesCount()
 

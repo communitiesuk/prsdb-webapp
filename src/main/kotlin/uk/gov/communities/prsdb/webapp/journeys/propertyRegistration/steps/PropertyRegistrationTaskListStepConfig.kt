@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
@@ -119,20 +120,34 @@ class PropertyRegistrationTaskListStepConfig(
             TaskSectionViewModel(
                 "registerProperty.taskList.aboutYourProperty.heading",
                 "about-your-property",
-                listOf(
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.aboutYourProperty.propertyDetails",
-                        state.propertyDetailsTask,
-                    ),
-                    TaskListItemViewModel.fromTask(
-                        "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
-                        state.ownershipAndLandlordsTask,
-                    ),
-                    TaskListItemViewModel.fromStep(
-                        "registerProperty.taskList.aboutYourProperty.occupied",
-                        state.occupied,
-                    ),
-                ),
+                buildList {
+                    add(
+                        TaskListItemViewModel.fromTask(
+                            "registerProperty.taskList.aboutYourProperty.propertyDetails",
+                            state.propertyDetailsTask,
+                        ),
+                    )
+                    add(
+                        TaskListItemViewModel.fromTask(
+                            "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                            state.ownershipAndLandlordsTask,
+                        ),
+                    )
+                    if (featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)) {
+                        add(
+                            TaskListItemViewModel.fromTask(
+                                "registerProperty.taskList.aboutYourProperty.correspondence",
+                                state.correspondenceTask,
+                            ),
+                        )
+                    }
+                    add(
+                        TaskListItemViewModel.fromStep(
+                            "registerProperty.taskList.aboutYourProperty.occupied",
+                            state.occupied,
+                        ),
+                    )
+                },
             ),
             TaskSectionViewModel(
                 "registerProperty.taskList.rentedOut.heading",

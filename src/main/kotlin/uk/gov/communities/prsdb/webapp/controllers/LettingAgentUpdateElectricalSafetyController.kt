@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateElectricalSafetyController.Companion.LETTING_AGENT_UPDATE_ELECTRICAL_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 @PrsdbController
@@ -43,7 +46,17 @@ class LettingAgentUpdateElectricalSafetyController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator> = journeyFactory.createJourneySteps(propertyOwnershipId, returnUrl)
 
-    override fun initialiseJourneyState(token: UUID): String = journeyFactory.initialiseJourneyState(token)
+    override fun initialiseJourneyState(
+        token: UUID,
+        currentLastModifiedDate: Instant,
+    ): String = journeyFactory.initialiseJourneyState(token, currentLastModifiedDate)
+
+    override fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): Instant {
+        val propertyCompliance =
+            propertyOwnership.propertyCompliance
+                ?: throw PrsdbWebException("Property ownership ${propertyOwnership.id} does not have a compliance record")
+        return propertyCompliance.getMostRecentlyUpdated()
+    }
 
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @PostMapping("/{*stepPath}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

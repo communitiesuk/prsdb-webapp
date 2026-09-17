@@ -24,14 +24,14 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateGasSafetyController::class)
-class UpdateGasSafetyControllerTests(
+@WebMvcTest(LandlordUpdateGasSafetyController::class)
+class LandlordUpdateGasSafetyControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
@@ -49,20 +49,20 @@ class UpdateGasSafetyControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId)
+        LandlordUpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId)
 
     override val formContent = "hasGasSupply=true"
 
     override fun stubCreateJourneySteps() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(HasGasSupplyStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+        whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
+            .thenReturn(mapOf(BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
     private val journeyId = "test-journey-id"
     private val redirectUrl = "any-url"
 
     private val validFileUploadUrl =
-        UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
+        LandlordUpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE
             .replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
             "/${UploadGasCertStep.ROUTE_SEGMENT}?journeyId=$journeyId"
 
@@ -79,7 +79,7 @@ class UpdateGasSafetyControllerTests(
 
         @BeforeEach
         fun setUp() {
-            whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
+            whenever(journeyFactory.createJourneySteps(eq(propertyOwnershipId), any()))
                 .thenReturn(mapOf(UploadGasCertStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
         }
 

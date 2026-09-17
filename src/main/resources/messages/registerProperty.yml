@@ -84,6 +84,7 @@ taskList:
     heading: About your property
     propertyDetails: Property details
     ownershipAndLandlords: Ownership and landlords
+    correspondence: Who the council should contact
     occupied: Tell us if your property’s occupied
   rentedOut:
     heading: How your property’s rented out

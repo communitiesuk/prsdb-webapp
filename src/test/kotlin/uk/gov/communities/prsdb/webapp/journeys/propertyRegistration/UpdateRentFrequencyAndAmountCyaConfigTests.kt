@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.math.BigDecimal
 
@@ -28,6 +29,9 @@ import java.math.BigDecimal
 class UpdateRentFrequencyAndAmountCyaConfigTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateRentFrequencyAndAmountJourneyState
@@ -64,6 +68,7 @@ class UpdateRentFrequencyAndAmountCyaConfigTests {
             UpdateRentFrequencyAndAmountCyaConfig(
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
                 messageSource = mockMessageSource,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -90,6 +95,10 @@ class UpdateRentFrequencyAndAmountCyaConfigTests {
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+        verify(mockPropertyUpdateEmailService).sendLettingAgentUpdateEmailsIfLettingAgentUpdated(
+            propertyId,
+            listOf("How often the rent is charged", "The amount of rent charged"),
         )
     }
 

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
@@ -13,6 +14,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
     fun enableFeatureFlags() {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
+        featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
     }
 
     @Nested
@@ -23,7 +25,14 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.getAboutYourPropertyTask("Property details").statusText.contains("Complete"))
             assert(taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.contains("In progress"))
-            assert(taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.contains("Cannot start yet"))
+            assert(
+                taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot start yet"),
+            )
+            assert(
+                taskListPage.getAboutYourPropertyTask(
+                    "Tell us if your property’s occupied",
+                ).statusText.contains("Cannot start yet"),
+            )
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Gas safety certificate").statusText.contains("Cannot start yet"))
@@ -141,6 +150,27 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
                 "Once your property’s occupied, your letting agent or property manager can keep these details updated for you",
                 delegationTask.hintText.trim(),
             )
+        }
+    }
+
+    // TODO PDJB-1733: Remove this nested class when the CORRESPONDENCE_ADDRESS feature flag is removed
+    @Nested
+    inner class CorrespondenceAddressTaskFlagDisabled {
+        @BeforeEach
+        fun disableCorrespondenceAddressFlag() {
+            featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
+        }
+
+        @Test
+        fun `Correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
+            val taskListPage =
+                navigator.goToRestructuredPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy(),
+                )
+
+            assert("Who the council should contact" !in taskListPage.getAboutYourPropertyTaskNames()) {
+                "Correspondence task should not be visible when CORRESPONDENCE_ADDRESS feature flag is disabled"
+            }
         }
     }
 }

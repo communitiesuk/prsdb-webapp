@@ -14,10 +14,12 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
@@ -181,9 +183,58 @@ class PropertyRegistrationTaskListStepConfigTests {
         assertNull(tenancyItem?.url)
     }
 
+    @Nested
+    inner class CorrespondenceTaskListItemTests {
+        @BeforeEach
+        fun enableRestructureAndStubState() {
+            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            stubRestructuredState()
+        }
+
+        @Test
+        fun `getTaskListViewModel includes correspondence task between ownership and occupied when flag enabled`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
+
+            // Act
+            val aboutSection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
+
+            // Assert
+            assertEquals(
+                listOf(
+                    "registerProperty.taskList.aboutYourProperty.propertyDetails",
+                    "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                    "registerProperty.taskList.aboutYourProperty.correspondence",
+                    "registerProperty.taskList.aboutYourProperty.occupied",
+                ),
+                aboutSection.tasks.map { it.nameKey },
+            )
+        }
+
+        @Test
+        fun `getTaskListViewModel excludes the correspondence task when CORRESPONDENCE_ADDRESS is disabled`() {
+            // Arrange
+            whenever(mockFeatureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
+
+            // Act
+            val aboutSection = stepConfig.getTaskListViewModel(mockState).taskSections[0]
+
+            // Assert
+            assertEquals(
+                listOf(
+                    "registerProperty.taskList.aboutYourProperty.propertyDetails",
+                    "registerProperty.taskList.aboutYourProperty.ownershipAndLandlords",
+                    "registerProperty.taskList.aboutYourProperty.occupied",
+                ),
+                aboutSection.tasks.map { it.nameKey },
+            )
+        }
+    }
+
     private fun stubRestructuredState() {
         val mockPropertyDetailsTask = mock<PropertyDetailsTask>()
         val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
+        val mockCorrespondenceTask = mock<CorrespondenceTask>()
         val mockLicensingTask = mock<LicensingTask>()
         val mockTenancyDetailsTask = mock<TenancyDetailsTask>()
         val mockWhoProvidesDetailsTask = mock<WhoProvidesDetailsTask>()
@@ -193,6 +244,7 @@ class PropertyRegistrationTaskListStepConfigTests {
 
         whenever(mockPropertyDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockOwnershipAndLandlordsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
+        whenever(mockCorrespondenceTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockLicensingTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockTenancyDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
         whenever(mockWhoProvidesDetailsTask.taskStatus()).thenReturn(TaskStatus.CANNOT_START)
@@ -204,6 +256,7 @@ class PropertyRegistrationTaskListStepConfigTests {
 
         whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
         whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        whenever(mockState.correspondenceTask).thenReturn(mockCorrespondenceTask)
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
         whenever(mockState.tenancyDetailsTask).thenReturn(mockTenancyDetailsTask)
