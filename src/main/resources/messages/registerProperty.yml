@@ -184,7 +184,7 @@ provideLicensingLater:
       two: details about the license (if your property needs one)
 paymentOutcome:
   # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
-  fieldSetHeading: Payment outcome (test stub)
+  fieldSetHeading: TODO PDJB-993 payment outcome internal step
   radios:
     error:
       missing: Select a payment outcome
