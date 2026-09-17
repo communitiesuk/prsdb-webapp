@@ -782,6 +782,7 @@ class PropertyRegistrationJourneyFactory(
                         nextStep { journey.paymentRoutingStep }
                     }
                     step(journey.paymentRoutingStep) {
+                        routeSegment(PaymentRoutingStep.ROUTE_SEGMENT)
                         parents { journey.paymentSummaryStep.isComplete() }
                         nextDestination { mode ->
                             when (mode) {

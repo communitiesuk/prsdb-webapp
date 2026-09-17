@@ -181,6 +181,12 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+paymentOutcome:
+  # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
+  fieldSetHeading: Payment outcome (test stub)
+  radios:
+    error:
+      missing: Select a payment outcome
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'
