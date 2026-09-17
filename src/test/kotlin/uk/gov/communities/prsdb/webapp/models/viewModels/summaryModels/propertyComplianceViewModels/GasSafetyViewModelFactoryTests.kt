@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -44,53 +45,47 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return GasSafetyViewModelFactory(uploadService, messageSource, mockFeatureFlagManager(true)).fromEntity(propertyCompliance)
-    }
-
-    @Test
-    fun `fromEntity anchors the provide-later deadline to the last occupied date when the registration-date deadline is disabled`() {
-        val messageSource = mock<MessageSource>()
-        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
-            .thenAnswer { invocation ->
-                val args = invocation.getArgument<Array<Any>>(1)
-                "Provide this later (before ${args[0]})"
-            }
-        val factory = GasSafetyViewModelFactory(mock(), messageSource, mockFeatureFlagManager(false))
-        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
-
-        val expectedDeadline =
-            occupiedAtRegistrationDate
-                .plusDays(30)
-                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                .format(DATE_FORMATTER)
-        assertEquals(
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "commonText.yes",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasCert",
-                    "Provide this later (before $expectedDeadline)",
-                ),
-            ),
-            rows,
-        )
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideInsetTextKeys")
-    fun `getInsetTextKey returns the correct key`(
-        propertyCompliance: PropertyCompliance,
-        expectedKey: String?,
-    ) {
-        val insetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
-
-        assertEquals(expectedKey, insetTextKey)
+        return GasSafetyViewModelFactory(
+            uploadService,
+            messageSource,
+            mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = false),
+        ).fromEntity(propertyCompliance)
     }
 
     @Nested
-    inner class ProvideLater {
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    inner class FlagIndependentTests {
+        @ParameterizedTest(name = "{0}")
+        @MethodSource("provideInsetTextKeys")
+        fun `getInsetTextKey returns the correct key`(
+            propertyCompliance: PropertyCompliance,
+            expectedKey: String?,
+        ) {
+            val insetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance)
+
+            assertEquals(expectedKey, insetTextKey)
+        }
+
+        private fun provideInsetTextKeys() =
+            arrayOf(
+                arguments(named("with compliant gas cert", compliant), null),
+                arguments(named("without gas cert and unoccupied", missingUnoccupied), null),
+                arguments(
+                    named("without gas cert and occupied (no cert)", missingOccupiedNoCert),
+                    "checkGasSafety.occupiedNoCertInsetText",
+                ),
+                arguments(named("without gas cert and occupied (provide later)", missingOccupiedProvideLater), null),
+                arguments(named("with no gas supply", noGasSupply), "checkGasSafety.noGasSupplyInsetText"),
+                arguments(
+                    named("with expired gas cert and occupied", expiredOccupied),
+                    "checkGasSafety.occupiedNoCertInsetText",
+                ),
+                arguments(named("with expired gas cert and unoccupied", expiredBeforeUpload), null),
+            )
+    }
+
+    @Nested
+    inner class ProvideLaterTests {
         @Nested
         inner class WhenLettingAgentsEnabled {
             @Test
@@ -240,9 +235,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkGasSafety.provideThisLater.occupiedWithDeadline"
-
-        private fun mockFeatureFlagManager(registrationDateDeadlineEnabled: Boolean): FeatureFlagManager =
-            mock { on { checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) } doReturn registrationDateDeadlineEnabled }
 
         private fun mockFeatureFlagManager(
             registrationDateDeadlineEnabled: Boolean,
@@ -632,24 +624,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         ),
                     ),
                 ),
-            )
-
-        @JvmStatic
-        private fun provideInsetTextKeys() =
-            arrayOf(
-                arguments(named("with compliant gas cert", compliant), null),
-                arguments(named("without gas cert and unoccupied", missingUnoccupied), null),
-                arguments(
-                    named("without gas cert and occupied (no cert)", missingOccupiedNoCert),
-                    "checkGasSafety.occupiedNoCertInsetText",
-                ),
-                arguments(named("without gas cert and occupied (provide later)", missingOccupiedProvideLater), null),
-                arguments(named("with no gas supply", noGasSupply), "checkGasSafety.noGasSupplyInsetText"),
-                arguments(
-                    named("with expired gas cert and occupied", expiredOccupied),
-                    "checkGasSafety.occupiedNoCertInsetText",
-                ),
-                arguments(named("with expired gas cert and unoccupied", expiredBeforeUpload), null),
             )
     }
 }
