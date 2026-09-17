@@ -80,8 +80,13 @@ manualAddress:
     fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
   correspondence:
-    fieldSetHeading: 'TODO PDJB-1592: What is the postal address?'
-    fieldSetHint: This must be an address in England or Wales.
+    fieldSetHeading: Enter a postal address
+    preSubmitHeading: The council may send important documents to this address
+    preSubmitInset:
+      intro: 'By continuing, you confirm this address is:'
+      bullet:
+        one: in England or Wales
+        two: not a PO box
   fieldSetHint: This should be an address within England
   addressLineOne:
     label: Address line 1
