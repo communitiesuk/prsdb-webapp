@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Named.named
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -88,118 +89,152 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
         assertEquals(expectedKey, insetTextKey)
     }
 
-    @Test
-    fun `flag on - occupied provide-later renders a single gas-supply row with the deadline value and no cert row`() {
-        val messageSource = mock<MessageSource>()
-        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
-            .thenAnswer { invocation ->
-                val args = invocation.getArgument<Array<Any>>(1)
-                "Provide this later (before ${args[0]})"
+    @Nested
+    inner class ProvideLater {
+        @Nested
+        inner class WhenLettingAgentsEnabled {
+            @Test
+            fun `occupied provide-later renders a single gas-supply row with the deadline value and no cert row`() {
+                val messageSource = mock<MessageSource>()
+                whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
+                    .thenAnswer { invocation ->
+                        val args = invocation.getArgument<Array<Any>>(1)
+                        "Provide this later (before ${args[0]})"
+                    }
+                val factory =
+                    GasSafetyViewModelFactory(
+                        mock(),
+                        messageSource,
+                        mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = true),
+                    )
+                val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+
+                val expectedDeadline =
+                    occupiedAtRegistrationDate
+                        .plusDays(30)
+                        .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                        .format(DATE_FORMATTER)
+                assertEquals(
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            "Provide this later (before $expectedDeadline)",
+                        ),
+                    ),
+                    rows,
+                )
             }
-        val factory =
-            GasSafetyViewModelFactory(
-                mock(),
-                messageSource,
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = true),
-            )
-        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
 
-        val expectedDeadline =
-            occupiedAtRegistrationDate
-                .plusDays(30)
-                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                .format(DATE_FORMATTER)
-        assertEquals(
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "Provide this later (before $expectedDeadline)",
-                ),
-            ),
-            rows,
-        )
-    }
+            @Test
+            fun `unoccupied provide-later renders a single gas-supply row with the no-date value and no cert row`() {
+                val factory =
+                    GasSafetyViewModelFactory(
+                        mock(),
+                        mock(),
+                        mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+                    )
+                val rows = factory.fromEntity(missingUnoccupiedProvideLater)
 
-    @Test
-    fun `flag on - unoccupied provide-later renders a single gas-supply row with the no-date value and no cert row`() {
-        val factory =
-            GasSafetyViewModelFactory(
-                mock(),
-                mock(),
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
-            )
-        val rows = factory.fromEntity(missingUnoccupiedProvideLater)
-
-        assertEquals(
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "checkGasSafety.provideThisLater.unoccupied",
-                ),
-            ),
-            rows,
-        )
-    }
-
-    @Test
-    fun `flag off - occupied provide-later still renders both gas-supply and cert rows`() {
-        val messageSource = mock<MessageSource>()
-        whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
-            .thenAnswer { invocation ->
-                val args = invocation.getArgument<Array<Any>>(1)
-                "Provide this later (before ${args[0]})"
+                assertEquals(
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            "checkGasSafety.provideThisLater.unoccupied",
+                        ),
+                    ),
+                    rows,
+                )
             }
-        val factory =
-            GasSafetyViewModelFactory(
-                mock(),
-                messageSource,
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = false),
-            )
-        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
 
-        val expectedDeadline =
-            occupiedAtRegistrationDate
-                .plusDays(30)
-                .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                .format(DATE_FORMATTER)
-        assertEquals(
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "commonText.yes",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasCert",
-                    "Provide this later (before $expectedDeadline)",
-                ),
-            ),
-            rows,
-        )
-    }
+            @Test
+            fun `occupied no-cert (HAS_FAULTS) is unaffected and still renders both rows`() {
+                val factory =
+                    GasSafetyViewModelFactory(
+                        mock(),
+                        mock(),
+                        mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
+                    )
+                val rows = factory.fromEntity(missingOccupiedNoCert)
 
-    @Test
-    fun `flag on - occupied no-cert (HAS_FAULTS) is unaffected and renders both rows`() {
-        val factory =
-            GasSafetyViewModelFactory(
-                mock(),
-                mock(),
-                mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = true),
-            )
-        val rows = factory.fromEntity(missingOccupiedNoCert)
+                assertEquals(
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            "commonText.yes",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
+                            "commonText.no",
+                        ),
+                    ),
+                    rows,
+                )
+            }
+        }
 
-        assertEquals(
-            listOf(
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                    "commonText.yes",
-                ),
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.gasSafety.hasCert",
-                    "commonText.no",
-                ),
-            ),
-            rows,
-        )
+        @Nested
+        inner class WhenLettingAgentsDisabled {
+            @Test
+            fun `occupied provide-later still renders both gas-supply and cert rows`() {
+                val messageSource = mock<MessageSource>()
+                whenever(messageSource.getMessage(eq(PROVIDE_LATER_WITH_DEADLINE_KEY), any(), any<Locale>()))
+                    .thenAnswer { invocation ->
+                        val args = invocation.getArgument<Array<Any>>(1)
+                        "Provide this later (before ${args[0]})"
+                    }
+                val factory =
+                    GasSafetyViewModelFactory(
+                        mock(),
+                        messageSource,
+                        mockFeatureFlagManager(registrationDateDeadlineEnabled = false, delegateToLettingAgentEnabled = false),
+                    )
+                val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+
+                val expectedDeadline =
+                    occupiedAtRegistrationDate
+                        .plusDays(30)
+                        .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
+                        .format(DATE_FORMATTER)
+                assertEquals(
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            "commonText.yes",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
+                            "Provide this later (before $expectedDeadline)",
+                        ),
+                    ),
+                    rows,
+                )
+            }
+
+            @Test
+            fun `unoccupied provide-later still renders both gas-supply and cert rows`() {
+                val factory =
+                    GasSafetyViewModelFactory(
+                        mock(),
+                        mock(),
+                        mockFeatureFlagManager(registrationDateDeadlineEnabled = true, delegateToLettingAgentEnabled = false),
+                    )
+                val rows = factory.fromEntity(missingUnoccupiedProvideLater)
+
+                assertEquals(
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            "commonText.yes",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
+                            "checkGasSafety.provideThisLater.unoccupied",
+                        ),
+                    ),
+                    rows,
+                )
+            }
+        }
     }
 
     companion object {
