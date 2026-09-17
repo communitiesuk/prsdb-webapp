@@ -694,7 +694,13 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.submitYourRegistration.heading", shouldUseNumbering = false)
+                withHeadingMessageKey(
+                    paymentsStrategy.ifEnabledOrElse {
+                        ifEnabled { "registerProperty.taskList.submitYourRegistration.headingWithPayment" }
+                        ifDisabled { "registerProperty.taskList.submitYourRegistration.heading" }
+                    },
+                    shouldUseNumbering = false,
+                )
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }

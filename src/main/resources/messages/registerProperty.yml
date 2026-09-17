@@ -98,6 +98,7 @@ taskList:
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
+    headingWithPayment: Submit and pay
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers
