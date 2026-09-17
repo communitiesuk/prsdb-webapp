@@ -8,19 +8,25 @@ gasSafetyTask:
     error:
       missing: Select whether you have a gas supply or any gas appliances
     detail:
-      summary: What you should include
+      summary: What is included
       gasSupply:
         heading: Gas supply
-        text: Include any gas supply, even if it’s currently unused.
+        paragraph: Include any gas supply, even if it is not currently being used.
       gasAppliances:
         heading: Gas appliances
-        intro: 'Gas appliances include any:'
-        boilers: gas boilers (for heating or hot water)
-        cookers: gas cookers or hobs
-        fires: gas fires or heaters
-        waterHeaters: gas water heaters
-        other: other fixed or portable gas appliances
-        exclusion: Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater.
+        paragraph: 'Gas appliances include:'
+        bullet:
+          one: gas boilers (for heating or hot water)
+          two: gas cookers or hobs
+          three: gas fires or heaters
+          four: gas water heaters
+          five: other fixed or portable gas appliances
+      portableAppliances:
+        heading: Portable appliances
+        paragraph:
+          one: Include any portable or mobile space heaters that use a gas cylinder.
+          two: Do not include any other portable gas appliances that use detachable gas bottles, such as a barbecue or patio heater, unless you supplied it.
+          three: If you provide the appliance, it must be included.
   gasCert:
     heading: Do you have a gas safety certificate for this property?
     hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.

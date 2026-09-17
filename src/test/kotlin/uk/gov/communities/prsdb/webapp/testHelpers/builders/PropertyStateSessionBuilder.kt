@@ -211,6 +211,9 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLater() =
             beforePropertyRegistrationHasGasSupply().withProvideGasCertLaterFromGasSupply()
 
+        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLaterFromGasCert() =
+            beforePropertyRegistrationHasGasCert().withProvideGasCertLater()
+
         fun beforePropertyRegistrationCheckGasSafetyAnswersNoCert() = beforePropertyRegistrationHasGasCert().withNoGasCertificate()
 
         fun beforePropertyRegistrationCheckGasSafetyAnswersCertExpired() =
