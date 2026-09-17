@@ -36,13 +36,25 @@ class PaymentsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     fun `when feature is disabled ifEnabledOrElse returns the disabled branch`() {
         featureFlagManager.disableFeature(PAYMENTS)
 
-        assertEquals("off", strategy.ifEnabledOrElse(ifEnabled = { "on" }, ifDisabled = { "off" }))
+        assertEquals(
+            "off",
+            strategy.ifEnabledOrElse {
+                ifEnabled { "on" }
+                ifDisabled { "off" }
+            },
+        )
     }
 
     @Test
     fun `when feature is enabled ifEnabledOrElse returns the enabled branch`() {
         featureFlagManager.enableFeature(PAYMENTS)
 
-        assertEquals("on", strategy.ifEnabledOrElse(ifEnabled = { "on" }, ifDisabled = { "off" }))
+        assertEquals(
+            "on",
+            strategy.ifEnabledOrElse {
+                ifEnabled { "on" }
+                ifDisabled { "off" }
+            },
+        )
     }
 }

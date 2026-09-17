@@ -732,10 +732,10 @@ class PropertyRegistrationJourneyFactory(
                             }
 
                             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
-                                paymentsStrategy.ifEnabledOrElse(
-                                    ifEnabled = { journey.paymentSummaryStep },
-                                    ifDisabled = { journey.savePropertyRegistrationDataStep },
-                                )
+                                paymentsStrategy.ifEnabledOrElse {
+                                    ifEnabled { journey.paymentSummaryStep }
+                                    ifDisabled { journey.savePropertyRegistrationDataStep }
+                                }
                             }
                         }
                     }
@@ -754,27 +754,27 @@ class PropertyRegistrationJourneyFactory(
                             }
 
                             ConfirmMissingComplianceMode.CONFIRMED -> {
-                                paymentsStrategy.ifEnabledOrElse(
-                                    ifEnabled = { Destination(journey.paymentSummaryStep) },
-                                    ifDisabled = { Destination(journey.savePropertyRegistrationDataStep) },
-                                )
+                                paymentsStrategy.ifEnabledOrElse {
+                                    ifEnabled { Destination(journey.paymentSummaryStep) }
+                                    ifDisabled { Destination(journey.savePropertyRegistrationDataStep) }
+                                }
                             }
                         }
                     }
                 }
                 step(journey.savePropertyRegistrationDataStep) {
                     parents {
-                        paymentsStrategy.ifEnabledOrElse(
-                            ifEnabled = { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) },
-                            ifDisabled = {
+                        paymentsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) }
+                            ifDisabled {
                                 OrParents(
                                     journey.hasMissingComplianceStep.hasOutcome(
                                         ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
                                     ),
                                     journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                                 )
-                            },
-                        )
+                            }
+                        }
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }

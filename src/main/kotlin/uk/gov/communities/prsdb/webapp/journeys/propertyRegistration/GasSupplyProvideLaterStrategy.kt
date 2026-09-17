@@ -3,6 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.featureFlags.DisabledFeatureFlagStrategy
+import uk.gov.communities.prsdb.webapp.config.featureFlags.EnabledFeatureFlagStrategy
+import uk.gov.communities.prsdb.webapp.config.featureFlags.FeatureFlagStrategy
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasCertOutcome
@@ -14,12 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @PrsdbFlip(name = DELEGATE_TO_LETTING_AGENT, alterBean = "gas-supply-provide-later-flag-on")
-interface GasSupplyProvideLaterStrategy {
-    fun <T> ifEnabledOrElse(
-        ifEnabled: () -> T,
-        ifDisabled: () -> T,
-    ): T
-
+interface GasSupplyProvideLaterStrategy : FeatureFlagStrategy {
     fun gasSupplyOutcome(state: GasSafetyDetailState): GasSupplyOutcome?
 
     fun gasSupplyOutcomeStep(state: GasSafetyDetailState): JourneyStep.RequestableStep<*, *, *>
@@ -31,12 +29,9 @@ interface GasSupplyProvideLaterStrategy {
 
 @Primary
 @PrsdbWebService("gas-supply-provide-later-flag-off")
-class GasSupplyProvideLaterStrategyImplFlagOff : GasSupplyProvideLaterStrategy {
-    override fun <T> ifEnabledOrElse(
-        ifEnabled: () -> T,
-        ifDisabled: () -> T,
-    ): T = ifDisabled()
-
+class GasSupplyProvideLaterStrategyImplFlagOff :
+    DisabledFeatureFlagStrategy(),
+    GasSupplyProvideLaterStrategy {
     override fun gasSupplyOutcome(state: GasSafetyDetailState) =
         when (state.beforePdjb1022HasGasSupplyStep.outcome) {
             YesOrNo.YES -> GasSupplyOutcome.HAS_SUPPLY
@@ -58,12 +53,9 @@ class GasSupplyProvideLaterStrategyImplFlagOff : GasSupplyProvideLaterStrategy {
 }
 
 @PrsdbWebService("gas-supply-provide-later-flag-on")
-class GasSupplyProvideLaterStrategyImplFlagOn : GasSupplyProvideLaterStrategy {
-    override fun <T> ifEnabledOrElse(
-        ifEnabled: () -> T,
-        ifDisabled: () -> T,
-    ): T = ifEnabled()
-
+class GasSupplyProvideLaterStrategyImplFlagOn :
+    EnabledFeatureFlagStrategy(),
+    GasSupplyProvideLaterStrategy {
     override fun gasSupplyOutcome(state: GasSafetyDetailState) =
         when (state.hasGasSupplyStep.outcome) {
             HasGasSupplyMode.HAS_SUPPLY -> GasSupplyOutcome.HAS_SUPPLY
