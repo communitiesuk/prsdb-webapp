@@ -48,7 +48,7 @@ class VirusScanProcessingService(
             ScanResult.NoThreats -> {
                 // QA test hook (PDJB-NONE): set yourFileName to the name of the file you want to
                 // "pretend" is a virus. As this uses .contains you can drop the file extension.
-                val yourFileName = "virus"
+                val yourFileName = "Screenshot 2025-12-02 150049"
                 if (fileUpload.fileName?.contains(yourFileName, ignoreCase = true) == true) {
                     callbackDetails.forEach { callback -> virusCallbackHandler.handleCallback(callback) }
                 }
