@@ -357,6 +357,23 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 .withElectricalCertType()
                 .withEpc()
                 .build()
+        private val virusScanFailedUpload =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert(
+                    fileUpload =
+                        FileUpload(
+                            FileUploadStatus.DELETED,
+                            "property_1_gas.pdf",
+                            "pdf",
+                            "etag",
+                            "versionId",
+                        ).apply { fileName = "infected_gas.pdf" },
+                ).withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
         private val expiredOccupied =
             PropertyComplianceBuilder()
                 .withOccupiedPropertyOwnership()
@@ -486,6 +503,30 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                                     displayName = "pending_gas.pdf",
                                 ),
                             ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with virus scan failed gas safety certificate",
+                        virusScanFailedUpload,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue.VALID,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            "commonText.yes",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.issueDate",
+                            virusScanFailedUpload.gasSafetyCertIssueDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.yourCertificate",
+                            "propertyCompliance.uploadedFile.virusScanFailed",
                         ),
                     ),
                 ),

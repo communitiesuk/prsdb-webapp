@@ -97,6 +97,11 @@ class ElectricalSafetyViewModelFactory(
                         fallbackFileName = "electrical_safety_certificate",
                         uploadService = uploadService,
                     )
+                } else if (propertyCompliance.electricalSafetyFileUploads.isNotEmpty()) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.electricalSafety.yourCertificate",
+                        value = "propertyCompliance.uploadedFile.virusScanFailed",
+                    )
                 }
             }.toList()
 

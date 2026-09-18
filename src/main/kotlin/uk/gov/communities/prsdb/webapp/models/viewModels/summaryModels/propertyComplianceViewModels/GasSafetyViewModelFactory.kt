@@ -113,6 +113,11 @@ class GasSafetyViewModelFactory(
                         fallbackFileName = "gas_safety_certificate",
                         uploadService = uploadService,
                     )
+                } else if (propertyCompliance.gasSafetyFileUploads.isNotEmpty()) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.gasSafety.yourCertificate",
+                        value = "propertyCompliance.uploadedFile.virusScanFailed",
+                    )
                 }
             }.toList()
 }
