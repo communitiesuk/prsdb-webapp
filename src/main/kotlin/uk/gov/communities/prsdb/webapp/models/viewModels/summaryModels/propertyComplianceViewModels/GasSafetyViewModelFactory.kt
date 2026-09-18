@@ -98,7 +98,9 @@ class GasSafetyViewModelFactory(
                     )
                 }
 
-                val visibleUploads = propertyCompliance.gasSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
+                val (uploadsDeletedByVirusScan, visibleUploads) =
+                    propertyCompliance.gasSafetyFileUploads.partition { it.status == FileUploadStatus.DELETED }
+
                 if (visibleUploads.isNotEmpty()) {
                     addFileUploadRows(
                         visibleUploads = visibleUploads,
@@ -112,6 +114,11 @@ class GasSafetyViewModelFactory(
                         noUploadMessageKey = "",
                         fallbackFileName = "gas_safety_certificate",
                         uploadService = uploadService,
+                    )
+                } else if (uploadsDeletedByVirusScan.isNotEmpty()) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.gasSafety.yourCertificate",
+                        value = "propertyCompliance.uploadedFile.virusScanFailed",
                     )
                 }
             }.toList()
