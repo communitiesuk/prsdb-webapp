@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -29,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -48,6 +50,7 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
+    private val addressRepository: AddressRepository,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
@@ -74,6 +77,11 @@ class PropertyOwnershipService(
         tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
+        val registeringLandlord = landlords.first()
+        // TODO: PDJB-1593: Landlords will soon answer a correspondence question directly; snapshot the property
+        // address as a placeholder correspondence address until then.
+        val correspondenceAddress =
+            addressRepository.save(Address(AddressDataModel.fromAddress(address), address.localCouncil))
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -87,6 +95,8 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
+                correspondenceEmail = registeringLandlord.email,
+                correspondenceAddress = correspondenceAddress,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
