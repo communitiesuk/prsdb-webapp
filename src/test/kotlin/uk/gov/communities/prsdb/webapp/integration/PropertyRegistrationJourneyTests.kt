@@ -544,7 +544,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.epcHeading).isVisible()
             // submit
             checkAnswersPage.confirm()
-            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
 
             // Confirmation - render page
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -764,7 +764,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
             // submit
             checkAnswersPage.confirm()
-            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
 
             // Confirmation - render page
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -1045,7 +1045,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Confirm Missing Compliance - submit
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
-            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
 
             // Confirmation - verify record saved
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -2062,7 +2062,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.warning).isVisible()
             checkAnswersPage.confirm()
 
-            val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
@@ -2092,7 +2092,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            navigator.completePropertyRegistrationPaymentSuccessfully()
         }
 
         @Test
@@ -2112,7 +2112,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            navigator.completePropertyRegistrationPaymentSuccessfully()
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2157,7 +2157,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            navigator.completePropertyRegistrationPaymentSuccessfully()
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2338,7 +2338,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val delegatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             delegatedCheckAnswersPage.confirm()
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            navigator.completePropertyRegistrationPaymentSuccessfully()
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2547,7 +2547,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkAnswersPage.confirm()
 
-            assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+            navigator.completePropertyRegistrationPaymentSuccessfully()
         }
     }
 
