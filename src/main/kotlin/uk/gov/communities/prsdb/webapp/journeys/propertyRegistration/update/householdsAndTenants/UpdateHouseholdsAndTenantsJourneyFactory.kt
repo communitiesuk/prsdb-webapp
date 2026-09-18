@@ -18,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -67,6 +69,10 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons()
@@ -130,6 +136,7 @@ class UpdateHouseholdsAndTenantsJourney(
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     journeyStateService: JourneyStateService,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourney>,
@@ -144,9 +151,14 @@ class UpdateHouseholdsAndTenantsJourney(
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
-interface UpdateHouseholdsAndTenantsJourneyState : CheckYourAnswersJourneyState {
+interface UpdateHouseholdsAndTenantsJourneyState :
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep
-    val propertyId: Long
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.householdsAndTenants"
 }

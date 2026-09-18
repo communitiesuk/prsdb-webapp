@@ -5,8 +5,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -19,7 +19,7 @@ class LocalCouncilUserCyaStepConfig(
     private val localCouncilDataService: LocalCouncilDataService,
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<LocalCouncilUserRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
         mapOf(
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
@@ -81,7 +81,7 @@ class LocalCouncilUserCyaStepConfig(
 @JourneyFrameworkComponent
 final class LocalCouncilUserCyaStep(
     stepConfig: LocalCouncilUserCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LocalCouncilUserRegistrationJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<LocalCouncilUserRegistrationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-answers"
     }

@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
-class CompleteFurnishedStatusUpdateStepConfig(
+class ApplyFurnishedStatusUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateFurnishedStatusJourneyState>() {
@@ -40,13 +40,10 @@ class CompleteFurnishedStatusUpdateStepConfig(
     override fun resolveNextDestination(
         state: UpdateFurnishedStatusJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent
-class CompleteFurnishedStatusUpdateStep(
-    stepConfig: CompleteFurnishedStatusUpdateStepConfig,
+class ApplyFurnishedStatusUpdateStep(
+    stepConfig: ApplyFurnishedStatusUpdateStepConfig,
 ) : JourneyStep.InternalStep<Complete, UpdateFurnishedStatusJourneyState>(stepConfig)

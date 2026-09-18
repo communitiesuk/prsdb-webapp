@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateSuccessBannerService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
@@ -44,7 +45,9 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
-    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
+    @MockitoBean
+    private lateinit var propertyUpdateSuccessBannerService: PropertyUpdateSuccessBannerService
+
     @Test
     fun `getLettingAgentPropertyDetails renders the letting agent view for a valid token`() {
         val token = UUID.randomUUID()
@@ -115,6 +118,61 @@ class LettingAgentPropertyDetailsControllerTests(
             .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
             .andExpect {
                 status { isNotFound() }
+            }
+    }
+
+    @Test
+    fun `getLettingAgentPropertyDetails adds showUpdateSuccessBanner and message key to the model when a banner entry exists`() {
+        val token = UUID.randomUUID()
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
+        whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
+            .thenReturn(propertyOwnership)
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
+            .thenReturn(true)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
+            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        val complianceViewModel = createComplianceViewModel()
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+            .thenReturn(complianceViewModel)
+        whenever(propertyUpdateSuccessBannerService.consumeSuccess(propertyOwnership.id))
+            .thenReturn("propertyDetails.updateSuccessBanner.licensing")
+
+        mvc
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .andExpect {
+                status { isOk() }
+                model { attribute("showUpdateSuccessBanner", true) }
+                model { attribute("updateSuccessBannerMessageKey", "propertyDetails.updateSuccessBanner.licensing") }
+            }
+    }
+
+    @Test
+    fun `getLettingAgentPropertyDetails does not add showUpdateSuccessBanner when no banner entry exists`() {
+        val token = UUID.randomUUID()
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
+        whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
+            .thenReturn(propertyOwnership)
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
+            .thenReturn(true)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
+            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        val complianceViewModel = createComplianceViewModel()
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+            .thenReturn(complianceViewModel)
+        whenever(propertyUpdateSuccessBannerService.consumeSuccess(propertyOwnership.id))
+            .thenReturn(null)
+
+        mvc
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("showUpdateSuccessBanner") }
             }
     }
 

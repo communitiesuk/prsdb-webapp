@@ -18,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -77,15 +79,19 @@ class UpdateGasSafetyJourneyFactory(
             step(journey.updateCheckGasSafetyAnswersStep) {
                 routeSegment(UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.gasSafetyDetailsTask.isComplete() }
-                nextStep { journey.completeGasSafetyUpdateStep }
+                nextStep { journey.applyGasSafetyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                     )
                 }
             }
-            step(journey.completeGasSafetyUpdateStep) {
+            step(journey.applyGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.applyGasSafetyUpdateStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceButtons()
@@ -157,7 +163,8 @@ class UpdateGasSafetyJourney(
     journeyName: String = "gasSafety",
     override val gasSafetyDetailsTask: GasSafetyDetailsTask,
     val updateCheckGasSafetyAnswersStep: UpdateCheckGasSafetyAnswersStep,
-    override val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep,
+    override val applyGasSafetyUpdateStep: ApplyGasSafetyUpdateStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateGasSafetyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -181,10 +188,14 @@ class UpdateGasSafetyJourney(
 interface UpdateGasSafetyJourneyState :
     JourneyState,
     GasSafetyDependencies,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val gasSafetyDetailsTask: GasSafetyDetailsTask
-    val propertyId: Long
+    override val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
+    val applyGasSafetyUpdateStep: ApplyGasSafetyUpdateStep
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.gasSafety"
 }

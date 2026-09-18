@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -81,15 +83,19 @@ class UpdateElectricalSafetyJourneyFactory(
             step(journey.updateCheckElectricalSafetyAnswersStep) {
                 routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.electricalSafetyDetailsTask.isComplete() }
-                nextStep { journey.completeElectricalSafetyUpdateStep }
+                nextStep { journey.applyElectricalSafetyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                     )
                 }
             }
-            step(journey.completeElectricalSafetyUpdateStep) {
+            step(journey.applyElectricalSafetyUpdateStep) {
                 parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.applyElectricalSafetyUpdateStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceButtons()
@@ -164,7 +170,8 @@ class UpdateElectricalSafetyJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "electricalSafety",
     val updateCheckElectricalSafetyAnswersStep: UpdateCheckElectricalSafetyAnswersStep,
-    override val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep,
+    override val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateElectricalSafetyJourneyState>,
@@ -189,10 +196,14 @@ class UpdateElectricalSafetyJourney(
 interface UpdateElectricalSafetyJourneyState :
     JourneyState,
     ElectricalSafetyDependencies,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
-    val propertyId: Long
+    override val propertyId: Long
     val lastModifiedDate: String
     val previousUploadIds: List<Long>
-    val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep
+    val applyElectricalSafetyUpdateStep: ApplyElectricalSafetyUpdateStep
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.electricalSafety"
 }

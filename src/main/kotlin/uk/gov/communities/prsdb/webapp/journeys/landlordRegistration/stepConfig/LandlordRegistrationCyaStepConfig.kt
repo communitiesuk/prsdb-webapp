@@ -12,8 +12,8 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtension
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
@@ -42,7 +42,7 @@ class LandlordRegistrationCyaStepConfig(
     private val securityContextService: SecurityContextService,
     private val messageSource: MessageSource,
     private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
-) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
+) : AbstractCompleteJourneyStepConfig<LandlordRegistrationState>() {
     override fun chooseTemplate(state: LandlordRegistrationState) =
         if (isOrgLandlord(state)) {
             "forms/orgLandlordRegistrationCheckAnswersForm"
@@ -155,7 +155,7 @@ class LandlordRegistrationCyaStepConfig(
         securityContextService.refreshContext()
     }
 
-    // Overrides AbstractCheckYourAnswersStepConfig, which deleted the journey
+    // Overrides AbstractCompleteJourneyStepConfig, which deleted the journey
     // We don't want to delete the journey at this stage when this page is included within another journey,
     // such as accepting a joint landlord invitation
     override fun resolveNextDestination(
@@ -600,4 +600,4 @@ class LandlordRegistrationCyaStepConfig(
 @JourneyFrameworkComponent
 final class LandlordRegistrationCyaStep(
     stepConfig: LandlordRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LandlordRegistrationState>(stepConfig)
+) : AbstractCompleteJourneyStep<LandlordRegistrationState>(stepConfig)

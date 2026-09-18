@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 @JourneyFrameworkComponent
 class OrgTypeCyaStepConfig(
     private val messageSource: MessageSource,
-) : AbstractCheckYourAnswersStepConfig<UpdateOrganisationTypeJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateOrganisationTypeJourneyState>() {
     override fun chooseTemplate(state: UpdateOrganisationTypeJourneyState) = "forms/checkOrganisationTypeAnswersForm"
 
     override fun getStepSpecificContent(state: UpdateOrganisationTypeJourneyState): Map<String, Any?> =
@@ -107,7 +107,7 @@ class OrgTypeCyaStepConfig(
 @JourneyFrameworkComponent
 final class OrgTypeCyaStep(
     stepConfig: OrgTypeCyaStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateOrganisationTypeJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateOrganisationTypeJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-type-check-your-answers"
     }

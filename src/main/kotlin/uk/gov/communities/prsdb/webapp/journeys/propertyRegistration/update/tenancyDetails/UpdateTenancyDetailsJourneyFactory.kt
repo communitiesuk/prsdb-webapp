@@ -30,6 +30,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -97,6 +99,10 @@ class UpdateTenancyDetailsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateTenancyDetailsCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             replaceHeadingsAndButtons(state)
@@ -186,6 +192,7 @@ class UpdateTenancyDetailsJourney(
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     override val cyaStep: UpdateTenancyDetailsCyaStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
@@ -201,8 +208,12 @@ class UpdateTenancyDetailsJourney(
 
 interface UpdateTenancyDetailsJourneyState :
     TenancyDetailsState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     override val cyaStep: UpdateTenancyDetailsCyaStep
-    val propertyId: Long
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.tenancyDetails"
 }

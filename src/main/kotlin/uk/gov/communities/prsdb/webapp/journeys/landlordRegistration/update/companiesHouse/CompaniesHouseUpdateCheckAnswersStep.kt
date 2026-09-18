@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.com
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgIsRegisteredCompanyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordService
 class CompaniesHouseUpdateCheckAnswersStepConfig(
     private val landlordService: LandlordService,
     private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
-) : AbstractCheckYourAnswersStepConfig<UpdateCompaniesHouseJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateCompaniesHouseJourneyState>() {
     override fun chooseTemplate(state: UpdateCompaniesHouseJourneyState) = "forms/companiesHouseUpdateCheckAnswersForm"
 
     override fun getStepSpecificContent(state: UpdateCompaniesHouseJourneyState): Map<String, Any?> {
@@ -67,7 +67,7 @@ class CompaniesHouseUpdateCheckAnswersStepConfig(
 @JourneyFrameworkComponent
 final class CompaniesHouseUpdateCheckAnswersStep(
     stepConfig: CompaniesHouseUpdateCheckAnswersStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateCompaniesHouseJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateCompaniesHouseJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-answers"
     }

@@ -3,15 +3,15 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.gov
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OrgCompaniesHouseDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 
 @JourneyFrameworkComponent
 class UpdateGoverningBodyCyaStepConfig(
     private val landlordService: LandlordService,
     private val orgCompaniesHouseDetailsHelper: OrgCompaniesHouseDetailsHelper,
-) : AbstractCheckYourAnswersStepConfig<UpdateGoverningBodyJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateGoverningBodyJourneyState>() {
     override fun chooseTemplate(state: UpdateGoverningBodyJourneyState) = "forms/governingBodyUpdateCheckAnswersForm"
 
     override fun getStepSpecificContent(state: UpdateGoverningBodyJourneyState): Map<String, Any?> =
@@ -41,7 +41,7 @@ class UpdateGoverningBodyCyaStepConfig(
 @JourneyFrameworkComponent
 final class UpdateGoverningBodyCyaStep(
     stepConfig: UpdateGoverningBodyCyaStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateGoverningBodyJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateGoverningBodyJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "governing-body-check-your-answers"
     }

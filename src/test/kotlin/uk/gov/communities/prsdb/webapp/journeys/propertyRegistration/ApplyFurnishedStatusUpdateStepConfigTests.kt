@@ -8,20 +8,21 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.CompleteFurnishedStatusUpdateStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.ApplyFurnishedStatusUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FurnishedStatusFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
-class CompleteFurnishedStatusUpdateStepConfigTests {
+class ApplyFurnishedStatusUpdateStepConfigTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
@@ -35,7 +36,7 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
     private lateinit var mockFurnishedStatusStep: FurnishedStatusStep
 
     @Mock
-    private lateinit var stepConfig: CompleteFurnishedStatusUpdateStepConfig
+    private lateinit var stepConfig: ApplyFurnishedStatusUpdateStepConfig
 
     @Mock
     private lateinit var mockFurnishedStatusFormModel: FurnishedStatusFormModel
@@ -47,7 +48,7 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
     @BeforeEach
     fun setUp() {
         stepConfig =
-            CompleteFurnishedStatusUpdateStepConfig(
+            ApplyFurnishedStatusUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
                 propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
@@ -101,11 +102,11 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
     }
 
     @Test
-    fun `resolveNextDestination calls deleteJourney on state`() {
+    fun `resolveNextDestination does not delete the journey`() {
         // Act
         stepConfig.resolveNextDestination(mockState, Destination.ExternalUrl("redirect"))
 
         // Assert
-        verify(mockState).deleteJourney()
+        verify(mockState, never()).deleteJourney()
     }
 }

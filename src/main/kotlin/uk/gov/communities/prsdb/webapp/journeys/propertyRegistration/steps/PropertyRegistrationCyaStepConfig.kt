@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -29,7 +29,7 @@ class PropertyRegistrationCyaStepConfig(
     private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val featureFlagManager: FeatureFlagManager,
-) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<PropertyRegistrationJourneyState>() {
     // TODO PDJB-1340: Remove the legacy template branch when PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING is removed.
     override fun chooseTemplate(state: PropertyRegistrationJourneyState): String =
         if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
@@ -408,7 +408,7 @@ class PropertyRegistrationCyaStepConfig(
 @JourneyFrameworkComponent
 final class PropertyRegistrationCyaStep(
     stepConfig: PropertyRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<PropertyRegistrationJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<PropertyRegistrationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-answers"
     }

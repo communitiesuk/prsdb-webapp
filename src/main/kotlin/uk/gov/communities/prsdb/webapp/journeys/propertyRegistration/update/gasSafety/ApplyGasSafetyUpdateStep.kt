@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class CompleteGasSafetyUpdateStepConfig(
+class ApplyGasSafetyUpdateStepConfig(
     private val propertyComplianceService: PropertyComplianceService,
     private val uploadService: UploadService,
 ) : AbstractInternalStepConfig<Complete, UpdateGasSafetyJourneyState>() {
@@ -48,13 +48,10 @@ class CompleteGasSafetyUpdateStepConfig(
     override fun resolveNextDestination(
         state: UpdateGasSafetyJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
+    ): Destination = defaultDestination
 }
 
 @JourneyFrameworkComponent
-class CompleteGasSafetyUpdateStep(
-    stepConfig: CompleteGasSafetyUpdateStepConfig,
+class ApplyGasSafetyUpdateStep(
+    stepConfig: ApplyGasSafetyUpdateStepConfig,
 ) : JourneyStep.InternalStep<Complete, UpdateGasSafetyJourneyState>(stepConfig)

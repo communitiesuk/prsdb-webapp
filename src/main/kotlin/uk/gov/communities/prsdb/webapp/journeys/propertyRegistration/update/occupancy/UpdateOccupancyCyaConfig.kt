@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -25,7 +25,7 @@ class UpdateOccupancyCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
     private val propertyUpdateEmailService: PropertyUpdateEmailService,
-) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateOccupancyJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -114,7 +114,7 @@ class UpdateOccupancyCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateOccupancyCyaStep(
     stepConfig: UpdateOccupancyCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateOccupancyJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateOccupancyJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "occupancy-check-your-answers"
     }

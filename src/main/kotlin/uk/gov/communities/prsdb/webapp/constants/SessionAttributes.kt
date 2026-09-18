@@ -55,3 +55,5 @@ const val DEREGISTERED_ORGANISATION_NAME = "deregisteredOrganisationName"
 const val FEATURE_FLAG_OVERRIDES = "featureFlagOverrides"
 
 const val LETTING_AGENT_INVITATION_TOKEN_WITH_JOURNEY_IDS = "lettingAgentInvitationTokenWithJourneyIds"
+
+const val PROPERTY_UPDATE_SUCCESS_BANNER_SESSION_ATTRIBUTE = "propertyUpdateSuccessBanner"

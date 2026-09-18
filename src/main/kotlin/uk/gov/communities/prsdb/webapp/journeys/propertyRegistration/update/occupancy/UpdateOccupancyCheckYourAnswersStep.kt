@@ -3,13 +3,13 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occ
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCompleteJourneyStepConfig
 
 @JourneyFrameworkComponent
 class UpdateOccupancyCheckYourAnswersStepConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
-) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
+) : AbstractCompleteJourneyStepConfig<UpdateOccupancyJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
@@ -30,7 +30,7 @@ class UpdateOccupancyCheckYourAnswersStepConfig(
 @JourneyFrameworkComponent
 final class UpdateOccupancyCheckYourAnswersStep(
     stepConfig: UpdateOccupancyCheckYourAnswersStepConfig,
-) : AbstractCheckYourAnswersStep<UpdateOccupancyJourneyState>(stepConfig) {
+) : AbstractCompleteJourneyStep<UpdateOccupancyJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-your-answers"
     }

@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FurnishedStatusState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -41,7 +43,7 @@ class UpdateFurnishedStatusJourneyFactory(
             step(journey.furnishedStatus) {
                 routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 backUrl { returnUrl }
-                nextStep { journey.completeFurnishedStatusUpdateStep }
+                nextStep { journey.applyFurnishedStatusUpdateStep }
                 initialStep()
                 withAdditionalContentProperties {
                     mapOf(
@@ -53,8 +55,12 @@ class UpdateFurnishedStatusJourneyFactory(
                     )
                 }
             }
-            step(journey.completeFurnishedStatusUpdateStep) {
+            step(journey.applyFurnishedStatusUpdateStep) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.applyFurnishedStatusUpdateStep.hasOutcome(Complete.COMPLETE) }
                 nextUrl { returnUrl }
             }
         }
@@ -69,7 +75,8 @@ class UpdateFurnishedStatusJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateFurnishedStatusJourney(
     override val furnishedStatus: FurnishedStatusStep,
-    override val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep,
+    override val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "furnished status",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -80,8 +87,12 @@ class UpdateFurnishedStatusJourney(
 
 interface UpdateFurnishedStatusJourneyState :
     JourneyState,
-    FurnishedStatusState {
-    val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep
-    val propertyId: Long
+    FurnishedStatusState,
+    HasPropertyId {
+    val applyFurnishedStatusUpdateStep: ApplyFurnishedStatusUpdateStep
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.furnishedStatus"
 }

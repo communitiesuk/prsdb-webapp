@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -64,6 +66,10 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
@@ -146,6 +152,7 @@ class UpdateRentFrequencyAndAmountJourney(
     override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     // Check your answers step
     override val cyaStep: UpdateRentFrequencyAndAmountCyaStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "rent frequency and amount",
     override val finishCyaStep: FinishCyaJourneyStep,
@@ -161,9 +168,13 @@ class UpdateRentFrequencyAndAmountJourney(
 }
 
 interface UpdateRentFrequencyAndAmountJourneyState :
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask
     override val cyaStep: UpdateRentFrequencyAndAmountCyaStep
-    val propertyId: Long
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.rentFrequencyAndAmount"
 }

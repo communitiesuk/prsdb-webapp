@@ -20,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Licen
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.HasPropertyId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CompletePropertyUpdateStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -135,6 +137,10 @@ class UpdateLicensingJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateLicensingCyaStep.ROUTE_SEGMENT)
                 parents { journey.licensingTask.isComplete() }
+                nextStep { journey.completePropertyUpdateStep }
+            }
+            step(journey.completePropertyUpdateStep) {
+                parents { journey.cyaStep.isComplete() }
                 nextUrl { returnUrl }
             }
             configureStep(journey.licensingTask.licensingTypeStep) {
@@ -166,6 +172,7 @@ class UpdateLicensingJourney(
     override val licensingTask: LicensingTask,
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
+    override val completePropertyUpdateStep: CompletePropertyUpdateStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     override val stateFactory: ObjectFactory<UpdateLicensingJourneyState>,
     journeyStateService: JourneyStateService,
@@ -187,11 +194,15 @@ class UpdateLicensingJourney(
 
 interface UpdateLicensingJourneyState :
     LicensingDependencies,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState,
+    HasPropertyId {
     val licensingTask: LicensingTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: UpdateLicensingCyaStep
+    val completePropertyUpdateStep: CompletePropertyUpdateStep
     val hasOriginalLicense: Boolean
-    val propertyId: Long
+    override val propertyId: Long
     val lastModifiedDate: String
+    override val successBannerMessageKey: String
+        get() = "propertyDetails.updateSuccessBanner.licensing"
 }
