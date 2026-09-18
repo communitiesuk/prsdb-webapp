@@ -2392,7 +2392,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertNull(propertyCompliance.epcExemptionReason)
             assertNull(propertyCompliance.epcMeesExemptionReason)
             assertTrue(propertyCompliance.epcProvideLater == true)
-            assertTrue(propertyCompliance.hasGasSupply == true)
+            assertNull(propertyCompliance.hasGasSupply)
             assertNull(propertyCompliance.gasSafetyCertIssueDate)
             assertTrue(propertyCompliance.gasSafetyCertProvideLater == true)
             assertTrue(gasSafetyFileUploadIds.isEmpty())
