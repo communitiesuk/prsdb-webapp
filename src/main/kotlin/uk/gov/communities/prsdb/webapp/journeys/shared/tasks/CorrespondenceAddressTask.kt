@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-// The correspondence (postal) address task. Reuses the shared AddressTask lookup/select/manual flow.
 @JourneyFrameworkComponent
 class CorrespondenceAddressTask(
     journeyStateService: JourneyStateService,

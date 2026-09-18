@@ -68,9 +68,6 @@ class LookupAddressStepConfig(
 
     private var template: String = DEFAULT_TEMPLATE
 
-    // Lets a task render this step with its own template (e.g. the correspondence address page, which adds guidance
-    // content around the standard lookup fields). Safe as per-instance state because @JourneyFrameworkComponent is
-    // @Scope("prototype"), so each task owns its own step config instance.
     fun withTemplate(template: String): LookupAddressStepConfig {
         this.template = template
         return this

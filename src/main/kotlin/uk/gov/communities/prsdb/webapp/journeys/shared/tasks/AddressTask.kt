@@ -42,8 +42,6 @@ abstract class AddressTask(
     protected open val selectAddressContentProperties: Map<String, Any?> = emptyMap()
     protected open val manualAddressContentProperties: Map<String, Any?> = emptyMap()
 
-    // Template for the lookup step, overridable by subclasses that need extra page content around the standard lookup
-    // fields (e.g. CorrespondenceAddressTask).
     protected open val lookupAddressTemplate: String = LookupAddressStepConfig.DEFAULT_TEMPLATE
 
     override val taskState get() = this
