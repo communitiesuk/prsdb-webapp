@@ -59,24 +59,23 @@ class NftDataSeederTests(
         properties: Int = numOfProperties,
         batchSize: Int = 25,
         generatedAddresses: Int = 2000,
-    ) =
-        NftDataSeeder(
-            sessionFactory = sessionFactory,
-            localCouncilRepository = localCouncilRepository,
-            epcCertificateBaseUrl = "http://localhost",
-            numOfSystemOperators = 2,
-            numOfLcUsers = 2,
-            numOfLandlords = landlords,
-            numOfProperties = properties,
-            batchSize = batchSize,
-            randomSeed = 239L,
-            // A blank referenceDate resolves to Instant.now(), which makes seeding non-reproducible: the
-            // random-call sequence for date generation depends on the exact instant, so any two runs (even with
-            // the same random seed) can diverge. Use a fixed date so "seedDatabase is deterministic" actually
-            // tests what it claims to test.
-            referenceDate = "2024-01-01",
-            numOfGeneratedAddresses = generatedAddresses,
-        )
+    ) = NftDataSeeder(
+        sessionFactory = sessionFactory,
+        localCouncilRepository = localCouncilRepository,
+        epcCertificateBaseUrl = "http://localhost",
+        numOfSystemOperators = 2,
+        numOfLcUsers = 2,
+        numOfLandlords = landlords,
+        numOfProperties = properties,
+        batchSize = batchSize,
+        randomSeed = 239L,
+        // A blank referenceDate resolves to Instant.now(), which makes seeding non-reproducible: the
+        // random-call sequence for date generation depends on the exact instant, so any two runs (even with
+        // the same random seed) can diverge. Use a fixed date so "seedDatabase is deterministic" actually
+        // tests what it claims to test.
+        referenceDate = "2024-01-01",
+        numOfGeneratedAddresses = generatedAddresses,
+    )
 
     @BeforeEach
     fun setUp() {
@@ -221,7 +220,10 @@ class NftDataSeederTests(
     }
 
     private fun countRows(tableName: String): Long =
-        jdbcTemplate.queryForObject("SELECT count(*) FROM $tableName", Long::class.java)!!
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM $tableName",
+            Long::class.java,
+        )!!
 
     private fun captureSeedSnapshot() =
         SeedSnapshot(
