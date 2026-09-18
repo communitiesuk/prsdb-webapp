@@ -471,13 +471,54 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     fun `afterStepIsReached throws when gasSupplyOutcome is null and registration is not delegated to a letting agent`() {
         // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceDataWithNullValues()
         whenever(mockState.isDelegatedToLettingAgent(any())).thenReturn(false)
-        whenever(mockState.gasSafetyTask.gasSafetyDetailsTask.gasSupplyOutcome).thenReturn(null)
+
+        val mockOccupiedStep = mock<OccupiedStep>()
+        whenever(mockState.occupied).thenReturn(mockOccupiedStep)
+        whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = false })
+
+        val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
+        whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
+        whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)
+
+        whenever(mockState.propertyDetailsTask).thenReturn(mockPropertyDetailsTask)
+        whenever(mockPropertyDetailsTask.addressTask).thenReturn(mockAddressTask)
+        whenever(mockAddressTask.getAddress()).thenReturn(
+            AddressDataModel(singleLineAddress = "1 Test St", uprn = 12345L, localCouncilId = 1),
+        )
+        val mockPropertyTypeStep = mock<PropertyTypeStep>()
+        whenever(mockPropertyDetailsTask.propertyTypeStep).thenReturn(mockPropertyTypeStep)
+        whenever(mockPropertyTypeStep.formModel).thenReturn(
+            PropertyTypeFormModel().apply { propertyType = PropertyType.DETACHED_HOUSE },
+        )
+
+        val mockLicensingTask = mock<LicensingTask>()
+        whenever(mockState.licensingTask).thenReturn(mockLicensingTask)
+        whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.SELECTIVE_LICENCE)
+        whenever(mockLicensingTask.getLicenceNumberOrNull()).thenReturn(null)
+
+        val mockOwnershipTypeStep = mock<OwnershipTypeStep>()
+        whenever(mockState.ownershipAndLandlordsTask).thenReturn(mockOwnershipAndLandlordsTask)
+        whenever(mockOwnershipAndLandlordsTask.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
+        whenever(mockOwnershipTypeStep.formModel).thenReturn(
+            OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD },
+        )
+        val mockJointLandlordsTask = mock<JointLandlordsPropertyRegistrationTask>()
+        whenever(mockOwnershipAndLandlordsTask.jointLandlordsTask).thenReturn(mockJointLandlordsTask)
+        val mockHasJointLandlordsStep = mock<HasJointLandlordsStep>()
+        whenever(mockJointLandlordsTask.hasJointLandlordsStep).thenReturn(mockHasJointLandlordsStep)
+        whenever(mockHasJointLandlordsStep.formModel).thenReturn(
+            HasJointLandlordsFormModel().apply { hasJointLandlords = false },
+        )
+        whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mock())
+
+        val mockGasDetailsTask = mock<GasSafetyDetailsTask>()
+        whenever(mockGasDetailsTask.gasSupplyOutcome).thenReturn(null)
+        val mockGasTask = mock<GasSafetyTask>()
+        whenever(mockGasTask.gasSafetyDetailsTask).thenReturn(mockGasDetailsTask)
+        whenever(mockState.gasSafetyTask).thenReturn(mockGasTask)
 
         // Act & Assert
         assertThrows<IllegalStateException> { stepConfig.afterStepIsReached(mockState) }
