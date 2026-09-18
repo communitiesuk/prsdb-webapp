@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentUpdateEpcController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -31,6 +32,14 @@ class PropertyDetailsLettingAgentViewTests : IntegrationTestWithImmutableData("d
 
         assertThat(detailsPage.serviceNavigation).isVisible()
         assertThat(detailsPage.serviceNavigation.serviceName).hasText("Register your rental property")
+    }
+
+    @Test
+    fun `the feedback survey link is shown with the configured URL`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLettingAgentView(allDetailsDelegatedToken)
+
+        assertThat(detailsPage.surveyLink).isVisible()
+        assertThat(detailsPage.surveyLink).hasAttribute("href", LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL)
     }
 
     @Test
