@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -565,4 +566,52 @@ class PropertyDetailsViewModelTests {
         viewModel.propertyDetailsSection.single {
             it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms"
         }
+
+    @Test
+    fun `showCorrespondenceSection defaults to false`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertFalse(viewModel.showCorrespondenceSection)
+    }
+
+    @Test
+    fun `showCorrespondenceSection is true when passed true`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = true,
+            )
+
+        assertTrue(viewModel.showCorrespondenceSection)
+    }
+
+    @Test
+    fun `correspondenceSection contains placeholder email and address rows without change actions`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = true,
+            )
+
+        assertEquals(2, viewModel.correspondenceSection.size)
+
+        val emailRow = viewModel.correspondenceSection[0]
+        assertEquals("propertyDetails.propertyRecord.correspondence.emailAddress", emailRow.fieldHeading)
+        assertEquals("landlord@example.com", emailRow.fieldValue)
+        assertFalse(emailRow.hasActions)
+
+        val addressRow = viewModel.correspondenceSection[1]
+        assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
+        assertEquals(listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"), addressRow.fieldValue)
+        assertFalse(addressRow.hasActions)
+    }
 }

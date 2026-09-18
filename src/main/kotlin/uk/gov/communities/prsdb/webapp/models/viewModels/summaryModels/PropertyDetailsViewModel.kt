@@ -8,6 +8,9 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
+    // TODO PDJB-1680: also pass true for the local-council view when the correspondence
+    //  section is added to the LC view of the property record.
+    val showCorrespondenceSection: Boolean = false,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,
         if (isLandlordView) PropertyDetailsViewType.LANDLORD else PropertyDetailsViewType.LOCAL_COUNCIL,
@@ -25,6 +28,22 @@ class PropertyDetailsViewModel(
 
     val ownershipSection: List<SummaryListRowViewModel> =
         listOf(ownershipTypeRow("propertyDetails.propertyRecord.ownership.ownershipType"))
+
+    // TODO PDJB-1736: replace the placeholder email and address below with values
+    //  read from the correspondence entity once the DB schema and repository exist.
+    val correspondenceSection: List<SummaryListRowViewModel> =
+        listOf(
+            SummaryListRowViewModel(
+                fieldHeading = "propertyDetails.propertyRecord.correspondence.emailAddress",
+                fieldValue = "landlord@example.com",
+                // TODO: PDJB-1595: Change link
+            ),
+            SummaryListRowViewModel(
+                fieldHeading = "propertyDetails.propertyRecord.correspondence.address",
+                fieldValue = listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"),
+                // TODO: PDJB-1596: Change link
+            ),
+        )
 
     val occupiedSection: List<SummaryListRowViewModel> =
         listOf(occupiedRow("propertyDetails.propertyRecord.occupation.isOccupied"))
