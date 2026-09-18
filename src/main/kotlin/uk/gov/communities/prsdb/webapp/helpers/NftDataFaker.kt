@@ -462,6 +462,9 @@ object NftDataFaker {
         )
     }
 
+    fun isGasSafetyCertificateCurrent(issueDate: Date?): Boolean =
+        issueDate?.after(Date.valueOf(referenceDate().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))) == true
+
     fun generateJourneyId(): String = faker.regexify("[a-z0-9]{7}")
 
     fun generateIncompletePropertyJourneyState(address: Address): String {

@@ -263,10 +263,8 @@ class NftDataSeederDao(
     }
 
     /**
-     * Counts addresses that would be returned by [findAddresses] for the given [restrictToAvailable], so callers can
-     * compute a random offset that is guaranteed to land within the real available range (rather than the raw
-     * address table size, which over-estimates the available range once [restrictToAvailable] addresses start being
-     * consumed by seeded property ownerships).
+     * Counts addresses that would be returned by [findAddresses]. The seeder uses this once to initialise the
+     * in-memory counts used while it is the only database writer.
      */
     fun countAvailableAddresses(restrictToAvailable: Boolean): Int {
         val query =
