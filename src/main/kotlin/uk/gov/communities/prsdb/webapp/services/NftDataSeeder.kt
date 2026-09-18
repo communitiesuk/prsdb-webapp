@@ -810,13 +810,31 @@ class NftDataSeeder(
 
         override fun replenishValues() {
             val valueSet = values.toSet()
+            val usedAddressIds = values.map { it.id }.toSet()
             val availableAddressCount = if (restrictToAvailable) remainingAvailableAddressCount else eligibleAddressCount
-            val newAddresses =
-                nftDataSeederDao.findAddresses(
-                    limit = replenishmentSize,
-                    offset = NftDataFaker.generateNumberLessThan((availableAddressCount - replenishmentSize).coerceAtLeast(1)),
-                    restrictToAvailable,
+            val firstOffset =
+                NftDataFaker.generateNumberLessThan(
+                    (availableAddressCount - replenishmentSize).coerceAtLeast(1),
                 )
+            var offset = firstOffset
+            var triedFromStart = firstOffset == 0
+            var newAddresses = emptyList<Address>()
+            while (newAddresses.isEmpty() && offset <= availableAddressCount) {
+                newAddresses =
+                    nftDataSeederDao
+                        .findAddresses(
+                            limit = replenishmentSize,
+                            offset = offset,
+                            restrictToAvailable,
+                        ).filterNot { it.id in usedAddressIds }
+                offset =
+                    if (!triedFromStart) {
+                        triedFromStart = true
+                        0
+                    } else {
+                        offset + replenishmentSize
+                    }
+            }
             values = (valueSet + NftDataFaker.shuffle(newAddresses)).toList()
         }
     }
