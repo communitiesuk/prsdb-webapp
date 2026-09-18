@@ -32,6 +32,12 @@
 
                     <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList}, ~{fragments/epcAdditionalContent :: epcAdditionalContent(${complianceDetails.epcSupplementarySections}, ${complianceDetails.epcSummaryCard.insetViewModel?.messageKey}, ${complianceDetails.epcExpiredInsetViewModel})})}"></div>
                 </div>
+
+                <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                    #{common.confirmationPage.feedback.heading},
+                    #{propertyDetails.lettingAgentView.feedback.body},
+                    ${lettingAgentPropertyDetailsSurveyUrl})}">
+                </div>
             </div>
         </div>
     </main>
