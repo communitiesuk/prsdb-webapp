@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
-// TODO PDJB-1591 update the lookup page
 @JourneyFrameworkComponent
 class CorrespondenceAddressTask(
     journeyStateService: JourneyStateService,
@@ -22,11 +21,7 @@ class CorrespondenceAddressTask(
         noAddressFoundStep,
         manualAddressStep,
     ) {
-    override val lookupAddressContentProperties: Map<String, Any?> =
-        mapOf(
-            "fieldSetHeading" to "addressForms.lookupAddress.correspondence.fieldSetHeading",
-            "fieldSetHint" to "addressForms.lookupAddress.correspondence.fieldSetHint",
-        )
+    override val lookupAddressTemplate = "forms/correspondenceLookupAddressForm"
 
     override val selectAddressContentProperties: Map<String, Any?> =
         mapOf(
