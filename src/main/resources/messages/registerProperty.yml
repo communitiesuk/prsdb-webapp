@@ -98,9 +98,11 @@ taskList:
     lettingAgentProvidesHint: The letting agent will provide these details
   submitYourRegistration:
     heading: Submit your registration
+    headingWithPayment: Submit and pay
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers
+    checkAnswersWithPayment: Submit and pay
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
 checkAnswers:
@@ -180,6 +182,12 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+paymentOutcome:
+  # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
+  fieldSetHeading: TODO PDJB-993 payment outcome internal step
+  radios:
+    error:
+      missing: Select a payment outcome
 whoProvidesRentalDetails:
   heading: Who will provide details about how your property’s rented out
   intro: 'To register your property, we need details about:'

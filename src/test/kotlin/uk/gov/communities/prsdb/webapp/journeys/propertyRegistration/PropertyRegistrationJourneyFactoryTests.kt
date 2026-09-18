@@ -27,6 +27,7 @@ class PropertyRegistrationJourneyFactoryTests {
         val state = mock<PropertyRegistrationJourneyState> { on { this.checkingAnswersFor } doReturn checkingAnswersFor }
         val stateFactory = mock<ObjectFactory<PropertyRegistrationJourneyState>> { on { getObject() } doReturn state }
         val featureFlagManager = mock<FeatureFlagManager> { on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateEnabled }
-        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager)
+        val paymentsStrategy = mock<PaymentsPropertyRegistrationStrategy>()
+        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, paymentsStrategy)
     }
 }

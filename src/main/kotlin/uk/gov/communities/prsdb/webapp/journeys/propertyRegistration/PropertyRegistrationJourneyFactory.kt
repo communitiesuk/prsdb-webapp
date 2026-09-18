@@ -56,10 +56,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Letti
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.NonRetryablePaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeInterruptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupancyChangeRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentSummaryStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -67,6 +71,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RetryablePaymentFailedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
@@ -105,6 +110,7 @@ import java.security.Principal
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val featureFlagManager: FeatureFlagManager,
+    private val paymentsStrategy: PaymentsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -688,7 +694,13 @@ class PropertyRegistrationJourneyFactory(
                 }
             }
             section {
-                withHeadingMessageKey("registerProperty.taskList.submitYourRegistration.heading", shouldUseNumbering = false)
+                withHeadingMessageKey(
+                    paymentsStrategy.ifEnabledOrElse {
+                        ifEnabled { "registerProperty.taskList.submitYourRegistration.headingWithPayment" }
+                        ifDisabled { "registerProperty.taskList.submitYourRegistration.heading" }
+                    },
+                    shouldUseNumbering = false,
+                )
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     backStep { journey.taskListStep }
@@ -726,7 +738,10 @@ class PropertyRegistrationJourneyFactory(
                             }
 
                             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED -> {
-                                journey.savePropertyRegistrationDataStep
+                                paymentsStrategy.ifEnabledOrElse {
+                                    ifEnabled { journey.paymentSummaryStep }
+                                    ifDisabled { journey.savePropertyRegistrationDataStep }
+                                }
                             }
                         }
                     }
@@ -745,19 +760,62 @@ class PropertyRegistrationJourneyFactory(
                             }
 
                             ConfirmMissingComplianceMode.CONFIRMED -> {
-                                Destination(journey.savePropertyRegistrationDataStep)
+                                paymentsStrategy.ifEnabledOrElse {
+                                    ifEnabled { Destination(journey.paymentSummaryStep) }
+                                    ifDisabled { Destination(journey.savePropertyRegistrationDataStep) }
+                                }
                             }
                         }
                     }
                 }
+                paymentsStrategy.ifEnabled {
+                    step(journey.paymentSummaryStep) {
+                        routeSegment(PaymentSummaryStep.ROUTE_SEGMENT)
+                        parents {
+                            OrParents(
+                                journey.hasMissingComplianceStep.hasOutcome(
+                                    ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
+                                ),
+                                journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                            )
+                        }
+                        nextStep { journey.paymentRoutingStep }
+                    }
+                    step(journey.paymentRoutingStep) {
+                        routeSegment(PaymentRoutingStep.ROUTE_SEGMENT)
+                        parents { journey.paymentSummaryStep.isComplete() }
+                        nextDestination { mode ->
+                            when (mode) {
+                                PaymentOutcome.SUCCESS -> Destination(journey.savePropertyRegistrationDataStep)
+                                PaymentOutcome.RETRYABLE_FAILURE -> Destination(journey.retryablePaymentFailedStep)
+                                PaymentOutcome.NON_RETRYABLE_FAILURE -> Destination(journey.nonRetryablePaymentFailedStep)
+                            }
+                        }
+                    }
+                    step(journey.retryablePaymentFailedStep) {
+                        routeSegment(RetryablePaymentFailedStep.ROUTE_SEGMENT)
+                        parents { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.RETRYABLE_FAILURE) }
+                        nextStep { journey.paymentSummaryStep }
+                    }
+                    step(journey.nonRetryablePaymentFailedStep) {
+                        routeSegment(NonRetryablePaymentFailedStep.ROUTE_SEGMENT)
+                        parents { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.NON_RETRYABLE_FAILURE) }
+                        noNextDestination()
+                    }
+                }
                 step(journey.savePropertyRegistrationDataStep) {
                     parents {
-                        OrParents(
-                            journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
-                            ),
-                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
-                        )
+                        paymentsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.paymentRoutingStep.hasOutcome(PaymentOutcome.SUCCESS) }
+                            ifDisabled {
+                                OrParents(
+                                    journey.hasMissingComplianceStep.hasOutcome(
+                                        ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES_OR_DELEGATED,
+                                    ),
+                                    journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                                )
+                            }
+                        }
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
@@ -805,6 +863,11 @@ class PropertyRegistrationJourney(
     override val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
+    // Payment steps (behind PAYMENTS flag) — TODO PDJB-991 stubs
+    override val paymentSummaryStep: PaymentSummaryStep,
+    override val paymentRoutingStep: PaymentRoutingStep,
+    override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
+    override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
     journeyStateService: JourneyStateService,
     private val userToLandlordService: UserToLandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
@@ -915,6 +978,12 @@ interface PropertyRegistrationJourneyState :
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
+
+    // Payment steps (behind PAYMENTS flag) — TODO PDJB-991 stubs
+    val paymentSummaryStep: PaymentSummaryStep
+    val paymentRoutingStep: PaymentRoutingStep
+    val retryablePaymentFailedStep: RetryablePaymentFailedStep
+    val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
