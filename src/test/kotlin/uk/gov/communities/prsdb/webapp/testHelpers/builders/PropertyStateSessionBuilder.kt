@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -17,8 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddre
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CorrespondenceEmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -76,7 +77,10 @@ class PropertyStateSessionBuilder(
         houseNameOrNumber: String = "1",
         postcode: String = "FA1 1AA",
     ): PropertyStateSessionBuilder {
-        withSubmittedValue(CorrespondenceEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(
+            CorrespondenceEmailStep.ROUTE_SEGMENT,
+            CorrespondenceEmailFormModel().apply { whichEmail = CorrespondenceEmailOption.ACCOUNT_EMAIL },
+        )
 
         val addressScope = CorrespondenceAddressTask.ROUTE_SEGMENT
         val lookupAddressFormModel =
