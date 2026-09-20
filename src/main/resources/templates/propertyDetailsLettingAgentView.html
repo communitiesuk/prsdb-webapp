@@ -5,12 +5,12 @@
     <main class="govuk-main-wrapper">
         <div id="page-contents" class="govuk-grid-row">
             <div class="govuk-grid-column-two-thirds">
-                <th:block th:if="${updateSuccessBannerMessageKey != null}" th:with="isSuccess=true">
+                <th:block th:if="${updateSuccessBanner != null}" th:with="isSuccess=true">
                     <div id="update-success-banner"
                          th:replace="~{fragments/banners/notificationBanner ::
                         notificationBanner(#{propertyDetails.updateSuccessBanner.title}, ~{::#update-success-banner/content()})}"
                          th:with="isSuccess=true">
-                        <p class="govuk-notification-banner__heading" th:text="#{${updateSuccessBannerMessageKey}}">
+                        <p class="govuk-notification-banner__heading" th:text="#{${updateSuccessBanner}}">
                             propertyDetails.updateSuccessBanner
                         </p>
                     </div>
