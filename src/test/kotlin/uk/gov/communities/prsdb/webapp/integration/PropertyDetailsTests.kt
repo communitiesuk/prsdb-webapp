@@ -404,6 +404,27 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Nested
+        inner class CorrespondenceSection {
+            @Test
+            fun `shows the correspondence section when the CORRESPONDENCE_ADDRESS flag is enabled`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+                assertThat(detailsPage.sectionHeading("Who the council should contact")).isVisible()
+                assertThat(detailsPage.propertyDetailsSummaryList.contactEmailAddressRow.value).containsText("landlord@example.com")
+                assertThat(detailsPage.propertyDetailsSummaryList.contactAddressRow.value).containsText("11 Elm Drive")
+            }
+
+            @Test
+            fun `hides the correspondence section when the CORRESPONDENCE_ADDRESS flag is disabled`(page: Page) {
+                featureFlagManager.disableFeature(CORRESPONDENCE_ADDRESS)
+
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+
+                assertThat(detailsPage.sectionHeading("Who the council should contact")).not().isVisible()
+            }
+        }
+
+        @Nested
         inner class LandlordDetails {
             @Test
             fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`(page: Page) {

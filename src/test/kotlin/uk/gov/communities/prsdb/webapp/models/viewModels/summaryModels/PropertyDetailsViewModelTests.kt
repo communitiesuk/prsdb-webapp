@@ -605,4 +605,19 @@ class PropertyDetailsViewModelTests {
         assertEquals(listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"), addressRow.fieldValue)
         assertFalse(addressRow.hasActions)
     }
+
+    @Test
+    fun `correspondenceSection rows have no change actions in the local council view`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = false,
+                messageSource = mockMessageSource,
+                showCorrespondenceSection = true,
+            )
+
+        val section = viewModel.correspondenceSection
+        assertNotNull(section)
+        assertTrue(section!!.none { it.hasActions })
+    }
 }

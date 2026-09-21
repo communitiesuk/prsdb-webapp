@@ -669,10 +669,9 @@ class PropertyDetailsControllerTests(
             }
         }
 
-        // TODO PDJB-1680: Update this test
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-        fun `getPropertyDetailsLocalCouncilView does not show correspondence section even when CORRESPONDENCE_ADDRESS flag is enabled`() {
+        fun `getPropertyDetailsLocalCouncilView shows correspondence section when CORRESPONDENCE_ADDRESS flag is enabled`() {
             val propertyOwnership = createPropertyOwnership()
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
@@ -681,6 +680,25 @@ class PropertyDetailsControllerTests(
                 .thenReturn(Pair(emptyList(), emptyList()))
             whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
             whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(true)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { isOk() }
+                content { string(containsString("landlord@example.com")) }
+                content { string(containsString("11 Elm Drive")) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView hides correspondence section when CORRESPONDENCE_ADDRESS flag is disabled`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+            whenever(featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)).thenReturn(false)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { isOk() }
