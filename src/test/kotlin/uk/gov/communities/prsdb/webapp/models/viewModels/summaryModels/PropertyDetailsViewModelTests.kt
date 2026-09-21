@@ -575,6 +575,7 @@ class PropertyDetailsViewModelTests {
                 createPropertyOwnership(),
                 isLandlordView = true,
                 messageSource = mockMessageSource,
+                showCorrespondenceSection = false,
             )
 
         assertNull(viewModel.correspondenceSection)
