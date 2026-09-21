@@ -145,6 +145,12 @@ For example:
 ```kotlin
 @ExtendWith(MockitoExtension::class)
 class MyServiceTests {
+    @Mock
+    private lateinit var mockRepository: MyRepository
+
+    @InjectMocks
+    private lateinit var myService: MyService
+
     @Test
     fun `Example test`() {
         // Arrange
@@ -154,7 +160,7 @@ class MyServiceTests {
         val result = myService.retrieveItem(id)
 
         // Assert
-        assertEquals(expected, result)
+        assertEquals("expected", result)
         verify(mockRepository).findById(id)
     }
 }
