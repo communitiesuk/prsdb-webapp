@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -33,12 +32,9 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateHouseholdsAndTenantsController::class)
 class LettingAgentUpdateHouseholdsAndTenantsControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateHouseholdsAndTenantsJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService

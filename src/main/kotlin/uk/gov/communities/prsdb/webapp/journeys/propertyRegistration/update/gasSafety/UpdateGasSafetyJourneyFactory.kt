@@ -81,13 +81,16 @@ class UpdateGasSafetyJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
             step(journey.completeGasSafetyUpdateStep) {
                 parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
+                }
             }
             replaceButtons()
         }
@@ -120,7 +123,13 @@ class UpdateGasSafetyJourneyFactory(
         }
 
     private fun JourneyBuilder<UpdateGasSafetyJourney>.replaceButtons() {
+        configureStep(journey.gasSafetyDetailsTask.beforePdjb1022HasGasSupplyStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
         configureStep(journey.gasSafetyDetailsTask.hasGasSupplyStep) {
+            withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
+        }
+        configureStep(journey.gasSafetyDetailsTask.beforePdjb1022HasGasCertStep) {
             withAdditionalContentProperty { "submitButtonText" to "forms.buttons.continue" }
         }
         configureStep(journey.gasSafetyDetailsTask.hasGasCertStep) {
@@ -140,7 +149,10 @@ class UpdateGasSafetyJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -155,7 +167,7 @@ class UpdateGasSafetyJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateGasSafetyJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -167,6 +179,7 @@ class UpdateGasSafetyJourney(
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val propertyOwnershipId: Long? get() = propertyId
 }
 
 interface UpdateGasSafetyJourneyState :

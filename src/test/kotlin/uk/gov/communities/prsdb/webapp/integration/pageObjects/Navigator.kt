@@ -138,7 +138,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
@@ -239,6 +238,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.orga
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.EnterPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.lettingAgentInvitation.steps.SetPasswordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
@@ -254,8 +255,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
@@ -291,6 +290,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.GoverningBodyMemberData
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
+import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreLettingAgentJourneyTokenRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LettingAgentInvitationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
@@ -1002,7 +1002,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply(propertyIsOccupied).build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HasGasSupplyStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT)
         return createValidPage(page, HasGasSupplyFormPagePropertyRegistration::class)
     }
 
@@ -1010,7 +1010,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasGasCert().build(),
         )
-        navigateToPropertyRegistrationJourneyStep(HasGasCertStep.ROUTE_SEGMENT)
+        navigateToPropertyRegistrationJourneyStep(BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT)
         return createValidPage(page, HasGasCertFormPagePropertyRegistration::class)
     }
 
@@ -1397,6 +1397,7 @@ class Navigator(
     }
 
     fun goToPropertyDetailsLettingAgentView(token: UUID): PropertyDetailsPageLettingAgentView {
+        storeLettingAgentAccessInSession(token)
         navigate(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
         return createValidPage(
             page,
@@ -1694,6 +1695,32 @@ class Navigator(
         response.dispose()
     }
 
+    private fun storeLettingAgentAccessInSession(token: UUID) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_LETTING_AGENT_ACCESS_ROUTE}",
+                RequestOptions.create().setData(StoreInvitationTokenRequestModel(token)),
+            )
+        assertTrue(response.ok(), "Failed to store letting agent access. Received status code: ${response.status()}")
+        response.dispose()
+    }
+
+    private fun storeLettingAgentInvitationJourneyToken(
+        journeyId: String,
+        token: String,
+    ) {
+        val response =
+            page.request().post(
+                "http://localhost:$port/${SessionController.STORE_LETTING_AGENT_JOURNEY_TOKEN_ROUTE}",
+                RequestOptions.create().setData(StoreLettingAgentJourneyTokenRequestModel(journeyId, token)),
+            )
+        assertTrue(
+            response.ok(),
+            "Failed to store letting agent journey token. Received status code: ${response.status()}",
+        )
+        response.dispose()
+    }
+
     fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
@@ -1730,11 +1757,18 @@ class Navigator(
         )
     }
 
-    fun goToLettingAgentInvitationJourney(token: String): ValidateTokenPage {
+    fun goToLettingAgentInvitationSetPasswordJourney(token: String): SetPasswordPage {
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
         )
-        return createValidPage(page, ValidateTokenPage::class)
+        return createValidPage(page, SetPasswordPage::class)
+    }
+
+    fun goToLettingAgentInvitationEnterPasswordJourney(token: String): EnterPasswordPage {
+        navigate(
+            "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, EnterPasswordPage::class)
     }
 
     fun navigateToLettingAgentInvitationWithInvalidToken(token: String) {
@@ -1745,6 +1779,7 @@ class Navigator(
         setJourneyStateInSession(
             LettingAgentInvitationStateSessionBuilder.beforeSetPassword(token).build(),
         )
+        storeLettingAgentInvitationJourneyToken(TEST_JOURNEY_ID, token)
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}/${SetPasswordStep.ROUTE_SEGMENT}" +
                 "?journeyId=$TEST_JOURNEY_ID",
@@ -1756,6 +1791,7 @@ class Navigator(
         setJourneyStateInSession(
             LettingAgentInvitationStateSessionBuilder.beforeEnterPassword(token).build(),
         )
+        storeLettingAgentInvitationJourneyToken(TEST_JOURNEY_ID, token)
         navigate(
             "${LettingAgentInvitationController.LETTING_AGENT_INVITATION_ROUTE}/${EnterPasswordStep.ROUTE_SEGMENT}" +
                 "?journeyId=$TEST_JOURNEY_ID",

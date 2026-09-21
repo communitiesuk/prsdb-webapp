@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -27,6 +28,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.checkAnswer
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BeforePdjb1022HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
@@ -42,8 +45,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
@@ -73,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDependencies
@@ -127,8 +129,6 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                // TODO PDJB-1391: update this journey-level Check Your Answers page with flag on/off versions
-                //  so it displays the who-provides-details answers when DELEGATE_TO_LETTING_AGENT is enabled.
                 WhoProvidesRentalDetailsStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
                         whoProvidesChangeCyaJourney()
@@ -254,11 +254,14 @@ class PropertyRegistrationJourneyFactory(
                     }
                 }
 
-                HasGasSupplyStep.ROUTE_SEGMENT,
-                HasGasCertStep.ROUTE_SEGMENT,
+                BeforePdjb1022HasGasSupplyStep.ROUTE_SEGMENT,
+                BeforePdjb1022HasGasCertStep.ROUTE_SEGMENT,
                 CheckGasCertUploadsStep.ROUTE_SEGMENT,
                 -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.beforePdjb1022HasGasCertStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                     configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.hasGasCertStep) {
                         backDestination { journey.returnToCyaPageDestination }
                     }
@@ -266,6 +269,9 @@ class PropertyRegistrationJourneyFactory(
 
                 GasCertIssueDateStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.gasSafetyTask.gasSafetyDetailsTask, { journey })
+                    configureStep(journey.gasSafetyTask.gasSafetyDetailsTask.gasCertIssueDateStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 HasElectricalCertStep.ROUTE_SEGMENT,
@@ -318,6 +324,9 @@ class PropertyRegistrationJourneyFactory(
 
                 HasMeesExemptionStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.epcTask.epcDetailsTask, { journey })
+                    configureStep(journey.epcTask.epcDetailsTask.hasMeesExemptionStep) {
+                        backDestination { journey.returnToCyaPageDestination }
+                    }
                 }
 
                 MeesExemptionStep.ROUTE_SEGMENT -> {
@@ -538,13 +547,24 @@ class PropertyRegistrationJourneyFactory(
                     saveProgress()
                 }
             }
+            val correspondenceEnabled = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
             section {
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.ownershipAndLandlords", shouldUseNumbering = false)
                 task(journey.ownershipAndLandlordsTask) {
                     withDependencies { journey }
                     parents { journey.propertyDetailsTask.isComplete() }
-                    nextStep { journey.occupied }
+                    nextStep { if (correspondenceEnabled) journey.correspondenceTask.firstStep else journey.occupied }
                     saveProgress()
+                }
+            }
+            if (correspondenceEnabled) {
+                section {
+                    withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
+                    task(journey.correspondenceTask) {
+                        parents { journey.ownershipAndLandlordsTask.isComplete() }
+                        nextStep { journey.occupied }
+                        saveProgress()
+                    }
                 }
             }
             val delegateEnabled = featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)
@@ -552,7 +572,13 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.occupied", shouldUseNumbering = false)
                 step(journey.occupied) {
                     routeSegment(OccupiedStep.ROUTE_SEGMENT)
-                    parents { journey.ownershipAndLandlordsTask.isComplete() }
+                    parents {
+                        if (correspondenceEnabled) {
+                            journey.correspondenceTask.isComplete()
+                        } else {
+                            journey.ownershipAndLandlordsTask.isComplete()
+                        }
+                    }
                     nextStep { occupancy ->
                         if (delegateEnabled) {
                             when (occupancy) {
@@ -756,6 +782,7 @@ class PropertyRegistrationJourney(
     // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
     override val propertyDetailsTask: PropertyDetailsTask,
     override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
+    override val correspondenceTask: CorrespondenceTask,
     override val tenancyDetailsTask: TenancyDetailsTask,
     override val whoProvidesDetailsTask: WhoProvidesDetailsTask,
     // Gas safety task
@@ -862,6 +889,9 @@ interface PropertyRegistrationJourneyState :
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 
+    // No property ownership exists yet during registration.
+    override val propertyOwnershipId: Long? get() = null
+
     // Journey-structure tasks (the two alternative flows)
     // Legacy journey only (flag-off) — remove with the old journey
     val occupationTask: OccupationTask
@@ -869,6 +899,8 @@ interface PropertyRegistrationJourneyState :
     // Restructured journey only (flag-on)
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
+
+    val correspondenceTask: CorrespondenceTask
     val tenancyDetailsTask: TenancyDetailsTask
     val whoProvidesDetailsTask: WhoProvidesDetailsTask
     override val finishCyaStep: FinishCyaJourneyStep
@@ -886,10 +918,8 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // TODO PDJB-1391: replace the placeholder "provide later" handling in the CYA/save steps with the real
-    //  delegated-details flow.
-    // Both flags must be checked before reading the step outcome: the who-provides step is only wired into the
-    // graph when restructure is also on, so reading its outcome in the legacy journey would throw.
+    // Check both flags before reading the step outcome: the who-provides step is not wired into
+    // the legacy journey, so accessing its outcome there would throw.
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
             featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) &&

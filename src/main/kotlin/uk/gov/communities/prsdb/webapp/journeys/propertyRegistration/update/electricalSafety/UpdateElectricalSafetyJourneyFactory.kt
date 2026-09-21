@@ -60,8 +60,8 @@ class UpdateElectricalSafetyJourneyFactory(
     private fun mainJourneyMap(
         state: UpdateElectricalSafetyJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             task(journey.electricalSafetyDetailsTask) {
                 withDependencies { journey }
@@ -85,23 +85,25 @@ class UpdateElectricalSafetyJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
             step(journey.completeElectricalSafetyUpdateStep) {
                 parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
+                }
             }
             replaceButtons()
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateElectricalSafetyJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperties {
@@ -134,7 +136,6 @@ class UpdateElectricalSafetyJourneyFactory(
             }
             replaceButtons()
         }
-    }
 
     private fun JourneyBuilder<UpdateElectricalSafetyJourney>.replaceButtons() {
         configureStep(journey.electricalSafetyDetailsTask.hasElectricalCertStep) {
@@ -154,7 +155,10 @@ class UpdateElectricalSafetyJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -169,7 +173,7 @@ class UpdateElectricalSafetyJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateElectricalSafetyJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
@@ -181,6 +185,7 @@ class UpdateElectricalSafetyJourney(
 
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override val allowProvideCertificateLaterRoute: Boolean = false
+    override val propertyOwnershipId: Long? get() = propertyId
 }
 
 interface UpdateElectricalSafetyJourneyState :

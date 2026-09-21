@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -65,9 +64,6 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -347,7 +343,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(mock())
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(true)
 
         mvc
             .perform(
@@ -401,7 +397,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-        whenever(lettingAgentAccessService.getInvitationByPropertyOwnershipId(propertyOwnership.id)).thenReturn(null)
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(false)
 
         mvc
             .perform(

@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
@@ -37,12 +36,9 @@ import java.util.UUID
 @WebMvcTest(LettingAgentUpdateElectricalSafetyController::class)
 class LettingAgentUpdateElectricalSafetyControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateElectricalSafetyJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService

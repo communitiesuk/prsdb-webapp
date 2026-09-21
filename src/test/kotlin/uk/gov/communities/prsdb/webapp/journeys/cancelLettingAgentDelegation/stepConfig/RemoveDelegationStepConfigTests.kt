@@ -57,7 +57,7 @@ class RemoveDelegationStepConfigTests {
         val stepConfig = createStepConfig()
 
         whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID)).thenReturn(mockLettingAgentAccess)
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(PROPERTY_OWNERSHIP_ID)).thenReturn(mockLettingAgentAccess)
         whenever(mockLettingAgentAccess.invitedEmail).thenReturn("agent@example.com")
         whenever(mockPropertyOwnershipService.getPropertyOwnership(PROPERTY_OWNERSHIP_ID)).thenReturn(
             mockPropertyOwnership,
@@ -78,7 +78,7 @@ class RemoveDelegationStepConfigTests {
         val stepConfig = createStepConfig()
 
         whenever(mockState.propertyOwnershipId).thenReturn(PROPERTY_OWNERSHIP_ID)
-        whenever(mockLettingAgentAccessService.getInvitationByPropertyOwnershipId(PROPERTY_OWNERSHIP_ID)).thenReturn(null)
+        whenever(mockPropertyOwnershipService.getLettingAgentAccess(PROPERTY_OWNERSHIP_ID)).thenReturn(null)
 
         assertThrows<PrsdbWebException> {
             stepConfig.afterStepIsReached(mockState)

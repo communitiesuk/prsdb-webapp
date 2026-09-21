@@ -9,11 +9,13 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import java.time.Instant
 import java.util.UUID
 
 abstract class AbstractLettingAgentUpdateController(
@@ -40,25 +42,30 @@ abstract class AbstractLettingAgentUpdateController(
         returnUrl: String,
     ): Map<String, StepLifecycleOrchestrator>
 
-    protected abstract fun initialiseJourneyState(token: UUID): String
+    protected abstract fun initialiseJourneyState(
+        token: UUID,
+        currentLastModifiedDate: Instant,
+    ): String
+
+    protected open fun resolveLastModifiedDate(propertyOwnership: PropertyOwnership): Instant = propertyOwnership.getMostRecentlyUpdated()
 
     protected fun dispatchJourneyStep(
         stepPath: String,
         token: UUID,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView {
-        val propertyOwnershipId =
-            lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership?.id
+        val propertyOwnership =
+            lettingAgentAccessService.getInvitationByTokenOrNull(token)?.propertyOwnership
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
 
-        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnershipId)
+        propertyOwnershipService.throwIfCurrentUserNotAuthorizedToEdit(propertyOwnership.id)
 
         val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
 
         return JourneyStepDispatcher.handleInitialisableRequest(
             rawStepPath = stepPath,
-            createRoutingMap = { createJourneySteps(propertyOwnershipId, returnUrl) },
-            initialiseJourney = { initialiseJourneyState(token) },
+            createRoutingMap = { createJourneySteps(propertyOwnership.id, returnUrl) },
+            initialiseJourney = { initialiseJourneyState(token, resolveLastModifiedDate(propertyOwnership)) },
             dispatch = dispatch,
         )
     }

@@ -59,8 +59,8 @@ class UpdateEpcJourneyFactory(
     private fun mainJourneyMap(
         state: UpdateEpcJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             task(journey.epcDetailsTask) {
                 withDependencies { journey }
@@ -81,23 +81,25 @@ class UpdateEpcJourneyFactory(
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
-                        "submitButtonText" to "forms.buttons.continue",
                     )
                 }
             }
             step(journey.completeEpcUpdateStep) {
                 parents { journey.updateCheckEpcAnswersStep.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.compliance")
+                }
             }
             replaceButtons()
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateEpcJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperties {
@@ -119,7 +121,6 @@ class UpdateEpcJourneyFactory(
             }
             replaceButtons()
         }
-    }
 
     private fun JourneyBuilder<UpdateEpcJourney>.replaceButtons() {
         configureStep(journey.epcDetailsTask.hasEpcStep) {
@@ -148,7 +149,10 @@ class UpdateEpcJourneyFactory(
         }
     }
 
-    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initializeJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -163,7 +167,7 @@ class UpdateEpcJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateEpcJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
 

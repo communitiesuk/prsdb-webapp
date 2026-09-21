@@ -37,7 +37,10 @@ class UpdateTenancyDetailsJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateTenancyDetailsJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 
     final fun createJourneySteps(
         propertyId: Long,
@@ -47,7 +50,7 @@ class UpdateTenancyDetailsJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -94,7 +97,11 @@ class UpdateTenancyDetailsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateTenancyDetailsCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
+                }
             }
             replaceHeadingsAndButtons(state)
         }
@@ -193,7 +200,7 @@ class UpdateTenancyDetailsJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 }
 
 interface UpdateTenancyDetailsJourneyState :

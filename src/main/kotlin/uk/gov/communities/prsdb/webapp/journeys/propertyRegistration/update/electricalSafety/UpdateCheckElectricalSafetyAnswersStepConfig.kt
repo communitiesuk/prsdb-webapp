@@ -23,7 +23,7 @@ class UpdateCheckElectricalSafetyAnswersStepConfig(
         return mapOf(
             "rows" to factory.createRows(),
             "insetTextKey" to factory.getInsetTextKey(),
-            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "submitButton" to "transactionSubmitButton",
         )
     }

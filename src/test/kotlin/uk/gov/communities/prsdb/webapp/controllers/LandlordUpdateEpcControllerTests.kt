@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.security.Principal
 
 @WebMvcTest(LandlordUpdateEpcController::class)
@@ -62,7 +65,12 @@ class LandlordUpdateEpcControllerTests(
                 PropertyDetailsController.getPropertyCompliancePath(propertyOwnershipId),
             ),
         ).thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(any())).thenReturn("journey-id")
+        val ownership =
+            createOccupiedPropertyOwnership(id = propertyOwnershipId).also {
+                MockPropertyComplianceData.createPropertyComplianceForOwnership(it)
+            }
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(ownership)
+        whenever(journeyFactory.initializeJourneyState(any(), any())).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
@@ -70,11 +78,8 @@ class LandlordUpdateEpcControllerTests(
         }
 
         verify(journeyFactory).initializeJourneyState(
-            argThat {
-                this is Pair<*, *> &&
-                    first == propertyOwnershipId &&
-                    (second as? Principal)?.name == LANDLORD_USER
-            },
+            argThat { this is Pair<*, *> && first == propertyOwnershipId && (second as Principal).name == LANDLORD_USER },
+            eq(ownership.propertyCompliance!!.getMostRecentlyUpdated()),
         )
     }
 }
