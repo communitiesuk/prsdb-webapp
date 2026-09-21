@@ -669,6 +669,7 @@ class PropertyDetailsControllerTests(
             }
         }
 
+        // TODO PDJB-1680: Update this test
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getPropertyDetailsLocalCouncilView does not show correspondence section even when CORRESPONDENCE_ADDRESS flag is enabled`() {

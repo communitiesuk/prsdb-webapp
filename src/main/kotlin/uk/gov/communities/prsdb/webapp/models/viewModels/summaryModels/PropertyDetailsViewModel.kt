@@ -8,8 +8,7 @@ class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
     isLandlordView: Boolean = true,
     messageSource: MessageSource,
-    // TODO PDJB-1680: also pass true for the local-council view when the correspondence
-    //  section is added to the LC view of the property record.
+    // TODO PDJB-1733: Remove when the correspondence is always shown
     val showCorrespondenceSection: Boolean = false,
 ) : PropertyDetailsViewModelBase(
         propertyOwnership,

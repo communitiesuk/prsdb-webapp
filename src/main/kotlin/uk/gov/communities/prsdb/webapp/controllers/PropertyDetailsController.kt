@@ -192,8 +192,7 @@ class PropertyDetailsController(
 
         val provideLaterEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
-        // TODO PDJB-1680: pass showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
-        //  once the local-council view renders the correspondence section.
+        // TODO PDJB-1680: pass showCorrespondenceSection as appropriate
         val (propertyDetails, viewName) =
             getPropertyDetailsViewModelAndView(
                 propertyOwnership,
