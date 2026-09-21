@@ -36,12 +36,14 @@ class PropertyDetailsViewModel(
                 SummaryListRowViewModel(
                     fieldHeading = "propertyDetails.propertyRecord.correspondence.emailAddress",
                     fieldValue = "landlord@example.com",
-                    // TODO: PDJB-1595: Change link
+                    // TODO PDJB-1595: when adding the landlord change link, build this row via
+                    //  PropertyDetailsViewModelBase.rowWithViewTypeSpecificChangeLink
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "propertyDetails.propertyRecord.correspondence.address",
                     fieldValue = listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"),
-                    // TODO: PDJB-1596: Change link
+                    // TODO PDJB-1596: when adding the landlord change link, build this row via
+                    //  PropertyDetailsViewModelBase.rowWithViewTypeSpecificChangeLink
                 ),
             )
         } else {
