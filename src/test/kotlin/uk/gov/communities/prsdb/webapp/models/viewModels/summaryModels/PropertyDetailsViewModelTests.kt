@@ -568,31 +568,6 @@ class PropertyDetailsViewModelTests {
         }
 
     @Test
-    fun `showCorrespondenceSection defaults to false`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createPropertyOwnership(),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-            )
-
-        assertFalse(viewModel.showCorrespondenceSection)
-    }
-
-    @Test
-    fun `showCorrespondenceSection is true when passed true`() {
-        val viewModel =
-            PropertyDetailsViewModel(
-                createPropertyOwnership(),
-                isLandlordView = true,
-                messageSource = mockMessageSource,
-                showCorrespondenceSection = true,
-            )
-
-        assertTrue(viewModel.showCorrespondenceSection)
-    }
-
-    @Test
     fun `correspondenceSection contains placeholder email and address rows without change actions`() {
         val viewModel =
             PropertyDetailsViewModel(
