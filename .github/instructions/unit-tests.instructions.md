@@ -131,3 +131,31 @@ companion object {
     )
 }
 ```
+
+## Test Structure
+
+Split each unit test into 3 sections, Arrange, Act, Assert.
+
+- Arrange sets up mocks to allow the test to work.
+- Act runs the logic to be tested.
+- Assert verifies the result.
+
+For example:
+
+```kotlin
+@ExtendWith(MockitoExtension::class)
+class MyServiceTests {
+    @Test
+    fun `Example test`() {
+        // Arrange
+        whenever(mockRepository.findById(anyString())).thenReturn(item)
+
+        // Act
+        val result = myService.retrieveItem(id)
+
+        // Assert
+        assertEquals(expected, result)
+        verify(mockRepository).findById(id)
+    }
+}
+```
