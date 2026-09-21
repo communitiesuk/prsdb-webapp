@@ -95,7 +95,7 @@
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.ownership.heading}">propertyDetails.propertyRecord.ownership.heading</h3>
                         <dl th:if="${not #lists.isEmpty(propertyDetails.ownershipSection)}" th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.ownershipSection})}"></dl>
                         <!--/* PDJB-1733 Remove the guard block, leaving contents */-->
-                        <th:block th:if="${propertyDetails.showCorrespondenceSection}">
+                        <th:block th:if="${propertyDetails.correspondenceSection != null}">
                             <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.correspondence.heading}">propertyDetails.propertyRecord.correspondence.heading</h3>
                             <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.correspondenceSection})}"></dl>
                         </th:block>

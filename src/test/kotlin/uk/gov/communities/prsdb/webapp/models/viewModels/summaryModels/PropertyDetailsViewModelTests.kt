@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -568,7 +569,19 @@ class PropertyDetailsViewModelTests {
         }
 
     @Test
-    fun `correspondenceSection contains placeholder email and address rows without change actions`() {
+    fun `correspondenceSection is null when showCorrespondenceSection is false`() {
+        val viewModel =
+            PropertyDetailsViewModel(
+                createPropertyOwnership(),
+                isLandlordView = true,
+                messageSource = mockMessageSource,
+            )
+
+        assertNull(viewModel.correspondenceSection)
+    }
+
+    @Test
+    fun `correspondenceSection contains placeholder email and address rows without when showCorrespondenceSection is true`() {
         val viewModel =
             PropertyDetailsViewModel(
                 createPropertyOwnership(),
@@ -577,14 +590,16 @@ class PropertyDetailsViewModelTests {
                 showCorrespondenceSection = true,
             )
 
-        assertEquals(2, viewModel.correspondenceSection.size)
+        val section = viewModel.correspondenceSection
+        assertNotNull(section)
+        assertEquals(2, section!!.size)
 
-        val emailRow = viewModel.correspondenceSection[0]
+        val emailRow = section[0]
         assertEquals("propertyDetails.propertyRecord.correspondence.emailAddress", emailRow.fieldHeading)
         assertEquals("landlord@example.com", emailRow.fieldValue)
         assertFalse(emailRow.hasActions)
 
-        val addressRow = viewModel.correspondenceSection[1]
+        val addressRow = section[1]
         assertEquals("propertyDetails.propertyRecord.correspondence.address", addressRow.fieldHeading)
         assertEquals(listOf("Flat 1", "11 Elm Drive", "London", "NW8 2DK"), addressRow.fieldValue)
         assertFalse(addressRow.hasActions)
