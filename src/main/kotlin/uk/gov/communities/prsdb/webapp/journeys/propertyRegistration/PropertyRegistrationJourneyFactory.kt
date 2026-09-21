@@ -74,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesUpdateRoutingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.CorrespondenceTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDependencies
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
@@ -105,9 +106,15 @@ import java.security.Principal
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val featureFlagManager: FeatureFlagManager,
+    private val userToLandlordService: UserToLandlordService,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            state.loggedInLandlordEmail = userToLandlordService.getCurrentLandlordForUser().email
+            state.isStateInitialized = true
+        }
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
@@ -561,6 +568,7 @@ class PropertyRegistrationJourneyFactory(
                 section {
                     withHeadingMessageKey("registerProperty.taskList.aboutYourProperty.correspondence", shouldUseNumbering = false)
                     task(journey.correspondenceTask) {
+                        withDependencies { journey }
                         parents { journey.ownershipAndLandlordsTask.isComplete() }
                         nextStep { journey.occupied }
                         saveProgress()
@@ -810,6 +818,8 @@ class PropertyRegistrationJourney(
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
+    override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+    override var loggedInLandlordEmail: String? by delegateProvider.nullableDelegate("loggedInLandlordEmail")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
     // Hoists the who-provides answer onto the base journey state so the occupancy-change routing can read it
@@ -867,10 +877,6 @@ class PropertyRegistrationJourney(
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
-    override val loggedInLandlordEmail: String?
-        // TODO: PDJB-1274: Update emails to account for org landlord
-        get() = userToLandlordService.getCurrentLandlordForUser().email
-
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }
@@ -884,8 +890,11 @@ interface PropertyRegistrationJourneyState :
     EpcDependencies,
     LicensingDependencies,
     WhoProvidesDetailsDependencies,
+    CorrespondenceDependencies,
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
+    var isStateInitialized: Boolean
+    override var loggedInLandlordEmail: String?
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 

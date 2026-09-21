@@ -8,7 +8,9 @@ import org.mockito.kotlin.mock
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.WhoProvidesRentalDetailsStep
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 class PropertyRegistrationJourneyFactoryTests {
     @Test
@@ -27,6 +29,8 @@ class PropertyRegistrationJourneyFactoryTests {
         val state = mock<PropertyRegistrationJourneyState> { on { this.checkingAnswersFor } doReturn checkingAnswersFor }
         val stateFactory = mock<ObjectFactory<PropertyRegistrationJourneyState>> { on { getObject() } doReturn state }
         val featureFlagManager = mock<FeatureFlagManager> { on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateEnabled }
-        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager)
+        val landlord = mock<Landlord> { on { email } doReturn "original.landlord@example.com" }
+        val userToLandlordService = mock<UserToLandlordService> { on { getCurrentLandlordForUser() } doReturn landlord }
+        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, userToLandlordService)
     }
 }
