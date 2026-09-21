@@ -197,8 +197,8 @@ class PropertyDetailsController(
             getPropertyDetailsViewModelAndView(
                 propertyOwnership,
                 provideLaterEnabled,
-                isLandlordView = false,
                 showCorrespondenceSection = false,
+                isLandlordView = false,
             )
 
         val landlordSummaryCards =
