@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 @IsValidPrioritised
 class CorrespondenceEmailFormModel : FormModel {
     @NotNull(message = "registerProperty.correspondenceEmail.radios.error.missing")
-    var whichEmail: CorrespondenceEmailOption? = null
+    var correspondenceEmailOption: CorrespondenceEmailOption? = null
 
     @ValidatedBy(
         constraints = [
@@ -30,10 +30,10 @@ class CorrespondenceEmailFormModel : FormModel {
     var differentEmailAddress: String = ""
 
     fun isDifferentEmailAddressPresentIfSelected(): Boolean =
-        whichEmail != CorrespondenceEmailOption.DIFFERENT_EMAIL || differentEmailAddress.isNotBlank()
+        correspondenceEmailOption != CorrespondenceEmailOption.DIFFERENT_EMAIL || differentEmailAddress.isNotBlank()
 
     fun isDifferentEmailAddressValidFormatIfPresent(): Boolean =
-        whichEmail != CorrespondenceEmailOption.DIFFERENT_EMAIL ||
+        correspondenceEmailOption != CorrespondenceEmailOption.DIFFERENT_EMAIL ||
             differentEmailAddress.isBlank() ||
             EmailConstraintValidator().isValid(differentEmailAddress)
 }

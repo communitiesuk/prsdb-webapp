@@ -16,7 +16,7 @@ class CorrespondenceEmailFormModelTests {
 
         assertThat(violations).hasSize(1)
         val violation = violations.single()
-        assertThat(violation.propertyPath.toString()).isEqualTo("whichEmail")
+        assertThat(violation.propertyPath.toString()).isEqualTo("correspondenceEmailOption")
         assertThat(violation.messageTemplate).isEqualTo("registerProperty.correspondenceEmail.radios.error.missing")
     }
 
@@ -24,7 +24,7 @@ class CorrespondenceEmailFormModelTests {
     fun `is valid when account email is selected and no different email is entered`() {
         val model =
             CorrespondenceEmailFormModel().apply {
-                whichEmail = CorrespondenceEmailOption.ACCOUNT_EMAIL
+                correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
             }
 
         val violations = validator.validate(model)
@@ -36,7 +36,7 @@ class CorrespondenceEmailFormModelTests {
     fun `is valid when account email is selected and a stale invalid different email is present`() {
         val model =
             CorrespondenceEmailFormModel().apply {
-                whichEmail = CorrespondenceEmailOption.ACCOUNT_EMAIL
+                correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL
                 differentEmailAddress = "not-an-email"
             }
 
@@ -49,7 +49,7 @@ class CorrespondenceEmailFormModelTests {
     fun `is invalid when different email is selected but no email is entered`() {
         val model =
             CorrespondenceEmailFormModel().apply {
-                whichEmail = CorrespondenceEmailOption.DIFFERENT_EMAIL
+                correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
                 differentEmailAddress = ""
             }
 
@@ -66,7 +66,7 @@ class CorrespondenceEmailFormModelTests {
     fun `is invalid when different email is selected and email is not a valid format`() {
         val model =
             CorrespondenceEmailFormModel().apply {
-                whichEmail = CorrespondenceEmailOption.DIFFERENT_EMAIL
+                correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
                 differentEmailAddress = "not-an-email"
             }
 
@@ -83,7 +83,7 @@ class CorrespondenceEmailFormModelTests {
     fun `is valid when different email is selected and a valid email is entered`() {
         val model =
             CorrespondenceEmailFormModel().apply {
-                whichEmail = CorrespondenceEmailOption.DIFFERENT_EMAIL
+                correspondenceEmailOption = CorrespondenceEmailOption.DIFFERENT_EMAIL
                 differentEmailAddress = "someone@example.com"
             }
 

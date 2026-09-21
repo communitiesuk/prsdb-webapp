@@ -79,7 +79,7 @@ class PropertyStateSessionBuilder(
     ): PropertyStateSessionBuilder {
         withSubmittedValue(
             CorrespondenceEmailStep.ROUTE_SEGMENT,
-            CorrespondenceEmailFormModel().apply { whichEmail = CorrespondenceEmailOption.ACCOUNT_EMAIL },
+            CorrespondenceEmailFormModel().apply { correspondenceEmailOption = CorrespondenceEmailOption.ACCOUNT_EMAIL },
         )
 
         val addressScope = CorrespondenceAddressTask.ROUTE_SEGMENT
