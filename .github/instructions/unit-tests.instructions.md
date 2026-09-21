@@ -26,8 +26,10 @@ class MyControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `myEndpoint returns 200 for authorised landlord user`() {
+        // Arrange
         whenever(myService.getData()).thenReturn(data)
 
+        // Act, Assert
         mvc.get("/landlord/my-endpoint").andExpect {
             status { isOk() }
         }
@@ -57,10 +59,13 @@ class MyServiceTests {
 
     @Test
     fun `retrieveItem returns item when it exists`() {
+        // Arrange
         whenever(mockRepository.findById(anyString())).thenReturn(item)
 
+        // Act
         val result = myService.retrieveItem(id)
 
+        // Assert
         assertEquals(expected, result)
         verify(mockRepository).findById(id)
     }
