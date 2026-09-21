@@ -146,7 +146,7 @@ class PropertyRegistrationJourneyFactory(
 
                 LettingAgentEmailStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask) {
+                        fromTask(journey.whoProvidesDetailsTask, journey) {
                             checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                         }
                     } else {
