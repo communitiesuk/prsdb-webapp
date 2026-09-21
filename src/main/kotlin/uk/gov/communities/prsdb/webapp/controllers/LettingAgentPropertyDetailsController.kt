@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LettingAgentPropertyDetailsController.Companion.LETTING_AGENT_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -36,20 +37,16 @@ class LettingAgentPropertyDetailsController(
     @AvailableWhenFeatureEnabled(DELEGATE_TO_LETTING_AGENT)
     @GetMapping
     fun getLettingAgentPropertyDetails(
-        // TODO: PDJB-1659: Check that the interceptor will direct this to the invalid link page instead of showing a 404
-        //  if this is not parseable as a UUID.
-        //  It might be a case of making this a string then checking the validity with the same method the interceptor uses.
         @PathVariable token: UUID,
         model: Model,
     ): String {
-        // TODO: PDJB-1659: Authorise that the letting agent stored in the session has access to this property.
         val lettingAgentAccess =
             lettingAgentAccessService.getInvitationByTokenOrNull(token)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No letting agent access found for token $token")
 
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(lettingAgentAccess.propertyOwnership.id)
 
-        if (!lettingAgentAccessService.propertyHasLettingAgent(propertyOwnership)) {
+        if (!propertyOwnershipService.hasLettingAgent(propertyOwnership.id)) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Property ownership ${propertyOwnership.id} does not have a letting agent",
@@ -73,6 +70,7 @@ class LettingAgentPropertyDetailsController(
                 lettingAgentAccessToken = token,
             ),
         )
+        model.addAttribute("lettingAgentPropertyDetailsSurveyUrl", LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL)
 
         return "propertyDetailsLettingAgentView"
     }

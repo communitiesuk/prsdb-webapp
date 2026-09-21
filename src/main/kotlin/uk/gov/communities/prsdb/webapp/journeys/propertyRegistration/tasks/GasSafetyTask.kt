@@ -39,4 +39,5 @@ class GasSafetyTask(
 interface GasSafetyDependencies {
     val isOccupied: Boolean
     val allowProvideCertificateLaterRoute: Boolean
+    val propertyOwnershipId: Long? get() = null
 }

@@ -31,7 +31,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -64,7 +64,11 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT)
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
+                }
             }
             configureStep(journey.rentFrequencyAndAmountTask.rentFrequency) {
                 withAdditionalContentProperty {
@@ -134,7 +138,10 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             }
         }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -150,15 +157,14 @@ class UpdateRentFrequencyAndAmountJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateRentFrequencyAndAmountJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaUrlPath: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
 }
 
-interface UpdateRentFrequencyAndAmountJourneyState :
-    CheckYourAnswersJourneyState {
+interface UpdateRentFrequencyAndAmountJourneyState : CheckYourAnswersJourneyState {
     val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask
     override val cyaStep: UpdateRentFrequencyAndAmountCyaStep
     val propertyId: Long

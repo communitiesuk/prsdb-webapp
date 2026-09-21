@@ -80,7 +80,7 @@ management:
 
 argon2:
   iterations: 2
-  memory: 16384
+  memory: 19456
   parallelism: 1
 
 base-url:
@@ -139,6 +139,12 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1664-password-benchmark-endpoint"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1040-correspondence-address"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-1009-payments"
       enabled: false
       expiry-date: "2026-12-31"
 

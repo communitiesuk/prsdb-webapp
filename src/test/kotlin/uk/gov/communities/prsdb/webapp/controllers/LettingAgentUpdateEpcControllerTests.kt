@@ -25,21 +25,18 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.util.UUID
 
 @WebMvcTest(LettingAgentUpdateEpcController::class)
 class LettingAgentUpdateEpcControllerTests(
     @Autowired webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: UpdateEpcJourneyFactory
-
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -51,7 +48,11 @@ class LettingAgentUpdateEpcControllerTests(
     private lateinit var featureFlagManager: FeatureFlagManager
 
     private val token = UUID.randomUUID()
-    private val propertyOwnership = createOccupiedPropertyOwnership()
+    private val propertyOwnership =
+        createOccupiedPropertyOwnership().also {
+            MockPropertyComplianceData.createPropertyComplianceForOwnership(it)
+        }
+    private val expectedComplianceDate get() = propertyOwnership.propertyCompliance!!.getMostRecentlyUpdated()
     private val returnUrl = LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token)
     private val updateStepRoute =
         LettingAgentUpdateEpcController.getUpdateEpcRoute(token) + "/${HasEpcStep.ROUTE_SEGMENT}"
@@ -92,14 +93,14 @@ class LettingAgentUpdateEpcControllerTests(
         stubValidToken()
         whenever(journeyFactory.createJourneySteps(propertyOwnership.id, returnUrl))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(token)).thenReturn("journey-id")
+        whenever(journeyFactory.initializeJourneyState(token, expectedComplianceDate)).thenReturn("journey-id")
 
         mvc.get(updateStepRoute).andExpect {
             status { is3xxRedirection() }
             redirectedUrl("$updateStepRoute?${JourneyIdProvider.PARAMETER_NAME}=journey-id")
         }
 
-        verify(journeyFactory).initializeJourneyState(token)
+        verify(journeyFactory).initializeJourneyState(token, expectedComplianceDate)
     }
 
     @Test
@@ -161,7 +162,7 @@ class LettingAgentUpdateEpcControllerTests(
         stubValidToken()
         whenever(journeyFactory.createJourneySteps(propertyOwnership.id, returnUrl))
             .thenThrow(NoSuchJourneyException())
-        whenever(journeyFactory.initializeJourneyState(token)).thenReturn("journey-id")
+        whenever(journeyFactory.initializeJourneyState(token, expectedComplianceDate)).thenReturn("journey-id")
 
         mvc
             .post(updateStepRoute) {
@@ -173,7 +174,7 @@ class LettingAgentUpdateEpcControllerTests(
                 redirectedUrl("$updateStepRoute?${JourneyIdProvider.PARAMETER_NAME}=journey-id")
             }
 
-        verify(journeyFactory).initializeJourneyState(token)
+        verify(journeyFactory).initializeJourneyState(token, expectedComplianceDate)
     }
 
     @Test

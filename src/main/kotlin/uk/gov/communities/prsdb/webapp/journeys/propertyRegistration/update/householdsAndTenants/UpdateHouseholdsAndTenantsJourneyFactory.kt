@@ -33,7 +33,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -52,8 +52,8 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
     private fun mainJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
@@ -67,17 +67,20 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
+                }
             }
             replaceHeadingsAndButtons()
         }
-    }
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateHouseholdsAndTenantsJourney,
         returnUrl: String,
-    ): Map<String, StepLifecycleOrchestrator> {
-        return journey(state) {
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { returnUrl }
             configure {
                 withAdditionalContentProperty {
@@ -97,7 +100,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             }
             replaceHeadingsAndButtons()
         }
-    }
 
     private fun JourneyBuilder<UpdateHouseholdsAndTenantsJourney>.replaceHeadingsAndButtons() {
         configureStep(journey.householdsAndTenantsTask.households) {
@@ -118,7 +120,10 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         }
     }
 
-    fun initialiseJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initialiseJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -133,7 +138,7 @@ class UpdateHouseholdsAndTenantsJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, "households and tenants"),
     UpdateHouseholdsAndTenantsJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 

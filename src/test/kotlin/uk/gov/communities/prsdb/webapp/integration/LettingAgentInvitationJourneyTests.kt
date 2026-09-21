@@ -14,8 +14,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.EnterPasswordPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.PasswordCreationConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.SetPasswordPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.StoreAccessPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.lettingAgentInvitationJourneyPages.ValidateTokenPage
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import java.net.URI
 
@@ -23,14 +21,14 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     private val tokenWithoutPassword = "3334abcd-5678-abcd-1234-567abcd1111a"
 
     private val tokenWithPassword = "3334abcd-5678-abcd-1234-567abcd2222b"
-    private val invitationLink = "http://localhost/letting-agent/invitation?token=$tokenWithoutPassword"
+    private val propertyDetailsLink = "http://localhost/landlord/letting-agent/property-details/$tokenWithoutPassword"
 
     @MockitoBean
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @BeforeEach
     fun setup() {
-        whenever(absoluteUrlProvider.buildLettingAgentInvitationUri(any())).thenReturn(URI(invitationLink))
+        whenever(absoluteUrlProvider.buildLettingAgentPropertyDetailsUri(any())).thenReturn(URI(propertyDetailsLink))
     }
 
     private val seededPassword = "Password123!" // pragma: allowlist secret
@@ -39,26 +37,19 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     fun `user who does not have a password can walk the set password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithoutPassword)
-        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
+        val setPasswordPage = navigator.goToLettingAgentInvitationSetPasswordJourney(tokenWithoutPassword)
 
         val rawPassword = "password1" // pragma: allowlist secret
-        val setPasswordPage = assertPageIs(page, SetPasswordPage::class)
+        assertPageIs(page, SetPasswordPage::class)
         setPasswordPage.submitPasswords(rawPassword, rawPassword)
-
-        // TODO PDJB-1659: Remove this step from the journey test once store-access becomes a silent step
-        val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
-        storeAccessPage.form.submit()
 
         val confirmationPage = assertPageIs(page, PasswordCreationConfirmationPage::class)
         BaseComponent
             .assertThat(confirmationPage.confirmationBanner)
             .containsText("Property password created")
         assertThat(confirmationPage.backLink.locator).hasCount(0)
-        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", invitationLink)
-        assertThat(confirmationPage.updateLink.locator).hasText(invitationLink)
+        assertThat(confirmationPage.updateLink.locator).hasAttribute("href", propertyDetailsLink)
+        assertThat(confirmationPage.updateLink.locator).hasText(propertyDetailsLink)
         confirmationPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithoutPassword))
@@ -68,17 +59,9 @@ class LettingAgentInvitationJourneyTests : IntegrationTestWithMutableData("data-
     fun `user who has a password can walk the enter password journey`(page: Page) {
         featureFlagManager.enable(DELEGATE_TO_LETTING_AGENT)
 
-        val validateTokenPage = navigator.goToLettingAgentInvitationJourney(tokenWithPassword)
-        // TODO PDJB-1659: Update when validate token step is replaced by an interceptor
-        assertPageIs(page, ValidateTokenPage::class)
-        validateTokenPage.form.submit()
-
-        val enterPasswordPage = assertPageIs(page, EnterPasswordPage::class)
+        val enterPasswordPage = navigator.goToLettingAgentInvitationEnterPasswordJourney(tokenWithPassword)
+        assertPageIs(page, EnterPasswordPage::class)
         enterPasswordPage.submitPassword(seededPassword)
-
-        // TODO PDJB-1659: Remove this step from the journey test
-        val storeAccessPage = assertPageIs(page, StoreAccessPage::class)
-        storeAccessPage.form.submit()
 
         assertPageIs(page, PropertyDetailsPageLettingAgentView::class, mapOf("token" to tokenWithPassword))
     }

@@ -1,10 +1,24 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import jakarta.validation.constraints.NotNull
+import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
+import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
 class GasSupplyFormModel : FormModel {
-    @NotNull(message = "propertyCompliance.gasSafetyTask.gasSupply.error.missing")
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "propertyCompliance.gasSafetyTask.gasSupply.error.missing",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "hasGasSupplyIsValidForAction",
+            ),
+        ],
+    )
     var hasGasSupply: Boolean? = null
+
+    var action: String? = null
+
+    fun hasGasSupplyIsValidForAction(): Boolean = action == "provideThisLater" || hasGasSupply != null
 }

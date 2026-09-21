@@ -16,13 +16,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
+import uk.gov.communities.prsdb.webapp.constants.LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewType
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.ElectricalSafetyViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.EpcViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.GasSafetyViewModelFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
-import uk.gov.communities.prsdb.webapp.services.LettingAgentAccessService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -35,10 +35,7 @@ import java.util.UUID
 @Import(MessageSourceConfig::class)
 class LettingAgentPropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
-) : ControllerTest(webContext) {
-    @MockitoBean
-    private lateinit var lettingAgentAccessService: LettingAgentAccessService
-
+) : LettingAgentAccessControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -48,9 +45,9 @@ class LettingAgentPropertyDetailsControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory
 
-    // TODO PDJB-1659 - update so getLettingAgentPropertyDetails is NOT be accessible without authentication
+    // Access to this endpoint is restricted by the LettingAGentAccessInterceptor
     @Test
-    fun `getLettingAgentPropertyDetails is accessible without authentication and renders the letting agent view`() {
+    fun `getLettingAgentPropertyDetails renders the letting agent view for a valid token`() {
         val token = UUID.randomUUID()
         val propertyOwnership = createOccupiedPropertyOwnership()
 
@@ -58,7 +55,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
             .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
@@ -72,6 +69,33 @@ class LettingAgentPropertyDetailsControllerTests(
                 status { isOk() }
                 view { name("propertyDetailsLettingAgentView") }
                 model { attributeExists("propertyDetails") }
+            }
+    }
+
+    @Test
+    fun `getLettingAgentPropertyDetails includes the survey URL in the model`() {
+        val token = UUID.randomUUID()
+        val propertyOwnership = createOccupiedPropertyOwnership()
+
+        whenever(lettingAgentAccessService.getInvitationByTokenOrNull(eq(token)))
+            .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
+        whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
+            .thenReturn(propertyOwnership)
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
+            .thenReturn(true)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(eq(propertyOwnership.id)))
+            .thenReturn(PropertyComplianceBuilder.createWithInDateCerts())
+        val complianceViewModel = createComplianceViewModel()
+        whenever(propertyComplianceViewModelFactory.create(any(), any(), any(), anyOrNull()))
+            .thenReturn(complianceViewModel)
+
+        mvc
+            .get(LettingAgentPropertyDetailsController.getLettingAgentPropertyDetailsPath(token))
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute("lettingAgentPropertyDetailsSurveyUrl", LETTING_AGENT_PROPERTY_DETAILS_SURVEY_URL)
+                }
             }
     }
 
@@ -112,7 +136,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(false)
 
         mvc
@@ -131,7 +155,7 @@ class LettingAgentPropertyDetailsControllerTests(
             .thenReturn(MockLettingAgentData.createLettingAgentAccess(token = token, propertyOwnership = propertyOwnership))
         whenever(propertyOwnershipService.getPropertyOwnership(eq(propertyOwnership.id)))
             .thenReturn(propertyOwnership)
-        whenever(lettingAgentAccessService.propertyHasLettingAgent(any()))
+        whenever(propertyOwnershipService.hasLettingAgent(any()))
             .thenReturn(true)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(any()))
             .thenReturn(null)

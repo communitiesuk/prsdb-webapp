@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -28,7 +29,7 @@ class UpdateFurnishedStatusJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnershipService.getLastModifiedDate(propertyId).toString()
             state.isStateInitialized = true
         }
 
@@ -55,12 +56,19 @@ class UpdateFurnishedStatusJourneyFactory(
             }
             step(journey.completeFurnishedStatusUpdateStep) {
                 parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
-                nextUrl { returnUrl }
+                nextDestination {
+                    Destination
+                        .ExternalUrl(returnUrl)
+                        .withFlashAttribute("updateSuccessBanner", "propertyDetails.updateSuccessBanner.tenancyDetails")
+                }
             }
         }
     }
 
-    fun initializeJourneyState(seed: Any): String = stateFactory.getObject().initializeOrRestoreState(seed)
+    fun initializeJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
 }
 
 @JourneyFrameworkComponent
@@ -72,7 +80,7 @@ class UpdateFurnishedStatusJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateFurnishedStatusJourneyState {
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
-    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate(LAST_MODIFIED_DATE_KEY)
 }
 
 interface UpdateFurnishedStatusJourneyState :

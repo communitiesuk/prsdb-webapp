@@ -4,6 +4,7 @@ import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import java.time.Instant
 import java.time.LocalDate
 
 class MockPropertyComplianceData {
@@ -41,6 +43,16 @@ class MockPropertyComplianceData {
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
         )
+
+        fun createPropertyComplianceForOwnership(
+            propertyOwnership: PropertyOwnership,
+            createdDate: Instant = propertyOwnership.getMostRecentlyUpdated(),
+        ): PropertyCompliance {
+            val compliance = createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", createdDate)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", compliance)
+            return compliance
+        }
 
         val defaultGasAndEicrIssueDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
         val defaultElectricalSafetyExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR).toJavaLocalDate()

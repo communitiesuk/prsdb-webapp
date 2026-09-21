@@ -21,7 +21,7 @@ class RemoveDelegationStepConfig(
 
     override fun afterStepIsReached(state: CancelLettingAgentDelegationJourneyState) {
         val lettingAgentAccess =
-            lettingAgentAccessService.getInvitationByPropertyOwnershipId(state.propertyOwnershipId)
+            propertyOwnershipService.getLettingAgentAccess(state.propertyOwnershipId)
                 ?: throw PrsdbWebException(
                     "Cannot cancel letting agent delegation for property ownership ${state.propertyOwnershipId}: " +
                         "no letting agent access found",

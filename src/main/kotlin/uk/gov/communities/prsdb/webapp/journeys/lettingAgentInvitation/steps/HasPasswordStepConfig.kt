@@ -27,7 +27,7 @@ class HasPasswordStepConfig(
         }
 
     override fun afterStepIsReached(state: LettingAgentInvitationJourneyState) {
-        val token = UUID.fromString(requireNotNull(state.invitationToken) { "Invitation token is missing from the journey state" })
+        val token = UUID.fromString(state.invitationToken)
         val invitation = lettingAgentAccessService.getInvitationByToken(token)
         state.hasExistingPassword = lettingAgentPasswordService.hasPasswordBeenSet(invitation)
     }
