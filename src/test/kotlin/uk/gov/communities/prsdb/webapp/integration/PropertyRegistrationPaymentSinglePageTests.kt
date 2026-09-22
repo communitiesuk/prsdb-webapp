@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTU
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
@@ -47,6 +48,28 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
 
         checkAnswersPage.confirm()
+
+        assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `confirming missing compliance routes straight to confirmation when payments is disabled`(page: Page) {
+        featureFlagManager.disableFeature(PAYMENTS)
+
+        val taskListPage =
+            navigator.goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder
+                    .beforePropertyRegistrationCheckAnswersOccupied()
+                    .withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        checkAnswersPage.confirm()
+
+        val confirmMissingCompliancePage = assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
 
         assertPageIs(page, ConfirmationPagePropertyRegistration::class)
     }
