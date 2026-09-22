@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LettingAgentAccess
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LettingAgentAccessRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -30,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
-import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -50,7 +48,6 @@ class PropertyOwnershipService(
     private val userToLandlordService: UserToLandlordService,
     private val lettingAgentAccessService: LettingAgentAccessService,
     private val lettingAgentAccessRepository: LettingAgentAccessRepository,
-    private val addressRepository: AddressRepository,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @Transactional
@@ -78,10 +75,6 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val registeringLandlord = landlords.first()
-        // TODO: PDJB-1593/PDJB-1733: When we add correspondence address to CYA page, we'll need to add it to the saving logic if the FF is on.
-        // When removing the FF entirely, we can remove this address repo lookup.
-        val correspondenceAddress =
-            addressRepository.save(Address(AddressDataModel.fromAddress(address).copy(uprn = null), address.localCouncil))
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -95,8 +88,10 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
+                // TODO PDJB-1593: Use journey correspondence address and email when the flag is on; keep landlord defaults when off.
+                // TODO PDJB-1733: Remove the flag-off correspondence defaults.
                 correspondenceEmail = registeringLandlord.email,
-                correspondenceAddress = correspondenceAddress,
+                correspondenceAddress = registeringLandlord.address,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
