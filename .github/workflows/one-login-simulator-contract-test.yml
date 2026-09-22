@@ -1,0 +1,44 @@
+name: One Login Simulator Contract Test
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        type: string
+    secrets:
+      NOTIFY_KEY:
+        required: false
+      NOTIFY_PRODUCTION_KEY:
+        required: false
+
+jobs:
+  simulator-contract-test:
+    name: One Login simulator contract test
+    if: inputs.environment == 'nft'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Run official simulator contract tests
+        env:
+          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
+          EMAILNOTIFICATIONS_PRODUCTION_APIKEY: ${{ secrets.NOTIFY_PRODUCTION_KEY }}
+        run: ./gradlew oneLoginSimulatorContractTest --no-daemon --console=plain

@@ -178,6 +178,17 @@ require(shardCount == null || (shardIndex != null && shardIndex in 1..shardCount
     "shardIndex must be set and within 1..shardCount when shardCount is given"
 }
 
+tasks.named<Test>("test") {
+    exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
+}
+
+tasks.register<Test>("oneLoginSimulatorContractTest") {
+    group = "verification"
+    useJUnitPlatform()
+    dependsOn("copyBuiltAssets")
+    include("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
