@@ -39,7 +39,7 @@ fun <T : PropertyRegistrationJourneyState> JourneyBuilder<T>.whoProvidesChangeCy
         }
         nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
     }
-    fromTask(journey.whoProvidesDetailsTask) {
+    fromTask(journey.whoProvidesDetailsTask, journey) {
         step(task.lettingAgentEmailStep) {
             routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
             parents { journey.confirmChangeToLettingAgentStep.isComplete() }
