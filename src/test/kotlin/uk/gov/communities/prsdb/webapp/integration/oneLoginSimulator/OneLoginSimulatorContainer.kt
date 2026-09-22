@@ -45,7 +45,14 @@ class OneLoginSimulatorContainer : AutoCloseable {
                         .put("scopes", listOf("openid"))
                         .put("redirectUrls", listOf(redirectUrl))
                         .put("postLogoutRedirectUrls", listOf(postLogoutRedirectUrl))
-                        .put("claims", listOf("https://vocab.account.gov.uk/v1/coreIdentityJWT", "https://vocab.account.gov.uk/v1/address", "https://vocab.account.gov.uk/v1/returnCode"))
+                        .put(
+                            "claims",
+                            listOf(
+                                "https://vocab.account.gov.uk/v1/coreIdentityJWT",
+                                "https://vocab.account.gov.uk/v1/address",
+                                "https://vocab.account.gov.uk/v1/returnCode",
+                            ),
+                        )
                         .put("identityVerificationSupported", true)
                         .put("idTokenSigningAlgorithm", "ES256")
                         .put("clientLoCs", listOf("P0", "P2"))
@@ -69,6 +76,8 @@ class OneLoginSimulatorContainer : AutoCloseable {
     }
 
     companion object {
-        private const val IMAGE = "ghcr.io/govuk-one-login/simulator@sha256:0d5e62c1db1c400c4881be2270b3f08aeb55c72ca3d9eb9a6e5196becef6f5e5"
+        private const val IMAGE =
+            "ghcr.io/govuk-one-login/simulator@" +
+                "sha256:0d5e62c1db1c400c4881be2270b3f08aeb55c72ca3d9eb9a6e5196becef6f5e5"
     }
 }
