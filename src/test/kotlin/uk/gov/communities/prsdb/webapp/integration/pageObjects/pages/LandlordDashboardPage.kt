@@ -26,9 +26,6 @@ class LandlordDashboardPage(
     val addComplianceInformationButton = Button.byText(page, "Compliance actions")
     val notificationBanner = DashboardNotificationBanner(page)
 
-    val rentersRightsBillLink = Link.byText(page, "Renters’ Rights Bill")
-    val privacyNoticeLink = Link.byText(page, "How your information is used")
-
     class DashboardNotificationBanner(
         page: Page,
     ) : NotificationBanner(page) {

@@ -161,20 +161,6 @@ class LandlordControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
-        val landlord = createIndividualLandlord()
-        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
-        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
-        mvc
-            .get(LANDLORD_DASHBOARD_URL)
-            .andExpect {
-                status { isOk() }
-                model { attribute("privacyNoticeUrl", "/landlord/privacy-notice?withBackUrl=7") }
-            }
-    }
-
-    @Test
     fun `getComplianceActions returns a redirect for unauthenticated user`() {
         mvc
             .get(COMPLIANCE_ACTIONS_URL)

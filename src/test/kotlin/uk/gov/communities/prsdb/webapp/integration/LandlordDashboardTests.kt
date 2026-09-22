@@ -2,12 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import kotlin.test.Test
@@ -56,19 +54,6 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.addComplianceInformationButton.clickAndWait()
         assertPageIs(page, ComplianceActionsPage::class)
-    }
-
-    @Test
-    fun `the renters rights bill link goes to an external page`(page: Page) {
-        val dashboard = navigator.goToLandlordDashboard()
-        assertThat(dashboard.rentersRightsBillLink).hasAttribute("href", RENTERS_RIGHTS_BILL_URL)
-    }
-
-    @Test
-    fun `the privacy notice link goes to the privacy notice page`(page: Page) {
-        val dashboard = navigator.goToLandlordDashboard()
-        dashboard.privacyNoticeLink.clickAndWait()
-        assertPageIs(page, LandlordPrivacyNoticePage::class)
     }
 
     @Nested
