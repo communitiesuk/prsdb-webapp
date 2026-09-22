@@ -112,6 +112,8 @@ class PropertyRegistrationJourneyFactory(
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
+            // TODO: PDJB-1738: Use the current organisational sub-user's email rather than the organisation's email
+            // when setting the initial loggedInLandlordEmail snapshot.
             state.loggedInLandlordEmail = userToLandlordService.getCurrentLandlordForUser().email
             state.isStateInitialized = true
         }
