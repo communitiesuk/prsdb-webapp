@@ -18,7 +18,7 @@ class OneLoginSimulatorContainer : AutoCloseable {
 
     val clientId = "prsdb-test-client"
     val baseUrl: String
-        get() = "http://${container.host}:${container.firstMappedPort}"
+        get() = "http://${container.host.replace("localhost", "127.0.0.1")}:${container.firstMappedPort}"
 
     val issuerUrl: String
         get() = "$baseUrl/"

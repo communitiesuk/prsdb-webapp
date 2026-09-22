@@ -12,6 +12,7 @@ class OneLoginSimulatorIntegrationTest : OneLoginSimulatorIntegrationTestBase() 
     @Test
     fun `seeded landlord can authenticate through the official simulator`(page: Page) {
         page.navigate("http://localhost:$port/oauth2/authorization/one-login")
+        assertTrue(page.url().startsWith(simulator.baseUrl), "Expected simulator page but was ${page.url()}")
 
         val simulatorPage = OneLoginSimulatorPage(page)
         simulatorPage.submitSubject(SEEDED_LANDLORD_SUBJECT)
@@ -24,6 +25,7 @@ class OneLoginSimulatorIntegrationTest : OneLoginSimulatorIntegrationTestBase() 
     @Test
     fun `identity verification authorization request includes the expected claims`(page: Page) {
         page.navigate("http://localhost:$port/id-verification/oauth2/authorize/one-login")
+        assertTrue(page.url().startsWith(simulator.baseUrl), "Expected simulator page but was ${page.url()}")
 
         val simulatorPage = OneLoginSimulatorPage(page)
 
