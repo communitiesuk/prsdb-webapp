@@ -1,12 +1,5 @@
 package uk.gov.communities.prsdb.webapp.config.featureFlags
 
-// Common mechanism for feature-flagged strategies. A strategy interface extends this and is flipped between the
-// enabled/disabled implementations via @PrsdbFlip, so callers can branch on the flag without knowing the flag name:
-//
-//     strategy.ifEnabledOrElse {
-//         ifEnabled { enabledValue }
-//         ifDisabled { disabledValue }
-//     }
 interface FeatureFlagStrategy {
     fun <T> ifEnabledOrElse(branches: IfEnabledOrElseBuilder<T>.() -> Unit): T
 
