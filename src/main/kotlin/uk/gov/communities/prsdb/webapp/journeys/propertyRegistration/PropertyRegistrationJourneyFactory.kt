@@ -819,6 +819,8 @@ class PropertyRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+    // TODO: PDJB-1593: ensure CYA reuses the originally selected email source for the correspondence/letting-agent
+    // decision, rather than recalculating from the live landlord email when the page is revisited.
     override var loggedInLandlordEmail: String by delegateProvider.requiredImmutableDelegate("loggedInLandlordEmail")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
