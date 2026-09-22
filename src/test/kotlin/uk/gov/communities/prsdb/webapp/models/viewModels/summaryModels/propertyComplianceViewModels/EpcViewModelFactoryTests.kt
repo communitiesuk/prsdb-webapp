@@ -75,7 +75,7 @@ class EpcViewModelFactoryTests {
 
     companion object {
         private val mockMessageSource: MessageSource = mock()
-        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
+        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource, mock())
 
         private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
 

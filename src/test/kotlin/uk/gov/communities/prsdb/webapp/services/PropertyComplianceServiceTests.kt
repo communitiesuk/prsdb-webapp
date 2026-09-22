@@ -24,7 +24,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -84,9 +83,6 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
-    @Mock
-    private lateinit var mockFeatureFlagManager: FeatureFlagManager
-
     private lateinit var propertyComplianceService: PropertyComplianceService
 
     private val propertyOwnershipId = 1L
@@ -120,7 +116,6 @@ class PropertyComplianceServiceTests {
                 mockAbsoluteUrlProvider,
                 mockUserToLandlordService,
                 mockPropertyOwnershipService,
-                mockFeatureFlagManager,
             )
         lenient()
             .`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri())

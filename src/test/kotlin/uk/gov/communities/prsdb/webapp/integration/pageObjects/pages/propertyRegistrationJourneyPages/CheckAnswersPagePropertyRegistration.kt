@@ -70,6 +70,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val complianceSummaryList = ComplianceSummaryList(page)
 
+    val tenancyHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
+
     val restructuredTenancyHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
     val restructuredTenancyUnoccupiedBodyText =

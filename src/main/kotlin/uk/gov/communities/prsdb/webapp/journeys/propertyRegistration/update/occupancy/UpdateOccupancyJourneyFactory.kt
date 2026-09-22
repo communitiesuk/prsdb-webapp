@@ -55,6 +55,11 @@ class UpdateOccupancyJourneyFactory(
         return journeyMap(state, checkingAnswersFor, propertyId)
     }
 
+    fun initializeJourneyState(
+        seed: Any?,
+        currentLastModifiedDate: java.time.Instant,
+    ): String = stateFactory.getObject().initialiseOrRestoreStateReinitialisingIfOutdated(seed, currentLastModifiedDate)
+
     private fun isDelegatedToLettingAgent(propertyId: Long): Boolean = propertyOwnershipService.hasLettingAgent(propertyId)
 
     private fun journeyMap(

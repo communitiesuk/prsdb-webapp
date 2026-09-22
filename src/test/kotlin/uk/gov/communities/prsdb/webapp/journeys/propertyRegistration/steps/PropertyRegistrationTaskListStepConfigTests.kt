@@ -180,12 +180,6 @@ class PropertyRegistrationTaskListStepConfigTests {
 
     @Nested
     inner class CorrespondenceTaskListItemTests {
-        @BeforeEach
-        fun enableRestructureAndStubState() {
-            whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
-            stubRestructuredState()
-        }
-
         @Test
         fun `getTaskListViewModel includes correspondence task between ownership and occupied when flag enabled`() {
             // Arrange

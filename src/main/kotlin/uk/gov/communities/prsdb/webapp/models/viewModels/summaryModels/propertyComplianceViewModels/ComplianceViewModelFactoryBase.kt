@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
@@ -10,6 +11,7 @@ import java.util.Locale
 
 abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
+    protected val featureFlagManager: FeatureFlagManager,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
     protected abstract val provideLaterNoDeadlineKey: String
