@@ -20,6 +20,14 @@ Make a note of the Property Registration Number.
 
 ((hasJointLandlords??These invitations will expire in 28 days.))
 
+((hasMissingDetails??## Providing missing details))
+
+((hasMissingDetails??You still need to provide the:))
+
+((missingDetailsList))
+
+((hasMissingDetails??To keep your property registered, provide these details within 28 days.))
+
 ((hasDelegatedToLettingAgent??## You sent a request to your letting agent or property manager))
 
 ((hasDelegatedToLettingAgent??You’ve asked your letting agent or property manager to provide the:))
