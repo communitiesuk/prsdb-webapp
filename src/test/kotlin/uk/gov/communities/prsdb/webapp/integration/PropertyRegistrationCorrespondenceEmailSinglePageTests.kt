@@ -7,9 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.CORRESPONDENCE_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.CorrespondenceEmailOption
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CorrespondenceEmailFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
 class PropertyRegistrationCorrespondenceEmailSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
@@ -65,16 +63,6 @@ class PropertyRegistrationCorrespondenceEmailSinglePageTests : IntegrationTestWi
     }
 
     private fun goToCorrespondenceEmailPage(page: Page): CorrespondenceEmailFormPagePropertyRegistration {
-        val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder
-                    .beforePropertyRegistrationPropertyType()
-                    .withPropertyType()
-                    .withBedrooms()
-                    .withOwnershipType()
-                    .withHasNoJointLandlords(),
-            )
-        taskListPage.clickAboutYourPropertyTaskWithName("Who the council should contact")
-        return assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
+        return navigator.skipToPropertyRegistrationCorrespondenceEmailPage()
     }
 }
