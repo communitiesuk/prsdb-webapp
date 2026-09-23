@@ -700,6 +700,24 @@ class Navigator(
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
+    fun goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments(): CheckAnswersPagePropertyRegistration {
+        val taskListPage =
+            goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    fun goToRestructuredPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
+        val taskListPage =
+            goToRestructuredPropertyRegistrationTaskList(
+                PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
+            )
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder
