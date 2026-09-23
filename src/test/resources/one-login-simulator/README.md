@@ -15,6 +15,5 @@ The core-identity and address structures also follow the [GOV.UK One Login ident
 claim guidance](https://docs.sign-in.service.gov.uk/integrate-with-integration-environment/prove-users-identity/).
 Their values are only sufficient for the webapp's existing identity-claim parsing contract.
 
-The simulator accepts any string as a return-code `code`. `"00"` is a synthetic value used
-only to exercise the return-code claim requested by the webapp; this test does not interpret
-or assert its meaning.
+`return-codes.json` supplies a simulator-valid code so the requested return-code claim is
+returned. Its value is not asserted.

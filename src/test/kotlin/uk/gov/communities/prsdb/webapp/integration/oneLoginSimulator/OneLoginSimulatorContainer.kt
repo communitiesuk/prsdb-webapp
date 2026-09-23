@@ -4,6 +4,9 @@ import org.json.JSONObject
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.utility.DockerImageName
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.ADDRESS
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.CORE_IDENTITY
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.RETURN_CODE
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -48,9 +51,9 @@ class OneLoginSimulatorContainer : AutoCloseable {
                         .put(
                             "claims",
                             listOf(
-                                "https://vocab.account.gov.uk/v1/coreIdentityJWT",
-                                "https://vocab.account.gov.uk/v1/address",
-                                "https://vocab.account.gov.uk/v1/returnCode",
+                                CORE_IDENTITY,
+                                ADDRESS,
+                                RETURN_CODE,
                             ),
                         )
                         .put("identityVerificationSupported", true)

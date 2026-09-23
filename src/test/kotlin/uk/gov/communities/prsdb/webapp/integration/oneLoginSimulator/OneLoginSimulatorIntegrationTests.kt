@@ -2,6 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration.oneLoginSimulator
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.ADDRESS
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.CORE_IDENTITY
+import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys.Companion.RETURN_CODE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.OneLoginSimulatorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -10,8 +13,8 @@ import kotlin.test.assertTrue
 
 class OneLoginSimulatorIntegrationTests : OneLoginSimulatorIntegrationTestBase() {
     @Test
-    fun `seeded landlord can authenticate through the official simulator`(page: Page) {
-        page.navigate("http://localhost:$port/oauth2/authorization/one-login")
+    fun `seeded landlord can access the dashboard through the official simulator`(page: Page) {
+        navigator.navigateToLandlordDashboard()
         assertTrue(page.url().startsWith(simulator.baseUrl), "Expected simulator page but was ${page.url()}")
 
         val simulatorPage = OneLoginSimulatorPage(page)
@@ -30,9 +33,10 @@ class OneLoginSimulatorIntegrationTests : OneLoginSimulatorIntegrationTestBase()
         val simulatorPage = OneLoginSimulatorPage(page)
 
         assertEquals("[\"Cl.Cm.P2\"]", simulatorPage.vtrValue)
-        assertTrue(simulatorPage.claimsValue.contains("https://vocab.account.gov.uk/v1/coreIdentityJWT"))
-        assertTrue(simulatorPage.claimsValue.contains("https://vocab.account.gov.uk/v1/address"))
-        assertTrue(simulatorPage.claimsValue.contains("https://vocab.account.gov.uk/v1/returnCode"))
+        assertEquals(
+            setOf(CORE_IDENTITY, ADDRESS, RETURN_CODE),
+            simulatorPage.userInfoClaimNames,
+        )
 
         simulatorPage.submitIdentityVerificationFixture(
             subject = SEEDED_LANDLORD_SUBJECT,

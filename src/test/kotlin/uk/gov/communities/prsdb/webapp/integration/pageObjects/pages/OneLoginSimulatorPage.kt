@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
+import org.json.JSONObject
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -11,8 +12,8 @@ class OneLoginSimulatorPage(
     val vtrValue: String
         get() = getAuthorizationRequestParameter("vtr")
 
-    val claimsValue: String
-        get() = getAuthorizationRequestParameter("claims")
+    val userInfoClaimNames: Set<String>
+        get() = JSONObject(getAuthorizationRequestParameter("claims")).getJSONObject("userinfo").keySet()
 
     fun submitSubject(subject: String) {
         page.locator("[data-testid='sub']").fill(subject)
