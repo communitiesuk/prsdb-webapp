@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
@@ -92,6 +93,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
