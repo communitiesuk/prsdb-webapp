@@ -201,40 +201,40 @@ VALUES (1, 3, ''),
        (3, 1, 'L3');
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, correspondence_email, correspondence_address_id)
-VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1),
-       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (8, true, 1, 0, 0, 40, 13, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (10, true, 1, 0, 0, 42, 15, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 1, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 2, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1),
-       (33, true, 1, 0, 0, 65, 38, '05/02/25', '01/15/25', 3, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1);
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (2, false, 1, 1, 2, 34, 7, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (3, true, 1, 1, 2, 35, 8, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (4, true, 1, 1, 2, 36, 9, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (5, true, 1, 1, 2, 37, 10, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (6, false, 1, 1, 2, 38, 11, '01/15/25', '01/15/25', null, 1, 1, null, null, 2, 1, null, 123.12, true, 'email@example.com', 1, '2027-01-01'),
+       (7, true, 1, 0, 0, 39, 12, '02/02/25', '02/02/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (8, true, 1, 0, 0, 40, 13, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (9, true, 1, 0, 0, 41, 14, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (10, true, 1, 0, 0, 42, 15, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (11, true, 1, 0, 0, 43, 16, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (16, true, 1, 0, 0, 48, 21, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (17, true, 1, 0, 0, 49, 22, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (18, true, 1, 0, 0, 50, 23, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (19, true, 1, 0, 0, 51, 24, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (20, true, 1, 0, 0, 52, 25, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (21, true, 1, 0, 0, 53, 26, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (22, true, 1, 0, 0, 54, 27, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (23, true, 1, 0, 0, 55, 28, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (24, true, 1, 0, 0, 56, 29, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (25, true, 1, 0, 0, 57, 30, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (26, true, 1, 0, 0, 58, 31, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (27, true, 1, 0, 0, 59, 32, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (28, true, 1, 0, 0, 60, 33, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (29, true, 1, 0, 0, 61, 34, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (30, true, 1, 0, 0, 62, 35, '05/02/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (31, true, 1, 0, 0, 63, 36, '05/02/25', '01/15/25', 1, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (32, true, 1, 0, 0, 64, 37, '05/02/25', '01/15/25', 2, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01'),
+       (33, true, 1, 0, 0, 65, 38, '05/02/25', '01/15/25', 3, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01');
 
 -- "Provide later" compliance records for all properties
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
@@ -339,8 +339,8 @@ INSERT INTO registration_number (id, created_date, number, type)
 VALUES (67, '01/15/25', 0006001034, 0);
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, last_modified_date, license_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, correspondence_email, correspondence_address_id)
-VALUES (34, true, 1, 0, 0, 67, 40, '01/15/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1);
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, correspondence_email, correspondence_address_id, renewal_date)
+VALUES (34, true, 1, 0, 0, 67, 40, '01/15/25', '01/15/25', null, 1, null, null, null, null, null, null, null, false, 'email@example.com', 1, '2027-01-01');
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (34, 34, '2025-01-15');
