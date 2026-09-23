@@ -25,9 +25,9 @@ SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM lan
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                 registration_number_id, address_id, property_build_type, num_bedrooms, rent_amount,
-                                marked_joint_landlord, is_occupied)
-VALUES (1, true, 1, 0, 0, 3, 2, 1, null, null, false, false),
-       (2, true, 1, 1, 2, 4, 3, 1, 1, 123.12, true, true);
+                                marked_joint_landlord, is_occupied, correspondence_email, correspondence_address_id)
+VALUES (1, true, 1, 0, 0, 3, 2, 1, null, null, false, false, 'email@example.com', 1),
+       (2, true, 1, 1, 2, 4, 3, 1, 1, 123.12, true, true, 'email@example.com', 1);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)

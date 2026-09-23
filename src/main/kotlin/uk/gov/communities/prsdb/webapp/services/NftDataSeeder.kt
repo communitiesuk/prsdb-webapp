@@ -615,7 +615,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setLong(7, registrationNumberId)
         propertyOwnershipStmt.setLongOrNull(8, licenceIdIfHasLicence)
         propertyOwnershipStmt.setInt(9, NftDataFaker.generatePropertyAndOtherType().first.ordinal)
-        propertyOwnershipStmt.setLong(10, propertyOwnershipAddressGenerator.next().id)
+        val propertyAddress = propertyOwnershipAddressGenerator.next()
+        propertyOwnershipStmt.setLong(10, propertyAddress.id)
         remainingAvailableAddressCount--
         propertyOwnershipStmt.setIntOrNull(11, numBedrooms)
         propertyOwnershipStmt.setStringOrNull(12, standardAndCustomBillsIncluded?.first)
@@ -627,6 +628,8 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBoolean(18, isOccupied)
         propertyOwnershipStmt.setBooleanOrNull(19, licenseProvideLater)
         propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
+        propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
+        propertyOwnershipStmt.setLong(22, propertyAddress.id)
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
