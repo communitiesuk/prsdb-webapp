@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -20,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -32,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -64,6 +68,9 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
+
+    @MockitoBean
+    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -160,6 +167,247 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation adds a missing details section for an occupied property when phase two flag is enabled and tenancy is provide later`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        val expectedCompleteByDate =
+            CompleteByDateHelper
+                .getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation uses the legacy compliance section when phase two is disabled`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(false)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            )            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation includes every selected provide later detail`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+                licenseProvideLater = true,
+                tenancyProvideLater = true,
+            )
+        val compliance =
+            mock<PropertyCompliance> {
+                on { isGasSafetyCertMissing } doReturn false
+                on { isElectricalSafetyMissing } doReturn false
+                on { epcHasFaults } doReturn false
+                on { gasSafetyCertProvideLater } doReturn true
+                on { electricalSafetyCertProvideLater } doReturn true
+                on { epcProvideLater } doReturn true
+            }
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("licenseProvideLater", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("gasSafetyRequired", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("electricalSafetyRequired", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("epcRequired", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("tenancyProvideLater", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation hides provide missing details section when delegated to letting agent`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+                licenseProvideLater = true,
+                tenancyProvideLater = true,
+            )
+        val compliance =
+            mock<PropertyCompliance> {
+                on { gasSafetyCertProvideLater } doReturn true
+                on { electricalSafetyCertProvideLater } doReturn true
+                on { epcProvideLater } doReturn true
+            }
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            )            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation only shows provide later items that were selected`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+                tenancyProvideLater = true,
+            )
+        val compliance =
+            mock<PropertyCompliance> {
+                on { gasSafetyCertProvideLater } doReturn false
+                on { electricalSafetyCertProvideLater } doReturn false
+                on { epcProvideLater } doReturn false
+            }
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("gasSafetyRequired", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("electricalSafetyRequired", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("epcRequired", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("tenancyProvideLater", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation includes joint landlord invitation status when pending invitations exist`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(listOf(mock()))
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("hasPendingJointLandlordInvitations", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation hides joint landlord messaging when there are no pending invitations`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(mock())
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("hasPendingJointLandlordInvitations", false))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
@@ -182,6 +430,9 @@ class RegisterPropertyControllerTests(
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
             .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", false))
             .andExpect(MockMvcResultMatchers.model().attributeDoesNotExist("completeByDate"))
+
+        verify(propertyComplianceService, never()).getComplianceForPropertyOrNull(propertyOwnership.id)
+        verify(jointLandlordInvitationService).getPendingInvitations(propertyOwnership)
     }
 
     @Test

@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ORG_PROPERTY_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
@@ -47,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -66,6 +68,7 @@ class RegisterPropertyController(
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
@@ -110,13 +113,40 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
 
-        val actionRequiredForCompliance =
+        val compliance =
             if (propertyOwnership.isOccupied) {
-                val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
-                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.epcHasFaults
+                propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
             } else {
-                false
+                null
             }
+
+        val gasSafetyRequired = propertyOwnership.isOccupied && (compliance == null || compliance.isGasSafetyCertMissing)
+        val electricalSafetyRequired = propertyOwnership.isOccupied && (compliance == null || compliance.isElectricalSafetyMissing)
+        val epcRequired = propertyOwnership.isOccupied && (compliance == null || compliance.epcHasFaults)
+        val actionRequiredForCompliance = gasSafetyRequired || electricalSafetyRequired || epcRequired
+
+        val gasSafetyProvideLater = propertyOwnership.isOccupied && compliance?.gasSafetyCertProvideLater == true
+        val electricalSafetyProvideLater = propertyOwnership.isOccupied && compliance?.electricalSafetyCertProvideLater == true
+        val epcProvideLater = propertyOwnership.isOccupied && compliance?.epcProvideLater == true
+
+        // TODO: PDJB-1742: Remove this when we remove PROPERTY_REGISTRATION_PHASE_TWO flag
+        val phaseTwoFeatureEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
+        val provideMissingDetails =
+            phaseTwoFeatureEnabled &&
+                propertyOwnership.isOccupied &&
+                (
+                    propertyOwnership.licenseProvideLater == true ||
+                        propertyOwnership.tenancyProvideLater == true ||
+                        gasSafetyProvideLater ||
+                        electricalSafetyProvideLater ||
+                        epcProvideLater
+                )
+        model.addAttribute("provideMissingDetails", provideMissingDetails)
+        model.addAttribute("gasSafetyRequired", gasSafetyProvideLater)
+        model.addAttribute("electricalSafetyRequired", electricalSafetyProvideLater)
+        model.addAttribute("epcRequired", epcProvideLater)
+        model.addAttribute("licenseProvideLater", propertyOwnership.licenseProvideLater == true)
+        model.addAttribute("tenancyProvideLater", propertyOwnership.tenancyProvideLater == true)
 
         // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
         val lettingAgentFeatureEnabled =
@@ -131,9 +161,13 @@ class RegisterPropertyController(
                 propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
+        val hasPendingJointLandlordInvitations =
+            jointLandlordInvitationService.getPendingInvitations(propertyOwnership).isNotEmpty()
+        model.addAttribute("hasPendingJointLandlordInvitations", hasPendingJointLandlordInvitations)
+
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
-        if (delegatedToLettingAgent || actionRequiredForCompliance) {
+        if (delegatedToLettingAgent || actionRequiredForCompliance || provideMissingDetails) {
             val completeByDate =
                 CompleteByDateHelper.getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
             val formattedDate =
