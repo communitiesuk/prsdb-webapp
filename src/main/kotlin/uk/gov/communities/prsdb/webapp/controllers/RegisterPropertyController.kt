@@ -129,6 +129,7 @@ class RegisterPropertyController(
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         val provideMissingDetails =
             hasProvideMissingDetails(isOccupied, propertyOwnership, compliance, propertyRegistrationPhaseTwoEnabled)
+        model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("provideMissingDetails", provideMissingDetails)
         model.addAttribute("gasSafetyRequired", isOccupied && compliance?.gasSafetyCertProvideLater == true)
         model.addAttribute("electricalSafetyRequired", isOccupied && compliance?.electricalSafetyCertProvideLater == true)

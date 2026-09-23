@@ -35,7 +35,7 @@
                 registerProperty.confirmation.useInAdverts
             </p>
 
-            <th:block th:if="${hasPendingJointLandlordInvitations and !delegatedToLettingAgent}">
+            <th:block th:if="${propertyRegistrationPhaseTwoEnabled and hasPendingJointLandlordInvitations and !delegatedToLettingAgent}">
                 <h2 class="govuk-heading-m"
                     th:text="#{registerProperty.confirmation.whatHappensNext.heading}">
                     registerProperty.confirmation.whatHappensNext.heading
