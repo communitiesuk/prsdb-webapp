@@ -20,12 +20,6 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Test
-    fun `the back link is not shown when navigated to directly`(page: Page) {
-        val privacyNoticePage = navigator.goToLandlordPrivacyNoticePage()
-        assertThat(privacyNoticePage.backLink).isHidden()
-    }
-
-    @Test
     fun `the back link is shown when navigated to from the dashboard and returns to the dashboard`(page: Page) {
         featureFlagManager.disableFeature(LANDLORD_DASHBOARD_UPDATE)
         val dashboard = navigator.goToLandlordDashboard()
@@ -34,6 +28,12 @@ class LandlordPrivacyNoticeTests : IntegrationTestWithImmutableData("data-local.
         assertThat(privacyNoticePage.backLink).isVisible()
         privacyNoticePage.backLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `the back link is not shown when navigated to directly`(page: Page) {
+        val privacyNoticePage = navigator.goToLandlordPrivacyNoticePage()
+        assertThat(privacyNoticePage.backLink).isHidden()
     }
 
     @Test

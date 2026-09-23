@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -178,6 +179,8 @@ class LandlordControllerTests(
                 status { isOk() }
                 model { attribute("showUsefulLinksSection", true) }
                 model { attribute("privacyNoticeUrl", "/landlord/privacy-notice?withBackUrl=7") }
+                model { attribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL) }
+                model { attribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE) }
             }
     }
 
