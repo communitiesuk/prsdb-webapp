@@ -17,6 +17,18 @@ dashboard:
     heading: Add compliance information for your properties
   complianceActions:
     button: Compliance actions
+  aboutTheDatabase:
+    heading: Useful information
+  action:
+    privacyNotice:
+      linkText: How your information is used
+      descriptionText: Read the privacy notice to understand how your information is used on the pilot
+    rentersRightsBill:
+      linkText: Renters’ Rights Bill
+      descriptionText: See how the Renters’ Rights Bill is progressing and what that means for the database
+    understandThisPrivateBeta:
+      linkText: Understand this private beta
+      descriptionText: View the start page for this private beta to understand how it will work and what you need to know
   notificationBanner:
     title: Important
     heading: 'You have {0,,number} outstanding property actions'

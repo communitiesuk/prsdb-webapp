@@ -46,6 +46,29 @@
                 </div>
             </div>
         </section>
+        <section class="prsd-dashboard__section" th:if="${showUsefulLinksSection}">
+            <h2 class="govuk-heading-l" th:text="#{landlord.dashboard.aboutTheDatabase.heading}">landlord.dashboard.aboutTheDatabase.heading</h2>
+            <div class="govuk-grid-row">
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.rentersRightsBill.linkText',
+                    ${rentersRightsBillUrl},
+                    'landlord.dashboard.action.rentersRightsBill.descriptionText')}">
+                    Renters' rights bill content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.privacyNotice.linkText',
+                    ${privacyNoticeUrl},
+                    'landlord.dashboard.action.privacyNotice.descriptionText')}">
+                    Privacy notice content link
+                </div>
+                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
+                    'landlord.dashboard.action.understandThisPrivateBeta.linkText',
+                    ${registerLandlordUrl},
+                    'landlord.dashboard.action.understandThisPrivateBeta.descriptionText')}">
+                    Renters' rights bill content link
+                </div>
+            </div>
+        </section>
     </div>
 </main>
 </html>

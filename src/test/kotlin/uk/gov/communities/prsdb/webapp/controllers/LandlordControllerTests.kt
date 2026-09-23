@@ -11,6 +11,8 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DASHBOARD_UPDATE
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -46,6 +48,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var usersIncompletePropertyService: UsersIncompletePropertyService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -158,6 +163,37 @@ class LandlordControllerTests(
                 ?.model
                 ?.get("landlordDashboardNotificationBannerViewModel") as LandlordDashboardNotificationBannerViewModel
         assertEquals(2, bannerViewModel.numberOfIncompleteProperties)
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard shows the useful links section and sets privacyNoticeUrl when the dashboard update flag is disabled`() {
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(LANDLORD_DASHBOARD_UPDATE)).thenReturn(false)
+        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("showUsefulLinksSection", true) }
+                model { attribute("privacyNoticeUrl", "/landlord/privacy-notice?withBackUrl=7") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard hides the useful links section when the dashboard update flag is enabled`() {
+        val landlord = createIndividualLandlord()
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(featureFlagManager.checkFeature(LANDLORD_DASHBOARD_UPDATE)).thenReturn(true)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("showUsefulLinksSection", false) }
+                model { attributeDoesNotExist("privacyNoticeUrl") }
+            }
     }
 
     @Test
