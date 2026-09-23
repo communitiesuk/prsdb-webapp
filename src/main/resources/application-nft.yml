@@ -4,9 +4,6 @@ features:
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "pdjb-926-landlord-dashboard-update"
-      enabled: false
-      expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
@@ -29,6 +26,9 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
+      enabled: false
+      expiry-date: "2026-12-31"
+    - name: "pdjb-926-landlord-dashboard-update"
       enabled: false
       expiry-date: "2026-12-31"
 
