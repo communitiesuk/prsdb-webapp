@@ -111,6 +111,9 @@ class CheckAnswersPagePropertyRegistration(
     val epcHeading =
         Heading(page.locator("h3", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
 
+    val epcCardTitle =
+        Heading(page.locator("h4.govuk-summary-card__title", Page.LocatorOptions().setHasText("Your EPC")))
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {

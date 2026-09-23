@@ -288,6 +288,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `CYA page renders EPC summary card title as h4 to preserve heading hierarchy`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart()
+
+            BaseComponent.assertThat(checkAnswersPage.epcCardTitle).isVisible()
+            assertThat(page.locator("main h2.govuk-summary-card__title")).hasCount(0)
+        }
+
+        @Test
         fun `when delegate to letting agent feature is disabled, letting agent delegation section is not displayed`(page: Page) {
             featureFlagManager.disableFeature(DELEGATE_TO_LETTING_AGENT)
             val taskListPage =
