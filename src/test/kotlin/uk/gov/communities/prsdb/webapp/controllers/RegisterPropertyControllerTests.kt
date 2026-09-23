@@ -408,6 +408,35 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation keeps pending joint landlord and delegated letting agent states separate`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                isOccupied = true,
+            )
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
+        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(listOf(mock()))
+        whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
+        whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(true)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.model().attribute("hasPendingJointLandlordInvitations", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
