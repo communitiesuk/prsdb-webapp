@@ -26,8 +26,10 @@ class MyControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `myEndpoint returns 200 for authorised landlord user`() {
+        // Arrange
         whenever(myService.getData()).thenReturn(data)
 
+        // Act, Assert
         mvc.get("/landlord/my-endpoint").andExpect {
             status { isOk() }
         }
@@ -57,10 +59,13 @@ class MyServiceTests {
 
     @Test
     fun `retrieveItem returns item when it exists`() {
+        // Arrange
         whenever(mockRepository.findById(anyString())).thenReturn(item)
 
+        // Act
         val result = myService.retrieveItem(id)
 
+        // Assert
         assertEquals(expected, result)
         verify(mockRepository).findById(id)
     }
@@ -129,5 +134,39 @@ companion object {
         Arguments.of("input1", "expected1"),
         Arguments.of("input2", "expected2"),
     )
+}
+```
+
+## Test Structure
+
+Split each unit test into 3 sections, Arrange, Act, Assert.
+
+- Arrange sets up mocks to allow the test to work.
+- Act runs the logic to be tested.
+- Assert verifies the result.
+
+For example:
+
+```kotlin
+@ExtendWith(MockitoExtension::class)
+class MyServiceTests {
+    @Mock
+    private lateinit var mockRepository: MyRepository
+
+    @InjectMocks
+    private lateinit var myService: MyService
+
+    @Test
+    fun `Example test`() {
+        // Arrange
+        whenever(mockRepository.findById(anyString())).thenReturn(item)
+
+        // Act
+        val result = myService.retrieveItem(id)
+
+        // Assert
+        assertEquals("expected", result)
+        verify(mockRepository).findById(id)
+    }
 }
 ```
