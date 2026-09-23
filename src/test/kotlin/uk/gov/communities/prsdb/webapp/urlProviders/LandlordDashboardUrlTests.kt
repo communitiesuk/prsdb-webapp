@@ -32,11 +32,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
