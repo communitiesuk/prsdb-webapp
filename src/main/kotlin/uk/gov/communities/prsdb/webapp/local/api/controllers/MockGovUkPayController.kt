@@ -132,83 +132,82 @@ class MockGovUkPayController(
         }
 
     private fun StoredPayment.toResponseJson(): String {
-        val response =
-            JSONObject()
-                .put("amount", amount)
-                .put("description", description)
-                .put("reference", reference)
-                .put("state", JSONObject().put("status", status).put("finished", finished))
-                .put("payment_id", paymentId)
-                .put("payment_provider", "sandbox")
-                .put("created_date", createdDate)
-                .put("delayed_capture", delayedCapture)
-                .put("return_url", returnUrl)
-                .put("_links", linksJson())
-
-        email?.let { response.put("email", it) }
-        metadata?.let { response.put("metadata", it) }
-        if (cardEntered) {
-            response.put("provider_id", providerId)
-            response.put("authorisation_mode", "web")
-            response.put("card_details", cardDetailsJson())
-        }
-        return response.toString()
+        val conditionalFields =
+            buildString {
+                email?.let { append(""","email":${JSONObject.quote(it)}""") }
+                metadata?.let { append(""","metadata":$it""") }
+                if (cardEntered) {
+                    append(""","provider_id":"$providerId"""")
+                    append(""","authorisation_mode":"web"""")
+                    append(""","card_details":${cardDetailsJson()}""")
+                }
+            }
+        return """
+            {
+                "amount": $amount,
+                "description": ${JSONObject.quote(description)},
+                "reference": ${JSONObject.quote(reference)},
+                "state": { "status": "$status", "finished": $finished },
+                "payment_id": "$paymentId",
+                "payment_provider": "sandbox",
+                "created_date": "$createdDate",
+                "delayed_capture": $delayedCapture,
+                "return_url": ${JSONObject.quote(returnUrl)},
+                "_links": ${linksJson()}$conditionalFields
+            }
+            """.trimIndent()
     }
 
-    private fun StoredPayment.cardDetailsJson(): JSONObject {
+    private fun StoredPayment.cardDetailsJson(): String {
         val billing =
-            billingAddress ?: JSONObject()
-                .put("line1", "10 Downing Street")
-                .put("postcode", "SW1A 2AA")
-                .put("city", "London")
-                .put("country", "GB")
-        return JSONObject()
-            .put("card_brand", "Visa")
-            .put("card_type", "debit")
-            .put("last_digits_card_number", "1234")
-            .put("first_digits_card_number", "424242")
-            .put("expiry_date", "12/30")
-            .put("cardholder_name", cardholderName ?: "Sherlock Holmes")
-            .put("billing_address", billing)
+            billingAddress?.toString()
+                ?: """{ "line1": "10 Downing Street", "postcode": "SW1A 2AA", "city": "London", "country": "GB" }"""
+        return """
+            {
+                "card_brand": "Visa",
+                "card_type": "debit",
+                "last_digits_card_number": "1234",
+                "first_digits_card_number": "424242",
+                "expiry_date": "12/30",
+                "cardholder_name": ${JSONObject.quote(cardholderName ?: "Sherlock Holmes")},
+                "billing_address": $billing
+            }
+            """.trimIndent()
     }
 
-    private fun StoredPayment.linksJson(): JSONObject {
-        val links =
-            JSONObject()
-                .put("self", link("$baseUrl/v1/payments/$paymentId", "GET"))
-                .put("events", link("$baseUrl/v1/payments/$paymentId/events", "GET"))
-                .put("refunds", link("$baseUrl/v1/payments/$paymentId/refunds", "GET"))
-        when (status) {
-            "created" -> {
-                links.put("next_url", link("$baseUrl/mock-card-page/$paymentId", "GET"))
-                links.put(
-                    "next_url_post",
-                    JSONObject()
-                        .put("type", "application/x-www-form-urlencoded")
-                        .put("params", JSONObject().put("chargeTokenId", chargeToken))
-                        .put("href", "$baseUrl/mock-card-page/$paymentId")
-                        .put("method", "POST"),
-                )
-                links.put("cancel", link("$baseUrl/v1/payments/$paymentId/cancel", "POST"))
-            }
+    private fun StoredPayment.linksJson(): String {
+        val payment = "$baseUrl/v1/payments/$paymentId"
+        val cardPage = "$baseUrl/mock-card-page/$paymentId"
+        val stateLinks =
+            when (status) {
+                "created" ->
+                    """
+                    ,"next_url": { "href": "$cardPage", "method": "GET" }
+                    ,"next_url_post": { "type": "application/x-www-form-urlencoded", "params": { "chargeTokenId": "$chargeToken" }, "href": "$cardPage", "method": "POST" }
+                    ,"cancel": { "href": "$payment/cancel", "method": "POST" }
+                    """.trimIndent()
 
-            "capturable" -> {
-                links.put("capture", link("$baseUrl/v1/payments/$paymentId/capture", "POST"))
-                links.put("cancel", link("$baseUrl/v1/payments/$paymentId/cancel", "POST"))
+                "capturable" ->
+                    """
+                    ,"capture": { "href": "$payment/capture", "method": "POST" }
+                    ,"cancel": { "href": "$payment/cancel", "method": "POST" }
+                    """.trimIndent()
+
+                else -> ""
             }
-        }
-        return links
+        return """
+            {
+                "self": { "href": "$payment", "method": "GET" },
+                "events": { "href": "$payment/events", "method": "GET" },
+                "refunds": { "href": "$payment/refunds", "method": "GET" }$stateLinks
+            }
+            """.trimIndent()
     }
-
-    private fun link(
-        href: String,
-        method: String,
-    ): JSONObject = JSONObject().put("href", href).put("method", method)
 
     private fun errorJson(
         code: String,
         description: String,
-    ): String = JSONObject().put("code", code).put("description", description).toString()
+    ): String = """{ "code": "$code", "description": ${JSONObject.quote(description)} }"""
 
     private fun notFound(): ResponseEntity<String> = jsonResponse(HttpStatus.NOT_FOUND, errorJson("P0200", "Not found"))
 
