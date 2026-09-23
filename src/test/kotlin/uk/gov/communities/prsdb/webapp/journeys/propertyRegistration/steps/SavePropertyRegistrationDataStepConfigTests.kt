@@ -479,6 +479,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(OccupancyFormModel().apply { occupied = false })
 
+        val mockBedroomsStep = mock<BedroomsStep>()
+        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        whenever(mockBedroomsStep.formModel).thenReturn(NumberOfBedroomsFormModel().apply { numberOfBedrooms = "3" })
+
         val mockRentIncludesBillsTask = mock<RentIncludesBillsTask>()
         whenever(mockState.rentIncludesBillsTask).thenReturn(mockRentIncludesBillsTask)
         whenever(mockRentIncludesBillsTask.getBillsIncludedOrNull()).thenReturn(null)

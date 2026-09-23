@@ -180,6 +180,11 @@ class PropertyRegistrationTaskListStepConfigTests {
 
     @Nested
     inner class CorrespondenceTaskListItemTests {
+        @BeforeEach
+        fun stubState() {
+            stubRestructuredState()
+        }
+
         @Test
         fun `getTaskListViewModel includes correspondence task between ownership and occupied when flag enabled`() {
             // Arrange

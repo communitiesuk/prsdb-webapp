@@ -244,8 +244,7 @@ class PropertyComplianceServiceTests {
             nonCompliantProperties.map { compliance ->
                 ComplianceStatusDataModel.fromPropertyCompliance(
                     compliance,
-                    provideLaterDeadline =
-                        compliance.propertyOwnership.lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()),
+                    provideLaterDeadline = compliance.propertyOwnership.provideLaterDeadline,
                 )
             }
 

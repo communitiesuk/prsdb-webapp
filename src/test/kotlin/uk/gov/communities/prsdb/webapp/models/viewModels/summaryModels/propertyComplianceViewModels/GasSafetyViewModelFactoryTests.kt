@@ -97,11 +97,10 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 messageSource,
                 mockFeatureFlagManager(delegateToLettingAgentEnabled = true),
             )
-        val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+        val rows = factory.fromEntity(missingOccupiedProvideLater)
 
         val expectedDeadline =
             occupiedAtRegistrationDate
-                .plusDays(30)
                 .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                 .format(DATE_FORMATTER)
         assertEquals(
@@ -178,11 +177,10 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     messageSource,
                     mockFeatureFlagManager(delegateToLettingAgentEnabled = false),
                 )
-            val rows = factory.fromEntity(missingOccupiedAfterRegistrationProvideLater)
+            val rows = factory.fromEntity(missingOccupiedProvideLater)
 
             val expectedDeadline =
                 occupiedAtRegistrationDate
-                    .plusDays(30)
                     .plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                     .format(DATE_FORMATTER)
             assertEquals(
