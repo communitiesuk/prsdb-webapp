@@ -35,6 +35,8 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
@@ -113,38 +115,24 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
 
+        val isOccupied = propertyOwnership.isOccupied
         val compliance =
-            if (propertyOwnership.isOccupied) {
+            if (isOccupied) {
                 propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
             } else {
                 null
             }
 
-        val gasSafetyRequired = propertyOwnership.isOccupied && (compliance == null || compliance.isGasSafetyCertMissing)
-        val electricalSafetyRequired = propertyOwnership.isOccupied && (compliance == null || compliance.isElectricalSafetyMissing)
-        val epcRequired = propertyOwnership.isOccupied && (compliance == null || compliance.epcHasFaults)
-        val actionRequiredForCompliance = gasSafetyRequired || electricalSafetyRequired || epcRequired
-
-        val gasSafetyProvideLater = propertyOwnership.isOccupied && compliance?.gasSafetyCertProvideLater == true
-        val electricalSafetyProvideLater = propertyOwnership.isOccupied && compliance?.electricalSafetyCertProvideLater == true
-        val epcProvideLater = propertyOwnership.isOccupied && compliance?.epcProvideLater == true
+        val actionRequiredForCompliance = hasActionRequiredForCompliance(isOccupied, compliance)
 
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         val provideMissingDetails =
-            propertyRegistrationPhaseTwoEnabled &&
-                propertyOwnership.isOccupied &&
-                (
-                    propertyOwnership.licenseProvideLater == true ||
-                        propertyOwnership.tenancyProvideLater == true ||
-                        gasSafetyProvideLater ||
-                        electricalSafetyProvideLater ||
-                        epcProvideLater
-                )
+            hasProvideMissingDetails(isOccupied, propertyOwnership, compliance, propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("provideMissingDetails", provideMissingDetails)
-        model.addAttribute("gasSafetyRequired", gasSafetyProvideLater)
-        model.addAttribute("electricalSafetyRequired", electricalSafetyProvideLater)
-        model.addAttribute("epcRequired", epcProvideLater)
+        model.addAttribute("gasSafetyRequired", isOccupied && compliance?.gasSafetyCertProvideLater == true)
+        model.addAttribute("electricalSafetyRequired", isOccupied && compliance?.electricalSafetyCertProvideLater == true)
+        model.addAttribute("epcRequired", isOccupied && compliance?.epcProvideLater == true)
         model.addAttribute("licenseProvideLater", propertyOwnership.licenseProvideLater == true)
         model.addAttribute("tenancyProvideLater", propertyOwnership.tenancyProvideLater == true)
 
@@ -194,6 +182,34 @@ class RegisterPropertyController(
 
         return "registerPropertyConfirmation"
     }
+
+    private fun hasActionRequiredForCompliance(
+        isOccupied: Boolean,
+        compliance: PropertyCompliance?,
+    ): Boolean =
+        isOccupied &&
+            (
+                compliance == null ||
+                    compliance.isGasSafetyCertMissing ||
+                    compliance.isElectricalSafetyMissing ||
+                    compliance.epcHasFaults
+            )
+
+    private fun hasProvideMissingDetails(
+        isOccupied: Boolean,
+        propertyOwnership: PropertyOwnership,
+        compliance: PropertyCompliance?,
+        propertyRegistrationPhaseTwoEnabled: Boolean,
+    ): Boolean =
+        propertyRegistrationPhaseTwoEnabled &&
+            isOccupied &&
+            (
+                propertyOwnership.licenseProvideLater == true ||
+                    propertyOwnership.tenancyProvideLater == true ||
+                    compliance?.gasSafetyCertProvideLater == true ||
+                    compliance?.electricalSafetyCertProvideLater == true ||
+                    compliance?.epcProvideLater == true
+            )
 
     @GetMapping("/{*stepPath}")
     fun getJourneyStep(
