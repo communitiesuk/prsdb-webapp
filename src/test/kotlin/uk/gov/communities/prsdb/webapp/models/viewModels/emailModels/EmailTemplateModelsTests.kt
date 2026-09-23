@@ -53,7 +53,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
                         "P-XXX-YYY",
-                        "1 Street Name, AB1 2CD",
+                        "1 Street Name\nAB1 2CD",
                         "prsdUrl",
                         isOccupied = true,
                         jointLandlordEmails = listOf("joint1@example.com", "joint2@example.com"),

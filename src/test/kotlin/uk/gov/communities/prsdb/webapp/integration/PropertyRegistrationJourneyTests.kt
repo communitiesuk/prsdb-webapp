@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -139,6 +141,27 @@ import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+
+    private fun verifyConfirmationEmailSent(
+        expectedPrn: String,
+        expectedAddress: String,
+        expectedIsOccupied: Boolean,
+        expectedJointLandlordEmails: List<String>?,
+    ) {
+        verify(confirmationEmailSender).sendEmail(
+            eq("alex.surname@example.com"),
+            argThat<PropertyRegistrationConfirmationEmail> {
+                prn == expectedPrn &&
+                    multiLineAddress == expectedAddress &&
+                    prsdUrl == absoluteLandlordUrl &&
+                    isOccupied == expectedIsOccupied &&
+                    jointLandlordEmails == expectedJointLandlordEmails &&
+                    !isDelegatedToLettingAgent &&
+                    isPdjb939PhaseTwoEnabled
+            },
+        )
+    }
+
     private val propertyDetailsSectionHeader = "Property details"
     private val ownershipSectionHeader = "Ownership and landlords"
     private val occupiedSectionHeader = "Tell us if your property’s occupied"
@@ -566,15 +589,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
             // Check confirmation email
-            verify(confirmationEmailSender).sendEmail(
-                "alex.surname@example.com",
-                PropertyRegistrationConfirmationEmail(
-                    expectedPropertyRegNum.toString(),
-                    "1 Fictional Road, FA1 1AA",
-                    absoluteLandlordUrl,
-                    true,
-                    listOf("email2@address.com"),
-                ),
+            verifyConfirmationEmailSent(
+                expectedPrn = expectedPropertyRegNum.toString(),
+                expectedAddress = "1 Fictional Road\nFA1 1AA",
+                expectedIsOccupied = true,
+                expectedJointLandlordEmails = listOf("email2@address.com"),
             )
 
             // Go to dashboard
@@ -796,15 +815,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
             // Check confirmation email
-            verify(confirmationEmailSender).sendEmail(
-                "alex.surname@example.com",
-                PropertyRegistrationConfirmationEmail(
-                    expectedPropertyRegNum.toString(),
-                    "Test address line 1, Testville, EG1 2AB",
-                    absoluteLandlordUrl,
-                    false,
-                    null,
-                ),
+            verifyConfirmationEmailSent(
+                expectedPrn = expectedPropertyRegNum.toString(),
+                expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
+                expectedIsOccupied = false,
+                expectedJointLandlordEmails = null,
             )
 
             // Go to dashboard
@@ -2994,15 +3009,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
             // Check confirmation email
-            verify(confirmationEmailSender).sendEmail(
-                "alex.surname@example.com",
-                PropertyRegistrationConfirmationEmail(
-                    expectedPropertyRegNum.toString(),
-                    "1 Fictional Road, FA1 1AA",
-                    absoluteLandlordUrl,
-                    true,
-                    listOf("email2@address.com"),
-                ),
+            verifyConfirmationEmailSent(
+                expectedPrn = expectedPropertyRegNum.toString(),
+                expectedAddress = "1 Fictional Road\nFA1 1AA",
+                expectedIsOccupied = true,
+                expectedJointLandlordEmails = listOf("email2@address.com"),
             )
 
             // Go to dashboard
@@ -3198,15 +3209,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
             // Check confirmation email
-            verify(confirmationEmailSender).sendEmail(
-                "alex.surname@example.com",
-                PropertyRegistrationConfirmationEmail(
-                    expectedPropertyRegNum.toString(),
-                    "Test address line 1, Testville, EG1 2AB",
-                    absoluteLandlordUrl,
-                    false,
-                    null,
-                ),
+            verifyConfirmationEmailSent(
+                expectedPrn = expectedPropertyRegNum.toString(),
+                expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
+                expectedIsOccupied = false,
+                expectedJointLandlordEmails = null,
             )
 
             // Go to dashboard
