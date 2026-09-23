@@ -863,7 +863,7 @@ class PropertyRegistrationJourney(
     override val confirmChangeToLettingAgentStep: ConfirmChangeToLettingAgentStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
-    // Payment steps (behind PAYMENTS flag) — TODO PDJB-991 stubs
+    // Payment steps (behind PAYMENTS flag)
     override val paymentSummaryStep: PaymentSummaryStep,
     override val paymentRoutingStep: PaymentRoutingStep,
     override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
@@ -979,7 +979,7 @@ interface PropertyRegistrationJourneyState :
     val occupancyChangeRoutingStep: OccupancyChangeRoutingStep
     val occupancyChangeInterruptionStep: OccupancyChangeInterruptionStep
 
-    // Payment steps (behind PAYMENTS flag) — TODO PDJB-991 stubs
+    // Payment steps (behind PAYMENTS flag)
     val paymentSummaryStep: PaymentSummaryStep
     val paymentRoutingStep: PaymentRoutingStep
     val retryablePaymentFailedStep: RetryablePaymentFailedStep

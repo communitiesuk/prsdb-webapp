@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
@@ -99,6 +100,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentRoutingFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PaymentSummaryFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
@@ -120,6 +123,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesChangeInterruptionPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.WhoProvidesRentalDetailsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PaymentOutcome
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -193,12 +197,33 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         ).thenReturn(URI("http://localhost/landlord/letting-agent/property-details/test-token"))
     }
 
+    private fun completePropertyRegistrationPaymentSuccessfully(page: Page): ConfirmationPagePropertyRegistration {
+        val paymentSummaryPage = createValidPage(page, PaymentSummaryFormPagePropertyRegistration::class)
+        paymentSummaryPage.form.submit()
+        // TODO PDJB-993: Replace this radio selection with the real payment outcome once PaymentRoutingStep becomes an
+        //  internal step - the success outcome will then come from the payment status rather than a user-submitted radio.
+        val paymentRoutingPage = createValidPage(page, PaymentRoutingFormPagePropertyRegistration::class)
+        paymentRoutingPage.form.radios.selectValue(PaymentOutcome.SUCCESS)
+        paymentRoutingPage.form.submit()
+        return createValidPage(page, ConfirmationPagePropertyRegistration::class)
+    }
+
     @Nested
     inner class RestructureAndSkippingEnabled {
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
             featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
+        }
+
+        @Test
+        fun `completing the payment journey successfully reaches the confirmation page when payments is enabled`(page: Page) {
+            val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments()
+            assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
+
+            checkAnswersPage.confirm()
+
+            completePropertyRegistrationPaymentSuccessfully(page)
         }
 
         @Test
@@ -544,7 +569,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.epcHeading).isVisible()
             // submit
             checkAnswersPage.confirm()
-            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
 
             // Confirmation - render page
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -764,7 +789,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
             // submit
             checkAnswersPage.confirm()
-            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
 
             // Confirmation - render page
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -1045,7 +1070,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Confirm Missing Compliance - submit
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
-            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
 
             // Confirmation - verify record saved
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
@@ -2062,7 +2087,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkAnswersPage.warning).isVisible()
             checkAnswersPage.confirm()
 
-            val confirmationPage = navigator.completePropertyRegistrationPaymentSuccessfully()
+            val confirmationPage = completePropertyRegistrationPaymentSuccessfully(page)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
             assertTrue(confirmationPage.lettingAgentSubHeading.isVisible)
@@ -2092,7 +2117,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            navigator.completePropertyRegistrationPaymentSuccessfully()
+            completePropertyRegistrationPaymentSuccessfully(page)
         }
 
         @Test
@@ -2112,7 +2137,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            navigator.completePropertyRegistrationPaymentSuccessfully()
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2157,7 +2182,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             confirmMissingCompliancePage.form.radios.selectValue("true")
             confirmMissingCompliancePage.form.submit()
 
-            navigator.completePropertyRegistrationPaymentSuccessfully()
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2338,7 +2363,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             val delegatedCheckAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             delegatedCheckAnswersPage.confirm()
-            navigator.completePropertyRegistrationPaymentSuccessfully()
+            completePropertyRegistrationPaymentSuccessfully(page)
 
             val propertyOwnershipCaptor = captor<PropertyOwnership>()
             verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
@@ -2547,7 +2572,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             checkAnswersPage.confirm()
 
-            navigator.completePropertyRegistrationPaymentSuccessfully()
+            completePropertyRegistrationPaymentSuccessfully(page)
         }
     }
 

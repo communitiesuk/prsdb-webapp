@@ -22,7 +22,7 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
 
     @Test
     fun `submitting check your answers routes to the payment summary step when payments is enabled`(page: Page) {
-        val checkAnswersPage = navigateToRestructuredCheckAnswersPage(page, "Submit and pay")
+        val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPageWithPayments()
 
         checkAnswersPage.confirm()
 
@@ -31,20 +31,10 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
     }
 
     @Test
-    fun `completing the payment journey successfully reaches the confirmation page when payments is enabled`(page: Page) {
-        val checkAnswersPage = navigateToRestructuredCheckAnswersPage(page, "Submit and pay")
-        assertThat(checkAnswersPage.sectionHeader).containsText("Submit and pay")
-
-        checkAnswersPage.confirm()
-
-        navigator.completePropertyRegistrationPaymentSuccessfully()
-    }
-
-    @Test
     fun `submitting check your answers routes straight to confirmation when payments is disabled`(page: Page) {
         featureFlagManager.disableFeature(PAYMENTS)
 
-        val checkAnswersPage = navigateToRestructuredCheckAnswersPage(page, "Check and submit your answers")
+        val checkAnswersPage = navigator.goToRestructuredPropertyRegistrationCheckAnswersPage()
         assertThat(checkAnswersPage.sectionHeader).containsText("Submit your registration")
 
         checkAnswersPage.confirm()
@@ -72,19 +62,5 @@ class PropertyRegistrationPaymentSinglePageTests : IntegrationTestWithMutableDat
         confirmMissingCompliancePage.form.submit()
 
         assertPageIs(page, ConfirmationPagePropertyRegistration::class)
-    }
-
-    private fun navigateToRestructuredCheckAnswersPage(
-        page: Page,
-        submitTaskName: String,
-    ): CheckAnswersPagePropertyRegistration {
-        val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
-                PropertyStateSessionBuilder
-                    .beforePropertyRegistrationCheckAnswers()
-                    .withBedrooms(),
-            )
-        taskListPage.clickSubmitYourRegistrationTaskWithName(submitTaskName)
-        return assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 }
