@@ -55,8 +55,7 @@ class OneLoginSimulatorContainer : AutoCloseable {
                         )
                         .put("identityVerificationSupported", true)
                         .put("idTokenSigningAlgorithm", "ES256")
-                        .put("clientLoCs", listOf("P0", "P2"))
-                        .put("token_auth_method", "private_key_jwt"),
+                        .put("clientLoCs", listOf("P0", "P2")),
                 )
 
         val request =
@@ -76,6 +75,7 @@ class OneLoginSimulatorContainer : AutoCloseable {
     }
 
     companion object {
+        // Release 26.09.4 is deliberately pinned for repeatable contract tests; update after reviewing simulator releases.
         private const val IMAGE =
             "ghcr.io/govuk-one-login/simulator@" +
                 "sha256:0d5e62c1db1c400c4881be2270b3f08aeb55c72ca3d9eb9a6e5196becef6f5e5"

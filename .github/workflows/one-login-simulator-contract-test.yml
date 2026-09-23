@@ -1,21 +1,10 @@
 name: One Login Simulator Contract Test
 on:
   workflow_call:
-    inputs:
-      environment:
-        description: "Deployment environment"
-        required: true
-        type: string
-    secrets:
-      NOTIFY_KEY:
-        required: false
-      NOTIFY_PRODUCTION_KEY:
-        required: false
 
 jobs:
   simulator-contract-test:
     name: One Login simulator contract test
-    if: inputs.environment == 'nft'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -38,7 +27,4 @@ jobs:
       - run: npm run build
 
       - name: Run official simulator contract tests
-        env:
-          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-          EMAILNOTIFICATIONS_PRODUCTION_APIKEY: ${{ secrets.NOTIFY_PRODUCTION_KEY }}
         run: ./gradlew oneLoginSimulatorContractTest --no-daemon --console=plain

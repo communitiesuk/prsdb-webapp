@@ -20,11 +20,12 @@ class OneLoginSimulatorPage(
     }
 
     fun submitIdentityVerificationFixture(
+        subject: String,
         coreIdentity: String,
         address: String,
         returnCodes: String,
     ) {
-        page.locator("[data-testid='sub']").fill("urn:fdc:gov.uk:2022:UVWXY")
+        page.locator("[data-testid='sub']").fill(subject)
         page.locator("[data-testid='core-identity-vc']").fill(coreIdentity)
         page.locator("[data-testid='postal-address-details']").fill(address)
         page.locator("[data-testid='return-codes']").fill(returnCodes)

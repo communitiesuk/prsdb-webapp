@@ -13,7 +13,27 @@ import uk.gov.communities.prsdb.webapp.integration.IntegrationTest
 abstract class OneLoginSimulatorIntegrationTestBase : IntegrationTest() {
     companion object {
         private val clientKeys = OneLoginSimulatorClientKeys.create()
-        val simulator = OneLoginSimulatorContainer().apply { start() }
+        val simulator = startSimulator()
+
+        private fun startSimulator(): OneLoginSimulatorContainer {
+            val simulator = OneLoginSimulatorContainer()
+            try {
+                simulator.start()
+                return simulator
+            } catch (startupFailure: Exception) {
+                try {
+                    simulator.close()
+                } catch (cleanupFailure: Exception) {
+                    startupFailure.addSuppressed(cleanupFailure)
+                }
+                try {
+                    clientKeys.close()
+                } catch (cleanupFailure: Exception) {
+                    startupFailure.addSuppressed(cleanupFailure)
+                }
+                throw startupFailure
+            }
+        }
 
         @JvmStatic
         @DynamicPropertySource

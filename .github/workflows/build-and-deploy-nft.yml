@@ -8,9 +8,6 @@ jobs:
   simulator-contract-test:
     name: One Login simulator contract test
     uses: ./.github/workflows/one-login-simulator-contract-test.yml
-    with:
-      environment: "nft"
-    secrets: inherit
 
   build-and-deploy-integration:
     name: Build and deploy

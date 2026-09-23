@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class OneLoginSimulatorIntegrationTest : OneLoginSimulatorIntegrationTestBase() {
+class OneLoginSimulatorIntegrationTests : OneLoginSimulatorIntegrationTestBase() {
     @Test
     fun `seeded landlord can authenticate through the official simulator`(page: Page) {
         page.navigate("http://localhost:$port/oauth2/authorization/one-login")
@@ -35,6 +35,7 @@ class OneLoginSimulatorIntegrationTest : OneLoginSimulatorIntegrationTestBase() 
         assertTrue(simulatorPage.claimsValue.contains("https://vocab.account.gov.uk/v1/returnCode"))
 
         simulatorPage.submitIdentityVerificationFixture(
+            subject = SEEDED_LANDLORD_SUBJECT,
             coreIdentity = readResource("one-login-simulator/core-identity.json"),
             address = readResource("one-login-simulator/address.json"),
             returnCodes = readResource("one-login-simulator/return-codes.json"),

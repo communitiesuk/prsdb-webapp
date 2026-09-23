@@ -231,6 +231,7 @@ tasks.register<JavaExec>("playwright") {
 tasks.register<Test>("testWithoutIntegration") {
     group = "verification"
     exclude("uk/gov/communities/prsdb/webapp/integration/**")
+    exclude("uk/gov/communities/prsdb/webapp/integration/oneLoginSimulator/**")
 }
 
 // Read .env file for local development configuration. The .env file is gitignored and only exists on developer
