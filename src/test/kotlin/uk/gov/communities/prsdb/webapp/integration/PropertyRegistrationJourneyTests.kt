@@ -26,8 +26,8 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -584,7 +584,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertTrue(propertyOwnershipCaptor.value.isOccupied)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-                assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
             assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
