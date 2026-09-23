@@ -24,6 +24,8 @@ const val PAYMENTS = "pdjb-1009-payments"
 
 const val PROPERTY_REGISTRATION_PHASE_TWO = "pdjb-939-property-registration-phase-two"
 
+const val LANDLORD_DASHBOARD_UPDATE = "pdjb-926-landlord-dashboard-update"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
@@ -34,4 +36,5 @@ val featureFlagNames =
         CORRESPONDENCE_ADDRESS,
         PAYMENTS,
         PROPERTY_REGISTRATION_PHASE_TWO,
+        LANDLORD_DASHBOARD_UPDATE,
     )
