@@ -18,11 +18,6 @@ fun <T : PropertyRegistrationJourneyState> JourneyBuilder<T>.whoProvidesChangeCy
             routeSegment(WhoProvidesRentalDetailsStep.ROUTE_SEGMENT)
             nextStep { journey.whoProvidesUpdateRoutingStep }
         }
-        step(task.lettingAgentEmailStep) {
-            routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
-            parents { journey.confirmChangeToLettingAgentStep.isComplete() }
-            nextStep { journey.finishCyaStep }
-        }
     }
     step<WhoProvidesUpdateRouteMode, WhoProvidesUpdateRoutingStepConfig>(journey.whoProvidesUpdateRoutingStep) {
         stepSpecificInitialisation {
@@ -43,5 +38,12 @@ fun <T : PropertyRegistrationJourneyState> JourneyBuilder<T>.whoProvidesChangeCy
             journey.whoProvidesUpdateRoutingStep.hasOutcome(WhoProvidesUpdateRouteMode.CHANGED_TO_LETTING_AGENT)
         }
         nextStep { journey.whoProvidesDetailsTask.lettingAgentEmailStep }
+    }
+    fromTask(journey.whoProvidesDetailsTask) {
+        step(task.lettingAgentEmailStep) {
+            routeSegment(LettingAgentEmailStep.ROUTE_SEGMENT)
+            parents { journey.confirmChangeToLettingAgentStep.isComplete() }
+            nextStep { journey.finishCyaStep }
+        }
     }
 }
