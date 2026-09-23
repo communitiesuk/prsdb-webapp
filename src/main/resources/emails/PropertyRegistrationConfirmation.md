@@ -26,7 +26,7 @@ Make a note of the Property Registration Number.
 
 ((missingDetailsList))
 
-((hasMissingDetails??To keep your property registered, provide these details within 28 days.))
+((hasMissingDetails??^ To keep your property registered, provide these details within 28 days.))
 
 ((hasDelegatedToLettingAgent??## You sent a request to your letting agent or property manager))
 
