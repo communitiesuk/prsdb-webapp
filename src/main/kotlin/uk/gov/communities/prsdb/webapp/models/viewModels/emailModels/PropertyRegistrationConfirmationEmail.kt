@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
 data class PropertyRegistrationConfirmationEmail(
     val prn: String,
-    val singleLineAddress: String,
+    val multiLineAddress: String,
     val prsdUrl: String,
     val isOccupied: Boolean,
     val jointLandlordEmails: List<String>? = null,
@@ -32,7 +32,7 @@ data class PropertyRegistrationConfirmationEmail(
         val baseMap =
             hashMapOf(
                 prnKey to prn,
-                addressKey to singleLineAddress,
+                addressKey to multiLineAddress,
                 prsdUrlKey to prsdUrl,
                 occupiedKey to if (isOccupied) "yes" else "no",
                 unoccupiedKey to if (!isOccupied) "yes" else "no",

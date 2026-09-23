@@ -149,7 +149,6 @@ class PropertyRegistrationService(
         sendConfirmationEmails(
             landlord,
             propertyOwnership,
-            addressModel,
             jointLandlordEmails,
             isDelegatedToLettingAgent,
             licenseProvideLater = licenseProvideLater,
@@ -221,7 +220,6 @@ class PropertyRegistrationService(
     private fun sendConfirmationEmails(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
-        addressModel: AddressDataModel,
         jointLandlordEmails: List<String>?,
         isDelegatedToLettingAgent: Boolean,
         licenseProvideLater: Boolean,
@@ -237,7 +235,7 @@ class PropertyRegistrationService(
                 RegistrationNumberDataModel
                     .fromRegistrationNumber(propertyOwnership.registrationNumber)
                     .toString(),
-                addressModel.singleLineAddress,
+                propertyOwnership.address.toMultiLineAddress(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
                 propertyOwnership.isOccupied,
                 jointLandlordEmails,

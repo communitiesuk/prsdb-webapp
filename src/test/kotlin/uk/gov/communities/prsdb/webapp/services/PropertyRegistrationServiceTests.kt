@@ -465,7 +465,7 @@ class PropertyRegistrationServiceTests {
             eq(landlord.email),
             argThat<PropertyRegistrationConfirmationEmail> { email ->
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
-                    email.singleLineAddress == expectedPropertyOwnership.address.singleLineAddress &&
+                    email.multiLineAddress == expectedPropertyOwnership.address.toMultiLineAddress() &&
                     email.prsdUrl == dashboardUri.toString() &&
                     email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
             },

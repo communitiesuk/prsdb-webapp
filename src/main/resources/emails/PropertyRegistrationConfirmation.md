@@ -4,7 +4,7 @@
 
 ^ ((property address))
 
-Property registration number:
+Property Registration Number:
 
 ((prn number))
 

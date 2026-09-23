@@ -152,7 +152,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             eq("alex.surname@example.com"),
             argThat<PropertyRegistrationConfirmationEmail> {
                 prn == expectedPrn &&
-                    singleLineAddress == expectedAddress &&
+                    multiLineAddress == expectedAddress &&
                     prsdUrl == absoluteLandlordUrl &&
                     isOccupied == expectedIsOccupied &&
                     jointLandlordEmails == expectedJointLandlordEmails &&
@@ -591,7 +591,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check confirmation email
             verifyConfirmationEmailSent(
                 expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "1 Fictional Road, FA1 1AA",
+                expectedAddress = "1 Fictional Road\nFA1 1AA",
                 expectedIsOccupied = true,
                 expectedJointLandlordEmails = listOf("email2@address.com"),
             )
@@ -817,7 +817,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check confirmation email
             verifyConfirmationEmailSent(
                 expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "Test address line 1, Testville, EG1 2AB",
+                expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
                 expectedIsOccupied = false,
                 expectedJointLandlordEmails = null,
             )
@@ -3011,7 +3011,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check confirmation email
             verifyConfirmationEmailSent(
                 expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "1 Fictional Road, FA1 1AA",
+                expectedAddress = "1 Fictional Road\nFA1 1AA",
                 expectedIsOccupied = true,
                 expectedJointLandlordEmails = listOf("email2@address.com"),
             )
@@ -3211,7 +3211,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check confirmation email
             verifyConfirmationEmailSent(
                 expectedPrn = expectedPropertyRegNum.toString(),
-                expectedAddress = "Test address line 1, Testville, EG1 2AB",
+                expectedAddress = "Test address line 1\nTestville\nEG1 2AB",
                 expectedIsOccupied = false,
                 expectedJointLandlordEmails = null,
             )
