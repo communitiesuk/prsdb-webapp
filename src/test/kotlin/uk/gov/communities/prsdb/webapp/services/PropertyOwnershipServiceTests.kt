@@ -3,11 +3,14 @@ package uk.gov.communities.prsdb.webapp.services
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -34,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.LandlordType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -98,15 +102,21 @@ class PropertyOwnershipServiceTests {
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
-    @Test
-    fun `createPropertyOwnership creates a property ownership`() {
+    @ParameterizedTest
+    @EnumSource(LandlordType::class)
+    fun `createPropertyOwnership creates a property ownership`(landlordType: LandlordType) {
         // Arrange
         val ownershipType = OwnershipType.FREEHOLD
         val households = 1
         val tenants = 2
         val isOccupied = true
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
-        val landlord = MockLandlordData.createIndividualLandlord()
+        val landlordAddress = MockLandlordData.createAddress("10 Landlord Road, EG1 1AB")
+        val landlord =
+            when (landlordType) {
+                LandlordType.INDIVIDUAL -> MockLandlordData.createIndividualLandlord(address = landlordAddress)
+                LandlordType.ORGANISATION -> MockLandlordData.createOrgLandlord(address = landlordAddress)
+            }
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
@@ -131,6 +141,8 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
+                correspondenceEmail = landlord.email,
+                correspondenceAddress = landlordAddress,
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -171,7 +183,10 @@ class PropertyOwnershipServiceTests {
         // Assert
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
+        assertTrue(
+            ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value),
+        )
+        assertSame(landlordAddress, propertyOwnershipCaptor.value.correspondenceAddress)
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
     }
 
@@ -206,6 +221,8 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = null,
+                correspondenceEmail = landlord.email,
+                correspondenceAddress = landlord.address,
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -243,7 +260,9 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
+        assertTrue(
+            ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value),
+        )
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
     }
 

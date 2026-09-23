@@ -186,11 +186,12 @@ class PropertyDetailsController(
             propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
                 ?: throw PrsdbWebException("Property ownership $propertyOwnershipId does not have a compliance record")
 
-        // TODO PDJB-1680: pass showCorrespondenceSection as appropriate
+        val showCorrespondenceSection = featureFlagManager.checkFeature(CORRESPONDENCE_ADDRESS)
+
         val (propertyDetails, viewName) =
             getPropertyDetailsViewModelAndView(
                 propertyOwnership,
-                showCorrespondenceSection = false,
+                showCorrespondenceSection,
                 isLandlordView = false,
             )
 

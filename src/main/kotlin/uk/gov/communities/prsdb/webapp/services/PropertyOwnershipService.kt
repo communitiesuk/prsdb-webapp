@@ -74,6 +74,7 @@ class PropertyOwnershipService(
         tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
+        val registeringLandlord = landlords.first()
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -87,6 +88,10 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
+                // TODO PDJB-1593: Use journey correspondence address and email when the flag is on; keep landlord defaults when off.
+                // TODO PDJB-1733: Remove the flag-off correspondence defaults.
+                correspondenceEmail = registeringLandlord.email,
+                correspondenceAddress = registeringLandlord.address,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
