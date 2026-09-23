@@ -7,70 +7,90 @@ applyTo: "**/database/**,**/db/migrations/**"
 ## Entity Conventions
 
 ### Base Classes
-- `AuditableEntity`: Adds `createdAt`, `createdBy` (immutable)
-- `ModifiableAuditableEntity`: Adds `modifiedAt`, `modifiedBy` (mutable)
+- [AuditableEntity](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/AuditableEntity.kt): Adds `createdDate: Instant`, with a protected setter and a non-null, non-updatable column.
+- [ModifiableAuditableEntity](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/ModifiableAuditableEntity.kt): Adds nullable `lastModifiedDate: Instant?` with a protected setter. `getMostRecentlyUpdated()` returns `lastModifiedDate ?: createdDate`.
+- Standard audited aggregates commonly use these bases and identity-generated `Long` IDs, but not every entity does.
+  [LandlordIncompleteProperties](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/LandlordIncompleteProperties.kt) uses `@EmbeddedId`;
+  [LocalCouncilUserOrInvitation](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/LocalCouncilUserOrInvitation.kt) maps a view with `@IdClass`. Neither inherits an audit base.
 
 ### Entity Structure
+Use constructors to initialise required state and preserve intentional setter visibility. For example,
+[LettingAgentAccess](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/LettingAgentAccess.kt):
+
 ```kotlin
 @Entity
-@Table(name = "example_table")
-class ExampleEntity : ModifiableAuditableEntity() {
-    
+class LettingAgentAccess(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0
-    
-    lateinit var name: String
-    
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    lateinit var parent: ParentEntity
-    
-    @OneToMany(mappedBy = "example", cascade = [CascadeType.ALL])
-    val children: MutableList<ChildEntity> = mutableListOf()
+    val id: Long = 0,
+) : ModifiableAuditableEntity() {
+    @Column(nullable = false, unique = true)
+    lateinit var token: UUID
+        private set
+
+    @Column(nullable = false)
+    lateinit var invitedEmail: String
+        private set
+
+    @OneToOne(optional = false)
+    @JoinColumn(name = "property_ownership_id", nullable = false, unique = true)
+    lateinit var propertyOwnership: PropertyOwnership
+        private set
+
+    constructor(
+        token: UUID,
+        invitedEmail: String,
+        propertyOwnership: PropertyOwnership,
+    ) : this() {
+        this.token = token
+        this.invitedEmail = invitedEmail
+        this.propertyOwnership = propertyOwnership
+    }
 }
 ```
 
+Keep mutable relationships encapsulated:
+[PropertyOwnership](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/entity/PropertyOwnership.kt)
+keeps `ownershipLinks: MutableSet<OwnershipLink>` private, exposes `landlords: Set<Landlord>`, and changes membership
+through `addLandlord`/`removeLandlord`. Match join columns, nullability and cascades to the actual relationship.
+
 ## Repository Patterns
+Use derived queries for simple lookups, and `@Query` or custom implementations where needed.
+[PropertyOwnershipRepository](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/repository/PropertyOwnershipRepository.kt)
+combines standard JPA access with a custom search interface:
+
 ```kotlin
-@Repository
-interface ExampleRepository : JpaRepository<ExampleEntity, Long> {
-    
-    fun findByName(name: String): ExampleEntity?
-    
-    @Query("SELECT e FROM ExampleEntity e WHERE e.parent.id = :parentId")
-    fun findByParentId(parentId: Long): List<ExampleEntity>
+interface PropertyOwnershipRepository :
+    JpaRepository<PropertyOwnership, Long>,
+    PropertyOwnershipSearchRepository {
+    fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 }
 ```
 
 ### Underscore Navigation
-Use underscores to traverse relationships in derived query method names:
+Use underscores to traverse relationships in derived query method names. Property ownerships link to landlords
+through `PropertyOwnership.ownershipLinks`:
 ```kotlin
-fun findByPrimaryLandlord_BaseUser_Id(userId: String): List<PropertyOwnership>
+fun findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 ```
 
 ### Custom Search Repositories
-For text search, use the interface + implementation pattern:
+`PropertyOwnershipSearchRepository` and `PropertyOwnershipSearchRepositoryImpl` (in the same
+[source file](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/database/repository/PropertyOwnershipSearchRepository.kt))
+are an interface + implementation example using `EntityManager` and native SQL, not a requirement for every repository.
+The current text-search signature is:
+
 ```kotlin
 interface PropertyOwnershipSearchRepository {
-    fun searchMatching(searchTerm: String, localCouncilId: Int): Page<PropertyOwnership>
+    fun searchMatching(
+        searchTerm: String,
+        localCouncilUserBaseId: String,
+        restrictToLocalCouncil: Boolean = false,
+        restrictToLicenses: Collection<LicensingType> = LicensingType.entries,
+        pageable: Pageable,
+    ): Page<PropertyOwnership>
 }
-
-class PropertyOwnershipSearchRepositoryImpl(
-    private val entityManager: EntityManager,
-) : PropertyOwnershipSearchRepository {
-    // Uses native SQL with pg_trgm for text search
-    // Dual index strategy (GIN for small results, GIST for large)
-}
-```
-
-The main repository extends both `JpaRepository` and the custom search interface:
-```kotlin
-@Repository
-interface PropertyOwnershipRepository :
-    JpaRepository<PropertyOwnership, Long>,
-    PropertyOwnershipSearchRepository { }
 ```
 
 ## Flyway Migrations
@@ -79,27 +99,34 @@ interface PropertyOwnershipRepository :
 `V<major>_<minor>_<fix>__<descriptive_name>.sql`
 
 Examples:
-- `V1_0_0__create_landlord_table.sql`
-- `V1_1_0__add_property_compliance.sql`
-- `V1_1_1__fix_column_type.sql`
+- `V1_0_0__la_and_address_tables.sql`
+- `V1_7_1__update_bills_included_list_property_ownership_table.sql`
+- `V1_49_0__create_letting_agent_access_table.sql`
 
 ### Migration Location
 `src/main/resources/db/migrations/`
 
 ### Migration Content
 ```sql
--- V1_2_0__add_example_table.sql
+-- Template for a modifiable audited entity
 CREATE TABLE example_table (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    created_by VARCHAR(255),
-    modified_at TIMESTAMP,
-    modified_by VARCHAR(255)
+    created_date TIMESTAMPTZ(6) DEFAULT current_timestamp NOT NULL,
+    last_modified_date TIMESTAMPTZ(6)
 );
 
 CREATE INDEX idx_example_name ON example_table(name);
 ```
+
+Include `last_modified_date` only when the entity tracks modifications. See
+[V1_49_0](../../src/main/resources/db/migrations/V1_49_0__create_letting_agent_access_table.sql) for the identity/audit columns and
+[V1_41_0](../../src/main/resources/db/migrations/V1_41_0__use_timezone_aware_ownership_link_timestamps.sql) for timezone-aware timestamp conversion.
+
+When adding required columns to populated tables, add and backfill them before enforcing `NOT NULL`.
+Preserve existing data when replacing keys or relationships. For example,
+[V1_48_0](../../src/main/resources/db/migrations/V1_48_0__migrate_landlord_incomplete_properties_to_user.sql)
+backfills `user_id` before making it non-null and changing the composite key.
 
 ### Reference Data in Migrations
 
@@ -112,5 +139,6 @@ A migration that renames a preserved table must update `PRESERVED_TABLES` too, o
 truncated. `IntegrationTestHelperTests` covers this.
 
 ## Search with Trigrams
-- Use `pg_trgm` extension for fuzzy text search
-- See existing search implementations for patterns
+- Existing fuzzy address searches use PostgreSQL's `pg_trgm` extension.
+- Property search chooses GIN for smaller result sets and GiST for larger ones in `PropertyOwnershipSearchRepositoryImpl`.
+  This is a search-specific optimisation; consult the existing queries and indexes rather than requiring both indexes everywhere.

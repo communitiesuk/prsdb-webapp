@@ -13,100 +13,112 @@ If a wider refactor is justified, it may be mentioned but should not block the r
 
 ## Spring Annotations
 
-The project defines custom stereotype annotations that wrap standard Spring annotations with a
-`@Conditional(WebServerOnly::class)` guard. These exist so that web components are not loaded when the application
-runs in task-runner mode. Code should use:
+Choose stereotypes by the bean's purpose and lifecycle. The web wrappers use
+`@Conditional(WebServerOnly::class)` so web-only components are not loaded in task mode:
 
 - `@PrsdbController` instead of `@Controller`
 - `@PrsdbWebService` instead of `@Service`
 - `@PrsdbWebComponent` instead of `@Component`
 - `@PrsdbWebConfiguration` instead of `@Configuration`
 
-For scheduled task components, the equivalents are `@PrsdbTask` and `@PrsdbScheduledTask`.
+For task-only collaborators, use `@PrsdbTaskService` and `@PrsdbTaskConfiguration`. `@PrsdbTask` and
+`@PrsdbScheduledTask` are runner annotations, not substitutes for every task-mode bean.
 
-Any new controller, service, component, or configuration class that uses a bare Spring stereotype annotation instead
-of the project wrapper is a review finding.
+Shared web/task beans legitimately use plain Spring stereotypes: examples include `AuditingConfig`, `NotifyConfig`,
+`FeatureFlagConfig`, `NotifyEmailNotificationService` and `AbsoluteUrlProvider`. Flag an inappropriate lifecycle,
+not the presence of a bare annotation alone. Replacing a shared bean with a web-only wrapper can break tasks.
 
 ## Dependency Injection
 
-All dependencies are injected via constructor parameters. There should be no use of `@Autowired` on fields or setters.
+Production services and controllers use constructor injection, not `@Autowired` fields or setters.
 Constructor parameters should be `private val` unless there is a specific reason to expose them.
+Spring test fixtures legitimately use injected fields, `@MockitoBean` and `@MockitoSpyBean`; do not apply the
+production injection rule to those fixtures.
 
 ## Controllers
 
 Controllers follow this structure:
 
 - Annotated with `@PrsdbController` (not `@Controller`)
-- Role-based access via `@PreAuthorize("hasAnyRole('LANDLORD')")` or equivalent at the class level
+- Role-based access at class level for uniform permissions, or method level for mixed-role controllers
 - `@RequestMapping` for the base URL path
 - Dependencies injected via constructor
 
-If a new controller or endpoint is added without a `@PreAuthorize` annotation, or uses a bare `@Controller`, flag it.
+Review effective security-chain matching, class/method authorisation and service-owned resource access checks.
+Public registration, invitation and local mock endpoints intentionally differ from protected pages; absence of a
+`@PreAuthorize` token alone is not a finding. Controllers must invoke the appropriate service guard before
+dispatching protected operations.
 
 ## Journey Framework
 
-The journey framework is the project's custom multi-step form system. It has a specific component hierarchy:
-
-```
-Journey → Section → Task → Step → Page
-```
+The journey framework assembles directed graphs using the journey-builder DSL. Journeys can contain steps directly
+or reusable task subjourneys, with optional flat sections. Requestable steps use configurations, form models and
+templates, not a `Page` subclass. See [journeys.instructions.md](journeys.instructions.md).
 
 Key patterns to check:
 
-- **StepId enums** implement `StepId` or `GroupedStepId<T>` and define `urlPathSegment` values
-- **Step configurations** extend `AbstractRequestableStepConfig` and are annotated with `@JourneyFrameworkComponent`
-- **Step classes** extend `RequestableStep` and are annotated with `@JourneyFrameworkComponent`, with a companion
-  object defining the `ROUTE_SEGMENT` constant
-- **Journey factories** are annotated with `@PrsdbWebService` and use the journey builder DSL
-- **Form models** implement `FormModel` and are annotated with `@IsValidPrioritised`
+- **Requestable steps** pair `AbstractRequestableStepConfig` with `JourneyStep.RequestableStep` and a companion
+  `ROUTE_SEGMENT`; enums express modes/outcomes, not step identifiers
+- **Internal steps** use `AbstractInternalStepConfig` and `JourneyStep.InternalStep`, with no request URL
+- **Stateful framework components** use prototype-scoped `@JourneyFrameworkComponent`
+- **Navigation and reachability** are configured separately through destinations and parentage
+- **Journey factories** use the DSL and fresh state; `@PrsdbWebService` is common, but prototype factories also exist
+- **Journey form models** implement `FormModel`; prioritised validation requires `@IsValidPrioritised`
 
-New journey code that does not follow this hierarchy, or that skips the builder DSL in favour of manual wiring,
-is a review finding.
+Flag bypasses of the established builder/state lifecycle, not omission of an optional task or section.
+Flag-off and restructured flows can coexist within this same framework.
 
 ## Validation
 
-The project uses a custom prioritised validation framework rather than standard Bean Validation annotations like
-`@NotBlank` or `@Size`. The pattern is:
+Prefer the custom prioritised validation framework for new form validation. The pattern is:
 
 1. Annotate the form model class with `@IsValidPrioritised`
-2. Annotate individual properties with `@ValidatedBy`, specifying one or more `ConstraintDescriptor` entries
+2. Use `@ValidatedBy` or an existing composed validation annotation on properties
 3. Each `ConstraintDescriptor` references a `messageKey` (for i18n error messages) and a `validatorType`
-   (a `PrioritisedConstraintValidator` implementation)
+   that is a subtype of `PrioritisedConstraintValidator`
 
-New form models that use standard Bean Validation annotations instead of `@ValidatedBy` / `@IsValidPrioritised` are
-a review finding. Validation error messages should always use message keys from the messages properties file, not
-hardcoded strings.
+Value validators implement `PropertyConstraintValidator`; delegated constraints use
+`DelegatedPropertyConstraintValidator::class` and a no-argument Boolean `targetMethod`. Existing live forms also
+contain Jakarta constraints, sometimes mixed with prioritised constraints; do not demand unrelated migrations.
+Check new validation against the prioritised default and relevant form family.
+Validation errors use YAML message keys, not hardcoded human-readable strings.
 
 ## Entities and Auditing
 
-All JPA entities should extend one of:
+Ordinary audited domain entities extend one of:
 
 - `AuditableEntity` — provides an auto-populated `createdDate`
 - `ModifiableAuditableEntity` — extends the above with `lastModifiedDate`
 
-Most entities that are updated after creation should extend `ModifiableAuditableEntity`. New entities that do not
-extend either base class, or that define their own timestamp fields, are a review finding.
+Entities updated after creation generally use `ModifiableAuditableEntity`. Check the mapping's role before flagging
+a missing superclass: composite-key/link and projection mappings such as `LandlordIncompleteProperties` and
+`LocalCouncilUserOrInvitation` have different established contracts. Do not duplicate audit fields on ordinary entities.
 
-Entity properties that should not be set externally should use `private set`.
+Use restricted setters for properties that must not be set externally, and preserve encapsulated relationship
+collections and their mutation methods.
 
 ## Services and Transactions
 
-- Services are annotated with `@PrsdbWebService` (not `@Service`)
-- Methods that write to the database should be annotated with `@Transactional`
+- Services use the lifecycle-appropriate stereotype described above
+- Database mutations need appropriate transaction boundaries; the established annotation is `jakarta.transaction.Transactional`
+- Managed-entity dirty checking is valid; an explicit repository `save()` is not required for every update
 - Service methods should not catch and silently swallow exceptions from repository calls
+- Preserve stale-update checks and use the existing after-commit helper for side effects that depend on a successful commit
 
 ## Feature Flags
 
 Feature flags use FF4J. The patterns are:
 
-- **Endpoint-level**: `@AvailableWhenFeatureEnabled("FLAG_NAME")` or `@AvailableWhenFeatureDisabled("FLAG_NAME")`
+- **Endpoint-level**: `@AvailableWhenFeatureEnabled(FLAG_NAME)` or `@AvailableWhenFeatureDisabled(FLAG_NAME)`
   on controller methods
-- **Bean-level**: `@PrsdbFlip(name = "FLAG_NAME", alterBean = "bean-name")` on interface methods, with separate
+- **Bean-level**: supported `@PrsdbFlip(name = FLAG_NAME, alterBean = "bean-name")` on interface methods, with separate
   flag-on and flag-off implementation beans
-- **Programmatic**: `featureFlagManager.checkFeature("FLAG_NAME")` in service or controller logic
+- **Programmatic**: `featureFlagManager.checkFeature(FLAG_NAME)` in service or controller logic
 
 Flag names should be defined as constants, not inline strings. New feature-flagged code should follow whichever
 of the above patterns is most appropriate for the scope of the flag.
+Check registration lists and profile configuration together. Session overrides are development-only by policy and
+property-gated; do not assume an environment-level production guard exists.
 
 ## Database Migrations
 
@@ -115,7 +127,7 @@ Flyway migrations follow the naming convention `V<MAJOR>_<MINOR>_<PATCH>__<descr
 
 Review points:
 
-- New tables should include `created_date TIMESTAMPTZ(6) DEFAULT current_timestamp NOT NULL` at minimum,
+- New audited domain tables should include `created_date TIMESTAMPTZ(6) DEFAULT current_timestamp NOT NULL` at minimum,
   and `last_modified_date TIMESTAMPTZ(6)` if the entity is modifiable
 - Column types should be consistent with existing tables (e.g. `TIMESTAMPTZ(6)` for timestamps, `BIGINT` for IDs
   with `GENERATED BY DEFAULT AS IDENTITY`)
@@ -127,14 +139,17 @@ Review points:
 The project has several test layers:
 
 - **Unit tests**: JUnit 5 with Mockito Kotlin. Use `@MockitoBean` for Spring-managed mocks.
-- **Controller tests**: `@WebMvcTest` extending the `ControllerTest` base class, which sets up MockMvc with
-  security configuration. New controller tests that do not extend `ControllerTest` may be missing security
-  filter setup.
-- **Integration tests**: Playwright-based, using TestContainers for PostgreSQL. Base classes
+- **Controller tests**: `@WebMvcTest` extending `ControllerTest` directly or through a shared intermediate base.
+  Check inherited security/filter setup rather than requiring direct inheritance.
+- **Browser integration tests**: Playwright-based, using shared Testcontainers for PostgreSQL and Redis. Base classes
   (`IntegrationTest`, `IntegrationTestWithMutableData`, `IntegrationTestWithImmutableData`) handle DB lifecycle.
-  Integration tests that do not extend the appropriate base class are a review finding.
+  Page transitions should use the existing page-creation helpers, preserving URL and accessibility assertions.
+- **Journey unit tests**: configurations, routing, tasks and state can be exercised without a browser or Spring context
+- **Other tests**: context tests can live outside the integration package; frontend tests use Node rather than JUnit
 
-Test method names use backtick-quoted descriptive strings (e.g. `` `submitting feedback escapes brackets and redirects` ``).
+Prefer backtick-quoted descriptive Kotlin test names (e.g. `` `submitting feedback escapes brackets and redirects` ``).
+Existing conventional names such as `contextLoads`, `kotlin.test` assertions and suitable Jupiter parameter sources
+are not reasons for unrelated rewrites.
 
 ## Security
 
@@ -144,7 +159,7 @@ Beyond `@PreAuthorize` on controllers, review for:
   custom AJAX calls or REST endpoints need explicit handling)
 - No secrets, API keys, or credentials in source code
 - New routes: any new URL pattern must be covered by the appropriate security filter chain
-  (`LandlordSecurityConfig`, `LocalCouncilSecurityConfig`, or `DefaultSecurityConfig`)
+  (`LandlordSecurityConfig`, `LocalCouncilSecurityConfig`, `LettingAgentSecurityConfig`, or `DefaultSecurityConfig`)
 
 ## What Not to Flag
 

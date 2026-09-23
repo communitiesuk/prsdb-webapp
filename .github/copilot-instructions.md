@@ -10,30 +10,33 @@ Context-aware instructions are available for different parts of the codebase. Th
 
 | Instruction File | Applies To |
 |------------------|------------|
-| [journeys.instructions.md](instructions/journeys.instructions.md) | `journeys/`, `forms/` |
+| [journeys.instructions.md](instructions/journeys.instructions.md) | Kotlin `journeys/`, journey component annotation |
 | [controllers.instructions.md](instructions/controllers.instructions.md) | `controllers/` |
 | [services.instructions.md](instructions/services.instructions.md) | `services/` |
 | [database.instructions.md](instructions/database.instructions.md) | `database/`, `db/migrations/` |
-| [integration-tests.instructions.md](instructions/integration-tests.instructions.md) | `integration/` tests |
-| [unit-tests.instructions.md](instructions/unit-tests.instructions.md) | Unit tests (`src/test/`) |
-| [frontend.instructions.md](instructions/frontend.instructions.md) | `templates/`, `css/`, `js/` |
-| [feature-flags.instructions.md](instructions/feature-flags.instructions.md) | `featureFlags/`, flag annotations |
-| [validation.instructions.md](instructions/validation.instructions.md) | `validation/` |
+| [integration-tests.instructions.md](instructions/integration-tests.instructions.md) | Browser tests, shared integration fixtures, session builders and test resources |
+| [unit-tests.instructions.md](instructions/unit-tests.instructions.md) | Kotlin tests, with guidance by test layer |
+| [frontend.instructions.md](instructions/frontend.instructions.md) | `templates/`, `css/`, `js/`, assets and root frontend build files |
+| [feature-flags.instructions.md](instructions/feature-flags.instructions.md) | Runtime flag configuration, annotations, constants, overrides and flag tests |
+| [validation.instructions.md](instructions/validation.instructions.md) | Validators, request models and composed validation annotations |
 | [models.instructions.md](instructions/models.instructions.md) | `models/` (dataModels, requestModels, viewModels) |
 | [messages.instructions.md](instructions/messages.instructions.md) | `messages/` (i18n YAML files) |
-| [exceptions.instructions.md](instructions/exceptions.instructions.md) | `exceptions/` |
+| [exceptions.instructions.md](instructions/exceptions.instructions.md) | Exceptions, journey exceptions and error-handling guidance |
 | [helpers.instructions.md](instructions/helpers.instructions.md) | `helpers/`, `extensions/`, `converters/` |
 | [clients.instructions.md](instructions/clients.instructions.md) | `clients/` (external API clients) |
 | [constants.instructions.md](instructions/constants.instructions.md) | `constants/`, `enums/` |
-| [config.instructions.md](instructions/config.instructions.md) | `config/`, `security/`, `filters/`, `interceptors/` |
-| [scheduled-tasks.instructions.md](instructions/scheduled-tasks.instructions.md) | `application/` (scheduled task runners) |
+| [config.instructions.md](instructions/config.instructions.md) | Runtime configuration, security, filters, interceptors, bootstrap and application YAML |
+| [scheduled-tasks.instructions.md](instructions/scheduled-tasks.instructions.md) | `application/` runners and task annotations/conditions |
+| [emails.instructions.md](instructions/emails.instructions.md) | Email Markdown/metadata, personalization models and Notify contract tests |
+| [build-ci.instructions.md](instructions/build-ci.instructions.md) | Gradle, root frontend build configuration and GitHub workflows |
+| [reviewing-code.instructions.md](instructions/reviewing-code.instructions.md) | Cross-cutting review priorities |
 
 ## Important: Follow Existing Patterns
 
 Before implementing new functionality, search the codebase for similar examples and follow the established patterns. This codebase has well-defined conventions for:
 - Controllers and their corresponding tests
 - Services and repository interactions
-- Multi-step form journeys (see `forms/` and `journeys/` packages)
+- Multi-step form journeys (see `journeys/`, request form models and shared templates)
 - Integration tests with page objects
 - Feature flags and conditional behaviour
 - Local API stubs for third-party services
@@ -75,11 +78,11 @@ worktree and runs `npm install`.
 
 **PowerShell** (use `.\gradlew`):
 ```powershell
-.\gradlew build                  # Build (includes compiling frontend assets via npm)
-.\gradlew test                   # Run all tests
-.\gradlew testWithoutIntegration # Run unit tests only (no Docker needed)
+.\gradlew build                  # Full build/check lifecycle, including frontend assets
+.\gradlew test                   # JVM tests, including integration tests
+.\gradlew testWithoutIntegration # Excludes the integration package; some tests still need Docker
 .\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests"          # Single test class
-.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.someTest" # Single test method
+.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.index returns a redirect for unauthenticated user"
 .\gradlew ktlintCheck            # Lint with Ktlint
 .\gradlew ktlintFormat           # Auto-format with Ktlint
 npm test                         # Run frontend JS tests
@@ -88,18 +91,20 @@ npm run build                    # Build frontend assets only
 
 **Bash** (use `./gradlew`):
 ```bash
-./gradlew build                  # Build (includes compiling frontend assets via npm)
-./gradlew test                   # Run all tests
-./gradlew testWithoutIntegration # Run unit tests only (no Docker needed)
+./gradlew build                  # Full build/check lifecycle, including frontend assets
+./gradlew test                   # JVM tests, including integration tests
+./gradlew testWithoutIntegration # Excludes the integration package; some tests still need Docker
 ./gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests"          # Single test class
-./gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.someTest" # Single test method
+./gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.index returns a redirect for unauthenticated user"
 ./gradlew ktlintCheck            # Lint with Ktlint
 ./gradlew ktlintFormat           # Auto-format with Ktlint
 npm test                         # Run frontend JS tests
 npm run build                    # Build frontend assets only
 ```
 
-Integration tests require Docker running (uses testcontainers for PostgreSQL).
+Container-backed tests require Docker for shared PostgreSQL and Redis containers, including some context tests outside
+the `integration` package. JVM compilation/testing also builds and copies frontend assets, so Node/npm and frontend
+dependencies are prerequisites. Node tests run separately. See [build-ci.instructions.md](instructions/build-ci.instructions.md).
 
 ## Line Endings
 
@@ -125,46 +130,50 @@ The webapp is a Kotlin Spring Boot application using Thymeleaf templates with th
 ### Package Structure
 - `annotations/` - Custom Spring annotations (`@PrsdbController`, `@PrsdbWebService`, `@PrsdbRestController`, `@PrsdbTaskService`, `@PrsdbWebComponent`, etc.)
 - `application/` - Scheduled task runners
-- `clients/` - External API clients (EPC Register, OS Downloads)
+- `clients/` - External HTTP/SDK adapters and profile-selected stubs
 - `config/` - Spring configuration, security, filters, interceptors
 - `constants/` - Constants and domain enums
 - `controllers/` - HTTP endpoints
-- `database/entity/` and `database/repository/` - JPA entities and repositories
+- `database/entity/`, `database/repository/`, `database/dao/` - JPA mappings, repositories and bulk-loading data access
 - `exceptions/` - Custom exception classes
-- `forms/` - Multi-step form page classes (`AbstractPage` hierarchy)
 - `helpers/` - Converters, extension functions, utility helpers
-- `journeys/` - Journey state management with step-by-step flow
+- `journeys/` - Graph-based journey DSL, steps/configurations, reusable tasks and typed state
 - `local/api/` - Local development stubs for third-party APIs (annotated with `@Profile("local")`)
 - `models/` - Data models, request/form models, view models
 - `services/` - Business logic
 - `validation/` - Custom validation framework (`@ValidatedBy` + `PropertyConstraintValidator`)
 
 ### Custom Annotations
-The project uses custom Spring annotations instead of plain Spring annotations:
+Choose annotations by purpose and lifecycle:
 - `@PrsdbController` / `@PrsdbRestController` — for controllers
 - `@PrsdbWebService` / `@PrsdbTaskService` — for services
-- `@PrsdbWebComponent` — for journey factories and other components
+- `@PrsdbWebComponent` — for web-only components
+- `@JourneyFrameworkComponent` — for prototype-scoped journey components
 - `@PrsdbWebConfiguration` / `@PrsdbTaskConfiguration` — for config beans
 - `@PrsdbControllerAdvice` — for exception handlers
 
+Web wrappers exclude beans when `web-server-deactivated` is active; task wrappers require that profile.
+Intentionally shared beans, such as Notify, auditing and feature configuration, retain plain Spring stereotypes.
+Runner annotations (`@PrsdbTask` / `@PrsdbScheduledTask`) are distinct from task service/configuration wrappers.
+
 ### Multi-Step Form Framework ("Journeys")
-Complex forms use a journey framework with step-by-step flows. See `journeys.instructions.md` for full details.
-
-Journey hierarchy: `Journey` → `JourneyWithTaskList` → `UpdateJourney` → `GroupedUpdateJourney`
-
-Page hierarchy: `AbstractPage` → `Page`, `PageWithContentProvider`, `FileUploadPage`, `CheckAnswersPage`
-
-Journeys are instantiated via factory classes annotated with `@PrsdbWebComponent`.
+Complex forms use `JourneyBuilder.journey(state)` to assemble requestable/internal steps and reusable task subjourneys,
+optionally grouped into sections. Factories provide routing maps to `JourneyStepDispatcher`; navigation destinations
+and parentage/reachability are separate concerns. Requestable configurations bind form models and render templates.
+See [journeys.instructions.md](instructions/journeys.instructions.md) for state, prototype scope and current examples.
 
 ### Feature Flags (FF4J)
 Feature flags are configured in `application.yml` under `features`. See `feature-flags.instructions.md` for full details.
 - `@AvailableWhenFeatureEnabled` / `@AvailableWhenFeatureDisabled` on endpoints
-- `@PrsdbFlip` for service method switching
+- `FeatureFlagManager.checkFeature` for runtime decisions; `@PrsdbFlip` also supports service switching
 - Flag names in `FeatureFlagNames.kt`, release names in `FeatureFlagReleaseNames.kt`
-- Strict startup validation ensures YAML config and code constants stay in sync
+- Startup validation compares bound flag/release configuration with the registered name lists
+- Session overrides are development-only by policy and disabled in base configuration; their guard is property-based
 
 ### Authentication
-Uses GOV.UK One Login OAuth2. For local development, the `local-no-auth` profile provides a mock that auto-authenticates with all roles.
+Uses GOV.UK One Login and, for local councils, Internal Access OAuth2. `local-no-auth` uses local mock providers;
+roles still depend on the selected user's database records and the relevant security-chain role mapper. The default
+seeded One Login user supports all four roles, but alternative identities, seed data and callback routes can differ.
 
 ## Conventions
 
@@ -172,20 +181,24 @@ Uses GOV.UK One Login OAuth2. For local development, the `local-no-auth` profile
 Flyway migrations go in `src/main/resources/db/migrations/` with naming: `V<major>_<minor>_<fix>__<name>.sql`. See `database.instructions.md` for entity and repository patterns.
 
 ### Frontend Assets
-Uses GOV.UK Frontend 5.11.0 + Ministry of Justice Frontend 3.3.1. See `frontend.instructions.md` for templates, SCSS, JS, and fragment conventions.
+Uses GOV.UK Frontend and Ministry of Justice Frontend, with versions in `package.json` / `package-lock.json`.
+See [frontend.instructions.md](instructions/frontend.instructions.md) for templates, SCSS, JS and fragments.
 
 ### Integration Tests
-Tests use Playwright (`@UsePlaywright`) with page object pattern and 35+ reusable components. See `integration-tests.instructions.md` for base classes, Navigator, and naming conventions.
+Browser tests use Playwright (`@UsePlaywright`), shared page objects/components and accessibility assertions.
+See [integration-tests.instructions.md](instructions/integration-tests.instructions.md) for fixtures and Navigator patterns.
 
 ### Email Templates
 Email templates are markdown files in `src/main/resources/emails/`. Template IDs for Notify service are configured in `emailTemplates.json`.
+See [emails.instructions.md](instructions/emails.instructions.md) for personalization, remote template versioning and contract checks.
 
 ### Spring Profiles
 - `local` - Local development with Docker Compose dependencies
-- `local-no-auth` - Mock One Login authentication
+- `local-no-auth` - Local mock OAuth2 providers
+- `local-org-landlord` - Alternative organisational-landlord mock identity
 - `local-auth` - Real One Login integration environment
 - `use-notify` - Enable real email sending via Notify
-- `web-server-deactivated` + `scheduled-task` - Run scheduled tasks locally
+- `web-server-deactivated` + `scheduled-task` + the exact task-name profile - Select a scheduled runner
 
 ### Pull requests
 When creating a pull request, use the template defined in [pull_request_template.md](pull_request_template.md).

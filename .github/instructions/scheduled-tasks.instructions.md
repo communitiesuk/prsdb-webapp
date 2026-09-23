@@ -1,5 +1,5 @@
 ---
-applyTo: "**/application/**"
+applyTo: "**/application/**,**/annotations/taskAnnotations/**"
 ---
 
 # Scheduled Tasks Instructions
@@ -11,26 +11,42 @@ Scheduled tasks are ephemeral application runners that spin up, execute, and exi
 ## Task Runner Pattern
 
 ```kotlin
-@PrsdbScheduledTask("my-task-name")
-class MyTaskRunner(
+@PrsdbScheduledTask("my-task-scheduled-task")
+class MyTaskApplicationRunner(
     private val context: ApplicationContext,
-    private val myService: MyService,
+    private val taskLogic: MyTaskLogic,
 ) : ApplicationRunner {
-
     override fun run(args: ApplicationArguments?) {
-        myService.doWork()
+        taskLogic.doWork() // Returns to the runner after the transaction completes
 
         val code = SpringApplication.exit(context, { 0 })
         exitProcess(code)
+    }
+}
+
+@PrsdbTaskService
+class MyTaskLogic(
+    private val myService: MyService,
+) {
+    @Transactional
+    fun doWork() {
+        myService.doWork()
     }
 }
 ```
 
 **Key points:**
 - Annotate with `@PrsdbScheduledTask("task-name")` — this combines `@Component`, `@TaskName`, and conditional activation
-- The task **must** call `SpringApplication.exit()` and `exitProcess()` at the end
-- Inject services for business logic — keep the runner thin
+- After successful work (or a completed batch), call `SpringApplication.exit()` and `exitProcess()` with the appropriate code
+- Keep the runner thin. A separate, injected `@PrsdbTaskService` task-logic collaborator can own `@Transactional` work,
+  returning/committing **before** the runner exits. Do not terminate the process inside a transaction or annotate `run()`
+  as transactional and exit before its proxy can commit.
 - The task **must exit with a non-zero exit code if any error occurs during execution** — see [Error Handling and Exit Codes](#error-handling-and-exit-codes)
+
+This transaction boundary is used by
+[DeleteIncompletePropertiesTaskApplicationRunner](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/application/DeleteIncompletePropertiesTaskApplicationRunner.kt),
+[DeleteExpiredJointLandlordInvitationsTaskApplicationRunner](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/application/DeleteExpiredJointLandlordInvitationsTaskApplicationRunner.kt)
+and [JointLandlordInvitationExpiryEmailTaskApplicationRunner](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/application/JointLandlordInvitationExpiryEmailTaskApplicationRunner.kt).
 
 ## Error Handling and Exit Codes
 
@@ -75,33 +91,44 @@ override fun run(args: ApplicationArguments?) {
 ```
 
 **Do not** silently swallow exceptions and exit 0 — a caught-and-logged error that still exits 0 will not raise an
-alarm and the failure will go unnoticed.
+alarm and the failure will go unnoticed. Never put a blanket successful exit in `finally`; it can mask the original failure.
 
 > **Note on `@Transactional` batch tasks:** prefer *returning* a failure count over *throwing* after a partially
-> successful batch. Throwing out of a `@Transactional` method rolls back the whole transaction, undoing the work that
-> did succeed. Returning the count lets the successful work commit while the runner still exits non-zero.
+> successful batch. Throwing to signal failures can roll back successful work. Return the count from the transactional
+> collaborator so valid successes can commit before the runner exits non-zero. Returning a count cannot rescue a transaction
+> already marked rollback-only; choose per-item transaction boundaries where necessary.
 
 ## Custom Annotations
 
-| Annotation | Purpose |
-|-----------|---------|
-| `@PrsdbScheduledTask` | For scheduled (recurring) tasks — requires `web-server-deactivated` + `scheduled-task` profiles and a task-specific profile |
-| `@PrsdbTask` | For one-time/event-triggered tasks — requires `web-server-deactivated` profile only |
-| `@PrsdbTaskService` | For services only loaded during task execution |
-| `@PrsdbTaskConfiguration` | For task-specific configuration beans |
-| `@TaskOnly` | Conditional bean annotation — only available during task execution |
+| Annotation / condition | Purpose |
+|------------------------|---------|
+| `@PrsdbScheduledTask("name")` | Requires `web-server-deactivated`, `scheduled-task` and the exact `name` profile |
+| `@PrsdbTask("name")` | One-time/event-triggered runner; requires `web-server-deactivated` and the exact `name` profile |
+| `@PrsdbTaskService` | Task-mode service; guarded only by `TaskOnly`, not a particular task name |
+| `@PrsdbTaskConfiguration` | Task-mode configuration; guarded only by `TaskOnly` |
+| `TaskOnly` | Spring `Condition` implementation checking `web-server-deactivated`; **not** an `@TaskOnly` annotation |
 
 ## Profile-Based Activation
 
-Tasks are conditionally loaded via profiles to prevent them running in web server mode:
-- `web-server-deactivated` — disables the web server
-- `scheduled-task` — enables scheduled task runners
-- Task-specific profile (e.g. `incomplete-property-reminder-scheduled-task`)
+[TaskHasName / ScheduledTaskHasName](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/annotations/taskAnnotations/TaskHasName.kt)
+control runner activation:
+- `web-server-deactivated` is required for both runner types and disables the web server via `application.yml`.
+- `scheduled-task` is additionally required for scheduled runners.
+- A non-blank annotation name must exactly match an active task-specific profile.
+- A blank name bypasses **only the name check**, not the task-mode or scheduled-mode checks.
 
-For local testing, activate all required profiles:
-```
+For the example above, the matching local profile set is:
+```text
 web-server-deactivated, scheduled-task, local, my-task-scheduled-task
 ```
+
+Activate one intended task-name profile per process. Multiple task profiles do not form a batch: each runner exits the
+process, so later runners will not execute.
+
+[DefaultScheduledTaskApplicationRunner](../../src/main/kotlin/uk/gov/communities/prsdb/webapp/application/DefaultScheduledTaskApplicationRunner.kt)
+has a blank name and `Ordered.LOWEST_PRECEDENCE`. It is always eligible in scheduled task mode, **not**
+`@ConditionalOnMissingBean`. If reached (no selected runner, or a runner returned without exiting), it logs the
+configuration failure and exits **1**.
 
 ## Infrastructure
 
@@ -115,15 +142,20 @@ In production, tasks are triggered by **EventBridge Scheduler** which spins up e
 | `NgdAddressUpdateTaskApplicationRunner` | `@PrsdbScheduledTask` | Load NGD address data updates |
 | `IncompletePropertiesReminderTaskApplicationRunner` | `@PrsdbScheduledTask` | Send reminder emails for incomplete properties |
 | `DeleteIncompletePropertiesTaskApplicationRunner` | `@PrsdbScheduledTask` | Clean up properties older than 28 days |
+| `DeleteExpiredJointLandlordInvitationsTaskApplicationRunner` | `@PrsdbScheduledTask` | Delete expired joint invitations (`jl-invitation-deletion-scheduled-task`) |
+| `JointLandlordInvitationExpiryEmailTaskApplicationRunner` | `@PrsdbScheduledTask` | Send joint-invitation expiry emails (`jl-invitation-expiry-email-scheduled-task`) |
 | `NftDataSeedingTaskApplicationRunner` | `@PrsdbTask` | Seed test data for NFT environment |
-| `DefaultScheduledTaskApplicationRunner` | `@PrsdbScheduledTask` | Fallback — exits with message if no task configured |
+| `DefaultScheduledTaskApplicationRunner` | `@PrsdbScheduledTask` | Always-eligible scheduled-mode guard at lowest precedence; exits 1 if reached |
 
 ## Adding a New Scheduled Task
 
 1. Create the runner class in `application/` implementing `ApplicationRunner`
-2. Annotate with `@PrsdbScheduledTask("your-task-name")`
-3. Inject services for business logic
+2. Annotate with `@PrsdbScheduledTask("my-task-scheduled-task")` and use that exact task-name profile
+3. Inject services/task logic for business work; put transactions on a separate collaborator that returns before exit
 4. Ensure any error during execution results in a non-zero exit code (fail fast by letting exceptions propagate, or
    track failures and set the exit code — see [Error Handling and Exit Codes](#error-handling-and-exit-codes))
-5. Call `SpringApplication.exit()` and `exitProcess()` at the end of `run()`
+5. After work/commit completes, call `SpringApplication.exit()` and `exitProcess()` with the correct exit code
 6. Add any task-only services with `@PrsdbTaskService`
+
+See [config instructions](config.instructions.md#custom-annotations-for-config-classes) for shared versus mode-specific
+beans and [service instructions](services.instructions.md) for business-logic conventions.
