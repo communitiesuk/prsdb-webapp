@@ -32,7 +32,7 @@ class PropertyRegistrationOccupancyChangeInterruptionSinglePageTests : Integrati
             navigator.goToRestructuredPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
             )
-        taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
+        taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         checkAnswersPage.summaryList.occupancyQuestionRow.clickFirstActionLinkAndWait()
