@@ -413,8 +413,8 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
 
                 assertThat(detailsPage.sectionHeading("Who the council should contact")).isVisible()
-                assertThat(detailsPage.propertyDetailsSummaryList.contactEmailAddressRow.value).containsText("landlord@example.com")
-                assertThat(detailsPage.propertyDetailsSummaryList.contactAddressRow.value).containsText("11 Elm Drive")
+                assertThat(detailsPage.propertyDetailsSummaryList.contactEmailAddressRow.value).containsText("email@example.com")
+                assertThat(detailsPage.propertyDetailsSummaryList.contactAddressRow.value).containsText("1 Fictional Road")
             }
 
             @Test

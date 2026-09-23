@@ -679,7 +679,11 @@ class PropertyDetailsControllerTests(
         @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `getPropertyDetailsLocalCouncilView shows correspondence section when CORRESPONDENCE_ADDRESS flag is enabled`() {
-            val propertyOwnership = createPropertyOwnership(correspondenceEmail = "correspondence@example.com")
+            val propertyOwnership =
+                createPropertyOwnership(
+                    correspondenceEmail = "correspondence@example.com",
+                    correspondenceAddress = createAddress("25 Contact Road, Bristol, BS1 2AB"),
+                )
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfCurrentUserAuthorized(eq(1)))
                 .thenReturn(propertyOwnership)
@@ -691,7 +695,9 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { isOk() }
                 content { string(containsString("correspondence@example.com")) }
-                content { string(containsString("11 Elm Drive")) }
+                content { string(containsString("25 Contact Road")) }
+                content { string(containsString("Bristol")) }
+                content { string(containsString("BS1 2AB")) }
             }
         }
 
