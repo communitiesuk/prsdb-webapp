@@ -31,6 +31,7 @@ class PropertyRegistrationJourneyFactoryTests {
         val featureFlagManager = mock<FeatureFlagManager> { on { checkFeature(DELEGATE_TO_LETTING_AGENT) } doReturn delegateEnabled }
         val landlord = mock<Landlord> { on { email } doReturn "original.landlord@example.com" }
         val userToLandlordService = mock<UserToLandlordService> { on { getCurrentLandlordForUser() } doReturn landlord }
-        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, userToLandlordService)
+        val paymentsStrategy = mock<PaymentsPropertyRegistrationStrategy>()
+        return PropertyRegistrationJourneyFactory(stateFactory, featureFlagManager, userToLandlordService, paymentsStrategy)
     }
 }

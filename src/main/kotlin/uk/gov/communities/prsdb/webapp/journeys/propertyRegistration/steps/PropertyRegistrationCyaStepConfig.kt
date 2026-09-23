@@ -150,6 +150,7 @@ class PropertyRegistrationCyaStepConfig(
         tenancyDetails: List<SummaryListRowViewModel>,
     ) = mapOf<String, Any?>(
         "title" to "registerProperty.title",
+        // TODO PDJB-1686: Change this button text to "Submit and pay" when the PAYMENTS feature flag is enabled.
         "submitButtonText" to submitButtonText,
         "warningTextKey" to warningTextKey,
         "insetText" to insetText,
