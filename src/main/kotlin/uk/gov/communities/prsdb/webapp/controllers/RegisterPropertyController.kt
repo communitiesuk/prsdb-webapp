@@ -130,9 +130,9 @@ class RegisterPropertyController(
         val epcProvideLater = propertyOwnership.isOccupied && compliance?.epcProvideLater == true
 
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
-        val phaseTwoFeatureEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
+        val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         val provideMissingDetails =
-            phaseTwoFeatureEnabled &&
+            propertyRegistrationPhaseTwoEnabled &&
                 propertyOwnership.isOccupied &&
                 (
                     propertyOwnership.licenseProvideLater == true ||
