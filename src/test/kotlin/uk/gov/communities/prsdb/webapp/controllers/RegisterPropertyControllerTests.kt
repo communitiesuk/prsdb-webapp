@@ -167,7 +167,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation adds a missing details section for an occupied property when phase two flag is enabled and tenancy is provide later`() {
+    fun `getConfirmation adds a missing details section for an occupied property with phase two enabled and tenancy provide later`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -226,7 +226,8 @@ class RegisterPropertyControllerTests(
                 MockMvcRequestBuilders
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
-            )            .andExpect(MockMvcResultMatchers.status().isOk)
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", false))
             .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
     }
@@ -309,7 +310,8 @@ class RegisterPropertyControllerTests(
                 MockMvcRequestBuilders
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
-            )            .andExpect(MockMvcResultMatchers.status().isOk)
+            )
+            .andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
             .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
     }
