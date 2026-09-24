@@ -17,13 +17,17 @@ anniversary AS (
     FROM property_ownership po
     LEFT JOIN earliest_landlord_anniversary ela ON ela.property_ownership_id = po.id
 ),
+uk_today AS (
+    SELECT (now() AT TIME ZONE 'Europe/London')::date AS today
+),
 next_anniversary AS (
-    SELECT property_ownership_id,
-           day,
-           month,
-           EXTRACT(YEAR FROM current_date)::int
-               + CASE WHEN (month, day) <= (EXTRACT(MONTH FROM current_date), EXTRACT(DAY FROM current_date)) THEN 1 ELSE 0 END AS year
-    FROM anniversary
+    SELECT a.property_ownership_id,
+           a.day,
+           a.month,
+           EXTRACT(YEAR FROM t.today)::int
+               + CASE WHEN (a.month, a.day) <= (EXTRACT(MONTH FROM t.today), EXTRACT(DAY FROM t.today)) THEN 1 ELSE 0 END AS year
+    FROM anniversary a
+    CROSS JOIN uk_today t
 )
 UPDATE property_ownership po
 SET renewal_date = CASE

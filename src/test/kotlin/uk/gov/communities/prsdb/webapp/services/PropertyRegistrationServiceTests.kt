@@ -1354,7 +1354,7 @@ class PropertyRegistrationServiceTests {
                 isOccupied = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                landlords = any(),
+                registeringLandlord = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
