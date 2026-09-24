@@ -28,6 +28,12 @@ class MockGovUkPayController(
 
     private val baseUrl get() = "http://localhost:$serverPort/local/gov-uk-pay"
 
+    /**
+     * Mocks some of the gov UK pay endpoints for local development,
+     * full details can be found here:
+     * https://docs.payments.service.gov.uk/api_reference/#api-reference
+     */
+
     @PostMapping("/v1/payments")
     fun createPayment(
         @RequestBody body: String,
