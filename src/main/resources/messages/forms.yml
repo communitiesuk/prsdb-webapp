@@ -335,6 +335,7 @@ numberOfHouseholds:
       three: married or living together as a couple
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
   label: Enter how many households live in your property
+  #  TODO PDJB-1340: Refactor this section to remove the duplication of the numberOfHouseholds section above.
   restructureAndSkipping:
     heading: Households in your property
     paragraph:
