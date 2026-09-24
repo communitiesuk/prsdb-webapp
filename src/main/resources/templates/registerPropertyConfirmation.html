@@ -82,12 +82,10 @@
                     <li th:if="${tenancyProvideLater}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.tenancyDetails}">registerProperty.confirmation.provideMissingDetails.tenancyDetails</li>
                 </ul>
-                <div class="govuk-inset-text govuk-!-margin-top-0 govuk-!-padding-top-2 govuk-!-padding-bottom-2">
-                    <p class="govuk-body govuk-!-margin-bottom-0"
-                       th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.two(${completeByDate})}">
-                        registerProperty.confirmation.provideMissingDetails.paragraph.two
-                    </p>
-                </div>
+                <p class="govuk-inset-text"
+                   th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.two(${completeByDate})}">
+                    registerProperty.confirmation.provideMissingDetails.paragraph.two
+                </p>
             </th:block>
 
             <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !provideMissingDetails}">
