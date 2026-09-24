@@ -47,7 +47,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.ProvideMissingDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
@@ -142,26 +142,17 @@ class RegisterPropertyController(
                 propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
-        val confirmationViewModel =
-            PropertyRegistrationConfirmationViewModel.from(
+        val provideMissingDetailsViewModel =
+            ProvideMissingDetailsViewModel.from(
                 isOccupied = isOccupied,
                 propertyOwnership = propertyOwnership,
                 propertyCompliance = propertyCompliance,
                 provideMissingDetails = provideMissingDetails,
                 delegatedToLettingAgent = delegatedToLettingAgent,
             )
-        model.addAttribute("propertyRegistrationConfirmation", confirmationViewModel)
-
-        val effectiveProvideMissingDetails = confirmationViewModel.provideMissingDetails
+        model.addAttribute("provideMissingDetailsViewModel", provideMissingDetailsViewModel)
 
         model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
-        model.addAttribute("provideMissingDetails", effectiveProvideMissingDetails)
-        model.addAttribute("gasSafetyRequired", confirmationViewModel.gasSafetyRequired)
-        model.addAttribute("electricalSafetyRequired", confirmationViewModel.electricalSafetyRequired)
-        model.addAttribute("epcRequired", confirmationViewModel.epcRequired)
-        model.addAttribute("licenseProvideLater", confirmationViewModel.licenseProvideLater)
-        model.addAttribute("tenancyProvideLater", confirmationViewModel.tenancyProvideLater)
-
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
         if (delegatedToLettingAgent || actionRequiredForCompliance || provideMissingDetails) {

@@ -3,8 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
-data class PropertyRegistrationConfirmationViewModel(
-    val provideMissingDetails: Boolean,
+data class ProvideMissingDetailsViewModel(
     val gasSafetyRequired: Boolean,
     val electricalSafetyRequired: Boolean,
     val epcRequired: Boolean,
@@ -18,10 +17,11 @@ data class PropertyRegistrationConfirmationViewModel(
             propertyCompliance: PropertyCompliance?,
             provideMissingDetails: Boolean,
             delegatedToLettingAgent: Boolean,
-        ): PropertyRegistrationConfirmationViewModel {
-            val effectiveProvideMissingDetails = provideMissingDetails && !delegatedToLettingAgent
-            return PropertyRegistrationConfirmationViewModel(
-                provideMissingDetails = effectiveProvideMissingDetails,
+        ): ProvideMissingDetailsViewModel? {
+            if (!provideMissingDetails || delegatedToLettingAgent) {
+                return null
+            }
+            return ProvideMissingDetailsViewModel(
                 gasSafetyRequired = isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true,
                 electricalSafetyRequired = isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true,
                 epcRequired = isOccupied && propertyCompliance?.epcProvideLater == true,

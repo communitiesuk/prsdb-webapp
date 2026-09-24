@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.ProvideMissingDetailsViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -192,8 +193,18 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
+            .andExpect(
+                MockMvcResultMatchers.model().attribute(
+                    "provideMissingDetailsViewModel",
+                    ProvideMissingDetailsViewModel(
+                        gasSafetyRequired = false,
+                        electricalSafetyRequired = false,
+                        epcRequired = false,
+                        licenseProvideLater = false,
+                        tenancyProvideLater = true,
+                    ),
+                ),
+            ).andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
     }
 
     @Test
@@ -222,7 +233,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
     }
 
@@ -261,12 +272,18 @@ class RegisterPropertyControllerTests(
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("licenseProvideLater", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("gasSafetyRequired", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("electricalSafetyRequired", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("epcRequired", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("tenancyProvideLater", true))
+            .andExpect(
+                MockMvcResultMatchers.model().attribute(
+                    "provideMissingDetailsViewModel",
+                    ProvideMissingDetailsViewModel(
+                        gasSafetyRequired = true,
+                        electricalSafetyRequired = true,
+                        epcRequired = true,
+                        licenseProvideLater = true,
+                        tenancyProvideLater = true,
+                    ),
+                ),
+            )
     }
 
     @Test
@@ -304,7 +321,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetailsViewModel", null))
             .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
     }
 
@@ -339,11 +356,18 @@ class RegisterPropertyControllerTests(
                     .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
-            .andExpect(MockMvcResultMatchers.model().attribute("gasSafetyRequired", false))
-            .andExpect(MockMvcResultMatchers.model().attribute("electricalSafetyRequired", false))
-            .andExpect(MockMvcResultMatchers.model().attribute("epcRequired", false))
-            .andExpect(MockMvcResultMatchers.model().attribute("tenancyProvideLater", true))
+            .andExpect(
+                MockMvcResultMatchers.model().attribute(
+                    "provideMissingDetailsViewModel",
+                    ProvideMissingDetailsViewModel(
+                        gasSafetyRequired = false,
+                        electricalSafetyRequired = false,
+                        epcRequired = false,
+                        licenseProvideLater = false,
+                        tenancyProvideLater = true,
+                    ),
+                ),
+            )
     }
 
     @Test
