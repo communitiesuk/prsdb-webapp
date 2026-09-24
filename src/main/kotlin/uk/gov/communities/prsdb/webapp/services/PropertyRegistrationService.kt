@@ -104,7 +104,7 @@ class PropertyRegistrationService(
                 customPropertyType,
                 markedJointLandlord,
                 tenancyProvideLater,
-                mutableSetOf(landlord),
+                landlord,
                 licenseProvideLater = licenseProvideLater,
             )
 
@@ -178,7 +178,7 @@ class PropertyRegistrationService(
         customPropertyType: String?,
         markedJointLandlord: Boolean,
         tenancyProvideLater: Boolean?,
-        landlords: MutableSet<Landlord>,
+        registeringLandlord: Landlord,
         licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -206,7 +206,7 @@ class PropertyRegistrationService(
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            landlords = landlords,
+            registeringLandlord = registeringLandlord,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,

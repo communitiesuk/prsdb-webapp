@@ -58,7 +58,7 @@ class PropertyOwnershipService(
         isOccupied: Boolean,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        landlords: MutableSet<Landlord>,
+        registeringLandlord: Landlord,
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
@@ -76,11 +76,10 @@ class PropertyOwnershipService(
         tenancyProvideLater: Boolean? = null,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
-        val registeringLandlord = landlords.first()
 
         val registrationDate = LocalDate.now(DateTimeHelper.UK_ZONE)
         val anniversary = registeringLandlord.anniversary ?: MonthDay.from(registrationDate)
-        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary, registrationDate.year)
+        val renewalDate = RenewalDateHelper.getRenewalDate(anniversary, registrationDate)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -89,7 +88,7 @@ class PropertyOwnershipService(
                 currentNumTenants = numberOfPeople,
                 isOccupied = isOccupied,
                 registrationNumber = registrationNumber,
-                landlords = landlords,
+                landlords = mutableSetOf(registeringLandlord),
                 propertyBuildType = propertyBuildType,
                 customPropertyType = customPropertyType,
                 address = address,

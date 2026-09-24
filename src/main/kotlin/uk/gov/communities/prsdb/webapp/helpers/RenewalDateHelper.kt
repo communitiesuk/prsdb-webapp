@@ -8,14 +8,25 @@ import java.time.Year
 object RenewalDateHelper {
     fun getRenewalDate(
         anniversary: MonthDay,
-        referenceYear: Int,
+        from: LocalDate,
     ): LocalDate {
-        val targetYear = referenceYear + 1
-        val isLeapDay = anniversary.month == Month.FEBRUARY && anniversary.dayOfMonth == 29
-        return if (isLeapDay && !Year.isLeap(targetYear.toLong())) {
-            LocalDate.of(targetYear, Month.MARCH, 1)
+        val anniversaryThisYear = getLeapYearAdjustedDate(anniversary, from.year)
+        return if (anniversaryThisYear > from) {
+            anniversaryThisYear
         } else {
-            anniversary.atYear(targetYear)
+            getLeapYearAdjustedDate(anniversary, from.year + 1)
         }
     }
+
+    private fun getLeapYearAdjustedDate(
+        monthDay: MonthDay,
+        year: Int,
+    ): LocalDate =
+        if (isLeapDay(monthDay) && !Year.isLeap(year.toLong())) {
+            LocalDate.of(year, Month.MARCH, 1)
+        } else {
+            monthDay.atYear(year)
+        }
+
+    private fun isLeapDay(monthDay: MonthDay): Boolean = monthDay == MonthDay.of(Month.FEBRUARY, 29)
 }

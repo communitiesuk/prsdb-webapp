@@ -149,7 +149,7 @@ class PropertyOwnershipServiceTests {
                 renewalDate =
                     RenewalDateHelper.getRenewalDate(
                         MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
-                        LocalDate.now(DateTimeHelper.UK_ZONE).year,
+                        LocalDate.now(DateTimeHelper.UK_ZONE),
                     ),
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
@@ -174,7 +174,7 @@ class PropertyOwnershipServiceTests {
             isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
             propertyBuildType = propertyBuildType,
             customPropertyType = customPropertyType,
             address = address,
@@ -234,7 +234,7 @@ class PropertyOwnershipServiceTests {
                 renewalDate =
                     RenewalDateHelper.getRenewalDate(
                         MonthDay.from(LocalDate.now(DateTimeHelper.UK_ZONE)),
-                        LocalDate.now(DateTimeHelper.UK_ZONE).year,
+                        LocalDate.now(DateTimeHelper.UK_ZONE),
                     ),
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
@@ -258,7 +258,7 @@ class PropertyOwnershipServiceTests {
             isOccupied = isOccupied,
             numberOfHouseholds = households,
             numberOfPeople = tenants,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
             propertyBuildType = propertyBuildType,
             customPropertyType = customPropertyType,
             address = address,
@@ -298,7 +298,7 @@ class PropertyOwnershipServiceTests {
             isOccupied = true,
             numberOfHouseholds = 1,
             numberOfPeople = 2,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
             propertyBuildType = propertyBuildType,
             customPropertyType = "End terrace",
             address = address,
@@ -335,7 +335,7 @@ class PropertyOwnershipServiceTests {
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
             propertyBuildType = propertyBuildType,
             customPropertyType = "End terrace",
             address = address,
@@ -372,7 +372,7 @@ class PropertyOwnershipServiceTests {
             isOccupied = false,
             numberOfHouseholds = 0,
             numberOfPeople = 0,
-            landlords = mutableSetOf(landlord),
+            registeringLandlord = landlord,
             propertyBuildType = PropertyType.OTHER,
             customPropertyType = "End terrace",
             address = address,
@@ -388,7 +388,7 @@ class PropertyOwnershipServiceTests {
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedRenewalDate =
-            RenewalDateHelper.getRenewalDate(MonthDay.of(3, 15), LocalDate.now(DateTimeHelper.UK_ZONE).year)
+            RenewalDateHelper.getRenewalDate(MonthDay.of(3, 15), LocalDate.now(DateTimeHelper.UK_ZONE))
         assertEquals(expectedRenewalDate, propertyOwnershipCaptor.value.renewalDate)
     }
 
