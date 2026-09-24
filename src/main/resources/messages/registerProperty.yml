@@ -61,6 +61,16 @@ confirmation:
       epc: energy performance certificate (EPC)
       tenancyDetails: tenancy details
       completeByParagraph: To keep the property registered, they must provide these details before {0}. We’ll notify you when they’ve provided this information.
+  provideMissingDetails:
+    heading: Providing missing details
+    paragraph:
+        one: 'You still need to provide the:'
+        two: To keep the property registered, provide these details before {0}.
+    licensingDetails: licensing details
+    gasSafetyCertificate: gas safety certificate
+    electricalSafetyCertificate: electrical safety certificate
+    epc: energy performance certificate (EPC)
+    tenancyDetails: tenancy details
   goToDashboard: Go to dashboard
   feedback:
     body: 'Answer a few short questions about <strong>property registration</strong>.'

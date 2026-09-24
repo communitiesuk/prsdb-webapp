@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.constants.DELEGATE_TO_LETTING_AGENT
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -233,11 +234,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Nested
-    inner class RestructureAndSkippingEnabled {
+    inner class EnableFeatureFlags {
         @BeforeEach
         fun enableRestructureAndSkippingFlag() {
             featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
             featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
+            featureFlagManager.enableFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         }
 
         @Test
@@ -404,7 +406,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.sectionHeader).containsText(gasSafetyHeader)
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
@@ -414,7 +416,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkGasCertUploadsPage.table.rows.count())
 
             checkGasCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -429,7 +431,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.submit()
 
             // Remove Gas Cert Upload - render page
@@ -467,7 +469,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Electrical Cert Uploads - render page
             assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(electricalSafetyHeader)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
@@ -476,7 +478,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
 
             checkElectricalCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -493,7 +495,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.submit()
             val checkElectricalSafetyAnswersPage =
                 assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
@@ -834,7 +836,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertFalse(propertyOwnershipCaptor.value.isOccupied)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -1110,6 +1112,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     propertyOwnershipCaptor.value.registrationNumber,
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -2427,14 +2430,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertNull(propertyCompliance.tenancyStartedBeforeEpcExpiry)
             assertNull(propertyCompliance.epcExemptionReason)
             assertNull(propertyCompliance.epcMeesExemptionReason)
-            assertTrue(propertyCompliance.epcProvideLater == true)
+            assertEquals(true, propertyCompliance.epcProvideLater)
             assertNull(propertyCompliance.hasGasSupply)
             assertNull(propertyCompliance.gasSafetyCertIssueDate)
-            assertTrue(propertyCompliance.gasSafetyCertProvideLater == true)
+            assertEquals(true, propertyCompliance.gasSafetyCertProvideLater)
             assertTrue(gasSafetyFileUploadIds.isEmpty())
             assertNull(propertyCompliance.electricalSafetyExpiryDate)
             assertNull(propertyCompliance.electricalCertType)
-            assertTrue(propertyCompliance.electricalSafetyCertProvideLater == true)
+            assertEquals(true, propertyCompliance.electricalSafetyCertProvideLater)
             assertTrue(electricalSafetyFileUploadIds.isEmpty())
         }
 
@@ -2841,7 +2844,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
@@ -2851,7 +2854,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkGasCertUploadsPage.table.rows.count())
 
             checkGasCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -2866,7 +2869,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkGasCertUploadsPage.table.rows.count())
             checkGasCertUploadsPage.form.submit()
 
             // Remove Gas Cert Upload - render page
@@ -2904,7 +2907,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Electrical Cert Uploads - render page
             assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
             uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
@@ -2913,7 +2916,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
             assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 2)
+            assertEquals(2, checkElectricalCertUploadsPage.table.rows.count())
 
             checkElectricalCertUploadsPage.table
                 .getClickableCell(0, 2)
@@ -2930,7 +2933,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
             assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
-            assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+            assertEquals(1, checkElectricalCertUploadsPage.table.rows.count())
             checkElectricalCertUploadsPage.form.submit()
             val checkElectricalSafetyAnswersPage =
                 assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
@@ -3228,7 +3231,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertFalse(propertyOwnershipCaptor.value.isOccupied)
-            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+            assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
