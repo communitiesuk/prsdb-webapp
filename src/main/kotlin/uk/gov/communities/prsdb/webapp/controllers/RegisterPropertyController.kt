@@ -116,19 +116,19 @@ class RegisterPropertyController(
         )
 
         val isOccupied = propertyOwnership.isOccupied
-        val compliance =
+        val propertyCompliance =
             if (isOccupied) {
                 propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
             } else {
                 null
             }
 
-        val actionRequiredForCompliance = hasActionRequiredForCompliance(isOccupied, compliance)
+        val actionRequiredForCompliance = hasActionRequiredForCompliance(isOccupied, propertyCompliance)
 
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         val provideMissingDetails =
-            hasProvideMissingDetails(isOccupied, propertyOwnership, compliance, propertyRegistrationPhaseTwoEnabled)
+            hasProvideMissingDetails(isOccupied, propertyOwnership, propertyCompliance, propertyRegistrationPhaseTwoEnabled)
 
         // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
         val lettingAgentFeatureEnabled =
@@ -146,9 +146,9 @@ class RegisterPropertyController(
         val effectiveProvideMissingDetails = provideMissingDetails && !delegatedToLettingAgent
         model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("provideMissingDetails", effectiveProvideMissingDetails)
-        model.addAttribute("gasSafetyRequired", isOccupied && compliance?.gasSafetyCertProvideLater == true)
-        model.addAttribute("electricalSafetyRequired", isOccupied && compliance?.electricalSafetyCertProvideLater == true)
-        model.addAttribute("epcRequired", isOccupied && compliance?.epcProvideLater == true)
+        model.addAttribute("gasSafetyRequired", isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true)
+        model.addAttribute("electricalSafetyRequired", isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true)
+        model.addAttribute("epcRequired", isOccupied && propertyCompliance?.epcProvideLater == true)
         model.addAttribute("licenseProvideLater", propertyOwnership.licenseProvideLater == true)
         model.addAttribute("tenancyProvideLater", propertyOwnership.tenancyProvideLater == true)
 
