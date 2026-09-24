@@ -242,25 +242,23 @@ class PropertyDetailsController(
 
     private fun buildNotificationBanner(
         isLandlordView: Boolean,
-        propertyDetails: PropertyDetailsViewModelBase,
+        propertyDetails: PropertyDetailsViewModel,
         propertyCompliance: PropertyCompliance,
-    ): List<NotificationMessage> {
-        val provideLaterDetails = propertyDetails as PropertyDetailsViewModel
-        return notificationBannerViewModelService
+    ): List<NotificationMessage> =
+        notificationBannerViewModelService
             .getPropertyDetailsNotificationBanner(
                 propertyCompliance = propertyCompliance,
                 isLandlordView = isLandlordView,
-                isOccupied = provideLaterDetails.isOccupied,
-                isLicensingProvideLater = provideLaterDetails.isLicensingProvideLater,
-                isTenancyProvideLater = provideLaterDetails.isTenancyProvideLater,
+                isOccupied = propertyDetails.isOccupied,
+                isLicensingProvideLater = propertyDetails.isLicensingProvideLater,
+                isTenancyProvideLater = propertyDetails.isTenancyProvideLater,
             ).messages
-    }
 
     private fun getPropertyDetailsViewModelAndView(
         propertyOwnership: PropertyOwnership,
         showCorrespondenceSection: Boolean,
         isLandlordView: Boolean,
-    ): Pair<PropertyDetailsViewModelBase, String> =
+    ): Pair<PropertyDetailsViewModel, String> =
         Pair(
             PropertyDetailsViewModel(propertyOwnership, isLandlordView, messageSource, showCorrespondenceSection),
             PROPERTY_DETAILS_VIEW,
