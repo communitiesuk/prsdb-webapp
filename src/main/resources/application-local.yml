@@ -100,6 +100,9 @@ plausible:
   base-url: http://localhost:${server.port}/local/plausible
   api-key: local-no-analytics
 
+gov-uk-pay:
+  base-url: http://localhost:${server.port}/local/gov-uk-pay
+
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 
@@ -131,6 +134,9 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-1009-payments"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "pdjb-926-landlord-dashboard-update"
       enabled: true
       expiry-date: "2026-12-31"
 

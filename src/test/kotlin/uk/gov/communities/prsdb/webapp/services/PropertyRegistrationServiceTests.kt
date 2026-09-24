@@ -16,6 +16,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -76,6 +77,9 @@ class PropertyRegistrationServiceTests {
 
     @Mock
     private lateinit var mockDelegateToLettingAgentEmailService: DelegateToLettingAgentEmailService
+
+    @Mock
+    private lateinit var mockFeatureFlagManager: uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -461,7 +465,7 @@ class PropertyRegistrationServiceTests {
             eq(landlord.email),
             argThat<PropertyRegistrationConfirmationEmail> { email ->
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
-                    email.singleLineAddress == expectedPropertyOwnership.address.singleLineAddress &&
+                    email.multiLineAddress == expectedPropertyOwnership.address.toMultiLineAddress() &&
                     email.prsdUrl == dashboardUri.toString() &&
                     email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
             },
@@ -1329,6 +1333,84 @@ class PropertyRegistrationServiceTests {
         verify(mockConfirmationEmailSender).sendEmail(
             eq(landlord.email),
             argThat<PropertyRegistrationConfirmationEmail> { isDelegatedToLettingAgent },
+        )
+    }
+
+    @Test
+    fun `registerProperty sends confirmation email with provide-later flags for a non-delegated occupied property`() {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 8888)
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord),
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
+        whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                isOccupied = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                landlords = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
+                licenseProvideLater = anyOrNull(),
+                tenancyProvideLater = anyOrNull(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://gov.uk"))
+        whenever(mockFeatureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
+
+        propertyRegistrationService.registerProperty(
+            addressModel = AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+            propertyType = PropertyType.DETACHED_HOUSE,
+            licenseType = LicensingType.NO_LICENSING,
+            licenceNumber = "",
+            ownershipType = OwnershipType.FREEHOLD,
+            isOccupied = true,
+            numberOfHouseholds = 1,
+            numberOfPeople = 1,
+            numBedrooms = null,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+            customPropertyType = null,
+            licenseProvideLater = true,
+            gasSafetyCertProvideLater = true,
+            electricalSafetyCertProvideLater = true,
+            epcProvideLater = true,
+            tenancyProvideLater = true,
+            isDelegatedToLettingAgent = false,
+        )
+
+        verify(mockConfirmationEmailSender).sendEmail(
+            eq(landlord.email),
+            argThat<PropertyRegistrationConfirmationEmail> {
+                isPdjb939PhaseTwoEnabled &&
+                    licenseProvideLater &&
+                    gasSafetyCertProvideLater &&
+                    electricalSafetyCertProvideLater &&
+                    epcProvideLater &&
+                    tenancyProvideLater &&
+                    !isDelegatedToLettingAgent
+            },
         )
     }
 }
