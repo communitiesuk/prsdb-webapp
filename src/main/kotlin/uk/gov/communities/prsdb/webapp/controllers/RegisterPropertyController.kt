@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationConfirmationViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
@@ -144,13 +145,24 @@ class RegisterPropertyController(
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
         val effectiveProvideMissingDetails = provideMissingDetails && !delegatedToLettingAgent
+        val confirmationViewModel =
+            PropertyRegistrationConfirmationViewModel(
+                provideMissingDetails = effectiveProvideMissingDetails,
+                gasSafetyRequired = isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true,
+                electricalSafetyRequired = isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true,
+                epcRequired = isOccupied && propertyCompliance?.epcProvideLater == true,
+                licenseProvideLater = propertyOwnership.licenseProvideLater == true,
+                tenancyProvideLater = propertyOwnership.tenancyProvideLater == true,
+            )
+        model.addAttribute("propertyRegistrationConfirmation", confirmationViewModel)
+
         model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("provideMissingDetails", effectiveProvideMissingDetails)
-        model.addAttribute("gasSafetyRequired", isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true)
-        model.addAttribute("electricalSafetyRequired", isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true)
-        model.addAttribute("epcRequired", isOccupied && propertyCompliance?.epcProvideLater == true)
-        model.addAttribute("licenseProvideLater", propertyOwnership.licenseProvideLater == true)
-        model.addAttribute("tenancyProvideLater", propertyOwnership.tenancyProvideLater == true)
+        model.addAttribute("gasSafetyRequired", confirmationViewModel.gasSafetyRequired)
+        model.addAttribute("electricalSafetyRequired", confirmationViewModel.electricalSafetyRequired)
+        model.addAttribute("epcRequired", confirmationViewModel.epcRequired)
+        model.addAttribute("licenseProvideLater", confirmationViewModel.licenseProvideLater)
+        model.addAttribute("tenancyProvideLater", confirmationViewModel.tenancyProvideLater)
 
         val hasPendingJointLandlordInvitations =
             jointLandlordInvitationService.getPendingInvitations(propertyOwnership).isNotEmpty()

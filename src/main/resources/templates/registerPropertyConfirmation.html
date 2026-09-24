@@ -61,7 +61,7 @@
                 </p>
             </th:block>
 
-            <th:block th:if="${provideMissingDetails}">
+            <th:block th:if="${propertyRegistrationConfirmation.provideMissingDetails}">
                 <h3 class="govuk-heading-s"
                     th:text="#{registerProperty.confirmation.provideMissingDetails.heading}">
                     registerProperty.confirmation.provideMissingDetails.heading
@@ -71,15 +71,15 @@
                     registerProperty.confirmation.provideMissingDetails.paragraph.one
                 </p>
                 <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
-                    <li th:if="${licenseProvideLater}"
+                    <li th:if="${propertyRegistrationConfirmation.licenseProvideLater}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.licensingDetails}">registerProperty.confirmation.provideMissingDetails.licensingDetails</li>
-                    <li th:if="${gasSafetyRequired}"
+                    <li th:if="${propertyRegistrationConfirmation.gasSafetyRequired}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate</li>
-                    <li th:if="${electricalSafetyRequired}"
+                    <li th:if="${propertyRegistrationConfirmation.electricalSafetyRequired}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate</li>
-                    <li th:if="${epcRequired}"
+                    <li th:if="${propertyRegistrationConfirmation.epcRequired}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.epc}">registerProperty.confirmation.provideMissingDetails.epc</li>
-                    <li th:if="${tenancyProvideLater}"
+                    <li th:if="${propertyRegistrationConfirmation.tenancyProvideLater}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.tenancyDetails}">registerProperty.confirmation.provideMissingDetails.tenancyDetails</li>
                 </ul>
                 <p class="govuk-inset-text"
