@@ -144,17 +144,17 @@ class RegisterPropertyController(
                 propertyOwnershipService.hasLettingAgent(propertyOwnership.id)
         model.addAttribute("delegatedToLettingAgent", delegatedToLettingAgent)
 
-        val effectiveProvideMissingDetails = provideMissingDetails && !delegatedToLettingAgent
         val confirmationViewModel =
-            PropertyRegistrationConfirmationViewModel(
-                provideMissingDetails = effectiveProvideMissingDetails,
-                gasSafetyRequired = isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true,
-                electricalSafetyRequired = isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true,
-                epcRequired = isOccupied && propertyCompliance?.epcProvideLater == true,
-                licenseProvideLater = propertyOwnership.licenseProvideLater == true,
-                tenancyProvideLater = propertyOwnership.tenancyProvideLater == true,
+            PropertyRegistrationConfirmationViewModel.from(
+                isOccupied = isOccupied,
+                propertyOwnership = propertyOwnership,
+                propertyCompliance = propertyCompliance,
+                provideMissingDetails = provideMissingDetails,
+                delegatedToLettingAgent = delegatedToLettingAgent,
             )
         model.addAttribute("propertyRegistrationConfirmation", confirmationViewModel)
+
+        val effectiveProvideMissingDetails = confirmationViewModel.provideMissingDetails
 
         model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("provideMissingDetails", effectiveProvideMissingDetails)
