@@ -129,7 +129,7 @@ class RegisterPropertyController(
         // TODO: PDJB-1742: Remove feature flag check when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
         val propertyRegistrationPhaseTwoEnabled = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)
         val provideMissingDetails =
-            hasProvideMissingDetails(isOccupied, propertyOwnership, propertyCompliance, propertyRegistrationPhaseTwoEnabled)
+            hasProvideMissingDetails(propertyRegistrationPhaseTwoEnabled, isOccupied, propertyOwnership, propertyCompliance)
 
         // TODO: PDJB-1617: Remove this when we remove DELEGATE_TO_LETTING_AGENT flag
         val lettingAgentFeatureEnabled =
@@ -211,10 +211,10 @@ class RegisterPropertyController(
             )
 
     private fun hasProvideMissingDetails(
+        propertyRegistrationPhaseTwoEnabled: Boolean,
         isOccupied: Boolean,
         propertyOwnership: PropertyOwnership,
         propertyCompliance: PropertyCompliance?,
-        propertyRegistrationPhaseTwoEnabled: Boolean,
     ): Boolean =
         propertyRegistrationPhaseTwoEnabled &&
             isOccupied &&
