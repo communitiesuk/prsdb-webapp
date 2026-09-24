@@ -200,20 +200,20 @@ class RegisterPropertyController(
 
     private fun hasActionRequiredForCompliance(
         isOccupied: Boolean,
-        compliance: PropertyCompliance?,
+        propertyCompliance: PropertyCompliance?,
     ): Boolean =
         isOccupied &&
             (
-                compliance == null ||
-                    compliance.isGasSafetyCertMissing ||
-                    compliance.isElectricalSafetyMissing ||
-                    compliance.epcHasFaults
+                propertyCompliance == null ||
+                    propertyCompliance.isGasSafetyCertMissing ||
+                    propertyCompliance.isElectricalSafetyMissing ||
+                    propertyCompliance.epcHasFaults
             )
 
     private fun hasProvideMissingDetails(
         isOccupied: Boolean,
         propertyOwnership: PropertyOwnership,
-        compliance: PropertyCompliance?,
+        propertyCompliance: PropertyCompliance?,
         propertyRegistrationPhaseTwoEnabled: Boolean,
     ): Boolean =
         propertyRegistrationPhaseTwoEnabled &&
@@ -221,9 +221,9 @@ class RegisterPropertyController(
             (
                 propertyOwnership.licenseProvideLater == true ||
                     propertyOwnership.tenancyProvideLater == true ||
-                    compliance?.gasSafetyCertProvideLater == true ||
-                    compliance?.electricalSafetyCertProvideLater == true ||
-                    compliance?.epcProvideLater == true
+                    propertyCompliance?.gasSafetyCertProvideLater == true ||
+                    propertyCompliance?.electricalSafetyCertProvideLater == true ||
+                    propertyCompliance?.epcProvideLater == true
             )
 
     @GetMapping("/{*stepPath}")
