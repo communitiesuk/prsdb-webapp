@@ -291,7 +291,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
         fun `CYA page renders EPC summary card title as h4 to preserve heading hierarchy`(page: Page) {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart()
 
-            BaseComponent.assertThat(checkAnswersPage.epcCardTitle).isVisible()
+            BaseComponent.assertThat(checkAnswersPage.epcCard.title).isVisible()
             assertThat(page.locator("main h2.govuk-summary-card__title")).hasCount(0)
         }
 
