@@ -38,6 +38,7 @@ class PropertyRegistrationCyaStepConfig(
             return getContentBeforePdjb1022(state)
         }
 
+        // TODO PDJB-1022: Remove featureFlagManager argument once the feature flag is removed and the letting agent journey is fully implemented
         return if (state.isDelegatedToLettingAgent(featureFlagManager)) {
             getDelegatedToLettingAgentContent(state)
         } else {

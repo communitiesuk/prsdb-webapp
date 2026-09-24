@@ -344,9 +344,6 @@ class PropertyRegistrationJourneyFactory(
         }
 
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        restructuredMainJourneyMap(state)
-
-    private fun restructuredMainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
@@ -750,8 +747,8 @@ interface PropertyRegistrationJourneyState :
     var registrationNumberValue: Long?
     var backUrlKey: Int?
 
-    // Check both flags before reading the step outcome: the who-provides step is not wired into
-    // the legacy journey, so accessing its outcome there would throw.
+    // TODO PDJB-1022: Remove featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) check (and featureFlagManager argument)
+    //  once the feature flag is removed and the letting agent journey is fully implemented
     fun isDelegatedToLettingAgent(featureFlagManager: FeatureFlagManager): Boolean =
         featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT) &&
             whoProvidesDetailsTask.whoProvidesRentalDetailsStep.outcome == WhoProvidesRentalDetailsMode.LETTING_AGENT_PROVIDES
