@@ -164,7 +164,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation adds a missing details section for an occupied property with phase two enabled and tenancy provide later`() {
+    fun `getConfirmation shows the provide missing details block when phase two is enabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -210,7 +210,7 @@ class RegisterPropertyControllerTests(
     // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation uses the before pdjb-939 compliance section when phase two is disabled`() {
+    fun `getConfirmation uses the before pdjb-939 compliance block when phase two is disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
