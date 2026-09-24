@@ -27,9 +27,6 @@ class WhoProvidesDetailsTask(
             dependencies.cachedWhoProvidesRentalDetails = value
         }
 
-    override val loggedInLandlordEmail: String
-        get() = dependencies.loggedInLandlordEmail
-
     override fun makeSubJourney(state: WhoProvidesDetailsState) =
         subJourney(state) {
             step(journey.whoProvidesRentalDetailsStep) {
@@ -61,5 +58,4 @@ class WhoProvidesDetailsTask(
 
 interface WhoProvidesDetailsDependencies {
     var cachedWhoProvidesRentalDetails: WhoProvidesRentalDetails?
-    val loggedInLandlordEmail: String
 }

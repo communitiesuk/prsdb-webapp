@@ -10,7 +10,7 @@ class AllowLettingAgentEmailFormModelTests {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"
-                landlordEmailAtStartOfJourney = "landlord@example.com"
+                landlordEmail = "landlord@example.com"
             }
 
         assertTrue(formModel.isEmailNotLandlord())
@@ -21,7 +21,7 @@ class AllowLettingAgentEmailFormModelTests {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "landlord@example.com"
-                landlordEmailAtStartOfJourney = "landlord@example.com"
+                landlordEmail = "landlord@example.com"
             }
 
         assertFalse(formModel.isEmailNotLandlord())
@@ -32,7 +32,7 @@ class AllowLettingAgentEmailFormModelTests {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "Landlord@Example.COM"
-                landlordEmailAtStartOfJourney = "landlord@example.com"
+                landlordEmail = "landlord@example.com"
             }
 
         assertFalse(formModel.isEmailNotLandlord())
@@ -43,7 +43,7 @@ class AllowLettingAgentEmailFormModelTests {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = null
-                landlordEmailAtStartOfJourney = "landlord@example.com"
+                landlordEmail = "landlord@example.com"
             }
 
         assertTrue(formModel.isEmailNotLandlord())
@@ -54,18 +54,7 @@ class AllowLettingAgentEmailFormModelTests {
         val formModel =
             AllowLettingAgentEmailFormModel().apply {
                 emailAddress = "agent@example.com"
-                landlordEmailAtStartOfJourney = null
-            }
-
-        assertTrue(formModel.isEmailNotLandlord())
-    }
-
-    @Test
-    fun `isEmailNotLandlord uses the landlord email snapshot from the start of the journey rather than the current email`() {
-        val formModel =
-            AllowLettingAgentEmailFormModel().apply {
-                emailAddress = "new.landlord@example.com"
-                landlordEmailAtStartOfJourney = "original.landlord@example.com"
+                landlordEmail = null
             }
 
         assertTrue(formModel.isEmailNotLandlord())

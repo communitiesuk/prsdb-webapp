@@ -7,9 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.WhoProvidesDetailsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AllowLettingAgentEmailFormModel
+import uk.gov.communities.prsdb.webapp.services.UserToLandlordService
 
 @JourneyFrameworkComponent
-class LettingAgentEmailStepConfig : AbstractRequestableStepConfig<Complete, AllowLettingAgentEmailFormModel, WhoProvidesDetailsState>() {
+class LettingAgentEmailStepConfig(
+    private val userToLandlordService: UserToLandlordService,
+) : AbstractRequestableStepConfig<Complete, AllowLettingAgentEmailFormModel, WhoProvidesDetailsState>() {
     override val formModelClass = AllowLettingAgentEmailFormModel::class
 
     override fun getStepSpecificContent(state: WhoProvidesDetailsState) = emptyMap<String, Any?>()
@@ -23,7 +26,7 @@ class LettingAgentEmailStepConfig : AbstractRequestableStepConfig<Complete, Allo
         formData: FormData,
     ): FormData =
         super.enrichSubmittedDataBeforeValidation(state, formData) +
-            (AllowLettingAgentEmailFormModel::landlordEmailAtStartOfJourney.name to state.loggedInLandlordEmail)
+            (AllowLettingAgentEmailFormModel::landlordEmail.name to userToLandlordService.getCurrentLandlordForUser().email)
 }
 
 @JourneyFrameworkComponent

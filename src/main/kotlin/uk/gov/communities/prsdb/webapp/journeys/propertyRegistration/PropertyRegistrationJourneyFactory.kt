@@ -154,7 +154,7 @@ class PropertyRegistrationJourneyFactory(
 
                 LettingAgentEmailStep.ROUTE_SEGMENT -> {
                     if (featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)) {
-                        fromTask(journey.whoProvidesDetailsTask, journey) {
+                        fromTask(journey.whoProvidesDetailsTask) {
                             checkAnswerStep(task.lettingAgentEmailStep, LettingAgentEmailStep.ROUTE_SEGMENT)
                         }
                     } else {
@@ -879,14 +879,13 @@ class PropertyRegistrationJourney(
     override val retryablePaymentFailedStep: RetryablePaymentFailedStep,
     override val nonRetryablePaymentFailedStep: NonRetryablePaymentFailedStep,
     journeyStateService: JourneyStateService,
-    private val userToLandlordService: UserToLandlordService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     override var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
-    // TODO: PDJB-1593: ensure CYA reuses the originally selected email source for the correspondence/letting-agent
-    // decision, rather than recalculating from the live landlord email when the page is revisited.
+    // TODO: PDJB-1593: ensure correspondence CYA reuses the originally selected email source rather than
+    // recalculating from the live landlord email when the page is revisited.
     override var loggedInLandlordEmail: String by delegateProvider.requiredImmutableDelegate("loggedInLandlordEmail")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
