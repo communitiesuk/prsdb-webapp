@@ -147,7 +147,7 @@ class NftDataSeederDao(
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
              license_id, property_build_type, address_id, num_bedrooms,
              bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_occupied, license_provide_later, tenancy_provide_later, correspondence_email, correspondence_address_id, renewal_date, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE '2027-01-01', true)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }

@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
+import java.sql.Timestamp
 import java.time.Instant
+import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -94,6 +96,43 @@ class NftDataFakerTests {
         assertEquals(first, second)
     }
 
+    @Test
+    fun `generateRenewalDate returns next year's anniversary of the created date when this year's has passed`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2025-03-10T12:00:00Z")))
+
+        // Assert
+        assertEquals(LocalDate.of(2026, 3, 10), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `generateRenewalDate returns this year's anniversary of the created date when it is still to come`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2024-09-01T12:00:00Z")))
+
+        // Assert
+        assertEquals(LocalDate.of(2025, 9, 1), renewalDate.toLocalDate())
+    }
+
+    @Test
+    fun `generateRenewalDate uses the UK date of the created date`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+
+        // Act
+        // 23:30 UTC on 31 March is 00:30 BST on 1 April
+        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2025-03-31T23:30:00Z")))
+
+        // Assert
+        assertEquals(LocalDate.of(2026, 4, 1), renewalDate.toLocalDate())
+    }
+
     private fun generateFakerSample(): List<String> =
         List(FAKER_SAMPLE_SIZE) {
             listOf(
@@ -112,5 +151,6 @@ class NftDataFakerTests {
         private const val SAMPLE_SIZE = 10_000
         private const val FAKER_SAMPLE_SIZE = 500
         private val FIXED_REFERENCE: Instant = Instant.parse("2025-01-01T00:00:00Z")
+        private val MIDYEAR_REFERENCE: Instant = Instant.parse("2025-06-15T12:00:00Z")
     }
 }

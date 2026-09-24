@@ -630,6 +630,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
+        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(createdDate))
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
