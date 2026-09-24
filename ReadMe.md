@@ -295,6 +295,23 @@ logging in.
 
 If anyone knows a better way to do this please add it here!
 
+### NFT One Login Simulator profile
+
+The `one-login-simulator` Spring profile overrides the webapp's One Login OAuth2 client configuration to target
+the GOV.UK One Login Simulator deployed in NFT, instead of the real GOV.UK One Login integration environment.
+
+This profile is **NFT-only** and is never active by default. It must be explicitly added alongside the `nft`
+profile (e.g. `SPRING_PROFILES_ACTIVE=default,nft,one-login-simulator`) to take effect, and requires five
+dedicated environment variables to be set: `ONE_LOGIN_SIMULATOR_CLIENT_ID`, `ONE_LOGIN_SIMULATOR_PUBLIC_KEY`,
+`ONE_LOGIN_SIMULATOR_PRIVATE_KEY`, `ONE_LOGIN_SIMULATOR_ISSUER_URL`, and `ONE_LOGIN_SIMULATOR_DID_URL`. These are
+separate from the standard `ONE_LOGIN_*` variables, so activating this profile never risks or overwrites the
+real One Login credentials.
+
+This profile exists to support performance testing against the simulator (see `communitiesuk/prsdb-infra#348`
+for the simulator's infrastructure). Activating/deactivating it, starting/stopping the simulator service, and
+running performance tests is intentionally **not** automated by this profile alone — that orchestration is
+separate, future work (PDJB-430).
+
 ### Testing Org Landlords
 
 If you need to instead log in as an org landlord to see their dashboard & other views locally, run the `local-org-landlord`

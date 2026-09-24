@@ -222,6 +222,29 @@ spring:
 spring:
   config:
     activate:
+      on-profile: one-login-simulator
+
+  security:
+    oauth2:
+      client:
+        registration:
+          one-login:
+            client-id: ${ONE_LOGIN_SIMULATOR_CLIENT_ID}
+        provider:
+          one-login:
+            issuer-uri: ${ONE_LOGIN_SIMULATOR_ISSUER_URL}
+
+one-login:
+  jwt:
+    public.key: ${ONE_LOGIN_SIMULATOR_PUBLIC_KEY}
+    private.key: ${ONE_LOGIN_SIMULATOR_PRIVATE_KEY}
+  did.uri: ${ONE_LOGIN_SIMULATOR_DID_URL}
+
+---
+
+spring:
+  config:
+    activate:
       on-profile: web-server-deactivated
 
   main:
