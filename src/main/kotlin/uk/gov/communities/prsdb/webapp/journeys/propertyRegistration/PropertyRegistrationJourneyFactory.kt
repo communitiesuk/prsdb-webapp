@@ -963,10 +963,12 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     var isStateInitialized: Boolean
     override var loggedInLandlordEmailAtStartOfJourney: String
+
     // This journey keeps a snapshot of the current landlord's email at start-of-journey so the
     // shared joint-landlord invite task can reject self-invites without depending on later edits.
     override val loggedInLandlordEmail: String?
         get() = loggedInLandlordEmailAtStartOfJourney
+
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 
