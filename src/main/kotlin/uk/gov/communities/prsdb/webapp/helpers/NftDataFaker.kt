@@ -162,12 +162,10 @@ object NftDataFaker {
                 } else {
                     null
                 }
-            val subjectId = generateSubjectIdentifier()
-            val createdDate = generateCreatedDate()
             CoreLandlordDetails(
                 id = id.toLong(),
-                subjectId = subjectId,
-                createdDate = createdDate,
+                subjectId = generateSubjectIdentifier(),
+                createdDate = generateCreatedDate(),
                 landlordType = landlordType,
                 organisationDetails = organisationDetails,
             )
@@ -223,7 +221,6 @@ object NftDataFaker {
                     pickOne(
                         listOf(CharityRegulator.ENGLAND_AND_WALES, CharityRegulator.NORTHERN_IRELAND, CharityRegulator.SCOTLAND),
                     )
-
                 else -> CharityRegulator.NONE
             }
         val charityNumber = if (hasCharityRegistration) faker.regexify("[0-9]{6,8}") else null
