@@ -151,8 +151,6 @@ class RegisterPropertyController(
                 delegatedToLettingAgent = delegatedToLettingAgent,
             )
         model.addAttribute("provideMissingDetailsViewModel", provideMissingDetailsViewModel)
-
-        model.addAttribute("propertyRegistrationPhaseTwoEnabled", propertyRegistrationPhaseTwoEnabled)
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
         if (delegatedToLettingAgent || actionRequiredForCompliance || provideMissingDetails) {
