@@ -501,6 +501,8 @@ class NftDataSeeder(
         landlordStmt.setDate(9, NftDataFaker.generateDateOfBirth())
         landlordStmt.setLong(10, registrationNumberId)
         landlordStmt.setBoolean(11, isVerified)
+        landlordStmt.setInt(12, coreDetails.anniversary.dayOfMonth)
+        landlordStmt.setInt(13, coreDetails.anniversary.monthValue)
         landlordStmt.addBatch()
     }
 
@@ -542,6 +544,8 @@ class NftDataSeeder(
         organisationLandlordStmt.setDate(24, details.registrantDateOfBirth)
         organisationLandlordStmt.setString(25, details.registrantEmail)
         organisationLandlordStmt.setString(26, details.registrantPhoneNumber)
+        organisationLandlordStmt.setInt(27, coreDetails.anniversary.dayOfMonth)
+        organisationLandlordStmt.setInt(28, coreDetails.anniversary.monthValue)
         organisationLandlordStmt.addBatch()
 
         organisationalLandlordUserStmt.setTimestamp(1, coreDetails.createdDate)
@@ -630,7 +634,7 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
-        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(createdDate))
+        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(landlordDetails.anniversary))
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)

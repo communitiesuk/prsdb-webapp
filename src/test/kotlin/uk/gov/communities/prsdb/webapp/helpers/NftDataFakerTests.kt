@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
+import java.time.MonthDay
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
@@ -97,40 +98,42 @@ class NftDataFakerTests {
     }
 
     @Test
-    fun `generateRenewalDate returns next year's anniversary of the created date when this year's has passed`() {
+    fun `generateAnniversary falls between the landlord's created date and the reference date`() {
+        // Arrange
+        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
+        val landlordCreatedDate = Timestamp.from(Instant.parse("2025-06-05T12:00:00Z"))
+
+        // Act
+        val anniversaries = List(SAMPLE_SIZE) { NftDataFaker.generateAnniversary(landlordCreatedDate) }
+
+        // Assert
+        anniversaries.forEach {
+            assertTrue(it in MonthDay.of(6, 5)..MonthDay.of(6, 15), "Expected $it to be between 5 and 15 June")
+        }
+    }
+
+    @Test
+    fun `generateRenewalDate returns next year's anniversary when this year's has passed`() {
         // Arrange
         NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
 
         // Act
-        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2025-03-10T12:00:00Z")))
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(3, 10))
 
         // Assert
         assertEquals(LocalDate.of(2026, 3, 10), renewalDate.toLocalDate())
     }
 
     @Test
-    fun `generateRenewalDate returns this year's anniversary of the created date when it is still to come`() {
+    fun `generateRenewalDate returns this year's anniversary when it is still to come`() {
         // Arrange
         NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
 
         // Act
-        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2024-09-01T12:00:00Z")))
+        val renewalDate = NftDataFaker.generateRenewalDate(MonthDay.of(9, 1))
 
         // Assert
         assertEquals(LocalDate.of(2025, 9, 1), renewalDate.toLocalDate())
-    }
-
-    @Test
-    fun `generateRenewalDate uses the UK date of the created date`() {
-        // Arrange
-        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
-
-        // Act
-        // 23:30 UTC on 31 March is 00:30 BST on 1 April
-        val renewalDate = NftDataFaker.generateRenewalDate(Timestamp.from(Instant.parse("2025-03-31T23:30:00Z")))
-
-        // Assert
-        assertEquals(LocalDate.of(2026, 4, 1), renewalDate.toLocalDate())
     }
 
     private fun generateFakerSample(): List<String> =

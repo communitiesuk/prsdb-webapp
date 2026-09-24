@@ -86,8 +86,8 @@ class NftDataSeederDao(
             """
             INSERT INTO landlord 
             (id, created_date, last_modified_date, individual_subject_identifier, individual_name, individual_email, individual_phone_number, individual_address_id, individual_date_of_birth, 
-             registration_number_id, individual_is_verified, individual_country_of_residence, individual_is_active, individual_has_accepted_privacy_notice, landlord_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
+             registration_number_id, individual_is_verified, anniversary_day, anniversary_month, individual_country_of_residence, individual_is_active, individual_has_accepted_privacy_notice, landlord_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
             """
         return connection.prepareStatement(query)
     }
@@ -104,8 +104,8 @@ class NftDataSeederDao(
              organisation_lead_trustee_phone, organisation_lead_trustee_address_id,
              organisation_main_contact_name, organisation_main_contact_email, organisation_main_contact_phone,
              organisation_registrant_name, organisation_registrant_date_of_birth, organisation_registrant_email,
-             organisation_registrant_phone_number)
-            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             organisation_registrant_phone_number, anniversary_day, anniversary_month)
+            VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }

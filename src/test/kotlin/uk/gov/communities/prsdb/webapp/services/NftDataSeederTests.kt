@@ -237,6 +237,34 @@ class NftDataSeederTests(
     }
 
     @Test
+    fun `seedDatabase gives every landlord an anniversary and their properties a matching renewal date`() {
+        newSeeder().seedDatabase()
+
+        assertEquals(
+            0L,
+            jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM landlord WHERE anniversary_day IS NULL OR anniversary_month IS NULL",
+                Long::class.java,
+            ),
+        )
+        assertEquals(
+            0L,
+            jdbcTemplate.queryForObject(
+                """
+                SELECT count(*)
+                FROM property_ownership po
+                JOIN ownership_link ol ON ol.landlordship_id = po.id
+                JOIN landlord l ON l.id = ol.landlord_id
+                WHERE (EXTRACT(MONTH FROM po.renewal_date), EXTRACT(DAY FROM po.renewal_date))
+                          <> (l.anniversary_month, l.anniversary_day)
+                  AND NOT (l.anniversary_month = 2 AND l.anniversary_day = 29)
+                """.trimIndent(),
+                Long::class.java,
+            ),
+        )
+    }
+
+    @Test
     fun `seedDatabase is deterministic for a given random seed`() {
         newSeeder().seedDatabase()
         val firstRunSnapshot = captureSeedSnapshot()

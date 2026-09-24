@@ -107,10 +107,12 @@ object NftDataFaker {
 
     fun generateDateOfBirth(): Date = Date.valueOf(faker.timeAndDate().birthday(18, 120))
 
-    fun generateRenewalDate(createdDate: Timestamp): Date {
-        val registrationDate = createdDate.toInstant().atZone(DateTimeHelper.UK_ZONE).toLocalDate()
-        return Date.valueOf(RenewalDateHelper.getRenewalDate(MonthDay.from(registrationDate), referenceDate()))
-    }
+    // The app sets a landlord's anniversary when they register their first property, so we approximate that date
+    // as a random date between the landlord registering and the reference date.
+    fun generateAnniversary(landlordCreatedDate: Timestamp): MonthDay =
+        MonthDay.from(generateDateAfter(landlordCreatedDate).toInstant().atZone(DateTimeHelper.UK_ZONE))
+
+    fun generateRenewalDate(anniversary: MonthDay): Date = Date.valueOf(RenewalDateHelper.getRenewalDate(anniversary, referenceDate()))
 
     fun generateIncompletePropertyCreatedDate(
         landlordCreatedDate: Timestamp,
@@ -165,10 +167,13 @@ object NftDataFaker {
                 } else {
                     null
                 }
+            val subjectId = generateSubjectIdentifier()
+            val createdDate = generateCreatedDate()
             CoreLandlordDetails(
                 id = id.toLong(),
-                subjectId = generateSubjectIdentifier(),
-                createdDate = generateCreatedDate(),
+                subjectId = subjectId,
+                createdDate = createdDate,
+                anniversary = generateAnniversary(createdDate),
                 landlordType = landlordType,
                 organisationDetails = organisationDetails,
             )
@@ -599,6 +604,7 @@ object NftDataFaker {
         val id: Long,
         val subjectId: String,
         val createdDate: Timestamp,
+        val anniversary: MonthDay,
         val landlordType: LandlordType = LandlordType.INDIVIDUAL,
         val organisationDetails: OrganisationLandlordDetails? = null,
     )
