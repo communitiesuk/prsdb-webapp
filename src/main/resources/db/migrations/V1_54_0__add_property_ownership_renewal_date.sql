@@ -1,44 +1,36 @@
 ALTER TABLE property_ownership ADD COLUMN renewal_date DATE;
 
-WITH picked AS (
-    SELECT po.id AS po_id,
-           l.anniversary_day AS anniversary_day,
-           l.anniversary_month AS anniversary_month
+WITH earliest_landlord_anniversary AS (
+    SELECT DISTINCT ON (ol.landlordship_id)
+           ol.landlordship_id AS property_ownership_id,
+           l.anniversary_day,
+           l.anniversary_month
+    FROM ownership_link ol
+    JOIN landlord l ON l.id = ol.landlord_id
+    WHERE l.anniversary_day IS NOT NULL
+    ORDER BY ol.landlordship_id, ol.created_date, ol.id
+),
+anniversary AS (
+    SELECT po.id AS property_ownership_id,
+           COALESCE(ela.anniversary_day, EXTRACT(DAY FROM po.created_date AT TIME ZONE 'Europe/London')::int) AS day,
+           COALESCE(ela.anniversary_month, EXTRACT(MONTH FROM po.created_date AT TIME ZONE 'Europe/London')::int) AS month
     FROM property_ownership po
-    JOIN LATERAL (
-        SELECT la.anniversary_day, la.anniversary_month
-        FROM ownership_link ol
-        JOIN landlord la ON la.id = ol.landlord_id
-        WHERE ol.landlordship_id = po.id
-          AND la.anniversary_day IS NOT NULL
-          AND la.anniversary_month IS NOT NULL
-        ORDER BY ol.landlord_id
-        LIMIT 1
-    ) l ON true
+    LEFT JOIN earliest_landlord_anniversary ela ON ela.property_ownership_id = po.id
 ),
-leap_year_adjusted_anniversaries AS (
-    SELECT picked.po_id,
-           CASE
-               WHEN anniversary_month = 2 AND anniversary_day = 29
-                    AND NOT (year % 4 = 0 AND (year % 100 <> 0 OR year % 400 = 0))
-                   THEN make_date(year, 3, 1)
-               ELSE make_date(year, anniversary_month, anniversary_day)
-           END AS anniversary_date
-    FROM picked
-    CROSS JOIN generate_series(
-        EXTRACT(YEAR FROM current_date)::int,
-        EXTRACT(YEAR FROM current_date)::int + 1
-    ) AS year
-),
-renewal AS (
-    SELECT po_id, MIN(anniversary_date) AS renewal_date
-    FROM leap_year_adjusted_anniversaries
-    WHERE anniversary_date > current_date
-    GROUP BY po_id
+next_anniversary AS (
+    SELECT property_ownership_id,
+           day,
+           month,
+           EXTRACT(YEAR FROM current_date)::int
+               + CASE WHEN (month, day) <= (EXTRACT(MONTH FROM current_date), EXTRACT(DAY FROM current_date)) THEN 1 ELSE 0 END AS year
+    FROM anniversary
 )
 UPDATE property_ownership po
-SET renewal_date = renewal.renewal_date
-FROM renewal
-WHERE po.id = renewal.po_id;
+SET renewal_date = CASE
+        WHEN na.month = 2 AND na.day = 29 THEN make_date(na.year, 2, 28) + 1
+        ELSE make_date(na.year, na.month, na.day)
+    END
+FROM next_anniversary na
+WHERE na.property_ownership_id = po.id;
 
 ALTER TABLE property_ownership ALTER COLUMN renewal_date SET NOT NULL;
