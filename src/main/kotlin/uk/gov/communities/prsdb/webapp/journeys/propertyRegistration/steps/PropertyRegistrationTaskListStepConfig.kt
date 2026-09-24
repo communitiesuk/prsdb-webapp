@@ -36,7 +36,7 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
-        val sectionViewModels = restructuredSectionViewModels(state)
+        val sectionViewModels = sectionViewModels(state)
 
         val backUrlFromState =
             state
@@ -53,7 +53,7 @@ class PropertyRegistrationTaskListStepConfig(
         )
     }
 
-    private fun restructuredSectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
+    private fun sectionViewModels(state: PropertyRegistrationJourneyState): List<TaskSectionViewModel> =
         listOf(
             TaskSectionViewModel(
                 "registerProperty.taskList.aboutYourProperty.heading",

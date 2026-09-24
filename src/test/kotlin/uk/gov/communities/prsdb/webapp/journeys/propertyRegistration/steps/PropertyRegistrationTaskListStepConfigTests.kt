@@ -64,8 +64,8 @@ class PropertyRegistrationTaskListStepConfigTests {
     @Nested
     inner class WhoProvidesDetailsTaskListItemTests {
         @BeforeEach
-        fun enableRestructureAndStubState() {
-            stubRestructuredState()
+        fun enableStubState() {
+            stubState()
         }
 
         @Test
@@ -124,7 +124,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         // Arrange
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(false)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -144,7 +144,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         // Arrange
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(mockState.cachedOccupied).thenReturn(false)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -164,7 +164,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         // Arrange
         whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(mockState.cachedOccupied).thenReturn(true)
-        stubRestructuredState()
+        stubState()
 
         // Act
         val taskListViewModel = stepConfig.getTaskListViewModel(mockState)
@@ -182,7 +182,7 @@ class PropertyRegistrationTaskListStepConfigTests {
     inner class CorrespondenceTaskListItemTests {
         @BeforeEach
         fun stubState() {
-            stubRestructuredState()
+            this@PropertyRegistrationTaskListStepConfigTests.stubState()
         }
 
         @Test
@@ -225,7 +225,7 @@ class PropertyRegistrationTaskListStepConfigTests {
         }
     }
 
-    private fun stubRestructuredState() {
+    private fun stubState() {
         val mockPropertyDetailsTask = mock<PropertyDetailsTask>()
         val mockOwnershipAndLandlordsTask = mock<OwnershipAndLandlordsTask>()
         val mockCorrespondenceTask = mock<CorrespondenceTask>()
