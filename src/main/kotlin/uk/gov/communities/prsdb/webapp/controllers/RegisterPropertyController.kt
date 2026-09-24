@@ -161,7 +161,7 @@ class RegisterPropertyController(
         model.addAttribute("epcRequired", confirmationViewModel.epcRequired)
         model.addAttribute("licenseProvideLater", confirmationViewModel.licenseProvideLater)
         model.addAttribute("tenancyProvideLater", confirmationViewModel.tenancyProvideLater)
-        
+
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
         if (delegatedToLettingAgent || actionRequiredForCompliance || provideMissingDetails) {
