@@ -23,11 +23,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val sectionHeader = SectionHeader(page.locator("main"))
 
-    val heading = Heading(page.locator("h1"))
+    val heading = Heading(page.locator("h1.govuk-heading-xl"))
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
-
-    val restructuredHeading = Heading(page.locator("h1.govuk-heading-xl"))
 
     val aboutYourPropertyHeading =
         Heading(page.locator("h2.govuk-heading-l", Page.LocatorOptions().setHasText("About your property")))
@@ -57,7 +55,7 @@ class CheckAnswersPagePropertyRegistration(
 
     val lettingAgentDelegationUnoccupiedPanel = TicketPanel(page)
 
-    val restructuredSectionHeadings: List<String>
+    val sectionHeadings: List<String>
         get() =
             page
                 .locator("main h2.govuk-heading-l, main h3.govuk-heading-m")
@@ -71,23 +69,21 @@ class CheckAnswersPagePropertyRegistration(
     val complianceSummaryList = ComplianceSummaryList(page)
 
     val tenancyHeading =
-        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy and rental information")))
-
-    val restructuredTenancyHeading =
         Heading(page.locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details")))
-    val restructuredTenancyUnoccupiedBodyText =
+
+    val tenancyUnoccupiedBodyText =
         Paragraph.byText(
             page,
             "We’ll ask for tenancy details when your property becomes occupied.",
         )
-    private val restructuredTenancyRowKeys =
+    private val tenancyRowKeys =
         page
             .locator("h3.govuk-heading-m", Page.LocatorOptions().setHasText("Tenancy details"))
             .locator("xpath=following-sibling::dl[1]//dt[contains(@class,'govuk-summary-list__key')]")
 
-    fun restructuredTenancyRowHeadings(): List<String> {
-        val rowCount = restructuredTenancyRowKeys.count()
-        return (0 until rowCount).map { index -> restructuredTenancyRowKeys.nth(index).innerText().trim() }
+    fun tenancyRowHeadings(): List<String> {
+        val rowCount = tenancyRowKeys.count()
+        return (0 until rowCount).map { index -> tenancyRowKeys.nth(index).innerText().trim() }
     }
 
     val complianceCertificatesHeading =
