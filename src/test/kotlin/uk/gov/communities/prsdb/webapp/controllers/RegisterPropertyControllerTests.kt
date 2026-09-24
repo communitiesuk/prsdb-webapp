@@ -67,7 +67,7 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
-    
+
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
 
