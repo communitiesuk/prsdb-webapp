@@ -52,11 +52,6 @@ confirmation:
       paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   whatHappensNext:
     heading: What happens next
-    jointLandlords:
-      subHeading: We’ll notify you when joint landlords respond to their invitations
-      paragraph:
-        one: Their invitations have now been sent.
-        two: If you’re advertising this property, you’ll need to wait until each landlord joins. This is because your advert must include everyone’s Landlord Registration Number.
     lettingAgent:
       subHeading: Your letting agent or property manager needs to provide the remaining required details
       emailedParagraph: "We’ve now emailed your letting agent or property manager and asked them to provide:"
