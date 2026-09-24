@@ -74,7 +74,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         @Test
         fun `Submitting provide this later on licensing routes to occupied provide licensing later page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationOwnershipType()
                         .withBedrooms()
@@ -99,7 +99,7 @@ class PropertyRegistrationPropertyAndLicensingSinglePageTests : IntegrationTestW
         @Test
         fun `Submitting provide this later on licensing routes to unoccupied provide licensing later page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationOwnershipType()
                         .withBedrooms()

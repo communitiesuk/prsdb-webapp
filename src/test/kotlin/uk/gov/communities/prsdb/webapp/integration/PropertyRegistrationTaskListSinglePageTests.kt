@@ -27,9 +27,11 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
                 taskListPage.getAboutYourPropertyTask("Who the council should contact").statusText.contains("Cannot start yet"),
             )
             assert(
-                taskListPage.getAboutYourPropertyTask(
-                    "Tell us if your property’s occupied",
-                ).statusText.contains("Cannot start yet"),
+                taskListPage
+                    .getAboutYourPropertyTask(
+                        "Tell us if your property’s occupied",
+                    ).statusText
+                    .contains("Cannot start yet"),
             )
             assert(taskListPage.getRentedOutTask("Who will provide these details").statusText.contains("Cannot start yet"))
             assert(taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.contains("Cannot start yet"))
@@ -69,8 +71,9 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `Delegation task appears with Not started status for occupied property`() {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOccupancy()
                         .withOccupancyStatus(true),
                 )
 
@@ -79,7 +82,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Delegation task appears with Not needed yet status for unoccupied property`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
 
             assertEquals("Not\u00A0needed\u00A0yet", taskListPage.getRentedOutTask("Who will provide these details").statusText.trim())
         }
@@ -95,8 +98,9 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `Delegation task does not appear for occupied property when DELEGATE_TO_LETTING_AGENT feature flag is disabled`() {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOccupancy()
                         .withOccupancyStatus(true),
                 )
 
@@ -107,7 +111,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Delegation task does not appear for unoccupied property when DELEGATE_TO_LETTING_AGENT feature flag is disabled`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
 
             assert("Who will provide these details" !in taskListPage.getRentedOutTaskNames()) {
                 "Delegation task should not be visible for unoccupied property when feature flag is disabled"
@@ -125,8 +129,9 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `Delegation task appears with Not started status for occupied property`() {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy()
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder
+                        .beforePropertyRegistrationOccupancy()
                         .withOccupancyStatus(true),
                 )
 
@@ -140,7 +145,7 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
 
         @Test
         fun `Delegation task appears with Not needed yet status for unoccupied property`() {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
 
             val delegationTask = taskListPage.getRentedOutTask("Who will provide these details")
             assertEquals("Not\u00A0needed\u00A0yet", delegationTask.statusText.trim())
@@ -162,8 +167,8 @@ class PropertyRegistrationTaskListSinglePageTests : IntegrationTestWithImmutable
         @Test
         fun `Correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy(),
+                navigator.goToPropertyRegistrationTaskList(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy(),
                 )
 
             assert("Who the council should contact" !in taskListPage.getAboutYourPropertyTaskNames()) {

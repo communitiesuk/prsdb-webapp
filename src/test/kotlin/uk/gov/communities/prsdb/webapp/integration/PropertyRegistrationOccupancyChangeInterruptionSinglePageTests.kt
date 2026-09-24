@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 
 class PropertyRegistrationOccupancyChangeInterruptionSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @BeforeEach
-    fun enableRestructureAndSkippingAndDelegateFlags() {
+    fun enableLettingAgentFlag() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
@@ -27,7 +27,7 @@ class PropertyRegistrationOccupancyChangeInterruptionSinglePageTests : Integrati
 
     private fun goToOccupancyChangeInterruptionPage(page: Page): OccupancyChangeInterruptionPagePropertyRegistration {
         val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
+            navigator.goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
             )
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")

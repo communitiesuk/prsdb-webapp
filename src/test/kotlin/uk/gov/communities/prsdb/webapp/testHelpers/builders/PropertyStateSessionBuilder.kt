@@ -128,8 +128,6 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHmoAdditionalLicence() =
             beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
 
-        fun beforePropertyRegistrationOccupancy() = beforePropertyRegistrationLicensingType().withLicensingType(LicensingType.NO_LICENSING)
-
         fun beforePropertyRegistrationOccupiedLicensingType() =
             beforePropertyRegistrationOwnershipType()
                 .withBedrooms()
@@ -138,7 +136,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(true)
                 .withLandlordProvidesRentalDetails()
 
-        fun beforePropertyRegistrationRestructuredOccupancy() =
+        fun beforePropertyRegistrationOccupancy() =
             beforePropertyRegistrationOwnershipType()
                 .withBedrooms()
                 .withOwnershipType()

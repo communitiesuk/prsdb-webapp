@@ -13,7 +13,7 @@ class PropertyRegistrationOccupancySinglePageTests : IntegrationTestWithImmutabl
     inner class OccupancyStep {
         @Test
         fun `Submitting with no occupancy option selected returns an error`(page: Page) {
-            val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+            val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
             occupancyPage.form.submit()
             assertThat(occupancyPage.form.getErrorMessage()).containsText("Select whether the property is occupied")
         }
