@@ -13,8 +13,6 @@ class CorrespondenceLookupAddressFormPagePropertyDetailsUpdate(
         page,
         urlPath(urlArguments["propertyOwnershipId"]!!.toLong()),
     ) {
-    val heading = Heading(page.locator("h1"))
-
     companion object {
         fun urlPath(propertyOwnershipId: Long): String =
             LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressRoute(propertyOwnershipId) +

@@ -11,6 +11,4 @@ class OrgGovBodyMemberLookupAddressFormPageLandlordRegistration(
 ) : LookupAddressFormPage(
         page,
         "$LANDLORD_REGISTRATION_ROUTE/${GovBodyMemberAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
-    ) {
-    val heading = page.locator("h1")
-}
+    )

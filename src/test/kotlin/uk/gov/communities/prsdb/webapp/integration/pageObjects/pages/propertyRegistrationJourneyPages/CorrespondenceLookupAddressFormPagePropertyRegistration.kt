@@ -13,6 +13,4 @@ class CorrespondenceLookupAddressFormPagePropertyRegistration(
         page,
         "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/" +
             "${CorrespondenceAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
-    ) {
-    val heading = Heading(page.locator("h1"))
-}
+    )
