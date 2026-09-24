@@ -7,28 +7,23 @@ import java.time.Year
 
 class RenewalDateHelper {
     companion object {
+        private val LEAP_DAY = MonthDay.of(Month.FEBRUARY, 29)
+
         fun getRenewalDate(
             anniversary: MonthDay,
-            from: LocalDate,
-        ): LocalDate {
-            val anniversaryThisYear = getLeapYearAdjustedDate(anniversary, from.year)
-            return if (anniversaryThisYear > from) {
-                anniversaryThisYear
-            } else {
-                getLeapYearAdjustedDate(anniversary, from.year + 1)
-            }
-        }
+            currentDate: LocalDate = LocalDate.now(DateTimeHelper.UK_ZONE),
+        ): LocalDate =
+            getLeapAdjustedAnniversaryDate(anniversary, currentDate.year).takeIf { it.isAfter(currentDate) }
+                ?: getLeapAdjustedAnniversaryDate(anniversary, currentDate.year + 1)
 
-        private fun getLeapYearAdjustedDate(
-            monthDay: MonthDay,
+        private fun getLeapAdjustedAnniversaryDate(
+            anniversary: MonthDay,
             year: Int,
         ): LocalDate =
-            if (isLeapDay(monthDay) && !Year.isLeap(year.toLong())) {
+            if (anniversary == LEAP_DAY && !Year.isLeap(year.toLong())) {
                 LocalDate.of(year, Month.MARCH, 1)
             } else {
-                monthDay.atYear(year)
+                anniversary.atYear(year)
             }
-
-        private fun isLeapDay(monthDay: MonthDay): Boolean = monthDay == MonthDay.of(Month.FEBRUARY, 29)
     }
 }
