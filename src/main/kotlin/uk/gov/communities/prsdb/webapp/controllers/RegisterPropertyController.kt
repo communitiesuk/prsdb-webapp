@@ -51,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyRegistrationCon
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -71,7 +70,6 @@ class RegisterPropertyController(
     private val propertyComplianceService: PropertyComplianceService,
     private val backUrlStorageService: BackUrlStorageService,
     private val userToLandlordService: UserToLandlordService,
-    private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
@@ -163,11 +161,7 @@ class RegisterPropertyController(
         model.addAttribute("epcRequired", confirmationViewModel.epcRequired)
         model.addAttribute("licenseProvideLater", confirmationViewModel.licenseProvideLater)
         model.addAttribute("tenancyProvideLater", confirmationViewModel.tenancyProvideLater)
-
-        val hasPendingJointLandlordInvitations =
-            jointLandlordInvitationService.getPendingInvitations(propertyOwnership).isNotEmpty()
-        model.addAttribute("hasPendingJointLandlordInvitations", hasPendingJointLandlordInvitations)
-
+        
         model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
         if (delegatedToLettingAgent || actionRequiredForCompliance || provideMissingDetails) {

@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordRegistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -93,10 +92,7 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
-
-    @MockitoBean
-    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
-
+    
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
 

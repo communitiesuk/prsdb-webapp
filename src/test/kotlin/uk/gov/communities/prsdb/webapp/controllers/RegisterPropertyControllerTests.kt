@@ -35,7 +35,6 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -68,10 +67,7 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var userToLandlordService: UserToLandlordService
-
-    @MockitoBean
-    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
-
+    
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
 
@@ -186,7 +182,6 @@ class RegisterPropertyControllerTests(
                 .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
 
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
-        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
 
@@ -217,7 +212,6 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
-        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(false)
 
@@ -258,7 +252,6 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
-        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
 
@@ -299,7 +292,6 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
-        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
         whenever(propertyOwnershipService.hasLettingAgent(propertyOwnership.id)).thenReturn(true)
@@ -338,7 +330,6 @@ class RegisterPropertyControllerTests(
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
         whenever(userToLandlordService.getCurrentLandlordForUser()).thenReturn(createIndividualLandlord())
         whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
-        whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_PHASE_TWO)).thenReturn(true)
 
