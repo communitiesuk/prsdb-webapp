@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -83,6 +84,7 @@ class PropertyRegistrationService(
         isDelegatedToLettingAgent: Boolean = false,
     ) {
         val landlord = userToLandlordService.getCurrentLandlordForUser()
+        val anniversary = landlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
 
         val propertyOwnership =
             createPropertyOwnershipAndRelatedEntities(
@@ -105,10 +107,11 @@ class PropertyRegistrationService(
                 markedJointLandlord,
                 tenancyProvideLater,
                 landlord,
+                anniversary,
                 licenseProvideLater = licenseProvideLater,
             )
 
-        landlord.setAnniversaryIfAbsent(MonthDay.from(propertyOwnership.registrationDate))
+        landlord.setAnniversaryIfAbsent(anniversary)
 
         if (lettingAgentEmail != null) {
             val invitation = lettingAgentAccessService.createInvitation(propertyOwnership, lettingAgentEmail)
@@ -179,6 +182,7 @@ class PropertyRegistrationService(
         markedJointLandlord: Boolean,
         tenancyProvideLater: Boolean?,
         registeringLandlord: Landlord,
+        anniversary: MonthDay,
         licenseProvideLater: Boolean = false,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -207,6 +211,7 @@ class PropertyRegistrationService(
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
             registeringLandlord = registeringLandlord,
+            anniversary = anniversary,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,

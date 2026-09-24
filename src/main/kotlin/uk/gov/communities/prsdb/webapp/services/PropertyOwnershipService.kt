@@ -59,6 +59,7 @@ class PropertyOwnershipService(
         numberOfHouseholds: Int,
         numberOfPeople: Int,
         registeringLandlord: Landlord,
+        anniversary: MonthDay,
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
@@ -77,7 +78,6 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
-        val anniversary = registeringLandlord.anniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
         val renewalDate = RenewalDateHelper.getRenewalDate(anniversary)
 
         return propertyOwnershipRepository.save(

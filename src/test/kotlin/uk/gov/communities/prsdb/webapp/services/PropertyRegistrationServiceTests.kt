@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.NullSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -13,7 +16,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_PHASE_TWO
@@ -29,13 +31,13 @@ import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLettingAgentData
 import java.net.URI
-import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
 import java.util.UUID
@@ -119,17 +121,18 @@ class PropertyRegistrationServiceTests {
         assertEquals("Address already registered", errorThrown.message)
     }
 
-    @Test
-    fun `registerProperty delegates to setAnniversaryIfAbsent with the property's registration date`() {
-        val landlord = spy(MockLandlordData.createIndividualLandlord())
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ["--03-15"])
+    fun `registerProperty uses the landlord's anniversary, or today if they have none, for the renewal date and the landlord`(
+        existingAnniversary: MonthDay?,
+    ) {
+        val landlord = MockLandlordData.createIndividualLandlord()
+        existingAnniversary?.let { landlord.setAnniversaryIfAbsent(it) }
+        val expectedAnniversary = existingAnniversary ?: MonthDay.now(DateTimeHelper.UK_ZONE)
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
-        val expectedPropertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                landlords = mutableSetOf(landlord),
-                address = address,
-                createdDate = Instant.parse("2024-05-10T09:00:00Z"),
-            )
+        val expectedPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), address = address)
 
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockUserToLandlordService.getCurrentLandlordForUser()).thenReturn(landlord)
@@ -140,6 +143,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = 1,
                 numberOfPeople = 1,
                 registeringLandlord = landlord,
+                anniversary = expectedAnniversary,
                 propertyBuildType = PropertyType.DETACHED_HOUSE,
                 customPropertyType = null,
                 address = address,
@@ -176,7 +180,7 @@ class PropertyRegistrationServiceTests {
             customPropertyType = null,
         )
 
-        verify(landlord).setAnniversaryIfAbsent(MonthDay.of(5, 10))
+        assertEquals(expectedAnniversary, landlord.anniversary)
     }
 
     @Test
@@ -234,6 +238,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -278,6 +283,7 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -328,6 +334,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -419,6 +426,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -523,6 +531,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -566,6 +575,7 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -629,6 +639,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -674,6 +685,7 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
             registeringLandlord = landlord,
+            anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -728,6 +740,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -809,6 +822,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -887,6 +901,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -974,6 +989,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -1051,6 +1067,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
                 registeringLandlord = landlord,
+                anniversary = MonthDay.now(DateTimeHelper.UK_ZONE),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -1118,6 +1135,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1165,6 +1183,7 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = any(),
             numberOfPeople = any(),
             registeringLandlord = any(),
+            anniversary = any(),
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
@@ -1207,6 +1226,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1254,6 +1274,7 @@ class PropertyRegistrationServiceTests {
             numberOfHouseholds = any(),
             numberOfPeople = any(),
             registeringLandlord = any(),
+            anniversary = any(),
             propertyBuildType = any(),
             address = any(),
             license = anyOrNull(),
@@ -1291,6 +1312,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -1355,6 +1377,7 @@ class PropertyRegistrationServiceTests {
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
                 registeringLandlord = any(),
+                anniversary = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
