@@ -15,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -614,8 +613,7 @@ class PropertyDetailsViewModelTests {
         val action = addressRow.actions.single()
         val expectedUrl =
             LandlordUpdateCorrespondenceAddressController
-                .getUpdateCorrespondenceAddressRoute(propertyOwnership.id) +
-                "/${LookupAddressStep.ROUTE_SEGMENT}"
+                .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id)
         assertEquals(expectedUrl, action.url)
     }
 

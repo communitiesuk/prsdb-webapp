@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -331,8 +330,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(changeAction).isVisible()
                 assertThat(changeAction.link).hasAttribute(
                     "href",
-                    LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressRoute(propertyOwnershipId) +
-                        "/${LookupAddressStep.ROUTE_SEGMENT}",
+                    LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnershipId),
                 )
             }
 

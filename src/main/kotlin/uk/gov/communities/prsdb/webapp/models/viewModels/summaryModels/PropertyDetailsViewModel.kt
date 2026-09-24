@@ -4,7 +4,6 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.LandlordUpdateCorrespondenceAddressController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 class PropertyDetailsViewModel(
     propertyOwnership: PropertyOwnership,
@@ -44,8 +43,7 @@ class PropertyDetailsViewModel(
                     value = propertyOwnership.correspondenceAddress.toMultiLineAddress().split("\n"),
                     landlordActionLink =
                         LandlordUpdateCorrespondenceAddressController
-                            .getUpdateCorrespondenceAddressRoute(propertyOwnership.id) +
-                            "/${LookupAddressStep.ROUTE_SEGMENT}",
+                            .getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnership.id),
                 ),
             )
         } else {

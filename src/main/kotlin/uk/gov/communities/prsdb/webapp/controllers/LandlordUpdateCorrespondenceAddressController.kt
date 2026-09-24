@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStepDispatcher
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.correspondenceAddress.UpdateCorrespondenceAddressJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -76,5 +77,8 @@ class LandlordUpdateCorrespondenceAddressController(
 
         fun getUpdateCorrespondenceAddressRoute(propertyOwnershipId: Long): String =
             UPDATE_CORRESPONDENCE_ADDRESS_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+
+        fun getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnershipId: Long): String =
+            getUpdateCorrespondenceAddressRoute(propertyOwnershipId) + "/${LookupAddressStep.ROUTE_SEGMENT}"
     }
 }

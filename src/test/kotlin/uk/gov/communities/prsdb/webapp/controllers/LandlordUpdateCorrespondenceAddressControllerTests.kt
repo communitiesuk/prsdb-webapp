@@ -27,8 +27,7 @@ class LandlordUpdateCorrespondenceAddressControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressRoute(propertyOwnershipId) +
-            "/${LookupAddressStep.ROUTE_SEGMENT}"
+        LandlordUpdateCorrespondenceAddressController.getUpdateCorrespondenceAddressFirstStepRoute(propertyOwnershipId)
 
     override val formContent = "postcode=FA1+1AA&houseNameOrNumber=1"
 
