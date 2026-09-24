@@ -460,6 +460,13 @@ For CYA journeys extending `CheckYourAnswersJourneyState`, the following extensi
   `finishCyaStep`.
 - `checkAnswerTask(task, route? = null)` and `checkAnswerTask(task, dependencies, route? = null)` —
   mounts a whole task as an initial task whose `nextStep` is `finishCyaStep`.
+- `checkAnswerTaskFrom(task, startStep, route? = null)` and
+  `checkAnswerTaskFrom(task, dependencies, startStep, route? = null)` — mounts a whole task as above
+  and additionally overrides the `backDestination` of `startStep` to `journey.returnToCyaPageDestination`.
+  Use this when the CYA change link takes the user to a mid-task step rather than the task's first
+  step: without the override, pressing "Back" would continue back through the task; with the override
+  it returns to the CYA page. Equivalent to writing `checkAnswerTask(...)` followed by
+  `configureStep(startStep) { backDestination { journey.returnToCyaPageDestination } }`.
 
 A typical CYA routing map dispatches on the answer being changed:
 
@@ -481,6 +488,12 @@ companion object {
 
                 LookupAddressStep.ROUTE_SEGMENT ->
                     checkAnswerTask(journey.addressTask)
+
+                DateOfBirthStep.ROUTE_SEGMENT ->
+                    checkAnswerTaskFrom(
+                        journey.personalDetailsTask,
+                        journey.personalDetailsTask.dateOfBirthStep,
+                    )
             }
 
             step(journey.finishCyaStep) {
