@@ -215,8 +215,8 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockComplianceDetailsHelper.getElectricalSafetyCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockComplianceDetailsHelper.getEpcCyaContent(any(), any())).thenReturn(emptyMap())
         lenient().`when`(mockLicensingDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
-        lenient().`when`(mockOccupancyDetailsHelper.getRestructuredOccupancySummaryList(any())).thenReturn(emptyList())
-        lenient().`when`(mockOccupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(any(), any(), any())).thenReturn(emptyList())
+        lenient().`when`(mockOccupancyDetailsHelper.getOccupancySummaryList(any())).thenReturn(emptyList())
+        lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any())).thenReturn(emptyList())
         lenient().`when`(mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any())).thenReturn(emptyList())
         lenient().`when`(mockState.whoProvidesDetailsTask).thenReturn(mockWhoProvidesDetailsTask)
         lenient().`when`(mockState.licensingTask).thenReturn(mockLicensingTask)
@@ -232,15 +232,16 @@ class PropertyRegistrationCyaStepConfigTests {
         lenient().`when`(mockLettingAgentEmailStep.formModel).thenReturn(mockLettingAgentEmailFormModel)
     }
 
+    // TODO PDJB-1022: Remove this inner class once the feature flag is removed and the letting agent journey is fully implemented
     @Nested
-    inner class RestructuredContentWithoutLettingAgents {
+    inner class ContentBeforePdjb1022 {
         @BeforeEach
-        fun enableRestructureAndSkippingFlagWithoutLettingAgents() {
+        fun disableLettingAgentFlag() {
             lenient().`when`(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(false)
         }
 
         @Test
-        fun `chooseTemplate returns restructured CYA template`() {
+        fun `chooseTemplate returns CYA template`() {
             assertEquals(
                 "forms/propertyRegistrationCheckAnswersForm",
                 stepConfig.chooseTemplate(mockState),
@@ -248,9 +249,9 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent puts occupancyDetails from getRestructuredOccupancySummaryList`() {
+        fun `getStepSpecificContent puts occupancyDetails from getOccupancySummaryList`() {
             val expectedOccupancyDetails = listOf<SummaryListRowViewModel>()
-            whenever(mockOccupancyDetailsHelper.getRestructuredOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
+            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -258,10 +259,10 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent puts tenancyDetails from getRestructuredCheckYourAnswersSummaryList`() {
+        fun `getStepSpecificContent puts tenancyDetails from getCheckYourAnswersSummaryList`() {
             val expectedTenancyDetails = listOf<SummaryListRowViewModel>()
             whenever(
-                mockOccupancyDetailsHelper.getRestructuredCheckYourAnswersSummaryList(any(), any(), any()),
+                mockOccupancyDetailsHelper.getCheckYourAnswersSummaryList(any(), any(), any()),
             ).thenReturn(expectedTenancyDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -287,7 +288,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses complete registration button and restructured warning text`() {
+        fun `getStepSpecificContent uses complete registration button and warning text`() {
             val content = stepConfig.getStepSpecificContent(mockState)
 
             assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
@@ -304,7 +305,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses restructured no licensing wording when no licence selected`() {
+        fun `getStepSpecificContent uses no licensing wording when no licence selected`() {
             whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
 
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -336,7 +337,7 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
-        fun `getStepSpecificContent uses Address heading for restructured property details row`() {
+        fun `getStepSpecificContent uses Address heading for property details row`() {
             val content = stepConfig.getStepSpecificContent(mockState)
             val propertyDetailsRows = content["propertyDetails"] as List<SummaryListRowViewModel>
 
@@ -363,7 +364,7 @@ class PropertyRegistrationCyaStepConfigTests {
         fun `getStepSpecificContent hides joint landlord invitations when there are no joint landlords`() {
             val expectedOccupancyDetails = listOf(mock<SummaryListRowViewModel>())
             whenever(mockHasJointLandlordsFormModel.hasJointLandlords).thenReturn(false)
-            whenever(mockOccupancyDetailsHelper.getRestructuredOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
+            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -392,7 +393,7 @@ class PropertyRegistrationCyaStepConfigTests {
             whenever(mockJointLandlordsTask.inviteJointLandlordsTask).thenReturn(mockInviteJointLandlordsTask)
             whenever(mockInviteJointLandlordsTask.invitedJointLandlords).thenReturn(listOf("joint.landlord@example.com"))
             whenever(mockInviteJointLandlordsTask.checkJointLandlordsStep).thenReturn(mockCheckJointLandlordsStep)
-            whenever(mockOccupancyDetailsHelper.getRestructuredOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
+            whenever(mockOccupancyDetailsHelper.getOccupancySummaryList(mockState)).thenReturn(expectedOccupancyDetails)
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -411,9 +412,9 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class LettingAgentRestructuredContent {
+    inner class NotDelegatedToLettingAgentContent {
         @BeforeEach
-        fun enableLettingAgentFlags() {
+        fun setUpStubs() {
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(false)
         }
@@ -522,9 +523,9 @@ class PropertyRegistrationCyaStepConfigTests {
     }
 
     @Nested
-    inner class DelegatedRestructuredContent {
+    inner class DelegatedToLettingAgentContent {
         @BeforeEach
-        fun enableDelegationFlags() {
+        fun setUpStubs() {
             whenever(mockFeatureFlagManager.checkFeature(DELEGATE_TO_LETTING_AGENT)).thenReturn(true)
             whenever(mockState.isDelegatedToLettingAgent(mockFeatureFlagManager)).thenReturn(true)
         }
