@@ -61,6 +61,21 @@
                 </p>
             </th:block>
 
+            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent}">
+                <h2 class="govuk-heading-m"
+                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
+                    registerProperty.confirmation.whatYouNeedToDoNext.heading
+                </h2>
+                <h3 class="govuk-heading-s"
+                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading}">
+                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading
+                </h3>
+                <p class="govuk-body"
+                   th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
+                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
+                </p>
+            </th:block>
+
             <th:block th:if="${propertyRegistrationConfirmation.provideMissingDetails}">
                 <h3 class="govuk-heading-s"
                     th:text="#{registerProperty.confirmation.provideMissingDetails.heading}">
@@ -85,21 +100,6 @@
                 <p class="govuk-inset-text"
                    th:text="#{registerProperty.confirmation.provideMissingDetails.paragraph.two(${completeByDate})}">
                     registerProperty.confirmation.provideMissingDetails.paragraph.two
-                </p>
-            </th:block>
-
-            <th:block th:if="${actionRequiredForCompliance and !delegatedToLettingAgent and !provideMissingDetails}">
-                <h2 class="govuk-heading-m"
-                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.heading
-                </h2>
-                <h3 class="govuk-heading-s"
-                    th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading
-                </h3>
-                <p class="govuk-body"
-                   th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
-                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
                 </p>
             </th:block>
 

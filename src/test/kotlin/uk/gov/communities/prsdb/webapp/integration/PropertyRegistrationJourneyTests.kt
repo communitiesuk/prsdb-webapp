@@ -609,7 +609,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
             assertTrue(propertyOwnershipCaptor.value.isOccupied)
             assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
-            assertTrue(confirmationPage.whatHappensNextHeading.isVisible)
+            assertFalse(confirmationPage.whatHappensNextHeading.isVisible)
             assertFalse(confirmationPage.lettingAgentSubHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
@@ -1112,6 +1112,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                     propertyOwnershipCaptor.value.registrationNumber,
                 )
             assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+            assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
             assertTrue(confirmationPage.surveyLink.locator.isVisible)
             assertThat(confirmationPage.surveyLink).hasAttribute("href", INDIVIDUAL_PROPERTY_REGISTRATION_SURVEY_URL)
             assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
