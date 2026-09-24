@@ -87,15 +87,15 @@
                     registerProperty.confirmation.provideMissingDetails.paragraph.one
                 </p>
                 <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
-                    <li th:if="${provideMissingDetailsViewModel.licenseProvideLater}"
+                    <li th:if="${provideMissingDetailsViewModel.showLicensingDetails}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.licensingDetails}">registerProperty.confirmation.provideMissingDetails.licensingDetails</li>
-                    <li th:if="${provideMissingDetailsViewModel.gasSafetyRequired}"
+                    <li th:if="${provideMissingDetailsViewModel.showGasSafetyCertificate}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.gasSafetyCertificate</li>
-                    <li th:if="${provideMissingDetailsViewModel.electricalSafetyRequired}"
+                    <li th:if="${provideMissingDetailsViewModel.showElectricalSafetyCertificate}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate}">registerProperty.confirmation.provideMissingDetails.electricalSafetyCertificate</li>
-                    <li th:if="${provideMissingDetailsViewModel.epcRequired}"
+                    <li th:if="${provideMissingDetailsViewModel.showEpc}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.epc}">registerProperty.confirmation.provideMissingDetails.epc</li>
-                    <li th:if="${provideMissingDetailsViewModel.tenancyProvideLater}"
+                    <li th:if="${provideMissingDetailsViewModel.showTenancyDetails}"
                         th:text="#{registerProperty.confirmation.provideMissingDetails.tenancyDetails}">registerProperty.confirmation.provideMissingDetails.tenancyDetails</li>
                 </ul>
                 <p class="govuk-inset-text"

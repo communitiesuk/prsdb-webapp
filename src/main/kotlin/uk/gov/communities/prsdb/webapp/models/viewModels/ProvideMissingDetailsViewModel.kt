@@ -4,11 +4,11 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 data class ProvideMissingDetailsViewModel(
-    val gasSafetyRequired: Boolean,
-    val electricalSafetyRequired: Boolean,
-    val epcRequired: Boolean,
-    val licenseProvideLater: Boolean,
-    val tenancyProvideLater: Boolean,
+    val showGasSafetyCertificate: Boolean,
+    val showElectricalSafetyCertificate: Boolean,
+    val showEpc: Boolean,
+    val showLicensingDetails: Boolean,
+    val showTenancyDetails: Boolean,
 ) {
     companion object {
         fun from(
@@ -22,11 +22,11 @@ data class ProvideMissingDetailsViewModel(
                 return null
             }
             return ProvideMissingDetailsViewModel(
-                gasSafetyRequired = isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true,
-                electricalSafetyRequired = isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true,
-                epcRequired = isOccupied && propertyCompliance?.epcProvideLater == true,
-                licenseProvideLater = propertyOwnership.licenseProvideLater == true,
-                tenancyProvideLater = propertyOwnership.tenancyProvideLater == true,
+                showGasSafetyCertificate = isOccupied && propertyCompliance?.gasSafetyCertProvideLater == true,
+                showElectricalSafetyCertificate = isOccupied && propertyCompliance?.electricalSafetyCertProvideLater == true,
+                showEpc = isOccupied && propertyCompliance?.epcProvideLater == true,
+                showLicensingDetails = propertyOwnership.licenseProvideLater == true,
+                showTenancyDetails = propertyOwnership.tenancyProvideLater == true,
             )
         }
     }

@@ -197,11 +197,11 @@ class RegisterPropertyControllerTests(
                 MockMvcResultMatchers.model().attribute(
                     "provideMissingDetailsViewModel",
                     ProvideMissingDetailsViewModel(
-                        gasSafetyRequired = false,
-                        electricalSafetyRequired = false,
-                        epcRequired = false,
-                        licenseProvideLater = false,
-                        tenancyProvideLater = true,
+                        showGasSafetyCertificate = false,
+                        showElectricalSafetyCertificate = false,
+                        showEpc = false,
+                        showLicensingDetails = false,
+                        showTenancyDetails = true,
                     ),
                 ),
             ).andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
@@ -209,7 +209,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation uses the legacy compliance section when phase two is disabled`() {
+    fun `getConfirmation uses the before pdjb-939 compliance section when phase two is disabled`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -276,11 +276,11 @@ class RegisterPropertyControllerTests(
                 MockMvcResultMatchers.model().attribute(
                     "provideMissingDetailsViewModel",
                     ProvideMissingDetailsViewModel(
-                        gasSafetyRequired = true,
-                        electricalSafetyRequired = true,
-                        epcRequired = true,
-                        licenseProvideLater = true,
-                        tenancyProvideLater = true,
+                        showGasSafetyCertificate = true,
+                        showElectricalSafetyCertificate = true,
+                        showEpc = true,
+                        showLicensingDetails = true,
+                        showTenancyDetails = true,
                     ),
                 ),
             )
@@ -360,11 +360,11 @@ class RegisterPropertyControllerTests(
                 MockMvcResultMatchers.model().attribute(
                     "provideMissingDetailsViewModel",
                     ProvideMissingDetailsViewModel(
-                        gasSafetyRequired = false,
-                        electricalSafetyRequired = false,
-                        epcRequired = false,
-                        licenseProvideLater = false,
-                        tenancyProvideLater = true,
+                        showGasSafetyCertificate = false,
+                        showElectricalSafetyCertificate = false,
+                        showEpc = false,
+                        showLicensingDetails = false,
+                        showTenancyDetails = true,
                     ),
                 ),
             )
