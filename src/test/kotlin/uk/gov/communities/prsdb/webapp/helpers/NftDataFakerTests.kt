@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import org.junit.jupiter.api.Test
-import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.MonthDay
@@ -95,21 +94,6 @@ class NftDataFakerTests {
         val second = List(FAKER_SAMPLE_SIZE) { NftDataFaker.generateCreatedDate().toString() }
 
         assertEquals(first, second)
-    }
-
-    @Test
-    fun `generateAnniversary falls between the landlord's created date and the reference date`() {
-        // Arrange
-        NftDataFaker.reset(seed = TEST_SEED, reference = MIDYEAR_REFERENCE)
-        val landlordCreatedDate = Timestamp.from(Instant.parse("2025-06-05T12:00:00Z"))
-
-        // Act
-        val anniversaries = List(SAMPLE_SIZE) { NftDataFaker.generateAnniversary(landlordCreatedDate) }
-
-        // Assert
-        anniversaries.forEach {
-            assertTrue(it in MonthDay.of(6, 5)..MonthDay.of(6, 15), "Expected $it to be between 5 and 15 June")
-        }
     }
 
     @Test

@@ -237,13 +237,24 @@ class NftDataSeederTests(
     }
 
     @Test
-    fun `seedDatabase gives every landlord an anniversary and their properties a matching renewal date`() {
+    fun `seedDatabase gives landlords the anniversary of their first property registration and their properties a matching renewal date`() {
         newSeeder().seedDatabase()
 
         assertEquals(
             0L,
             jdbcTemplate.queryForObject(
-                "SELECT count(*) FROM landlord WHERE anniversary_day IS NULL OR anniversary_month IS NULL",
+                """
+                SELECT count(*)
+                FROM landlord l
+                LEFT JOIN (
+                    SELECT ol.landlord_id, MIN(po.created_date) AT TIME ZONE 'Europe/London' AS first_registration_date
+                    FROM ownership_link ol
+                    JOIN property_ownership po ON po.id = ol.landlordship_id
+                    GROUP BY ol.landlord_id
+                ) fr ON fr.landlord_id = l.id
+                WHERE (l.anniversary_month, l.anniversary_day) IS DISTINCT FROM
+                      (EXTRACT(MONTH FROM fr.first_registration_date)::int, EXTRACT(DAY FROM fr.first_registration_date)::int)
+                """.trimIndent(),
                 Long::class.java,
             ),
         )

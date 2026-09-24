@@ -11,8 +11,10 @@ import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.CoreLandlordDetails
+import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.PropertyScenario
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBigDecimalOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBooleanOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setDateOrNull
@@ -26,6 +28,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.MonthDay
 import java.time.ZoneOffset
 import kotlin.math.ceil
 import kotlin.math.min
@@ -251,14 +254,23 @@ class NftDataSeeder(
             var reminderEmailsAdded = 0
             var incompletePropertiesAdded = 0
 
+            var propertyRegistrationsPlanned = 0
+
             fun propertyRegistrationsAdded() = propertyOwnershipsAdded + incompletePropertiesAdded
 
             val numOfLandlordBatches = ceil(numOfLandlords.toFloat() / batchSize).toInt()
             for (landlordBatchNum in 1..numOfLandlordBatches) {
                 val landlordIdRange = ((landlordBatchNum - 1) * batchSize + 1)..min(landlordBatchNum * batchSize, numOfLandlords)
-                val coreDetailsForLandlords = NftDataFaker.generateCoreDetailsForLandlords(landlordIdRange.toList())
+                val plannedLandlords =
+                    NftDataFaker.generateCoreDetailsForLandlords(landlordIdRange.toList()).map { landlord ->
+                        val numOfPropertiesLeft = numOfProperties - propertyRegistrationsPlanned
+                        val numOfPropertiesForLandlord =
+                            NftDataFaker.generateNumberOfPropertiesForLandlord().coerceAtMost(numOfPropertiesLeft)
+                        propertyRegistrationsPlanned += numOfPropertiesForLandlord
+                        PlannedLandlord(landlord, List(numOfPropertiesForLandlord) { planPropertyRegistration(landlord) })
+                    }
 
-                coreDetailsForLandlords.forEach {
+                plannedLandlords.forEach {
                     addLandlordToBatch(
                         prsdbUserStmt,
                         registrationNumberStmt,
@@ -266,7 +278,8 @@ class NftDataSeeder(
                         organisationLandlordStmt,
                         organisationalLandlordUserStmt,
                         organisationGoverningBodyMemberStmt,
-                        it,
+                        it.coreDetails,
+                        it.anniversary,
                         registrationNumberId = (++registrationNumbersAdded).toLong(),
                     )
                 }
@@ -282,29 +295,30 @@ class NftDataSeeder(
 
                 log("Seeded ${landlordIdRange.last} landlords")
 
-                coreDetailsForLandlords.forEach { landlord ->
-                    val numOfPropertiesLeft = numOfProperties - propertyRegistrationsAdded()
-                    val numOfPropertiesForLandlord = NftDataFaker.generateNumberOfPropertiesForLandlord().coerceAtMost(numOfPropertiesLeft)
+                plannedLandlords.forEach { plannedLandlord ->
+                    val landlord = plannedLandlord.coreDetails
 
-                    repeat(numOfPropertiesForLandlord) {
-                        val scenario = NftDataFaker.generatePropertyScenario()
+                    plannedLandlord.propertyRegistrations.forEach { registration ->
+                        val scenario = registration.scenario
                         if (scenario.isRegistrationComplete) {
                             val propertyOwnershipId = (++propertyOwnershipsAdded).toLong()
+                            val propertyOwnershipCreatedDate = checkNotNull(registration.propertyOwnershipCreatedDate)
 
-                            val propertyOwnershipCreatedDate =
-                                addPropertyOwnershipToBatchReturningCreatedDate(
-                                    registrationNumberStmt,
-                                    propertyOwnershipStmt,
-                                    landlordMembershipStmt,
-                                    licenceStmt,
-                                    scenario.isOccupied,
-                                    registrationNumberId = (++registrationNumbersAdded).toLong(),
-                                    licenceIdIfHasLicence = if (scenario.hasLicence) (++licencesAdded).toLong() else null,
-                                    propertyOwnershipId,
-                                    landlord,
-                                    licenseProvideLater = scenario.licenseProvideLater,
-                                    tenancyProvideLater = scenario.tenancyProvideLater,
-                                )
+                            addPropertyOwnershipToBatch(
+                                registrationNumberStmt,
+                                propertyOwnershipStmt,
+                                landlordMembershipStmt,
+                                licenceStmt,
+                                scenario.isOccupied,
+                                registrationNumberId = (++registrationNumbersAdded).toLong(),
+                                licenceIdIfHasLicence = if (scenario.hasLicence) (++licencesAdded).toLong() else null,
+                                propertyOwnershipId,
+                                propertyOwnershipCreatedDate,
+                                landlord,
+                                landlordAnniversary = checkNotNull(plannedLandlord.anniversary),
+                                licenseProvideLater = scenario.licenseProvideLater,
+                                tenancyProvideLater = scenario.tenancyProvideLater,
+                            )
                             val complianceId = (++complianceRecordsAdded).toLong()
                             fileUploadsAdded =
                                 addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
@@ -457,6 +471,7 @@ class NftDataSeeder(
         organisationalLandlordUserStmt: PreparedStatement,
         organisationGoverningBodyMemberStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
+        anniversary: MonthDay?,
         registrationNumberId: Long,
     ) {
         prsdbUserStmt.setString(1, coreDetails.subjectId)
@@ -470,13 +485,14 @@ class NftDataSeeder(
         registrationNumberStmt.addBatch()
 
         when (coreDetails.landlordType) {
-            LandlordType.INDIVIDUAL -> addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, registrationNumberId)
+            LandlordType.INDIVIDUAL -> addIndividualLandlordToBatch(individualLandlordStmt, coreDetails, anniversary, registrationNumberId)
             LandlordType.ORGANISATION ->
                 addOrganisationLandlordToBatch(
                     organisationLandlordStmt,
                     organisationalLandlordUserStmt,
                     organisationGoverningBodyMemberStmt,
                     coreDetails,
+                    anniversary,
                     registrationNumberId,
                 )
         }
@@ -485,6 +501,7 @@ class NftDataSeeder(
     private fun addIndividualLandlordToBatch(
         landlordStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
+        anniversary: MonthDay?,
         registrationNumberId: Long,
     ) {
         val name = NftDataFaker.generateName()
@@ -501,8 +518,8 @@ class NftDataSeeder(
         landlordStmt.setDate(9, NftDataFaker.generateDateOfBirth())
         landlordStmt.setLong(10, registrationNumberId)
         landlordStmt.setBoolean(11, isVerified)
-        landlordStmt.setInt(12, coreDetails.anniversary.dayOfMonth)
-        landlordStmt.setInt(13, coreDetails.anniversary.monthValue)
+        landlordStmt.setIntOrNull(12, anniversary?.dayOfMonth)
+        landlordStmt.setIntOrNull(13, anniversary?.monthValue)
         landlordStmt.addBatch()
     }
 
@@ -511,6 +528,7 @@ class NftDataSeeder(
         organisationalLandlordUserStmt: PreparedStatement,
         organisationGoverningBodyMemberStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
+        anniversary: MonthDay?,
         registrationNumberId: Long,
     ) {
         val details =
@@ -544,8 +562,8 @@ class NftDataSeeder(
         organisationLandlordStmt.setDate(24, details.registrantDateOfBirth)
         organisationLandlordStmt.setString(25, details.registrantEmail)
         organisationLandlordStmt.setString(26, details.registrantPhoneNumber)
-        organisationLandlordStmt.setInt(27, coreDetails.anniversary.dayOfMonth)
-        organisationLandlordStmt.setInt(28, coreDetails.anniversary.monthValue)
+        organisationLandlordStmt.setIntOrNull(27, anniversary?.dayOfMonth)
+        organisationLandlordStmt.setIntOrNull(28, anniversary?.monthValue)
         organisationLandlordStmt.addBatch()
 
         organisationalLandlordUserStmt.setTimestamp(1, coreDetails.createdDate)
@@ -569,7 +587,14 @@ class NftDataSeeder(
         }
     }
 
-    private fun addPropertyOwnershipToBatchReturningCreatedDate(
+    private fun planPropertyRegistration(landlord: CoreLandlordDetails): PlannedPropertyRegistration {
+        val scenario = NftDataFaker.generatePropertyScenario()
+        val propertyOwnershipCreatedDate =
+            if (scenario.isRegistrationComplete) NftDataFaker.generateCreatedDate(after = landlord.createdDate) else null
+        return PlannedPropertyRegistration(scenario, propertyOwnershipCreatedDate)
+    }
+
+    private fun addPropertyOwnershipToBatch(
         registrationNumberStmt: PreparedStatement,
         propertyOwnershipStmt: PreparedStatement,
         membershipStmt: PreparedStatement,
@@ -578,12 +603,12 @@ class NftDataSeeder(
         registrationNumberId: Long,
         licenceIdIfHasLicence: Long?,
         propertyOwnershipId: Long,
+        createdDate: Timestamp,
         landlordDetails: CoreLandlordDetails,
+        landlordAnniversary: MonthDay,
         licenseProvideLater: Boolean?,
         tenancyProvideLater: Boolean?,
-    ): Timestamp {
-        val createdDate = NftDataFaker.generateCreatedDate(after = landlordDetails.createdDate)
-
+    ) {
         registrationNumberStmt.setLong(1, registrationNumberId)
         registrationNumberStmt.setTimestamp(2, createdDate)
         registrationNumberStmt.setLong(3, registrationNumberGenerator.next())
@@ -634,15 +659,13 @@ class NftDataSeeder(
         propertyOwnershipStmt.setBooleanOrNull(20, tenancyProvideLater)
         propertyOwnershipStmt.setString(21, NftDataFaker.generateEmail())
         propertyOwnershipStmt.setLong(22, propertyAddress.id)
-        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(landlordDetails.anniversary))
+        propertyOwnershipStmt.setDate(23, NftDataFaker.generateRenewalDate(landlordAnniversary))
         propertyOwnershipStmt.addBatch()
 
         membershipStmt.setLong(1, landlordDetails.id)
         membershipStmt.setLong(2, propertyOwnershipId)
         membershipStmt.setTimestamp(3, createdDate)
         membershipStmt.addBatch()
-
-        return createdDate
     }
 
     private fun addIncompletePropertyToBatch(
@@ -767,6 +790,24 @@ class NftDataSeeder(
 
     private fun log(message: String) {
         println("${LocalDateTime.now()} $message")
+    }
+
+    private data class PlannedPropertyRegistration(
+        val scenario: PropertyScenario,
+        // Only completed registrations have a property ownership
+        val propertyOwnershipCreatedDate: Timestamp?,
+    )
+
+    private data class PlannedLandlord(
+        val coreDetails: CoreLandlordDetails,
+        val propertyRegistrations: List<PlannedPropertyRegistration>,
+    ) {
+        // Mirrors the app, which sets a landlord's anniversary when they complete their first property registration
+        val anniversary: MonthDay? =
+            propertyRegistrations
+                .mapNotNull { it.propertyOwnershipCreatedDate }
+                .minOrNull()
+                ?.let { MonthDay.from(it.toInstant().atZone(DateTimeHelper.UK_ZONE)) }
     }
 
     private abstract class Generator<T> {

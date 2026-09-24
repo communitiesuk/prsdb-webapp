@@ -107,11 +107,6 @@ object NftDataFaker {
 
     fun generateDateOfBirth(): Date = Date.valueOf(faker.timeAndDate().birthday(18, 120))
 
-    // The app sets a landlord's anniversary when they register their first property, so we approximate that date
-    // as a random date between the landlord registering and the reference date.
-    fun generateAnniversary(landlordCreatedDate: Timestamp): MonthDay =
-        MonthDay.from(generateDateAfter(landlordCreatedDate).toInstant().atZone(DateTimeHelper.UK_ZONE))
-
     fun generateRenewalDate(anniversary: MonthDay): Date = Date.valueOf(RenewalDateHelper.getRenewalDate(anniversary, referenceDate()))
 
     fun generateIncompletePropertyCreatedDate(
@@ -173,7 +168,6 @@ object NftDataFaker {
                 id = id.toLong(),
                 subjectId = subjectId,
                 createdDate = createdDate,
-                anniversary = generateAnniversary(createdDate),
                 landlordType = landlordType,
                 organisationDetails = organisationDetails,
             )
@@ -229,6 +223,7 @@ object NftDataFaker {
                     pickOne(
                         listOf(CharityRegulator.ENGLAND_AND_WALES, CharityRegulator.NORTHERN_IRELAND, CharityRegulator.SCOTLAND),
                     )
+
                 else -> CharityRegulator.NONE
             }
         val charityNumber = if (hasCharityRegistration) faker.regexify("[0-9]{6,8}") else null
@@ -604,7 +599,6 @@ object NftDataFaker {
         val id: Long,
         val subjectId: String,
         val createdDate: Timestamp,
-        val anniversary: MonthDay,
         val landlordType: LandlordType = LandlordType.INDIVIDUAL,
         val organisationDetails: OrganisationLandlordDetails? = null,
     )
