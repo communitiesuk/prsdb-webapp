@@ -207,6 +207,7 @@ class RegisterPropertyControllerTests(
             ).andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
     }
 
+    // TODO: PDJB-1742: Delete test when we remove the PROPERTY_REGISTRATION_PHASE_TWO flag
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation uses the before pdjb-939 compliance section when phase two is disabled`() {
