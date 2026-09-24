@@ -95,7 +95,7 @@
         <th:block th:if="${hideDelegatedSections != true}">
             <h3 class="govuk-heading-m" th:text="#{${rentedOutEpcHeadingKey}}"></h3>
             <th:block th:if="${epcCardTitle != null}">
-                <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
+                <div th:replace="~{fragments/summaryCard :: summaryCardWithHeadingLevel(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows}, 'h4')}"></div>
             </th:block>
             <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>
             <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">

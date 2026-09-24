@@ -179,8 +179,7 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
                         .withSubmittedValue(
                             LettingAgentEmailStep.ROUTE_SEGMENT,
                             AllowLettingAgentEmailFormModel().apply { emailAddress = "letting.agent@example.com" },
-                        )
-                        .withBedrooms(),
+                        ).withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Submit and pay")
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -201,12 +200,20 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationSubheading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.lettingAgentDelegationBodyText).isVisible()
             assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.value).containsText("My letting agent or property manager")
-            BaseComponent.assertThat(checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.actions.getActionLink("Change")).isVisible()
+            BaseComponent
+                .assertThat(
+                    checkAnswersPage.summaryList.whoProvidesRentalDetailsRow.actions
+                        .getActionLink("Change"),
+                ).isVisible()
             assertThat(
                 checkAnswersPage.summaryList.lettingAgentEmailRow.key,
             ).containsText("Letting agent or property manager’s email address")
             assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.value).containsText("letting.agent@example.com")
-            BaseComponent.assertThat(checkAnswersPage.summaryList.lettingAgentEmailRow.actions.getActionLink("Change")).isVisible()
+            BaseComponent
+                .assertThat(
+                    checkAnswersPage.summaryList.lettingAgentEmailRow.actions
+                        .getActionLink("Change"),
+                ).isVisible()
             checkAnswersPage.summaryList.lettingAgentEmailRow.clickFirstActionLinkAndWait()
             val emailPage = assertPageIs(page, LettingAgentEmailPagePropertyRegistration::class)
 
@@ -285,6 +292,14 @@ class PropertyRegistrationCheckAnswersSinglePageTests : IntegrationTestWithImmut
             BaseComponent.assertThat(checkAnswersPage.restructuredHeading).containsText("Check your answers for:")
             BaseComponent.assertThat(checkAnswersPage.aboutYourPropertyHeading).isVisible()
             BaseComponent.assertThat(checkAnswersPage.propertyDetailsHeading).isVisible()
+        }
+
+        @Test
+        fun `CYA page renders EPC summary card title as h4 to preserve heading hierarchy`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageEpcExpiredInDateAtTenancyStart()
+
+            BaseComponent.assertThat(checkAnswersPage.epcCard.title).isVisible()
+            assertThat(page.locator("main h4.govuk-summary-card__title")).hasCount(1)
         }
 
         @Test
