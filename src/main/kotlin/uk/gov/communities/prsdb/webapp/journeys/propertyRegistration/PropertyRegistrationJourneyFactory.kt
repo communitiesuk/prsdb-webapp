@@ -119,8 +119,8 @@ class PropertyRegistrationJourneyFactory(
 
         if (!state.isStateInitialized) {
             // TODO: PDJB-1738: Use the current organisational sub-user's email rather than the organisation's email
-            // when setting the initial loggedInLandlordEmail snapshot.
-            state.loggedInLandlordEmail = userToLandlordService.getCurrentLandlordForUser().email
+            // when setting the initial loggedInLandlordEmailAtStartOfJourney snapshot.
+            state.loggedInLandlordEmailAtStartOfJourney = userToLandlordService.getCurrentLandlordForUser().email
             state.isStateInitialized = true
         }
 
@@ -886,7 +886,8 @@ class PropertyRegistrationJourney(
 
     // TODO: PDJB-1593: ensure correspondence CYA reuses the originally selected email source rather than
     // recalculating from the live landlord email when the page is revisited.
-    override var loggedInLandlordEmail: String by delegateProvider.requiredImmutableDelegate("loggedInLandlordEmail")
+    override var loggedInLandlordEmailAtStartOfJourney: String by
+        delegateProvider.requiredImmutableDelegate("loggedInLandlordEmailAtStartOfJourney")
     override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 
     // Hoists the who-provides answer onto the base journey state so the occupancy-change routing can read it
@@ -961,7 +962,7 @@ interface PropertyRegistrationJourneyState :
     CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     var isStateInitialized: Boolean
-    override var loggedInLandlordEmail: String
+    override var loggedInLandlordEmailAtStartOfJourney: String
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
 

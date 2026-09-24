@@ -20,7 +20,7 @@ class CorrespondenceEmailStepConfig : AbstractRequestableStepConfig<Complete, Co
                     RadiosButtonViewModel(
                         value = CorrespondenceEmailOption.ACCOUNT_EMAIL,
                         labelMsgKey = "registerProperty.correspondenceEmail.radios.option.accountEmail.label",
-                        hintValue = state.loggedInLandlordEmail,
+                        hintValue = state.loggedInLandlordEmailAtStartOfJourney,
                     ),
                     RadiosButtonViewModel(
                         value = CorrespondenceEmailOption.DIFFERENT_EMAIL,

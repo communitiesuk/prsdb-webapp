@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.CorrespondenceAddre
 interface CorrespondenceState : JourneyState {
     val correspondenceEmailStep: CorrespondenceEmailStep
     val addressTask: CorrespondenceAddressTask
-    val loggedInLandlordEmail: String?
+    val loggedInLandlordEmailAtStartOfJourney: String?
 }
 
 @JourneyFrameworkComponent
@@ -23,8 +23,8 @@ class CorrespondenceTask(
     CorrespondenceState {
     override val taskState get() = this
 
-    override val loggedInLandlordEmail: String?
-        get() = dependencies.loggedInLandlordEmail
+    override val loggedInLandlordEmailAtStartOfJourney: String?
+        get() = dependencies.loggedInLandlordEmailAtStartOfJourney
 
     override fun makeSubJourney(state: CorrespondenceState) =
         subJourney(state) {
@@ -43,5 +43,5 @@ class CorrespondenceTask(
 }
 
 interface CorrespondenceDependencies {
-    val loggedInLandlordEmail: String?
+    val loggedInLandlordEmailAtStartOfJourney: String?
 }

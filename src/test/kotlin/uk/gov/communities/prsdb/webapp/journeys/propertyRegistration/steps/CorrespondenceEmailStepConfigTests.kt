@@ -15,7 +15,7 @@ class CorrespondenceEmailStepConfigTests {
     @Test
     fun `getStepSpecificContent uses the landlord email that was snapshotted at the start of the journey for the account email option`() {
         val mockJourneyState = mock<CorrespondenceState>()
-        whenever(mockJourneyState.loggedInLandlordEmail).thenReturn("original.landlord@example.com")
+        whenever(mockJourneyState.loggedInLandlordEmailAtStartOfJourney).thenReturn("original.landlord@example.com")
         val stepConfig = CorrespondenceEmailStepConfig()
 
         val content = stepConfig.getStepSpecificContent(mockJourneyState)
