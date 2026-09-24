@@ -192,6 +192,22 @@ provideLicensingLater:
     bullet:
       one: if your property needs a license or not
       two: details about the license (if your property needs one)
+correspondenceEmail:
+  heading: Where should the council send emails?
+  hint: This is the email address the council will use if they need to contact someone about the property
+  radios:
+    error:
+      missing: Select which email address the council should send emails to
+    option:
+      accountEmail:
+        label: The email address from my account
+      differentEmail:
+        label: A different email address (must belong to you or another landlord)
+        input:
+          label: Email address
+          error:
+            missing: Enter an email address
+            invalidFormat: Enter an email address in the correct format, like name@example.com
 paymentOutcome:
   # TODO PDJB-993: stub content - remove when this becomes an internal step driven by the real payment status.
   fieldSetHeading: TODO PDJB-993 payment outcome internal step

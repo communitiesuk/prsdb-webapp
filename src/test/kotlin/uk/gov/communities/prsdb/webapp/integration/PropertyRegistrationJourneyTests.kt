@@ -344,9 +344,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordsPage.form.submit()
 
-            // TODO PDJB-1590 - update email address page (may need to include check that the landlord's email is displayed)
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submit()
+            correspondenceEmailPage.submitAccountEmail()
 
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
@@ -706,7 +705,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submit()
+            correspondenceEmailPage.submitDifferentEmail("differentemail@example.com")
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
 
@@ -1681,7 +1680,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             hasJointLandlordsPage.submitHasNoJointLandlords()
 
             val correspondenceEmailPage = assertPageIs(page, CorrespondenceEmailFormPagePropertyRegistration::class)
-            correspondenceEmailPage.submit()
+            correspondenceEmailPage.submitAccountEmail()
             val correspondenceLookupPage = assertPageIs(page, CorrespondenceLookupAddressFormPagePropertyRegistration::class)
             assertThat(correspondenceLookupPage.heading).containsText("Where the council should send post about this property")
 
