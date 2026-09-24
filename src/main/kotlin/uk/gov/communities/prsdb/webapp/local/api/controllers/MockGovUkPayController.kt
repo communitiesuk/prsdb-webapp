@@ -14,10 +14,22 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import java.net.URI
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
+/**
+ * Mocks the GOV.UK Pay endpoints we use, for local development. Only the standard `web` payment journey is supported.
+ *
+ * API reference: https://docs.payments.service.gov.uk/api_reference/#api-reference
+ *
+ * When updating, follow the request parameters and response attributes listed on each endpoint's reference page.
+ * Attributes that the real API only returns in circumstances this mock can't produce (e.g. Stripe fees, Worldpay SCA
+ * exemptions, recurring payment agreements, corporate card surcharges, 3D Secure, digital wallets) are omitted, as they
+ * would be for a real payment made using a test (sandbox) account.
+ */
 @Profile("local")
 @PrsdbRestController
 @RequestMapping("/local/gov-uk-pay")
@@ -28,24 +40,18 @@ class MockGovUkPayController(
 
     private val baseUrl get() = "http://localhost:$serverPort/local/gov-uk-pay"
 
-    /**
-     * Mocks some of the gov UK pay endpoints for local development,
-     * full details can be found here:
-     * https://docs.payments.service.gov.uk/api_reference/#api-reference
-     */
-
     @PostMapping("/v1/payments")
     fun createPayment(
         @RequestBody body: String,
     ): ResponseEntity<String> {
         val request = JSONObject(body)
 
-        val amount = if (request.has("amount")) request.optInt("amount", 0) else 0
+        val amount = request.optInt("amount", 0)
         val reference = request.optString("reference", "")
         val description = request.optString("description", "")
         val returnUrl = request.optString("return_url", "")
 
-        validationError(amount, reference, description, returnUrl)?.let {
+        createPaymentValidationError(amount, reference, description, returnUrl)?.let {
             return jsonResponse(HttpStatus.UNPROCESSABLE_ENTITY, it)
         }
 
@@ -57,15 +63,17 @@ class MockGovUkPayController(
                 reference = reference,
                 description = description,
                 returnUrl = returnUrl,
+                language = request.optString("language", "en"),
                 email = request.optStringOrNull("email"),
                 delayedCapture = request.optBoolean("delayed_capture", false),
+                moto = request.optBoolean("moto", false),
+                authorisationMode = request.optString("authorisation_mode", "web"),
                 metadata = request.optJSONObject("metadata"),
                 cardholderName = prefilledDetails?.optStringOrNull("cardholder_name"),
                 billingAddress = prefilledDetails?.optJSONObject("billing_address"),
                 providerId = Random.nextLong(1_000_000_000L, 9_999_999_999L).toString(),
                 chargeToken = UUID.randomUUID().toString(),
                 createdDate = Instant.now().toString(),
-                status = "created",
             )
         payments[payment.paymentId] = payment
         return jsonResponse(HttpStatus.CREATED, payment.toResponseJson())
@@ -78,9 +86,8 @@ class MockGovUkPayController(
         @PathVariable paymentId: String,
     ): ResponseEntity<String> {
         val payment = payments[paymentId] ?: return notFound()
-        payment.cardEntered = true
         if (payment.delayedCapture) {
-            payment.status = "capturable"
+            payment.markCapturable()
         } else {
             payment.markCaptured()
         }
@@ -119,11 +126,11 @@ class MockGovUkPayController(
         if (payment.finished) {
             return jsonResponse(HttpStatus.BAD_REQUEST, errorJson("P0501", "Cancellation of payment failed"))
         }
-        payment.status = "cancelled"
+        payment.markCancelled()
         return ResponseEntity.noContent().build()
     }
 
-    private fun validationError(
+    private fun createPaymentValidationError(
         amount: Int,
         reference: String,
         description: String,
@@ -144,7 +151,6 @@ class MockGovUkPayController(
                 metadata?.let { append(""","metadata":$it""") }
                 if (cardEntered) {
                     append(""","provider_id":"$providerId"""")
-                    append(""","authorisation_mode":"web"""")
                     append(""","card_details":${cardDetailsJson()}""")
                 }
             }
@@ -153,16 +159,43 @@ class MockGovUkPayController(
                 "amount": $amount,
                 "description": ${JSONObject.quote(description)},
                 "reference": ${JSONObject.quote(reference)},
-                "state": { "status": "$status", "finished": $finished },
+                "language": ${JSONObject.quote(language)},
+                "state": ${stateJson()},
                 "payment_id": "$paymentId",
                 "payment_provider": "sandbox",
                 "created_date": "$createdDate",
+                "refund_summary": ${refundSummaryJson()},
+                "settlement_summary": ${settlementSummaryJson()},
                 "delayed_capture": $delayedCapture,
+                "moto": $moto,
                 "return_url": ${JSONObject.quote(returnUrl)},
+                "authorisation_mode": ${JSONObject.quote(authorisationMode)},
                 "_links": ${linksJson()}$conditionalFields
             }
             """.trimIndent()
     }
+
+    private fun StoredPayment.stateJson(): String =
+        if (status == "cancelled") {
+            """{ "status": "$status", "finished": $finished, "message": "Payment was cancelled by your service", "code": "P0040" }"""
+        } else {
+            """{ "status": "$status", "finished": $finished }"""
+        }
+
+    private fun StoredPayment.refundSummaryJson(): String {
+        val (refundStatus, amountAvailable) =
+            when (status) {
+                "success" -> "available" to amount
+                "cancelled", "failed", "error" -> "unavailable" to 0
+                else -> "pending" to amount
+            }
+        return """{ "status": "$refundStatus", "amount_available": $amountAvailable, "amount_submitted": 0 }"""
+    }
+
+    private fun StoredPayment.settlementSummaryJson(): String =
+        capturedAt?.let {
+            """{ "capture_submit_time": "$it", "captured_date": "${LocalDate.ofInstant(it, ZoneOffset.UTC)}" }"""
+        } ?: "{}"
 
     private fun StoredPayment.cardDetailsJson(): String {
         val billing =
@@ -235,24 +268,43 @@ class MockGovUkPayController(
         val reference: String,
         val description: String,
         val returnUrl: String,
+        val language: String,
         val email: String?,
         val delayedCapture: Boolean,
+        val moto: Boolean,
+        val authorisationMode: String,
         val metadata: JSONObject?,
         val cardholderName: String?,
         val billingAddress: JSONObject?,
         val providerId: String,
         val chargeToken: String,
         val createdDate: String,
-        var status: String,
     ) {
+        var status: String = "created"
+            private set
+
         var cardEntered: Boolean = false
+            private set
+
+        var capturedAt: Instant? = null
+            private set
 
         val finished: Boolean
             get() = status in setOf("success", "cancelled", "failed", "error")
 
+        fun markCapturable() {
+            status = "capturable"
+            cardEntered = true
+        }
+
         fun markCaptured() {
             status = "success"
             cardEntered = true
+            capturedAt = Instant.now()
+        }
+
+        fun markCancelled() {
+            status = "cancelled"
         }
     }
 }

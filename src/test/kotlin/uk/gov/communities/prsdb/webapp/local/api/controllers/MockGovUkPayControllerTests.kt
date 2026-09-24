@@ -165,6 +165,10 @@ class MockGovUkPayControllerTests {
             .perform(get("/local/gov-uk-pay/v1/payments/$paymentId"))
             .andExpect(jsonPath("$.state.status").value("cancelled"))
             .andExpect(jsonPath("$.state.finished").value(true))
+            .andExpect(jsonPath("$.state.code").value("P0040"))
+            .andExpect(jsonPath("$.state.message").value("Payment was cancelled by your service"))
+            .andExpect(jsonPath("$.refund_summary.status").value("unavailable"))
+            .andExpect(jsonPath("$.refund_summary.amount_available").value(0))
     }
 
     @Test
@@ -196,11 +200,32 @@ class MockGovUkPayControllerTests {
             .andExpect(jsonPath("$._links.events.href", startsWith("http://localhost:8080/local/gov-uk-pay/v1/payments/")))
             .andExpect(jsonPath("$._links.refunds.href", startsWith("http://localhost:8080/local/gov-uk-pay/v1/payments/")))
             .andExpect(jsonPath("$._links.cancel.method").value("POST"))
+            .andExpect(jsonPath("$.language").value("en"))
+            .andExpect(jsonPath("$.moto").value(false))
+            .andExpect(jsonPath("$.authorisation_mode").value("web"))
+            .andExpect(jsonPath("$.state.code").doesNotExist())
+            .andExpect(jsonPath("$.refund_summary.status").value("pending"))
+            .andExpect(jsonPath("$.refund_summary.amount_available").value(12000))
+            .andExpect(jsonPath("$.refund_summary.amount_submitted").value(0))
+            .andExpect(jsonPath("$.settlement_summary").isMap)
+            .andExpect(jsonPath("$.settlement_summary.capture_submit_time").doesNotExist())
             .andExpect(jsonPath("$.card_details").doesNotExist())
             .andExpect(jsonPath("$.provider_id").doesNotExist())
-            .andExpect(jsonPath("$.moto").doesNotExist())
-            .andExpect(jsonPath("$.refund_summary").doesNotExist())
-            .andExpect(jsonPath("$.language").doesNotExist())
+    }
+
+    @Test
+    fun `language, moto and authorisation mode supplied on creation are echoed back in the payment details`() {
+        val body =
+            """
+            {"amount":100,"reference":"R","description":"D","return_url":"https://x",
+             "language":"cy","moto":true,"authorisation_mode":"web"}
+            """.trimIndent()
+
+        mvc
+            .perform(post("/local/gov-uk-pay/v1/payments").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(jsonPath("$.language").value("cy"))
+            .andExpect(jsonPath("$.moto").value(true))
+            .andExpect(jsonPath("$.authorisation_mode").value("web"))
     }
 
     @Test
@@ -230,6 +255,10 @@ class MockGovUkPayControllerTests {
             .andExpect(jsonPath("$.card_details.billing_address.country").value("GB"))
             .andExpect(jsonPath("$.provider_id").isNotEmpty)
             .andExpect(jsonPath("$.authorisation_mode").value("web"))
+            .andExpect(jsonPath("$.refund_summary.status").value("available"))
+            .andExpect(jsonPath("$.refund_summary.amount_available").value(12000))
+            .andExpect(jsonPath("$.settlement_summary.capture_submit_time").isNotEmpty)
+            .andExpect(jsonPath("$.settlement_summary.captured_date", matchesPattern("\\d{4}-\\d{2}-\\d{2}")))
             .andExpect(jsonPath("$._links.next_url").doesNotExist())
             .andExpect(jsonPath("$._links.cancel").doesNotExist())
     }
