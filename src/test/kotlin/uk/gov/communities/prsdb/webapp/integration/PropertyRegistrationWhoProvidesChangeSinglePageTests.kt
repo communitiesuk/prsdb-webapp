@@ -23,13 +23,13 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
     }
 
     @BeforeEach
-    fun enabledFeatureFlags() {
+    fun enableLettingAgentFlag() {
         featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
     }
 
     private fun goToCheckAnswersWithLandlordProvidingDetails(page: Page): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
+            navigator.goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder
                     .beforePropertyRegistrationCheckAnswersOccupied()
                     .withLandlordProvidesRentalDetails()
@@ -41,7 +41,7 @@ class PropertyRegistrationWhoProvidesChangeSinglePageTests : IntegrationTestWith
 
     private fun goToCheckAnswersWithLettingAgentProvidingDetails(page: Page): CheckAnswersPagePropertyRegistration {
         val taskListPage =
-            navigator.goToRestructuredPropertyRegistrationTaskList(
+            navigator.goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder
                     .beforePropertyRegistrationCheckAnswersOccupied()
                     .withLettingAgentProvidesRentalDetails()

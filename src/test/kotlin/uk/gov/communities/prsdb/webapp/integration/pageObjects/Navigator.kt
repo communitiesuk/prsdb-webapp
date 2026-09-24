@@ -692,7 +692,7 @@ class Navigator(
             PropertyRegistrationCyaStep.ROUTE_SEGMENT,
         )
 
-    fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
+    fun goToPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
         setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
         return createValidPage(page, TaskListPagePropertyRegistration::class)
@@ -849,7 +849,7 @@ class Navigator(
 
     fun skipToTenancyDetailsHouseholdsPage(): NumberOfHouseholdsFormPagePropertyRegistration {
         val taskListPage =
-            goToRestructuredPropertyRegistrationTaskList(
+            goToPropertyRegistrationTaskList(
                 PropertyStateSessionBuilder.beforeTenancyDetails(),
             )
         taskListPage.clickRentedOutTaskWithName("Tenancy details")
