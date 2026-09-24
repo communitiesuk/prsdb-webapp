@@ -51,8 +51,8 @@ class MockGovUkPayController(
         val description = request.optString("description", "")
         val returnUrl = request.optString("return_url", "")
 
-        createPaymentValidationError(amount, reference, description, returnUrl)?.let {
-            return jsonResponse(HttpStatus.UNPROCESSABLE_ENTITY, it)
+        validateCreatePaymentRequest(amount, reference, description, returnUrl)?.let { error ->
+            return jsonResponse(HttpStatus.UNPROCESSABLE_ENTITY, error)
         }
 
         val prefilledDetails = request.optJSONObject("prefilled_cardholder_details")
@@ -130,7 +130,7 @@ class MockGovUkPayController(
         return ResponseEntity.noContent().build()
     }
 
-    private fun createPaymentValidationError(
+    private fun validateCreatePaymentRequest(
         amount: Int,
         reference: String,
         description: String,
