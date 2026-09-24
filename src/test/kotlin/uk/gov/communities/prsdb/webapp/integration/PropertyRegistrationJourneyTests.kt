@@ -217,9 +217,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Nested
-    inner class RestructureAndSkippingEnabled {
+    inner class CorrespondenceEnabled {
         @BeforeEach
-        fun enableRestructureAndSkippingFlag() {
+        fun enableCorrespondenceFlag() {
             featureFlagManager.enableFeature(CORRESPONDENCE_ADDRESS)
         }
 
@@ -1545,7 +1545,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows three sections with expected task order`(page: Page) {
+        fun `task list shows three sections with expected task order`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1585,18 +1585,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+        fun `CYA shows tenancy heading and helper text without tenancy rows when property is unoccupied`(page: Page) {
+            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).isVisible()
-            assertThat(checkAnswersPage.restructuredTenancyUnoccupiedBodyText).isVisible()
-            assertEquals(emptyList<String>(), checkAnswersPage.restructuredTenancyRowHeadings())
+            assertThat(checkAnswersPage.tenancyHeading).isVisible()
+            assertThat(checkAnswersPage.tenancyUnoccupiedBodyText).isVisible()
+            assertEquals(emptyList<String>(), checkAnswersPage.tenancyRowHeadings())
         }
 
         @Test
-        fun `restructured CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
+        fun `CYA shows occupancy section heading and Yes for occupied by tenants when property is occupied`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
 
             assertThat(checkAnswersPage.occupancyHeading).containsText("Tell us if your property’s occupied")
@@ -1604,8 +1604,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured CYA shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
-            val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+        fun `CYA shows occupancy section heading and No for occupied by tenants when property is unoccupied`(page: Page) {
+            val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -1614,9 +1614,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `the occupancy question change link on the restructured CYA navigates to the occupancy page`(page: Page) {
+        fun `the occupancy question change link on the CYA navigates to the occupancy page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
@@ -1629,8 +1629,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        @Suppress("ktlint:standard:max-line-length")
-        fun `restructured occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
+        fun `occupied journey reaches check answers after EPC and tenancy details`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1716,8 +1715,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             rentAmountPage.submitRentAmount("400")
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).containsText("Tenancy details")
-            assertThat(checkAnswersPage.tenancyHeading).isHidden()
+            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
         }
 
         @Test
@@ -1746,9 +1744,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             // Check Your Answers - render page
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
             assertThat(checkAnswersPage.heading).containsText("Check your answers")
-            assertThat(checkAnswersPage.restructuredTenancyHeading).containsText("Tenancy details")
-            assertThat(checkAnswersPage.tenancyHeading).isHidden()
-            assertEquals(listOf("Tenancy details"), checkAnswersPage.restructuredTenancyRowHeadings())
+            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
+            assertEquals(listOf("Tenancy details"), checkAnswersPage.tenancyRowHeadings())
             assertThat(checkAnswersPage.summaryList.tenancyDetailsRow.value).containsText("Provide this later")
         }
 
@@ -1772,8 +1769,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             provideTenancyDetailsLaterPage.form.submit()
 
             val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-            assertThat(checkAnswersPage.restructuredTenancyHeading).containsText("Tenancy details")
-            assertThat(checkAnswersPage.tenancyHeading).isHidden()
+            assertThat(checkAnswersPage.tenancyHeading).containsText("Tenancy details")
 
             checkAnswersPage.summaryList.tenancyDetailsRow.actions
                 .getActionLink("Change")
@@ -1890,7 +1886,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
+        fun `task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
             val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
             registerPropertyStartPage.startButton.clickAndWait()
             val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
@@ -1920,11 +1916,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows a grouping task as in progress when it is partially completed`() {
+        fun `task list shows a grouping task as in progress when it is partially completed`() {
             // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
             // grouping task (which now contains all three) is partway through.
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType(),
                 )
 
@@ -1945,7 +1941,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured task list shows grouping tasks as complete when their answers are provided`() {
+        fun `task list shows grouping tasks as complete when their answers are provided`() {
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
 
@@ -1966,7 +1962,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        fun `restructured occupied journey completes full flow and shows answers on check answers`(page: Page) {
+        fun `occupied journey completes full flow and shows answers on check answers`(page: Page) {
             navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
@@ -1991,7 +1987,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         fun `CYA does not show Which bills are included row when rent does not include bills`() {
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(billsIncluded = false)
 
-            assertFalse(checkAnswersPage.restructuredTenancyRowHeadings().contains("Which bills are included"))
+            assertFalse(checkAnswersPage.tenancyRowHeadings().contains("Which bills are included"))
         }
 
         @Test
@@ -2013,7 +2009,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withCheckedJointLandlords(mutableListOf("email@address.com")),
@@ -2035,7 +2031,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersOccupied(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2069,10 +2065,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         }
 
         @Test
-        @Suppress("ktlint:standard:max-line-length")
         fun `details can be delegated to a letting agent for an occupied property`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationOccupancy()
                         .withOccupancyStatus(true)
@@ -2105,7 +2100,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             page: Page,
         ) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
@@ -2129,7 +2124,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `registering a property sets the registering landlord's anniversary to the registration date when it is null`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
@@ -2174,7 +2169,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
 
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withBedrooms(),
@@ -2217,7 +2212,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
             @Test
             fun `occupied journey routes straight from occupancy to licensing without asking who provides the details`(page: Page) {
-                val occupancyPage = navigator.skipToPropertyRegistrationRestructuredOccupancyPage()
+                val occupancyPage = navigator.skipToPropertyRegistrationOccupancyPage()
                 occupancyPage.submitIsOccupied()
 
                 assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
@@ -2226,16 +2221,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             @Test
             fun `who provides details task is absent from the rented out section`() {
                 val taskListPage =
-                    navigator.goToRestructuredPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy().withOccupancyStatus(true),
+                    navigator.goToPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy().withOccupancyStatus(true),
                     )
 
                 assertFalse(taskListPage.getRentedOutTaskNames().contains("Who will provide these details"))
             }
 
             @Test
-            fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
-                val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
+            fun `task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
+                val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
                 val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
 
                 // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
@@ -2304,8 +2299,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             @Test
             fun `correspondence task does not appear when CORRESPONDENCE_ADDRESS feature flag is disabled`() {
                 val taskListPage =
-                    navigator.goToRestructuredPropertyRegistrationTaskList(
-                        PropertyStateSessionBuilder.beforePropertyRegistrationRestructuredOccupancy(),
+                    navigator.goToPropertyRegistrationTaskList(
+                        PropertyStateSessionBuilder.beforePropertyRegistrationOccupancy(),
                     )
 
                 assertFalse("Who the council should contact" in taskListPage.getAboutYourPropertyTaskNames())
@@ -2314,9 +2309,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Nested
-    inner class RestructureAndSkippingWithDelegateToLettingAgentEnabled {
+    inner class DelegateToLettingAgentEnabled {
         @BeforeEach
-        fun enableRestructureAndSkippingAndDelegateFlags() {
+        fun enableLettingAgentFlag() {
             featureFlagManager.enableFeature(DELEGATE_TO_LETTING_AGENT)
         }
 
@@ -2346,7 +2341,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 )
             val acceptedEpc = MockEpcData.createEpcDataModel(expiryDate = validExpiryDate)
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswersOccupied()
                         .withGasSupply()
@@ -2416,7 +2411,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             page: Page,
         ) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2439,7 +2434,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             page: Page,
         ) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2489,7 +2484,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             page: Page,
         ) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersDelegatedToLettingAgent(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2526,7 +2521,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             page: Page,
         ) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().withBedrooms(),
                 )
             taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
@@ -2566,7 +2561,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         @Test
         fun `submitting an unoccupied property with the letting agent panel displayed reaches the confirmation page`(page: Page) {
             val taskListPage =
-                navigator.goToRestructuredPropertyRegistrationTaskList(
+                navigator.goToPropertyRegistrationTaskList(
                     PropertyStateSessionBuilder
                         .beforePropertyRegistrationCheckAnswers()
                         .withBedrooms(),
