@@ -312,7 +312,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             )
             .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("provideMissingDetails", false))
             .andExpect(MockMvcResultMatchers.model().attribute("delegatedToLettingAgent", true))
     }
 

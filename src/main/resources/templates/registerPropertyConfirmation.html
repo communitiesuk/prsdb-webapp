@@ -61,7 +61,7 @@
                 </p>
             </th:block>
 
-            <th:block th:if="${provideMissingDetails and !delegatedToLettingAgent}">
+            <th:block th:if="${provideMissingDetails}">
                 <h3 class="govuk-heading-s"
                     th:text="#{registerProperty.confirmation.provideMissingDetails.heading}">
                     registerProperty.confirmation.provideMissingDetails.heading
