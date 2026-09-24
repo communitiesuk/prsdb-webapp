@@ -92,7 +92,7 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
-    
+
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
 
