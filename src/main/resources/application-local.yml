@@ -100,6 +100,9 @@ plausible:
   base-url: http://localhost:${server.port}/local/plausible
   api-key: local-no-analytics
 
+gov-uk-pay:
+  base-url: http://localhost:${server.port}/local/gov-uk-pay
+
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 
