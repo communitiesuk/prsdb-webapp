@@ -109,6 +109,11 @@ plausible:
   # far-future default keeps the total-transactions metric on the legacy Flow-event counting method.
   transaction-event-start-date: ${PLAUSIBLE_TRANSACTION_EVENT_START_DATE:2099-01-01}
 
+gov-uk-pay:
+  base-url: https://publicapi.payments.service.gov.uk
+  api-key: ${GOV_UK_PAY_API_KEY}
+  annual-payment-amount-in-pence: ${ANNUAL_PAYMENT_AMOUNT_IN_PENCE}
+
 cloudwatch-metrics:
   ecs:
     namespace: ${CLOUDWATCH_ECS_NAMESPACE:AWS/ECS}
