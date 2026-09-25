@@ -317,6 +317,15 @@ class PropertyRegistrationCyaStepConfigTests {
         }
 
         @Test
+        fun `getStepSpecificContent uses complete registration button when payments is disabled`() {
+            whenever(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(false)
+
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
+        }
+
+        @Test
         fun `getStepSpecificContent uses restructured no licensing wording when no licence selected`() {
             whenever(mockLicensingTask.getLicensingType()).thenReturn(LicensingType.NO_LICENSING)
 
@@ -461,15 +470,6 @@ class PropertyRegistrationCyaStepConfigTests {
 
             assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
             assertEquals("forms.warning", content["warningTextKey"])
-        }
-
-        @Test
-        fun `getStepSpecificContent uses complete registration button even when payments is enabled`() {
-            lenient().`when`(mockFeatureFlagManager.checkFeature(PAYMENTS)).thenReturn(true)
-
-            val content = stepConfig.getStepSpecificContent(mockState)
-
-            assertEquals("forms.buttons.completeRegistration", content["submitButtonText"])
         }
 
         @Test
